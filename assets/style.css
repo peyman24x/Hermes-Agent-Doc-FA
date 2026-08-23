@@ -147,6 +147,38 @@ footer.page-footer a{color:var(--accent);text-decoration:none}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:55}
 body.nav-open .overlay{display:block}
 
+/* ───── بخش حمایت (دونیت) ───── */
+.donate{max-width:1080px;margin:0 auto;padding:2.6rem 1.5rem 2rem;text-align:center;scroll-margin-top:75px}
+.donate-title{font-size:1.55rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:.6rem;margin:.2rem 0 .4rem}
+.donate-sub{color:var(--muted);max-width:640px;margin:0 auto;font-size:.95rem}
+.donate-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:1rem;margin-top:1.7rem}
+.donate-card{background:var(--surface);border:1px solid var(--border);border-radius:1.05rem;padding:1.5rem 1.35rem 1.3rem;box-shadow:var(--shadow);transition:.22s ease;position:relative;overflow:hidden}
+.donate-card::before{content:"";position:absolute;inset-inline:0;top:0;height:3px;opacity:.9}
+.donate-card.sol::before{background:linear-gradient(90deg,#9945FF,#14F195)}
+.donate-card.eth::before{background:linear-gradient(90deg,#627EEA,#3C3C3D)}
+.donate-card.btc::before{background:linear-gradient(90deg,#F7931A,#ffd58a)}
+.donate-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 12px 34px rgba(37,99,235,.16)}
+.chain-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;margin:0 auto .65rem;font-size:1.35rem;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.sol .chain-icon{background:linear-gradient(135deg,#9945FF,#14F195)}
+.eth .chain-icon{background:linear-gradient(135deg,#627EEA,#3C3C3D)}
+.btc .chain-icon{background:linear-gradient(135deg,#F7931A,#e2761b)}
+.donate-card h3{margin:0 0 .1rem;font-size:1.06rem}
+.donate-card .net{font-size:.74rem;color:var(--muted)}
+.tokens{display:flex;gap:.35rem;justify-content:center;flex-wrap:wrap;margin:.7rem 0 .9rem}
+.token-chip{font-size:.68rem;padding:.12rem .6rem;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:700;border:1px solid transparent}
+.addr-box{direction:ltr;display:flex;align-items:center;gap:.55rem;background:var(--code-bg);border-radius:.65rem;padding:.55rem .7rem;border:1px solid rgba(120,145,180,.2)}
+.addr{flex:1;color:var(--code-text);font-family:Consolas,'Cascadia Mono',monospace;font-size:.71rem;word-break:break-all;text-align:left;line-height:1.65;user-select:all}
+.copy-addr{flex-shrink:0;cursor:pointer;border:1px solid #33415c;background:#1a2740;color:#c3d3e8;padding:.32rem .85rem;border-radius:.45rem;font-size:.74rem;font-family:'Vazirmatn',Tahoma,sans-serif;transition:.15s}
+.copy-addr:hover{background:#24345a;border-color:#4a5f85}
+.copy-addr.ok{background:#14532d;border-color:#1e7a41;color:#bbf7d0}
+.donate-note{margin-top:1.6rem;font-size:.88rem;color:var(--muted)}
+.donate-note strong{color:var(--text)}
+.donate-cta{margin-top:.9rem;font-size:.82rem}
+.donate-cta a{display:inline-flex;align-items:center;gap:.4rem;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;text-decoration:none;font-weight:800;padding:.55rem 1.4rem;border-radius:99px;box-shadow:0 6px 18px rgba(245,158,11,.35);transition:.2s}
+.donate-cta a:hover{transform:translateY(-2px);box-shadow:0 9px 24px rgba(245,158,11,.45)}
+
+@media print{.donate{display:none}}
+
 @media (max-width:1020px){
   .hamburger{display:inline-flex}
   aside.sidebar{position:fixed;top:0;bottom:0;inset-inline-end:0;width:300px;max-height:none;background:var(--surface);z-index:58;transform:translateX(100%);transition:transform .25s;padding-top:1.2rem}

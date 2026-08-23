@@ -131,6 +131,22 @@
     });
   });
 
+  /* ── کپی آدرس‌های دونیت ── */
+  Array.prototype.forEach.call(document.querySelectorAll('.copy-addr'), function (btn) {
+    var box = btn.parentElement;
+    var addr = box.querySelector('.addr');
+    if (!addr) return;
+    btn.addEventListener('click', function () {
+      copyText(addr.textContent.trim()).then(function () {
+        btn.classList.add('ok'); btn.textContent = 'کپی شد ✓';
+        setTimeout(function () { btn.classList.remove('ok'); btn.textContent = 'کپی'; }, 1800);
+      }).catch(function () {
+        btn.textContent = 'خطا!';
+        setTimeout(function () { btn.textContent = 'کپی'; }, 1800);
+      });
+    });
+  });
+
   /* ── بازگشت به بالا ── */
   var toTop = document.getElementById('toTop');
   if (toTop) {

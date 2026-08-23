@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ابزارها و تول‌ست‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tools" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌های اصلی<span class="sep">/</span><strong>ابزارها و تول‌ست‌ها</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>ابزارها و تول‌ست‌ها</h1>
+<p>ابزارها توابعی هستند که توانایی‌های ایجنت را گسترش می‌دهند. آن‌ها در <strong>تول‌ست‌های</strong> منطقی سازمان یافته‌اند که می‌توان به‌ازای هر پلتفرم فعال یا غیرفعالشان کرد.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> ابزارهای موجود</h2>
+<p>هرمس با یک رجیستری گستردهٔ ابزار داخلی عرضه می‌شود که جستجوی وب، اتوماسیون مرورگر، اجرای ترمینال، ویرایش فایل، حافظه، واگذاری، کارهای زمان‌بندی، هوم‌اسیسنت و بیشتر را پوشش می‌دهد.</p>
+
+<div class="callout note">
+  <div class="callout-title">ℹ️ توجه</div>
+  <p><strong>حافظهٔ بین-نشستی Honcho</strong> به‌صورت پلاگین ارائه‌دهندهٔ حافظه (<code>plugins/memory/honcho/</code>) موجود است، نه به‌عنوان تول‌ست داخلی. برای نصب به «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/plugins" target="_blank" rel="noopener">پلاگین‌ها</a>» مراجعه کنید.</p>
+</div>
+
+<p>دسته‌های کلی:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>دسته</th><th>نمونه‌ها</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><strong>وب</strong></td><td><code>web_search</code>، <code>web_extract</code></td><td>جستجو در وب و استخراج محتوای صفحه.</td></tr>
+    <tr><td><strong>جستجوی X</strong></td><td><code>x_search</code></td><td>جستجوی پست‌ها و رشته‌های X (توییتر) از طریق ابزار Responses داخلی <code>x_search</code> مختص xAI — مشروط به اعتبارنامهٔ xAI (OAuth سوپرگروک یا <code>XAI_API_KEY</code>)؛ به‌طور پیش‌فرض خاموش، با <code>hermes tools</code> ← 🐦 X (Twitter) Search فعال کنید.</td></tr>
+    <tr><td><strong>ترمینال و فایل</strong></td><td><code>terminal</code>، <code>process</code>، <code>read_file</code>، <code>patch</code></td><td>اجرای دستورات و دستکاری فایل‌ها.</td></tr>
+    <tr><td><strong>مرورگر</strong></td><td><code>browser_navigate</code>، <code>browser_snapshot</code>، <code>browser_vision</code></td><td>اتوماسیون تعاملی مرورگر با پشتیبانی متنی و بینایی.</td></tr>
+    <tr><td><strong>رسانه</strong></td><td><code>vision_analyze</code>، <code>image_generate</code>، <code>text_to_speech</code></td><td>تحلیل و تولید چندهمدلی.</td></tr>
+    <tr><td><strong>ارکستراسیون ایجنت</strong></td><td><code>todo</code>، <code>clarify</code>، <code>execute_code</code>، <code>delegate_task</code></td><td>برنامه‌ریزی، شفاف‌سازی، اجرای کد و واگذاری به ساب‌ایجنت.</td></tr>
+    <tr><td><strong>حافظه و بازیابی</strong></td><td><code>memory</code>، <code>session_search</code></td><td>حافظهٔ پایدار و جستجوی نشست.</td></tr>
+    <tr><td><strong>اتوماسیون</strong></td><td><code>cronjob</code></td><td>کارهای زمان‌بندی با اکشن‌های ساخت/فهرست/به‌روزرسانی/توقف/ازسرگیری/اجرا/حذف. تحویل خروجی توسط سیستم تحویل خود کرون، CLI <code>hermes send</code> و اعلان‌کنندهٔ گیت‌وی انجام می‌شود — نه توسط ابزارِ قابل‌فراخوانی-برای-ایجنت.</td></tr>
+    <tr><td><strong>یکپارچه‌سازی‌ها</strong></td><td><code>ha_*</code>، ابزارهای سرور MCP</td><td>هوم‌اسیسنت، MCP و سایر یکپارچه‌سازی‌ها.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>برای رجیستری معتبرِ برگرفته از کد، به «<a href="https://hermes-agent.nousresearch.com/docs/reference/tools-reference" target="_blank" rel="noopener">مرجع ابزارهای داخلی</a>» و «<a href="https://hermes-agent.nousresearch.com/docs/reference/toolsets-reference" target="_blank" rel="noopener">مرجع تول‌ست‌ها</a>» مراجعه کنید.</p>
+
+<div class="callout tip">
+  <div class="callout-title">💡 گیت‌وی ابزار Nous</div>
+  <p>مشترکین پولی <a href="https://portal.nousresearch.com" target="_blank" rel="noopener">Nous Portal</a> می‌توانند جستجوی وب، تولید تصویر، TTS و اتوماسیون مرورگر را از طریق «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tool-gateway" target="_blank" rel="noopener">گیت‌وی ابزار</a>» استفاده کنند — بدون نیاز به کلیدهای API جداگانه. برای فعال‌سازی <code>hermes model</code> را اجرا کنید، یا ابزارهای تکی را با <code>hermes tools</code> پیکربندی کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> استفاده از تول‌ست‌ها</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># استفاده از تول‌ست‌های مشخص
+hermes chat --toolsets "web,terminal"
+
+# دیدن همهٔ ابزارهای موجود
+hermes tools
+
+# پیکربندی ابزارها به‌ازای پلتفرم (تعاملی)
+hermes tools</code></pre>
+</div>
+<p>تول‌ست‌های رایج شامل <code>web</code>، <code>search</code>، <code>terminal</code>، <code>file</code>، <code>browser</code>، <code>vision</code>، <code>image_gen</code>، <code>skills</code>، <code>tts</code>، <code>todo</code>، <code>memory</code>، <code>session_search</code>، <code>cronjob</code>، <code>code_execution</code>، <code>delegation</code>، <code>clarify</code>، <code>homeassistant</code>، <code>messaging</code>، <code>spotify</code>، <code>discord</code>، <code>discord_admin</code>، <code>debugging</code> و <code>safe</code> هستند.</p>
+<p>برای مجموعهٔ کامل، از جمله پیش‌تنظیم‌های پلتفرمی مانند <code>hermes-cli</code> و <code>hermes-telegram</code> و تول‌ست‌های داینامیک MCP مانند <code>mcp-&lt;server&gt;</code>، به «<a href="https://hermes-agent.nousresearch.com/docs/reference/toolsets-reference" target="_blank" rel="noopener">مرجع تول‌ست‌ها</a>» مراجعه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> حاشیه‌نویسی نتایج ابزار</h2>
+<p>چند رفتار ابزار که هنگام خواندن رونوشت‌های ایجنت ارزش دانستن دارند:</p>
+<ul>
+  <li><strong>مرگ با سیگنال توضیح داده می‌شود.</strong> وقتی یک دستور ترمینالی توسط سیگنال کشته می‌شود، نتیجه به‌جای کد عددیِ خالی یک یادداشت انسانی‌خوان حمل می‌کند — مثلاً خروج <code>-9</code>/<code>137</code> می‌شود «terminated by signal 9: SIGKILL — often the kernel OOM killer on memory exhaustion, or an explicit kill -9» و segfault، abort، SIGTERM، pipe شکسته و محدودیت‌های CPU/حجم-فایل هم به همین شکل برچسب می‌خورند. کدهای منفی (معناشناسی زیرپروسه) قطعی بیان می‌شوند؛ قرارداد <code>128+signum</code> شل با «usually» احتیاط‌آمیز ذکر می‌شود چون یک اپلیکیشن می‌تواند به‌طور مشروع با آن کدها خارج شود.</li>
+  <li><strong>فایل‌های متنی UTF-16 تبدیل می‌شوند، نه رد.</strong> <code>read_file</code> فایل UTF-16 را تشخیص می‌دهد (BOM یا حدس الگوی بایتی، در هر دو endian — رایج برای فایل‌های نت‌پد ویندوز و خروجی‌های <code>&gt;</code> پاورشل) و برای نمایش به UTF-8 تبدیل‌اش می‌کند به‌جای اینکه فایل را باینری علامت بزند. نتیجه نکته‌ای افشای تبدیل را هم دارد؛ ویرایش‌ها با <code>patch</code>/<code>write_file</code> به‌صورت UTF-8 بازکدگذاری می‌شوند. فایل‌های بالای ۱۰ مگابایت و فایل‌های واقعاً باینری همچنان ردِ فایل-باینری می‌گیرند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> بک‌اندهای ترمینال</h2>
+<p>ابزار ترمینال می‌تواند دستورات را در محیط‌های مختلف اجرا کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>بک‌اند</th><th>توضیح</th><th>مورد استفاده</th></tr></thead>
+  <tbody>
+    <tr><td><code>local</code></td><td>اجرای روی ماشین خودتان (پیش‌فرض)</td><td>توسعه، کارهای مطمئن</td></tr>
+    <tr><td><code>docker</code></td><td>کانتینرهای ایزوله</td><td>امنیت، تکرارپذیری</td></tr>
+    <tr><td><code>ssh</code></td><td>سرور راهن</td><td>سندباکس، دور نگه‌داشتن ایجنت از کد خودش</td></tr>
+    <tr><td><code>singularity</code></td><td>کانتینرهای HPC</td><td>محاسبات خوشه‌ای، بدون root</td></tr>
+    <tr><td><code>modal</code></td><td>اجرای ابری</td><td>سرورلس، مقیاس</td></tr>
+    <tr><td><code>daytona</code></td><td>ورک‌اسپیس سندباکس ابری</td><td>محیط‌های توسعهٔ راهنِ پایدار</td></tr>
+    <tr><td><code>vercel_sandbox</code></td><td>میکروVM ابری Vercel Sandbox</td><td>اجرای ابری با ماندگاری فایل‌سیستم مبتنی بر اسنپ‌شات</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>پیکربندی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — در ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>terminal:
+  backend: local    # یا: docker, ssh, singularity, modal, daytona, vercel_sandbox
+  cwd: "."          # پوشهٔ کاری
+  timeout: 180      # مهلت دستور بر حسب ثانیه</code></pre>
+</div>
+
+<h3>فایل‌های راه‌اندازی شل و دستورات غیرتعاملی</h3>
+<p>فراخوانی‌های ترمینال ایجنت، شل شما را <strong>غیرتعاملی</strong> اجرا می‌کنند — نه TTY هست و نه انسانی سر پرامپت. مقداردهی اولیهٔ شلِ سنگین یا تعاملی که در ترمینال عادی هرگز متوجهش نمی‌شوید می‌تواند هر دستوری که ایجنت اجرا می‌کند را بشکند یا به‌شدت کُند کند:</p>
+<ul>
+  <li><strong>مقداردهی کُند (<code>nvm</code>، مدیرهای نسخه، پرامپت‌های دست‌کار-شبکه):</strong> سورس‌کردن کلاسیک <code>nvm.sh</code> به <em>هر</em> شروعِ شل تأخیر محسوسی اضافه می‌کند و ایجنت شل‌های زیادی شروع می‌کند. rc‌فایل‌های چندثانیه‌ای یک <code>git status</code> سریع را به ریسک تایم‌اوت تبدیل می‌کنند.</li>
+  <li><strong>بلوک‌های منتظر-TTY:</strong> هر چیزی در <code>.bashrc</code>/<code>.zshrc</code> که پرامپت بدهد، <code>tmux</code>/<code>screen</code> attach کند، <code>read</code> بزند یا منو چاپ کند یک شل غیرتعاملی را معلق می‌کند — دستور ظاهراً تا ابد اجرا می‌شود و بعد تایم‌اوت.</li>
+  <li><strong>خروجی بدون قید و شرط:</strong> rc‌فایل‌هایی که بنر <code>echo</code> می‌کنند، خروجی هر دستور را که ایجنت باید تجزیه کند آلوده می‌کنند.</li>
+</ul>
+<p>راه‌حل، همان گارد استانداردی است که اغلب توزیع‌ها از قبل بالای <code>.bashrc</code> می‌فرستند — وقتی شل غیرتعاملی است زود return کنید و هر چیز سنگین یا تعاملی را زیر آن نگه دارید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash — ~/.bashrc</span><button class="copy-btn">کپی</button></div>
+  <pre><code># این گارد را نزدیک بالای فایل نگه دارید
+case $- in
+  *i*) ;;      # تعاملی: ادامه بده
+  *) return;;  # غیرتعاملی: همین‌جا توقف کن
+esac
+
+# مقداردهی سنگین/تعاملی زیرِ گارد می‌رود
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] &amp;&amp; \. "$NVM_DIR/nvm.sh"</code></pre>
+</div>
+<p>کاربران Zsh: راه‌اندازیِ مخصوص-لاگین را در <code>.zprofile</code> و مخصوص-تعامل را در <code>.zshrc</code> بگذارید؛ <code>.zshenv</code> را مینیمال نگه دارید چون برای همهٔ شل‌ها از جمله غیرتعاملی‌ها اجرا می‌شود. اگر ایجنت واقعاً به ابزاری نیاز دارد که فقط rc‌فایل شما روی PATH می‌گذارد، تغییر <code>PATH</code> را <em>بالای</em> گارد export کنید (خروجیِ PATH ارزان است) یا باینری را در <code>~/.local/bin</code> سیم‌لینک کنید.</p>
+<p>اگر دستورات ترمینال ایجنت بلافاصله بعد از کارکردنِ درست در ترمینال خودتان هنگ یا تایم‌اوت می‌کنند، اولین مظنون مقداردهی اولیهٔ شل شماست.</p>
+
+<h3>بک‌اند داکر</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>terminal:
+  backend: docker
+  docker_image: python:3.11-slim</code></pre>
+</div>
+<p><strong>یک کانتینر ماندگار، مشترک در کل پروسه.</strong> هرمس در اولین استفاده یک کانتینر طولانی‌عمرِ واحد شروع می‌کند (<code>docker run -d ... sleep infinity</code>) و هر فراخوانی ترمینال، فایل و <code>execute_code</code> را از طریق <code>docker exec</code> به همان کانتینر هدایت می‌کند. تغییرهای پوشهٔ کاری، پکیج‌های نصب‌شده، تنظیمات محیط و فایل‌های نوشته‌شده در <code>/workspace</code> همه از یک فراخوانی ابزار تا بعدی، در سراسر <code>/new</code>، <code>/reset</code> و ساب‌ایجنت‌های <code>delegate_task</code> و برای تمام طول عمر پروسهٔ هرمس باقی می‌مانند. کانتینر هنگام خاموشی متوقف و حذف می‌شود.</p>
+<p>یعنی بک‌اند داکر مثل یک VM سندباکسِ ماندگار رفتار می‌کند، نه یک کانتینر تازه به‌ازای هر دستور. اگر یک بار <code>pip install foo</code> بزنید، برای باقی نشست همان‌جا هست. اگر <code>cd /workspace/project</code> کنید، فراخوانی‌های <code>ls</code> بعدی همان پوشه را می‌بینند. برای جزئیات کامل چرخهٔ حیات و پرچم <code>container_persistent</code> که کنترل می‌کند <code>/workspace</code> و <code>/root</code> از ری‌استارت‌های هرمس جان سالم به در ببرند، به «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/configuration#docker-backend" target="_blank" rel="noopener">پیکربندی ← بک‌اند داکر</a>» مراجعه کنید.</p>
+
+<h3>بک‌اند SSH</h3>
+<p>برای امنیت توصیه می‌شود — ایجنت نمی‌تواند کد خودش را ویرایش کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>terminal:
+  backend: ssh</code></pre>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash — تنظیم اعتبارنامه در ~/.hermes/.env</span><button class="copy-btn">کپی</button></div>
+  <pre><code>TERMINAL_SSH_HOST=my-server.example.com
+TERMINAL_SSH_USER=myuser
+TERMINAL_SSH_KEY=~/.ssh/id_rsa</code></pre>
+</div>
+
+<h3>Singularity/Apptainer</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># پیش‌ساخت SIF برای کارگرهای موازی
+apptainer build ~/python.sif docker://python:3.11-slim
+
+# پیکربندی
+hermes config set terminal.backend singularity
+hermes config set terminal.singularity_image ~/python.sif</code></pre>
+</div>
+
+<h3>Modal (ابر سرورلس)</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>uv pip install modal
+modal setup
+hermes config set terminal.backend modal</code></pre>
+</div>
+
+<h3>Vercel Sandbox</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>pip install 'hermes-agent[vercel]'
+hermes config set terminal.backend vercel_sandbox
+hermes config set terminal.vercel_runtime node24</code></pre>
+</div>
+<p>با هر سهٔ <code>VERCEL_TOKEN</code>، <code>VERCEL_PROJECT_ID</code> و <code>VERCEL_TEAM_ID</code> احراز هویت کنید. این راه‌اندازیِ مبتنی بر access-token مسیر پشتیبانی‌شده برای استقرارها و پروسه‌های بلندمدتِ معمول هرمس روی Render، Railway، داکر و میزبان‌های مشابه است. Runtimeهای پشتیبانی‌شده <code>node24</code>، <code>node22</code> و <code>python3.13</code> هستند؛ هرمس به‌طور پیش‌فرض <code>/vercel/sandbox</code> را به‌عنوان ریشهٔ ورک‌اسپیس راهن انتخاب می‌کند.</p>
+<p>برای توسعهٔ محلیِ موردی، هرمس توکن‌های کوتاه‌عمر OIDC ورسل را هم می‌پذیرد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>VERCEL_OIDC_TOKEN="$(vc project token &lt;project-name&gt;)" hermes chat</code></pre>
+</div>
+<p>از داخل پوشهٔ پروژهٔ ورسلِ لینک‌شده:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>VERCEL_OIDC_TOKEN="$(vc project token)" hermes chat</code></pre>
+</div>
+<p>با <code>container_persistent: true</code>، هرمس از اسنپ‌شات‌های ورسل برای حفظ وضعیت فایل‌سیستم در بازسازی‌های سندباکس برای همان کار استفاده می‌کند. این می‌تواند شامل اعتبارنامه‌ها، مهارت‌ها و فایل‌های کشِ همگام‌شدهٔ هرمس داخل سندباکس باشد. اسنپ‌شات‌ها پروسه‌های زنده، فضای PID یا همان هویتِ زندهٔ سندباکس را حفظ نمی‌کنند.</p>
+<p>دستورات ترمینال پس‌زمینه از جریان عمومیِ پروسهٔ غیر-محلیِ هرمس استفاده می‌کنند: تولید، poll، انتظار، لاگ و kill هنگام زنده‌بودن سندباکس از طریق ابزار process معمول کار می‌کنند، اما هرمس بازیابی بومیِ پروسهٔ جداشدهٔ ورسل پس از پاکسازی یا ری‌استارت ارائه نمی‌دهد.</p>
+<p><code>container_disk</code> را تنظیم‌نشده بگذارید یا روی پیش‌فرض مشترک <code>51200</code>؛ اندازه‌دهی دیسک سفارشی برای Vercel Sandbox پشتیبانی نمی‌شود و تشخیص‌ها/ساخت بک‌اند را شکست می‌دهد.</p>
+
+<h3>منابع کانتینر</h3>
+<p>CPU، حافظه، دیسک و ماندگاری را برای همهٔ بک‌اندهای کانتینری پیکربندی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>terminal:
+  backend: docker  # یا singularity, modal, daytona, vercel_sandbox
+  container_cpu: 1              # هسته‌های CPU (پیش‌فرض: 1)
+  container_memory: 5120        # حافظه به MB (پیش‌فرض: ۵GB)
+  container_disk: 51200         # دیسک به MB (پیش‌فرض: ۵۰GB)
+  container_persistent: true    # ماندگاری فایل‌سیستم بین نشست‌ها (پیش‌فرض: true)</code></pre>
+</div>
+<p>وقتی <code>container_persistent: true</code> باشد، پکیج‌ها، فایل‌ها و پیکربندیِ نصب‌شده در سراسر نشست‌ها باقی می‌مانند.</p>
+
+<h3>امنیت کانتینر</h3>
+<p>همهٔ بک‌اندهای کانتینری با سخت‌سازی امنیتی اجرا می‌شوند:</p>
+<ul>
+  <li>فایل‌سیستم ریشهٔ فقط‌خواندنی (داکر)</li>
+  <li>حذف همهٔ قابلیت‌های (capabilities) لینوکس</li>
+  <li>بدون ارتقای امتیاز</li>
+  <li>محدودیت PID (۲۵۶ پروسه)</li>
+  <li>ایزوله‌سازی کامل فضای نام (namespace)</li>
+  <li>ورک‌اسپیس ماندگار از طریق والوم‌ها، نه لایهٔ ریشهٔ قابل‌نوشتن</li>
+</ul>
+<p>داکر می‌تواند به‌صورت اختیاری یک فهرست مجاز محیطیِ صریح از طریق <code>terminal.docker_forward_env</code> بگیرد، اما متغیرهای فورواردشده برای دستورات داخل کانتینر قابل‌مشاهده‌اند و باید برای آن نشست در معرض بدانند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> مدیریت پروسه‌های پس‌زمینه</h2>
+<p>پروسه‌های پس‌زمینه را شروع کنید و مدیریتشان کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>terminal(command="pytest -v tests/", background=true)
+# خروجی: {"session_id": "proc_abc123", "pid": 12345}
+
+# سپس با ابزار process مدیریت کنید:
+process(action="list")       # نمایش همهٔ پروسه‌های در حال اجرا
+process(action="poll", session_id="proc_abc123")   # بررسی وضعیت
+process(action="wait", session_id="proc_abc123")   # بلاک تا اتمام
+process(action="log", session_id="proc_abc123")    # خروجی کامل
+process(action="kill", session_id="proc_abc123")   # خاتمه
+process(action="write", session_id="proc_abc123", data="y")  # ارسال ورودی</code></pre>
+</div>
+<p>حالت PTY‏ (<code>pty=true</code>) ابزارهای CLI تعاملی مثل Codex و Claude Code را ممکن می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> پشتیبانی sudo</h2>
+<p>اگر دستوری به sudo نیاز داشته باشد، از شما رمز پرسیده می‌شود (برای نشست کش می‌شود). یا <code>SUDO_PASSWORD</code> را در <code>~/.hermes/.env</code> تنظیم کنید.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>در پلتفرم‌های پیام‌رسانی، اگر sudo شکست بخورد، خروجی نکته‌ای برای افزودن <code>SUDO_PASSWORD</code> به <code>~/.hermes/.env</code> دارد.</p>
+</div>
+</section>
+
+<div class="pager">
+  <a href="overview.html"><span class="dir">→ قبلی</span><span class="ttl">نگاه کلی قابلیت‌ها</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">سیستم مهارت‌ها (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tools" target="_blank" rel="noopener">Tools &amp; Toolsets</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

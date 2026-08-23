@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نگاه کلی قابلیت‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/overview" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌های اصلی<span class="sep">/</span><strong>نگاه کلی</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>نگاه کلی قابلیت‌ها</h1>
+<p>هرمس ایجنت مجموعه‌ای غنی از توانایی‌ها دارد که بسیار فراتر از گفتگوی ساده است. از حافظهٔ پایدار و زمینهٔ آگاه از فایل تا اتوماسیون مرورگر و گفتگوهای صوتی، این قابلیت‌ها با هم کار می‌کنند تا هرمس یک دستیار خودکارِ قدرتمند باشد.</p>
+
+<div class="callout tip">
+  <div class="callout-title">💡 نمی‌دانید از کجا شروع کنید؟</div>
+  <p><code>hermes setup --portal</code> در یک فرمان هم یک ارائه‌دهندهٔ مدل و هم هر چهار ابزار گیت‌وی ابزار (جستجوی وب، تولید تصویر، TTS، مرورگر) را پوشش می‌دهد. به «<a href="https://hermes-agent.nousresearch.com/docs/integrations/nous-portal" target="_blank" rel="noopener">Nous Portal</a>» مراجعه کنید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> هسته</h2>
+<ul>
+  <li><strong><a href="tools.html">ابزارها و تول‌ست‌ها</a></strong> — ابزارها توابعی هستند که توانایی‌های ایجنت را گسترش می‌دهند. آن‌ها در تول‌ست‌های منطقی سازمان یافته‌اند که می‌توان به‌ازای هر پلتفرم فعال یا غیرفعالشان کرد و جستجوی وب، اجرای ترمینال، ویرایش فایل، حافظه، واگذاری و بیشتر را پوشش می‌دهند.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skills" target="_blank" rel="noopener">سیستم مهارت‌ها</a></strong> — سندهای دانشِ در-لحظه که ایجنت می‌تواند هنگام نیاز بارگذاری کند. مهارت‌ها از الگوی افشای تدریجی پیروی می‌کنند تا مصرف توکن حداقل شود و با استاندارد باز <a href="https://agentskills.io/specification" target="_blank" rel="noopener">agentskills.io</a> سازگارند.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory" target="_blank" rel="noopener">حافظهٔ پایدار</a></strong> — حافظهٔ کراندار و گزینش‌شده که بین نشست‌ها باقی می‌ماند. هرمس ترجیحات، پروژه‌ها، محیط و چیزهایی را که یاد گرفته از طریق <code>MEMORY.md</code> و <code>USER.md</code> به خاطر می‌سپارد.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files" target="_blank" rel="noopener">فایل‌های زمینه</a></strong> — هرمس به‌طور خودکار فایل‌های زمینهٔ پروژه (<code>.hermes.md</code>، <code>AGENTS.md</code>، <code>CLAUDE.md</code>، <code>SOUL.md</code>، <code>.cursorrules</code>) را کشف و بارگذاری می‌کند؛ فایل‌هایی که نحوهٔ رفتار او در پروژهٔ شما را شکل می‌دهند.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/context-references" target="_blank" rel="noopener">ارجاع‌های زمینه</a></strong> — <code>@</code> را به‌همراه یک ارجاع تایپ کنید تا فایل‌ها، پوشه‌ها، تفاوت‌های git و URLها مستقیم در پیام‌هایتان تزریق شوند. هرمس ارجاع را درون‌خطی باز می‌کند و محتوا را خودکار پیوست می‌کند.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/checkpoints-and-rollback" target="_blank" rel="noopener">چک‌پوینت‌ها</a></strong> — هرمس پیش از تغییر فایل‌ها به‌طور خودکار از پوشهٔ کاری شما اسنپ‌شات می‌گیرد و در صورت خرابی یک تور ایمنی برای بازگشت با <code>/rollback</code> به شما می‌دهد.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> اتوماسیون</h2>
+<ul>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/cron" target="_blank" rel="noopener">کارهای زمان‌بندی (کرون)</a></strong> — زمان‌بندی کارها برای اجرای خودکار با زبان طبیعی یا عبارات کرون. کارها می‌توانند مهارت بچسبانند، نتایج را به هر پلتفرمی تحویل بدهند و عملیات توقف/ازسرگیری/ویرایش را پشتیبانی کنند.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/delegation" target="_blank" rel="noopener">واگذاری به ساب‌ایجنت</a></strong> — ابزار <code>delegate_task</code> نمونه‌های ایجنت فرزند با زمینهٔ ایزوله، تول‌ست‌های محدود و نشست‌های ترمینال خودشان تولید می‌کند. به‌طور پیش‌فرض ۳ ساب‌ایجنت هم‌زمان (قابل پیکربندی) برای جریان‌های کاری موازی.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/code-execution" target="_blank" rel="noopener">اجرای کد</a></strong> — ابزار <code>execute_code</code> به ایجنت اجازه می‌دهد اسکریپت‌های پایتونی بنویسد که ابزارهای هرمس را برنامه‌پذیر صدا بزنند و گردش‌کارهای چندمرحله‌ای را با اجرای RPCِ سندباکس‌شده در یک نوبتِ LLM جمع کنند.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/hooks" target="_blank" rel="noopener">هوک‌های رویداد</a></strong> — اجرای کد سفارشی در نقاط کلیدی چرخهٔ حیات. هوک‌های گیت‌وی لاگ‌گیری، هشدارها و وب‌هوک‌ها را مدیریت می‌کنند؛ هوک‌های پلاگین رهگیری ابزار، متریک‌ها و گاردریل‌ها را.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/batch-processing" target="_blank" rel="noopener">پردازش گروهی</a></strong> — اجرای ایجنت هرمس روی صدها یا هزاران پرامپت به‌صورت موازی و تولید دادهٔ مسیر (trajectory) ساخت‌یافته با قالب ShareGPT برای تولید دادهٔ آموزشی یا ارزیابی.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> رسانه و وب</h2>
+<ul>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/voice-mode" target="_blank" rel="noopener">حالت صوتی</a></strong> — تعامل صوتی کامل در CLI و پلتفرم‌های پیام‌رسانی. با میکروفون با ایجنت حرف بزنید، پاسخ‌های گفتاری بشنوید و در کانال‌های صوتی دیسکورد گفتگوی صوتی زنده داشته باشید.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/wake-word" target="_blank" rel="noopener">کلمهٔ بیدارباش</a></strong> — تریگرِ دست‌آزادِ «هِی هرمس» برای CLI، TUI و اپ دسکتاپ. یک شنوندهٔ هات‌وُرد روی دستگاه با گفتن عبارت بیدارباش، یک نشست صوتی شروع می‌کند.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/browser" target="_blank" rel="noopener">اتوماسیون مرورگر</a></strong> — اتوماسیون کامل مرورگر با چند بک‌اند: ابری Browserbase، ابری Browser Use، کروم/بریو/کرومیوم/اج محلی از طریق CDP، یا کرومیوم محلی. وب‌سایت‌ها را باز کنید، فرم‌ها را پر کنید و اطلاعات را استخراج کنید.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/vision" target="_blank" rel="noopener">بینایی و پیست تصویر</a></strong> — پشتیبانی بینایی چندهمدلی. تصاویر را از کلیپ‌بورد در CLI پیست کنید و از ایجنت بخواهید با هر مدلِ دارای بینایی آن‌ها را تحلیل، توصیف یا پردازش کند.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/image-generation" target="_blank" rel="noopener">تولید تصویر</a></strong> — تولید تصویر از پرامپت متنی با FAL.ai. یازده مدل پشتیبانی می‌شود (FLUX 2 Klein/Pro، GPT-Image 1.5/2، Nano Banana Pro، Ideogram V3، Recraft V4 Pro، Qwen، Z-Image Turbo، Krea V2 Medium/Large)؛ یکی را با <code>hermes tools</code> انتخاب کنید.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tts" target="_blank" rel="noopener">صوت و TTS</a></strong> — خروجی متن-به-گفتار و رونویسی پیام‌های صوتی در همهٔ پلتفرم‌های پیام‌رسانی، با ده گزینهٔ بومی: Edge TTS (رایگان)، ElevenLabs، OpenAI TTS، MiniMax، Mistral Voxtral، Google Gemini، xAI، NeuTTS، KittenTTS و Piper — به‌علاوهٔ ارائه‌دهندگان فرمان سفارشی برای هر CLI محلی TTS.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> یکپارچه‌سازی‌ها</h2>
+<ul>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp" target="_blank" rel="noopener">یکپارچه‌سازی MCP</a></strong> — به هر سرور MCP از طریق ترنسپورت stdio یا HTTP وصل شوید. به ابزارهای بیرونی از گیت‌هاب، پایگاه‌های داده، فایل‌سیستم‌ها و APIهای داخلی دسترسی داشته باشید بدون نوشتن ابزار بومی هرمس. شامل فیلتر ابزار به‌ازای-سرور و پشتیبانی sampling.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/provider-routing" target="_blank" rel="noopener">مسیریابی ارائه‌دهنده</a></strong> — کنترل ریزبینانه بر اینکه کدام ارائه‌دهندگان هوش مصنوعی درخواست‌های شما را مدیریت کنند. با مرتب‌سازی، فهرست سفید، فهرست سیاه و ترتیب اولویت، روی هزینه، سرعت یا کیفیت بهینه کنید.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/fallback-providers" target="_blank" rel="noopener">ارائه‌دهندگان پشتیبان</a></strong> — شکست خودکار به ارائه‌دهندگان LLM پشتیبان وقتی مدل اصلی‌تان با خطا مواجه می‌شود، شامل fallback مستقل برای کارهای کمکی مثل بینایی و فشرده‌سازی.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/credential-pools" target="_blank" rel="noopener">استخر اعتبارنامه‌ها</a></strong> — توزیع فراخوانی‌های API بین چند کلید برای یک ارائه‌دهنده. چرخش خودکار هنگام محدودیت نرخ یا شکست.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/configuration#prompt-caching" target="_blank" rel="noopener">کش پرامپت</a></strong> — کش پیشوندِ یک‌ساعتهٔ بین-نشستیِ داخلی برای Claude روی آنتروپیک بومی، OpenRouter و Nous Portal. همیشه فعال؛ بدون نیاز به پیکربندی.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory-providers" target="_blank" rel="noopener">ارائه‌دهندگان حافظه</a></strong> — بک‌اندهای حافظهٔ خارجی (Honcho، OpenViking، Mem0، Hindsight، Holographic، RetainDB، ByteRover، Supermemory) را متصل کنید برای مدل‌سازی کاربر بین-نشستی و شخصی‌سازی فراتر از سیستم حافظهٔ داخلی.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server" target="_blank" rel="noopener">سرور API</a></strong> — هرمس را به‌عنوان یک اندپوینت HTTP سازگار با OpenAI عرضه کنید. هر فرانت‌اندی که فرمت OpenAI صحبت می‌کند را وصل کنید — Open WebUI، LobeChat، LibreChat و بیشتر.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/acp" target="_blank" rel="noopener">یکپارچه‌سازی IDE (ACP)</a></strong> — از هرمس داخل ادیتورهای سازگار با ACP مثل VS Code، Zed و JetBrains استفاده کنید. گفتگو، فعالیت ابزار، تفاوت فایل‌ها و دستورات ترمینال داخل ادیتور شما رندر می‌شوند.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/batch-processing" target="_blank" rel="noopener">پردازش گروهی</a></strong> — اجرای ایجنت روی بسیاری از پرامپت‌ها یا کارها به‌صورت موازی از CLI، با خروجی‌های ساخت‌یافته و ضبط مسیر مناسب برای ارزیابی یا خطوط لولهٔ آموزشی پایین‌دستی.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> سفارشی‌سازی</h2>
+<ul>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/personality" target="_blank" rel="noopener">شخصیت و SOUL.md</a></strong> — شخصیت ایجنت کاملاً قابل سفارشی‌سازی. <code>SOUL.md</code> فایل هویت اصلی است — اولین چیز در پرامپت سیستمی — و می‌توانید پیش‌تنظیم‌های <code>/personality</code> داخلی یا سفارشی را به‌ازای هر نشست جایگزین کنید.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skins" target="_blank" rel="noopener">پوسته‌ها و تم‌ها</a></strong> — نمایش بصری CLI را سفارشی کنید: رنگ‌های بنر، چهره‌ها و فعل‌های اسپینر، برچسب‌های جعبهٔ پاسخ، متن برندینگ و پیشوند فعالیت ابزار.</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/plugins" target="_blank" rel="noopener">پلاگین‌ها</a></strong> — ابزارها، هوک‌ها و یکپارچه‌سازی‌های سفارشی را بدون تغییر کد هسته اضافه کنید. سه نوع پلاگین: عمومی (ابزار/هوک)، ارائه‌دهندگان حافظه (دانش بین-نشستی) و موتورهای زمینه (مدیریت زمینهٔ جایگزین). از طریق رابط تعاملی یکپارچهٔ <code>hermes plugins</code> مدیریت می‌شوند.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="../which-file-does-what.html"><span class="dir">→ قبلی</span><span class="ttl">هر فایل چه‌کاری می‌کند؟</span></a>
+  <a class="next" href="tools.html"><span class="dir">بعدی ←</span><span class="ttl">ابزارها و تول‌ست‌ها</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/overview" target="_blank" rel="noopener">Features Overview</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ترماکس (اندروید) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/getting-started/termux" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>شروع کار<span class="sep">/</span><strong>ترماکس (اندروید)</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>هرمس روی اندروید با Termux</h1>
+
+<div class="callout warning">
+  <div class="callout-title">⚠️ پلتفرم ردهٔ ۲ (Tier 2)</div>
+  <p>ترماکس (اندروید) یک <a href="platform-support.html">پلتفرم ردهٔ ۲</a> است. اسکریپت نصب و مستندات این صفحه فقط به‌صورت «در حد توان» نگهداری می‌شوند. کامیت‌های شاخهٔ <code>main</code> ممکن است هر لحظه این بسته‌ها را بشکنند.</p>
+</div>
+
+<p>هرمس ایجنت می‌تواند مستقیم روی یک گوشی اندرویدی از طریق <a href="https://termux.dev/" target="_blank" rel="noopener">Termux</a> اجرا شود.</p>
+<p>این روش به شما یک CLI محلیِ کاری روی گوشی، به‌علاوهٔ بسته‌های جانبیِ اصلی‌ای می‌دهد که در حال حاضر می‌دانیم روی اندروید تمیز نصب می‌شوند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چه چیزهایی در مسیر تست‌شده پشتیبانی می‌شود؟</h2>
+<p>بستهٔ تست‌شدهٔ ترماکس این‌ها را نصب می‌کند:</p>
+<ul>
+  <li>CLI هرمس</li>
+  <li>پشتیبانی کرون</li>
+  <li>پشتیبانی ترمینال پس‌زمینه/PTY</li>
+  <li>پشتیبانی گیت‌وی تلگرام (اجراهای پس‌زمینه به‌صورت دستی/در حد توان)</li>
+  <li>پشتیبانی MCP</li>
+  <li>پشتیبانی حافظهٔ Honcho</li>
+  <li>پشتیبانی ACP</li>
+</ul>
+<p>به‌طور مشخص، این معادل نصب زیر است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>python -m pip install -e '.[termux]' -c constraints-termux.txt</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> چه چیزهایی هنوز بخشی از مسیر تست‌شده نیستند؟</h2>
+<p>چند قابلیت هنوز به وابستگی‌های سبک دسکتاپ/سرور نیاز دارند که برای اندروید منتشر نشده‌اند، یا هنوز روی گوشی‌ها اعتبارسنجی نشده‌اند:</p>
+<ul>
+  <li>بستهٔ <code>.[all]</code> امروز روی اندروید پشتیبانی نمی‌شود</li>
+  <li>بستهٔ <code>voice</code> توسط <code>faster-whisper -&gt; ctranslate2</code> مسدود است و <code>ctranslate2</code> ویل اندرویدی منتشر نمی‌کند</li>
+  <li>راه‌اندازی خودکار مرورگر / پلی‌رایت در نصب‌کنندهٔ ترماکس رد می‌شود</li>
+  <li>ایزوله‌سازی ترمینال مبتنی بر داکر داخل ترماکس در دسترس نیست</li>
+  <li>اندروید ممکن است کارهای پس‌زمینهٔ ترماکس را معلق کند، پس ماندگاری گیت‌وی «در حد توان» است نه یک سرویس مدیریت‌شدهٔ معمولی</li>
+</ul>
+<p>این مانع از آن نمی‌شود که هرمس به‌عنوان یک ایجنت CLIِ بومیِ گوشی خوب کار کند — فقط یعنی نصب موبایلِ توصیه‌شده عمداً محدودتر از نصب دسکتاپ/سرور است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گزینهٔ بومی `pkg` نگهداری‌شده توسط جامعه</h2>
+
+<div class="callout caution">
+  <div class="callout-title">⚠️ توزیع شخص ثالث</div>
+  <p>این مخزن APT **توسط جامعه و توسط @adybag14-cyber نگهداری می‌شود و یک توزیع رسمی NousResearch نیست**. NousResearch این بسته‌ها را نمی‌سازد، امضا نمی‌کند، میزبانی نمی‌کند یا بازرسی نمی‌کند. فعال‌سازی این مخزن به معنای اعتماد به مخزن و کلید امضای اپراتور آن است. خود ترماکس همچنان پلتفرمی ردهٔ ۲ / در-حد-توان باقی می‌ماند.</p>
+</div>
+
+<p>برای کاربرانی که نصب بومی با مدیر پکیج را به ساخت وابستگی‌های پایتون/راست روی گوشی ترجیح می‌دهند، یک مخزن APT نگهداری‌شده توسط جامعه موجود است. بوت‌استرپ مخزن و سورس‌های بسته‌بندی در <a href="https://github.com/adybag14-cyber/termux-python" target="_blank" rel="noopener">adybag14-cyber/termux-python</a> و بیلد بستهٔ هرمس در <a href="https://adybag14-cyber/termux-hermes" target="_blank" rel="noopener">adybag14-cyber/termux-hermes</a> منتشر شده‌اند.</p>
+
+<p>کلید/سورس مخزن و هرمس را نصب کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl -fsSL https://raw.githubusercontent.com/adybag14-cyber/termux-python/main/scripts/setup_apt_repo.sh | bash
+pkg install hermes-agent</code></pre>
+</div>
+
+<p>اثر انگشت کلید امضای مخزن که توزیع جامعه در حال حاضر مستند کرده:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">fingerprint</span><button class="copy-btn">کپی</button></div>
+  <pre><code>EAD24A2124EFA7393A78B7B14699F966313F7A6B</code></pre>
+</div>
+
+<p>نصب‌های هرمسِ مدیریت‌شده با APT با روش نصب <code>apt</code> علامت می‌خورند. بنابراین هرمس خودبه‌روزرسانِ Git خود را روی فایل‌های متعلق به پکیج اجرا نمی‌کند؛ به‌جای آن از مدیر پکیج استفاده کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>pkg update
+pkg upgrade hermes-agent</code></pre>
+</div>
+
+<p>مشکلات بسته‌بندی/مخزن/امضای این گزینه را باید به مخازن بسته‌بندی جامعهٔ بالا گزارش کرد. باگ‌های زمانِ اجرای هرمس همچنان می‌توانند اینجا گزارش شوند — با در نظر داشتن اینکه پشتیبانی اندروید/ترماکس «در حد توان» است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گزینهٔ ۱: نصب‌کنندهٔ یک‌خطی</h2>
+<p>هرمس اکنون مسیر نصب آگاه از ترماکس دارد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash</code></pre>
+</div>
+<p>روی ترماکس، نصب‌کننده به‌طور خودکار:</p>
+<ul>
+  <li>برای پکیج‌های سیستمی از <code>pkg</code> استفاده می‌کند</li>
+  <li>venv را با <code>python -m venv</code> می‌سازد</li>
+  <li>اول بستهٔ گستردهٔ <code>.[termux-all]</code> را امتحان می‌کند و به بستهٔ کوچک‌تر <code>.[termux]</code> (و سپس نصب پایه) برمی‌گردد — نصب‌کنندهٔ curl این ترتیب را خودکار رعایت می‌کند</li>
+  <li><code>hermes</code> را در <code>$PREFIX/bin</code> لینک می‌کند تا روی PATH ترماکس شما بماند</li>
+  <li>راه‌اندازی تست‌نشدهٔ مرورگر / واتساپ را رد می‌کند</li>
+</ul>
+<p>اگر فرمان‌های صریح را می‌خواهید یا باید نصبِ شکست‌خورده را عیب‌یابی کنید، از مسیر دستی زیر استفاده کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گزینهٔ ۲: نصب دستی (کاملاً صریح)</h2>
+
+<h3>۱. به‌روزرسانی ترماکس و نصب پکیج‌های سیستمی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>pkg update
+pkg install -y git python clang rust make pkg-config libffi openssl nodejs ripgrep ffmpeg</code></pre>
+</div>
+<p>چرا این پکیج‌ها؟</p>
+<ul>
+  <li><code>python</code> — زمان اجرا + پشتیبانی venv</li>
+  <li><code>git</code> — کلون/به‌روزرسانی مخزن</li>
+  <li><code>clang</code>، <code>rust</code>، <code>make</code>، <code>pkg-config</code>، <code>libffi</code>، <code>openssl</code> — برای بیلد چند وابستگی پایتونی روی اندروید لازم‌اند</li>
+  <li><code>nodejs</code> — زمان اجرای نود، اختیاری برای آزمایش‌های فراتر از مسیر تست‌شدهٔ اصلی</li>
+  <li><code>ripgrep</code> — جستجوی سریع فایل</li>
+  <li><code>ffmpeg</code> — تبدیل‌های رسانه/TTS</li>
+</ul>
+
+<h3>۲. کلون هرمس</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>git clone https://github.com/NousResearch/hermes-agent.git
+cd hermes-agent</code></pre>
+</div>
+
+<h3>۳. ساخت محیط مجازی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>python -m venv venv
+source venv/bin/activate
+export ANDROID_API_LEVEL="$(getprop ro.build.version.sdk)"
+python -m pip install --upgrade pip setuptools wheel</code></pre>
+</div>
+<p><code>ANDROID_API_LEVEL</code> برای پکیج‌های مبتنی بر Rust/maturin مانند <code>jiter</code> مهم است.</p>
+
+<h3>۴. نصب بستهٔ تست‌شدهٔ ترماکس</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>python -m pip install -e '.[termux]' -c constraints-termux.txt</code></pre>
+</div>
+<p>اگر فقط ایجنتِ هستهٔ مینیمال را می‌خواهید، این هم کار می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>python -m pip install -e '.' -c constraints-termux.txt</code></pre>
+</div>
+
+<h3>۵. قرار دادن <code>hermes</code> روی PATH ترماکس</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>ln -sf "$PWD/venv/bin/hermes" "$PREFIX/bin/hermes"</code></pre>
+</div>
+<p><code>$PREFIX/bin</code> در ترماکس از قبل روی PATH است، پس این کار باعث می‌شود فرمان <code>hermes</code> در شل‌های جدید هم بدون نیاز به فعال‌سازی دوبارهٔ venv در دسترس بماند.</p>
+
+<h3>۶. تأیید نصب</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes --version
+hermes doctor</code></pre>
+</div>
+
+<h3>۷. شروع هرمس</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> راه‌اندازی‌های توصیه‌شدهٔ بعدی</h2>
+
+<h3>پیکربندی مدل</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes model</code></pre>
+</div>
+<p>یا کلیدها را مستقیم در <code>~/.hermes/.env</code> تنظیم کنید.</p>
+
+<h3>اجرای دوبارهٔ ویزارد کامل راه‌اندازی بعداً</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes setup</code></pre>
+</div>
+
+<h3>نصب دستی وابستگی‌های اختیاری Node</h3>
+<p>مسیر تست‌شدهٔ ترماکس عمداً راه‌اندازی Node/مرورگر را رد می‌کند. اگر بعداً می‌خواهید با ابزار مرورگر آزمایش کنید، آن‌چه لازم دارید به بک‌اند شما بستگی دارد:</p>
+<ul>
+  <li><strong>ارائه‌دهندگان مرورگر ابری</strong> (Browserbase، Browser Use، Firecrawl) کرومیوم خودشان را میزبانی می‌کنند، پس همان Node.js کافی است — <code>agent-browser</code> در اولین استفاده به‌صورت تنبل از طریق <code>npx agent-browser</code> حل می‌شود:
+    <div class="codebox">
+      <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+      <pre><code>pkg install nodejs-lts</code></pre>
+    </div>
+  </li>
+  <li><strong>اتوماسیون مرورگر محلی</strong> روی ترماکس به نصب واقعی <code>agent-browser</code> نیاز دارد — مسیر جایگزینِ npxِ خالی در حالت محلی عمداً رد می‌شود چون برای «آماده» اعلام‌کردن بیش از حد شکننده است:
+    <div class="codebox">
+      <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+      <pre><code>pkg install nodejs-lts
+npm install -g agent-browser &amp;&amp; agent-browser install</code></pre>
+    </div>
+  </li>
+</ul>
+<p>ابزار مرورگر به‌طور خودکار پوشه‌های ترماکس (<code>/data/data/com.termux/files/usr/bin</code>) را در جستجوی PATH خود می‌گنجاند، پس <code>agent-browser</code> و <code>npx</code> بدون هیچ پیکربندی اضافیِ PATH پیدا می‌شوند.</p>
+<p>ابزار مرورگر/واتساپ روی اندروید را تا اعلام خلاف آن، آزمایشی بدانید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> عیب‌یابی</h2>
+
+<h3>خطای <code>No solution found</code> هنگام نصب <code>.[all]</code></h3>
+<p>به‌جای آن از بستهٔ تست‌شدهٔ ترماکس استفاده کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>python -m pip install -e '.[termux]' -c constraints-termux.txt</code></pre>
+</div>
+<p>مانعِ فعلی، بستهٔ <code>voice</code> است:</p>
+<ul>
+  <li><code>voice</code> به <code>faster-whisper</code> وابسته است</li>
+  <li><code>faster-whisper</code> به <code>ctranslate2</code> وابسته است</li>
+  <li><code>ctranslate2</code> ویل اندرویدی منتشر نمی‌کند</li>
+</ul>
+
+<h3>شکست <code>uv pip install</code> روی اندروید</h3>
+<p>به‌جای آن از مسیر ترماکس با venv کتابخانهٔ استاندارد + <code>pip</code> استفاده کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>python -m venv venv
+source venv/bin/activate
+export ANDROID_API_LEVEL="$(getprop ro.build.version.sdk)"
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -e '.[termux]' -c constraints-termux.txt</code></pre>
+</div>
+
+<h3>شکایت <code>jiter</code> / <code>maturin</code> از <code>ANDROID_API_LEVEL</code></h3>
+<p>سطح API را پیش از نصب صریح تنظیم کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>export ANDROID_API_LEVEL="$(getprop ro.build.version.sdk)"
+python -m pip install -e '.[termux]' -c constraints-termux.txt</code></pre>
+</div>
+
+<h3><code>hermes doctor</code> می‌گوید ripgrep یا Node غایب است</h3>
+<p>آن‌ها را با پکیج‌های ترماکس نصب کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>pkg install ripgrep nodejs</code></pre>
+</div>
+
+<h3>شکست بیلد هنگام نصب پکیج‌های پایتونی</h3>
+<p>مطمئن شوید زنجیرهٔ ابزار بیلد نصب است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>pkg install clang rust make pkg-config libffi openssl</code></pre>
+</div>
+<p>سپس دوباره امتحان کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>python -m pip install -e '.[termux]' -c constraints-termux.txt</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> محدودیت‌های شناخته‌شده روی گوشی‌ها</h2>
+<ul>
+  <li>بک‌اند داکر در دسترس نیست</li>
+  <li>رونویسی صوتی محلی از طریق <code>faster-whisper</code> در مسیر تست‌شده در دسترس نیست</li>
+  <li>راه‌اندازی اتوماسیون مرورگر عمداً توسط نصب‌کننده رد می‌شود</li>
+  <li>برخی بسته‌های اختیاری ممکن است کار کنند، اما فقط <code>.[termux]</code> و <code>.[termux-all]</code> در حال حاضر به‌عنوان بسته‌های تست‌شدهٔ اندرویدی مستند شده‌اند</li>
+</ul>
+<p>اگر به مشکل جدیدِ مخصوص اندروید خوردید، لطفاً یک issue در گیت‌هاب باز کنید همراه با:</p>
+<ul>
+  <li>نسخهٔ اندروید شما</li>
+  <li>خروجی <code>termux-info</code></li>
+  <li><code>python --version</code></li>
+  <li><code>hermes doctor</code></li>
+  <li>فرمان دقیق نصب و خروجی کامل خطا</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="platform-support.html"><span class="dir">→ قبلی</span><span class="ttl">پشتیبانی پلتفرم‌ها</span></a>
+  <a class="next" href="../user-guide/which-file-does-what.html"><span class="dir">بعدی ←</span><span class="ttl">هر فایل چه‌کاری می‌کند؟</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/getting-started/termux" target="_blank" rel="noopener">Termux (Android)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

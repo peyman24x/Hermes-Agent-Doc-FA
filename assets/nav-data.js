@@ -7,7 +7,7 @@ window.HERMES_NAV = [
   { p:"getting-started/learning-path.html",    t:"مسیر یادگیری",                                d:1 },
   { p:"getting-started/updating.html",         t:"به‌روزرسانی و حذف",                           d:1 },
   { p:"getting-started/platform-support.html", t:"پشتیبانی پلتفرم‌ها",                          d:1 },
-  { p:"getting-started/termux.html",           t:"ترماکس (اندروید)",                            d:0 },
+  { p:"getting-started/termux.html",           t:"ترماکس (اندروید)",                            d:1 },
   { p:"getting-started/nix-setup.html",        t:"نصب با Nix",                                  d:0 }
 ]},
 { id:"user-guide", cat:"⚙️ کار با Hermes", pages:[
@@ -35,13 +35,13 @@ window.HERMES_NAV = [
   { p:"user-guide/secrets/command.html",            t:"منبع رمز Command Helper",          d:0 },
   { p:"user-guide/secrets/onepassword.html",        t:"1Password",                        d:0 },
   { p:"user-guide/skills/google-workspace.html",    t:"گوگل‌ورک‌اسپیس (جیمیل، تقویم…)",    d:0 },
-  { p:"user-guide/which-file-does-what.html",       t:"هر فایل چه‌کاری می‌کند؟",           d:0 },
+  { p:"user-guide/which-file-does-what.html",       t:"هر فایل چه‌کاری می‌کند؟",           d:1 },
   { p:"user-guide/windows-native.html",             t:"راهنمای ویندوز (بومی)",            d:0 },
   { p:"user-guide/windows-wsl-quickstart.html",     t:"راهنمای ویندوز (WSL2)",            d:0 }
 ]},
 { id:"features", cat:"🧠 قابلیت‌های اصلی", pages:[
-  { p:"user-guide/features/overview.html",             t:"نگاه کلی قابلیت‌ها",                 d:0 },
-  { p:"user-guide/features/tools.html",                t:"ابزارها و تول‌ست‌ها",                 d:0 },
+  { p:"user-guide/features/overview.html",             t:"نگاه کلی قابلیت‌ها",                 d:1 },
+  { p:"user-guide/features/tools.html",                t:"ابزارها و تول‌ست‌ها",                 d:1 },
   { p:"user-guide/features/skills.html",               t:"سیستم مهارت‌ها (Skills)",            d:0 },
   { p:"user-guide/features/curator.html",              t:"نگهدارندهٔ مهارت‌ها (Curator)",       d:0 },
   { p:"user-guide/features/memory.html",               t:"حافظه",                               d:0 },

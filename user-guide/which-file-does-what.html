@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>هر فایل چه‌کاری می‌کند؟ — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/which-file-does-what" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>هر فایل چه‌کاری می‌کند؟</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>هر فایل چه‌کاری می‌کند؟</h1>
+
+<p>«به ایجنت‌ام چیزی گفتم و فراموشش کرد.» «کدام فایل مغز ایجنت من است؟» «SOUL.md را ویرایش کردم — چرا اسم من را نمی‌داند؟» همهٔ این سؤال‌ها به یک چیز برمی‌گردند: Hermes Agent توسط چند فایل مارک‌داون شکل می‌گیرد و هر کدام نقش متفاوتی دارد. این صفحه همهٔ آن‌ها را در یک جا نقشه‌برداری می‌کند. برای عمق بیشتر دربارهٔ هر کدام، به صفحات «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory" target="_blank" rel="noopener">حافظهٔ پایدار</a>»، «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/personality" target="_blank" rel="noopener">شخصیت و SOUL.md</a>» و «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files" target="_blank" rel="noopener">فایل‌های زمینه</a>» مراجعه کنید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> جدول اصلی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فایل</th><th>چه چیزی در خود دارد</th><th>چه کسی می‌نویسدش</th><th>ایجنت کِی می‌بیندش</th><th>کجا زندگی می‌کند</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>SOUL.md</strong></td>
+      <td>هویت اصلی ایجنت — شخصیت، لحن، سبک ارتباطی، چیزهایی که از نظر سبکی باید پرهیز شوند</td>
+      <td>شما. هرمس در صورت نبود، یک فایل اولیه می‌کارد؛ فایل‌های موجود هرگز بازنویسی نمی‌شوند</td>
+      <td>جایگاه شمارهٔ ۱ پرامپت سیستمی، در شروع نشست</td>
+      <td><code>~/.hermes/SOUL.md</code> (یا <code>$HERMES_HOME/SOUL.md</code> با home سفارشی) — هرگز پوشهٔ کاری</td>
+    </tr>
+    <tr>
+      <td><strong>USER.md</strong></td>
+      <td>پروفایل کاربر — نام شما، نقش، ترجیحات، سبک ارتباطی، انتظارات</td>
+      <td>ایجنت، از طریق ابزار <code>memory</code> (می‌توانید ذخیره‌سازی را با <code>write_approval</code> بگیرید، یا مدخل‌ها را با <code>hermes journey edit</code> ویرایش کنید)</td>
+      <td>به‌صورت اسنپ‌شاتِ منجمد در شروع نشست به پرامپت سیستمی تزریق می‌شود</td>
+      <td><code>~/.hermes/memories/</code></td>
+    </tr>
+    <tr>
+      <td><strong>MEMORY.md</strong></td>
+      <td>یادداشت‌های شخصی ایجنت — حقایق محیط، قراردادهای پروژه، رفتارهای عجیب ابزارها، چیزهای آموخته‌شده</td>
+      <td>ایجنت، از طریق ابزار <code>memory</code> (همان گزینه‌های گیت و ویرایش USER.md)</td>
+      <td>به‌صورت اسنپ‌شاتِ منجمد در شروع نشست به پرامپت سیستمی تزریق می‌شود</td>
+      <td><code>~/.hermes/memories/</code></td>
+    </tr>
+    <tr>
+      <td><strong>AGENTS.md</strong></td>
+      <td>دستورالعمل‌های پروژه، قراردادها، معماری — فرمان‌ها، پورت‌ها، مسیرها، گردش‌کارهای مخصوص مخزن</td>
+      <td>شما (یا هر کس نویسندهٔ پروژه است)</td>
+      <td>هنگام راه‌اندازی از پوشهٔ کاری شما در پرامپت سیستمی بارگذاری می‌شود؛ نسخه‌های پوشه‌های تودرتو وقتی ایجنت در زیرپوشه‌ها حرکت می‌کند به‌تدریج کشف می‌شوند</td>
+      <td>پوشهٔ کاری پروژه + زیرپوشه‌ها</td>
+    </tr>
+    <tr>
+      <td><strong>.hermes.md</strong> / <strong>HERMES.md</strong></td>
+      <td>دستورالعمل‌های پروژه، مثل AGENTS.md اما مخصوص هرمس و با بالاترین اولویت</td>
+      <td>شما</td>
+      <td>هنگام راه‌اندازی در پرامپت سیستمی بارگذاری می‌شود (اولین تطبیق بر AGENTS.md مقدم است)</td>
+      <td>پروژهٔ شما — کشف تا ریشهٔ git بالا می‌رود</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout note">
+  <div class="callout-title">ℹ️ در هر نشست فقط یک فایل زمینهٔ پروژه</div>
+  <p>در هر نشست فقط <strong>یک</strong> نوع زمینهٔ پروژه بارگذاری می‌شود و اولین تطبیق برنده است: <code>.hermes.md</code> ← <code>AGENTS.md</code> ← <code>CLAUDE.md</code> ← <code>.cursorrules</code>. <code>SOUL.md</code> همیشه به‌طور مستقل به‌عنوان هویت ایجنت بارگذاری می‌شود — بخشی از آن زنجیرهٔ اولویت نیست. برای فهرست کامل، از جمله سازگاری <code>CLAUDE.md</code> و <code>.cursorrules</code>، به «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files" target="_blank" rel="noopener">فایل‌های زمینه</a>» مراجعه کنید.</p>
+</div>
+
+<p>یک خلاصهٔ کاربردی:</p>
+<ul>
+  <li><strong>SOUL.md</strong> «ایجنت <em>چه کسی است</em>» — اگر قرار است همه‌جا همراهتان باشد، جای آن اینجاست.</li>
+  <li><strong>USER.md</strong> «<em>شما</em> چه کسی هستید» — ایجنت آن را برایتان نگه می‌دارد.</li>
+  <li><strong>MEMORY.md</strong> «ایجنت چه چیزهایی <em>یاد گرفته</em>» — این را هم خودش نگه می‌دارد.</li>
+  <li><strong>AGENTS.md</strong> (یا <code>.hermes.md</code>) «<em>پروژه</em> به چه نیاز دارد» — اگر چیزی متعلق به پروژه است، جای آن اینجاست.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> «چرا چیزی را که همین الان گفتم فراموش کرد؟»</h2>
+<p>حافظه (MEMORY.md و USER.md) به‌صورت یک <strong>اسنپ‌شات منجمد</strong> که یک بار در شروع نشست گرفته شده به پرامپت سیستمی تزریق می‌شود — وقتی ایجنت وسط نشست چیزی را ذخیره می‌کند، تغییر بلافاصله روی دیسک ماندگار می‌شود اما تا شروع نشستِ بعدی در پرامپت سیستمی ظاهر نمی‌شود. این عمدی است: حفظ کش پیشوندِ LLM برای کارایی، و پاسخ‌های ابزار همیشه وضعیت زنده را نشان می‌دهند پس چیزی از دست نمی‌رود — یک نشست جدید باز کنید و حافظهٔ به‌روزشده همان‌جاست. جزئیات کامل در «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory#how-memory-appears-in-the-system-prompt" target="_blank" rel="noopener">حافظه چگونه در پرامپت سیستمی ظاهر می‌شود</a>».</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> اشتباه‌های رایج</h2>
+
+<h3>«دربارهٔ خودم در SOUL.md نوشتم، ولی USER.md خالی ماند»</h3>
+<p><code>SOUL.md</code> و <code>USER.md</code> دو سیستم جداگانه‌اند که هرگز به هم غذا نمی‌دهند. <code>SOUL.md</code> یک فایل شخصیتی است که <strong>شما</strong> مستقیم ویرایش می‌کنید — لحن و هویت را شکل می‌دهد و محتوایش عیناً به‌عنوان جایگاه شمارهٔ ۱ پرامپت تزریق می‌شود. <code>USER.md</code> بخشی از حافظهٔ پایدار است و توسط <strong>ایجنت</strong> از طریق ابزار <code>memory</code> نوشته می‌شود. اگر می‌خواهید حقایقی دربارهٔ خودتان در USER.md باشد، به ایجنت بگویید («به خاطر بسپر که پاسخ‌های مختصر را ترجیح می‌دهم») تا ذخیره‌شان کند — ویرایش SOUL.md حافظه را پر نمی‌کند و مدخل‌های حافظه هم پرسونا را عوض نمی‌کنند. از SOUL.md برای هدایت پایدار لحن و شخصیت استفاده کنید؛ ترجیحات و حقایق پروفایل را به حافظه بسپارید. به «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/personality#what-should-go-in-soulmd" target="_blank" rel="noopener">چه چیزی باید در SOUL.md باشد؟</a>» و «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory#two-targets-explained" target="_blank" rel="noopener">توضیح دو مقصد</a>» مراجعه کنید.</p>
+
+<h3>«وسط نشست اسمم را گفتم و طوری رفت که انگار هرگز نشنیده»</h3>
+<p>اگر ایجنت اسم شما را در حافظه ذخیره کرده باشد، ذخیره کار کرده — با پاسخ‌های ابزار <code>memory</code> یا <code>hermes journey list</code> بررسی کنید. چیزی که می‌بینید همان قاعدهٔ اسنپ‌شات منجمد بالاست: پرامپت سیستمی وسط نشست نوسازی نمی‌شود، پس بلوک حافظهٔ <em>تزریق‌شده</em> هنوز وضعیتِ شروعِ نشست را نشان می‌دهد. ایجنت همچنان می‌تواند از آنچه در گفتگوی فعلی به او گفته‌اید استفاده کند (در زمینه است) و مدخل ذخیره‌شده از نشست بعدی در پرامپت سیستمی خواهد بود. همین برای ویرایش‌های <code>SOUL.md</code> یا <code>AGENTS.md</code> هم که حین اجرای یک نشست انجام می‌دهید صادق است: زمینه در شروع نشست سرهم می‌شود، پس برای اعمال تغییرات نشست را دوباره راه‌اندازی کنید.</p>
+
+<div class="callout tip">
+  <div class="callout-title">💡 راهنمای تصمیم سریع</div>
+  <ul>
+    <li>می‌خواهید روش <strong>حرف‌زدن</strong> ایجنت عوض شود؟ <code>~/.hermes/SOUL.md</code> را ویرایش کنید — «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/personality" target="_blank" rel="noopener">شخصیت و SOUL.md</a>».</li>
+    <li>می‌خواهید ایجنت <strong>یک واقعیت را به خاطر بسپارد</strong>؟ فقط به او بگویید — خودش در حافظه ذخیره می‌کند. «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory" target="_blank" rel="noopener">حافظهٔ پایدار</a>».</li>
+    <li>می‌خواهید <strong>قواعد پروژه</strong> تعیین کنید؟ یک <code>AGENTS.md</code> (یا <code>.hermes.md</code>) در پروژه بگذارید — «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files" target="_blank" rel="noopener">فایل‌های زمینه</a>».</li>
+    <li>تغییر شخصیتی <strong>موقت</strong> می‌خواهید؟ از <code>/personality</code> استفاده کنید — یک اورلی سطح-نشست است، بدون نیاز به ویرایش فایل.</li>
+  </ul>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مستندات مرتبط</h2>
+<ul>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory" target="_blank" rel="noopener">حافظهٔ پایدار</a> — MEMORY.md، USER.md، ابزار <code>memory</code>، محدودیت‌های ظرفیت، <code>write_approval</code></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/personality" target="_blank" rel="noopener">شخصیت و SOUL.md</a> — راهنمای محتوای SOUL.md، پیش‌تنظیم‌های <code>/personality</code>، پشتهٔ پرامپت</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files" target="_blank" rel="noopener">فایل‌های زمینه</a> — AGENTS.md، <code>.hermes.md</code>، کشف تدریجی، اسکن امنیتی</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="../getting-started/termux.html"><span class="dir">→ قبلی</span><span class="ttl">ترماکس (اندروید)</span></a>
+  <a class="next" href="../user-guide/features/overview.html"><span class="dir">بعدی ←</span><span class="ttl">نگاه کلی قابلیت‌ها</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/which-file-does-what" target="_blank" rel="noopener">Which File Does What?</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
