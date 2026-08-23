@@ -15,7 +15,7 @@ window.HERMES_NAV = [
   { p:"user-guide/tui.html",                        t:"رابط ترمینال مدرن (TUI)",          d:0 },
   { p:"user-guide/configuration.html",              t:"پیکربندی (config.yaml)",           d:0 },
   { p:"user-guide/configuring-models.html",         t:"پیکربندی مدل‌ها",                   d:0 },
-  { p:"user-guide/sessions.html",                   t:"نشست‌ها",                           d:0 },
+  { p:"user-guide/sessions.html",                   t:"نشست‌ها",                           d:1 },
   { p:"user-guide/profiles.html",                   t:"پروفایل‌ها",                        d:1 },
   { p:"user-guide/git-worktrees.html",              t:"گیت‌ورک‌تری (Worktree)",            d:0 },
   { p:"user-guide/docker.html",                     t:"اجرای داکر",                        d:1 },

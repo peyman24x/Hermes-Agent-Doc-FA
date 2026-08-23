@@ -8,11 +8,12 @@
 ![Status](https://img.shields.io/badge/پیشرفت-در%20حال%20ترجمه-success.svg)
 ![Static](https://img.shields.io/badge/سایت-کاملاً%20استاتیک-informational.svg)
 ![Repo](https://img.shields.io/badge/گیت‌هاب-Hermes--Agent--Doc--FA-181717.svg?logo=github)
+![Live](https://img.shields.io/badge/سایت%20آنلاین-doc.hermes.peyman24x.ir-00b67a.svg?logo=link)
 ![Offline](https://img.shields.io/badge/اجرای%20آفلاین-بدون%20سرور-brightgreen.svg)
 
 > **طراحی و اجرا: [peyman24x.ir](https://peyman24x.ir)** · انتشار تحت [لایسنس MIT](LICENSE)
 
-> 🔗 مخزن پروژه: **[github.com/peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA)**
+> 🔗 مخزن پروژه: **[github.com/peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA)** · 🌐 سایت آنلاین: **[doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir)**
 >
 > 📋 **[ورک‌لاگ پروژه (WORKLOG.md)](WORKLOG.md)** — وضعیت لحظه‌ای ترجمه، قراردادها و واژه‌نامه، دستورالعمل ساخت صفحهٔ جدید و صف اولویت‌های ادامهٔ کار. نقطهٔ شروع هر نشست کاری همین سند است.
 

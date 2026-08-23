@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نشست‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/sessions" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>نشست‌ها</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>نشست‌ها</h1>
+<p>هرمس ایجنت هر گفتگو را به‌طور خودکار به‌صورت یک نشست ذخیره می‌کند. نشست‌ها امکان ازسرگیری گفتگو، جستجوی بین-نشستی و مدیریت کامل تاریخچهٔ گفتگوها را فراهم می‌کنند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نشست‌ها چگونه کار می‌کنند</h2>
+<p>هر گفتگو — چه از CLI، تلگرام، دیسکورد، اسلک، واتساپ، سیگنال، ماتریکس، تیمز یا هر پلتفرم پیام‌رسانی دیگر — به‌صورت نشستی با تاریخچهٔ کامل پیام‌ها ذخیره می‌شود. نشست‌ها در این‌ها پیگیری می‌شوند:</p>
+<ol>
+  <li><strong>دیتابیس SQLite</strong> (<code>~/.hermes/state.db</code>) — فرادادهٔ ساخت‌یافتهٔ نشست با جستجوی تمام‌متن FTS5، به‌علاوهٔ تاریخچهٔ کامل پیام‌ها</li>
+</ol>
+<p>دیتابیس SQLite این‌ها را ذخیره می‌کند:</p>
+<ul>
+  <li>شناسهٔ نشست، پلتفرم مبدأ، شناسهٔ کاربر</li>
+  <li><strong>عنوان نشست</strong> (نام یکتا و انسانی‌خوان)</li>
+  <li>نام مدل و پیکربندی</li>
+  <li>اسنپ‌شات پرامپت سیستمی</li>
+  <li>تاریخچهٔ کامل پیام‌ها (نقش، محتوا، فراخوانی ابزار، نتایج ابزار)</li>
+  <li>شمارش توکن‌ها (ورودی/خروجی)</li>
+  <li>مهرهای زمانی (started_at، ended_at)</li>
+  <li>شناسهٔ نشست والد (برای انشعاب نشستِ ناشی از فشرده‌سازی)</li>
+</ul>
+
+<h3>چه چیزی به زمینه اضافه می‌شود</h3>
+<p>هرمس تاریخچهٔ نشست را ذخیره می‌کند تا بتواند گفتگوها را ازسر بگیرد، اما هر بایتی که تا حالا داشته را دوباره و دوباره نمی‌فرستد. در هر نوبت، مدل پرامپت سیستمیِ انتخاب‌شده، پنجرهٔ گفتگوی فعلی و هر محتوایی را که هرمس صریحاً برای آن نوبت تزریق می‌کند می‌بیند.</p>
+<p>پیوست‌های رسانه‌ای به‌صورت ورودیِ مخصوص-نوبت مدیریت می‌شوند:</p>
+<ul>
+  <li>تصاویر ممکن است به‌صورت بومی به فراخوانی بعدی مدل وصل شوند، یا وقتی مدل فعال از بینایی بومی پشتیبانی نمی‌کند از پیش به توصیف متنی تحلیل شوند.</li>
+  <li>صوت وقتی گفتار-به-متن پیکربندی شده به متن رونویسی می‌شود.</li>
+  <li>اسناد متنی می‌توانند متن استخراج‌شده‌شان لحاظ شود؛ سایر انواع سند معمولاً با مسیر محلیِ ذخیره‌شده و یک یادداشت کوتاه نمایندگی می‌شوند.</li>
+  <li>مسیر پیوست‌ها و متن استخراجی/مشتق‌شده ممکن است در رونوشت ظاهر شود، اما بایت‌های خام تصویر، صوت یا فایل باینری به‌تکرار در پرامپت‌های آینده کپی نمی‌شوند.</li>
+</ul>
+<p>مثلاً اگر کاربری تصویری بفرستد و از هرمس بخواهد از آن میم بسازد، هرمس ممکن است آن تصویر را یک بار با بینایی بررسی کند و یک اسکریپت پردازش تصویر اجرا کند. نوبت‌های آینده به‌طور خودکار JPEG اصلی را در زمینه حمل نمی‌کنند. فقط آنچه در گفتگو نوشته شده را حمل می‌کنند: درخواست کاربر، توصیف کوتاه تصویر، مسیر کش محلی یا پاسخ نهایی دستیار.</p>
+<p>شایع‌ترین عامل رشد زمینه خودِ فایل رسانه‌ای نیست؛ متن مفصل است: رونوشت‌های پیست‌شده، لاگ‌های کامل، خروجی‌های بزرگ ابزار، دیف‌های بلند، گزارش‌های وضعیت مکرر و سرریزهای اثباتِ باجزئیات. به‌جای کپی‌کردن مصنوعات بزرگ در چت، خلاصه‌ها، مسیرهای فایل، گزیده‌های متمرکز و جستجوهای پشتیبان‌شده با ابزار را ترجیح دهید.</p>
+
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>وقتی نشست طولانی شد از <code>/compress</code>، برای رشتهٔ تازه از <code>/new</code> و فقط وقتی می‌خواهید نشست‌های پایان‌یافتهٔ قدیمی را از ذخیره‌گاه پاک کنید از <code>hermes sessions prune</code> استفاده کنید. اگر <code>state.db</code> صرفاً بزرگ شده، اول از گزینهٔ غیرمخرب شروع کنید: <code>hermes sessions optimize</code> قطعات اندیس FTS5 را ادغام و دیتابیس را VACUUM می‌کند بدون دست‌زدن به هیچ دادهٔ نشستی. فشرده‌سازی زمینهٔ فعال را کوچک می‌کند؛ یک حذفِ حریم خصوصی نیست. به <code>/new</code> نام بدهید (مثلاً <code>/new payments-refactor</code>) تا عنوان اولیهٔ نشست جدید از همان اول تنظیم شود — برای یافتنش بعداً با <code>/resume &lt;name&gt;</code> یا در انتخابگر <code>/sessions</code> مفید است.</p>
+</div>
+
+<h3>مبدأهای نشست</h3>
+<p>هر نشست با پلتفرم مبدأش برچسب می‌خورد:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مبدأ</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>cli</code></td><td>CLI تعاملی (<code>hermes</code> یا <code>hermes chat</code>)</td></tr>
+    <tr><td><code>telegram</code></td><td>پیام‌رسان تلگرام</td></tr>
+    <tr><td><code>discord</code></td><td>سرور/DM دیسکورد</td></tr>
+    <tr><td><code>slack</code></td><td>ورک‌اسپیس اسلک</td></tr>
+    <tr><td><code>whatsapp</code></td><td>پیام‌رسان واتساپ</td></tr>
+    <tr><td><code>signal</code></td><td>پیام‌رسان سیگنال</td></tr>
+    <tr><td><code>matrix</code></td><td>اتاق‌ها و DMهای ماتریکس</td></tr>
+    <tr><td><code>mattermost</code></td><td>کانال‌های مترمست</td></tr>
+    <tr><td><code>email</code></td><td>ایمیل (IMAP/SMTP)</td></tr>
+    <tr><td><code>sms</code></td><td>پیامک از طریق Twilio</td></tr>
+    <tr><td><code>dingtalk</code></td><td>پیام‌رسان دینگ‌تاک</td></tr>
+    <tr><td><code>feishu</code></td><td>پیام‌رسان فیشو/لارک</td></tr>
+    <tr><td><code>wecom</code></td><td>WeCom (وی‌چت کاری)</td></tr>
+    <tr><td><code>weixin</code></td><td>ویکسین (وی‌چت شخصی)</td></tr>
+    <tr><td><code>bluebubbles</code></td><td>iMessage اپل از طریق سرور مکِ BlueBubbles</td></tr>
+    <tr><td><code>qqbot</code></td><td>ربات QQ (تنسنت QQ) از طریق API رسمی v2</td></tr>
+    <tr><td><code>homeassistant</code></td><td>گفتگوی هوم‌اسیسنت</td></tr>
+    <tr><td><code>webhook</code></td><td>وب‌هوک‌های ورودی</td></tr>
+    <tr><td><code>api-server</code></td><td>درخواست‌های سرور API</td></tr>
+    <tr><td><code>acp</code></td><td>یکپارچه‌سازی ادیتور ACP</td></tr>
+    <tr><td><code>cron</code></td><td>کارهای زمان‌بندی‌شدهٔ کرون</td></tr>
+    <tr><td><code>batch</code></td><td>اجراهای پردازش گروهی</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> ازسرگیری نشست در CLI</h2>
+<p>گفتگوهای قبلی را از CLI با <code>--continue</code> یا <code>--resume</code> ازسر بگیرید:</p>
+
+<h3>ادامهٔ آخرین نشست</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ازسرگیری جدیدترین نشست CLI
+hermes --continue
+hermes -c
+
+# یا با زیرفرمان chat
+hermes chat --continue
+hermes chat -c</code></pre>
+</div>
+<p>این جدیدترین نشستِ <code>cli</code> را از دیتابیس SQLite پیدا و تاریخچهٔ کامل گفتگویش را بارگذاری می‌کند.</p>
+
+<h4>ادامهٔ مخصوص-هر-ترمینال</h4>
+<p>یک <code>-c</code> ساده آگاه از ترمینال است: هر نشست CLI یک فایل ردپای کوچک زیر <code>~/.hermes/terminal-sessions/</code> می‌گذارد که به ترمینالی که در آن اجرا شده کلید خورده (دستگاه tty، پنل tmux، پنجرهٔ kitty، پنل wezterm، پنل Zellij، نشست ویندوز ترمینال و…). وقتی دوباره در <em>همان</em> ترمینال <code>hermes -c</code> بزنید، هرمس نشستِ خودِ آن ترمینال را ازسر می‌گیرد — پس دو پنل کنار هم هر کدام گفتگوی خودشان را ادامه می‌دهند به‌جای اینکه هر دو سرِ جدیدترینِ سراسری بروند. اگر ردپایی برای آن ترمینال نباشد (اولین استفاده، نشست حذف‌شده یا ردپای کهنه‌تر از ۳۰ روز)، <code>-c</code> به رفتار جدیدترین-نشست برمی‌گردد. <code>-c "name"</code> و <code>--resume</code> متأثر نمی‌شوند. با <code>session.terminal_continue: false</code> در <code>config.yaml</code> غیرفعالش کنید.</p>
+
+<h3>ازسرگیری با نام</h3>
+<p>اگر به نشست عنوان داده‌اید (به «<a href="#naming">نام‌گذاری نشست</a>» پایین مراجعه کنید)، می‌توانید با نام ازسرش بگیرید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ازسرگیری نشستی با نام
+hermes -c "my project"
+
+# اگر واریانت‌های تبار وجود دارد (my project، my project #2، my project #3)،
+# به‌طور خودکار جدیدترین را ازسر می‌گیرد
+hermes -c "my project"   # → "my project #3" را ازسر می‌گیرد</code></pre>
+</div>
+
+<h3>ازسرگیری نشست مشخص</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ازسرگیری نشستی مشخص با شناسه
+hermes --resume 20250305_091523_a1b2c3d4
+hermes -r 20250305_091523_a1b2c3d4
+
+# ازسرگیری با عنوان
+hermes --resume "refactoring auth"
+
+# ازسرگیری جدیدترین نشست — همان جستجوی -c
+hermes --resume latest
+
+# یا با زیرفرمان chat
+hermes chat --resume 20250305_091523_a1b2c3d4</code></pre>
+</div>
+<p>شناسهٔ نشست‌ها هنگام خروج از نشست CLI نمایش داده می‌شوند و با <code>hermes sessions list</code> پیدا می‌شوند.</p>
+
+<div class="callout note">
+  <div class="callout-title">ℹ️ توجه</div>
+  <p><code>latest</code> یک کلیدواژهٔ رزروشده برای <code>--resume</code> است. نشستی که واقعاً عنوانش «latest» باشد همچنان با شناسه‌اش یا از طریق <code>-c latest</code> (تطبیق عنوان) در دسترس است.</p>
+</div>
+
+<h3>ازسرگیری در پوشهٔ مشخص</h3>
+<p><code>--in &lt;dir&gt;</code> را بدهید تا پیش از شروع یا ازسرگیری وارد یک پوشه شوید. همراه با <code>--resume latest</code> (یا <code>-c</code>)، جدیدترین نشستِ متعلق به ورک‌اسپیس آن پوشه انتخاب می‌شود — نه لازم است اول <code>cd</code> بزنید نه شناسه‌ها را به خاطر بسپارید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ازسرگیری جدیدترین نشستی که به ./my-project تعلق دارد
+hermes --resume latest --in ./my-project
+
+# با TUI هم کار می‌کند
+hermes --tui --resume latest --in ./my-project</code></pre>
+</div>
+<p><code>--in</code> همچنین نشست را به آن پوشه پین می‌کند: پوشهٔ کاریِ ثبت‌شدهٔ نشستِ ازسرگرفته بازگردانده نمی‌شود (مثل اینکه <code>--no-restore-cwd</code> داده باشید).</p>
+
+<h3>ازسرگیری پوشهٔ کاری را بازمی‌گرداند</h3>
+<p>ازسرگیری یک نشست CLI همچنین به پوشهٔ کاریِ ثبت‌شدهٔ نشست (ریشهٔ مخزن git یا پوشهٔ پروژه‌اش) <code>cd</code> می‌کند، تا گفتگو در همان ورک‌اسپیسی که متعلق بود ادامه یابد. اگر ترجیح می‌دهید همان‌جا که هستید بمانید، <code>--no-restore-cwd</code> بدهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes --resume 20250305_091523_a1b2c3 --no-restore-cwd</code></pre>
+</div>
+<p>یک خط <code>↪ restored workspace dir: …</code> تغییر را تأیید می‌کند. شکست بازگردانی هرگز خودِ ازسرگیری را نمی‌شکند.</p>
+
+<h3>فیلتر نشست‌ها بر اساس ورک‌اسپیس</h3>
+<p><code>hermes sessions list</code> گزینهٔ <code>--workspace &lt;needle&gt;</code> را می‌پذیرد تا فقط نشست‌هایی را نشان دهد که کلید ورک‌اسپیس‌شان (ریشهٔ مخزن git، وگرنه cwd) مطابقت دارد — با زیررشتهٔ مسیر یا نام پایهٔ دقیق پوشه:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes sessions list --workspace my-project
+hermes sessions list --workspace ~/code/hermes-agent</code></pre>
+</div>
+
+<h3>خلاصهٔ گفتگو هنگام ازسرگیری</h3>
+<p>وقتی نشستی را ازسر می‌گیرید، هرمس پیش از پرامپت ورودی، خلاصهٔ فشرده‌ای از گفتگوی قبلی را در پنلی استایل‌دار نمایش می‌دهد:</p>
+<p>این خلاصه:</p>
+<ul>
+  <li><strong>پیام‌های کاربر</strong> (با <code>●</code> طلایی) و <strong>پاسخ‌های دستیار</strong> (با <code>◆</code> سبز) را نشان می‌دهد</li>
+  <li>پیام‌های بلند را <strong>می‌بُرَد</strong> (۳۰۰ کاراکتر برای کاربر، ۲۰۰ کاراکتر / ۳ خط برای دستیار)</li>
+  <li><strong>فراخوانی‌های ابزار را جمع می‌کند</strong> به یک شمارش همراه نام ابزارها (مثلاً <code>[3 tool calls: terminal, web_search]</code>)</li>
+  <li>پیام‌های سیستمی، نتایج ابزار و استدلال داخلی را <strong>مخفی می‌کند</strong></li>
+  <li>روی <strong>۱۰ تبادل آخر سقف</strong> می‌زند با نشانگر «... N earlier messages ...»</li>
+  <li>از <strong>استایل کم‌رنگ</strong> استفاده می‌کند تا از گفتگوی فعال متمایز باشد</li>
+</ul>
+<p>برای غیرفعال‌کردن خلاصه و نگه‌داشتن رفتار یک‌خطیِ مینیمال، در <code>~/.hermes/config.yaml</code> تنظیم کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  resume_display: minimal   # پیش‌فرض: full</code></pre>
+</div>
+
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>شناسهٔ نشست‌ها از قالب <code>YYYYMMDD_HHMMSS_&lt;hex&gt;</code> پیروی می‌کند — نشست‌های CLI/TUI پسوند هگز ۶ کاراکتری دارند (مثلاً <code>20250305_091523_a1b2c3</code>) و نشست‌های گیت‌وی پسوند ۸ کاراکتری (مثلاً <code>20250305_091523_a1b2c3d4</code>). می‌توانید با شناسه (کامل یا پیشوند یکتا) یا با عنوان ازسر بگیرید — هر دو با <code>-c</code> و <code>-r</code> کار می‌کنند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> تحویل بین‌پلتفرمی (Handoff)</h2>
+<p>از یک نشست CLI با <code>/handoff &lt;platform&gt;</code> استفاده کنید تا گفتگوی زنده را به کانال خانگیِ یک پلتفرم پیام‌رسانی منتقل کنید. ایجنت دقیقاً از همان‌جایی که CLI رها کرد ادامه می‌دهد — همان شناسهٔ نشست، رونوشت کاملِ آگاه-از-نقش، با همهٔ فراخوانی‌های ابزار.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">داخل یک نشست CLI</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/handoff telegram</code></pre>
+</div>
+<p>چه اتفاقی می‌افتد:</p>
+<ol>
+  <li>CLI اعتبارسنجی می‌کند که <code>&lt;platform&gt;</code> فعال است و کانال خانگی دارد (یک بار <code>/sethome</code> را از چت مقصد اجرا کنید تا پیکربندی شود).</li>
+  <li>CLI نشست را در انتظار علامت می‌زند و <strong>گیت‌وی را به‌صورت بلاک poll می‌کند</strong>. اگر ایجنت وسط نوبت باشد امتناع می‌کند — اول صبر کنید پاسخ فعلی تمام شود.</li>
+  <li>پایان‌بخشِ گیت‌وی تحویل را برمی‌دارد و از آداپتور مقصد یک رشتهٔ تازه می‌خواهد:
+    <ul>
+      <li><strong>تلگرام</strong> — یک تاپیک فروم جدید باز می‌کند (تاپیک‌های DM اگر حالت Topics از Bot API نسخهٔ 9.4+ در چت فعال باشد، یا تاپیک سوپرگروه فروم).</li>
+      <li><strong>دیسکورد</strong> — یک رشته با آرشیو-خودکارِ ۱۴۴۰ دقیقه‌ای زیر کانال متنی خانگی می‌سازد.</li>
+      <li><strong>اسلک</strong> — یک پیام بذر می‌فرستد و از <code>ts</code> آن به‌عنوان لنگر رشته استفاده می‌کند.</li>
+      <li><strong>واتساپ / سیگنال / ماتریکس / پیامک</strong> — رشتهٔ بومی ندارند، مستقیم به کانال خانگی برمی‌گردند.</li>
+    </ul>
+  </li>
+  <li>گیت‌وی کلید مقصد را به شناسهٔ نشست CLI موجود شما دوباره متصل می‌کند، سپس یک نوبتِ کاربرِ ساختگی می‌سازد که از ایجنت تأیید و خلاصه می‌خواهد. پاسخ در رشتهٔ جدید فرود می‌آید.</li>
+  <li>وقتی گیت‌وی موفقیت را تأیید کرد، CLI یک راهنمای <code>/resume</code> چاپ کرده و تمیز خارج می‌شود:
+    <div class="codebox">
+      <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+      <pre><code>↻ Handoff complete. The session is now active on telegram.
+  Resume it on this CLI later with: /resume my-session-title</code></pre>
+    </div>
+  </li>
+  <li>از آن نقطه، گفتگو روی پلتفرم زندگی می‌کند. در رشتهٔ جدید پاسخ بدهید — هر کسی که در آن کانال مجاز باشد همان نشست را به اشتراک می‌گذارد، و هر پیام واقعیِ بعدیِ کاربر در رشته، یکپارچه ملحق می‌شود چون نشست‌های رشته بدون <code>user_id</code> کلید می‌خورند.</li>
+</ol>
+<p><strong>بازگشت به CLI:</strong> وقتی خواستید به دسکتاپ برگردید، فقط <code>/resume &lt;title&gt;</code> را اجرا کنید (یا <code>hermes -r "&lt;title&gt;"</code> از شل) و از همان‌جایی که پلتفرم رها کرد ادامه دهید.</p>
+<p><strong>حالت‌های شکست:</strong></p>
+<ul>
+  <li>کانال خانگی پیکربندی نشده ← CLI با راهنمای <code>/sethome</code> امتناع می‌کند.</li>
+  <li>پلتفرم فعال نیست / گیت‌وی در حال اجرا نیست ← CLI در ۶۰ ثانیه تایم‌اوت می‌شود با پیامی روشن و نشست CLI شما دست‌نخورده می‌ماند.</li>
+  <li>ساخت رشته شکست می‌خورد (مجوزها، حالت تاپیک خاموش) ← مستقیم به کانال خانگی برمی‌گردد و همچنان کامل می‌شود؛ ایزوله‌سازی رشته نیست ولی خود تحویل کار می‌کند.</li>
+  <li><code>adapter.send</code> شکست می‌خورد (محدودیت نرخ، خطای گذرا API) ← تحویل ناموفق با ذکر علت علامت می‌خورد؛ سطر پاک می‌شود تا دوباره امتحان کنید.</li>
+</ul>
+<p><strong>محدودیتی که ارزش دانستن دارد:</strong> برای پلتفرم‌های بدون-رشته با کانال‌های خانگیِ گروهیِ چندکاربره، نوبت ساختگی به‌صورت نشست سبک-DM کلید می‌خورد. این برای کانال‌های خانگیِ خود-DM (راه‌اندازی معمول) کار می‌کند ولی برای گفتگوهای گروهیِ واقعاً مشترک ایده‌آل نیست. رشته‌سازی تلگرام/دیسکورد/اسلک را پوشش می‌دهد — که اتفاقاً حالت رایج است — پس اغلب راه‌اندازی‌ها هرگز به این نمی‌خورند.</p>
+</section>
+
+<section class="doc-sec" id="naming">
+<h2><span class="secnum">۴</span> نام‌گذاری نشست</h2>
+<p>به نشست‌ها عنوان‌های انسانی‌خوان بدهید تا راحت پیدایشان کنید و ازسر بگیرید.</p>
+
+<h3>عنوان‌های خودکار</h3>
+<p>هرمس پس از اولین تبادل، به‌طور خودکار برای هر نشست یک عنوان توصیفیِ کوتاه (۳ تا ۷ واژه) تولید می‌کند. این در یک نخِ پس‌زمینه با یک مدل کمکیِ سریع اجرا می‌شود، پس هیچ تأخیری اضافه نمی‌کند. عنوان‌های خودکار را هنگام مرور نشست‌ها با <code>hermes sessions list</code> یا <code>hermes sessions browse</code> می‌بینید.</p>
+<p>عنوان‌گذاری خودکار فقط یک بار برای هر نشست اجرا می‌شود و اگر خودتان از قبل عنوان گذاشته باشید رد می‌شود.</p>
+
+<h3>تنظیم دستی عنوان</h3>
+<p>درون هر نشست چت (CLI یا گیت‌وی) از فرمان اسلش <code>/title</code> استفاده کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان در چت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/title my research project</code></pre>
+</div>
+<p>عنوان بلافاصله اعمال می‌شود. اگر نشست هنوز در دیتابیس ساخته نشده باشد (مثلاً <code>/title</code> را پیش از اولین پیام اجرا کنید)، در صف می‌رود و با شروع نشست اعمال می‌شود.</p>
+<p>همچنین می‌توانید نشست‌های موجود را از خط فرمان تغییر نام دهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes sessions rename 20250305_091523_a1b2c3d4 "refactoring auth module"</code></pre>
+</div>
+
+<h3>قواعد عنوان</h3>
+<ul>
+  <li><strong>یکتا</strong> — هیچ دو نشستی نمی‌توانند عنوان یکسان داشته باشند</li>
+  <li><strong>حداکثر ۱۰۰ کاراکتر</strong> — خروجی فهرست تمیز می‌ماند</li>
+  <li><strong>پاک‌سازی‌شده</strong> — کاراکترهای کنترلی، کاراکترهای عرض-صفر و overrideهای RTL خودکار حذف می‌شوند</li>
+  <li><strong>یونیکد عادی مشکلی ندارد</strong> — ایموجی، CJK و کاراکترهای لهجه‌دار همه کار می‌کنند</li>
+</ul>
+
+<h3>تبارِ خودکار هنگام فشرده‌سازی</h3>
+<p>وقتی زمینهٔ نشستی فشرده می‌شود (دستی با <code>/compress</code> یا خودکار)، هرمس یک نشست ادامهٔ جدید می‌سازد. اگر نشست اصلی عنوان داشت، نشست جدید به‌طور خودکار عنوانِ شماره‌دار می‌گیرد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">نمونه</span><button class="copy-btn">کپی</button></div>
+  <pre><code>"my project" → "my project #2" → "my project #3"</code></pre>
+</div>
+<p>وقتی با نام ازسر می‌گیرید (<code>hermes -c "my project"</code>)، به‌طور خودکار جدیدترین نشستِ تبار را انتخاب می‌کند.</p>
+
+<h3>/title در پلتفرم‌های پیام‌رسانی</h3>
+<p>فرمان <code>/title</code> در همهٔ پلتفرم‌های گیت‌وی کار می‌کند (تلگرام، دیسکورد، اسلک، واتساپ):</p>
+<ul>
+  <li><code>/title My Research</code> — تنظیم عنوان نشست</li>
+  <li><code>/title</code> — نمایش عنوان فعلی</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> فرمان‌های مدیریت نشست</h2>
+<p>هرمس مجموعهٔ کامل فرمان‌های مدیریت نشست را از طریق <code>hermes sessions</code> ارائه می‌کند:</p>
+
+<h3>فهرست نشست‌ها</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># فهرست نشست‌های اخیر (پیش‌فرض: ۲۰ تای آخر)
+hermes sessions list
+
+# فیلتر بر اساس پلتفرم
+hermes sessions list --source telegram
+
+# نمایش نشست‌های بیشتر
+hermes sessions list --limit 50</code></pre>
+</div>
+<p>وقتی نشست‌ها عنوان دارند، خروجی عنوان‌ها، پیش‌نمایش‌ها و مهرهای زمانیِ نسبی را نشان می‌دهد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Title                  Preview                                  Last Active   ID
+────────────────────────────────────────────────────────────────────────────────────────────────
+refactoring auth       Help me refactor the auth module please   2h ago        20250305_091523_a
+my project #3          Can you check the test failures?          yesterday     20250304_143022_e
+—                      What's the weather in Las Vegas?          3d ago        20250303_101500_f</code></pre>
+</div>
+<p>وقتی هیچ نشستی عنوان ندارد، قالب ساده‌تری استفاده می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Preview                                            Last Active   Src    ID
+──────────────────────────────────────────────────────────────────────────────────────
+Help me refactor the auth module please             2h ago        cli    20250305_091523_a
+What's the weather in Las Vegas?                    3d ago        tele   20250303_101500_f</code></pre>
+</div>
+
+<h3>صادرات نشست‌ها</h3>
+<p><code>hermes sessions export</code> یک سطح واحد برای هر قالب صادراتی است که با <code>--format</code> انتخاب می‌شود:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>قالب</th><th>خروجی</th><th>برای چه استفاده کنید</th></tr></thead>
+  <tbody>
+    <tr><td><code>jsonl</code> (پیش‌فرض)</td><td>یک شیء JSON به‌ازای هر نشست</td><td>پشتیبان‌ها، رفت‌وبرگشت ماشینی</td></tr>
+    <tr><td><code>md</code> / <code>qmd</code></td><td>یک فایل Markdown/Quarto به‌ازای هر نشست + مانیفست</td><td>آرشیو خوانا، یادداشت</td></tr>
+    <tr><td><code>html</code></td><td>یک صفحهٔ خودبسنده (سایدبار برای چند-نشستی)</td><td>اشتراک، مرور</td></tr>
+    <tr><td><code>trace</code></td><td>JSONL کلاد-کد</td><td>HF Agent Trace Viewer و <code>--upload</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>به‌علاوه <code>--only user-prompts</code> برای نمای فقط-پرامپت (در jsonl یا md).</p>
+<p>همهٔ قالب‌ها همان پیچ‌های انتخابی را به اشتراک می‌گذارند: <code>--session-id</code> برای یک نشست، یا مجموعهٔ کامل فیلترهای <code>prune</code>/<code>archive</code> برای گروهی — ‏<code>--older-than</code> / <code>--newer-than</code> / <code>--before</code> / <code>--after</code> (مدت‌هایی مثل <code>5h</code>/<code>2d</code>/<code>1w</code>، روزِ خالی، یا مهر زمانی ISO)، ‏<code>--source</code>، <code>--title</code>، <code>--model</code>، <code>--provider</code>، <code>--cwd</code>، <code>--min/--max-messages</code>، <code>--min/--max-tokens</code>، <code>--min/--max-cost</code>، <code>--min/--max-tool-calls</code>، <code>--user</code>، <code>--chat-id</code>، <code>--chat-type</code>، <code>--branch</code>، <code>--end-reason</code>. ‏<code>--dry-run</code> مجموعهٔ تطبیق را بدون نوشتن پیش‌نمایش می‌کند. <code>--redact</code> رازها (کلیدهای API، توکن‌ها، اعتبارنامه‌ها) را از محتوای صادرشده در هر قالبی پاک می‌کند — برای هر چیزی که قصد اشتراکش را دارید توصیه می‌شود. نکته: فیلترهای گروهی با نشست‌های <em>پایان‌یافته</em> تطبیق می‌خورند؛ <code>export</code> بدون فیلتر همه‌چیز را می‌ریزد، از جمله فعال‌ها.</p>
+
+<h4>JSONL (پیش‌فرض)</h4>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># صادرات همهٔ نشست‌ها به یک فایل JSONL
+hermes sessions export backup.jsonl
+
+# صادرات نشست‌های یک پلتفرم مشخص
+hermes sessions export telegram-history.jsonl --source telegram
+
+# صادرات یک نشست
+hermes sessions export session.jsonl --session-id 20250305_091523_a1b2c3d4
+
+# پاک‌سازی کلیدها/توکن‌ها/اعتبارنامه‌ها از محتوای صادرشده
+hermes sessions export backup.jsonl --redact</code></pre>
+</div>
+<p>فایل‌های صادرشده در هر خط یک شیء JSON با فرادادهٔ کامل نشست و همهٔ پیام‌ها دارند.</p>
+
+<h4>HTML</h4>
+<p><code>--format html</code> یک فایل HTML خودبسندهٔ واحد می‌نویسد — بدون وابستگی راهن — با حباب‌های پیام استایل‌دار، خروجی ابزارِ تاشو و (برای صادرات چند-نشستی) سایدباری برای جابه‌جایی بین نشست‌ها:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># یک نشست به‌صورت صفحهٔ HTML مستقل
+hermes sessions export --format html --session-id 20250305_091523_a1b2c3d4 transcript.html
+
+# همهٔ نشست‌های تلگرام هفتهٔ اخیر در یک فایل، با پاک‌سازی رازها
+hermes sessions export --format html --newer-than 1w --source telegram --redact archive.html</code></pre>
+</div>
+
+<h4>فقط پرامپت‌ها</h4>
+<p><code>--only user-prompts</code> فقط پرامپت‌هایی را که نوشته‌اید صادر می‌کند — بدون پاسخ دستیار، خروجی ابزار یا زمینهٔ سیستمی. برای ساخت کتابخانهٔ پرامپت یا بازبینی چیزهایی که پرسیدید مفید است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># یک رکورد JSONL به‌ازای هر پرامپت (شناسهٔ نشست، اندیس، مهر زمانی، متن)
+hermes sessions export prompts.jsonl --session-id 20250305_091523_a1b2c3d4 --only user-prompts
+
+# مارک‌داون، مستقیم در stdout
+hermes sessions export - --session-id 20250305_091523_a1b2c3d4 --only user-prompts --format md</code></pre>
+</div>
+<p>با <code>--format jsonl</code> (پیش‌فرض) یا <code>md</code> کار می‌کند، همان فیلترها را برای صادرات گروهی می‌پذیرد و با <code>--redact</code> ترکیب می‌شود.</p>
+
+<h4>تریس‌ها (HF Agent Trace Viewer)</h4>
+<p><code>--format trace</code> همان JSONL کلاد-کد را تولید می‌کند — شکلی که هاب هاغینگ‌فیس برای <a href="https://huggingface.co/docs/hub/agent-traces" target="_blank" rel="noopener">Agent Trace Viewer</a> خودکار تشخیص می‌دهد. محلی بنویسیدش، یا <code>--upload</code> را اضافه کنید تا به دیتاست خصوصیِ خودتان <code>hermes-traces</code> پوش شود (<code>HF_TOKEN</code> را می‌خواند):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># تریس جدیدترین نشست، در stdout
+hermes sessions export --format trace
+
+# یک نشست به فایل تریس محلی
+hermes sessions export --format trace --session-id 20250305_091523_a1b2c3d4 trace.jsonl
+
+# آپلود مستقیم به دیتاست تریس‌های خصوصی HF
+hermes sessions export --format trace --session-id 20250305_091523_a1b2c3d4 --upload</code></pre>
+</div>
+<p>صادرات تریس به‌طور پیش‌فرض پاک‌سازیِ راز دارند (برای ترک ماشین ساخته شده‌اند)؛ <code>--no-redact</code> پس از بازبینی دستی از آن خارج می‌شود. <code>--upload</code> بدون <code>--public</code> خصوصی است. صادرات گروهی تریس با فیلترها به‌ازای هر نشست یک <code>&lt;id&gt;.trace.jsonl</code> می‌نویسد.</p>
+
+<h4>Markdown / QMD</h4>
+<p><code>--format md</code> یا <code>--format qmd</code> را وقتی بدهید که پیش از مخفی یا حذف‌کردن نشست‌های قدیمی یک آرشیو فایل‌مبنا و خوانا می‌خواهید. صادرات Markdown/QMD برای هر نشست یک فایل در یک پوشه می‌نویسد (پیش‌فرض: <code>~/.hermes/session-exports</code>).</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># صادرات یک نشست به Markdown
+hermes sessions export --format md --session-id 20250305_091523_a1b2c3d4
+
+# صادرات یک تبار فشرده‌سازی به‌صورت یک سند منطقی واحد
+hermes sessions export --format md --session-id 20250305_091523_a1b2c3d4 --lineage logical
+
+# پیش‌نمایش نشست‌های پایان‌یافتهٔ بالای ۹۰ روز بدون نوشتن فایل
+hermes sessions export --format md --older-than 90 --dry-run
+
+# صادرات نشست‌های پایان‌یافتهٔ تلگرام بالای ۲ هفته به فایل‌های QMD
+hermes sessions export --format qmd --older-than 2w --source telegram
+
+# صادرات نشست‌های بلند Claude، با پاک‌سازی رازها
+hermes sessions export --format md --model sonnet --min-messages 50 --redact
+
+# فقط پس از راستی‌آزمایی، صادرات و حذف یک نشستِ صریحاً نام‌برده
+hermes sessions export --format md --session-id 20250305_091523_a1b2c3d4 --delete-after-verified --yes</code></pre>
+</div>
+<p>صادرات Markdown/QMD برای هر نشستِ صادرشده یک فایل <code>.md</code> یا <code>.qmd</code> به‌علاوهٔ یک <code>manifest.jsonl</code> با مسیر فایل، تعداد پیام، شناسه‌های تبار و SHA-256 می‌نویسد. صادرات گروهی حداقل یک فیلتر لازم دارد؛ صادرات گروهیِ خالی رد می‌شود. <code>--delete-after-verified</code> عمداً به <code>--session-id</code> محدود است و <code>--yes</code> می‌خواهد. چون حذف نشست والد، نشست‌های delegate/ساب‌ایجنتش را هم حذف می‌کند، این حالت قبل از حذف هر چیز، هر delegate را در فایلی جداگانه صادر و راستی‌آزمایی می‌کند. اگر مجموعهٔ delegate حین صادرات تغییر کند، حذف رد می‌شود. <code>--redact</code> پیش از نوشتن، رازها را از محتوای پیام و خروجی ابزار پاک می‌کند — برای هر صادراتی که قصد اشتراکش را دارید توصیه می‌شود.</p>
+
+<h3>حذف یک نشست</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># حذف نشست مشخص (با تأیید)
+hermes sessions delete 20250305_091523_a1b2c3d4
+
+# حذف بدون تأیید
+hermes sessions delete 20250305_091523_a1b2c3d4 --yes</code></pre>
+</div>
+
+<h3>تغییر نام یک نشست</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># تنظیم یا تغییر عنوان نشست
+hermes sessions rename 20250305_091523_a1b2c3d4 "debugging auth flow"
+
+# عنوان‌های چندواژه‌ای در CLI گیومه نمی‌خواهند
+hermes sessions rename 20250305_091523_a1b2c3d4 debugging auth flow</code></pre>
+</div>
+<p>اگر عنوان از قبل به نشست دیگری تعلق داشته باشد، خطا نشان داده می‌شود.</p>
+
+<h3>پین‌کردن یک نشست</h3>
+<p>پین‌کردن یک پرچم پایدار «نگه‌دار» تنظیم می‌کند: نشست‌های پین‌شده از جاروب کهنگیِ <code>sessions.auto_archive</code> معاف‌اند و همیشه در فهرست‌ها ظاهر می‌شوند. همان پرچمی است که بخش Pinned سایدبار دسکتاپ استفاده می‌کند — از هر یک از دو سطح پین کنید و هر دو می‌بینندش.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># پین یک یا چند نشست (پیشوندهای شناسهٔ یکتا هم کار می‌کنند)
+hermes sessions pin 20250305_091523_a1b2c3d4
+hermes sessions pin 20250305 20250306
+
+# برداشتن پین
+hermes sessions unpin 20250305_091523_a1b2c3d4
+
+# فهرست نشست‌های پین‌شده
+hermes sessions pinned
+
+# خروجی ماشین‌خوان، مثلاً برای پشتیبان شبانهٔ مجموعهٔ پین‌هایتان
+hermes sessions pinned --json &gt; pinned-sessions.json</code></pre>
+</div>
+
+<h3>هرس نشست‌های قدیمی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># حذف نشست‌های پایان‌یافتهٔ غیرفعال برای ۹۰ روز (پیش‌فرض)
+hermes sessions prune
+
+# آستانهٔ سن سفارشی — اعداد خالی یعنی روز
+hermes sessions prune --older-than 30
+
+# مدت‌ها هم کار می‌کنند: 5h، 30m، 2d، 1w
+hermes sessions prune --older-than 12h
+
+# حذف فقط یک بازهٔ زمانی مشخص (مثلاً دسته‌ای از نشست‌های تستی
+# ساخته‌شده در ۵ ساعت اخیر)
+hermes sessions prune --newer-than 5h
+
+# بازهٔ صریح با مهرهای زمانی مطلق
+hermes sessions prune --after "2026-07-05 09:00" --before "2026-07-05 14:30"
+
+# هرس فقط نشست‌های یک پلتفرم مشخص (همهٔ سن‌ها — هر فیلتری
+# پیش‌فرض ضمنیِ ۹۰ روز را غیرفعال می‌کند)
+hermes sessions prune --source telegram
+hermes sessions prune --source cron --older-than 60   # برای محدودترشدن یک پرچم زمانی اضافه کنید
+
+# فیلترهای بیشتر — همگی با هم AND می‌شوند
+hermes sessions prune --newer-than 5h --title "smoke test"   # زیررشتهٔ عنوان
+hermes sessions prune --older-than 30 --max-messages 3        # نشست‌های ریز
+hermes sessions prune --cwd ~/scratch --end-reason done       # بر اساس cwd / علت پایان
+hermes sessions prune --model gpt-5 --older-than 1w           # بر اساس مدل (زیررشته)
+hermes sessions prune --provider openrouter --older-than 60   # بر اساس ارائه‌دهندهٔ صورت‌حساب
+hermes sessions prune --branch feature/old-experiment         # بر اساس شاخهٔ git
+hermes sessions prune --user 12345678 --chat-type group       # بر اساس مبدأ پیام‌رسانی
+hermes sessions prune --max-tokens 500 --older-than 7         # بر اساس مصرف توکن
+hermes sessions prune --max-cost 0.01 --max-tool-calls 0      # اجراهای ارزانِ بدون-ابزار
+
+# پیش‌نمایش آنچه حذف می‌شد، بدون حذف هیچ‌چیز
+hermes sessions prune --newer-than 5h --dry-run
+
+# رد کردن تأیید
+hermes sessions prune --older-than 30 --yes</code></pre>
+</div>
+<p>مقادیر زمانی (<code>--older-than</code>، <code>--newer-than</code>، <code>--before</code>، <code>--after</code>) یک مدت (<code>5h</code>، <code>30m</code>، <code>2d</code>، <code>1w</code>)، عددِ خالیِ روز، یا مهر زمانی ISO‏ (<code>2026-07-05</code>، <code>2026-07-05 14:30</code>) می‌پذیرند. <code>--older-than</code>/<code>--before</code> سقف و <code>--newer-than</code>/<code>--after</code> کف را تنظیم می‌کنند. جفتِ <code>--older-than</code>/<code>--newer-than</code> از آخرین فعالیتِ پیام استفاده می‌کند (برای نشست‌های خالی به شروع نشست برمی‌گردد)؛ <code>--before</code>/<code>--after</code> صریحاً زمان شروع نشست را می‌گیرد. هر جفت را برای یک بازه ترکیب کنید.</p>
+<p>فیلترهای ویژگی: <code>--source</code> (پلتفرم، دقیق)، <code>--title</code> / <code>--model</code> / <code>--branch</code> (زیررشتهٔ بدون حساسیت به بزرگی/کوچکی)، <code>--provider</code> (ارائه‌دهندهٔ صورت‌حساب، دقیق)، <code>--end-reason</code>، <code>--user</code>، <code>--chat-id</code>، <code>--chat-type</code> (دقیق)، <code>--cwd</code> (پیشوند مسیر)، به‌علاوهٔ کران‌های عددی <code>--min/--max-messages</code>، <code>--min/--max-tokens</code> (ورودی+خروجی)، <code>--min/--max-cost</code> (دلار، واقعی با بازگشت به تخمینی) و <code>--min/--max-tool-calls</code>. استفاده از هر فیلتری پیش‌فرض ضمنیِ ۹۰ روز را غیرفعال می‌کند، پس <code>hermes sessions prune --source cron</code> یا <code>--model gpt-4o</code> با همهٔ سن‌ها تطبیق می‌خورد — برای محدودکردنش پرچم زمانی اضافه کنید. فقط <code>hermes sessions prune</code> کاملاً خالی، برش ۹۰ روزه را نگه می‌دارد. هر اجرای بدون <code>--yes</code> پیش از درخواست تأیید، شمار تطبیق‌ها به‌علاوهٔ قدیمی‌ترین و جدیدترین نشستِ مطابق را نشان می‌دهد.</p>
+<p>نشست‌های آرشیوشده به‌طور پیش‌فرض رد می‌شوند؛ برای حذف آن‌ها هم <code>--include-archived</code> بدهید.</p>
+
+<div class="callout note">
+  <div class="callout-title">ℹ️ توجه</div>
+  <p>هرس فقط نشست‌های <strong>پایان‌یافته</strong> را حذف می‌کند (نشست‌هایی که صریحاً پایان یافته یا خودکار ریست شده‌اند). نشست‌های فعال هرگز هرس نمی‌شوند.</p>
+</div>
+
+<h3>آرشیو گروهی نشست‌ها</h3>
+<p>اگر می‌خواهید نشست‌ها از فهرست‌هایتان بیرون بروند بدون حذف هیچ‌چیز، <code>hermes sessions archive</code> همان فیلترهای prune را می‌گیرد اما به‌جای حذف، نشست‌های مطابق را نرم‌مخفی می‌کند (همان پرچم آرشیوی که آرشیوِ تک‌نشستی از UI دسکتاپ/داشبورد می‌گذارد — پیام‌ها و جستجو سالم می‌مانند):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># آرشیو همه‌چیز از ۵ ساعت اخیر (مثلاً ۷۵ نشست اسموک-تست CI)
+hermes sessions archive --newer-than 5h
+
+# آرشیو بر اساس زیررشتهٔ عنوان، اول پیش‌نمایش
+hermes sessions archive --title "dry run" --dry-run
+hermes sessions archive --title "dry run" --yes</code></pre>
+</div>
+<p>حداقل یک فیلتر لازم است — <code>hermes sessions archive</code> خالی از آرشیوکردن کل تاریخچه‌تان سر باز می‌زند. نشست‌های آرشیوشده از <code>hermes sessions list</code> و <code>/resume</code> پنهان می‌شوند اما در دیتابیس می‌مانند و از فهرست نشست‌های دسکتاپ/داشبورد قابل خروج از آرشیوند.</p>
+
+<h3>آمار نشست‌ها</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes sessions stats</code></pre>
+</div>
+<p>خروجی:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Total sessions: 142
+Total messages: 3847
+  cli: 89 sessions
+  telegram: 38 sessions
+  discord: 15 sessions
+Database size: 12.4 MB</code></pre>
+</div>
+<p>برای تحلیل عمیق‌تر — مصرف توکن، برآورد هزینه، تفکیک ابزار و الگوهای فعالیت — از <code><a href="https://hermes-agent.nousresearch.com/docs/reference/cli-commands#hermes-insights" target="_blank" rel="noopener">hermes insights</a></code> استفاده کنید.</p>
+
+<h3>تعمیر نشست‌های سرگردان گیت‌وی</h3>
+<p>اگر گفتگوی گیت‌وی بعد از ری‌استارت «به عقب در زمان می‌پرد» — تاپیکی چندروزه را طوری ازسر بگیرد که انگار پیام‌های اخیر هرگز اتفاق نیفتاده‌اند — ممکن است گفتگوی زنده در سطری نشسته باشد که هویت مسیریابی‌اش را گم کرده (کلاس آسیبی که در کار تداوم نشستِ نسخهٔ v0.21 تعمیر شد؛ نسخه‌های فعلی ذاتاً جلویش را می‌گیرند و در زمان اجرا خودترمیم می‌شوند).</p>
+<p><code>hermes sessions repair-routing</code> سطرهای نشستِ دارای-پیامِ بدون هویت مسیریابی را پیدا می‌کند و هر یک را دوباره به گفتگویی که ادامه‌اش است می‌چسباند — اما فقط وقتی شواهد بی‌ابهام باشد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># فقط گزارش — هر سرگردان، فرزندخواندگی پیشنهادی و شواهد را نشان می‌دهد
+hermes sessions repair-routing
+
+# انجام فرزندخواندگی‌ها (اول گیت‌وی را متوقف کنید — گیت‌وی در حال اجرا
+# مسیریابی قدیمی را در حافظه دارد و روی تعمیر بازمی‌نویسدش)
+hermes sessions repair-routing --apply
+
+# باز/بستن پنجرهٔ پیوستگی (پیش‌فرض ۹۰۰ ثانیه)
+hermes sessions repair-routing --max-gap-seconds 300</code></pre>
+</div>
+<p>قواعد شواهد:</p>
+<ul>
+  <li><strong>تبار</strong> — <code>parent_session_id</code> سرگردان به سطری کلیددار از همان پلتفرم اشاره می‌کند (یک واقعیتِ ثبت‌شده؛ هیچ پنجرهٔ زمانی اعمال نمی‌شود)</li>
+  <li><strong>پیوستگی</strong> — دقیقاً یک سطر کلیددار از همان پلتفرم در پنجرهٔ شروعِ سرگردان ساکت شده</li>
+</ul>
+<p>هر چیز مبهمی (دو پیشین‌نمای کاندید، دو سرگردان مدعیِ همان پیشین‌نما) با ذکر دلیل گزارش و دست‌نخورده می‌ماند — یک فرزندخواندگیِ اشتباه، یک گفتگو را به چت دیگری می‌پیوندد. سطر منسوخ‌شده زیر <code>superseded_by_repair</code> بازنشسته می‌شود تا بازیابیِ ری‌استارت هرگز زنده‌اش نکند.</p>
+<p>تعمیر عمداً <strong>خودکار نیست</strong>: اگر چت از آن موقع تاریخچهٔ دومی ساخته، انتخاب اینکه ادامهٔ کدام رشته است با شماست. گفتگوی سرگردان به‌هرحال از طریق <code>/resume</code> و جستجوی نشست خوانا می‌ماند — مسیریابی تنها چیزی است که تعمیر عوض می‌کند. اول پشتیبان بگیرید (<code>cp ~/.hermes/state.db ~/.hermes/state.db.bak</code>).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> درون‌ریزی نشست‌ها از Claude Code و Codex CLI</h2>
+<p>گفتگویی را در CLI ایجنت دیگری شروع کرده‌اید؟ می‌توانید به هرمس بیاوریدش و همین‌جا ادامه دهید. هرمس لاگ‌های نشست Claude Code‏ (<code>~/.claude/projects/</code>) و رول‌اوت‌های Codex CLI‏ (<code>~/.codex/sessions/</code>) را می‌خواند — فایل‌های خارجی فقط خوانده می‌شوند، هرگز تغییر نمی‌کنند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># انتخابگر تعاملی روی هر دو ابزار، جدیدترین اول
+hermes sessions import
+
+# محدود به یک ابزار، یا اشاره به فایل مشخص
+hermes sessions import --from claude
+hermes sessions import --from codex ~/.codex/sessions/2026/08/15/rollout-....jsonl
+
+# درون‌ریزی و ازسرگیری در یک گام
+hermes --resume @claude
+hermes --resume @codex</code></pre>
+</div>
+<p><code>hermes sessions import</code> نشست هرمسی تازه‌ای با عنوان <code>Imported from Claude Code: &lt;اولین پیام کاربر&gt;</code> (یا Codex CLI) می‌سازد و شناسه به‌همراه فرمانِ آماده‌پیست <code>hermes --resume &lt;id&gt;</code> را چاپ می‌کند. <code>--resume @claude</code> / <code>--resume @codex</code> همان انتخابگر را نشان می‌دهند و شما را مستقیم داخل گفتگوی درون‌ریزی‌شده می‌گذارند.</p>
+<p>چه چیزی منتقل می‌شود: گفتگوی مرتبِ کاربر/دستیار، با فعالیت ابزار فشرده‌شده به یادداشت‌های کوتاه <code>[ran tool: …]</code> داخل نوبت‌های دستیار. پرامپت‌های سیستمی، زمینهٔ تزریق‌شده، رده‌های استدلال و خروجی خام ابزار جا می‌مانند — درون‌ریزی یک رونوشت تمیز است، نه بازپخشِ بایت‌به‌بایت.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> ابزار جستجوی نشست</h2>
+<p>ایجنت یک ابزار داخلی <code>session_search</code> دارد که با موتور FTS5 مربوط به SQLite جستجوی تمام‌متن روی همهٔ گفتگوهای گذشته انجام می‌دهد — و به ایجنت اجازه می‌دهد در هر نشستی که پیدا می‌کند اسکرول کند. هیچ فراخوانی LLM نمی‌کند و به‌جای تولید خلاصه، نماهایی از پیام‌های واقعیِ دیتابیس را برمی‌گرداند.</p>
+
+<h3>چهار شکل فراخوانی</h3>
+<p>ابزار از اینکه کدام آرگومان‌ها را تنظیم کرده‌اید می‌فهمد چه می‌خواهید. پارامتر <code>mode</code> وجود ندارد.</p>
+
+<p><strong>۱. کشف — <code>query</code> بدهید:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>session_search(query="auth refactor", limit=3)</code></pre>
+</div>
+<p>FTS5 را اجرا می‌کند، نتایج را بر اساس تبار نشست بی‌تکرار می‌کند و N نشست برتر را برمی‌گرداند. کشف به‌طور پیش‌فرض از جزئیات تطبیقی استفاده می‌کند: نتیجهٔ با بالاترین رتبه پنجرهٔ زمینهٔ کامل و bookendهایش را می‌آورد، در حالی که نتایج پایین‌تر فشرده می‌مانند. برای سیراب‌کردن کامل هر نتیجه <code>detail="full"</code> بدهید.</p>
+<p>هر نتیجه این‌ها را دارد:</p>
+<ul>
+  <li><code>session_id</code>، <code>title</code>، <code>when</code>، <code>source</code></li>
+  <li><code>snippet</code> — گزیدهٔ تطبیق با هایلایت FTS5</li>
+  <li><code>detail</code> — <code>full</code> یا <code>compact</code></li>
+  <li><code>bookend_start</code> / <code>bookend_end</code> — اول/آخر ۳ پیام کاربر+دستیار برای نتایج کامل؛ فهرست‌های خالی برای نتایج فشرده</li>
+  <li><code>messages</code> — ‏±۵ پیام حول تطبیق FTS5 برای نتایج کامل؛ فقط پیامِ لنگرِ علامت‌خورده برای نتایج فشرده</li>
+  <li><code>match_message_id</code>، <code>messages_before</code>، <code>messages_after</code></li>
+</ul>
+<p>نتیجهٔ برتر بلافاصله «هدف ← تطبیق ← حل» را بازسازی می‌کند. اگر نتیجهٔ فشردهٔ دیگری امیدوارکننده‌تر بود، از شناسه‌های نشست و پیامش با شکل اسکرول استفاده کنید. زمان معمول روی یک دیتابیس نشست واقعی: ده‌ها میلی‌ثانیه.</p>
+
+<p><strong>۲. اسکرول — <code>session_id</code> + <code>around_message_id</code> بدهید:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>session_search(session_id="20260510_174648_805cc2", around_message_id=590803, window=10)</code></pre>
+</div>
+<p>پنجره‌ای از پیام‌های ±<code>window</code> حول لنگر برمی‌گرداند. بدون FTS5، بدون bookend — فقط همان تکه. بعد از فراخوانی کشف استفاده کنید وقتی زمینهٔ بیشتری از پنجرهٔ پیش‌فرض ±۵ می‌خواهید.</p>
+<ul>
+  <li>اسکرول <strong>به جلو</strong>: <code>messages[-1].id</code> را به‌عنوان <code>around_message_id</code> پس بدهید</li>
+  <li>اسکرول <strong>به عقب</strong>: <code>messages[0].id</code> را به‌عنوان <code>around_message_id</code> پس بدهید</li>
+  <li>پیام مرزی در هر دو پنجره به‌عنوان نشانگر جهت‌یابی ظاهر می‌شود</li>
+  <li>وقتی <code>messages_before</code> یا <code>messages_after</code> کمتر از <code>window</code> است، در شروع یا پایان نشست هستید</li>
+</ul>
+<p>زمان معمول: ۱ تا ۲ میلی‌ثانیه به‌ازای هر فراخوانی اسکرول.</p>
+
+<p><strong>۳. خواندن — <code>session_id</code> بدون لنگر بدهید:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn"> کپی</button></div>
+  <pre><code>session_search(session_id="20260510_174648_805cc2")</code></pre>
+</div>
+<p>کل نشست را برمی‌گرداند، یا برای نشست‌های بزرگ نمای کراندارِ سر/دُم. این شکل برای حل لینک <code>@session:&lt;profile&gt;/&lt;id&gt;</code> هم استفاده می‌شود.</p>
+
+<p><strong>۴. مرور — بدون آرگومان:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>session_search()</code></pre>
+</div>
+<p>نشست‌های اخیر را زمان‌گذر برمی‌گرداند (عنوان‌ها، پیش‌نمایش‌ها، مهرهای زمانی). وقتی کاربر بدون نام‌بردن موضوعی می‌پرسد «روی چه کار می‌کردم» مفید است.</p>
+
+<h3>نگارش کوئری FTS5</h3>
+<p>حالت کلیدواژه از نگارش استاندارد کوئری FTS5 پشتیبانی می‌کند:</p>
+<ul>
+  <li>کلیدواژه‌های ساده: <code>docker deployment</code> (پیش‌فرض FTS5 همان AND است)</li>
+  <li>عبارت: <code>"exact phrase"</code></li>
+  <li>بولی: <code>docker OR kubernetes</code>، <code>python NOT java</code></li>
+  <li>پیشوند: <code>deploy*</code></li>
+</ul>
+
+<h3>پارامترهای اختیاری</h3>
+<ul>
+  <li><code>sort</code> — <code>newest</code> یا <code>oldest</code>، روی رتبه‌بندی FTS5. برای ترتیبِ فقط-ارتباطی (پیش‌فرض؛ مناسب یادآوری اکتشافی) حذفش کنید. برای سؤال‌های «X را کجا رها کردیم» از <code>newest</code> و برای «X چطور شروع شد» از <code>oldest</code> استفاده کنید.</li>
+  <li><code>detail</code> — <code>adaptive</code> (پیش‌فرض) فقط نتیجهٔ کشفِ برتر را کامل سیراب می‌کند؛ <code>full</code> هر نتیجهٔ کشف را.</li>
+  <li><code>role_filter</code> — نقش‌های جداشده با ویرگول برای شمول. کشف به‌طور پیش‌فرض <code>user,assistant</code> است (خروجی ابزار معمولاً نویز است). برای شمول خروجی ابزار <code>user,assistant,tool</code> بدهید (دیباگ رفتار ابزار) یا برای جستجوی فقط خروجی ابزار <code>tool</code>.</li>
+</ul>
+
+<h3>کِی استفاده می‌شود</h3>
+<p>به ایجنت گفته شده که جستجوی نشست را خودکار به‌کار بگیرد:</p>
+<blockquote><p>«وقتی کاربر به چیزی از گفتگوی گذشته اشاره می‌کند یا مشکوکید زمینهٔ قبلی مرتبطی وجود دارد، پیش از اینکه از او بخواهید تکرار کند، با session_search یادش بیاورید.»</p></blockquote>
+<p>تریگرهای معمول: «این را قبلاً انجام دادیم»، «یادت هست وقتی»، «بار قبل»، «همان‌طور که گفتم»، یا هر ارجاعی به پروژه/شخص/مفهومی که در پنجرهٔ فعلی نیست.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> پیگیری نشست به‌ازای-پلتفرم</h2>
+
+<h3>نشست‌های گیت‌وی</h3>
+<p>روی پلتفرم‌های پیام‌رسانی، نشست‌ها با کلید قطعیِ ساخته‌شده از مبدأ پیام کلید می‌خورند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نوع چت</th><th>قالب کلید پیش‌فرض</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td>DM تلگرام</td><td><code>agent:main:telegram:dm:&lt;chat_id&gt;</code></td><td>یک نشست به‌ازای هر چت DM</td></tr>
+    <tr><td>DM دیسکورد</td><td><code>agent:main:discord:dm:&lt;chat_id&gt;</code></td><td>یک نشست به‌ازای هر چت DM</td></tr>
+    <tr><td>DM واتساپ</td><td><code>agent:main:whatsapp:dm:&lt;canonical_identifier&gt;</code></td><td>یک نشست به‌ازای هر کاربر DM (نام‌های مستقل LID/تلفن وقتی نگاشت موجود است در یک هویت جمع می‌شوند)</td></tr>
+    <tr><td>گفتگوی گروهی</td><td><code>agent:main:&lt;platform&gt;:group:&lt;chat_id&gt;:&lt;user_id&gt;</code></td><td>به‌ازای-کاربر داخل گروه، وقتی پلتفرم شناسهٔ کاربر ارائه می‌دهد</td></tr>
+    <tr><td>رشته/تاپیک گروهی</td><td><code>agent:main:&lt;platform&gt;:group:&lt;chat_id&gt;:&lt;thread_id&gt;</code></td><td>نشست مشترک برای همهٔ اعضای رشته (پیش‌فرض). به‌ازای-کاربر با <code>thread_sessions_per_user: true</code>.</td></tr>
+    <tr><td>کانال</td><td><code>agent:main:&lt;platform&gt;:channel:&lt;chat_id&gt;:&lt;user_id&gt;</code></td><td>به‌ازای-کاربر داخل کانال، وقتی پلتفرم شناسهٔ کاربر ارائه می‌دهد</td></tr>
+  </tbody>
+</table>
+</div>
+<p>وقتی هرمس نتواند شناسهٔ شرکت‌کننده‌ای برای چت مشترک بگیرد، به یک نشست مشترکِ واحد برای آن اتاق برمی‌گردد.</p>
+
+<h3>نشست‌های گروهی مشترک در برابر ایزوله</h3>
+<p>به‌طور پیش‌فرض هرمس از <code>group_sessions_per_user: true</code> در <code>config.yaml</code> استفاده می‌کند. یعنی:</p>
+<ul>
+  <li>آلیس و باب می‌توانند هر دو در همان کانال دیسکورد با هرمس حرف بزنند بدون اشتراک تاریخچهٔ رونوشت</li>
+  <li>کارِ طولانیِ پرابزارِ یک کاربر، پنجرهٔ زمینهٔ کاربر دیگر را آلوده نمی‌کند</li>
+  <li>مدیریت وقفه هم به‌ازای-کاربر می‌ماند چون کلید ایجنت-در-حال-اجرا با کلید نشست ایزوله تطبیق می‌کند</li>
+</ul>
+<p>اگر به‌جایش یک «مغز اتاقِ» مشترک می‌خواهید، تنظیم کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>group_sessions_per_user: false</code></pre>
+</div>
+<p>این گروه‌ها/کانال‌ها را به یک نشست مشترکِ واحد به‌ازای اتاق برمی‌گرداند که زمینهٔ گفتگوی مشترک را حفظ می‌کند ولی هزینهٔ توکن، وضعیت وقفه و رشد زمینه را هم مشترک می‌کند.</p>
+
+<h3>سیاست‌های ریست نشست</h3>
+<p><strong>به‌طور پیش‌فرض نشست‌های گیت‌وی هرگز خودکار ریست نمی‌شوند</strong>‏ (<code>mode: none</code>). می‌توانید با بخش <code>session_reset</code> در <code>config.yaml</code> به ریست خودکار بپیوندید:</p>
+<ul>
+  <li><strong>none</strong> — هرگز ریست خودکار نشود (پیش‌فرض؛ زمینه با <code>/reset</code> و فشرده‌سازی مدیریت می‌شود)</li>
+  <li><strong>idle</strong> — ریست پس از N دقیقه بی‌فعالیتی</li>
+  <li><strong>daily</strong> — ریست در ساعت مشخصی هر روز</li>
+  <li><strong>both</strong> — ریست با هرکدام زودتر بیفتد (idle یا daily)</li>
+</ul>
+<p>پیش از ریست خودکارِ نشست، به ایجنت یک نوبت داده می‌شود تا خاطرات یا مهارت‌های مهم گفتگو را ذخیره کند.</p>
+<p>نشست‌های دارای <strong>پروسه‌های پس‌زمینهٔ فعال</strong> صرف‌نظر از سیاست، هرگز خودکار ریست نمی‌شوند.</p>
+
+<h3>تداوم پس از کرش و ری‌استارت</h3>
+<p>یک چت گیت‌وی طراحی شده که <strong>یک نشست پیوسته</strong> باشد — که با رشدش مکرراً فشرده می‌شود — تا وقتی صریحاً <code>/new</code> (یا <code>/reset</code>) بزنید. این در سراسر کرش‌ها، ری‌استارت‌ها و به‌روزرسانی‌های گیت‌وی برقرار است:</p>
+<ul>
+  <li>هویت نشست (کلید مسیریابی، چت، مبدأ) هنگام ساخته‌شدن سطر نشست <strong>اتمی</strong> نوشته می‌شود، روی همهٔ مسیرهای ساخت (<code>/new</code>، اولین پیام، فرزندان <code>/branch</code>). اگر آن نوشتن شکست بخورد، نوسازیِ مسیریابیِ همان نوبتِ بعدی سطر را خودکار تعمیر می‌کند.</li>
+  <li>پس از ری‌استارت، گیت‌وی هر چت را به نشستی با جدیدترین <strong>فعالیتِ واقعی</strong> دوباره حل می‌کند — یک سطر قدیمی و کهنه هرگز نمی‌تواند بر گفتگویی که واقعاً داشتید غلبه کند.</li>
+  <li>بازیابی <strong>به مرزهای /new احترام می‌گذارد</strong>: اگر جدیدترین رویداد یک چت، ریست عمدی باشد، بازیابی از نو شروع می‌کند به‌جای اینکه از پشت ریست گذشته و نشست قدیمی‌تری را زنده کند. نشست‌های بازیابی‌شده زمان بیکاریِ واقعی‌شان را هم نگه می‌دارند، تا سیاست اختیاری idle/daily به‌درستی رویشان اعمال شود به‌جای اینکه هر نشست بازیابی‌شده نو به‌نو تلقی شود.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> مکان‌های ذخیره‌سازی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>چه چیزی</th><th>مسیر</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td>دیتابیس SQLite</td><td><code>~/.hermes/state.db</code></td><td>همهٔ فرادادهٔ نشست + پیام‌ها با FTS5</td></tr>
+    <tr><td>پیام‌های گیت‌وی</td><td><code>~/.hermes/state.db</code></td><td>‏SQLite — مخزن رسمی همهٔ پیام‌های نشست</td></tr>
+    <tr><td>اندیس مسیریابی گیت‌وی</td><td>جدول <code>gateway_routing</code> در <code>~/.hermes/state.db</code></td><td>کلیدهای نشست را به شناسه‌های نشست فعال نگاشت می‌کند (فرادادهٔ مبدأ، پرچم‌های انقضا)</td></tr>
+    <tr><td>آینهٔ مسیریابی قدیمی</td><td><code>~/.hermes/sessions/sessions.json</code></td><td>آینهٔ سازگار-به-عقبِ اندیس مسیریابی، وقتی <code>gateway.write_sessions_json: true</code> (پیش‌فرض) نوشته می‌شود</td></tr>
+  </tbody>
+</table>
+</div>
+<p>دیتابیس SQLite برای خواننده‌های هم‌زمان و یک نویسندهٔ واحد از حالت WAL استفاده می‌کند که با معماری چندپلتفرمی گیت‌وی خوب جور است.</p>
+
+<div class="callout warning">
+  <div class="callout-title">⚠️ sessions.json فهرست نشست‌ها نیست</div>
+  <p>اندیس مسیریابی گیت‌وی در جدول <code>gateway_routing</code> داخل <code>state.db</code> زندگی می‌کند؛ ‏<code>~/.hermes/sessions/sessions.json</code> یک <strong>آینهٔ قدیمی</strong> از آن است که برای سازگاری به عقب نگه داشته شده (با <code>gateway.write_sessions_json: false</code> غیرفعالش کنید). کلیدهای نشست پیام‌رسانی‏ (<code>agent:main:&lt;platform&gt;:...</code>) را به شناسه‌های نشست فعال نگاشت می‌کند. فقط مدخل‌های گیت‌وی/پیام‌رسانی دارد، پس اگر پلتفرم پیام‌رسانی اجرا کنید فقط همان‌ها را می‌بینید (مثلاً <code>agent:main:whatsapp:dm:...</code>).</p>
+  <p>این <strong>انتظارشده</strong> است و به‌هیچ‌وجه به معنی گم‌شدن نشست‌های CLI شما نیست. <code>hermes sessions list</code>، ‏<code>/sessions</code> و داشبورد همگی <code>state.db</code> را می‌خوانند که <strong>هر</strong> نشستی را دارد (CLI، TUI و گیت‌وی). اسنپ‌شات‌های <code>/save</code> زیر <code>~/.hermes/sessions/saved/*.json</code> صادرات‌های راحتی‌اند، نه اندیس.</p>
+  <p>اگر نشست‌های CLI واقعاً در <code>hermes sessions list</code> ظاهر نمی‌شوند، علتش این است که <code>state.db</code> آن‌ها را دریافت نکرده — <code>hermes sessions repair</code> را اجرا کنید و هشدار <code>⚠ Session store unavailable</code> را هنگام راه‌اندازی CLI زیر نظر بگیرید که یعنی ماندگاری SQLite برای آن اجرا شکست خورده.</p>
+</div>
+
+<div class="callout note">
+  <div class="callout-title">ℹ️ رونوشت‌های JSONL قدیمی</div>
+  <p>نشست‌هایی که پیش از رسمی‌شدن state.db ساخته شده‌اند ممکن است فایل‌های <code>*.jsonl</code> باقی‌مانده در <code>~/.hermes/sessions/</code> داشته باشند. دیگر توسط هرمس نوشته یا خوانده نمی‌شوند. پس از تأیید وجود نشست متناظر در state.db، حذفشان امن است.</p>
+</div>
+
+<h3>طرح‌وارهٔ دیتابیس</h3>
+<p>جداول کلیدی در <code>state.db</code>:</p>
+<ul>
+  <li><strong>sessions</strong> — فرادادهٔ نشست (شناسه، مبدأ، user_id، مدل، عنوان، مهرهای زمانی، شمارش توکن). عنوان‌ها اندیس یکتا دارند (عنوان NULL مجاز است، فقط غیرNULLها باید یکتا باشند).</li>
+  <li><strong>messages</strong> — تاریخچهٔ کامل پیام‌ها (نقش، محتوا، tool_calls، نام ابزار، شمارش توکن)</li>
+  <li><strong>messages_fts</strong> — جدول مجازی FTS5 برای جستجوی تمام‌متن روی محتوای پیام</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> انقضا و پاک‌سازی نشست‌ها</h2>
+
+<h3>پاک‌سازی خودکار</h3>
+<ul>
+  <li>نشست‌های گیت‌وی بر اساس سیاست ریستِ پیکربندی‌شده، خودکار ریست می‌شوند</li>
+  <li>پیش از ریست، ایجنت خاطرات و مهارت‌های نشستِ در حال انقضا را ذخیره می‌کند</li>
+  <li>هرس خودکارِ اختیاری: وقتی <code>sessions.auto_prune</code> برابر <code>true</code> باشد، نشست‌های پایان‌یافتهٔ غیرفعال برای <code>sessions.retention_days</code> (پیش‌فرض ۹۰) هنگام راه‌اندازی CLI/گیت‌وی هرس می‌شوند</li>
+  <li>پس از هرسی که واقعاً سطر حذف کرد، وقتی حداقل <code>sessions.min_vacuum_interval_days</code> (پیش‌فرض ۳۰) از آخرین VACUUM موفق گذشته باشد، <code>state.db</code> برای بازیابی فضا VACUUM می‌شود (‏SQLite با DELETE ساده فایل را کوچک نمی‌کند)</li>
+  <li>هرس حداکثر یک بار در هر <code>sessions.min_interval_hours</code> (پیش‌فرض ۲۴) اجرا می‌شود؛ مهر زمانی آخرین اجرا داخل خود <code>state.db</code> پیگیری می‌شود تا بین همهٔ پروسه‌های هرمس در همان <code>HERMES_HOME</code> مشترک باشد</li>
+</ul>
+<p>پیش‌فرض <strong>خاموش</strong> است — تاریخچهٔ نشست برای یادآوریِ <code>session_search</code> ارزشمند است و حذف خاموشش می‌تواند کاربران را غافلگیر کند. در <code>~/.hermes/config.yaml</code> فعالش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>sessions:
+  auto_prune: true          # فعال‌سازی — پیش‌فرض false
+  retention_days: 90        # نشست‌های پایان‌یافته در این بازه فعال نگه داشته می‌شوند
+  vacuum_after_prune: true  # بازیابی فضا پس از جاروب هرس
+  min_vacuum_interval_days: 30 # دیتابیس را پرتکرارتر از این بازنویسی نکن
+  min_interval_hours: 24    # جاروب را پرتکرارتر از این دوباره اجرا نکن</code></pre>
+</div>
+<p>نشست‌های فعال صرف‌نظر از سن، هرگز خودکار هرس نمی‌شوند. سنِ نشست‌های پایان‌یافته از آخرین پیامشان حساب می‌شود، پس گفتگوی طولانی‌عمرِ اخیراً استفاده‌شده، صرفاً چون قبل از بازهٔ نگهداشت شروع شده حذف نمی‌شود.</p>
+
+<h3>پاک‌سازی دستی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># هرس نشست‌های بالای ۹۰ روز
+hermes sessions prune
+
+# حذف نشست مشخص
+hermes sessions delete &lt;session_id&gt;
+
+# صادرات پیش از هرس (پشتیبان)
+hermes sessions export backup.jsonl
+hermes sessions prune --older-than 30 --yes</code></pre>
+</div>
+
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>دیتابیس آهسته رشد می‌کند (معمول: ۱۰-۱۵ مگابایت برای صدها نشست) و تاریخچهٔ نشست، یادآوریِ <code>session_search</code> را در گفتگوهای گذشته توانمند می‌کند، پس هرس خودکار خاموش عرضه می‌شود. اگر بار کاری سنگین گیت‌وی/کرون دارید که <code>state.db</code> معنادار بر کارایی اثر می‌گذارد فعالش کنید (حالت شکستِ مشاهده‌شده: state.db سی‌وهشت‌وده‌مگابایتی با ~۱۰۰۰ نشست که درج‌های FTS5 و فهرست‌بندی <code>/resume</code> را کُند می‌کرد). برای پاک‌سازی یک‌باره بدون روشن‌کردن جاروب خودکار از <code>hermes sessions prune</code> استفاده کنید.</p>
+</div>
+</section>
+
+<div class="pager">
+  <a href="profiles.html"><span class="dir">→ قبلی</span><span class="ttl">پروفایل‌ها</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">گیت‌ورک‌تری (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/sessions" target="_blank" rel="noopener">Sessions</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

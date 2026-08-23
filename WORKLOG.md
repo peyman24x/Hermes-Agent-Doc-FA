@@ -10,8 +10,9 @@
 | **مسیر خروجی** | `hermes-docs-fa/` (سایت استاتیک تک‌پوشه، آفلاین + آمادهٔ GH Pages / Cloudflare Pages) |
 | **مالکیت و لایسنس** | طراحی و اجرا: [peyman24x.ir](https://peyman24x.ir) · تحت **MIT** (فایل `LICENSE`) |
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
+| **سایت آنلاین** | [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۲ از ۲۰۷ صفحه (۶٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۳ از ۲۰۷ صفحه (۶٪)** |
 
 ---
 
@@ -167,6 +168,13 @@ hermes-docs-fa/
 
 ---
 
+
+### نشست ۱۰ — ۲۰۲۶-۰۸-۲۳ (بخش دهم) — 💬 نشست‌ها
+- ترجمهٔ **user-guide/sessions.html** (۱۰ بخش کامل: کارکرد و مبدأها، ازسرگیری CLI شامل ادامهٔ مخصوص-ترمینال و --in، تحویل بین‌پلتفرمی /handoff، نام‌گذاری و تبار، فرمان‌های مدیریت شامل export چهارقالبه/prune/archive/pin/repair-routing، درون‌ریزی از Claude/Codex، ابزار session_search با چهار شکل فراخوانی، پیگیری پلتفرمی و ریست، ذخیره‌گاه و پاک‌سازی) ← مجموع: **۱۳ صفحه**.
+- pager صفحهٔ «پروفایل‌ها» به «نشست‌ها» متصل شد.
+
+---
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -184,12 +192,13 @@ hermes-docs-fa/
 | 10 | `user-guide/features/tools.html` | ابزارها و تول‌ست‌ها |
 | 11 | `user-guide/profiles.html` | پروفایل‌ها: اجرای چند ایجنت |
 | 12 | `user-guide/features/memory.html` | حافظهٔ پایدار |
+| 13 | `user-guide/sessions.html` | نشست‌ها |
 
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|
 | 🚀 شروع کار | **۶/۷** | فقط `nix-setup` (۱۲۱۳ خط — سخت‌ترین صفحهٔ باقی‌ماندهٔ این بخش) |
-| ⚙️ کار با Hermes | ۳/۲۸ | configuration (۲۶۱۴ خط، بزرگ‌ترین صفحهٔ پروژه)، cli، security (۸۱۷)، sessions (۹۰۴)، profiles |
+| ⚙️ کار با Hermes | ۴/۲۸ | configuration (۲۶۱۴ خط، بزرگ‌ترین صفحهٔ پروژه)، cli، security (۸۱۷)، sessions (۹۰۴)، profiles |
 | 🧠 قابلیت‌های اصلی | ۳/۳۱ | skills (۱۰۱۲)، mcp (۹۲۰)، web-dashboard (۱۱۵۷)، plugins (۷۹۵) |
 | 🤖 اتوماسیون | ۰/۸ | cron (۹۹۱)، hooks (۱۸۹۹ — بزرگ)، delegation |
 | 🎬 رسانه و وب | ۰/۵ | voice-mode، browser |
