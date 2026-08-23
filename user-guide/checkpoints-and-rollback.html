@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>چک‌پوینت و بازگشت — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/checkpoints-and-rollback" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>چک‌پوینت و بازگشت</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>چک‌پوینت‌ها و <code>/rollback</code></h1>
+<p>هرمس ایجنت می‌تواند پیش از <strong>عملیات مخرب</strong> به‌طور خودکار از پروژهٔ شما اسنپ‌شات بگیرد و با یک فرمان آن را بازیابی کند. چک‌پوینت‌ها از نسخهٔ v2 <strong>اختیاری</strong> شده‌اند — اغلب کاربران هرگز از <code>/rollback</code> استفاده نمی‌کنند و ذخیره‌گاه سایه‌ای در طول زمان سبک نیست، پس پیش‌فرض خاموش است.</p>
+<p>با <code>--checkpoints</code> به‌ازای-نشست فعالش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes chat --checkpoints</code></pre>
+</div>
+<p>یا به‌صورت سراسری در <code>~/.hermes/config.yaml</code>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>checkpoints:
+  enabled: true</code></pre>
+</div>
+<p>این تور ایمنی توسط یک **مدیر چک‌پوینت** داخلی قدرت می‌گیرد که یک مخزن گیتِ سایه‌ایِ مشترکِ واحد را زیر <code>~/.hermes/checkpoints/store/</code> نگه می‌دارد — به <code>.git</code> واقعی پروژهٔ شما هرگز دست نمی‌خورد. هر پروژه‌ای که ایجنت در آن کار می‌کند همان ذخیره‌گاه را به اشتراک می‌گذارد، پس دیتابیس اشیای محتوامنشأِ گیت بین پروژه‌ها و بین نوبت‌ها هم‌پوشانی‌ها را حذف می‌کند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چه چیزی چک‌پوینت را تریگر می‌کند</h2>
+<p>چک‌پوینت‌ها به‌طور خودکار پیش از این‌ها گرفته می‌شوند:</p>
+<ul>
+  <li><strong>ابزارهای فایل</strong> — ‏<code>write_file</code> و <code>patch</code></li>
+  <li><strong>فرمان‌های ترمینالی مخرب</strong> — ‏<code>rm</code>، ‏<code>rmdir</code>، ‏<code>cp</code>، ‏<code>install</code>، ‏<code>mv</code>، ‏<code>sed -i</code>، ‏<code>truncate</code>، ‏<code>dd</code>، ‏<code>shred</code>، ریدایرکت‌های خروجی‏ (<code>&gt;</code>) و <code>git reset</code>/<code>clean</code>/<code>checkout</code></li>
+</ul>
+<p>ایجنت <strong>حداکثر یک چک‌پوینت به‌ازای هر پوشه در هر نوبت</strong> می‌سازد، پس نشست‌های طولانی اسنپ‌شات اسپم نمی‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> مرجع سریع</h2>
+<p>فرمان‌های اسلش درون‌نشستی:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرمان</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>/rollback</code></td><td>فهرست همهٔ چک‌پوینت‌ها با آمار تغییر</td></tr>
+    <tr><td><code>/rollback &lt;N&gt;</code></td><td>بازیابی به چک‌پوینت N با حفظ ویرایش‌های دستی شما (آخرین نوبت چت را هم خنثی می‌کند)</td></tr>
+    <tr><td><code>/rollback &lt;N&gt; --all</code></td><td>بازیابی کامل — ویرایش‌های دستی شما را هم بازنویسی می‌کند</td></tr>
+    <tr><td><code>/rollback diff &lt;N&gt;</code></td><td>پیش‌نمایش دیف بین چک‌پوینت N و وضعیت فعلی</td></tr>
+    <tr><td><code>/rollback &lt;N&gt; &lt;file&gt;</code></td><td>بازیابی یک فایل تکی از چک‌پوینت N</td></tr>
+  </tbody>
+</table>
+</div>
+<p>‏CLI برای بازبینی و مدیریت ذخیره‌گاه بیرون از نشست:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرمان</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>hermes checkpoints</code></td><td>نمایش حجم کل، شمار پروژه، تفکیک به‌ازای-پروژه</td></tr>
+    <tr><td><code>hermes checkpoints status</code></td><td>همان <code>checkpoints</code> خالی</td></tr>
+    <tr><td><code>hermes checkpoints list</code></td><td>نام‌مستقل <code>status</code></td></tr>
+    <tr><td><code>hermes checkpoints prune</code></td><td>اجبار جاروب: حذف یتیم‌ها/کهنه‌ها، ‏GC، اجرای سقف حجم</td></tr>
+    <tr><td><code>hermes checkpoints clear</code></td><td>نابودی کل پایهٔ چک‌پوینت (اول می‌پرسد)</td></tr>
+    <tr><td><code>hermes checkpoints clear-legacy</code></td><td>حذف فقط آرشیوهای <code>legacy-*</code> از مهاجرت v1</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> چک‌پوینت‌ها چگونه کار می‌کنند</h2>
+<p>در سطح بالا:</p>
+<ul>
+  <li>هرمس تشخیص می‌دهد کِی ابزارها در شرف <strong>تغییر فایل‌ها</strong> در درخت کاری شما هستند.</li>
+  <li>یک بار در هر نوبت گفتگو (به‌ازای پوشه):
+    <ul>
+      <li>ریشهٔ پروژهٔ معقولی برای فایل حل می‌کند.</li>
+      <li><strong>ذخیره‌گاه سایه‌ای مشترک واحد</strong> را در <code>~/.hermes/checkpoints/store/</code> مقداردهی یا بازاستفاده می‌کند.</li>
+      <li>در اندکسی به‌ازای-پروژه stage می‌کند، یک tree می‌سازد و به ref مخصوص پروژه‏ (<code>refs/hermes/&lt;project-hash&gt;</code>) کامیت می‌زند.</li>
+    </ul>
+  </li>
+  <li>این refهای به‌ازای-پروژه تاریخچه‌ای از چک‌پوینت‌ها می‌سازند که می‌توانید با <code>/rollback</code> بازبینی و بازیابی‌شان کنید.</li>
+</ul>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text — جریان</span><button class="copy-btn">کپی</button></div>
+  <pre><code>user ──▶ agent ──▶ tools ──▶ cpMgr ──▶ store (shadow git)
+                        ◀──────┘
+        tools قبل از هر جهش: ensure_checkpoint()
+        cpMgr با git add/commit-tree/update-ref کامیت می‌زند</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پیکربندی</h2>
+<p>در <code>~/.hermes/config.yaml</code> پیکربندی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>checkpoints:
+  enabled: false              # کلید اصلی (پیش‌فرض: false — اختیاری)
+  max_snapshots: 20           # حداکثر چک‌پوینت به‌ازای پروژه (با بازنویسی ref + gc اجرا می‌شود)
+  max_total_size_mb: 500      # سقف سفت حجم کل ذخیره‌گاه؛ قدیمی‌ترین کامیت‌ها انداخته می‌شوند
+  max_file_size_mb: 10        # رد هر فایل تکیِ بزرگ‌تر از این
+
+  # نگهداری خودکار (پیش‌فرض روشن): جاروب ~/.hermes/checkpoints/ هنگام شروع
+  # و حذف مدخل‌های پروژه‌ای که last_touch‌شان از retention_days گذشته.
+  # حداکثر یک بار در min_interval_hours اجرا می‌شود، با نشانگر .last_prune
+  # پیگیری. این جاروب هرگز مدخل‌های «یتیم» (پوشهٔ کاری پیدا نشدنی) را حذف
+  # نمی‌کند — نبودِ workdir هنگام شروع مبهم است (پروژهٔ حذف‌شده در برابر
+  # والوم خارجیِ مانت‌نشده / اشتراک شبکه‌ای / VPN هنوز-بالا-نیامده)، پس
+  # پاک‌سازی یتیم‌ها فقط از طریق فرمان صریح `hermes checkpoints prune`
+  # پایین، با اعلان تأیید انجام می‌شود.
+  auto_prune: true
+  retention_days: 7
+  min_interval_hours: 24</code></pre>
+</div>
+<p>برای خاموش‌کردن همه‌چیز:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>checkpoints:
+  enabled: false
+  auto_prune: false</code></pre>
+</div>
+<p>وقتی <code>enabled: false</code> است، مدیر چک‌پوینت no-op است و هرگز عملیات گیت را تلاش نمی‌کند. وقتی <code>auto_prune: false</code> است، ذخیره‌گاه رشد می‌کند تا وقتی <code>hermes checkpoints prune</code> را دستی اجرا کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> فهرست‌کردن چک‌پوینت‌ها</h2>
+<p>از یک نشست CLI:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان در چت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/rollback</code></pre>
+</div>
+<p>هرمس با فهرستی قالب‌بندی‌شده نشان‌دهندهٔ آمار تغییر پاسخ می‌دهد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>📸 Checkpoints for /path/to/project:
+
+  1. 4270a8c  2026-03-16 04:36  before patch  (1 file, +1/-0)
+  2. eaf4c1f  2026-03-16 04:35  before write_file
+  3. b3f9d2e  2026-03-16 04:34  before terminal: sed -i s/old/new/ config.py  (1 file, +1/-1)
+
+  /rollback &lt;N&gt;             restore to checkpoint N (keeps your hand-edits)
+  /rollback &lt;N&gt; --all       full restore, overwriting your hand-edits too
+  /rollback diff &lt;N&gt;        preview changes since checkpoint N
+  /rollback &lt;N&gt; &lt;file&gt;      restore a single file from checkpoint N</code></pre>
+</div>
+
+<h3>بازبینی ذخیره‌گاه از شل</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes checkpoints</code></pre>
+</div>
+<p>نمونهٔ خروجی:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Checkpoint base: /home/you/.hermes/checkpoints
+Total size:      142.3 MB
+  store/         138.1 MB
+  legacy-*       4.2 MB
+Projects:        12
+
+  WORKDIR                                                       COMMITS    LAST TOUCH  STATE
+  /home/you/code/hermes-agent                                        20       2h ago  live
+  /home/you/code/experiments/rl-runner                                8       1d ago  live
+  /home/you/code/old-prototype                                        3       9d ago  orphan
+  ...
+
+Legacy archives (1):
+  legacy-20260506-050616                           4.2 MB
+
+Clear with: hermes checkpoints clear-legacy</code></pre>
+</div>
+<p>اجبار جاروب کامل (نشانگر همانی ۲۴ ساعته را نادیده می‌گیرد):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes checkpoints prune --retention-days 3 --max-size-mb 200</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> پیش‌نمایش تغییرات با <code>/rollback diff</code></h2>
+<p>پیش از پایبندشدن به بازیابی، ببینید از یک چک‌پوینت به بعد چه تغییری کرده:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان در چت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/rollback diff 1</code></pre>
+</div>
+<p>این یک خلاصهٔ diff stat گیت و سپس دیف واقعی را نشان می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> بازیابی با <code>/rollback</code></h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان در چت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/rollback 1</code></pre>
+</div>
+<p>در پس‌زمینه، هرمس:</p>
+<ol>
+  <li>وجود کامیت هدف را در ذخیره‌گاه سایه‌ای تأیید می‌کند.</li>
+  <li>یک <strong>اسنپ‌شات پیش-بازگشت</strong> از وضعیت فعلی می‌گیرد تا بعداً بتوانید «خنثی‌کردنِ خنثی‌کردن» کنید.</li>
+  <li>فایل‌های ردیابی‌شده را در پوشهٔ کاری شما بازیابی می‌کند — <strong>با حفظ ویرایش‌های دستی‌تان</strong> (پایین را ببینید).</li>
+  <li><strong>آخرین نوبت گفتگو را خنثی می‌کند</strong> تا زمینهٔ ایجنت با وضعیت فایل‌سیستمِ بازیابی‌شده مطابق شود.</li>
+</ol>
+
+<h3>ویرایش‌های دستی کاربر به‌طور پیش‌فرض حفظ می‌شوند</h3>
+<p><code>/rollback &lt;N&gt;</code> فقط فایل‌هایی را بازیابی می‌کند که خود هرمس تغییر داده. هر <code>write_file</code> / ‏<code>patch</code> موفق، هش محتوای فایل را در یک <strong>دفتر نوشتارهای ایجنت</strong> ثبت می‌کند؛ هنگام بازیابی، هر فایلی که محتوای فعلی‌اش دیگر با آخرین چیزی که هرمس نوشته مطابق نباشد (بعدش ویرایشش کرده‌اید، یا هرمس هرگز لمسش نکرده) به‌جای بازنویسی <strong>رد می‌شود</strong> و در خروجی فهرست می‌گردد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>✅ Restored to checkpoint a1b2c3d4: before write_file
+↷ Kept your hand-edits: src/config.py, notes.md
+Use /rollback &lt;N&gt; --all to restore those too.</code></pre>
+</div>
+<p>برای اجبار بازیابی کاملِ کلاسیک که همه‌چیز — شامل ویرایش‌های خودتان — را برمی‌گرداند، ‏<code>--all</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان در چت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/rollback 1 --all</code></pre>
+</div>
+<p>اگر دفتر خالی باشد (ذخیره‌گاهی از پیش از این قابلیت، یا هرمس هنوز در پروژه فایلی ننوشته)، ‏<code>/rollback</code> خودکار به بازیابی کامل برمی‌گردد.</p>
+
+<h3>بازیابی تک‌فایل</h3>
+<p>فقط یک فایل را از یک چک‌پوینت بازیابی کنید بدون اثر بر بقیهٔ پوشه:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان در چت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/rollback 1 src/broken_file.py</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> گاردهای ایمنی و کارایی</h2>
+<ul>
+  <li><strong>موجودیت گیت</strong> — اگر <code>git</code> روی PATH پیدا نشود، چک‌پوینت‌ها شفاف غیرفعال می‌شوند.</li>
+  <li><strong>دامنهٔ پوشه</strong> — هرمس پوشه‌های بیش‌ازحد گسترده را رد می‌کند (ریشهٔ <code>/</code>، ‏خانگی <code>$HOME</code>).</li>
+  <li><strong>حجم مخزن</strong> — پوشه‌های بیش از ۵۰٬۰۰۰ فایل رد می‌شوند.</li>
+  <li><strong>سقف حجم به‌ازای-فایل</strong> — فایل‌های بزرگ‌تر از <code>max_file_size_mb</code> (پیش‌فرض ۱۰ مگابایت) از اسنپ‌شات مستثنی‌اند. جلوی بلعیدن تصادفی دیتاست‌ها، وزن‌های مدل یا رسانه‌های تولیدی را می‌گیرد.</li>
+  <li><strong>سقف حجم کل ذخیره‌گاه</strong> — وقتی ذخیره‌گاه از <code>max_total_size_mb</code> (پیش‌فرض ۵۰۰ مگابایت) بگذرد، قدیمی‌ترین کامیتِ هر پروژه به‌صورت گردشی انداخته می‌شود تا زیر سقف بیاید.</li>
+  <li><strong>هرس واقعی</strong> — ‏<code>max_snapshots</code> با بازنویسی ref به‌ازای-پروژه و اجرای <code>git gc --prune=now</code> بعدش اجرا می‌شود، تا اشیای آزاد انباشته نشوند.</li>
+  <li><strong>اسنپ‌شات‌های بدون-تغییر</strong> — اگر از آخرین اسنپ‌شات تغییری نباشد، چک‌پوینت رد می‌شود.</li>
+  <li><strong>خطاهای غیرکشنده</strong> — همهٔ خطاهای داخل مدیر چک‌پوینت در سطح دیباگ لاگ می‌شوند؛ ابزارهای شما به کار ادامه می‌دهند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> چک‌پوینت‌ها کجا زندگی می‌کنند</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>~/.hermes/checkpoints/
+  ├── store/                 # مخزن گیت bare مشترک واحد
+  │   ├── HEAD, objects/     # داخل‌های گیت (بین پروژه‌ها مشترک)
+  │   ├── refs/hermes/&lt;hash&gt; # نوک شاخه به‌ازای-پروژه
+  │   ├── indexes/&lt;hash&gt;     # اندکس گیت به‌ازای-پروژه
+  │   ├── projects/&lt;hash&gt;.json  # workdir + created_at + last_touch
+  │   └── info/exclude
+  ├── .last_prune            # نشانگر همانیِ هرس خودکار
+  └── legacy-&lt;ts&gt;/           # مخازن سایه‌ای به‌ازای-پروژه از پیش-v2 آرشیو‌شده</code></pre>
+</div>
+<p>هر <code>&lt;hash&gt;</code> از مسیر مطلق پوشهٔ کاری مشتق می‌شود. معمولاً هرگز لازم نیست دستی به این‌ها دست بزنید — به‌جایش از <code>hermes checkpoints status</code> / ‏<code>prune</code> / ‏<code>clear</code> استفاده کنید.</p>
+
+<h3>مهاجرت از v1</h3>
+<p>پیش از بازنویسی v2، هر پوشهٔ کاری مخزن سایه‌ای گیتِ کاملِ خودش را مستقیم زیر <code>~/.hermes/checkpoints/&lt;hash&gt;/</code> می‌گرفت. آن چیدمان نمی‌توانست اشیا را بین پروژه‌ها هم‌پوشانی‌زدایی کند و یک هرس‌کنندهٔ no-op مستند داشت — ذخیره‌گاه بی‌کران رشد می‌کرد.</p>
+<p>در اولین اجرای v2، هر مخزن سایه‌ای پیش-v2 به <code>~/.hermes/checkpoints/legacy-&lt;timestamp&gt;/</code> منتقل می‌شود تا چیدمان تک‌ذخیره‌ایِ جدید تمیز شروع شود. تاریخچهٔ قدیمی <code>/rollback</code> همچنان با بازبینی دستی آرشیو legacy با <code>git</code> در دسترس است؛ وقتی مطمئن شدید لازمش ندارید، اجرا کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes checkpoints clear-legacy</code></pre>
+</div>
+<p>تا فضا پس گرفته شود. آرشیوهای legacy همچنین توسط <code>auto_prune</code> پس از <code>retention_days</code> جاروب می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> بهترین شیوه‌ها</h2>
+<ul>
+  <li><strong>چک‌پوینت‌ها را فقط وقتی لازم‌اند فعال کنید</strong> — ‏<code>hermes chat --checkpoints</code> یا <code>enabled: true</code> به‌ازای-پروفایل.</li>
+  <li><strong>قبل از بازیابی از <code>/rollback diff</code> استفاده کنید</strong> — پیش‌نمایش آنچه تغییر خواهد کرد تا چک‌پوینت درست را بردارید.</li>
+  <li><strong>وقتی فقط می‌خواهید تغییرات ایجنت‌محور را خنثی کنید، به‌جای <code>git reset</code> از <code>/rollback</code> استفاده کنید.</strong></li>
+  <li><strong>اگر چک‌پوینت‌ها را مرتب استفاده می‌کنید، گاهی <code>hermes checkpoints status</code> را چک کنید</strong> — نشان می‌دهد کدام پروژه‌ها فعال‌اند و ذخیره‌گاه چه هزینه‌ای برایتان دارد.</li>
+  <li><strong>برای حداکثر ایمنی با گیت‌ورک‌تری ترکیب کنید</strong> — هر نشست هرمس را در ورک‌تری/شاخهٔ خودش نگه دارید، با چک‌پوینت‌ها به‌عنوان لایهٔ اضافی.</li>
+</ul>
+<p>برای اجرای چند ایجنت موازی روی همان مخزن، به راهنمای «<a href="git-worktrees.html">گیت‌ورک‌تری</a>» مراجعه کنید.</p>
+</section>
+
+<div class="pager">
+  <a href="git-worktrees.html"><span class="dir">→ قبلی</span><span class="ttl">گیت‌ورک‌تری</span></a>
+  <a class="next" href="bot-mode.html"><span class="dir">بعدی ←</span><span class="ttl">حالت بات</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/checkpoints-and-rollback" target="_blank" rel="noopener">Checkpoints &amp; /rollback</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
