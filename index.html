@@ -63,50 +63,76 @@
 </div>
 
 <div class="donate" id="donate">
-  <h2 class="donate-title">☕ از پروژه حمایت کنید</h2>
-  <p class="donate-sub">
-    این مرجع فارسی <strong>رایگان، متن‌باز و بدون تبلیغ</strong> می‌ماند — و سوختش پشتیبانی شماست.
-    اگر این ترجمه برایتان مفید بود، با معادلِ یک فنجان قهوه به ادامهٔ کار انگیزه بدهید:
-    هر حمایت، یعنی صفحات بیشتری برای همهٔ فارسی‌زبانان، سریع‌تر و رایگان‌تر ترجمه می‌شوند. 🙏
-  </p>
-  <div class="donate-cards">
-    <div class="donate-card sol">
-      <div class="chain-icon">◎</div>
-      <h3>سولانا (Solana)</h3>
-      <div class="net">شبکهٔ Solana — کارمزد نامحسوس</div>
-      <div class="tokens"><span class="token-chip">SOL</span><span class="token-chip">USDT</span><span class="token-chip">USDC</span></div>
-      <div class="addr-box">
-        <span class="addr">CjFaNsZLzGHALAkDt2E7cRjeGmPd5iDqE8HKEEu3vYzf</span>
-        <button class="copy-addr">کپی</button>
+  <div class="donate-bg" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+  <div class="donate-inner">
+    <div class="donate-cup" aria-hidden="true">
+      <svg viewBox="0 0 96 96">
+        <defs>
+          <linearGradient id="cupGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#fbbf24"/><stop offset="1" stop-color="#ea580c"/>
+          </linearGradient>
+        </defs>
+        <g class="steam">
+          <path class="st" d="M34 28c0-5 5-5 5-10"/>
+          <path class="st" d="M47 24c0-6 6-6 6-12"/>
+          <path class="st" d="M60 28c0-5 5-5 5-10"/>
+        </g>
+        <path class="cup-body" d="M22 40h52v16c0 11-9 19-20 19h-12c-11 0-20-8-20-19z"/>
+        <path class="handle" d="M74 44h5a9 9 0 0 1 0 18h-5"/>
+        <ellipse class="liquid" cx="48" cy="40" rx="26" ry="4.5"/>
+      </svg>
+    </div>
+    <h2 class="donate-title">از پروژه حمایت کنید</h2>
+    <p class="donate-sub">
+      این مرجع فارسی <strong>رایگان، متن‌باز و بدون تبلیغ</strong> می‌ماند — و سوختش پشتیبانی شماست.
+      اگر این ترجمه برایتان مفید بود، با معادلِ یک فنجان قهوه به ادامهٔ کار انگیزه بدهید:
+      هر حمایت، یعنی صفحات بیشتری برای همهٔ فارسی‌زبانان، سریع‌تر و رایگان‌تر ترجمه می‌شوند. 🙏
+    </p>
+    <div class="donate-cards">
+      <div class="donate-card sol">
+        <div class="chain-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5.1 5.4c.2-.25.5-.4.85-.4h13.3c.63 0 .94.75.5 1.2l-3.1 3.1a1.2 1.2 0 0 1-.85.35H2.5c-.63 0-.94-.75-.5-1.2l3.1-3.05z"/><path d="M5.1 13.65c.22-.25.52-.35.85-.35h13.3c.63 0 .94.75.5 1.2l-3.1 3.1a1.2 1.2 0 0 1-.85.35H2.5c-.63 0-.94-.75-.5-1.2l3.1-3.1z" opacity=".9"/><path d="M18.9 10.4c-.22-.25-.52-.4-.85-.4H4.75c-.63 0-.94.75-.5 1.2l3.1 3.1c.23.23.53.35.85.35H18.4c.63 0 .94-.75.5-1.2l3.1-3.05z" transform="translate(1.3 -5.1)" opacity=".68"/></svg>
+        </div>
+        <h3>سولانا (Solana)</h3>
+        <div class="net">شبکهٔ Solana — کارمزد نامحسوس</div>
+        <div class="tokens"><span class="token-chip">SOL</span><span class="token-chip">USDT</span><span class="token-chip">USDC</span></div>
+        <div class="addr-box">
+          <span class="addr">CjFaNsZLzGHALAkDt2E7cRjeGmPd5iDqE8HKEEu3vYzf</span>
+          <button class="copy-addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>کپی</button>
+        </div>
+      </div>
+      <div class="donate-card eth">
+        <div class="chain-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.8 5.2 12.15 12 16.1l6.8-3.95z" opacity=".95"/><path d="M12 17.9 5.2 13.95 12 23l6.8-9.05z" opacity=".62"/></svg>
+        </div>
+        <h3>اتریوم (Ethereum)</h3>
+        <div class="net">شبکهٔ Ethereum — استاندارد ERC-20</div>
+        <div class="tokens"><span class="token-chip">ETH</span><span class="token-chip">USDT</span><span class="token-chip">USDC</span></div>
+        <div class="addr-box">
+          <span class="addr">0xFc68Bb3F041B1Dd90D3303403Fe7A6da8c7A99E8</span>
+          <button class="copy-addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>کپی</button>
+        </div>
+      </div>
+      <div class="donate-card btc">
+        <div class="chain-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" opacity=".22"/><text x="12" y="16.6" text-anchor="middle" font-size="12.5" font-weight="800" font-family="Arial, sans-serif">₿</text></svg>
+        </div>
+        <h3>بیت‌کوین (Bitcoin)</h3>
+        <div class="net">شبکهٔ Bitcoin — Native SegWit</div>
+        <div class="tokens"><span class="token-chip">BTC</span></div>
+        <div class="addr-box">
+          <span class="addr">bc1qeqd3xn0yxp7peuwlzaqfelepum0zmwk0pkhlmp</span>
+          <button class="copy-addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>کپی</button>
+        </div>
       </div>
     </div>
-    <div class="donate-card eth">
-      <div class="chain-icon">◆</div>
-      <h3>اتریوم (Ethereum)</h3>
-      <div class="net">شبکهٔ Ethereum — استاندارد ERC-20</div>
-      <div class="tokens"><span class="token-chip">ETH</span><span class="token-chip">USDT</span><span class="token-chip">USDC</span></div>
-      <div class="addr-box">
-        <span class="addr">0xFc68Bb3F041B1Dd90D3303403Fe7A6da8c7A99E8</span>
-        <button class="copy-addr">کپی</button>
-      </div>
+    <p class="donate-note">
+      💡 <strong>تتر (USDT) و USDC</strong> روی هر دو شبکهٔ سولانا و اتریوم قابل ارسال است — همان آدرس‌های بالا.
+      حتی <strong>۵ تتر</strong> از یک فنجان قهوه ارزان‌تر نیست، ولی برای ادامهٔ کار دقیقاً به همان اندازه انگیزه می‌دهد.
+    </p>
+    <div class="donate-cta">
+      <a href="#donate">☕ یک قهوه مهمان ما باشید</a>
     </div>
-    <div class="donate-card btc">
-      <div class="chain-icon">₿</div>
-      <h3>بیت‌کوین (Bitcoin)</h3>
-      <div class="net">شبکهٔ Bitcoin — Native SegWit</div>
-      <div class="tokens"><span class="token-chip">BTC</span></div>
-      <div class="addr-box">
-        <span class="addr">bc1qeqd3xn0yxp7peuwlzaqfelepum0zmwk0pkhlmp</span>
-        <button class="copy-addr">کپی</button>
-      </div>
-    </div>
-  </div>
-  <p class="donate-note">
-    💡 <strong>تتر (USDT) و USDC</strong> روی هر دو شبکهٔ سولانا و اتریوم قابل ارسال است — همان آدرس‌های بالا.
-    حتی <strong>۵ تتر</strong> از یک فنجان قهوه ارزان‌تر نیست، ولی برای ادامهٔ کار دقیقاً به همان اندازه انگیزه می‌دهد.
-  </p>
-  <div class="donate-cta">
-    <a href="#donate">☕ یک قهوه مهمان ما باشید</a>
   </div>
 </div>
 
