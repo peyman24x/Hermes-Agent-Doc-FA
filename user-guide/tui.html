@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رابط ترمینال مدرن (TUI) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/tui" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>رابط ترمینال مدرن (TUI)</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>رابط ترمینال مدرن (TUI)</h1>
+<p>TUI فرانت‌اند مدرن هرمس است — یک رابط ترمینالی با همان زمان اجرای پایتونیِ <a href="https://hermes-agent.nousresearch.com/docs/user-guide/cli" target="_blank" rel="noopener">CLI کلاسیک</a>. همان ایجنت، همان نشست‌ها، همان فرمان‌های اسلش؛ یک سطح تمیزتر و پاسخ‌گوتر برای تعامل با آن‌ها.</p>
+<p>این روش توصیه‌شده برای اجرای تعاملی هرمس است.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> اجرا</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># اجرای TUI
+hermes --tui
+
+# ازسرگیری آخرین نشست TUI (به آخرین نشست کلاسیک برمی‌گردد)
+hermes --tui -c
+hermes --tui --continue
+hermes --tui --resume latest
+
+# ازسرگیری نشستی مشخص با شناسه یا عنوان
+hermes --tui -r 20260409_000000_aa11bb
+hermes --tui --resume "my t0p session"
+
+# ازسرگیری آخرین نشست برای پوشهٔ پروژهٔ مشخص
+hermes --tui --resume latest --in ./my-project
+
+# اجرای مستقیم سورس — مرحلهٔ prebuild را رد می‌کند (برای مشارکت‌کنندگان TUI)
+hermes --tui --dev</code></pre>
+</div>
+<p>همچنین می‌توانید با متغیر محیطی فعالش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>export HERMES_TUI=1
+hermes          # حالا از TUI استفاده می‌کند
+hermes chat     # همینطور</code></pre>
+</div>
+<p>یا در <code>~/.hermes/config.yaml</code> پیش‌فرض پایدارش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  interface: tui   # "cli" (پیش‌فرض) یا "tui"</code></pre>
+</div>
+<p>با <code>display.interface: tui</code>، یک <code>hermes</code> ساده (و <code>hermes chat</code>) ‏TUI را راه می‌اندازد. پرچم‌های صریح همیشه می‌برند — ‏<code>hermes --cli</code> را اجرا کنید تا برای یک بار به REPL کلاسیک برگردید، یا <code>hermes --tui</code> / ‏<code>HERMES_TUI=1</code> وقتی پیش‌فرض پیکربندی <code>cli</code> است TUI را اجباری کنید.</p>
+<p>CLI کلاسیک پیش‌فرضِ عرضه‌شده باقی می‌ماند. هر چیزی که در «رابط CLI» مستند شده — فرمان‌های اسلش، فرمان‌های سریع، پیش‌بارگذاری مهارت، شخصیت‌ها، ورودی چندخطی، وقفه‌ها — در TUI یکسان کار می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> چرا TUI</h2>
+<ul>
+  <li><strong>اولین فریم آنی</strong> — بنر پیش از اتمام بارگذاری اپ رسم می‌شود، پس ترمینال هنگام شروع هرمس هرگز منجمد حس نمی‌شود.</li>
+  <li><strong>ورودی غیرمسدودکننده</strong> — پیش از آماده‌شدن نشست تایپ کنید و پیام‌ها را صف کنید. اولین پرامپت شما لحظه‌ای که ایجنت آنلاین شد ارسال می‌شود.</li>
+  <li><strong>اورلی‌های غنی</strong> — انتخاب‌گر مدل، انتخاب‌گر نشست، اعلان‌های تأیید و شفاف‌سازی همه به‌صورت پنل مودال رندر می‌شوند نه جریان‌های درون‌خطی.</li>
+  <li><strong>پنل نشست زنده</strong> — ابزارها و مهارت‌ها هم‌زمان با مقداردهی اولیه تدریجاً پر می‌شوند.</li>
+  <li><strong>انتخاب موس‌دوست</strong> — برای هایلایت بکشید با پس‌زمینهٔ یکدست به‌جای معکوس SGR. با حرکت کپی معمولی ترمینالتان کپی کنید.</li>
+  <li><strong>رندر صفحهٔ جایگزین</strong> — به‌روزرسانی‌های دیفرانسیلی یعنی بدون سوسو هنگام استریم، بدون شلوغی اسکرول‌بک بعد از خروج.</li>
+  <li><strong>تسهیلات کامپوزر</strong> — جمع‌شدنِ درجا برای قطعات بلند پیست‌شده، ‏چسباندن متن با <code>Cmd+V</code> / ‏<code>Ctrl+V</code> با جایگزینِ تصویر-کلیپ‌بورد، ایمنی bracketed-paste و نرمال‌سازی پیوستِ مسیر-فایل/تصویر.</li>
+</ul>
+<p>همان <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skins" target="_blank" rel="noopener">پوسته‌ها</a> و <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/personality" target="_blank" rel="noopener">شخصیت‌ها</a> اعمال می‌شوند. وسط نشست عوضشان کنید با <code>/skin ares</code>، ‏<code>/personality pirate</code>، و UI زنده دوباره رنگ می‌شود.</p>
+
+<h3>بخش‌های تاشوی بنر</h3>
+<p>بنر شروع TUI اطلاعات اجرا را در چهار بخش تاشو گروه می‌کند، هر کدام با شورون <code>▸</code> / ‏<code>▾</code> کنار عنوان بخش:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>بخش</th><th>وضعیت پیش‌فرض</th></tr></thead>
+  <tbody>
+    <tr><td>ابزارها</td><td>باز</td></tr>
+    <tr><td>مهارت‌ها</td><td>جمع‌شده</td></tr>
+    <tr><td>پرامپت سیستمی</td><td>جمع‌شده</td></tr>
+    <tr><td>سرورهای MCP</td><td>جمع‌شده</td></tr>
+  </tbody>
+</table>
+</div>
+<p>روی هر جای سرصفحهٔ بخش (یا شورونش) کلیک کنید تا تغییر کند. فهرست ابزارها به‌طور پیش‌فرض باز است چون پرمراجعه‌ترین بخش در شروع نشست است؛ مهارت‌ها، پرامپت سیستمی و سرورهای MCP به‌طور پیش‌فرض جمع می‌شوند تا بنر حتی وقتی ده‌ها مهارت نصب کرده‌اید یا سرورهای MCP زیادی وصل کرده‌اید فشرده بماند. وضعیت محلیِ همین نمونهٔ بنر است، پس اجرای بعدی به پیش‌فرض‌ها برمی‌گردد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> نیازمندی‌ها</h2>
+<ul>
+  <li><strong>Node.js</strong> ≥ نسخهٔ ۲۰ — ‏TUI به‌صورت زیرپروسه‌ای که از CLI پایتونی راه‌اندازی شده اجرا می‌شود. <code>hermes doctor</code> این را تأیید می‌کند.</li>
+  <li><strong>TTY</strong> — مثل CLI کلاسیک، پایپ‌کردن stdin یا اجرای در محیط‌های غیرتعاملی به حالت تک-کوئری برمی‌گردد.</li>
+</ul>
+<p>در اولین اجرا هرمس وابستگی‌های Node مربوط به TUI را در <code>ui-tui/node_modules</code> نصب می‌کند (یک‌باره، چند ثانیه). اجراهای بعدی سریع‌ند. اگر نسخهٔ جدیدی از هرمس بکشید، باندل TUI وقتی سورس‌ها جدیدتر از dist باشند خودکار دوباره بیلد می‌شود.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 روی ورک‌تری‌های گیت کار می‌کنید؟</div>
+  <p>مشارکت‌کنندگانی که <code>hermes --tui --dev</code> را از چند ورک‌تری اجرا می‌کنند می‌توانند به‌جای نصب به‌ازای-چک‌اوت، یک <code>node_modules</code> مشترک داشته باشند — به «<a href="https://hermes-agent.nousresearch.com/docs/developer-guide/worktree-ui-dev" target="_blank" rel="noopener">TUI و دسکتاپ از Worktreeها</a>» مراجعه کنید.</p>
+</div>
+
+<h3>پربیلد بیرونی</h3>
+<p>توزیع‌هایی که باندل از-پیش-ساخته عرضه می‌کنند (‏Nix، پکیج‌های سیستمی) می‌توانند هرمس را به آن اشاره دهند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>export HERMES_TUI_DIR=/path/to/prebuilt/ui-tui
+hermes --tui</code></pre>
+</div>
+<p>پوشه باید <code>dist/entry.js</code> داشته باشد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> کلیدهای میان‌بر</h2>
+<p>میان‌برها دقیقاً مطابق <a href="https://hermes-agent.nousresearch.com/docs/user-guide/cli#keybindings" target="_blank" rel="noopener">CLI کلاسیک</a> هستند. تنها تفاوت‌های رفتاری:</p>
+<ul>
+  <li><strong>کشیدن با موس</strong> متن را با پس‌زمینهٔ انتخابِ یکدست هایلایت می‌کند.</li>
+  <li><strong><code>Cmd+V</code> / ‏<code>Ctrl+V</code></strong> اول چسباندن متنی عادی را امتحان می‌کند، بعد به خواندن‌های OSC52/کلیپ‌بورد بومی برمی‌گردد، و در نهایت وقتی کلیپ‌بورد یا محتوای پیست‌شده به تصویر حل شود، پیوست تصویر.</li>
+  <li><strong><code>/terminal-setup</code></strong> اتصالات ترمینال محلی VS Code / ‏Cursor / ‏Windsurf را برای <code>Cmd+Enter</code> بهتر و هم‌ارزی undo/redo در مک نصب می‌کند.</li>
+  <li><strong>تکمیل‌خودکار اسلش</strong> به‌صورت پنل شناور با توضیحات باز می‌شود، نه دراپ‌داون درون‌خطی.</li>
+  <li><strong><code>Ctrl+X</code></strong> سوییچر نشست زنده را باز می‌کند. وقتی پیامِ صف‌شده‌ای هایلایت است (ارسال‌شده حین اجرای ایجنت)، به‌جایش همان پیام صف‌شده را حذف می‌کند. <strong><code>Esc</code></strong> ویرایش را لغو و هایلایت را برمی‌دارد بدون حذف.</li>
+  <li><strong><code>Ctrl+G</code> / ‏<code>Ctrl+X Ctrl+E</code></strong> — بافر ورودی فعلی را در <code>$EDITOR</code> باز می‌کنند برای نگارش چندخطی/پرامپت‌های بلند؛ ذخیره-و-خروج محتوا را به‌عنوان پرامپت پس می‌فرستد.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> فرمان‌های اسلش</h2>
+<p>همهٔ فرمان‌های اسلش بدون تغییر کار می‌کنند. چند تا متعلق به TUI‌اند — خروجی غنی‌تری تولید می‌کنند یا به‌صورت اورلی رندر می‌شوند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرمان</th><th>رفتار TUI</th></tr></thead>
+  <tbody>
+    <tr><td><code>/help</code></td><td>اورلی با فرمان‌های دسته‌بندی‌شده، قابل ناوبری با کلیدهای جهت</td></tr>
+    <tr><td><code>/sessions</code> (نام‌مستقل <code>/switch</code>)</td><td>سوییچر نشست زنده — فهرست نشست‌های باز TUI، جابه‌جایی بینشان، بستنشان یا شروع یکی دیگر</td></tr>
+    <tr><td><code>/model</code></td><td>انتخاب‌گر مودالِ مدلِ گروه‌بندی‌شده بر اساس ارائه‌دهنده، با اشاره‌های هزینه</td></tr>
+    <tr><td><code>/skin</code></td><td>پیش‌نمایش زنده — تغییر تم هم‌زمان با مرور اعمال می‌شود</td></tr>
+    <tr><td><code>/details</code></td><td>تغییر حالت جزئیات فراخوانی ابزار (سراسری یا به‌ازای-بخش)</td></tr>
+    <tr><td><code>/usage</code></td><td>پنل غنی توکن / هزینه / زمینه</td></tr>
+    <tr><td><code>/agents</code> (نام‌مستقل <code>/tasks</code>)</td><td>اورلی مشاهده‌پذیری — درخت زندهٔ ساب‌ایجنت با کنترل‌های کشتن/توقف، جمع‌های هزینه/توکن/فایل به‌ازای-شاخه، تاریخچهٔ نوبت‌به‌نوبت</td></tr>
+    <tr><td><code>/reload</code></td><td><code>~/.hermes/.env</code> را در پروسهٔ در حال اجرای TUI دوباره می‌خواند تا کلیدهای API تازه‌اضافه‌شده بدون ری‌استارت اثر کنند</td></tr>
+    <tr><td><code>/mouse [on|off|toggle|wheel|buttons|all]</code></td><td>انتخاب یک پیش‌تنظیم ردیابی موس در زمان اجرا (همچنین در <code>display.mouse_tracking</code> در config.yaml ماندگار می‌شود). <code>wheel</code> ‏(1000+1006) اسکرول با چرخ را بدون رویدادهای hover نگه می‌دارد — همان‌هایی که در tmux باعث اسپمِ «No image in clipboard» روی سطر پرامپت می‌شوند؛ ‏<code>buttons</code> کشیدن-برای-انتخاب را اضافه می‌کند؛ ‏<code>all</code> پیش‌فرض با UI مبتنی-بر-hover.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>هر فرمان اسلش دیگر (شامل مهارت‌های نصب‌شده، فرمان‌های سریع و سوییچ‌های شخصیت) دقیقاً مثل CLI کلاسیک کار می‌کند. به «مرجع فرمان‌های اسلش» مراجعه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> سوییچر نشست زنده</h2>
+<p>وقتی می‌خواهید یک ترمینال نقش دیسپچرِ چند نشست TUI را بازی کند از سوییچر نشست زنده استفاده کنید. فقط نشست‌هایی که الان در همین پروسهٔ TUI زنده‌اند را فهرست می‌کند؛ نشست‌های بسته رونوشت‌های ذخیره‌شده باقی می‌مانند و همچنان با <code>/resume</code> یا <code>hermes --tui --resume &lt;id-or-title&gt;</code> بازگشتنی‌اند.</p>
+<p>با هر کدام از این‌ها بازش کنید:</p>
+<ul>
+  <li><code>Ctrl+X</code> از داخل TUI.</li>
+  <li><code>/sessions</code> یا <code>/switch</code>.</li>
+  <li><code>/sessions new</code> برای ساخت فوری نشست زندهٔ تازه.</li>
+  <li>کلیک روی شمارندهٔ <code>N live sessions</code> در خط وضعیت.</li>
+</ul>
+<p>داخل سوییچر:</p>
+<ul>
+  <li><code>↑</code> / ‏<code>↓</code> جابه‌جایی انتخاب؛ کلیک موس هم سطرها را انتخاب می‌کند.</li>
+  <li><code>Enter</code> به نشست زندهٔ انتخاب‌شده سوییچ می‌کند.</li>
+  <li><code>Ctrl+D</code> نشست زندهٔ انتخاب‌شده را می‌بندد.</li>
+  <li><code>Ctrl+N</code> یک نشست زندهٔ خالی شروع می‌کند.</li>
+  <li><code>Ctrl+R</code> فهرست نشست‌های زنده را نوسازی می‌کند.</li>
+  <li><code>Esc</code> سوییچر را می‌بندد.</li>
+  <li><code>+new</code> را انتخاب کنید، پرامپتی تایپ و <code>Enter</code> بزنید تا نشست زندهٔ جدیدی اعزام شود. اول <code>Tab</code> را بزنید اگر می‌خواهید فقط برای همان نشست جدید مدلی انتخاب کنید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> رندر ریاضی LaTeX</h2>
+<p>خط لولهٔ مارک‌داون TUI ریاضی LaTeX را درون‌خطی رندر می‌کند: <code>$E = mc^2$</code> و <code>$$\frac{a}{b}$$</code> به‌جای سورس خام TeX به‌صورت ریاضیِ قالب‌بندی‌شده-با-یونیکد نمایش می‌یابند. برای ریاضی درون‌خطی و بلوکی کار می‌کند؛ نگارش پشتیبانی‌نشده به نمایش تحت‌اللفظی TeX در یک code span برمی‌گردد تا قابل‌کپی بماند.</p>
+<p>این همیشه-روشن است — چیزی برای پیکربندی نیست. CLI کلاسیک TeX خام را نگه می‌دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> تشخیص ترمینال روشن</h2>
+<p>TUI ترمینال‌های روشن را خودکار تشخیص و متناسب به تم روشن سوییچ می‌کند. تشخیص در سه لایه کار می‌کند:</p>
+<ol>
+  <li>متغیر محیطی <code>HERMES_TUI_THEME</code> — بالاترین اولویت. مقادیر: <code>light</code>، ‏<code>dark</code>، یا هگز ۶ کاراکتری خام پس‌زمینه (مثلاً <code>ffffff</code>، ‏<code>1a1a2e</code>).</li>
+  <li>متغیر محیطی <code>COLORFGBG</code> — اشارهٔ کلاسیکِ «رنگ پس‌زمینه‌ام چیست؟» که ترمینال‌های مشتق-از-xterm استفاده می‌کنند.</li>
+  <li>کاو زیرزمینهٔ ترمینال با OSC 11 — روی ترمینال‌های مدرن‏ (Ghostty، ‏Warp، ‏iTerm2، ‏WezTerm، ‏Kitty) که <code>COLORFGBG</code> را نمی‌گذارند کار می‌کند.</li>
+</ol>
+<p>اگر تم روشن را صرف‌نظر از ترمینال همیشگی می‌خواهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>export HERMES_TUI_THEME=light</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> سبک‌های نشانگر مشغولیت</h2>
+<p>نشانگر مشغولیت نوار وضعیت افزونه‌پذیر است — پیش‌فرض هر ۲.۵ ثانیه در حین کار ایجنت از پالت چهره‌های کاوایی هرمس می‌چرخد. سبک دیگری را با پیکربندی یا فرمان اسلش <code>/indicator</code> بردارید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  tui_status_indicator: kaomoji   # kaomoji | emoji | unicode | ascii</code></pre>
+</div>
+<p>یا در نشست: <code>/indicator emoji</code> (و غیره). سبک‌ها با عرض‌های گلیف منطبق عرضه می‌شوند تا باقی نوار وضعیت هنگام چرخش نلرزد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> ازسرگیری خودکار</h2>
+<p>به‌طور پیش‌فرض <code>hermes --tui</code> در هر اجرا نشست تازه‌ای شروع می‌کند. برای اتصال مجدد خودکار به جدیدترین نشست TUI‏ (مفید وقتی ترمینال یا اتصال SSH‌تان غیرمنتظره قطع می‌شود)، فعالش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>export HERMES_TUI_RESUME=1          # جدیدترین نشست TUI
+# یا:
+export HERMES_TUI_RESUME=&lt;session-id&gt;   # نشست مشخص</code></pre>
+</div>
+<p>برای ابطال به‌ازای-اجرا، متغیر را حذف یا <code>--resume &lt;id&gt;</code> را صریح بدهید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> خط وضعیت</h2>
+<p>خط وضعیت TUI وضعیت ایجنت را در زمان واقعی دنبال می‌کند:</p>
+<p>پس از نام‌گذاری نشست، عنوانش به‌صورت نشانِ رنگ-تأکیدی در لبهٔ دور سطر وضعیت ظاهر می‌شود. عنوان جای برچسب ورک‌اسپیس را می‌گیرد و روی ترمینال‌های باریک بریده می‌شود.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>وضعیت</th><th>معنا</th></tr></thead>
+  <tbody>
+    <tr><td><code>starting agent…</code></td><td>شناسهٔ نشست زنده است؛ ابزارها و مهارت‌ها هنوز در حال آنلاین‌شدن‌اند. می‌توانید تایپ کنید — پیام‌ها صف می‌شوند و وقتی آماده شد ارسال.</td></tr>
+    <tr><td><code>ready</code></td><td>ایجنت بیکار است و ورودی می‌پذیرد.</td></tr>
+    <tr><td><code>thinking…</code> / <code>running…</code></td><td>ایجنت در حال استدلال یا اجرای ابزار است.</td></tr>
+    <tr><td><code>interrupted</code></td><td>نوبت فعلی لغو شد؛ برای ارسال مجدد Enter بزنید.</td></tr>
+    <tr><td><code>forging session…</code> / <code>resuming…</code></td><td>اتصال اولیه یا دست‌دادنِ <code>--resume</code>.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>رنگ‌ها و آستانه‌های نوار وضعیت به‌ازای-پوسته با CLI کلاسیک مشترک‌اند — برای سفارشی‌سازی به «پوسته‌ها» مراجعه کنید.</p>
+<p>خط وضعیت همچنین نشان می‌دهد:</p>
+<ul>
+  <li><strong>پوشهٔ کاری با شاخهٔ گیت</strong> — ‏<code>~/projects/hermes-agent (docs/two-week-gap-sweep)</code>. پسوند شاخه وقتی در ترمینال کناری <code>git checkout</code> بزنید نوسازی می‌شود (کش mtime) تا TUI شاخهٔ فعالِ واقعی‌تان را بازتاب دهد نه چیزی که هنگام اجرا بود.</li>
+  <li><strong>زمان سپری‌شده به‌ازای-پرامپت</strong> — ‏<code>⏱ 12s/3m 45s</code> حین اجرای نوبت (زنده)، بعد از اتمام نوبت منجمد به <code>⏲ 32s / 3m 45s</code>. عدد اول زمان از آخرین پیام کاربر است؛ دومی کل مدت نشست. با هر پرامپت جدید ریست می‌شود.</li>
+  <li><strong><code>🗜️ N</code></strong> — تعداد دفعات فشرده‌سازی خودکار نشستِ در حال اجرا. با اولین فشرده‌سازی ظاهر می‌شود.</li>
+  <li><strong><code>▶ N</code></strong> — تعداد کارهای <code>/background</code>ِ در حال اجرا در این نشست. هر وقت حداقل یک کار در پرواز باشد ظاهر می‌شود.</li>
+  <li><strong><code>⚠ YOLO</code></strong> — هشدار دیدنی هر وقت حالت YOLO روشن است‏ (<code>hermes --yolo</code>، ‏<code>/yolo</code> یا <code>HERMES_YOLO_MODE=1</code>). همان نشان در بنر شروع هم ظاهر می‌شود تا نتوانید نشستِ خودتأیید را بدون توجه اجرا کنید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> پیکربندی</h2>
+<p>TUI به همهٔ پیکربندی استاندارد هرمس احترام می‌گذارد: <code>~/.hermes/config.yaml</code>، پروفایل‌ها، شخصیت‌ها، پوسته‌ها، فرمان‌های سریع، استخرهای اعتبارنامه، ارائه‌دهندگان حافظه، فعال‌سازی ابزار/مهارت. هیچ فایل پیکربندی مخصوص TUI وجود ندارد.</p>
+<p>مشتی کلید مخصوصاً سطح TUI را تنظیم می‌کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  skin: default              # هر پوستهٔ داخلی یا سفارشی
+  personality: helpful
+  details_mode: collapsed    # hidden | collapsed | expanded — پیش‌فرض سراسری آکاردئون
+  sections:                  # اختیاری: بازنویسی به‌ازای-بخش (هر زیرمجموعه)
+    thinking: expanded       # همیشه باز
+    tools: expanded          # همیشه باز
+    activity: collapsed      # بازگرداندن پنل فعالیت (پیش‌فرض مخفی)
+  mouse_tracking: all        # off | wheel | buttons | all (یا true/false برای سازگاری).
+                             #   wheel   — 1000+1006 (اسکرول + کلیک؛ بدون درگ، بدون hover —
+                             #             داخل tmux توصیه می‌شود تا اسپم «No image in
+                             #             clipboard» سطر پرامپت از رویدادهای hover ساکت شود)
+                             #   buttons — 1002 را برای انتخاب-کشیدی سمت ترمینال اضافه می‌کند
+                             #   all     — 1003 را برای hover اضافه می‌کند (صفحه‌بندی-اسکرول‌بار
+                             #             هنگام hover، mouseenter لینک و غیره)</code></pre>
+</div>
+<p>کلیدهای زمان اجرا:</p>
+<ul>
+  <li><code>/details [hidden|collapsed|expanded|cycle]</code> — تنظیم حالت سراسری</li>
+  <li><code>/details &lt;section&gt; [hidden|collapsed|expanded|reset]</code> — بازنویسی یک بخش
+    (بخش‌ها: <code>thinking</code>، ‏<code>tools</code>، ‏<code>subagents</code>، ‏<code>activity</code>)</li>
+</ul>
+<p><strong>دیدبانی پیش‌فرض</strong></p>
+<p>TUI با پیش‌فرض‌های نظرمحورِ به‌ازای-بخش عرضه می‌شود که نوبت را به‌جای دیواری از شورون به‌صورت رونوشت زنده استریم می‌کنند:</p>
+<ul>
+  <li><code>thinking</code> — <strong>باز</strong>. استدلال هم‌زمان با انتشار مدل درون‌خطی استریم می‌شود.</li>
+  <li><code>tools</code> — <strong>باز</strong>. فراخوانی‌های ابزار و نتایجشان باز رندر می‌شوند.</li>
+  <li><code>subagents</code> — به <code>details_mode</code> سراسری سقوط می‌کند (پیش‌فرض زیر شورون جمع — تا وقتی واگذاری واقعاً اتفاق بیفتد ساکت می‌ماند).</li>
+  <li><code>activity</code> — <strong>مخفی</strong>. فرادادهٔ محیطی (راهنماهای گیت‌وی، یادآورهای هم‌ارزی ترمینال، اعلان‌های پس‌زمینه) برای اغلب استفادهٔ روزمره نویز است. شکست‌های ابزار همچنان درون‌خطی روی سطر ابزارِ شکست‌خورده رندر می‌شوند؛ خطا/هشدارهای محیطی از طریق پشتیبان هشدار-شناور وقتی هر پنل مخفی است ظاهر می‌شوند.</li>
+</ul>
+<p>بازنویسی‌های به‌ازای-بخش بر هم پیش‌فرض بخش و هم <code>details_mode</code> سراسری مقدم‌اند. برای بازآرایی چیدمان:</p>
+<ul>
+  <li><code>display.sections.thinking: collapsed</code> — برگرداندن thinking زیر شورون</li>
+  <li><code>display.sections.tools: collapsed</code> — برگرداندن فراخوانی ابزار زیر شورون</li>
+  <li><code>display.sections.activity: collapsed</code> — بازگرداندن پنل فعالیت</li>
+  <li><code>/details &lt;section&gt; &lt;mode&gt;</code> در زمان اجرا</li>
+</ul>
+<p>هر چیزی که صریحاً در <code>display.sections</code> تنظیم شود بر پیش‌فرض‌ها مقدم است، پس پیکربندی‌های موجود بدون تغییر کار می‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> نشست‌ها</h2>
+<p>نشست‌ها بین TUI و CLI کلاسیک مشترک‌اند — هر دو به همان <code>~/.hermes/state.db</code> می‌نویسند. می‌توانید نشست را در یکی شروع و در دیگری ازسر بگیرید. انتخاب‌گر نشست، نشست‌های هر دو منبع را با برچسب منشأ ظاهر می‌کند.</p>
+<p>برای چرخهٔ حیات، جستجو، فشرده‌سازی و صادرات به «<a href="sessions.html">نشست‌ها</a>» مراجعه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> TUI چگونه با گیت‌وی خودش حرف می‌زند</h2>
+<p>به‌طور پیش‌فرض TUI گیت‌وی درون-پروسهٔ خودش را تولید می‌کند، پس هر نمونهٔ TUI خودبسنده است — چیزی برای پیکربندی نیست.</p>
+<p>ممکن است متغیر محیطی <code>HERMES_TUI_GATEWAY_URL</code> را در کدبیس یا لاگ‌ها ببینید. این یک <strong>جزئیات سیم‌کشی داخلیِ داشبورد وب</strong> است، نه یک پیچ اتصال-راهنِ رو-به-کاربر. وقتی تب «Chat» داشبورد را باز می‌کنید‏ (<code>hermes dashboard</code> ← ‏<code>/chat</code>)، وب‌سرور داشبورد یک پروسهٔ فرزند TUIِ جاسازی‌شده تولید و <code>HERMES_TUI_GATEWAY_URL</code> را تزریق می‌کند تا آن فرزند به <code>tui_gateway</code> درون-پروسهٔ خود داشبورد روی یک WebSocket لوپ‌بک‏ (<code>/api/ws</code>) وصل شود. اندپوینت <code>/api/ws</code> فقط داخل سرور داشبورد‏ (<code>hermes_cli/web_server.py</code>) وجود دارد و به عمر پروسه و احراز همان فرآیند بسته است.</p>
+<p>حالت عمومیِ «اشارهٔ هر TUI به هر پورت گیت‌وی مستقلی» وجود ندارد. به‌طور خاص، سرور API سازگار با OpenAI‏ (<code>hermes gateway</code> / پلتفرم <code>api_server</code>) ‏<code>/api/ws</code> سرو <strong>نمی‌کند</strong> — سطح بک‌اند-مدل است‏ (<code>/v1/chat/completions</code>، ‏<code>/v1/models</code>، …) و عمداً کانال کنترل JSON-RPC مربوط به TUI را عرضه نمی‌کند. تنظیم <code>HERMES_TUI_GATEWAY_URL</code> روی آن پورت ۴۰۴ می‌گیرد.</p>
+<p>اگر می‌خواهید چند سطح یک مجموعه نشست را به اشتراک بگذارند، از <code>~/.hermes/state.db</code> مشترک استفاده کنید (به «<a href="sessions.html">نشست‌ها</a>») یا چت جاسازی‌شدهٔ داشبورد وب — نه یک URL گیت‌وی دست‌کار.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> بازگشت به CLI کلاسیک</h2>
+<p>اجرای <code>hermes</code> (بدون <code>--tui</code>) به‌طور پیش‌فرض روی CLI کلاسیک می‌ماند. برای اینکه ماشینی TUI را ترجیح دهد، <code>display.interface: tui</code> را در <code>~/.hermes/config.yaml</code> بگذارید (پایدار) یا <code>HERMES_TUI=1</code> در پروفایل شل (به‌ازای-شل). برای برگشتن، <code>interface: cli</code> / حذف متغیر، یا برای یک‌بار <code>hermes --cli</code>.</p>
+<p>اگر TUI اجرا نشود (نبود Node، باندل مفقود، مشکل TTY)، هرمس یک تشخیص چاپ و بازمی‌گردد — به‌جای اینکه گیرتان بیندازد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> همچنین ببینید</h2>
+<ul>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/cli" target="_blank" rel="noopener">رابط CLI</a> — مرجع کامل فرمان‌های اسلش و میان‌برها (مشترک)</li>
+  <li><a href="sessions.html">نشست‌ها</a> — ازسرگیری، انشعاب و تاریخچه</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skins" target="_blank" rel="noopener">پوسته‌ها و تم‌ها</a> — رنگ‌آمیزی بنر، نوار وضعیت و اورلی‌ها</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/voice-mode" target="_blank" rel="noopener">حالت صوتی</a> — در هر دو رابط کار می‌کند</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/configuration" target="_blank" rel="noopener">پیکربندی</a> — همهٔ کلیدهای پیکربندی</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="bot-mode.html"><span class="dir">→ قبلی</span><span class="ttl">حالت بات</span></a>
+  <a class="next" href="sessions.html"><span class="dir">بعدی ←</span><span class="ttl">نشست‌ها</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/tui" target="_blank" rel="noopener">TUI</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

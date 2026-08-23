@@ -12,7 +12,7 @@ window.HERMES_NAV = [
 ]},
 { id:"user-guide", cat:"⚙️ کار با Hermes", pages:[
   { p:"user-guide/cli.html",                        t:"رابط خط فرمان (CLI)",              d:0 },
-  { p:"user-guide/tui.html",                        t:"رابط ترمینال مدرن (TUI)",          d:0 },
+  { p:"user-guide/tui.html",                        t:"رابط ترمینال مدرن (TUI)",          d:1 },
   { p:"user-guide/configuration.html",              t:"پیکربندی (config.yaml)",           d:0 },
   { p:"user-guide/configuring-models.html",         t:"پیکربندی مدل‌ها",                   d:0 },
   { p:"user-guide/sessions.html",                   t:"نشست‌ها",                           d:1 },
@@ -21,7 +21,7 @@ window.HERMES_NAV = [
   { p:"user-guide/docker.html",                     t:"اجرای داکر",                        d:1 },
   { p:"user-guide/security.html",                   t:"امنیت",                             d:1 },
   { p:"user-guide/checkpoints-and-rollback.html",   t:"چک‌پوینت و بازگشت",                 d:0 },
-  { p:"user-guide/bot-mode.html",                   t:"حالت بات (Bot Mode)",              d:0 },
+  { p:"user-guide/bot-mode.html",                   t:"حالت بات (Bot Mode)",              d:1 },
   { p:"user-guide/desktop.html",                    t:"اپلیکیشن دسکتاپ",                   d:0 },
   { p:"user-guide/egress.html",                     t:"پروکسی خروجی (Egress)",            d:0 },
   { p:"user-guide/egress/iron-proxy.html",          t:"پروکسی iron (تزریق اعتبارنامه)",   d:0 },
