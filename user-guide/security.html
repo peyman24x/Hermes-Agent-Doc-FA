@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>امنیت — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/security" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>امنیت</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>امنیت</h1>
+<p>هرمس ایجنت با مدل امنیتیِ دفاع-در-عمق طراحی شده است. این صفحه همهٔ مرزهای امنیتی را پوشش می‌دهد — از تأیید فرمان تا ایزوله‌سازی کانتینر و مجوز کاربر روی پلتفرم‌های پیام‌رسانی.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نمای کلی</h2>
+<p>مدل امنیتی هشت لایه دارد:</p>
+<ol>
+  <li><strong>مجوز کاربر</strong> — چه کسی می‌تواند با ایجنت حرف بزند (فهرست‌های مجاز، جفت‌سازی DM)</li>
+  <li><strong>تأیید فرمان خطرناک</strong> — انسان-در-حلقه برای عملیات مخرب</li>
+  <li><strong>ایمنی نوشتن فایل</strong> — فهرست رد و سندباکس اختیاری نوشتن برای <code>write_file</code>/<code>patch</code></li>
+  <li><strong>ایزوله‌سازی کانتینر</strong> — سندباکس داکر/Singularity/Modal با تنظیمات سخت‌شده</li>
+  <li><strong>فیلتر اعتبارنامهٔ MCP</strong> — ایزوله‌سازی متغیرهای محیطی زیرپروسه‌های MCP</li>
+  <li><strong>اسکن فایل‌های زمینه</strong> — تشخیص تزریق پرامپت در فایل‌های پروژه</li>
+  <li><strong>ایزوله‌سازی بین-نشستی</strong> — نشست‌ها نمی‌توانند به داده یا وضعیت هم دسترسی داشته باشند؛ مسیرهای ذخیره‌گاه کارهای کرونی در برابر حملات پیمایش-مسیر سخت‌ شده‌اند</li>
+  <li><strong>پاک‌سازی ورودی</strong> — پارامترهای پوشهٔ کاری در بک‌اندهای ابزار ترمینال با فهرست مجاز اعتبارسنجی می‌شوند تا از تزریق شل جلوگیری شود</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> تأیید فرمان خطرناک</h2>
+<p>پیش از اجرای هر فرمانی، هرمس آن را با فهرستی گزینش‌شده از الگوهای خطرناک تطبیق می‌دهد. اگر تطبیقی یافت شود، کاربر باید صریحاً آن را تأیید کند.</p>
+
+<h3>حالت‌های تأیید</h3>
+<p>سیستم تأیید سه حالت دارد که با <code>approvals.mode</code> در <code>~/.hermes/config.yaml</code> پیکربندی می‌شوند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>approvals:
+  mode: smart                     # smart | manual | off
+  timeout: 300                    # ثانیهٔ انتظار برای پاسخ کاربر (پیش‌فرض: 300)
+  cron_mode: deny                 # deny | approve — رفتار کارهای کرونی هنگای برخورد با فرمان خطرناک
+  single_query_mode: deny         # deny | approve — رفتار نشست‌های تک-کوئری (-q) با فرمان خطرناک
+  mcp_reload_confirm: true        # /reload-mcp پیش از بی‌اعتبارکردن کش ابزار MCP می‌پرسد
+  destructive_slash_confirm: true # /clear، /new، /reset، /undo پیش از دورریختن وضعیت می‌پرسند</code></pre>
+</div>
+<p>مجموعهٔ کامل کلیدها:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید</th><th>پیش‌فرض</th><th>چه چیزی را کنترل می‌کند</th></tr></thead>
+  <tbody>
+    <tr><td><code>mode</code></td><td><code>smart</code></td><td>سیاست تأیید فرمان‌های شلی خطرناک — جدول پایین.</td></tr>
+    <tr><td><code>timeout</code></td><td><code>300</code></td><td>ثانیه‌هایی که هرمس برای پاسخ تأیید صبر می‌کند پیش از تایم‌اوت.</td></tr>
+    <tr><td><code>cron_mode</code></td><td><code>deny</code></td><td>رفتار <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/cron" target="_blank" rel="noopener">کارهای کرونی</a> به‌صورت بدون-سرپرست وقتی به اعلان فرمان خطرناک می‌خورند. <code>deny</code> فرمان را مسدود می‌کند (ایجنت باید مسیر دیگری بیابد)؛ <code>approve</code> در زمینهٔ کرون همه‌چیز را خودکار تأیید می‌کند.</td></tr>
+    <tr><td><code>single_query_mode</code></td><td><code>deny</code></td><td>رفتار نشست‌های یک‌بارهٔ <code>hermes chat -q</code> وقتی به اعلان فرمان خطرناک می‌خورند. نشست <code>-q</code> یک نوبت اجرا و بدون کاربری که اعلان را پاسخ دهد خارج می‌شود؛ <code>deny</code> مسدود می‌کند، <code>approve</code> در زمینهٔ تک-کوئری همه‌چیز را خودکار تأیید می‌کند. آینهٔ <code>cron_mode</code>.</td></tr>
+    <tr><td><code>mcp_reload_confirm</code></td><td><code>true</code></td><td>وقتی true، <code>/reload-mcp</code> پیش از بازسازی مجموعهٔ ابزار MCP می‌پرسد. بازسازی کش پرامپت ارائه‌دهنده را بی‌اعتبار می‌کند (طرحواره‌های ابزار در پرامپت سیستمی‌اند)، پس پیام بعدی کل توکن‌های ورودی را دوباره می‌فرستد. کاربرانی که «همیشه تأیید» را می‌زنند این کلید را <code>false</code> می‌کنند.</td></tr>
+    <tr><td><code>destructive_slash_confirm</code></td><td><code>true</code></td><td>وقتی true، فرمان‌های اسلشِ مخربِ نشست‏ (<code>/clear</code>، <code>/new</code>، <code>/reset</code>، <code>/undo</code>) پیش از دورریختن وضعیت گفتگو می‌پرسند. دیالوگ سه‌گزینه‌ای (تأیید یک‌بار / همیشه / لغو) که روی تلگرام، دیسکورد و اسلک از دکمه‌های بومی بله/خیر عبور می‌کند؛ در جای دیگر متنی. TUI هم این تنظیم را برای مودال <code>/clear</code>، <code>/new</code> و <code>/reset</code> خود رعایت می‌کند؛ <code>HERMES_TUI_NO_CONFIRM=1</code> صرف‌نظر از مقدار پیکربندی، آن مودال را به‌زور رد می‌کند.</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>حالت</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><strong>smart</strong> (پیش‌فرض)</td><td>از یک LLM کمکی برای ارزیابی ریسک استفاده می‌کند. فرمان‌های کم‌ریسک (مثلاً <code>python -c "print('hello')"</code>) فقط برای همان فرمان خودکار تأیید می‌شوند. فرمان‌های واقعاً خطرناک خودکار رد می‌شوند. موارد نامطمئن به اعلان دستی ارجاع می‌شوند.</td></tr>
+    <tr><td><strong>manual</strong></td><td>همیشه برای فرمان‌های خطرناک از کاربر تأیید می‌پرسد.</td></tr>
+    <tr><td><strong>off</strong></td><td>همهٔ بررسی‌های تأیید خاموش — معادل اجرا با <code>--yolo</code>. همهٔ فرمان‌ها بدون اعلان اجرا می‌شوند.</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p><code>approvals.mode: off</code> همهٔ اعلان‌های امنیتی را خاموش می‌کند. فقط در محیط‌های مطمئن استفاده کنید (CI/CD، کانتینرها و غیره).</p>
+</div>
+
+<h3>حالت YOLO</h3>
+<p>حالت YOLO <strong>همهٔ</strong> اعلان‌های تأیید فرمان خطرناک را برای نشست فعلی دور می‌زند. سه راه فعال‌سازی دارد:</p>
+<ol>
+  <li><strong>پرچم CLI</strong>: شروع نشست با <code>hermes --yolo</code> یا <code>hermes chat --yolo</code></li>
+  <li><strong>فرمان اسلش</strong>: تایپ <code>/yolo</code> در طول نشست برای روشن/خاموش کردن</li>
+  <li><strong>متغیر محیطی</strong>: تنظیم <code>HERMES_YOLO_MODE=1</code></li>
+</ol>
+<p>فرمان <code>/yolo</code> یک <strong>سوییچ</strong> است — هر بار استفاده حالت را روشن یا خاموش می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>&gt; /yolo
+  ⚡ YOLO mode ON — all commands auto-approved. Use with caution.
+
+&gt; /yolo
+  ⚠ YOLO mode OFF — dangerous commands will require approval.</code></pre>
+</div>
+<p>حالت YOLO در نشست‌های CLI و گیت‌وی هر دو موجود است. در درون، متغیر محیطی <code>HERMES_YOLO_MODE</code> را تنظیم می‌کند که پیش از هر اجرای فرمانی بررسی می‌شود.</p>
+<p>وقتی YOLO فعال است، هرمس دو یادآور بصریِ پایدار نشان می‌دهد تا فراموش‌کردنِ دورزدنِ اعلان‌ها سخت باشد:</p>
+<ul>
+  <li>یک خط بنر قرمز در شروع نشست وقتی YOLO از قبل فعال است: <code>⚠ YOLO mode — all approval prompts bypassed</code>. وقتی YOLO خاموش است پنهان می‌شود تا بنر پیش‌فرض شلوغ نماند.</li>
+  <li>تکهٔ <code>⚠ YOLO</code> در نوار وضعیت در همهٔ سطوح عرض، با به‌روزرسانی زنده هنگام سوییچ (رندرکنندهٔ rich-text و جایگزین متنی ساده).</li>
+</ul>
+<div class="callout caution">
+  <div class="callout-title">⛔ خطر</div>
+  <p>حالت YOLO <strong>همهٔ</strong> بررسی‌های امنیتی فرمان خطرناک را برای نشست خاموش می‌کند — <strong>به‌جز</strong> فهرست رد سفت‌وسخت (پایین). فقط وقتی استفاده کنید که به فرمان‌های تولیدشده کاملاً اعتماد دارید (مثلاً اسکریپت‌های اتوماسیونِ خوب-تست‌شده در محیط‌های یک‌بارمصرف).</p>
+</div>
+<p>برای فرمان‌های اسلشِ مخرب نشست‏ (<code>/clear</code>، ‏<code>/new</code> / <code>/reset</code>، ‏<code>/undo</code>، ‏<code>/quit --delete</code> — ‏<code>/exit --delete</code> نام‌مستقل است)، CLI قبل از اجرا تأیید می‌خواهد. به «فرمان‌های اسلش — اعلان‌های تأیید فرمان‌های مخرب» در مرجع فرمان‌های اسلش مراجعه کنید.</p>
+
+<h3>فهرست رد سفت‌وسخت (کف همیشه-فعال)</h3>
+<p>برخی فرمان‌ها چنان فاجعه‌بارند — پاک‌سازی‌های برگشت‌ناپذیر فایل‌سیستم، بمب‌های fork، نوشتن مستقیم روی دستگاه بلاک — که هرمس از اجرایشان <strong>صرف‌نظر از</strong> موارد زیر سر باز می‌زند:</p>
+<ul>
+  <li><code>--yolo</code> / <code>/yolo</code> روشن</li>
+  <li><code>approvals.mode: off</code></li>
+  <li>کارهای کرونی در حالت بدون-سرپرستِ <code>approve</code></li>
+  <li>کلیک صریح کاربر روی «همیشه مجاز»</li>
+</ul>
+<p>فهرست رد، کفی زیر <code>--yolo</code> است. <strong>پیش از</strong> آنکه لایهٔ تأیید اصلاً فرمان را ببیند فعال می‌شود و هیچ پرچم دورزدنی ندارد. الگوهای فعلی (تمام‌شامل نیست؛ با <code>tools/approval.py::UNRECOVERABLE_BLOCKLIST</code> همگام نگه داشته می‌شود):</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>الگو</th><th>چرا سفت‌وسخت</th></tr></thead>
+  <tbody>
+    <tr><td><code>rm -rf /</code> و واریانت‌های بدیهی</td><td>ریشهٔ فایل‌سیستم را پاک می‌کند</td></tr>
+    <tr><td><code>rm -rf --no-preserve-root /</code></td><td>واریانت صریحِ «بله، منظورم ریشه است»</td></tr>
+    <tr><td><code>:(){ :|:&amp; };:</code> (بمب fork بشی)</td><td>میزبان را تا ری‌بوت پین می‌کند</td></tr>
+    <tr><td><code>mkfs.*</code> روی دستگاه ریشهٔ مانت‌شده</td><td>سیستمِ زنده را فرمت می‌کند</td></tr>
+    <tr><td><code>dd if=/dev/zero of=/dev/sd*</code></td><td>یک دیسک فیزیکی را صفر می‌کند</td></tr>
+    <tr><td>پایپ‌کردن URLهای نامطمئن به <code>sh</code> در顶层 ریشهٔ فایل‌سیستم</td><td>بردار حملهٔ اجرای کدِ راهن بیش از حد گسترده برای تأیید</td></tr>
+  </tbody>
+</table>
+</div>
+<p>اگر به فهرست رد بخورید، فراخوانی ابزار خطایی توضیحی به ایجنت برمی‌گرداند و هیچ‌چیز اجرا نمی‌شود. اگر گردش‌کاری قانونی به یکی از این فرمان‌ها نیاز دارد (مثلاً اپراتور خط لولهٔ پاک‌واقع-نصب‌مجدد هستید)، آن را بیرون از ایجنت اجرا کنید.</p>
+
+<h3>قواعد رد تعریف‌شده توسط کاربر (<code>approvals.deny</code>)</h3>
+<p>فهرست رد سفت‌وسخت ثابت و همراه کد است. <code>approvals.deny</code> همتای قابل-ویرایش توسط کاربرِ آن است: فهرستی از الگوهای glob که فرمان‌های ترمینالیِ مطابق را بی‌قیدوشرط مسدود می‌کنند — <strong>پیش از</strong> آنکه <code>--yolo</code>، ‏<code>/yolo</code> و <code>approvals.mode: off</code> اصلاً مشورت شوند. از آن برای yolo-با-استثنا استفاده کنید: «بگذار ایجنت همه‌چیز را بکند، جز این چیزهای مشخص، هرگز.»</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>approvals:
+  deny:
+    - "git push --force*"
+    - "*curl*|*sh*"
+    - "dd if=* of=/dev/*"</code></pre>
+</div>
+<p>جزئیات:</p>
+<ul>
+  <li>الگوها glob های <a href="https://docs.python.org/3/library/fnmatch.html" target="_blank" rel="noopener">fnmatch</a> هستند (<code>*</code>، ‏<code>?</code>، ‏<code>[...]</code>) که <strong>بدون حساسیت به بزرگی/کوچکی</strong> با کل متن فرمان تطبیق می‌خورند. <code>git push --force*</code> با <code>git push --force origin main</code> تطبیق می‌خورد ولی با <code>git push origin main</code> نه.</li>
+  <li>تطبیق روی همان واریانت‌های نرمال/رفع-ابهام‌شدهٔ فرمانی که آشکارساز الگوی خطرناک استفاده می‌کند اجرا می‌شود، پس ترفندهای سادهٔ نقل‌قولی‏ (<code>git pu""sh --force</code>) از کنار قاعده‌ای عبور نمی‌کنند.</li>
+  <li><strong>گیومهٔ YAML:</strong> همیشه الگوها را گیومه بزنید. <code>*</code> ابتداییِ خالی یک alias یاملی است و parse نمی‌شود؛ <code>{</code>، ‏<code>!</code> و <code>: </code> معانی یاملی خودشان را دارند. گیومهٔ تکی برای محتوای شل‌گونه امن‌ترین است.</li>
+  <li>قواعد رد روی بک‌اندهای دست‌رس-به-میزبان اعمال می‌شوند (local، SSH، داکرِ با-میزبان-مانت). بک‌اندهای کانتینریِ ایزوله کل پشتهٔ گارد را مثل همیشه رد می‌کنند — هیچ‌چیز که اجرا می‌کنند نمی‌تواند به میزبان دست بزند.</li>
+  <li>فرمانِ ردشده خطای BLOCKED به ایجنت برمی‌گرداند که به او می‌گوید دوباره امتحان یا بازنویسی نکند. هیچ‌چیز اجرا نمی‌شود.</li>
+</ul>
+<p>مثل بقیهٔ پیکربندی تأیید، تغییرها بلافاصله اثر می‌کنند (کش پیکربندی با کلید mtime است) — بدون نیاز به ری‌استارت نشست.</p>
+<div class="callout note">
+  <div class="callout-title">ℹ️ مدل تهدید</div>
+  <p>قواعد رد گاردریل در برابر ایجنتی صادق-اما-مخطئ‌اند، همان مدل تهدیدِ آشکارساز الگوی خطرناک. سندباکسی در برابر پروسه‌ای آگاهانه مخرب نیستند — برای آن، از بک‌اند ایزوله (داکر، Modal) یا محیطِ محدود-خروجی استفاده کنید.</p>
+</div>
+
+<h3>تایم‌اوت تأیید</h3>
+<p>وقتی اعلان فرمان خطرناک ظاهر می‌شود، کاربر زمان قابل‌پیکربندی برای پاسخ دارد. اگر در تایم‌اوت پاسخی نیاید، فرمان به‌طور پیش‌فرض <strong>رد</strong> می‌شود (توقف ایمن).</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>approvals:
+  timeout: 300  # ثانیه (پیش‌فرض: 300)</code></pre>
+</div>
+
+<h3>چه چیزی تأیید را تریگر می‌کند</h3>
+<p>الگوهای زیر اعلان تأیید را تریگر می‌کنند (تعریف‌شده در <code>tools/approval.py</code>):</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>الگو</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>rm -r</code> / <code>rm --recursive</code></td><td>حذف بازگشتی</td></tr>
+    <tr><td><code>rm ... /</code></td><td>حذف در مسیر ریشه</td></tr>
+    <tr><td><code>chmod 777/666</code> / <code>o+w</code> / <code>a+w</code></td><td>مجوزهای نوشتنی برای همه/دیگران</td></tr>
+    <tr><td><code>chmod --recursive</code> با مجوز ناامن</td><td>بازگشتیِ نوشتنی-برای-همه (پرچم بلند)</td></tr>
+    <tr><td><code>chown -R root</code> / <code>chown --recursive root</code></td><td>chown بازگشتی به root</td></tr>
+    <tr><td><code>mkfs</code></td><td>فرمت فایل‌سیستم</td></tr>
+    <tr><td><code>dd if=</code></td><td>کپی دیسک</td></tr>
+    <tr><td><code>&gt; /dev/sd</code></td><td>نوشتن روی دستگاه بلاک</td></tr>
+    <tr><td><code>DROP TABLE/DATABASE</code></td><td>‏SQL DROP</td></tr>
+    <tr><td><code>DELETE FROM</code> (بدون WHERE)</td><td>‏SQL DELETE بدون WHERE</td></tr>
+    <tr><td><code>TRUNCATE TABLE</code></td><td>‏SQL TRUNCATE</td></tr>
+    <tr><td><code>&gt; /etc/</code></td><td>بازنویسی پیکربندی سیستم</td></tr>
+    <tr><td><code>systemctl stop/restart/disable/mask</code></td><td>متوقف/ری‌استارت/غیرفعال‌کردن سرویس‌های سیستمی</td></tr>
+    <tr><td><code>kill -9 -1</code></td><td>کشتن همهٔ پروسه‌ها</td></tr>
+    <tr><td><code>pkill -9</code></td><td>کشتن اجباری پروسه‌ها</td></tr>
+    <tr><td>الگوهای بمب fork</td><td>بمب‌های fork</td></tr>
+    <tr><td><code>bash -c</code> / <code>sh -c</code> / <code>zsh -c</code> / <code>ksh -c</code></td><td>اجرای فرمان شل با پرچم <code>-c</code> (شامل پرچم‌های ترکیبی مثل <code>-lc</code>)</td></tr>
+    <tr><td><code>python -e</code> / <code>perl -e</code> / <code>ruby -e</code> / <code>node -c</code></td><td>اجرای اسکریپت با پرچم <code>-e</code>/<code>-c</code></td></tr>
+    <tr><td><code>curl ... | sh</code> / <code>wget ... | sh</code></td><td>پایپ محتوای راهن به شل</td></tr>
+    <tr><td><code>bash &lt;(curl ...)</code> / <code>sh &lt;(wget ...)</code></td><td>اجرای اسکریپت راهن با جایگزینی پروسه</td></tr>
+    <tr><td><code>tee</code> به <code>/etc/</code>، ‏<code>~/.ssh/</code>، ‏<code>~/.hermes/.env</code></td><td>بازنویسی فایل حساس با tee</td></tr>
+    <tr><td><code>&gt;</code> / <code>&gt;&gt;</code> به <code>/etc/</code>، ‏<code>~/.ssh/</code>، ‏<code>~/.hermes/.env</code></td><td>بازنویسی فایل حساس با ریدایرکت</td></tr>
+    <tr><td><code>xargs rm</code></td><td>‏xargs همراه rm</td></tr>
+    <tr><td><code>find -exec rm</code> / <code>find -delete</code></td><td>‏find با اکشن‌های مخرب</td></tr>
+    <tr><td><code>cp</code>/<code>mv</code>/<code>install</code> به <code>/etc/</code></td><td>کپی/انتقال فایل به پیکربندی سیستم</td></tr>
+    <tr><td><code>sed -i</code> / <code>sed --in-place</code> روی <code>/etc/</code></td><td>ویرایش درجا پیکربندی سیستم</td></tr>
+    <tr><td><code>pkill</code>/<code>killall</code> روی hermes/gateway</td><td>جلوگیری از خود-خاتمی</td></tr>
+    <tr><td><code>gateway run</code> با <code>&amp;</code>/<code>disown</code>/<code>nohup</code>/<code>setsid</code></td><td>جلوگیری از شروع گیت‌وی بیرون مدیر سرویس</td></tr>
+    <tr><td><code>docker stop/kill/restart</code>، ‏<code>docker compose down/stop/kill/restart</code></td><td>چرخهٔ حیات کانتینر (پرچم‌های سراسری و docker-compose را هم می‌گیرد)</td></tr>
+    <tr><td><code>docker -H</code>/<code>--host</code>/<code>--context</code>، ‏<code>DOCKER_HOST=</code>/<code>DOCKER_CONTEXT=</code></td><td>تغییرمسیر دیمن داکر — فرمان به دیمنِ دیگری (اغلب راهن) اشاره می‌کند</td></tr>
+    <tr><td><code>docker context use</code></td><td>پیش‌فرض دیمن را برای همهٔ فرمان‌های آیندهٔ docker عوض می‌کند</td></tr>
+    <tr><td><code>podman --remote</code>/<code>-r</code>/<code>--url</code>/<code>--connection</code>/<code>--identity</code>، ‏<code>CONTAINER_HOST=</code></td><td>تغییرمسیر دیمن راهن پودمن</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout note">
+  <div class="callout-title">ℹ️ دورزدن با کانتینر</div>
+  <p>هنگام اجرا روی بک‌اندهای <code>docker</code>، ‏<code>singularity</code>، ‏<code>modal</code>، ‏<code>daytona</code> یا <code>vercel_sandbox</code>، بررسی‌های فرمان خطرناک <strong>رد می‌شوند</strong> چون خود کانتینر مرز امنیتی است. فرمان‌های مخرب داخل کانتینر نمی‌توانند به میزبان آسیب بزنند.</p>
+</div>
+
+<h3>جریان تأیید (CLI)</h3>
+<p>در CLI تعاملی، فرمان‌های خطرناک اعلان تأیید درون‌خطی نشان می‌دهند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>  ⚠️  DANGEROUS COMMAND: recursive delete
+      rm -rf /tmp/old-project
+
+      [o]nce  |  [s]ession  |  [a]lways  |  [d]eny
+
+      Choice [o/s/a/D]:</code></pre>
+</div>
+<p>چهار گزینه:</p>
+<ul>
+  <li><strong>once</strong> — اجازهٔ همین یک اجرا</li>
+  <li><strong>session</strong> — اجازهٔ این الگو برای باقی نشست</li>
+  <li><strong>always</strong> — افزودن به فهرست مجاز دائمی (ذخیره در <code>config.yaml</code>)</li>
+  <li><strong>deny</strong> (پیش‌فرض) — مسدودکردن فرمان</li>
+</ul>
+
+<h3>جریان تأیید (گیت‌وی/پیام‌رسانی)</h3>
+<p>روی پلتفرم‌های پیام‌رسانی، ایجنت جزئیات فرمان خطرناک را به چت می‌فرستد و منتظر پاسخ کاربر می‌ماند:</p>
+<ul>
+  <li>پاسخ <strong>yes</strong>، ‏<strong>y</strong>، ‏<strong>approve</strong>، ‏<strong>ok</strong> یا <strong>go</strong> برای تأیید</li>
+  <li>پاسخ <strong>no</strong>، ‏<strong>n</strong>، ‏<strong>deny</strong> یا <strong>cancel</strong> برای رد</li>
+</ul>
+<p>متغیر محیطی <code>HERMES_EXEC_ASK=1</code> هنگام اجرای گیت‌وی خودکار تنظیم می‌شود.</p>
+
+<h3>فهرست مجاز دائمی</h3>
+<p>فرمان‌هایی که با «always» تأیید شده‌اند در <code>~/.hermes/config.yaml</code> ذخیره می‌شوند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># الگوهای فرمان خطرناکِ دائماً مجاز
+command_allowlist:
+  - rm
+  - systemctl</code></pre>
+</div>
+<p>این الگوها هنگام راه‌اندازی بارگذاری و در همهٔ نشست‌های آینده خاموش تأیید می‌شوند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>از <code>hermes config edit</code> برای بازبینی یا حذف الگوهای فهرست مجاز دائمی‌تان استفاده کنید.</p>
+</div>
+
+<h3>معدن‌کاوی تاریخچهٔ تأیید (<code>hermes approvals suggest</code>)</h3>
+<p>به‌جای پاسخ‌دادن به همان اعلان نشست پس از نشست، می‌توانید تصمیم‌های تأیید گذشته‌تان را به پیشنهادهای فهرست مجاز معدن‌کاوی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes approvals suggest            # اجرای خشک — یک پیشنهاد شماره‌دار چاپ می‌کند
+hermes approvals suggest --apply 1,3  # ادغام انتخاب‌ها در command_allowlist
+hermes approvals suggest --json     # خروجی ماشین‌خوان</code></pre>
+</div>
+<p>فرمان دیتابیس نشست‏ (<code>~/.hermes/state.db</code>) را برای فرمان‌های طبقه‌بندی-خطرناکی که واقعاً اجرا شدند — یعنی فرمان‌هایی که تأیید کردید — اسکن می‌کند، آن‌ها را به الگوها تجمیع می‌کند (<code>git push *</code> یا کلید طبقهٔ خطرناک برای فرمان‌های مرکب)، و بر اساس بسامد تأیید رتبه‌بندی:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Proposed command_allowlist additions (from approval history, last 90 days):
+
+  1. git push *    — approved 14x
+  2. docker restart/stop/kill (container lifecycle)    — approved 9x (class key)</code></pre>
+</div>
+<p>قواعد ایمنی:</p>
+<ul>
+  <li><strong>هیچ‌چیز هرگز خودکار اعمال نمی‌شود</strong> — اجرای پیش‌فرض فقط‌خواندنی است؛ فقط <code>--apply N[,M...]</code> صریح در config.yaml می‌نویسد.</li>
+  <li><strong>طبقه‌های مخرب هرگز پیشنهاد نمی‌شوند</strong>، صرف‌نظر از دفعات تأییدشان: حذف‌های بازگشتی، <code>sudo</code>، نوشتن دیسک/دستگاه، ویرایش اعتبارنامه و پیکربندی سیستمی، پایپ-به-شل، ‏SQL DROP/TRUNCATE، کشتن پروسه‌ها و هر طبقهٔ سفت‌وسخت کلاً مستثنی‌اند. <code>rm -rf build/</code> تأییدشدهٔ ۱۰۰ بارِ هنوز هرگز مدخل <code>rm</code> نمی‌سازد.</li>
+  <li>پیشنهادهایی که از قبل با <code>command_allowlist</code> موجود پوشش داده شده‌اند رد می‌شوند.</li>
+</ul>
+<p>پرچم‌های مفید: <code>--days N</code> (پنجرهٔ تاریخچه، پیش‌فرض ۹۰)، ‏<code>--min-count N</code> (حداقل تأیید برای واجدشرط‌شدن، پیش‌فرض ۲)، ‏<code>--limit N</code> و <code>--db PATH</code>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> ایمنی نوشتن فایل</h2>
+<p>پیش از آنکه <code>write_file</code> یا <code>patch</code> به دیسک دست بزند، هرمس مسیر هدف را با فهرست رد و سندباکس اختیاری تطبیق می‌دهد. نوشتن‌های مسدودشده بلافاصله خطا به ایجنت برمی‌گردند — <strong>اعلان تأییدی وجود ندارد</strong> و راهی برای دورزدن از UI چت نیست. مدل ممکن است هنوز ادعا کند ویرایش موفق بوده؛ وقتی <code>display.file_mutation_verifier</code> روشن است (پیش‌فرض)، به پانوشت راستی‌آزمای جهش-فایل بیش از خلاصهٔ پایانی دستیار اعتماد کنید.</p>
+
+<h3>مسیرهای محافظت‌شده (همیشه مسدود)</h3>
+<p>این دسته‌ها همیشه رد می‌شوند، حتی وقتی <code>HERMES_WRITE_SAFE_ROOT</code> تنظیم نشده:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>دسته</th><th>نمونه‌ها</th></tr></thead>
+  <tbody>
+    <tr><td>مخازن اعتبارنامهٔ OS</td><td><code>~/.ssh/</code> (کلیدها، <code>authorized_keys</code>)، ‏<code>~/.aws/</code>، ‏<code>~/.kube/</code>، ‏<code>/etc/sudoers</code>، ‏<code>~/.netrc</code></td></tr>
+    <tr><td>مخازن اعتبارنامهٔ هرمس</td><td><code>auth.json</code>، ‏<code>.env</code>، ‏<code>.anthropic_oauth.json</code>، ‏<code>mcp-tokens/</code>، ‏<code>pairing/</code> زیر HERMES_HOME (پروفایل فعال و ریشهٔ سراسری)</td></tr>
+    <tr><td>فایل‌های رمزی پروژه</td><td><code>.env</code>، ‏<code>.env.local</code>، ‏<code>.env.production</code>، ‏<code>.envrc</code> هرجا روی دیسک</td></tr>
+  </tbody>
+</table>
+</div>
+<p>مسیرهای حساس داخل ریشهٔ امن همچنان مسدودند — اشاره‌کردن <code>HERMES_WRITE_SAFE_ROOT</code> به <code>$HOME</code> اجازهٔ نوشتن <code>~/.ssh/id_rsa</code> را نمی‌دهد.</p>
+<p>نقض‌های ریشهٔ امن `Write denied: '…' is outside HERMES_WRITE_SAFE_ROOT (…)` برمی‌گردانند. مسدودسازی مسیر اعتبارنامه از `Write denied: '…' is a protected system/credential file.` استفاده می‌کند.</p>
+<p><strong>استثنا — ‏<code>~/.ssh/config</code> دروازهٔ تأیید دارد، نه مسدودسازی سفت.</strong> پیکربندی *کلاینتِ* SSH هیچ مادهٔ کلید-خصوصی ندارد و ویرایشش (نام‌مستقل‌های هاست، ‏<code>ProxyJump</code>، مقصدهای VS Code Remote-SSH) کاری روتین است، پس <code>write_file</code> / <code>patch</code> آن را از همان اعلانِ تأیید-یک‌بار/نشست/همیشه‌ای عبور می‌دهند که ابزار ترمینال از قبل برای نوشتن‌های <code>~/.ssh</code> استفاده می‌کند — به‌جای رد تختِ قبلی. همچنان می‌تواند دایرکتیوهای <code>ProxyCommand</code> / <code>Match exec</code>ِ اجراکنندهٔ فرمان حمل کند، پس نوشتن هرگز خاموش نیست. فراخوان‌های غیرتعاملی (پل فایل ACP، کارهای پس‌زمینه بدون کانال انسانی) ایمن متوقف می‌شوند. کلیدهای خصوصی، ‏<code>authorized_keys</code> و همه‌چیز زیر <code>~/.ssh/</code> سفت‌مسدود می‌مانند.</p>
+
+<h3>‏HERMES_WRITE_SAFE_ROOT (سندباکس اختیاری)</h3>
+<p>وقتی تنظیم شود، <code>write_file</code> و <code>patch</code> فقط می‌توانند مسیرهایی داخل پیشوندهای پوشهٔ فهرست‌شده را هدف بگیرند. هر چیز بیرون <strong>سفت‌مسدود</strong> است — نه عبوری از تأیید فرمان خطرناک.</p>
+<ul>
+  <li>در <a href="docker.html">ایمیج رسمی داکر</a> خودکار تنظیم می‌شود (<code>HERMES_WRITE_SAFE_ROOT=/opt/data</code>)</li>
+  <li>چند ریشه با جداکنندهٔ <code>:</code> در یونیکس یا <code>;</code> در ویندوز پشتیبانی می‌شود</li>
+  <li><strong>به‌سادگی به <code>~/.hermes/.env</code> اضافه نکنید.</strong> اگر روی پوشهٔ پروژه‌ای تنظیمش کنید، ایجنت نمی‌تواند به <code>~/.hermes/cron/jobs.json</code>، مهارت‌های پروفایل یا سایر وضعیت هرمس بیرون آن پیشوند بنویسد</li>
+</ul>
+<p>برای اجازهٔ هم‌زمان ورک‌اسپیس و خانهٔ هرمس:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>export HERMES_WRITE_SAFE_ROOT=/path/to/project:/home/you/.hermes</code></pre>
+</div>
+<p>برای برگرداندن نوشتن‌های نامحدود (تابع فهرست رد مسیرهای محافظت‌شده) متغیر را حذف کنید.</p>
+
+<h3>کرون و سایر وضعیت هرمس</h3>
+<p>از ایجنت نخواهید <code>~/.hermes/cron/jobs.json</code> را مستقیم <code>patch</code> کند. از ابزار <code>cronjob</code>، ‏<code>hermes cron</code> یا <code>/cron</code> استفاده کنید — مخزن کار را از API پشتیبانی‌شده به‌روز می‌کنند. همین برای سایر فایل‌های کنترلی هرمس وقتی ایمنی نوشتن ویرایش مستقیم را مسدود می‌کند صادق است.</p>
+<div class="callout note">
+  <div class="callout-title">ℹ️ دفاع-در-عمق، نه مرز سفت</div>
+  <p>گاردهای نوشتن فقط به <code>write_file</code> و <code>patch</code> اعمال می‌شوند. ابزار <code>terminal</code> با همان کاربر OS اجرا می‌شود و همچنان می‌تواند با فرمان‌های شلی مسیرهای ردشده را <code>cat</code> یا بازنویسی کند. فهرست رد آسیب تصادفی را کم می‌کند و به مدل‌ها سیگنال توقف روشنی می‌دهد؛ ایجنتِ متخاصم یا آلوده را سندباکس نمی‌کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مجوز کاربر (گیت‌وی)</h2>
+<p>هنگام اجرای گیت‌وی پیام‌رسانی، هرمس با سیستم مجوزِ لایه‌بندی‌شده کنترل می‌کند چه کسی می‌تواند با بات تعامل کند.</p>
+
+<h3>ترتیب بررسی مجوز</h3>
+<p>متد <code>_is_user_authorized()</code> به این ترتیب بررسی می‌کند:</p>
+<ol>
+  <li><strong>پرچم مجاز-همه به‌ازای-پلتفرم</strong> (مثلاً <code>DISCORD_ALLOW_ALL_USERS=true</code>)</li>
+  <li><strong>فهرست تأییدشدهٔ جفت‌سازی DM</strong> (کاربران تأییدشده با کدهای جفت‌سازی)</li>
+  <li><strong>فهرست‌های مجاز مخصوص-پلتفرم</strong> (مثلاً <code>TELEGRAM_ALLOWED_USERS=12345,67890</code>)</li>
+  <li><strong>فهرست مجاز سراسری</strong> (<code>GATEWAY_ALLOWED_USERS=12345,67890</code>)</li>
+  <li><strong>مجاز-همهٔ سراسری</strong> (<code>GATEWAY_ALLOW_ALL_USERS=true</code>)</li>
+  <li><strong>پیش‌فرض: رد</strong></li>
+</ol>
+
+<h3>فهرست‌های مجاز پلتفرمی</h3>
+<p>شناسه‌های کاربر مجاز را به‌صورت جداشده با ویرگول در <code>~/.hermes/.env</code> تنظیم کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash — ~/.hermes/.env</span><button class="copy-btn">کپی</button></div>
+  <pre><code># فهرست‌های مجاز مخصوص-پلتفرم
+TELEGRAM_ALLOWED_USERS=123456789,987654321
+DISCORD_ALLOWED_USERS=111222333444555666
+WHATSAPP_ALLOWED_USERS=15551234567
+SLACK_ALLOWED_USERS=U01ABC123
+
+# فهرست مجاز بین-پلتفرمی (برای همهٔ پلتفرم‌ها بررسی می‌شود)
+GATEWAY_ALLOWED_USERS=123456789
+
+# مجاز-همه به‌ازای-پلتفرم (با احتیاط)
+DISCORD_ALLOW_ALL_USERS=true
+
+# مجاز-همهٔ سراسری (با احتیاط شدید)
+GATEWAY_ALLOW_ALL_USERS=true</code></pre>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>اگر <strong>هیچ فهرست مجازی پیکربندی نشده باشد</strong> و <code>GATEWAY_ALLOW_ALL_USERS</code> تنظیم نشده باشد، <strong>همهٔ کاربران رد می‌شوند</strong>. گیت‌وی هنگام راه‌اندازی هشدار می‌دهد:</p>
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+    <pre><code>No user allowlists configured. All unauthorized users will be denied.
+Set GATEWAY_ALLOW_ALL_USERS=true in ~/.hermes/.env to allow open access,
+or configure platform allowlists (e.g. TELEGRAM_ALLOWED_USERS=your_id).</code></pre>
+  </div>
+</div>
+
+<h3>سیستم جفت‌سازی DM</h3>
+<p>برای مجوزدهی انعطاف‌پذیرتر، هرمس سیستم جفت‌سازی مبتنی-بر-کد دارد. به‌جای نیاز به شناسه‌های کاربر از قبل، کاربران ناشناس یک کد جفت‌سازی یک‌باره می‌گیرند که مالک بات از طریق CLI تأییدش می‌کند.</p>
+<p><strong>چگونه کار می‌کند:</strong></p>
+<ol>
+  <li>کاربر ناشناسی به بات DM می‌فرستد</li>
+  <li>بات با یک کد جفت‌سازی ۸ کاراکتری پاسخ می‌دهد</li>
+  <li>مالک بات <code>hermes pairing approve &lt;platform&gt; &lt;code&gt;</code> را در CLI اجرا می‌کند</li>
+  <li>کاربر برای آن پلتفرم برای همیشه تأیید می‌شود</li>
+</ol>
+<p>کنترل رفتار با DMهای غیرمجاز در <code>~/.hermes/config.yaml</code>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>unauthorized_dm_behavior: pair
+
+whatsapp:
+  unauthorized_dm_behavior: ignore</code></pre>
+</div>
+<ul>
+  <li><code>pair</code> برای پلتفرم‌های DMِ سبک-چت پیش‌فرض است. DMهای غیرمجاز پاسخِ کد جفت‌سازی می‌گیرند.</li>
+  <li><code>ignore</code> ‏DMهای غیرمجاز را خاموش رد می‌کند.</li>
+  <li>ایمیل به‌طور پیش‌فرض <code>ignore</code> است مگر <code>platforms.email.unauthorized_dm_behavior: pair</code> تنظیم شود، چون صندوق‌های ورودی می‌توانند حاوی نامه‌های ناخواندهٔ بی‌ربط باشند.</li>
+  <li>بخش‌های پلتفرمی پیش‌فرض سراسری را بازنویسی می‌کنند، پس می‌توانید تلگرام را روی جفت‌سازی و واتساپ را ساکت نگه دارید.</li>
+</ul>
+<p><strong>ویژگی‌های امنیتی</strong> (بر پایهٔ راهنمای OWASP + NIST SP 800-63-4):</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ویژگی</th><th>جزئیات</th></tr></thead>
+  <tbody>
+    <tr><td>قالب کد</td><td>۸ کاراکتری از الفبای ۳۲ کاراکتریِ بدونابهام (بدون 0/O/1/I)</td></tr>
+    <tr><td>تصادفی‌بودن</td><td>رمزنگارانه (<code>secrets.choice()</code>)</td></tr>
+    <tr><td>TTL کد</td><td>انقضای ۱ ساعته</td></tr>
+    <tr><td>محدودیت نرخ</td><td>۱ درخواست به‌ازای کاربر در هر ۱۰ دقیقه</td></tr>
+    <tr><td>سقف در-انتظار</td><td>حداکثر ۳ کد در-انتظار به‌ازای پلتفرم</td></tr>
+    <tr><td>قفل‌شدن</td><td>۵ تلاش ناموفق تأیید ← قفل ۱ ساعته</td></tr>
+    <tr><td>امنیت فایل</td><td><code>chmod 0600</code> روی همهٔ فایل‌های دادهٔ جفت‌سازی</td></tr>
+    <tr><td>لاگ‌گیری</td><td>کدها هرگز در stdout لاگ نمی‌شوند</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>فرمان‌های CLI جفت‌سازی:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># فهرست کاربران در-انتظار و تأییدشده
+hermes pairing list
+
+# تأیید یک کد جفت‌سازی
+hermes pairing approve telegram ABC12DEF
+
+# لغو دسترسی یک کاربر
+hermes pairing revoke telegram 123456789
+
+# پاک‌کردن همهٔ کدهای در-انتظار
+hermes pairing clear-pending</code></pre>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 کاربران داکر: فرمان‌های جفت‌سازی را با کاربر hermes اجرا کنید</div>
+  <p>ایمیج رسمی داکر گیت‌وی را با کاربر بدونامتیاز <code>hermes</code> (‏uid 10000) از طریق gosu اجرا می‌کند، اما <code>docker exec</code> به‌طور پیش‌فرض root است. فایل‌های تأییدی که root بسازد با حالت <code>0600 root:root</code> نوشته می‌شوند و گیت‌وی نمی‌تواند بخواندشان — تأیید خاموش نادیده گرفته می‌شود (<a href="https://github.com/NousResearch/hermes-agent/issues/10270" target="_blank" rel="noopener">#10270</a>).</p>
+  <p>همیشه <code>-u hermes</code> بدهید:</p>
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker exec -u hermes hermes-agent hermes pairing approve telegram ABC12DEF</code></pre>
+  </div>
+  <p>اگر از قبل فرمان را به‌عنوان root اجرا کرده‌اید و کاربر هنوز غیرمجاز است، کانتینر را ری‌استارت کنید — entrypoint در شروع بعدی مالکیت را درست می‌کند.</p>
+</div>
+<p><strong>ذخیره‌گاه:</strong> دادهٔ جفت‌سازی در <code>~/.hermes/pairing/</code> با فایل‌های JSON به‌ازای-پلتفرم:</p>
+<ul>
+  <li><code>{platform}-pending.json</code> — درخواست‌های جفت‌سازی در-انتظار</li>
+  <li><code>{platform}-approved.json</code> — کاربران تأییدشده</li>
+  <li><code>_rate_limits.json</code> — پیگیری محدودیت نرخ و قفل</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> ایزوله‌سازی کانتینر</h2>
+<p>هنگام استفاده از بک‌اند ترمینال <code>docker</code>، هرمس سخت‌سازی امنیتی سفت‌وسختی روی هر کانتینر اعمال می‌کند.</p>
+
+<h3>پرچم‌های امنیتی داکر</h3>
+<p>هر کانتینر با این پرچم‌ها اجرا می‌شود (تعریف‌شده در <code>tools/environments/docker.py</code>):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>_BASE_SECURITY_ARGS = [
+    "--cap-drop", "ALL",                          # حذف همهٔ قابلیت‌های لینوکس
+    "--cap-add", "DAC_OVERRIDE",                  # root بتواند در پوشه‌های bind-mount بنویسد
+    "--cap-add", "CHOWN",                         # مدیرهای پکیج مالکیت فایل لازم دارند
+    "--cap-add", "FOWNER",                        # مدیرهای پکیج مالکیت فایل لازم دارند
+    "--security-opt", "no-new-privileges",        # بستن ارتقای امتیاز
+    "--pids-limit", "256",                        # محدودکردن شمار پروسه
+    "--tmpfs", "/tmp:rw,nosuid,size=512m",        # /tmp با سقف حجم
+    "--tmpfs", "/var/tmp:rw,noexec,nosuid,size=256m",  # /var/tmp بدون-اجرا
+]</code></pre>
+</div>
+<p><code>SETUID</code>/<code>SETGID</code> در فهرست پایه <strong>نیستند</strong> — وقتی کانتینر به‌عنوان root شروع شود و یک init/entrypoint باید امتیاز را تنزل دهد به‌صورت شرطی اضافه می‌شوند (مسیر تنلیل-امتیاز s6). وقتی کانتینر از قبل با <code>--user</code> غیر-‌root اجرا می‌شود رد می‌شوند. tmpfs مربوط به <code>/run</code> هم از فهرست پایه جدا شده و به‌ازای-ایمیج مانت می‌شود (پیش‌فرضِ سخت‌شده <code>noexec</code>، ‏<code>exec</code> فقط برای ایمیج‌های s6-overlay که از <code>/run</code> اجرا می‌کنند).</p>
+
+<h3>محدودیت‌های منابع</h3>
+<p>منابع کانتینر در <code>~/.hermes/config.yaml</code> قابل پیکربندی‌اند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>terminal:
+  backend: docker
+  docker_image: "nikolaik/python-nodejs:python3.11-nodejs20"
+  docker_forward_env: []  # فقط فهرست مجاز صریح؛ خالی یعنی رازها بیرون کانتینر می‌مانند
+  container_cpu: 1        # هسته‌های CPU
+  container_memory: 5120  # مگابایت (پیش‌فرض ۵GB)
+  container_disk: 51200   # مگابایت (پیش‌فرض ۵۰GB، روی XFS به overlay2 نیاز دارد)
+  container_persistent: true  # ماندگاری فایل‌سیستم بین نشست‌ها</code></pre>
+</div>
+
+<h3>ماندگاری فایل‌سیستم</h3>
+<ul>
+  <li><strong>حالت ماندگار</strong> (<code>container_persistent: true</code>): ‏<code>/workspace</code> و <code>/root</code> را از <code>~/.hermes/sandboxes/docker/&lt;task_id&gt;/</code> بایند-مانت می‌کند</li>
+  <li><strong>حالت زودگذر</strong> (<code>container_persistent: false</code>): از tmpfs برای ورک‌اسپیس استفاده می‌کند — همه‌چیز در پاک‌سازی از دست می‌رود</li>
+</ul>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>برای استقرار گیت‌وی عملیاتی، از بک‌اند <code>docker</code>، ‏<code>modal</code>، ‏<code>daytona</code> یا <code>vercel_sandbox</code> استفاده کنید تا فرمان‌های ایجنت از سیستم میزبانتان ایزوله شوند. این نیاز به تأیید فرمان خطرناک را کلاً حذف می‌کند.</p>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>اگر نام‌هایی به <code>terminal.docker_forward_env</code> اضافه کنید، آن متغیرها عمداً برای فرمان‌های ترمینالی به کانتینر تزریق می‌شوند. برای اعتبارنامه‌های مخصوص-کار مثل <code>GITHUB_TOKEN</code> مفید است، ولی یعنی کدی که در کانتینر اجرا می‌شود می‌تواند بخواند و قاچاقشان کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> مقایسهٔ امنیت بک‌اندهای ترمینال</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>بک‌اند</th><th>ایزوله‌سازی</th><th>بررسی فرمان خطرناک</th><th>بهترین برای</th></tr></thead>
+  <tbody>
+    <tr><td><strong>local</strong></td><td>هیچ — روی میزبان اجرا می‌شود</td><td>✅ دارد</td><td>توسعه، کاربران مطمئن</td></tr>
+    <tr><td><strong>ssh</strong></td><td>ماشین راهن</td><td>✅ دارد</td><td>اجرا روی سرور جداگانه</td></tr>
+    <tr><td><strong>docker</strong></td><td>کانتینر</td><td>❌ رد می‌شود (کانتینر مرز است)</td><td>گیت‌وی عملیاتی</td></tr>
+    <tr><td><strong>singularity</strong></td><td>کانتینر</td><td>❌ رد می‌شود</td><td>محیط‌های HPC</td></tr>
+    <tr><td><strong>modal</strong></td><td>سندباکس ابری</td><td>❌ رد می‌شود</td><td>ایزوله‌سازی ابری مقیاس‌پذیر</td></tr>
+    <tr><td><strong>daytona</strong></td><td>سندباکس ابری</td><td>❌ رد می‌شود</td><td>ورک‌اسپیس‌های ابری پایدار</td></tr>
+    <tr><td><strong>vercel_sandbox</strong></td><td>میکروVM ابری</td><td>❌ رد می‌شود</td><td>اجرای ابری با ماندگاری اسنپ‌شات</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> عبور متغیرهای محیطی</h2>
+<p>هر دوی <code>execute_code</code> و <code>terminal</code> متغیرهای محیطی حساس را از پروسه‌های فرزند حذف می‌کنند تا از قاچاق اعتبارنامه توسط کدِ تولیدشدهٔ LLM جلوگیری شود. با این حال، مهارت‌هایی که <code>required_environment_variables</code> اعلام می‌کنند به‌طور قانونی به آن متغیرها نیاز دارند.</p>
+
+<h3>چگونه کار می‌کند</h3>
+<p>دو سازوکار عبور متغیرهای مشخصی از فیلترهای سندباکس را مجاز می‌کنند:</p>
+<p><strong>۱. عبور در-دامنهٔ مهارت (خودکار)</strong></p>
+<p>وقتی مهارتی بارگذاری می‌شود (با <code>skill_view</code> یا فرمان <code>/skill</code>) و <code>required_environment_variables</code> دارد، هر کدام از آن متغیرها که واقعاً در محیط تنظیم شده‌اند به‌طور خودکار به‌عنوان عبوری ثبت می‌شوند. متغیرهای مفقود (هنوز در وضعیت نیاز-به-راه‌اندازی) ثبت <strong>نمی‌شوند</strong>.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — در frontmatter مهارت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>required_environment_variables:
+  - name: TENOR_API_KEY
+    prompt: Tenor API key
+    help: Get a key from https://developers.google.com/tenor</code></pre>
+</div>
+<p>پس از بارگذاری این مهارت، <code>TENOR_API_KEY</code> به <code>execute_code</code>، ‏<code>terminal</code> (محلی) <strong>و بک‌اندهای راهن (داکر، Modal)</strong> عبور می‌کند — بدون پیکربندی دستی.</p>
+<div class="callout note">
+  <div class="callout-title">ℹ️ داکر و Modal</div>
+  <p>پیش از v0.5.1، ‏<code>forward_env</code> داکر سیستمی جدا از عبور مهارت بود. حالا ادغام شده‌اند — متغیرهای محیطیِ اعلام‌شده توسط مهارت خودکار به کانتینرهای داکر و سندباکس‌های Modal فوروارد می‌شوند بدون نیاز به افزودن دستی به <code>docker_forward_env</code>.</p>
+</div>
+<p><strong>۲. عبور مبتنی-بر-پیکربندی (دستی)</strong></p>
+<p>برای متغیرهایی که هیچ مهارتی اعلامشان نکرده، آن‌ها را به <code>terminal.env_passthrough</code> در config.yaml اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>terminal:
+  env_passthrough:
+    - MY_CUSTOM_KEY
+    - ANOTHER_TOKEN</code></pre>
+</div>
+
+<h3>عبور فایل‌های اعتبارنامه (توکن‌های OAuth و غیره)</h3>
+<p>برخی مهارت‌ها به <strong>فایل‌ها</strong> (نه فقط متغیرهای محیطی) در سندباکس نیاز دارند — مثلاً Google Workspace توکن‌های OAuth را به‌صورت <code>google_token.json</code> زیر HERMES_HOME پروفایل فعال نگه می‌دارد. مهارت‌ها این‌ها را در frontmatter اعلام می‌کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>required_credential_files:
+  - path: google_token.json
+    description: Google OAuth2 token (created by setup script)
+  - path: google_client_secret.json
+    description: Google OAuth2 client credentials</code></pre>
+</div>
+<p>وقتی بارگذاری شد، هرمس بررسی می‌کند این فایل‌ها در HERMES_HOME پروفایل فعال موجودند و برای مانت ثبتشان می‌کند:</p>
+<ul>
+  <li><strong>داکر</strong>: بایند-مانت فقط-خواندنی (<code>-v host:container:ro</code>)</li>
+  <li><strong>Modal</strong>: هنگام ساخت سندباکس مانت + پیش از هر فرمان همگام (راه‌اندازی OAuth وسط-نشست را هندل می‌کند)</li>
+  <li><strong>محلی</strong>: نیازی به کار نیست (فایل‌ها از قبل در دسترس‌اند)</li>
+</ul>
+<p>فایل‌های اعتبارنامه را می‌توان به‌صورت دستی هم در config.yaml فهرست کرد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>terminal:
+  credential_files:
+    - google_token.json
+    - my_custom_oauth_token.json</code></pre>
+</div>
+<p>مسیرها نسبت به <code>~/.hermes/</code>‌اند. فایل‌ها داخل کانتینر به <code>/root/.hermes/</code> مانت می‌شوند. این فهرست را <code>tools/credential_files.py</code> می‌خواند (<code>terminal.credential_files</code>) — زیر بلوک <code>terminal:</code> زندگی می‌کند ولی توسط ماژول فایل‌های-اعتبارنامه بارگذاری می‌شود نه بک‌اند اصلی ترمینال، پس بخشی از اسنپ‌شات <code>DEFAULT_CONFIG</code> همراه نیست.</p>
+
+<h3>هر سندباکس چه چیزی را فیلتر می‌کند</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>سندباکس</th><th>فیلتر پیش‌فرض</th><th>بازنویسیِ عبور</th></tr></thead>
+  <tbody>
+    <tr><td><strong>execute_code</strong></td><td>متغیرهای دارای <code>KEY</code>، ‏<code>TOKEN</code>، ‏<code>SECRET</code>، ‏<code>PASSWORD</code>، ‏<code>CREDENTIAL</code>، ‏<code>PASSWD</code>، ‏<code>AUTH</code> در نام را مسدود؛ فقط متغیرهای پیشوندِ امن را عبور می‌دهد</td><td>✅ متغیرهای عبوری هر دو بررسی را دور می‌زنند</td></tr>
+    <tr><td><strong>terminal</strong> (محلی)</td><td>متغیرهای زیرساختی صریح هرمس را مسدود (کلیدهای ارائه‌دهنده، توکن‌های گیت‌وی، کلیدهای API ابزار)</td><td>✅ متغیرهای عبوری فهرست رد را دور می‌زنند</td></tr>
+    <tr><td><strong>terminal</strong> (داکر)</td><td>به‌طور پیش‌فرض هیچ متغیر محیطی میزبانی ندارد</td><td>✅ متغیرهای عبوری + <code>docker_forward_env</code> با <code>-e</code> فوروارد می‌شوند</td></tr>
+    <tr><td><strong>terminal</strong> (Modal)</td><td>به‌طور پیش‌فرض هیچ محیط/فایل میزبانی ندارد</td><td>✅ فایل‌های اعتبارنامه مانت؛ عبور محیط با همگام‌سازی</td></tr>
+    <tr><td><strong>MCP</strong></td><td>همه‌چیز جز متغیرهای سیستمی امن + <code>env</code> صریحاً پیکربندی‌شده مسدود</td><td>❌ از عبور متأثر نیست (به‌جایش از پیکربندی <code>env</code> مربوط به MCP استفاده کنید)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>ملاحظات امنیتی</h3>
+<ul>
+  <li>عبور فقط متغیرهایی را تحت تأثیر قرار می‌دهد که شما یا مهارت‌هایتان صریحاً اعلام کرده‌اند — وضعیت امنیتی پیش‌فرض برای کدِ دلخواهِ تولیدشدهٔ LLM تغییرنکرده می‌ماند</li>
+  <li>فایل‌های اعتبارنامه <strong>فقط‌خواندنی</strong> به کانتینرهای داکر مانت می‌شوند</li>
+  <li>Skills Guard محتوای مهارت را پیش از نصب از الگوهای دسترسی مشکوک به محیط اسکن می‌کند</li>
+  <li>متغیرهای مفقود/تنظیم‌نشده هرگز ثبت نمی‌شوند (چیزی که وجود ندارد قابل درزشدن نیست)</li>
+  <li>رازهای زیرساختی هرمس (کلیدهای API ارائه‌دهنده، توکن‌های گیت‌وی) هرگز نباید به <code>env_passthrough</code> اضافه شوند — سازوکار اختصاصی خودشان را دارند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> مدیریت اعتبارنامهٔ MCP</h2>
+<p>زیرپروسه‌های سرور MCP ‏(Model Context Protocol) <strong>محیط فیلترشده</strong> دریافت می‌کنند تا از نشت تصادفی اعتبارنامه جلوگیری شود.</p>
+
+<h3>متغیرهای محیطی امن</h3>
+<p>فقط این متغیرها از میزبان به زیرپروسه‌های stdio مربوط به MCP عبور می‌کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">env</span><button class="copy-btn">کپی</button></div>
+  <pre><code>PATH, HOME, USER, LANG, LC_ALL, TERM, SHELL, TMPDIR</code></pre>
+</div>
+<p>به‌علاوهٔ هر متغیر <code>XDG_*</code>. همهٔ متغیرهای محیطی دیگر (کلیدهای API، توکن‌ها، رازها) <strong>حذف می‌شوند</strong>.</p>
+<p>متغیرهای صریحاً تعریف‌شده در پیکربندی <code>env</code> سرور MCP عبور می‌کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  github:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "ghp_..."  # فقط این عبور می‌کند</code></pre>
+</div>
+
+<h3>حذف اعتبارنامه از متن</h3>
+<p>پیام‌های خطای ابزارهای MCP پیش از بازگشت به LLM پاک‌سازی می‌شوند. الگوهای زیر با <code>[REDACTED]</code> جایگزین می‌شوند:</p>
+<ul>
+  <li>‏PATهای گیت‌هاب (<code>ghp_...</code>)</li>
+  <li>کلیدهای سبک OpenAI‏ (<code>sk-...</code>)</li>
+  <li>توکن‌های Bearer</li>
+  <li>پارامترهای <code>token=</code>، ‏<code>key=</code>، ‏<code>API_KEY=</code>، ‏<code>password=</code>، ‏<code>secret=</code></li>
+</ul>
+
+<h3>سیاست دسترسی وب‌سایت</h3>
+<p>می‌توانید محدود کنید ایجنت به کدام وب‌سایت‌ها از طریق ابزارهای وب و مرورگرش دسترسی داشته باشد. برای جلوگیری از دسترسی ایجنت به سرویس‌های داخلی، پنل‌های مدیریتی یا URLهای حساس دیگر مفید است.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — در ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>security:
+  website_blocklist:
+    enabled: true
+    domains:
+      - "*.internal.company.com"
+      - "admin.example.com"
+    shared_files:
+      - "/etc/hermes/blocked-sites.txt"</code></pre>
+</div>
+<p>وقتی URL مسدودی درخواست شود، ابزار خطایی برمی‌گرداند که توضیح می‌دهد دامنه به‌دلیل سیاست مسدود است. فهرست رد روی <code>web_search</code>، ‏<code>web_extract</code>، ‏<code>browser_navigate</code> و همهٔ ابزارهای دارای-URL اجباری می‌شود.</p>
+
+<h3>محافظت SSRF</h3>
+<p>همهٔ ابزارهای دارای-URL (جستجوی وب، استخراج وب، بینایی، مرورگر) پیش از دریافت، URLها را اعتبارسنجی می‌کنند تا از حملات SSRF ‏(جعل درخواست سمت-سرور) جلوگیری شود. آدرس‌های مسدودشده شامل:</p>
+<ul>
+  <li><strong>شبکه‌های خصوصی</strong> (RFC 1918): ‏<code>10.0.0.0/8</code>، ‏<code>172.16.0.0/12</code>، ‏<code>192.168.0.0/16</code></li>
+  <li><strong>Loopback</strong>: ‏<code>127.0.0.0/8</code>، ‏<code>::1</code></li>
+  <li><strong>Link-local</strong>: ‏<code>169.254.0.0/16</code> (شامل فرادادهٔ ابر روی <code>169.254.169.254</code>)</li>
+  <li><strong>فضای آدرس CGNAT / مشترک</strong> (RFC 6598): ‏<code>100.64.0.0/10</code> (‏Tailscale، ‏VPNهای WireGuard)</li>
+  <li><strong>نام‌های میزبان فرادادهٔ ابر</strong>: <code>metadata.google.internal</code>، ‏<code>metadata.goog</code></li>
+  <li><strong>آدرس‌های رزرو، چندپخشی و نامشخص</strong></li>
+</ul>
+<p>محافظت SSRF برای استفادهٔ رو-به-اینترنت همیشه فعال است و شکست‌های DNS مسدود تلقی می‌شوند (توقف ایمن). زنجیره‌های ریدایرکت در هر هاپ دوباره اعتبارسنجی می‌شوند تا از دورزدن‌های مبتنی-بر-ریدایرکت جلوگیری شود.</p>
+
+<h4>اجازهٔ عمدی URLهای خصوصی</h4>
+<p>برخی راه‌اندازی‌ها به‌طور قانونی به دسترسی URL خصوصی/داخلی نیاز دارند — شبکه‌های خانگی که <code>home.arpa</code> را به فضای RFC 1918 حل می‌کنند، اندپوینت‌های فقط-LAN مربوط به Ollama/llama.cpp، ویکی‌های داخلی، دیباگ فرادادهٔ ابر و مانند آن. برای این موارد یک خروج سراسری هست:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>security:
+  allow_private_urls: true   # پیش‌فرض: false</code></pre>
+</div>
+<p>وقتی روشن باشد، ابزارهای وب، مرورگر، دریافت‌های URL بینایی و دانلودهای رسانهٔ گیت‌وی دیگر مقصدهای RFC 1918 / loopback / link-local / CGNAT / فرادادهٔ ابر را رد نمی‌کنند. <strong>این یک مرز اعتماد آگاهانه است</strong> — فقط روی ماشین‌هایی فعالش کنید که اجرای URLهای دلخواهِ تزریق-پرامپتی‌شده توسط ایجنت روی شبکهٔ محلی، ریسک پذیرفته‌شده‌ای است. گیت‌وی‌های رو-به-عموم باید خاموشش نگه دارند.</p>
+<p>گارد زیررشتهٔ میزبان (که ترفندهای دامنهٔ یونیکدیِ شبیه‌ساز را حتی وقتی IP زیرین عمومی است مسدود می‌کند) صرف‌نظر از این تنظیم روشن می‌ماند.</p>
+
+<h3>اسکن امنیتی پیش-از-اجرا با Tirith</h3>
+<p>هرمس <a href="https://github.com/sheeki03/tirith" target="_blank" rel="noopener">tirith</a> را برای اسکن فرمان در سطح محتوا پیش از اجرا یکپارچه کرده. تیریث تهدیدهایی را تشخیص می‌دهد که تطبیق الگو به‌تنهایی از دست می‌دهد:</p>
+<ul>
+  <li>جعل URL با هم‌نگاشت (حملات دامنهٔ بین‌المللی‌سازی‌شده)</li>
+  <li>الگوهای پایپ-به-مفسر‏ (<code>curl | bash</code>، ‏<code>wget | sh</code>)</li>
+  <li>حملات تزریق ترمینال</li>
+</ul>
+<p>تیریث در اولین استفاده از ریلیزهای گیت‌هاب با راستی‌آزمایی چکسام SHA-256 خودکار نصب می‌شود (و راستی‌آزمایی provenance با cosign اگر موجود باشد).</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — در ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>security:
+  tirith_enabled: true       # فعال/غیرفعال‌کردن اسکن tirith (پیش‌فرض: true)
+  tirith_path: "tirith"      # مسیر باینری tirith (پیش‌فرض: جستجو در PATH)
+  tirith_timeout: 5          # تایم‌اوت زیرپروسه به ثانیه
+  tirith_fail_open: true     # اجازهٔ اجرا وقتی tirith در دسترس نیست (پیش‌فرض: true)</code></pre>
+</div>
+<p>وقتی <code>tirith_fail_open</code> برابر <code>true</code> (پیش‌فرض) باشد، فرمان‌ها اگر tirith نصب نباشد یا تایم‌اوت بخورد ادامه می‌یابند. در محیط‌های باامنیت-بالا <code>false</code> کنید تا فرمان‌ها هنگام نبود tirith مسدود شوند.</p>
+<p>تیریث باینری‌های از-پیش‌ساخته برای لینوکس (x86_64 / aarch64) و مک (x86_64 / arm64) دارد. روی پلتفرم‌های بدون باینری از-پیش‌ساخته (ویندوز و غیره)، تیریث خاموش رد می‌شود — گاردهای تطبیق-الگو همچنان اجرا می‌شوند و CLI بنرِ «در دسترس نیست» نشان نمی‌دهد. برای استفاده از tirith روی ویندوز، هرمس را زیر WSL اجرا کنید.</p>
+<p>حکم تیریث با جریان تأیید یکپارچه است: فرمان‌های امن عبور می‌کنند، در حالی که هر دو حالت مشکوک و مسدود، تأیید کاربر را با یافته‌های کامل tirith تریگر می‌کنند (شدت، عنوان، توضیح، جایگزین‌های امن‌تر). کاربر می‌تواند تأیید یا رد کند — انتخاب پیش‌فرض رد است تا سناریوهای بدون-سرپرست امن بمانند.</p>
+
+<h3>محافظت تزریق فایل‌های زمینه</h3>
+<p>فایل‌های زمینه (‏AGENTS.md، ‏.cursorrules، ‏SOUL.md) پیش از گنجانده‌شدن در پرامپت سیستمی از نظر تزریق پرامپت اسکن می‌شوند. اسکنر این‌ها را بررسی می‌کند:</p>
+<ul>
+  <li>دستورالعمل‌های نادیده‌گرفتن/نفیِ دستورالعمل‌های قبلی</li>
+  <li>کامنت‌های HTML پنهان با کلیدواژه‌های مشکوک</li>
+  <li>تلاش‌ها برای خواندن رازها (<code>.env</code>، ‏<code>credentials</code>، ‏<code>.netrc</code>)</li>
+  <li>قاچاق اعتبارنامه با <code>curl</code></li>
+  <li>کاراکترهای یونیکد نامرئی (فاصله‌های عرض-صفر، overrideهای دوجهته)</li>
+</ul>
+<p>فایل‌های مسدودشده هشدار نشان می‌دهند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>[BLOCKED: AGENTS.md contained potential prompt injection (prompt_injection). Content not loaded.]</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> بهترین شیوه‌های استقرار عملیاتی</h2>
+
+<h3>چک‌لیست استقرار گیت‌وی</h3>
+<ol>
+  <li><strong>فهرست‌های مجاز صریح تنظیم کنید</strong> — هرگز در پروداکشن <code>GATEWAY_ALLOW_ALL_USERS=true</code> نگذارید</li>
+  <li><strong>بک‌اند کانتینری استفاده کنید</strong> — ‏<code>terminal.backend: docker</code> در config.yaml</li>
+  <li><strong>محدودیت‌های منابع را محدود کنید</strong> — سقف‌های مناسب CPU، حافظه و دیسک</li>
+  <li><strong>رازها را امن نگه دارید</strong> — کلیدهای API در <code>~/.hermes/.env</code> با مجوز فایل درست</li>
+  <li><strong>جفت‌سازی DM را فعال کنید</strong> — به‌جای هاردکد شناسه‌ها از کدهای جفت‌سازی استفاده کنید</li>
+  <li><strong>فهرست مجاز فرمان را بازبینی کنید</strong> — <code>command_allowlist</code> در config.yaml را دوره‌ای ممیزی کنید</li>
+  <li><strong><code>terminal.cwd</code> تنظیم کنید</strong> — نگذارید ایجنت از پوشه‌های حساس کار کند</li>
+  <li><strong>غیر-root اجرا کنید</strong> — هرگز گیت‌وی را به‌عنوان root اجرا نکنید</li>
+  <li><strong>لاگ‌ها را پایش کنید</strong> — <code>~/.hermes/logs/</code> را برای تلاش‌های دسترسی غیرمجاز بررسی کنید</li>
+  <li><strong>به‌روز بمانید</strong> — برای وصله‌های امنیتی مرتب <code>hermes update</code> اجرا کنید</li>
+</ol>
+
+<h3>امن‌سازی کلیدهای API</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># مجوز درست روی فایل .env
+chmod 600 ~/.hermes/.env
+
+# برای سرویس‌های مختلف کلید جدا نگه دارید
+# هرگز فایل‌های .env را در کنترل نسخه commit نکنید</code></pre>
+</div>
+
+<h3>ایزوله‌سازی شبکه</h3>
+<p>برای حداکثر امنیت، گیت‌وی را روی ماشین یا VM جداگانه‌ای اجرا کنید. <code>terminal.backend: ssh</code> را در config.yaml تنظیم کنید، سپس جزئیات میزبان را با متغیرهای محیطی در <code>~/.hermes/.env</code> بدهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>terminal:
+  backend: ssh</code></pre>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash — ~/.hermes/.env</span><button class="copy-btn">کپی</button></div>
+  <pre><code>TERMINAL_SSH_HOST=agent-worker.local
+TERMINAL_SSH_USER=hermes
+TERMINAL_SSH_KEY=~/.ssh/hermes_agent_key</code></pre>
+</div>
+<p>جزئیات اتصال SSH در <code>.env</code> زندگی می‌کنند (نه <code>config.yaml</code>) تا همراه خروجی‌های پروفایل کامیت یا به اشتراک گذاشته نشوند. این اتصالات پیام‌رسانی گیت‌وی را از اجرای فرمان ایجنت جدا نگه می‌دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> بررسی مشورت زنجیرهٔ تأمین</h2>
+<p>هرمس با اسکنر مشورت داخلی عرضه می‌شود که پکیج‌های پایتون venv فعالِ منطبق با کاتالوگ گزینش‌شده‌ای از نسخه‌های شناخته‌شده-آلوده را علامت می‌زند (کرم‌های زنجیرهٔ تأمین مثل مسمومیت <code>mistralai 2.4.6</code> در می ۲۰۲۶). پیاده‌سازی در <code>hermes_cli/security_advisories.py</code> است.</p>
+<p>نحوهٔ اجرا:</p>
+<ul>
+  <li><strong>بنر شروع CLI.</strong> اگر مشورتی تطبیق بخورد یک خط هشدار با اشاره به <code>hermes doctor</code> برای رفع کامل چاپ می‌شود.</li>
+  <li><strong><code>hermes doctor</code>.</strong> هر مشورت فعال را با جزئیات نسخه و دستورالعمل رفع ۲ تا ۴ مرحله‌ای ظاهر می‌کند.</li>
+  <li><strong>شروع گیت‌وی.</strong> در <code>gateway.log</code> لاگ می‌شود؛ اولین پیام تعاملی یک بنر کوتاه اپراتوری می‌گیرد.</li>
+</ul>
+<p>هر مشورت شناسهٔ پایداری دارد. وقتی خواندید و اقدام کردید می‌توانید برای همیشه ردش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes doctor --ack &lt;advisory-id&gt;</code></pre>
+</div>
+<p>رد در <code>config.security.acked_advisories</code> ماندگار و از ری‌استارت جان سالم به در می‌برد. مشورت‌های قدیمی عمداً از کاتالوگ حذف <strong>نمی‌شوند</strong> — ماندنشان باعث می‌شود نصب‌های تازه دربارهٔ نسخه‌های آلودهٔ تاریخی که ممکن است هنوز در یک آینهٔ خصوصی کش شده‌اند هشدار بگیرند.</p>
+<p>خود بررسی فقط-کتابخانه-استاندارد است و از یک lookup ‏<code>importlib.metadata.version()</code> به‌ازای هر مشورت اجرا می‌شود، پس اجرا در هر شروع امن است.</p>
+
+<h3>نصب تنبل وابستگی‌های اختیاری</h3>
+<p>بسیاری از قابلیت‌ها (‏TTS میسترال، ElevenLabs، حافظهٔ Honcho، Bedrock، اسلک، ماتریکس، …) به پکیج‌های پایتونی وابسته‌اند که هر کاربری نمی‌خواهد. هرمس این‌ها را به‌جای نصب مشتاقانه زیر <code>hermes-agent[all]</code>، <strong>تنبلانه</strong> در اولین استفاده نصب می‌کند. پیاده‌سازی در <code>tools/lazy_deps.py</code> است.</p>
+<p>مبادلهای که این درست می‌کند:</p>
+<ul>
+  <li><strong>شکنندگی.</strong> وقتی وابستگی انتقالیِ یک بسته در PyPI ناموجود شود (قرنطینه بدافزار، yank، آپلود خراب)، کل resolve مربوط به <code>[all]</code> شکست می‌خورد و نصب‌های تازه خاموش به سطح کند‌شده برمی‌گشتند — از دست‌دادن ۱۰+ بستهٔ اختیاری نامرتبط یک‌جا. نصب تنبل هر بک‌اند را ایزوله می‌کند تا یک وابستهٔ آلوده نتواند قابلیت‌های نامرتبط را بشکند.</li>
+  <li><strong>تورم.</strong> کاربری که فقط با یک ارائه‌دهنده حرف می‌زند دیگر صدها پکیجی که هرگز import نمی‌کند نمی‌کشد.</li>
+</ul>
+<p>نحوهٔ کار:</p>
+<ol>
+  <li>یک ماژول بک‌اند در ابتدای مسیر اولین-import خود <code>ensure("feature.name")</code> صدا می‌زند.</li>
+  <li>اگر وابستگی‌ها مفقود باشند، <code>ensure</code> مقدار <code>security.allow_lazy_installs</code> در config.yaml (پیش‌فرض <code>true</code>) را بررسی و یک <code>pip install</code> در-دامنهٔ-venv برای مشخصات فهرست‌مجاز اجرا می‌کند.</li>
+  <li>اگر نصب شکست بخورد یا کاربر نصب تنبل را غیرفعال کرده باشد، فراخوانی <code>FeatureUnavailable</code> با stderr واقعی pip و اشاره به <code>hermes tools</code> برمی‌گرداند.</li>
+</ol>
+<p>تضمین‌های امنیتی اجباری‌شده توسط <code>tools/lazy_deps.py</code>:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>تضمین</th><th>یعنی چه</th></tr></thead>
+  <tbody>
+    <tr><td>فقط در-دامنهٔ venv</td><td>نصب‌ها <code>sys.executable</code> در venv فعال را هدف می‌گیرند — هرگز پایتون سیستم</td></tr>
+    <tr><td>فقط PyPI با نام</td><td>مشخصات نگارش <code>"package&gt;=1.0,&lt;2"</code> را می‌پذیرند. بدون <code>--index-url</code>، ‏<code>git+https://</code> یا مسیر file: — یک config.yaml مخرب نمی‌تواند نصب را تغییرمسیر دهد</td></tr>
+    <tr><td>فهرست مجاز</td><td>فقط مشخصاتی که در نگاشت درون-درختی <code>LAZY_DEPS</code> می‌آیند از این مسیر قابل نصب‌اند. غلط تایپی در نام قابلیت معنای «همه‌چیز را نصب کن» ندارد</td></tr>
+    <tr><td>خروج</td><td><code>security.allow_lazy_installs: false</code> را بگذارید تا نصب‌های زمان-اجرا کلاً غیرفعال شوند. برای شبکه‌های محدود یا وضعیت‌های امنیتی سخت‌گیرانه مفید</td></tr>
+    <tr><td>بدون retry خاموش</td><td>شکست‌ها به‌صورت <code>FeatureUnavailable</code> ظاهر می‌شوند — بدون کش وضعیت بد، بدون طوفان retry</td></tr>
+  </tbody>
+</table>
+</div>
+<p>برای غیرفعال‌کردن نصب‌های زمان-اجرا:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>security:
+  allow_lazy_installs: false</code></pre>
+</div>
+<p>وقتی غیرفعال باشد، بک‌اندهایی که به وابستگی‌های اختیاری نیاز دارند به کاربر می‌گویند نصب را دستی اجرا کند‏ (<code>pip install …</code>) یا از <code>hermes tools</code> بک‌اند دیگری انتخاب کند.</p>
+</section>
+
+<div class="pager">
+  <a href="docker.html"><span class="dir">→ قبلی</span><span class="ttl">اجرای داکر</span></a>
+  <a class="next" href="git-worktrees.html"><span class="dir">بعدی ←</span><span class="ttl">گیت‌ورک‌تری</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/security" target="_blank" rel="noopener">Security</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

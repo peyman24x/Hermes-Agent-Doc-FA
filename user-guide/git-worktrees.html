@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>گیت‌ورک‌تری — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/git-worktrees" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>گیت‌ورک‌تری</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>گیت‌ورک‌تری (Git Worktrees)</h1>
+<p>هرمس ایجنت اغلب روی مخازن بزرگ و طولانی‌عمر استفاده می‌شود. وقتی می‌خواهید:</p>
+<ul>
+  <li><strong>چند ایجنت را موازی</strong> روی همان پروژه اجرا کنید، یا</li>
+  <li>بازآرایی‌های آزمایشی را از شاخهٔ اصلی‌تان ایزوله نگه دارید،</li>
+</ul>
+<p><strong>ورک‌تری‌های</strong> گیت امن‌ترین راه دادنِ چک‌اوتِ خودش به هر ایجنت بدون تکثیر کل مخزن هستند.</p>
+<p>این صفحه نشان می‌دهد چطور ورک‌تری را با هرمس ترکیب کنید تا هر نشست پوشهٔ کاری تمیز و ایزوله داشته باشد.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چرا ورک‌تری با هرمس؟</h2>
+<p>هرمس <strong>پوشهٔ کاری جاری</strong> را ریشهٔ پروژه تلقی می‌کند:</p>
+<ul>
+  <li>‏CLI: پوشه‌ای که <code>hermes</code> یا <code>hermes chat</code> را در آن اجرا می‌کنید</li>
+  <li>گیت‌وی‌های پیام‌رسانی: پوشهٔ تنظیم‌شده با <code>terminal.cwd</code> در <code>~/.hermes/config.yaml</code></li>
+</ul>
+<p>اگر چند ایجنت را در <strong>همان چک‌اوت</strong> اجرا کنید، تغییرهایشان می‌تواند در هم تداخل کند:</p>
+<ul>
+  <li>ایجنتی ممکن است فایل‌هایی را که دیگری استفاده می‌کند حذف یا بازنویسی کند.</li>
+  <li>فهمیدن اینکه کدام تغییرها متعلق به کدام آزمایش‌اند سخت‌تر می‌شود.</li>
+</ul>
+<p>با ورک‌تری، هر ایجنت می‌گیرد:</p>
+<ul>
+  <li><strong>شاخه و پوشهٔ کاری خودش</strong></li>
+  <li><strong>تاریخچهٔ چک‌پوینت‌منیجر خودش</strong> برای <code>/rollback</code></li>
+</ul>
+<p>همچنین ببینید: «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/checkpoints-and-rollback" target="_blank" rel="noopener">چک‌پوینت‌ها و /rollback</a>».</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> شروع سریع: ساخت ورک‌تری</h2>
+
+<h3>از داخل نشست: <code>/worktree new</code></h3>
+<p>سریع‌ترین مسیر (الهام‌گرفته از <code>/worktree new</code> مربوط به Copilot CLI): از یک نشست CLI تعاملی، اجرا کنید</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان در چت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/worktree new my-experiment</code></pre>
+</div>
+<p>هرمس <code>.worktrees/my-experiment/</code> را داخل مخزن می‌سازد (شاخهٔ <code>hermes/my-experiment</code>، بر پایهٔ نوکِ راهنِ تازه-fetch‌شده مگر <code>worktree_sync: false</code>)، و ابزارهای ترمینال و فایل نشست را به آن بازهدایت می‌کند — بدون نیاز به ری‌استارت. نام را حذف کنید تا یک درخت تصادفی <code>hermes-&lt;id&gt;</code> بگیرید. <code>/worktree</code> به‌تنهایی درخت فعال را نشان می‌دهد؛ ‏<code>/worktree list</code> همه را فهرست می‌کند. هنگام خروج، درخت فقط اگر کامیت ناپوش‌شده داشته باشد نگه داشته می‌شود، دقیقاً مثل <code>hermes -w</code>.</p>
+
+<h3>دستی با گیت</h3>
+<p>از مخزن اصلی‌تان (دارای <code>.git/</code>)، یک ورک‌تری جدید برای شاخهٔ ویژگی بسازید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># از ریشهٔ مخزن اصلی
+cd /path/to/your/repo
+
+# ساخت شاخه و ورک‌تری جدید در ../repo-feature
+git worktree add ../repo-feature feature/hermes-experiment</code></pre>
+</div>
+<p>این می‌سازد:</p>
+<ul>
+  <li>یک پوشهٔ جدید: <code>../repo-feature</code></li>
+  <li>یک شاخهٔ جدید: <code>feature/hermes-experiment</code> چک‌اوت‌شده در آن پوشه</li>
+</ul>
+<p>حالا می‌توانید به ورک‌تری جدید <code>cd</code> کنید و هرمس را آنجا اجرا کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cd ../repo-feature
+
+# شروع هرمس در ورک‌تری
+hermes</code></pre>
+</div>
+<p>هرمس خواهد:</p>
+<ul>
+  <li><code>../repo-feature</code> را ریشهٔ پروژه ببیند.</li>
+  <li>آن پوشه را برای فایل‌های زمینه، ویرایش کد و ابزارها استفاده کند.</li>
+  <li>یک <strong>تاریخچهٔ چک‌پوینت جدا</strong> برای <code>/rollback</code> در دامنهٔ همین ورک‌تری استفاده کند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> اجرای چند ایجنت به‌صورت موازی</h2>
+<p>می‌توانید چند ورک‌تری، هرکدام با شاخهٔ خودش، بسازید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cd /path/to/your/repo
+
+git worktree add ../repo-experiment-a feature/hermes-a
+git worktree add ../repo-experiment-b feature/hermes-b</code></pre>
+</div>
+<p>در ترمینال‌های جدا:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ترمینال ۱
+cd ../repo-experiment-a
+hermes
+
+# ترمینال ۲
+cd ../repo-experiment-b
+hermes</code></pre>
+</div>
+<p>هر پروسهٔ هرمس:</p>
+<ul>
+  <li>روی شاخهٔ خودش کار می‌کند‏ (<code>feature/hermes-a</code> در برابر <code>feature/hermes-b</code>).</li>
+  <li>چک‌پوینت‌ها را زیر هش مخزن سایهٔ متفاوتی می‌نویسد (مشتق از مسیر ورک‌تری).</li>
+  <li>می‌تواند مستقل <code>/rollback</code> استفاده کند بدون اثر بر دیگری.</li>
+</ul>
+<p>این به‌ویژه مفید است وقتی:</p>
+<ul>
+  <li>بازآرایی‌های گروهی اجرا می‌کنید.</li>
+  <li>رویکردهای متفاوتی به همان کار را امتحان می‌کنید.</li>
+  <li>نشست‌های CLI + گیت‌وی را روی همان مخزن بالادستی جفت می‌کنید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پاک‌سازی امن ورک‌تری‌ها</h2>
+<p>وقتی با آزمایشی تمام کردید:</p>
+<ol>
+  <li>تصمیم بگیرید کار را نگه دارید یا دور بریزید.</li>
+  <li>اگر نگه‌داشتن را می‌خواهید:
+    <ul><li>شاخه را مثل همیشه در شاخهٔ اصلی merge کنید.</li></ul>
+  </li>
+  <li>ورک‌تری را حذف کنید:</li>
+</ol>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cd /path/to/your/repo
+
+# حذف پوشهٔ ورک‌تری و ارجاعش
+git worktree remove ../repo-feature</code></pre>
+</div>
+<p>نکته‌ها:</p>
+<ul>
+  <li><code>git worktree remove</code> از حذف ورک‌تریِ دارای تغییرات کامیت‌نشده بدون force سر باز می‌زند.</li>
+  <li>حذف ورک‌تری شاخه را <strong>خودکار حذف نمی‌کند</strong>؛ می‌توانید با فرمان‌های عادی <code>git branch</code> شاخه را حذف یا نگه دارید.</li>
+  <li>دادهٔ چک‌پوینت هرمس زیر <code>~/.hermes/checkpoints/</code> با حذف ورک‌تری خودکار هرس نمی‌شود، ولی معمولاً بسیار کوچک است.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> بهترین شیوه‌ها</h2>
+<ul>
+  <li><strong>یک ورک‌تری به‌ازای هر آزمایش هرمس</strong>
+    <ul><li>برای هر تغییر اساسی، شاخه/ورک‌تری اختصاصی بسازید. این دیف‌ها را متمرکز و PRها را کوچک و بازبینی‌پذیر نگه می‌دارد.</li></ul>
+  </li>
+  <li><strong>شاخه‌ها را به نام آزمایش بگذارید</strong>
+    <ul><li>مثلاً <code>feature/hermes-checkpoints-docs</code>، ‏<code>feature/hermes-refactor-tests</code>.</li></ul>
+  </li>
+  <li><strong>مکرر کامیت کنید</strong>
+    <ul><li>از کامیت‌های گیت برای نقاط عطف سطح‌بالا استفاده کنید. از «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/checkpoints-and-rollback" target="_blank" rel="noopener">چک‌پوینت‌ها و /rollback</a>» به‌عنوان تور ایمنی برای ویرایش‌های ابزارمحور بین کامیت‌ها.</li></ul>
+  </li>
+  <li><strong>هنگام استفاده از ورک‌تری، هرمس را از ریشهٔ مخزن bare اجرا نکنید</strong>
+    <ul><li>به‌جایش پوشه‌های ورک‌تری را ترجیح دهید تا هر ایجنت دامنهٔ روشنی داشته باشد.</li></ul>
+  </li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> استفاده از <code>hermes -w</code> (حالت ورک‌تری خودکار)</h2>
+<p>هرمس پرچم داخلی <code>-w</code> دارد که <strong>خودکار یک ورک‌تری گیتِ یک‌بارمصرف</strong> با شاخهٔ خودش می‌سازد. لازم نیست ورک‌تری را دستی راه بیندازید — فقط داخل مخزنتان <code>cd</code> کنید و اجرا کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cd /path/to/your/repo
+hermes -w</code></pre>
+</div>
+<p>هرمس خواهد:</p>
+<ul>
+  <li>یک ورک‌تری موقت زیر <code>.worktrees/</code> داخل مخزنتان بسازد.</li>
+  <li>یک شاخهٔ ایزوله چک‌اوت کند (مثلاً <code>hermes/hermes-&lt;hash&gt;</code>).</li>
+  <li>کل نشست CLI را داخل همان ورک‌تری اجرا کند.</li>
+</ul>
+<p>این آسان‌ترین راه گرفتن ایزوله‌سازی ورک‌تری است. می‌توانید با کوئری تکی هم ترکیبش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes -w -z "Fix issue #123"</code></pre>
+</div>
+<p>برای ایجنت‌های موازی، چند ترمینال باز کنید و در هرکدام <code>hermes -w</code> اجرا کنید — هر فراخوانی به‌طور خودکار ورک‌تری و شاخهٔ خودش را می‌گیرد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> جمع‌بندی</h2>
+<ul>
+  <li>از <strong>ورک‌تری‌های گیت</strong> استفاده کنید تا هر نشست هرمس چک‌اوت تمیز خودش را داشته باشد.</li>
+  <li>از <strong>شاخه‌ها</strong> برای ثبت تاریخچهٔ سطح‌بالای آزمایش‌هایتان.</li>
+  <li>از <strong>چک‌پوینت + ‏<code>/rollback</code></strong> برای بازیابی از اشتباهات داخل هر ورک‌تری.</li>
+</ul>
+<p>این ترکیب به شما می‌دهد:</p>
+<ul>
+  <li>تضمین قوی که ایجنت‌ها و آزمایش‌های متفاوت روی هم نمی‌روند.</li>
+  <li>چرخه‌های تکرار سریع با بازیابی آسان از ویرایش‌های بد.</li>
+  <li>پول‌ریکوئست‌های تمیز و بازبینی‌پذیر.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> توسعهٔ سطوح UI روی ورک‌تری‌ها</h2>
+<p>سطوح TypeScript‏ (<code>ui-tui/</code>، ‏<code>apps/desktop/</code>) هرکدام به یک <code>node_modules</code> نیاز دارند که یک <code>npm ci</code> تازه به‌ازای هر ورک‌تری، روی هر شاخه تکثیرش می‌کند. اگر روی TUI یا اپ دسکتاپ از چند ورک‌تری کار می‌کنید، «<a href="https://hermes-agent.nousresearch.com/docs/developer-guide/worktree-ui-dev" target="_blank" rel="noopener">TUI و دسکتاپ از Worktreeها</a>» را برای راهنماهای <code>htui</code> / <code>hgui</code> که با سیم‌لینک یک نصب را به اشتراک می‌گذارند ببینید.</p>
+</section>
+
+<div class="pager">
+  <a href="security.html"><span class="dir">→ قبلی</span><span class="ttl">امنیت</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">چک‌پوینت و بازگشت (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/git-worktrees" target="_blank" rel="noopener">Git Worktrees</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
