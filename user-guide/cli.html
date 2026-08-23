@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رابط خط فرمان (CLI) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/cli" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>رابط خط فرمان (CLI)</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>رابط خط فرمان (CLI)</h1>
+<p>CLI هرمس ایجنت یک رابط کاربری کامل ترمینالی است — نه UI وب. دارای ویرایش چندخطی، تکمیل‌خودکار فرمان‌های اسلش، تاریخچهٔ گفتگو، وقفه-و-بازهدایت، و خروجی استریم‌شدهٔ ابزار. برای آدم‌هایی ساخته شده که در ترمینال زندگی می‌کنند.</p>
+
+<div class="callout tip">
+  <div class="callout-title">💡 راه‌اندازی اولیه</div>
+  <p>یک فرمان — <code>hermes setup --portal</code> — و آمادهٔ <code>hermes chat</code> هستید. به «<a href="https://hermes-agent.nousresearch.com/docs/integrations/nous-portal" target="_blank" rel="noopener">Nous Portal</a>» مراجعه کنید.</p>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>هرمس همچنین یک TUI مدرن با اورلی‌های مودال، انتخاب موسی و ورودی غیرمسدودکننده عرضه می‌کند. با <code>hermes --tui</code> اجرایش کنید — به راهنمای «<a href="tui.html">TUI</a>» مراجعه کنید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> اجرای CLI</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># شروع نشست تعاملی (پیش‌فرض)
+hermes
+
+# حالت تک-کوئری (غیرتعاملی)
+hermes chat -q "Hello"
+
+# تک-کوئری از فایل یا stdin — هیچ چیز شلی-تفسیر نمی‌شود، پس
+# متن دلخواه (گیومه‌ها، $(...)، بک‌تیک‌ها) تحت‌اللفظی می‌رسد
+hermes chat --query-file prompt.txt
+hermes chat --query-file - &lt; prompt.txt
+
+# با مدل مشخص
+hermes chat --model "anthropic/claude-sonnet-4"
+
+# با ارائه‌دهندهٔ مشخص
+hermes chat --provider nous        # استفاده از Nous Portal
+hermes chat --provider openrouter  # اجبار OpenRouter
+
+# با تول‌ست‌های مشخص
+hermes chat --toolsets "web,terminal,skills"
+
+# شروع با یک یا چند مهارتِ از-پیش-بارگذاری‌شده
+hermes -s hermes-agent-dev,github-auth
+hermes chat -s github-pr-workflow -q "open a draft PR"
+
+# ازسرگیری نشست‌های قبلی
+hermes --continue             # ازسرگیری جدیدترین نشست CLI (-c)
+hermes --resume &lt;session_id&gt;  # ازسرگیری نشستی مشخص با شناسه (-r)
+hermes --resume latest        # جدیدترین نشست (مثل -c)
+hermes --resume latest --in ./dir  # جدیدترین نشست ./dir، ماندن در ./dir
+
+# حالت پرگویی (خروجی دیباگ)
+hermes chat --verbose
+
+# ورک‌تری گیت ایزوله (برای اجرای چند ایجنت موازی)
+hermes -w                         # حالت تعاملی در ورک‌تری
+hermes -w -z "Fix issue #123"     # تک-کوئری در ورک‌تری</code></pre>
+</div>
+
+<h3>پاک‌سازی ورک‌تری</h3>
+<p>نشست‌های <code>hermes -w</code> ورک‌تری‌های یک‌بارمصرف زیر <code>&lt;repo&gt;/.worktrees/</code> می‌سازند. یک هرس‌کنندهٔ محافظه‌کار هنگام شروع خودکار اجرا می‌شود (فقط درخت‌های تمیزِ کاملاً-merge‌شدهٔ عبورکرده از آستانهٔ سن را برمی‌دارد)، ولی درخت‌های نگه‌داشته‌شده و شاخه‌های محلیِ merge‌شده روی ماشین‌های شلوغ همچنان انباشته می‌شوند. صریح پس بگیریدشان:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes worktree list              # ممیزی: سن، حجم، حکم و دلیل به‌ازای هر درخت
+hermes worktree prune             # حذف درخت‌های امن + حذف شاخه‌های merge‌شده
+hermes worktree prune --dry-run   # نمایش برنامه بدون تغییر هیچ‌چیز
+hermes worktree prune --trees-only     # شاخه‌های محلی را دست نزن
+hermes worktree prune --branches-only  # ورک‌تری‌ها را دست نزن</code></pre>
+</div>
+<p>درون نشست، <code>/worktree prune [--dry-run]</code> همین کار را می‌کند (و هرگز درختی که نشست در آن اجراست را لمس نمی‌کند).</p>
+<p>تضمین‌های ایمنی (همهٔ حالت‌ها، هر سن):</p>
+<ul>
+  <li>تغییرات <strong>ردیابی‌شدهٔ</strong> کامیت‌نشده هرگز حذف نمی‌شوند.</li>
+  <li><strong>کامیت‌های یکتای ناپوش‌شده</strong> هرگز حذف نمی‌شوند — کامیت‌هایی که با rebase/squash بالادستی merge شده‌اند از طریق هم‌ارزی پچِ <code>git cherry</code> تشخیص داده و merge‌شده حساب می‌شوند، که همان چیزی است که اجازه می‌دهد نشتیِ غالبِ «PR مرج‌شده، درخت برای همیشه نگه‌داشته‌شده» بالاخره پس گرفته شود.</li>
+  <li>درخت‌های <strong>در حال استفاده توسط نشست هرمس در حال اجرا</strong> هرگز لمس نمی‌شوند.</li>
+  <li><strong>خراشِ فقط-untracked</strong> (پیش‌نویس بدنهٔ PR، یادداشت‌ها) قبل از حذف درختش به <code>~/.hermes/archive/worktree-prune/</code> آرشیو می‌شود — هرگز نابود نمی‌گردد.</li>
+  <li>حذف شاخه با محتوا گیت می‌خورد نه با نام: هر شاخهٔ محلی‌ای که همهٔ کامیت‌هایش روی بالادستی است امنِ حذف است؛ شاخه‌های دارای کار یکتا، شاخه‌های چک‌اوت‌شده و <code>main</code>/<code>master</code>/<code>develop</code> همیشه نگه داشته می‌شوند.</li>
+</ul>
+<p>وقتی <code>.worktrees/</code> از ۱۰ درخت یا ۵ گیگابایت بگذرد، شروع یک خط اعلان چاپ می‌کند که به این فرمان‌ها اشاره دارد.</p>
+
+<h3>مدیریت پلاگین</h3>
+<p>فرمان‌های <code>hermes plugins</code> پلاگین‌های بومی هرمس و بسته‌های قابل‌حمل Agent Plugins v1 را از همان گردش‌کار اختیاری مدیریت می‌کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes plugins install owner/repository --no-enable
+hermes plugins list
+hermes plugins enable &lt;plugin-name&gt;
+hermes plugins disable &lt;plugin-name&gt;
+hermes plugins update &lt;plugin-name&gt;
+hermes plugins remove &lt;plugin-name&gt;</code></pre>
+</div>
+<p>بسته‌های قابل‌حمل تا فعال‌سازی صریح غیرفعال می‌مانند. هرمس در حال حاضر Agent Skills قابل‌حمل و مدخل‌های stdio مربوط به MCP را بارگذاری می‌کند. برای زیرمجموعهٔ دقیق پشتیبانی‌شده و مرز اعتماد به «راهنمای توسعه‌دهندهٔ پلاگین ← بسته‌های قابل‌حمل Agent Plugins v1» مراجعه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> چیدمان رابط</h2>
+<p>بنر خوش‌آمدگویی مدل، بک‌اند ترمینال، پوشهٔ کاری، ابزارهای موجود و مهارت‌های نصب‌شده را در یک نگاه نشان می‌دهد.</p>
+
+<h3>نوار وضعیت</h3>
+<p>یک نوار وضعیت پایدار بالای ناحیهٔ ورودی می‌نشیند که در زمان واقعی به‌روز می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">نمونه</span><button class="copy-btn">کپی</button></div>
+  <pre><code> ⚕ claude-sonnet-4-20250514 │ 12.4K/200K │ [██████░░░░] 6% │ $0.06 │ 15m</code></pre>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>عنصر</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td>نام مدل</td><td>مدل فعلی (اگر بلندتر از ۲۶ کاراکتر باشد بریده می‌شود)</td></tr>
+    <tr><td>شمارش توکن</td><td>توکن‌های زمینهٔ استفاده‌شده / حداکثر پنجرهٔ زمینه</td></tr>
+    <tr><td>نوار زمینه</td><td>نشانگر پرشدگی بصری با آستانه‌های رنگ‌بندی‌شده</td></tr>
+    <tr><td>هزینه</td><td>هزینهٔ تخمینی نشست (یا <code>n/a</code> برای مدل‌های ناشناخته/بدون-قیمت)</td></tr>
+    <tr><td>🗜️ N</td><td><strong>شمار فشرده‌سازی زمینه</strong> — چند بار نشستِ در حال اجرا خودکار فشرده شده. با اولین فشرده‌سازی ظاهر می‌شود.</td></tr>
+    <tr><td>▶ N</td><td><strong>کارهای پس‌زمینهٔ فعال</strong> — چند پرامپت <code>/background</code> هنوز در این نشست اجرا هستند. هر وقت حداقل یک کار در پرواز باشد ظاهر می‌شود.</td></tr>
+    <tr><td>مدت</td><td>زمان سپری‌شدهٔ نشست</td></tr>
+    <tr><td>عنوان نشست</td><td>وقتی نشست عنوان گرفت، به‌صورت نشان طلایی به لبهٔ دور سنجاق می‌شود. عناوین بلند قبل از جابه‌جاکردن فیلدهای ضروری مدل و زمینه بریده می‌شوند.</td></tr>
+    <tr><td>⚠ YOLO</td><td><strong>هشدار حالت YOLO</strong> — هر وقت <code>HERMES_YOLO_MODE</code> روشن است نشان داده می‌شود (یا <code>hermes --yolo</code> هنگام اجرا یا <code>/yolo</code> وسط نشست). آینهٔ هشدار خطِ بنر تا فراموش نکنید در حالت خودتأیید هستید.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>نوار با عرض ترمینال سازگار می‌شود — چیدمان کامل در ≥ ۷۶ ستون، فشرده در ۵۲–۷۵، مینیمال (مدل + مدت، به‌علاوهٔ نشان YOLO وقتی فعال) زیر ۵۲.</p>
+<p><strong>کدگذاری رنگ زمینه:</strong></p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>رنگ</th><th>آستانه</th><th>معنا</th></tr></thead>
+  <tbody>
+    <tr><td>سبز</td><td>&lt; ۵۰٪</td><td>جای زیادی هست</td></tr>
+    <tr><td>زرد</td><td>۵۰–۸۰٪</td><td>در حال پُرشدن</td></tr>
+    <tr><td>نارنجی</td><td>۸۰–۹۵٪</td><td>نزدیک شدن به سقف</td></tr>
+    <tr><td>قرمز</td><td>≥ ۹۵٪</td><td>نزدیک سرریز — <code>/compress</code> را در نظر بگیرید</td></tr>
+  </tbody>
+</table>
+</div>
+<p>از <code>/usage</code> برای تفکیک دقیق شامل هزینه‌های به‌ازای-دسته (توکن ورودی در برابر خروجی) استفاده کنید.</p>
+<p>روی ارائه‌دهندهٔ <code>openai-codex</code>، ‏<code>/usage</code> همچنین ریست‌های ذخیره‌شدهٔ سقف مصرف حساب ChatGPT شما را نشان می‌دهد («You have N resets banked - use /usage reset to activate»). ‏<code>/usage reset</code> یکی از ریست‌های ذخیره‌شده را نقد می‌کند و سقف‌های ۵ ساعته و هفتگی‌تان را کامل بازیابی می‌کند. هرمس تا وقتی سقف‌هاتان تمام نشده نقد‌کردن را رد می‌کند (یک ریستِ ذخیره‌شده کل سهمیه را برمی‌گرداند، پس خرج‌کردنش زودهنگام هدر دادنش است) — ‏<code>/usage reset --force</code> بدهید تا به‌هرحال نقد شود.</p>
+
+<h3>نمایش ازسرگیری نشست</h3>
+<p>هنگام ازسرگیری نشستی قبلی‏ (<code>hermes -c</code> یا <code>hermes --resume &lt;id&gt;</code>)، پنلی با نام «Previous Conversation» بین بنر و پرامپت ورودی ظاهر می‌شود که خلاصهٔ فشرده‌ای از تاریخچهٔ گفتگو نشان می‌دهد. برای جزئیات و پیکربندی به «<a href="sessions.html">نشست‌ها ← خلاصهٔ گفتگو هنگام ازسرگیری</a>» مراجعه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> کلیدهای میان‌بر</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید</th><th>اقدام</th></tr></thead>
+  <tbody>
+    <tr><td><code>Enter</code></td><td>ارسال پیام</td></tr>
+    <tr><td><code>Alt+Enter</code>، ‏<code>Ctrl+J</code> یا <code>Shift+Enter</code></td><td>خط جدید (ورودی چندخطی). ‏<code>Shift+Enter</code> ترمینالی می‌خواهد که آن را از <code>Enter</code> تفکیک کند — پایین را ببینید. در ویندوز ترمینال، ‏<code>Alt+Enter</code> را خود ترمینال می‌گیرد (سوییچ تمام‌صفحه)؛ به‌جایش <code>Ctrl+Enter</code> یا <code>Ctrl+J</code> استفاده کنید.</td></tr>
+    <tr><td><code>Alt+V</code></td><td>چسباندن تصویر از کلیپ‌بورد وقتی ترمینال پشتیبانی می‌کند</td></tr>
+    <tr><td><code>Ctrl+V</code></td><td>چسباندن متن و پیوست فرصت‌طلبانهٔ تصاویر کلیپ‌بورد</td></tr>
+    <tr><td><code>Ctrl+B</code></td><td>شروع/توقف ضبط صوتی وقتی حالت صوتی فعال است‏ (<code>voice.record_key</code>، پیش‌فرض: <code>ctrl+b</code>)</td></tr>
+    <tr><td><code>Ctrl+G</code></td><td>باز کردن بافر ورودی فعلی در <code>$EDITOR</code>‏ (vim/nvim/nano/VS Code/و غیره). ذخیره و خروج، متن ویرایش‌شده را به‌عنوان پرامپت بعدی می‌فرستد — ایده‌آل برای پرامپت‌های بلند چندپاراگرافی.</td></tr>
+    <tr><td><code>Ctrl+X Ctrl+E</code></td><td>اتصال جایگزین سبک Emacs برای ادیتور خارجی (همان رفتار <code>Ctrl+G</code>).</td></tr>
+    <tr><td><code>Ctrl+S</code></td><td><strong>کنارگذاشتن پرامپت.</strong> پیش‌نویس فعلی را پارک و کامپوزر را پاک می‌کند تا اول چیز دیگری بفرستید. روی کامپوزر خالی دوباره <code>Ctrl+S</code> بزنید تا پیش‌نویس برگردد (مکان‌نما در انتها، تصاویر پیوست‌شده بازیابی). فشارهای مکرر به‌جای بازنویسی، پشته می‌سازند، پس پیش‌نویس قبلی هرگز خاموش گم نمی‌شود — با دو یا بیشتر کنارگذاشته، ‏<code>Ctrl+S</code> پنل مرور را باز می‌کند‏ (<code>↑</code>/<code>↓</code> ناوبری، ‏<code>Enter</code> بازیابی، ‏<code>D</code> دورانداختن، ‏<code>Esc</code> یا <code>Ctrl+S</code> بستن). نشان <code>📌 N</code> در نوار وضعیت می‌گوید چند پیش‌نویس پارک‌اند. پیش‌نویس‌های چندخطی دقیقاً رفت‌وبرگشت می‌کنند، شامل خطوط خالی. کنارگذاشتن فقط در حافظهٔ همین نشست است — چیزی روی دیسک نوشته نمی‌شود، چون پیش‌نویس‌ها اغلب راز دارند.</td></tr>
+    <tr><td><code>Ctrl+C</code></td><td>وقفهٔ ایجنت (دوبار در ۲ ثانیه برای خروج اجباری)</td></tr>
+    <tr><td><code>Ctrl+D</code></td><td>خروج</td></tr>
+    <tr><td><code>Ctrl+Z</code></td><td>معلق‌کردن هرمس به پس‌زمینه (فقط یونیکس). در شل <code>fg</code> را اجرا کنید تا برگردد.</td></tr>
+    <tr><td><code>Tab</code></td><td>پذیرش پیشنهاد-خودکار (متن شبح) یا تکمیل فرمان‌های اسلش</td></tr>
+    <tr><td><code>!&lt;command&gt;</code></td><td><strong>حالت شل</strong> — خودتان یک فرمان شلی اجرا کنید بدون خرج یک نوبت مدل (مثلاً <code>!git status</code>، ‏<code>!pytest -x</code>). پایین را ببینید.</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>پیش‌نمایش چسباندن چندخطی.</strong> وقتی بلوکی چندخطی می‌چسبانید، CLI به‌جای ریختن کل محتوا در اسکرول‌بک، یک پیش‌نمایش فشردهٔ یک‌خطی طنین می‌دهد‏ (<code>[pasted: 47 lines, 1,842 chars — press Enter to send]</code>). محتوای کامل همچنان همان چیزی است که ارسال می‌شود؛ این فقط پولیش نمایشی است.</p>
+
+<h3>حالت شل <code>!</code></h3>
+<p>خطی را با <code>!</code> شروع کنید تا به‌عنوان فرمان شلی اجرا شود به‌جای ارسال به ایجنت:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">نمونه</span><button class="copy-btn">کپی</button></div>
+  <pre><code>&gt; !git status
+&gt; !ls -la
+&gt; !pytest -x tests/cli</code></pre>
+</div>
+<ul>
+  <li><strong>هزینهٔ صفر.</strong> مدل هرگز فراخوانی نمی‌شود — بدون فراخوانی API، بدون توکن، بدون تأخیر.</li>
+  <li><strong>هیچ‌چیز وارد گفتگو نمی‌شود.</strong> فرمان و خروجیش به تاریخچه اضافه نمی‌شوند، پس زمینه‌تان تمیز و کش پرامپت دست‌نخورده می‌ماند.</li>
+  <li><strong>همان‌جایی اجرا می‌شود که ابزار <code>terminal</code> ایجنت اجرا می‌شود.</strong> از پوشهٔ کاری نشست استفاده می‌کند، پس <code>!pwd</code> با چیزی که ایجنت می‌دید مطابق است.</li>
+  <li><strong>تأییدها همچنان اعمال‌اند.</strong> فرمان خطرناک‏ (<code>rm -rf</code>، نوشتن در <code>~/.hermes/config.yaml</code> و غیره) از همان اعلان تأییدی می‌گذرد که ابزار <code>terminal</code> ایجنت استفاده می‌کند. <code>!</code> میان‌بر هزینه/تأخیر است، نه دورزدن امنیتی.</li>
+  <li><strong>خروج‌های غیرصفر نشان داده می‌شوند.</strong> فرمان شکست‌خورده بعد از خروجیش <code>! exited &lt;code&gt;</code> چاپ می‌کند.</li>
+  <li><code>!</code> به‌تنهایی یک یادآور یک‌خطی چاپ می‌کند.</li>
+</ul>
+<p>حالت شل فقط CLI است. پلتفرم‌های گیت‌وی‏ (دیسکورد، تلگرام، اسلک) و اجراهای کرونی آن را نادیده می‌گیرند — آن کاربران شل خودشان را دارند.</p>
+<p><strong>حذف مارک‌داون در پاسخ‌های نهایی.</strong> CLI پرگفتارترین حصارهای مارک‌داون و پوشش‌های <code>**پررنگ**</code> / <code>*مورب*</code> را از پاسخ‌های <em>نهایی</em> ایجنت حذف می‌کند تا به‌صورت نثر ترمینالیِ خوانا رندر شوند نه سورس خام. بلوک‌های کد و فهرست‌ها حفظ می‌شوند. این به پلتفرم‌های گیت‌وی یا نتایج ابزار اثری ندارد — آن‌ها مارک‌داونشان را برای رندر بومی نگه می‌دارند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> فرمان‌های اسلش</h2>
+<p><code>/</code> را تایپ کنید تا دراپ‌داون تکمیل‌خودکار ببینید. هرمس مجموعهٔ بزرگی از فرمان‌های اسلش CLI، فرمان‌های داینامیک مهارت و فرمان‌های سریع تعریف‌شده توسط کاربر پشتیبانی می‌کند. نمونه‌های رایج:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرمان</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>/help</code></td><td>نمایش راهنمای فرمان‌ها</td></tr>
+    <tr><td><code>/model</code></td><td>نمایش یا تغییر مدل فعلی</td></tr>
+    <tr><td><code>/tools</code></td><td>فهرست ابزارهای در دسترس</td></tr>
+    <tr><td><code>/skills browse</code></td><td>مرور هاب مهارت‌ها و مهارت‌های اختیاری رسمی</td></tr>
+    <tr><td><code>/background &lt;prompt&gt;</code></td><td>اجرای یک پرامپت در نشست پس‌زمینهٔ جداگانه</td></tr>
+    <tr><td><code>/skin</code></td><td>نمایش یا تعویض پوستهٔ فعال CLI</td></tr>
+    <tr><td><code>/voice on</code></td><td>فعال‌سازی حالت صوتی CLI‏ (برای ضبط <code>Ctrl+B</code>)</td></tr>
+    <tr><td><code>/voice tts</code></td><td>تغییر وضعیت پخش گفتاری پاسخ‌های هرمس</td></tr>
+    <tr><td><code>/reasoning high</code></td><td>افزایش تلاش استدلال</td></tr>
+    <tr><td><code>/title My Session</code></td><td>نام‌گذاری نشست فعلی</td></tr>
+    <tr><td><code>/status</code></td><td>اطلاعات نشست — مدل/پروفایل/توکن/مدت — و سپس بلوک محلی <strong>Session recap</strong> (شمارش نوبت‌های اخیر، ابزارهای پراستفاده، فایل‌های لمس‌شده، آخرین پرامپت کاربر + پاسخ دستیار). محاسبهٔ کاملاً محلی؛ بدون فراخوانی LLM.</td></tr>
+    <tr><td><code>/context [all]</code></td><td>تفکیک بصری مصرف زمینه — شبکهٔ بلوک گلیفی + جدول توکن به‌ازای-دسته (پرامپت سیستمی / ابزارها / مهارت‌ها / حافظه / گفتگو / فضای آزاد). ‏<code>/context all</code> هزینه‌های به‌ازای-مهارت و به‌ازای-تول‌ست را هم می‌آورد.</td></tr>
+    <tr><td><code>/sessions</code></td><td>انتخاب‌گر تعاملی نشست داخل خود CLI کلاسیک (همان سطح TUI). تایپ برای فیلتر، کلیدهای جهت برای ناوبری، ‏Enter برای ازسرگیری.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>برای فهرست کامل داخلیِ CLI و پیام‌رسانی، به «مرجع فرمان‌های اسلش» مراجعه کنید. برای راه‌اندازی، ارائه‌دهندگان، تنظیم سکوت و استفادهٔ صوتی/دیسکورد به «حالت صوتی» مراجعه کنید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>فرمان‌ها بدون حساسیت به بزرگی/کوچکی‌اند — ‏<code>/HELP</code> مثل <code>/help</code> کار می‌کند. مهارت‌های نصب‌شده هم خودکار فرمان اسلش می‌شوند.</p>
+</div>
+
+<h3>فرمان‌های سریع</h3>
+<p>می‌توانید فرمان‌های سفارشی تعریف کنید که فرمان‌های شلی را بدون فراخوانی LLM فوری اجرا کنند. این‌ها هم در CLI و هم در پلتفرم‌های پیام‌رسانی (تلگرام، دیسکورد و غیره) کار می‌کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>quick_commands:
+  status:
+    type: exec
+    command: systemctl status hermes-agent
+  gpu:
+    type: exec
+    command: nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv,noheader
+  restart:
+    type: alias
+    target: /gateway restart</code></pre>
+</div>
+<p>سپس در هر چتی <code>/status</code>، ‏<code>/gpu</code> یا <code>/restart</code> را تایپ کنید. برای مثال‌های بیشتر به راهنمای پیکربندی ← فرمان‌های سریع مراجعه کنید.</p>
+
+<h3>پیش‌بارگذاری مهارت‌ها هنگام اجرا</h3>
+<p>اگر از قبل می‌دانید کدام مهارت‌ها را برای نشست فعال می‌خواهید، هنگام اجرا پاسشان دهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes -s hermes-agent-dev,github-auth
+hermes chat -s github-pr-workflow -s github-auth</code></pre>
+</div>
+<p>هرمس هر مهارتِ نام‌برده را پیش از اولین نوبت در پرامپت نشست بارگذاری می‌کند. همان پرچم در حالت تعاملی و تک-کوئری کار می‌کند.</p>
+
+<h3>فرمان‌های اسلش مهارت</h3>
+<p>هر مهارتِ نصب‌شده در <code>~/.hermes/skills/</code> خودکار به‌عنوان فرمان اسلش ثبت می‌شود. نام مهارت می‌شود فرمان:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">نمونه</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/gif-search funny cats
+/axolotl help me fine-tune Llama 3 on my dataset
+/github-pr-workflow create a PR for the auth refactor
+
+# فقط نام مهارت آن را بار می‌کند و ایجنت می‌پرسد چه می‌خواهید:
+/excalidraw</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> شخصیت‌ها</h2>
+<p>یک شخصیت از-پیش-تعریف‌شده بگذارید تا لحن ایجنت عوض شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان در چت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/personality pirate
+/personality kawaii
+/personality concise</code></pre>
+</div>
+<p>شخصیت‌های داخلی شامل: <code>helpful</code>، ‏<code>concise</code>، ‏<code>technical</code>، ‏<code>creative</code>، ‏<code>teacher</code>، ‏<code>kawaii</code>، ‏<code>catgirl</code>، ‏<code>pirate</code>، ‏<code>shakespeare</code>، ‏<code>surfer</code>، ‏<code>noir</code>، ‏<code>uwu</code>، ‏<code>philosopher</code>، ‏<code>hype</code>.</p>
+<p>برای برگشتن به پیش‌فرض (بدون اورلی)، از <code>/personality none</code> استفاده کنید — <code>default</code> و <code>neutral</code> هم کار می‌کنند.</p>
+<p>همچنین می‌توانید شخصیت‌های سفارشی در <code>~/.hermes/config.yaml</code> تعریف کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>personalities:
+  helpful: "You are a helpful, friendly AI assistant."
+  kawaii: "You are a kawaii assistant! Use cute expressions..."
+  pirate: "Arrr! Ye be talkin' to Captain Hermes..."
+  # خودتان اضافه کنید!</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> ورودی چندخطی</h2>
+<p>دو راه برای واردکردن پیام‌های چندخطی هست:</p>
+<ol>
+  <li><strong><code>Alt+Enter</code>، ‏<code>Ctrl+J</code> یا <code>Shift+Enter</code></strong> — خط جدید درج می‌کند</li>
+  <li><strong>ادامه با بک‌اسلش</strong> — خطی را با <code>\</code> تمام کنید تا ادامه یابد:</li>
+</ol>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">نمونه</span><button class="copy-btn">کپی</button></div>
+  <pre><code>❯ Write a function that:\
+  1. Takes a list of numbers\
+  2. Returns the sum</code></pre>
+</div>
+<p><code>Ctrl+J</code> و ادامهٔ بک‌اسلش به‌طور پیش‌فرض فعال‌اند، هم‌راستا با میان‌برهای چندخطی Claude Code / ‏Codex / ‏OpenCode. روی ترمینال‌های پشتیبان‌شده مثل iTerm2، هرمس گزارش‌دهی کلید گسترده هم می‌خواهد تا <code>Shift+Enter</code> به‌صورت کلید خط-جدیدِ متمایز برسد. اگر ترمینال‌تان برای <code>Enter</code> ساده LF می‌فرستد و جایگزین قدیمیِ «Ctrl+J به‌عنوان-ارسال» را می‌خواهید، خارج شوید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  cli_multiline_shortcuts: false</code></pre>
+</div>
+<div class="callout note">
+  <div class="callout-title">ℹ️ توجه</div>
+  <p>چسباندن متن چندخطی پشتیبانی می‌شود — از هر کدام از کلیدهای خط-جدین بالا استفاده کنید، یا ساده محتوا را مستقیم پیست کنید.</p>
+</div>
+
+<h3>سازگاری Shift+Enter</h3>
+<p>اغلب ترمینال‌ها به‌طور پیش‌فرض برای <code>Enter</code> و <code>Shift+Enter</code> همان دنبالهٔ بایتی را می‌فرستند، پس اپلیکیشن‌ها نمی‌توانند تفکیکشان کنند. هرمس <code>Shift+Enter</code> را فقط وقتی می‌شناسد که ترمینال دنباله‌ای متمایز از طریق <a href="https://sw.kovidgoyal.net/kitty/keyboard-protocol/" target="_blank" rel="noopener">پروتکل کیبورد Kitty</a> یا حالت <code>modifyOtherKeys</code> مربوط به xterm بفرستد.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ترمینال</th><th>وضعیت</th></tr></thead>
+  <tbody>
+    <tr><td>‏Kitty، ‏foot، ‏WezTerm، ‏Ghostty</td><td><code>Shift+Enter</code> متمایز به‌طور پیش‌فرض فعال</td></tr>
+    <tr><td>‏iTerm2 (اخیر)، ‏Alacritty، ‏ترمینال VS Code، ‏Warp</td><td>با فعال‌سازی پروتکل Kitty در تنظیمات پشتیبانی می‌شود</td></tr>
+    <tr><td>‏Windows Terminal Preview نسخهٔ ۱.۲۵+</td><td>با فعال‌سازی پروتکل Kitty در تنظیمات پشتیبانی می‌شود</td></tr>
+    <tr><td>‏Terminal.app مک، ویندوز ترمینال پایدارِ خام</td><td>پشتیبانی نشده — <code>Shift+Enter</code> از <code>Enter</code> تفکیک‌ناپذیر است</td></tr>
+  </tbody>
+</table>
+</div>
+<p>جایی که ترمینال نمی‌تواند تفکیک کند، <code>Alt+Enter</code> و <code>Ctrl+J</code> به‌طور پیش‌فرض به کار ادامه می‌دهند. <strong>به‌طور خاص روی ویندوز ترمینال، <code>Alt+Enter</code> را خود ترمینال می‌گیرد (تمام‌صفحه را سوییچ می‌کند) و هرگز به هرمس نمی‌رسد — برای خط جدید از <code>Ctrl+Enter</code> (که به‌صورت <code>Ctrl+J</code> تحویل می‌شود) یا مستقیم <code>Ctrl+J</code> استفاده کنید.</strong></p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> بازهدایت ایجنت میان-نوبت</h2>
+<p>وقتی ایجنت در حال کار است، می‌توانید بدون شروع نوبت جدید اصلاحی بفرستید:</p>
+<ul>
+  <li><strong>پیام جدید تایپ + ‏Enter</strong> — نوبت فعال را با اصلاح شما بازهدایت می‌کند</li>
+  <li><strong><code>Ctrl+C</code></strong> — وقفهٔ عملیات فعلی (دو بار در ۲ ثانیه برای خروج اجباری)</li>
+  <li>کار ابزاری و استدلالِ نمایش‌داده‌شدهٔ تکمیل‌شده در زمینه می‌مانند</li>
+  <li>ابزارِ در حال اجرا پیش از اعمال اصلاح به مرز امنش می‌رسد</li>
+</ul>
+
+<h3>حالت ورودی هنگام اشغال</h3>
+<p>کلید پیکربندی <code>display.busy_input_mode</code> تعیین می‌کند هنگام فشردن Enter حین کار ایجنت چه شود:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>حالت</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>"interrupt"</code> (پیش‌فرض)</td><td>پیام شما نوبت فعال را بازهدایت می‌کند. تولید مدل با حفظ استدلالِ نمایش‌داده‌شده و کارِ تکمیل‌شده دوباره شروع می‌شود؛ ابزارهای در حال اجرا اول تمام می‌شوند</td></tr>
+    <tr><td><code>"queue"</code></td><td>پیام شما خاموش صف و پس از اتمام ایجنت به‌عنوان نوبت بعدی ارسال می‌شود</td></tr>
+    <tr><td><code>"steer"</code></td><td>پیام شما از طریق <code>/steer</code> به اجرای فعلی تزریق و بعد از فراخوانی ابزار بعدی به ایجنت می‌رسد — بدون وقفه، بدون نوبت جدید</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  busy_input_mode: "steer"   # یا "queue" یا "interrupt" (پیش‌فرض)</code></pre>
+</div>
+<p>حالت <code>"queue"</code> یک نوبت پیگیریِ جداگانه آماده می‌کند. <code>"steer"</code> همیشه تا مرز نتیجهٔ ابزار بعدی صبر می‌کند. حالت پیش‌فرض <code>"interrupt"</code> حین تولید مدل زودتر پاسخ می‌دهد در حالی که از لغو ابزارِ در حال اجرا خودداری می‌کند. وقتی می‌خواهید نوبت و کار پیش‌زمینه‌اش لغو شود از <code>/stop</code> استفاده کنید. مقادیر ناشناخته به <code>"interrupt"</code> سقوط می‌کنند.</p>
+<p><code>"steer"</code> دو بازگشت خودکار دارد: اگر ایجنت هنوز شروع نشده، یا تصویری پیوست شده، پیام به رفتار <code>"queue"</code> برمی‌گردد تا هیچ‌چیز از دست نرود.</p>
+<p>داخل CLI هم می‌توانید عوضش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان‌ها</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/busy queue
+/busy steer
+/busy interrupt
+/busy status</code></pre>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 راهنمای لمس-اول</div>
+  <p>اولین باری که حین کار هرمس Enter بزنید، هرمس یک یادآور یک‌خطی چاپ می‌کند که پیچ <code>/busy</code> را توضیح می‌دهد. فقط یک بار به‌ازای نصب صادر می‌شود؛ <code>onboarding.seen.busy_input_prompt</code> در config.yaml ثبت می‌کند که نشان داده شده. آن کلید را حذف کنید تا نکته دوباره بیاید.</p>
+</div>
+
+<h3>معلق‌کردن به پس‌زمینه</h3>
+<p>روی سیستم‌های یونیکسی، <strong><code>Ctrl+Z</code></strong> را بزنید تا هرمس مثل هر پروسهٔ ترمینالیِ دیگری به پس‌زمینه معلق شود. شل تأیید چاپ می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Hermes Agent has been suspended. Run `fg` to bring Hermes Agent back.</code></pre>
+</div>
+<p>در شل خود <code>fg</code> را تایپ کنید تا نشست دقیقاً از همان‌جا که رها کردید ادامه یابد. روی ویندوز پشتیبانی نمی‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> نمایش پیشرفت ابزار</h2>
+<p>‏CLI حین کار ایجنت بازخورد انیمیت‌شده نشان می‌دهد:</p>
+<p><strong>انیمیشن تفکر</strong> (حین فراخوانی‌های API):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">نمونه</span><button class="copy-btn">کپی</button></div>
+  <pre><code>  ◜ (｡•́︿•̀｡) pondering... (1.2s)
+  ◠ (⊙_⊙) contemplating... (2.4s)
+  ✧٩(ˊᗜˋ*)و✧ got it! (3.1s)</code></pre>
+</div>
+<p><strong>فید اجرای ابزار:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">نمونه</span><button class="copy-btn">کپی</button></div>
+  <pre><code>  ┊ 💻 terminal `ls -la` (0.3s)
+  ┊ 🔍 web_search (1.2s)
+  ┊ 📄 web_extract (2.1s)</code></pre>
+</div>
+<p>با <code>/verbose</code> بین حالت‌های نمایش بچرخید: <code>off → new → all → verbose</code>. این فرمان برای پلتفرم‌های پیام‌رسانی هم قابل فعال‌سازی است — به بخش تنظیمات نمایش در مستندات پیکربندی مراجعه کنید.</p>
+
+<h3>طول پیش‌نمایش ابزار</h3>
+<p>کلید پیکربندی <code>display.tool_preview_length</code> حداکثر تعداد کاراکترهای نشان‌داده‌شده در خطوط پیش‌نمایش فراخوانی ابزار را کنترل می‌کند (مثلاً مسیرهای فایل، فرمان‌های ترمینال). پیش‌فرض <code>0</code> است یعنی بدون سقف — مسیرها و فرمان‌های کامل نمایش داده می‌شوند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  tool_preview_length: 80   # بریدن پیش‌نمایش ابزار به ۸۰ کاراکتر (۰ = بدون سقف)</code></pre>
+</div>
+<p>روی ترمینال‌های باریک یا وقتی آرگومان‌های ابزار مسیرهای فایل خیلی بلند دارند مفید است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> مدیریت نشست</h2>
+
+<h3>ازسرگیری نشست‌ها</h3>
+<p>وقتی از نشست CLI خارج می‌شوید، یک فرمان ازسرگیری چاپ می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Resume this session with:
+  hermes --resume 20260225_143052_a1b2c3
+
+Session:        20260225_143052_a1b2c3
+Duration:       12m 34s
+Messages:       28 (5 user, 18 tool calls)</code></pre>
+</div>
+<p>گزینه‌های ازسرگیری:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes --continue                          # ازسرگیری جدیدترین نشست CLI
+hermes -c                                  # شکل کوتاه
+hermes -c "my project"                     # ازسرگیری نشست نام‌دار (جدیدترین تبار)
+hermes --resume 20260225_143052_a1b2c3     # ازسرگیری نشست مشخص با شناسه
+hermes --resume "refactoring auth"         # ازسرگیری با عنوان
+hermes --resume latest                     # جدیدترین نشست (مثل -c)
+hermes --resume latest --in ./my-project   # جدیدترین نشست ورک‌اسپیس ./my-project
+hermes -r 20260225_143052_a1b2c3           # شکل کوتاه</code></pre>
+</div>
+<p>ازسرگیری، تاریخچهٔ کامل گفتگو را از SQLite بازیابی می‌کند. ایجنت همهٔ پیام‌ها، فراخوانی‌های ابزار و پاسخ‌های قبلی را می‌بیند — درست انگار هرگز نرفته بودید.</p>
+<p>درون چت از <code>/title My Session Name</code> برای نام‌گذاری نشست فعلی استفاده کنید، یا از خط فرمان <code>hermes sessions rename &lt;id&gt; &lt;title&gt;</code>. برای مرور نشست‌های گذشته <code>hermes sessions list</code>.</p>
+
+<h3>ذخیره‌گاه نشست</h3>
+<p>نشست‌های CLI در دیتابیس وضعیت SQLite هرمس زیر <code>~/.hermes/state.db</code> ذخیره می‌شوند. دیتابیس نگه می‌دارد:</p>
+<ul>
+  <li>فرادادهٔ نشست (شناسه، عنوان، مهرهای زمانی، شمارنده‌های توکن)</li>
+  <li>تاریخچهٔ پیام</li>
+  <li>تبار در سراسر نشست‌های فشرده/ازسرگرفته</li>
+  <li>اندیس‌های جستجوی تمام‌متنِ استفاده‌شده توسط <code>session_search</code></li>
+</ul>
+<p>برخی آداپتورهای پیام‌رسانی همچنین فایل‌های رونوشت به‌ازای-پلتفرم را کنار دیتابیس نگه می‌دارند، اما خود CLI از مخزن نشست SQLite ازسر می‌گیرد.</p>
+
+<h3>فشرده‌سازی زمینه</h3>
+<p>گفتگوهای طولانی هنگام نزدیک‌شدن به سقف زمینه خودکار خلاصه می‌شوند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — در ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>compression:
+  enabled: true
+  threshold: 0.50    # فشرده‌سازی در ۵۰٪ سقف زمینه به‌طور پیش‌فرض
+
+# مدل خلاصه‌سازی زیر auxiliary پیکربندی می‌شود:
+auxiliary:
+  compression:
+    model: ""  # خالی بگذارید تا مدل چت اصلی استفاده شود (پیش‌فرض). یا یک مدل سریع ارزان پین کنید، مثل "google/gemini-3-flash-preview".</code></pre>
+</div>
+<p>وقتی فشرده‌سازی تریگر می‌شود، نوبت‌های میانی خلاصه می‌شوند در حالی که ۳ نوبت اول و ۲۰ نوبت آخر همیشه حفظ می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> نشست‌های پس‌زمینه</h2>
+<p>یک پرامپت را در نشست پس‌زمینهٔ جداگانه اجرا کنید در حالی که به استفاده از CLI برای کارهای دیگر ادامه می‌دهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان در چت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/background Analyze the logs in /var/log and summarize any errors from today</code></pre>
+</div>
+<p>هرمس بلافاصله کار را تأیید و پرامپت را به شما برمی‌گرداند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>🔄 Background task #1 started: "Analyze the logs in /var/log and summarize..."
+   Task ID: bg_143022_a1b2c3</code></pre>
+</div>
+
+<h3>چگونه کار می‌کند</h3>
+<p>هر پرامپت <code>/background</code> یک <strong>نشست ایجنت کاملاً جدا</strong> در نخ دیمن تولید می‌کند:</p>
+<ul>
+  <li><strong>گفتگوی ایزوله</strong> — ایجنت پس‌زمینه هیچ دانشی از تاریخچهٔ نشست فعلی شما ندارد. فقط پرامپتی که می‌دهید را دریافت می‌کند.</li>
+  <li><strong>همان پیکربندی</strong> — ایجنت پس‌زمینه مدل، ارائه‌دهنده، تول‌ست‌ها، تنظیمات استدلال و مدل fallback شما را از نشست فعلی به ارث می‌برد.</li>
+  <li><strong>غیرمسدودکننده</strong> — نشست پیش‌زمینه‌تان کاملاً تعاملی می‌ماند. می‌توانید چت کنید، فرمان اجرا کنید یا حتی کارهای پس‌زمینهٔ بیشتری شروع کنید.</li>
+  <li><strong>چند کار</strong> — می‌توانید چند کار پس‌زمینه را هم‌زمان اجرا کنید. هر کدام شناسهٔ شماره‌دار خودش را می‌گیرد.</li>
+</ul>
+
+<h3>نتایج</h3>
+<p>وقتی کار پس‌زمینه تمام شد، نتیجه به‌صورت پنلی در ترمینال شما ظاهر می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">نمونه</span><button class="copy-btn">کپی</button></div>
+  <pre><code>╭─ ⚕ Hermes (background #1) ──────────────────────────────────╮
+│ Found 3 errors in syslog from today:                         │
+│ 1. OOM killer invoked at 03:22 — killed process nginx        │
+│ 2. Disk I/O error on /dev/sda1 at 07:15                      │
+│ 3. Failed SSH login attempts from 192.168.1.50 at 14:30      │
+╰──────────────────────────────────────────────────────────────╯</code></pre>
+</div>
+<p>اگر کار شکست بخورد، به‌جایش اعلان خطا می‌بینید. اگر <code>display.bell_on_complete</code> در پیکربندی‌تان فعال باشد، زنگ ترمینال با اتمام کار به صدا درمی‌آید.</p>
+
+<h3>موارد استفاده</h3>
+<ul>
+  <li><strong>پژوهش طولانی</strong> — «‏/background research the latest developments in quantum error correction» در حالی که روی کد کار می‌کنید</li>
+  <li><strong>پردازش فایل</strong> — «‏/background analyze all Python files in this repo and list any security issues» در حالی که به گفتگو ادامه می‌دهید</li>
+  <li><strong>تحقیقات موازی</strong> — چند کار پس‌زمینه را برای کاوش هم‌زمان زوایای مختلف شروع کنید</li>
+</ul>
+<div class="callout note">
+  <div class="callout-title">ℹ️ توجه</div>
+  <p>نشست‌های پس‌زمینه در تاریخچهٔ گفتگوی اصلی‌تان ظاهر نمی‌شوند. نشست‌های مستقلی با شناسهٔ کار خودشان‌اند (مثلاً <code>bg_143022_a1b2c3</code>).</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> حالت ساکت</h2>
+<p>به‌طور پیش‌فرض CLI در حالت ساکت اجرا می‌شود که:</p>
+<ul>
+  <li>لاگ‌های پرگوی ابزارها را سرکوب می‌کند</li>
+  <li>بازخورد انیمیت‌شدهٔ سبک kawaii را فعال می‌کند</li>
+  <li>خروجی را تمیز و کاربرپسند نگه می‌دارد</li>
+</ul>
+<p>برای خروجی دیباگ:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes chat --verbose</code></pre>
+</div>
+</section>
+
+<div class="pager">
+  <a href="tui.html"><span class="dir">→ قبلی</span><span class="ttl">رابط ترمینال مدرن (TUI)</span></a>
+  <a class="next" href="configuring-models.html"><span class="dir">بعدی ←</span><span class="ttl">پیکربندی مدل‌ها</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/cli" target="_blank" rel="noopener">CLI Interface</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

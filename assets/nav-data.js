@@ -11,10 +11,10 @@ window.HERMES_NAV = [
   { p:"getting-started/nix-setup.html",        t:"نصب با Nix",                                  d:0 }
 ]},
 { id:"user-guide", cat:"⚙️ کار با Hermes", pages:[
-  { p:"user-guide/cli.html",                        t:"رابط خط فرمان (CLI)",              d:0 },
+  { p:"user-guide/cli.html",                        t:"رابط خط فرمان (CLI)",              d:1 },
   { p:"user-guide/tui.html",                        t:"رابط ترمینال مدرن (TUI)",          d:1 },
   { p:"user-guide/configuration.html",              t:"پیکربندی (config.yaml)",           d:0 },
-  { p:"user-guide/configuring-models.html",         t:"پیکربندی مدل‌ها",                   d:0 },
+  { p:"user-guide/configuring-models.html",         t:"پیکربندی مدل‌ها",                   d:1 },
   { p:"user-guide/sessions.html",                   t:"نشست‌ها",                           d:1 },
   { p:"user-guide/profiles.html",                   t:"پروفایل‌ها",                        d:1 },
   { p:"user-guide/git-worktrees.html",              t:"گیت‌ورک‌تری (Worktree)",            d:1 },

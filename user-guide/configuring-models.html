@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پیکربندی مدل‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/configuring-models" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>پیکربندی مدل‌ها</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>پیکربندی مدل‌ها</h1>
+<p>هرمس دو نوع جایگاه مدل دارد:</p>
+<ul>
+  <li><strong>مدل اصلی</strong> — چیزی که ایجنت با آن فکر می‌کند. هر پیام کاربر، هر حلقهٔ فراخوانی ابزار و هر پاسخ استریم‌شده از این مدل می‌گذرد.</li>
+  <li><strong>مدل‌های کمکی</strong> — کارهای جانبیِ کوچک‌تری که ایجنت برون‌سپاری می‌کند. فشرده‌سازی زمینه، بینایی (تحلیل تصویر)، خلاصه‌سازی صفحهٔ وب، امتیازدهی تأیید، مسیریابی ابزار MCP، تولید عنوان نشست و جستجوی مهارت. هر کدام جایگاه خودش را دارد و می‌تواند مستقل بازنویسی شود.</li>
+</ul>
+<p>این صفحه پیکربندی هر دو را از داشبورد پوشش می‌دهد. اگر فایل‌های پیکربندی یا CLI را ترجیح می‌دهید، به <a href="#alternative">«روش‌های جایگزین»</a> در پایین بپرید.</p>
+
+<div class="callout tip">
+  <div class="callout-title">💡 سریع‌ترین مسیر: Nous Portal</div>
+  <p><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tool-gateway" target="_blank" rel="noopener">Nous Portal</a> بیش از ۳۰۰ مدل زیر یک اشتراک ارائه می‌کند. روی نصب تازه، <code>hermes setup --portal</code> را اجرا کنید تا با یک فرمان وارد شوید و Nous ارائه‌دهندهٔ شما شود. آنچه متصل شده را با <code>hermes portal info</code> ببینید.</p>
+  <ul>
+    <li>مشترکان پورتال همچنین <strong>۱۰٪ تخفیف</strong> روی ارائه‌دهندگان صورت‌حساب-توکنی می‌گیرند.</li>
+  </ul>
+</div>
+
+<div class="callout note">
+  <div class="callout-title">ℹ️ طرح‌وارهٔ <code>model:</code> — رشتهٔ خالی در برابر نگاشت</div>
+  <p>در نصب کاملاً تازه، پیکربندی پیش‌فرضِ همراه <code>model: ""</code> دارد (یک نشانگر رشتهٔ خالی به معنی «هنوز پیکربندی نشده»). اولین باری که <code>hermes setup</code> یا <code>hermes model</code> را اجرا کنید، آن کلید درجا به نگاشتی با زیرکلیدهای <code>provider</code>، ‏<code>default</code>، ‏<code>base_url</code> و <code>api_mode</code> ارتقا می‌یابد — شکلی که در سراسر این صفحه می‌بینید. اگر هرگز رشتهٔ خالی در config.yaml دیدید، <code>hermes model</code> را اجرا کنید (یا در داشبورد **Change** را بزنید) و هرمس فرم دیکشنری را برایتان می‌نویسد.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> صفحهٔ Models</h2>
+<p>داشبورد را باز کنید و در سایدبار روی <strong>Models</strong> کلیک کنید. دو بخش می‌گیرید:</p>
+<ol>
+  <li><strong>Model Settings</strong> — پنل بالایی، جایی که مدل‌ها را به جایگاه‌ها نسبت می‌دهید.</li>
+  <li><strong>Usage analytics</strong> — کارت‌های رتبه‌بندی‌شده که هر مدلی که در بازهٔ انتخابی نشست اجرا کرده را با شمارش توکن، هزینه و نشان‌های قابلیت نشان می‌دهند.</li>
+</ol>
+<p>کارت بالایی پنل <strong>Model Settings</strong> است. سطر اصلی همیشه نشان می‌دهد ایجنت برای نشست‌های جدید چه چیزی راه می‌اندازد. برای باز کردن انتخاب‌گر روی <strong>Change</strong> کلیک کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> تنظیم مدل اصلی</h2>
+<p>روی سطر Main model روی <strong>Change</strong> کلیک کنید. انتخاب‌گر دو ستون دارد:</p>
+<ul>
+  <li><strong>چپ</strong> — ارائه‌دهندگان احرازشده. فقط ارائه‌دهندگانی که راه‌اندازی کرده‌اید (کلید API تنظیم‌شده، OAuth شده، یا اندپوینت سفارشی تعریف‌شده) اینجا می‌آیند. اگر ارائه‌دهنده‌ای غایب است، به <strong>Keys</strong> بروید و اعتبارش را اضافه کنید.</li>
+  <li><strong>راست</strong> — فهرست گزینش‌شدهٔ مدل‌های ارائه‌دهندهٔ انتخاب‌شده. این‌ها مدل‌های ايجنتی‌ای هستند که هرمس برای آن ارائه‌دهنده توصیه می‌کند، نه خروجی خام <code>/models</code> (که در OpenRouter شامل ۴۰۰+ مدل از جمله TTS، مولدهای تصویر و reranker است).</li>
+</ul>
+<p>در جعبهٔ فیلتر تایپ کنید تا بر اساس نام ارائه‌دهنده، اسلاگ یا شناسهٔ مدل محدود شود.</p>
+<p>مدلی را بردارید، <strong>Switch</strong> بزنید، و هرمس آن را در <code>~/.hermes/config.yaml</code> زیر بخش <code>model</code> می‌نویسد. <strong>این فقط به نشست‌های جدید اعمال می‌شود</strong> — هر تب چتی که از قبل باز است با همان مدلی که با آن شروع شد به کار ادامه می‌دهد. برای تعویض داغ چت فعلی، از فرمان اسلش <code>/model</code> داخلش استفاده کنید.</p>
+
+<h3>تعویض میان-نشستی و هشدارهای زمینه</h3>
+<p>وقتی <strong>داخل نشست فعال</strong> مدل را عوض می‌کنید (انتخاب‌گر مدل TUI، ‏CLI هرمس، یا <code>/model</code> در تلگرام/دیسکورد)، هرمس تخمین می‌زند آیا <strong>پیام بعدی</strong> شما فشرده‌سازی پیش-پروازِ زمینه را مقابل پنجرهٔ مدل جدید اجرا خواهد کرد. اگر نشست از قبل نزدیک یا بالای آستانهٔ فشرده‌سازی آن مدل باشد (به «فشرده‌سازی زمینه» در مستندات پیکربندی مراجعه کنید)، پاسخ تعویض شامل هشداری می‌شود — همان مسیر <code>warning_message</code> که برای اعلان‌های مدل-گران استفاده می‌شود. تعویض همچنان بلافاصله اعمال می‌شود؛ فشرده‌سازی روی <strong>اولین پیام کاربر پس از تعویض</strong>، قبل از پاسخ مدل اجرا می‌شود.</p>
+
+<div class="callout warning">
+  <div class="callout-title">⚠️ تعویض میان-نشستی کش پرامپت را ریست می‌کند</div>
+  <p>کش‌های پرامپت به مدلی که درخواست را سرو می‌کند کلید می‌خورند، پس هر تغییر مدلِ وسط گفتگو — تعویض صریح <code>/model</code>، یک <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/fallback-providers" target="_blank" rel="noopener">fallback خودکار</a>، یا چرخش <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/credential-pools" target="_blank" rel="noopener">استخر اعتبارنامه</a> روی حساب متفاوت — یعنی پیام بعدی کل گفتگو را به قیمت کامل توکن ورودی می‌خواند به‌جای نرخ کش‌شده (با ~۷۵–۹۰٪ تخفیف). روی نشست طولانی این خواندن یک‌باره می‌تواند تفاوت به‌ازای-توکن دو مدل را کمرنگ کند. وقتی لازم است عوض کنید، ولی ترجیحاً اوایل گفتگو یا بلافاصله بعد از شروع نشست تازه.</p>
+</div>
+
+<h3>سطح‌های آموزش-داده بدون سرپرست</h3>
+<p>مدل‌هایی مثل <code>muse-spark-1.2-contributor</code> تخفیف دارند چون فروشنده ممکن است روی پرامپت‌ها و تکمیل‌های شما آموزش ببیند. انتخاب تعاملی مدل همیشه یک اعلان تأیید نشان می‌دهد. مسیرهای شروعِ غیرتعاملی مثل کارگرهای کانبان و ایجنت‌های کرونی، چون نمی‌توانند آن سؤال را بپرسند، ایمن متوقف می‌شوند.</p>
+<p>اگر آموزش روی دادهٔ بار کاریِ بدون-سرپرست برایتان قابل‌قبول است، یک اقرار پایدار ثبت کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes config set security.allow_data_training_tiers_noninteractive true</code></pre>
+</div>
+<p>هرمس همچنان هشدار کامل سیاست-داده و کلید اقرار را در هر شروعِ بدون-سرپرست چاپ می‌کند، پس لاگ‌های کارگر رد ممیزی نگه می‌دارند. این تنظیم هشدارهای مدل-گران یا مسیریابی ارائه‌دهنده را تأیید نمی‌کند و جایگزین اعلان تأیید تعاملی هم نیست. با <code>hermes config unset security.allow_data_training_tiers_noninteractive</code> لغوش کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> تنظیم مدل‌های کمکی</h2>
+<p>روی <strong>Show auxiliary</strong> کلیک کنید تا ۱۱ جایگاه کار آشکار شوند. هر کار کمکی به‌طور پیش‌فرض <code>auto</code> است — یعنی هرمس برای آن کار مدل اصلی شما را هم امتحان می‌کند. اگر آن مسیر در دسترس نباشد یا به شکلی از جنس ظرفیت بسوزد، ‏<code>auto</code> ابتدا هر <code>fallback_chain</code> مخصوص-کار را دنبال می‌کند، بعد زنجیرهٔ اصلی <code>fallback_providers</code> / ‏<code>fallback_model</code>، و در نهایت زنجیرهٔ کشف کمکیِ داخلی هرمس. وقتی برای یک کار جانبی مدل ارزان‌تر یا سریع‌تری می‌خواهید، همان کار را بازنویسی کنید.</p>
+
+<h3>الگوهای رایج بازنویسی</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کار</th><th>کِی بازنویسی کنیم</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Title Gen</strong></td><td>وقتی تأخیر یا هزینهٔ عنوان مهم‌تر از هم‌خوانی با مدل اصلی است. یک مدل flash شناخته‌شدهٔ خوب پین کنید، یا <code>auxiliary.title_generation.prefer_fast_model: true</code> بگذارید تا هرمس ردیف سریع ارائه‌دهنده را انتخاب کند.</td></tr>
+    <tr><td><strong>Vision</strong></td><td>وقتی مدل اصلی‌تان بینایی ندارد. به <code>google/gemini-2.5-flash</code> یا <code>gpt-4o-mini</code> اشاره کنید.</td></tr>
+    <tr><td><strong>Compression</strong></td><td>وقتی فقط برای خلاصه‌کردن زمینه، توکن استدلال روی Opus/M2.7 می‌سوزانید. یک مدل چت سریع کار را با یک‌پنجاهمِ هزینه انجام می‌دهد.</td></tr>
+    <tr><td><strong>Approval</strong></td><td>برای <code>approval_mode: smart</code> — یک مدل سریع/ارزان‏ (haiku، ‏flash، ‏gpt-5-mini) تصمیم می‌گیرد آیا فرمان کم‌ریسک خودکار تأیید شود. مدل گران اینجا هدر دادن است.</td></tr>
+    <tr><td><strong>Web Extract</strong></td><td>وقتی <code>web_extract</code> را سنگین استفاده می‌کنید. همان منطق فشرده‌سازی — خلاصه‌سازی استدلال نمی‌خواهد.</td></tr>
+    <tr><td><strong>Skills Hub</strong></td><td><code>hermes skills search</code> از این استفاده می‌کند. معمولاً روی <code>auto</code> خوب است.</td></tr>
+    <tr><td><strong>MCP</strong></td><td>مسیریابی ابزار MCP. معمولاً روی <code>auto</code> خوب است.</td></tr>
+    <tr><td><strong>Triage Specifier</strong></td><td>مشخص‌گر دسته‌بندی کانبان‏ (<code>hermes kanban specify</code>) را مسیریابی می‌کند که یک خط خلاصه را به مشخصهٔ مشخص گسترش می‌دهد. یک مدل ارزان و توانا خوب کار می‌کند.</td></tr>
+    <tr><td><strong>Kanban Decomposer</strong></td><td>تجزیهٔ کار کانبان را مسیریابی می‌کند — یک کار دسته‌بندی را به گرافی از کارهای فرزند برای پروفایل‌های متخصص تقسیم می‌کند.</td></tr>
+    <tr><td><strong>Profile Describer</strong></td><td>تولید توضیح پروفایل‏ (<code>hermes profile describe --auto</code> / دکمهٔ تولید-خودکار داشبورد) را مسیریابی می‌کند. فراخوانی کوتاه و ارزان.</td></tr>
+    <tr><td><strong>Curator</strong></td><td>گذر بازبینی استفاده-از-مهارتِ کرتور را مسیریابی می‌کند. روی مدل‌های استدلالی می‌تواند دقیقه‌ها اجرا شود، پس مدل کمکیِ ارزان‌تر اغلب می‌ارزد.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>بازنویسی به‌ازای-کار</h3>
+<p>روی هر سطر کمکی <strong>Change</strong> کلیک کنید. همان انتخاب‌گر باز می‌شود، همان رفتار — ارائه‌دهنده + مدل را بردارید و Switch بزنید. سطر به‌جای <code>auto (use main model)</code> نمایش <code>provider · model</code> را می‌گیرد.</p>
+
+<h3>ریست همه به auto</h3>
+<p>اگر بیش‌ازحد تنظیم کرده‌اید و می‌خواهید از نو شروع کنید، بالای بخش کمکی <strong>Reset all to auto</strong> را بزنید. هر جایگاه به استفاده از مدل اصلی‌تان برمی‌گردد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> میان‌بر «Use as»</h2>
+<p>هر کارت مدل در صفحه یک دراپ‌داون <strong>Use as</strong> دارد. این مسیر سریع است — مدلی را که در تحلیل‌هایتان می‌بینید بردارید، <strong>Use as</strong> را بزنید، و با یک کلیک به جایگاه اصلی یا هر کار کمکی مشخصی نسبتش دهید. گزینه‌های دراپ‌داون:</p>
+<ul>
+  <li><strong>Main model</strong> — مثل کلیک Change روی سطر اصلی.</li>
+  <li><strong>All auxiliary tasks</strong> — این مدل را یک‌جا به هر ۱۱ جایگاه کمکی نسبت می‌دهد. مفید وقتی همهٔ کارهای جانبی را روی یک مدل flash ارزان می‌خواهید.</li>
+  <li><strong>گزینه‌های کار تکی</strong> — ‏Vision، ‏Web Extract، ‏Compression و غیره. مدلِ نسبت‌داده‌شدهٔ فعلی هر کار با <code>current</code> علامت می‌خورد.</li>
+</ul>
+<p>کارت‌ها وقتی الان به چیزی نسبت داده شده‌اند نشان <code>main</code> یا <code>aux · &lt;task&gt;</code> می‌گیرند — تا در یک نگاه ببینید کدام مدل‌های تاریخی‌تان کجا وصل‌اند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> چه چیزی در config.yaml نوشته می‌شود</h2>
+<p>وقتی از داشبورد ذخیره می‌کنید، هرمس در <code>~/.hermes/config.yaml</code> می‌نویسد:</p>
+<p><strong>مدل اصلی:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>model:
+  provider: openrouter
+  default: anthropic/claude-opus-4.7
+  base_url: ''        # با تعویض ارائه‌دهنده پاک می‌شود
+  api_mode: chat_completions</code></pre>
+</div>
+<p><strong>بازنویسی کمکی (مثال — بینایی روی gemini-flash):</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>auxiliary:
+  vision:
+    provider: openrouter
+    model: google/gemini-2.5-flash
+    base_url: ''
+    api_key: ''
+    timeout: 120
+    extra_body: {}
+    download_timeout: 30</code></pre>
+</div>
+<p><strong>کمکی روی auto (پیش‌فرض):</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>auxiliary:
+  compression:
+    provider: auto
+    model: ''
+    base_url: ''
+    # ... سایر فیلدها بدون تغییر</code></pre>
+</div>
+<p><code>provider: auto</code> با <code>model: ''</code> به هرمس می‌گوید برای آن کار از مدل اصلی استفاده کند، در حالی که اگر مسیر اصلی نتوانست فراخوانی کمکی را سرو کند، سیاست fallback همچنان رعایت می‌شود.</p>
+<p>زنجیره‌های fallback مخصوص-کارِ اختیاری زیر همان کار کمکی زندگی می‌کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>auxiliary:
+  title_generation:
+    provider: auto
+    model: ''
+    fallback_chain:
+      - provider: openrouter
+        model: inclusionai/ring-2.6-1t:free</code></pre>
+</div>
+<p>وقتی <code>fallback_chain</code> غایب باشد، <code>auto</code> قبل از زنجیرهٔ کشف کمکیِ داخلی، از زنجیرهٔ سطح‌بالا <code>fallback_providers</code> استفاده می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گزینه‌های درخواست به‌ازای-ارائه‌دهنده</h2>
+<p>مدخل‌های ارائه‌دهنده‏ (<code>providers.&lt;name&gt;</code> در دیکشنری <code>providers:</code>، یا آیتم‌های فهرست قدیمی <code>custom_providers</code>) دو پیچ می‌پذیرند که شکل گفتگوی هرمس با اندپوینت را تعیین می‌کنند:</p>
+<p><strong><code>extra_headers</code></strong> — نگاشتی از هدرهای HTTP اضافه که به هر درخواست LLMِ مسیریابی‌شده به base URL آن ارائه‌دهنده الصاق می‌شوند. آخرین اعمال می‌شوند — بعد از پیش‌فرض‌های URL/پروفایل و بازنویسی‌های هدر کاربر — پس از تعویض اعتبارنامه و بازسازی کلاینت جان سالم به در می‌برند. برای توکن‌های سرویس Cloudflare Access، احراز پروکسی یا طرح‌های bearer سفارشی مفید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>providers:
+  my-gateway:
+    api: https://llm.internal.example.com/v1
+    api_key: sk-...
+    extra_headers:
+      CF-Access-Client-Id: "xxxx.access"
+      CF-Access-Client-Secret: "yyyy"</code></pre>
+</div>
+<p>مقادیر هدر روتین‌آور اعتبارنامه‌اند — هرمس هرگز لاگشان نمی‌کند. <code>extra_headers</code> روی مسیرهای سازگار با OpenAI اعمال می‌شود؛ حالت‌های API مربوط به <code>anthropic_messages</code> و <code>bedrock_converse</code> از آن استفاده نمی‌کنند.</p>
+<p><strong><code>discover_models</code></strong> — روی <code>false</code> بگذارید (پیش‌فرض <code>true</code>) تا پرس‌وجوی فهرست <code>/models</code> اندپوینت رد شود و فقط <code>models</code>ی که روی مدخل پیکربندی کرده‌اید استفاده شوند. برای گیت‌وی‌هایی که فهرست مدلشان کُند، نامطمئن یا پرهیاهوست دست‌ودل‌باز:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>providers:
+  my-gateway:
+    api: https://llm.internal.example.com/v1
+    discover_models: false
+    models:
+      - my-finetune-v2
+      - my-finetune-v1</code></pre>
+</div>
+<p>با کشف خاموش، انتخاب‌گر مدل‏ (<code>hermes model</code>، ‏<code>/model</code>) فهرست پیکربندی‌شده را به‌جای کاو زنده نشان می‌دهد.</p>
+<p>برای یک گیت‌وی سازگار-با-آنتروپیک که نام‌مستقل خالیِ مدل را فقط پس از دریافت درخواست حل می‌کند، نام‌مستقل را با قابلیت به‌ازای-مدل <code>prompt_caching</code> به نشانگرهای کش پرامپتِ بومی بیاورید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>providers:
+  anthropic-proxy:
+    api: https://gateway.example.com/anthropic
+    transport: anthropic_messages
+    models:
+      fable:
+        context_length: 1000000
+        prompt_caching: true</code></pre>
+</div>
+<p>هرمس این اعلام را به مسیر دقیق ارائه‌دهنده و شناسهٔ مدلِ زمان-اجرا تطبیق می‌دهد، بدون بازنویسی نام‌مستقل. <code>prompt_caching: false</code> نشانگرهای کش را برای مدلی صریحاً خاموش می‌کند؛ وقتی حذف باشد، هرمس تشخیص عادی قابلیتِ ارائه‌دهنده و مدلش را نگه می‌دارد.</p>
+<div class="callout note">
+  <div class="callout-title">ℹ️ قالب قدیمی</div>
+  <p>پیکربندی‌های قدیمی‌تر از فهرست سطح‌بالا <code>custom_providers:</code> استفاده می‌کردند (با <code>base_url</code> به‌جای <code>api</code>). همچنان کار می‌کند و در <code>hermes update</code> خودکار به دیکشنری <code>providers:</code> مهاجرت می‌کند (پیکربندی v12).</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> چه زمانی اثر می‌کند؟</h2>
+<ul>
+  <li><strong>CLI</strong>‏ (<code>hermes chat</code>): فراخوانی بعدی <code>hermes chat</code>.</li>
+  <li><strong>گیت‌وی</strong> (تلگرام، دیسکورد، اسلک و غیره): *نشستِ جدیدِ* بعدی. نشست‌های موجود مدلشان را نگه می‌دارند. اگر می‌خواهید همهٔ نشست‌ها تغییر را بگیرند گیت‌وی را ری‌استارت کنید‏ (<code>hermes gateway restart</code>).</li>
+  <li><strong>تب چت داشبورد</strong>‏ (<code>/chat</code>): PTY جدید بعدی. چتِ بازِ فعلی مدلش را نگه می‌دارد — داخلش از <code>/model</code> برای تعویض داغ استفاده کنید.</li>
+</ul>
+<p>تغییرها هرگز کش پرامپت نشست‌های در حال اجرا را بی‌اعتبار نمی‌کنند. این عمدی است: تعویض مدل اصلی داخل نشست ریست کش می‌خواهد (پرامپت سیستمی حاوی محتوای مخصوص-مدل است)، و ما آن را برای فرمان اسلش صریح <code>/model</code> داخل چت نگه داشته‌ایم.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> عیب‌یابی</h2>
+
+<h3>«No authenticated providers» در انتخاب‌گر</h3>
+<p>هرمس ارائه‌دهنده‌ای را فقط وقتی فهرست می‌کند که اعتبار کاری داشته باشد. <strong>Keys</strong> را در سایدبار چک کنید — باید یکی از این‌ها را ببینید: کلید API، ‏OAuth موفق، یا URL اندپوینت سفارشی. اگر ارائه‌دهندهٔ موردنظر نیست، <code>hermes setup</code> را اجرا کنید تا متصل شود، یا به <strong>Keys</strong> بروید و متغیر محیطی را اضافه کنید.</p>
+
+<h3>مدل اصلی در چتِ در حال اجرا‌ام عوض نشد</h3>
+<p>انتظارش همین است. داشبورد <code>config.yaml</code> را می‌نویسد که نشست‌های جدید می‌خوانند. چتِ بازِ فعلی یک پروسهٔ ایجنت زنده است — با همان مدلی که باش تولید شده می‌ماند. برای تعویض داغ همان نشست، داخل چت <code>/model &lt;name&gt;</code> بزنید.</p>
+
+<h3>بازنویسی کمکی «اثر نکرد»</h3>
+<p>سه چیز را چک کنید:</p>
+<ol>
+  <li><strong>نشست جدید شروع کردید؟</strong> چت‌های موجود پیکربندی را دوباره نمی‌خوانند.</li>
+  <li><strong><code>provider</code> چیزی جز <code>auto</code> است؟</strong> اگر فیلد <code>auto</code> نشان می‌دهد، آن کار هنوز از مدل اصلی شما استفاده می‌کند. <strong>Change</strong> را بزنید و ارائه‌دهندهٔ واقعی بردارید.</li>
+  <li><strong>ارائه‌دهنده احراز شده؟</strong> اگر <code>minimax</code> را به کاری نسبت داده‌اید ولی کلید MiniMax ندارید، آن کار به پیش‌فرض openrouter برمی‌گردد و هشداری در <code>agent.log</code> لاگ می‌کند.</li>
+</ol>
+
+<h3>مدلی برداشتم ولی هرمس ارائه‌دهنده‌ام را عوض کرد</h3>
+<p>روی OpenRouter (یا هر تجمییع‌گر)، نام‌های خالیِ مدل ابتدا *داخل* تجمیع‌گر حل می‌شوند. پس <code>claude-sonnet-4</code> روی OpenRouter می‌شود <code>anthropic/claude-sonnet-4.6</code> و روی احراز OpenRouter شما می‌ماند. ولی اگر <code>claude-sonnet-4</code> را روی احراز آنتروپیکِ بومی تایپ کرده بودید، همان <code>claude-sonnet-4-6</code> می‌ماند. اگر تعویض ارائه‌دهندهٔ غیرمنتظره‌ای دیدید، چک کنید ارائه‌دهندهٔ فعلی همان چیزی است که انتظار دارید — انتخاب‌گر همیشه اصلیِ فعلی را بالای دیالوگ نشان می‌دهد.</p>
+</section>
+
+<section class="doc-sec" id="alternative">
+<h2><span class="secnum">۹</span> روش‌های جایگزین</h2>
+
+<h3>فرمان اسلش CLI</h3>
+<p>داخل هر نشست <code>hermes chat</code>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان در چت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/model gpt-5.4 --provider openrouter             # فقط همین نشست
+/model gpt-5.4 --provider openrouter --global    # همچنین در config.yaml ماندگار می‌شود
+/model claude-opus-4.6 --once                    # فقط نوبت بعدی، سپس خودکار برمی‌گردد</code></pre>
+</div>
+<p><code>--global</code> همان کاری را می‌کند که دکمهٔ <strong>Change</strong> داشبورد، به‌علاوه نشست در حال اجرا را درجا سوییچ می‌کند.</p>
+<p><code>--once</code> برای یک نوبت سوییچ می‌کند و بعد مدل قبلی را برمی‌گرداند — در موفقیت، خطا یا وقفه یکسان. هیچ‌چیز ماندگار نمی‌شود: ری‌استارت گیت‌وی وسط نوبت، روی مدل اصلی برمی‌گردد. مفید برای ارتقای یک سؤال سخت به مدل گران‏ («فقط همین یک بار از Opus بپرس») یا سقوط به مدل ارزان برای یک کوئری دورانداختن.</p>
+<div class="callout note">
+  <div class="callout-title">ℹ️ هزینهٔ کش-پرامپت</div>
+  <p>سوییچ یک‌نوبتی پیشوند کش پرامپت ارائه‌دهنده را دو بار می‌شکند (رفتن و برگشتن). در نشست طولانی روی ارائه‌دهندهٔ پیشوند-کش‌شونده (آنتروپیک، OpenAI)، نوبت بعدی هزینهٔ ورودی کامل می‌دهد — ‏<code>--once</code> برای نشست‌های کوتاه یا ارتقای ارزان←گران برنده است، ولی یک سؤال جانبیِ کوچک داخل نشست گرانِ طولانی می‌تواند بیشتری هزینه کند تا صرفه‌جویی کند.</p>
+</div>
+
+<h3>نام‌مستقل‌های سفارشی</h3>
+<p>نام‌های کوتاه خودتان را برای مدل‌هایی که زیاد سراغشان می‌روید تعریف کنید، بعد در CLI یا هر پلتفرم پیام‌رسانی <code>/model &lt;alias&gt;</code> بزنید. دو قالب هم‌ارز هست — هر کدام را که با گردش‌کارتان می‌خواند بردارید.</p>
+<p><strong>متعارف (سطح‌بالا <code>model_aliases:</code>)</strong> — کنترل کامل روی provider + base_url:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>model_aliases:
+  fav:
+    model: claude-sonnet-4.6
+    provider: anthropic
+  grok:
+    model: grok-4
+    provider: x-ai</code></pre>
+</div>
+<p><strong>فرم رشتهٔ کوتاه‏ (<code>model.aliases.&lt;name&gt;: provider/model</code>)</strong> — از شل راحت است چون <code>hermes config set</code> اسکالرها را می‌نویسد و حالا لفظ‌های درون‌خطی فهرست/نگاشت را هم تجزیه می‌کند، هرچند این فرم کوتاه هنوز <code>base_url</code> سفارشی حمل نمی‌تواند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes config set model.aliases.fav anthropic/claude-opus-4.6
+hermes config set model.aliases.grok x-ai/grok-4</code></pre>
+</div>
+<blockquote>
+<p><code>hermes config set</code> همچنین <strong>لفظ‌های فهرست/نگاشت</strong> درون‌خطی (سبک جریان JSON/YAML) را می‌پذیرد. گیومه بزنید تا شل سالم ردشان کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes config set platform_toolsets.line '["clarify", "file", "web"]'
+hermes config set display.tool_progress_overrides '{"terminal": "off"}'</code></pre>
+</div>
+</blockquote>
+<p>هر دو مسیر به همان بارگذار می‌ریزند‏ (<code>hermes_cli/model_switch.py</code>). مدخل‌های <code>model_aliases:</code> بر مدخل‌های هم‌نام <code>model.aliases:</code> مقدم‌اند.</p>
+<p>سپس در چت <code>/model fav</code> یا <code>/model grok</code>. نام‌مستقل‌های کاربر، نام‌های کوتاه داخلی‏ (<code>sonnet</code>، ‏<code>kimi</code>، ‏<code>opus</code> و غیره) را سایه می‌اندازند. برای مرجع کامل به «نام‌مستقل‌های سفارشی مدل» در مرجع فرمان‌های اسلش مراجعه کنید.</p>
+
+<h3>زیرفرمان <code>hermes model</code></h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes model            # انتخاب‌گر تعاملی ارائه‌دهنده + مدل (روش متعارف تعویض پیش‌فرض‌ها)</code></pre>
+</div>
+<p><code>hermes model</code> شما را از انتخاب ارائه‌دهنده، احراز هویت‏ (جریان‌های OAuth مرورگر باز می‌کنند؛ ارائه‌دهندگان کلید-API برای کلید می‌پرسند) و سپس انتخاب مدل مشخصی از کاتالوگ گزینش‌شدهٔ همان ارائه‌دهنده عبور می‌دهد. انتخاب در <code>model.provider</code> و <code>model.default</code> در <code>~/.hermes/config.yaml</code> نوشته می‌شود.</p>
+<p>برای فهرست‌کردن ارائه‌دهندگان/مدل‌ها بدون اجرای انتخاب‌گر، از داشبورد یا اندپوینت‌های REST پایین استفاده کنید. برای دیدن آنچه CLI الان واقعاً استفاده می‌کند: <code>hermes config get model --json</code> و <code>hermes status</code>.</p>
+
+<h3>ویرایش مستقیم پیکربندی</h3>
+<p><code>~/.hermes/config.yaml</code> را ویرایش و هرچه آن را می‌خواند ری‌استارت کنید. برای طرح‌وارهٔ کامل به «مرجع پیکربندی» مراجعه کنید.</p>
+
+<h3>‏REST API</h3>
+<p>داشبورد از سه اندپوینت استفاده می‌کند. برای اسکریپت‌نویسی مفید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># فهرست ارائه‌دهندگان احرازشده + فهرست‌های گزینش‌شدهٔ مدل
+curl -H "X-Hermes-Session-Token: $TOKEN" http://localhost:PORT/api/model/options
+
+# خواندن نسبت‌های فعلی اصلی + کمکی
+curl -H "X-Hermes-Session-Token: $TOKEN" http://localhost:PORT/api/model/auxiliary
+
+# تنظیم مدل اصلی
+curl -X POST -H "Content-Type: application/json" -H "X-Hermes-Session-Token: $TOKEN" \
+  -d '{"scope":"main","provider":"openrouter","model":"anthropic/claude-opus-4.7"}' \
+  http://localhost:PORT/api/model/set
+
+# بازنویسی یک کار کمکی
+curl -X POST -H "Content-Type: application/json" -H "X-Hermes-Session-Token: $TOKEN" \
+  -d '{"scope":"auxiliary","task":"vision","provider":"openrouter","model":"google/gemini-2.5-flash"}' \
+  http://localhost:PORT/api/model/set
+
+# نسبت یک مدل به همهٔ کارهای کمکی
+curl -X POST -H "Content-Type: application/json" -H "X-Hermes-Session-Token: $TOKEN" \
+  -d '{"scope":"auxiliary","task":"","provider":"openrouter","model":"google/gemini-2.5-flash"}' \
+  http://localhost:PORT/api/model/set
+
+# ریست همهٔ کارهای کمکی به auto
+curl -X POST -H "Content-Type: application/json" -H "X-Hermes-Session-Token: $TOKEN" \
+  -d '{"scope":"auxiliary","task":"__reset__","provider":"","model":""}' \
+  http://localhost:PORT/api/model/set</code></pre>
+</div>
+<p>توکن نشست هنگام شروع در HTML داشبورد تزریق و با هر ری‌استارت سرور می‌چرخد. اگر به داشبوردِ در حال اجرا اسکریپت می‌زنید، از devtools مرورگر بگیریدش‏ (<code>window.__HERMES_SESSION_TOKEN__</code>).</p>
+</section>
+
+<div class="pager">
+  <a href="tui.html"><span class="dir">→ قبلی</span><span class="ttl">رابط ترمینال مدرن (TUI)</span></a>
+  <a class="next" href="sessions.html"><span class="dir">بعدی ←</span><span class="ttl">نشست‌ها</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/configuring-models" target="_blank" rel="noopener">Configuring Models</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
