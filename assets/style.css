@@ -76,6 +76,8 @@ section.doc-sec{margin-bottom:2.6rem;padding-bottom:1.6rem;border-bottom:1px sol
 section.doc-sec:last-of-type{border-bottom:none}
 .secnum{display:inline-flex;align-items:center;justify-content:center;min-width:2em;height:2em;padding:0 .45em;background:var(--accent-soft);color:var(--accent);border-radius:.55rem;font-size:.75em;font-weight:800;flex-shrink:0}
 code{direction:ltr;unicode-bidi:isolate;font-family:Consolas,'Cascadia Mono','Courier New',monospace;font-size:.86em;background:var(--inline-bg);color:var(--inline-text);padding:.1em .45em;border-radius:.35em}
+blockquote{margin:1rem 0;padding:.6rem 1rem;border-inline-start:3px solid var(--border);border-radius:.4rem;background:var(--surface2);color:var(--muted);font-size:.92rem}
+blockquote strong{color:var(--text)}
 hr{border:none;border-top:1px dashed var(--border);margin:1.8rem 0}
 
 /* ───── جعبهٔ کد ───── */

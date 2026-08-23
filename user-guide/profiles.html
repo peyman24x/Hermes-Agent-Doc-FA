@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پروفایل‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/profiles" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>پروفایل‌ها</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>پروفایل‌ها: اجرای چند ایجنت</h1>
+<p>چند ایجنت هرمسِ مستقل را روی همان ماشین اجرا کنید — هر کدام با پیکربندی، کلیدهای API، حافظه، نشست‌ها، مهارت‌ها و وضعیت گیت‌ویِ خودش.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پروفایل چیست؟</h2>
+<p>پروفایل، یک پوشهٔ home جداگانه برای هرمس است. هر پروفایل پوشهٔ خودش را می‌گیرد شامل <code>config.yaml</code>، <code>.env</code>، <code>SOUL.md</code>، حافظه‌ها، نشست‌ها، مهارت‌ها، کارهای کرون و دیتابیس وضعیتِ خودش. پروفایل‌ها به شما اجازه می‌دهند برای اهداف مختلف ایجنت‌های جدا اجرا کنید — یک دستیار کدنویسی، یک بات شخصی، یک ایجنت پژوهش — بدون قاطی‌شدن وضعیت هرمس.</p>
+
+<div class="callout caution">
+  <div class="callout-title">⛔ به هر ایجنت پروفایل جداگانه‌اش را بدهید</div>
+  <p>هرگز دو پروسهٔ ایجنت را به یک پروفایل (همان home هرمس) اشاره ندهید. هر دو به‌طور خودکار حافظه می‌نویسند، و هر کدام نوشته‌های دیگری را هنگام شروع نشست به پرامپت سیستمی‌اش بارگذاری می‌کند — پس دو نویسنده روی یک home، وضعیت هم را ترکیب می‌کنند تا اینکه دیگر چیزی که پیکربندی کرده بودید باقی نماند. پروفایل‌ها دقیقاً برای جلوگیری از همین‌اند؛ ایجنت‌هایی که به حافظهٔ مشترک نیاز دارند به‌جای آن از یک <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory-providers" target="_blank" rel="noopener">ارائه‌دهندهٔ حافظهٔ خارجی</a> استفاده کنند.</p>
+</div>
+
+<p>وقتی پروفایلی می‌سازید، به‌طور خودکار به فرمانِ خودش تبدیل می‌شود. پروفایلی به نام <code>coder</code> بسازید و بلافاصله <code>coder chat</code>، <code>coder setup</code>، <code>coder gateway start</code> و غیره را دارید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> شروع سریع</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes profile create coder       # ساخت پروفایل + نام‌مستفر فرمان "coder"
+coder setup                       # پیکربندی کلیدهای API و مدل
+coder chat                        # شروع گفتگو</code></pre>
+</div>
+<p>همین. <code>coder</code> حالا یک پروفایل هرمسِ مستقل با پیکربندی، حافظه و وضعیت خودش است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> ساخت پروفایل</h2>
+
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>سریع‌ترین راه‌اندازی: داخل پروفایل جدید <code>hermes setup --portal</code> را اجرا کنید تا مدل + ابزارها یک‌جا متصل شوند. به «<a href="https://hermes-agent.nousresearch.com/docs/integrations/nous-portal" target="_blank" rel="noopener">Nous Portal</a>» مراجعه کنید.</p>
+</div>
+
+<h3>پروفایل خالی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes profile create mybot</code></pre>
+</div>
+<p>یک پروفایل تازه با مهارت‌های داخلیِ کاشته‌شده می‌سازد. <code>mybot setup</code> را برای پیکربندی کلیدهای API، مدل و توکن‌های گیت‌وی اجرا کنید.</p>
+<p>اگر قرار است از این پروفایل به‌عنوان کارگرِ کانبان استفاده کنید (یا می‌خواهید ارکستراتور کانبان کار به او بفرستد)، هنگام ساخت <code>--description "&lt;role&gt;"</code> بدهید تا ارکستراتور بداند در چه چیزی خوب است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes profile create researcher --description "Reads source code and external docs, writes findings."</code></pre>
+</div>
+<p>می‌توانید توضیحات را بعداً هم با <code>hermes profile describe</code> تنظیم یا خودکار تولید کنید — برای مدل کامل مسیریابی به «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban#auto-vs-manual-orchestration" target="_blank" rel="noopener">راهنمای کانبان</a>» مراجعه کنید.</p>
+
+<h3>فقط کلون پیکربندی (<code>--clone</code>)</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes profile create work --clone</code></pre>
+</div>
+<p><code>config.yaml</code>، <code>.env</code>، <code>SOUL.md</code> و مهارت‌های پروفایل فعلی‌تان را به پروفایل جدید کپی می‌کند. همان کلیدهای API، مدل و توانایی‌ها، اما نشست‌ها و حافظهٔ تازه. برای کلیدهای API متفاوت <code>~/.hermes/profiles/work/.env</code> و برای شخصیت متفاوت <code>~/.hermes/profiles/work/SOUL.md</code> را ویرایش کنید.</p>
+
+<h3>کلون همه‌چیز (<code>--clone-all</code>)</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes profile create backup --clone-all</code></pre>
+</div>
+<p><strong>همه‌چیز</strong> را کپی می‌کند — پیکربندی، کلیدهای API، شخصیت، تمام حافظه‌ها، مهارت‌ها، کارهای کرون و پلاگین‌ها. یک اسنپ‌شات کاریِ کامل. تاریخچهٔ به‌ازای-پروفایل مستثناست (تاریخچهٔ نشست، <code>state.db</code>، <code>backups/</code>، <code>state-snapshots/</code>، <code>checkpoints/</code>) — این‌ها متعلق به پروفایل مبدأند و می‌توانند به ده‌ها گیگابایت برسند. برای پشتیبان کاملِ شامل تاریخچه، به‌جایش از <code>hermes profile export</code> یا <code>hermes backup</code> استفاده کنید.</p>
+
+<h3>کلون از پروفایل مشخص</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes profile create work --clone-from coder</code></pre>
+</div>
+<p><code>--clone-from &lt;source&gt;</code> پروفایل مبدأ را مستقیم انتخاب می‌کند و به معنای کلونِ پیکربندی/مهارت/SOUL است. وقتی کپی کامل آن پروفایل مبدأ را می‌خواهید با <code>--clone-all</code> ترکیبش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes profile create work-backup --clone-from coder --clone-all</code></pre>
+</div>
+
+<div class="callout tip">
+  <div class="callout-title">💡 حافظهٔ Honcho + پروفایل‌ها</div>
+  <p>وقتی Honcho فعال است، عملیات کلون به‌طور خودکار یک AI peer اختصاصی برای پروفایل جدید می‌سازد در حالی که همان ورک‌اسپیس کاربر را به اشتراک می‌گذارد. هر پروفایل مشاهدات و هویت خودش را می‌سازد. برای جزئیات به «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory-providers#honcho" target="_blank" rel="noopener">Honcho — چندایجنت / پروفایل‌ها</a>» مراجعه کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> استفاده از پروفایل‌ها</h2>
+
+<h3>نام‌های مستقل فرمان</h3>
+<p>هر پروفایل به‌طور خودکار یک نام‌مستفر فرمان در <code>~/.local/bin/&lt;name&gt;</code> می‌گیرد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>coder chat                    # گفتگو با ایجنت coder
+coder setup                   # پیکربندی تنظیمات coder
+coder gateway start           # راه‌اندازی گیت‌وی coder
+coder doctor                  # بررسی سلامت coder
+coder skills list             # فهرست مهارت‌های coder
+coder config set model.default anthropic/claude-sonnet-4</code></pre>
+</div>
+<p>این نام‌مستفر با هر زیرفرمان هرمس کار می‌کند — در پس‌زمینه فقط <code>hermes -p &lt;name&gt;</code> است.</p>
+
+<h3>پرچم <code>-p</code></h3>
+<p>همچنین می‌توانید پروفایل را با هر فرمانی صریح هدف بگیرید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes -p coder chat
+hermes --profile=coder doctor
+hermes chat -p coder -q "hello"    # در هر جای فرمان کار می‌کند</code></pre>
+</div>
+
+<h3>پیش‌فرض چسبان (<code>hermes profile use</code>)</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes profile use coder
+hermes chat                   # حالا به coder اشاره می‌کند
+hermes tools                  # ابزارهای coder را پیکربندی می‌کند
+hermes profile use default    # بازگشت به پیش‌فرض</code></pre>
+</div>
+<p>یک پیش‌فرض تنظیم می‌کند تا فرمان‌های سادهٔ <code>hermes</code> به آن پروفایل هدف بگیرند. مثل <code>kubectl config use-context</code>.</p>
+
+<h3>بدانید کجا هستید</h3>
+<p>CLI همیشه نشان می‌دهد کدام پروفایل فعال است:</p>
+<ul>
+  <li><strong>پرامپت</strong>: <code>coder ❯</code> به‌جای <code>❯</code></li>
+  <li><strong>بنر</strong>: هنگام راه‌اندازی <code>Profile: coder</code> را نشان می‌دهد</li>
+  <li><strong><code>hermes profile</code></strong>: نام پروفایل فعلی، مسیر، مدل و وضعیت گیت‌وی را نشان می‌دهد</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> پروفایل در برابر ورک‌اسپیس در برابر سندباکس</h2>
+<p>پروفایل‌ها اغلب با ورک‌اسپیس یا سندباکس اشتباه گرفته می‌شوند، اما چیزهای متفاوتی‌اند:</p>
+<ul>
+  <li><strong>پروفایل</strong> به هرمس پوشهٔ وضعیت خودش را می‌دهد: <code>config.yaml</code>، <code>.env</code>، <code>SOUL.md</code>، نشست‌ها، حافظه، لاگ‌ها، کارهای کرون و وضعیت گیت‌وی.</li>
+  <li><strong>ورک‌اسپیس</strong> یا <strong>پوشهٔ کاری</strong> جایی است که دستورات ترمینال شروع می‌شوند. این جداگانه با <code>terminal.cwd</code> کنترل می‌شود.</li>
+  <li><strong>سندباکس</strong> چیزی است که دسترسی فایل‌سیستم را محدود می‌کند. پروفایل‌ها ایجنت را سندباکس <strong>نمی‌کنند</strong>.</li>
+</ul>
+<p>روی بک‌اند ترمینال پیش‌فرضِ <code>local</code>، ایجنت همان دسترسی فایل‌سیستمِ حساب کاربری شما را دارد. پروفایل مانع دسترسی‌اش به پوشه‌های بیرون از پوشهٔ پروفایل نمی‌شود.</p>
+<p>اگر می‌خواهید پروفایلی در پوشهٔ پروژهٔ مشخصی شروع شود، <code>terminal.cwd</code> مطلق را در <code>config.yaml</code> همان پروفایل صریح تنظیم کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>terminal:
+  backend: local
+  cwd: /absolute/path/to/project</code></pre>
+</div>
+<p>استفاده از <code>cwd: "."</code> روی بک‌اند local یعنی «پوشه‌ای که هرمس از آن راه‌اندازی شده»، نه «پوشهٔ پروفایل».</p>
+<p>همچنین توجه کنید:</p>
+<ul>
+  <li><code>SOUL.md</code> می‌تواند مدل را هدایت کند، اما مرز ورک‌اسپیس اجباری نمی‌کند.</li>
+  <li>تغییرات <code>SOUL.md</code> تمیز روی نشست جدید اثر می‌کنند. نشست‌های موجود ممکن است هنوز از وضعیت پرامپت قدیمی استفاده کنند.</li>
+  <li>پرسیدن از مدل «در کدام پوشه هستی؟» یک آزمون ایزوله‌سازی قابل‌اعتماد نیست. اگر پوشهٔ شروعِ قابل‌پیش‌بینی برای ابزارها می‌خواهید، <code>terminal.cwd</code> را صریح تنظیم کنید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> اجرای گیت‌وی‌ها</h2>
+<p>هر پروفایل گیت‌وی خودش را به‌عنوان پروسه‌ای جدا با توکن بات خودش اجرا می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>coder gateway start           # گیت‌وی coder را راه می‌اندازد
+assistant gateway start       # گیت‌وی assistant (پروسهٔ جدا)</code></pre>
+</div>
+
+<h3>توکن‌های بات متفاوت</h3>
+<p>هر پروفایل فایل <code>.env</code> خودش را دارد. توکن بات تلگرام/دیسکورد/اسلک متفاوتی در هر کدام پیکربندی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ویرایش توکن‌های coder
+nano ~/.hermes/profiles/coder/.env
+
+# ویرایش توکن‌های assistant
+nano ~/.hermes/profiles/assistant/.env</code></pre>
+</div>
+
+<h3>ایمنی: قفل توکن</h3>
+<p>اگر دو پروفایل تصادفاً از یک توکن بات استفاده کنند، گیت‌وی دوم با خطایی روشن که پروفایل متناقض را نام می‌برد مسدود می‌شود. برای تلگرام، دیسکورد، اسلک، واتساپ و سیگنال پشتیبانی شده است.</p>
+
+<h3>سرویس‌های پایدار</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>coder gateway install         # سرویس systemd/launchd به نام hermes-gateway-coder می‌سازد
+assistant gateway install     # سرویس hermes-gateway-assistant را می‌سازد</code></pre>
+</div>
+<p>هر پروفایل نام سرویس خودش را می‌گیرد. مستقل اجرا می‌شوند.</p>
+
+<div class="callout note">
+  <div class="callout-title">ℹ️ داخل ایمیج رسمی داکر</div>
+  <p>گیت‌وی‌های هر پروفایل توسط <a href="https://github.com/just-containers/s6-overlay" target="_blank" rel="noopener">s6-overlay</a> نظارت می‌شوند (PID 1 در کانتینر)، پس <code>hermes profile create &lt;name&gt;</code> به‌طور خودکار یک جایگاه سرویس s6 در <code>/run/service/gateway-&lt;name&gt;/</code> ثبت می‌کند. <code>hermes -p &lt;name&gt; gateway start/stop/restart</code> به‌جای تولید پروسهٔ خام به <code>s6-svc</code> فرمان می‌دهد — خرابی‌ها خودکار دوباره راه‌اندازی می‌شوند و <code>docker restart</code> مجموعهٔ قبلیِ گیت‌وی‌های در حال اجرا را حفظ می‌کند. برای جزئیات به «<a href="docker.html#sec-supervision">نظارت بر گیت‌وی هر پروفایل</a>» مراجعه کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> پیکربندی پروفایل‌ها</h2>
+<p>هر پروفایل این مواردِ مخصوص به خودش را دارد:</p>
+<ul>
+  <li><strong><code>config.yaml</code></strong> — مدل، ارائه‌دهنده، تول‌ست‌ها و همهٔ تنظیمات</li>
+  <li><strong><code>.env</code></strong> — کلیدهای API و توکن‌های بات</li>
+  <li><strong><code>SOUL.md</code></strong> — شخصیت و دستورالعمل‌ها</li>
+</ul>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>coder config set model.default anthropic/claude-sonnet-4
+echo "You are a focused coding assistant." &gt; ~/.hermes/profiles/coder/SOUL.md</code></pre>
+</div>
+<p>اگر می‌خواهید این پروفایل به‌طور پیش‌فرض در پروژهٔ مشخصی کار کند، <code>terminal.cwd</code> خودش را هم تنظیم کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>coder config set terminal.cwd /absolute/path/to/project</code></pre>
+</div>
+
+<h3>از داشبورد</h3>
+<p><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard#managing-multiple-profiles" target="_blank" rel="noopener">داشبورد وب</a> سطحی در مقیاس ماشین است که می‌تواند پیکربندی، کلیدهای API، مهارت‌ها، MCPها و مدل <strong>هر</strong> پروفایلی را از طریق سوییچر پروفایل در سایدبارش مدیریت کند — بدون نیاز به داشبورد جداگانه به‌ازای هر پروفایل. <code>coder dashboard</code> به داشبورد ماشین با پروفایل <code>coder</code> از-پیش-انتخاب‌شده می‌رود. تب چت داشبورد هم از سوییچر پیروی می‌کند و گفتگو را زیر home پروفایل انتخاب‌شده شروع می‌کند.</p>
+<p>نکته: «Set as active» در صفحهٔ پروفایل‌های داشبورد همان پیش‌فرض چسبان برای <strong>اجراهای آتیِ CLI/گیت‌وی</strong> است (مثل <code>hermes profile use</code>) — برای ویرایش یک پروفایل از داشبورد، به‌جایش از سوییچر استفاده کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> به‌روزرسانی</h2>
+<p><code>hermes update</code> کد را یک بار می‌گیرد (مشترک) و مهارت‌های داخلی جدید را به‌طور خودکار با <strong>همهٔ</strong> پروفایل‌ها همگام می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes update
+# → Code updated (12 commits)
+# → Skills synced: default (up to date), coder (+2 new), assistant (+2 new)</code></pre>
+</div>
+<p>مهارت‌های تغییر یافته توسط کاربر هرگز بازنویسی نمی‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> مدیریت پروفایل‌ها</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes profile list           # نمایش همهٔ پروفایل‌ها با وضعیت
+hermes profile show coder     # اطلاعات دقیق یک پروفایل
+hermes profile rename coder dev-bot   # تغییر نام (نام‌مستفر + سرویس به‌روز می‌شود)
+hermes profile export coder   # بسته‌بندی در coder.tar.gz (قابل اشتراک؛ کلیدها حذف می‌شوند)
+hermes profile import coder.tar.gz   # نصب یک آرشیو به‌عنوان پروفایل جدید</code></pre>
+</div>
+<p>در چت، همین دو به‌صورت <code>/export</code> و <code>/import</code> موجودند — و در اپ دسکتاپ به‌صورت ⌘K ← Export/Import profile…. به «<a href="#sharing">اشتراک یک پروفایل</a>» مراجعه کنید.</p>
+
+<h3>نام‌گذاری پروفایل پیش‌فرض</h3>
+<p>شناسهٔ داخلی پروفایل پیش‌فرض همیشه <code>default</code> است — واقعاً قابل تغییر نام نیست چون <code>~/.hermes</code> ریشهٔ نصب است. تغییر نامش در عوض یک <strong>نام نمایشی</strong> تنظیم می‌کند که سطوح UI به‌جای شناسهٔ خالی نشان می‌دهند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes profile rename default Harumesu   # یونیکد هم اوکی: 小助手</code></pre>
+</div>
+<p>نام نمایشی در <code>hermes profile list</code>/<code>show</code>، فرمان چتِ <code>/profile</code>، داشبورد و اپ دسکتاپ (شامل فهرست حالت بات) ظاهر می‌شود. فقط نمایشی است: <code>-p default</code>، نام سرویس‌ها، کارهای کرون و هر ارجاع دیگری به شناسهٔ رسمی <code>default</code> ادامه می‌دهند. به‌صورت <code>display_name</code> در <code>~/.hermes/profile.yaml</code> ذخیره می‌شود؛ آن خط را حذف کنید تا برگردد. پروفایل‌های نام‌دار هم می‌توانند <code>display_name</code> داشته باشند (از یک تغییر نام واقعی جان سالم به در می‌برد)، اما <code>rename</code> برایشان همچنان خود پروفایل را تغییر نام می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> حذف پروفایل</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes profile delete coder</code></pre>
+</div>
+<p>گیت‌وی را متوقف می‌کند، سرویس systemd/launchd را حذف می‌کند، نام‌مستفر فرمان را برمی‌دارد و تمام داده‌های پروفایل را پاک می‌کند. برای تأیید از شما خواسته می‌شود نام پروفایل را تایپ کنید.</p>
+<p>برای رد کردن تأیید از <code>--yes</code> استفاده کنید: <code>hermes profile delete coder --yes</code></p>
+<div class="callout note">
+  <div class="callout-title">ℹ️ توجه</div>
+  <p>پروفایل پیش‌فرض (<code>~/.hermes</code>) قابل حذف نیست. برای حذف همه‌چیز از <code>hermes uninstall</code> استفاده کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> تکمیل خودکار با Tab</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Bash
+eval "$(hermes completion bash)"
+
+# Zsh
+eval "$(hermes completion zsh)"</code></pre>
+</div>
+<p>این خط را به <code>~/.bashrc</code> یا <code>~/.zshrc</code> اضافه کنید تا تکمیل پایدار باشد. نام پروفایل‌ها بعد از <code>-p</code>، زیرفرمان‌های profile و فرمان‌های سطح بالا را تکمیل می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> چگونه کار می‌کند</h2>
+<p>پروفایل‌ها از متغیر محیطی <code>HERMES_HOME</code> استفاده می‌کنند. وقتی <code>coder chat</code> را اجرا می‌کنید، اسکریپت پوشاننده پیش از راه‌اندازی هرمس <code>HERMES_HOME=~/.hermes/profiles/coder</code> را تنظیم می‌کند. چون بیش از ۱۱۹ فایل کدبیس مسیرها را از طریق <code>get_hermes_home()</code> حل می‌کنند، وضعیت هرمس به‌طور خودکار به پوشهٔ پروفایل محدود می‌شود — پیکربندی، نشست‌ها، حافظه، مهارت‌ها، دیتابیس وضعیت، PID گیت‌وی، لاگ‌ها و کارهای کرون.</p>
+<p>این از پوشهٔ کاریِ ترمینال جدا است. اجرای ابزار از <code>terminal.cwd</code> شروع می‌شود (یا پوشهٔ راه‌اندازی وقتی <code>cwd: "."</code> روی بک‌اند local است)، نه به‌طور خودکار از <code>HERMES_HOME</code>.</p>
+<p>روی نصب‌های میزبان، زیرپروسه‌های ابزار به‌طور پیش‌فرض <code>HOME</code> واقعیِ کاربر سیستم‌عامل شما را نگه می‌دارند تا اعتبارنامه‌های موجودِ CLI زیر <code>~</code> بین پروفایل‌ها کار کنند. دادهٔ پروفایل با <code>HERMES_HOME</code> ایزوله است، نه با تغییر <code>HOME</code>. بک‌اندهای کانتینری همچنان از <code>{HERMES_HOME}/home</code> برای وضعیت پایدار ابزار استفاده می‌کنند، و کاربران میزبان که پیکربندی ابزارِ سخت‌گیرانه به‌ازای-پروفایل می‌خواهند می‌توانند با <code>terminal.home_mode: profile</code> فعالش کنند.</p>
+<p>یعنی دو چیزی که آسان قاطی می‌شوند:</p>
+<ul>
+  <li><code>HERMES_HOME</code> مرز پروفایل است. پیکربندی هرمس، <code>.env</code>، حافظه، نشست‌ها، مهارت‌ها، لاگ‌ها، کارهای کرون، وضعیت گیت‌وی و سایر داده‌های هرمس را کنترل می‌کند.</li>
+  <li><code>HOME</code> خانهٔ کاربر/سیستم‌عامل است که CLIهای خارجی انتظارش را دارند. روی نصب‌های میزبان، هرمس به‌طور پیش‌فرض آن را همان خانهٔ واقعی کاربر نگه می‌دارد تا ابزارهایی مثل <code>git</code>، <code>ssh</code>، <code>gh</code>، <code>az</code>، <code>npm</code>، Claude Code و Codex همان اعتبارنامه‌هایی را پیدا کنند که در شل عادی شما استفاده می‌کنند.</li>
+</ul>
+<p>مبادله این است که پروفایل‌های میزبان به‌طور پیش‌فرض وضعیت CLI در سطح کاربر را به اشتراک می‌گذارند. اگر به هویت CLI جداگانه به‌ازای هر پروفایل نیاز دارید، <code>terminal.home_mode: profile</code> را در <code>config.yaml</code> همان پروفایل تنظیم کنید. در آن حالت هرمس زیرپروسه‌های ابزار را با <code>HOME={HERMES_HOME}/home</code> اجرا می‌کند؛ آن‌گاه باید <code>~/.ssh</code>، <code>~/.gitconfig</code>، <code>~/.config/gh</code>، احراز هویت CLIهای ابری، احراز Claude/Codex، وضعیت npm و فایل‌های مشابهِ مخصوص پروفایل را داخل آن home مقداردهی یا لینک کنید.</p>
+<p>هرمس همچنین <code>HERMES_REAL_HOME</code> را به زیرپروسه‌ها عرضه می‌کند تا اسکریپت‌ها وقتی <code>home_mode: profile</code> فعال است بتوانند خانهٔ واقعی حساب را پیدا کنند.</p>
+<p>پروفایل پیش‌فرض خودِ <code>~/.hermes</code> است. نیازی به مهاجرت نیست — نصب‌های موجود یکسان کار می‌کنند.</p>
+</section>
+
+<section class="doc-sec" id="sharing">
+<h2><span class="secnum">۱۳</span> اشتراک یک پروفایل</h2>
+<p>پروفایلی که روی یک ماشین ساختید می‌تواند به ماشین دیگری برود — ورک‌استیشن خودتان، لپ‌تاپ هم‌تیمی یا جامعه. دو مسیر:</p>
+<p><strong>ارسال فایل.</strong> <code>/export</code> پروفایل را در یک <code>.tar.gz</code> بسته می‌کند — مهارت‌ها، حافظه، پرسونا، کرون‌ها، پلاگین‌ها، تنظیمات و (از دسکتاپ) تم و چیدمان شما. کلیدهای API حذف می‌شوند. دریافت‌کننده <code>/import</code> را اجرا می‌کند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># در چت /export را اجرا کنید، فایل را بدهید و او /import را روی آن اجرا کند
+hermes profile export coder
+hermes profile import ./coder.tar.gz --name coder</code></pre>
+</div>
+<p><strong>انتشار یک توزیع.</strong> پروفایل را به‌صورت یک <strong>مخزن گیت</strong> بسته‌بندی کنید تا دریافت‌کنندگان با یک فرمان نصبش کنند و بعداً به‌روزرسانی‌های نسخه‌بندی‌شده بگیرند. SOUL، پیکربندی، مهارت‌ها، کارهای کرون و اتصالات MCP را حمل می‌کند؛ اعتبارنامه‌ها، حافظه‌ها و نشست‌ها به‌ازای-ماشین می‌مانند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># نصب یک ایجنت کامل از یک مخزن گیت
+hermes profile install github.com/you/research-bot --alias
+
+# به‌روزرسانی بعدی وقتی نویسنده نسخهٔ جدید داد (حافظه‌ها + .env شما حفظ می‌شوند)
+hermes profile update research-bot</code></pre>
+</div>
+<p>برای تحویل یک‌باره یا جابه‌جایی از فایل خروجی استفاده کنید؛ برای ایجنتی که به انتشارش ادامه می‌دهید از توزیع. برای هر دو — جدول مقایسه، تألیف، انتشار، معنای به‌روزرسانی و مدل امنیتی — به «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/profile-distributions" target="_blank" rel="noopener">توزیع پروفایل: اشتراک یک ایجنت کامل</a>» مراجعه کنید.</p>
+</section>
+
+<div class="pager">
+  <a href="which-file-does-what.html"><span class="dir">→ قبلی</span><span class="ttl">هر فایل چه‌کاری می‌کند؟</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">گیت‌ورک‌تری (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/profiles" target="_blank" rel="noopener">Profiles</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

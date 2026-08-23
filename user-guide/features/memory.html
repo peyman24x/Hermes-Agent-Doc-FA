@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حافظهٔ پایدار — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌های اصلی<span class="sep">/</span><strong>حافظهٔ پایدار</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>حافظهٔ پایدار</h1>
+<p>هرمس ایجنت حافظه‌ای کراندار و گزینش‌شده دارد که بین نشست‌ها باقی می‌ماند. این به او اجازه می‌دهد ترجیحات شما، پروژه‌هایتان، محیطتان و چیزهایی را که یاد گرفته به خاطر بسپارد.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چگونه کار می‌کند</h2>
+<p>دو فایل حافظهٔ ایجنت را می‌سازند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فایل</th><th>هدف</th><th>سقف کاراکتر</th></tr></thead>
+  <tbody>
+    <tr><td><strong>MEMORY.md</strong></td><td>یادداشت‌های شخصی ایجنت — حقایق محیط، قراردادها، چیزهای آموخته‌شده</td><td>۲٬۲۰۰ کاراکتر (حدود ۸۰۰ توکن)</td></tr>
+    <tr><td><strong>USER.md</strong></td><td>پروفایل کاربر — ترجیحات شما، سبک ارتباطی، انتظارات</td><td>۱٬۳۷۵ کاراکتر (حدود ۵۰۰ توکن)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>هر دو در <code>~/.hermes/memories/</code> ذخیره می‌شوند و در شروع نشست به‌صورت اسنپ‌شاتِ منجمد به پرامپت سیستمی تزریق می‌شوند. ایجنت حافظهٔ خودش را با ابزار <code>memory</code> مدیریت می‌کند — می‌تواند مدخل اضافه، جایگزین یا حذف کند.</p>
+
+<div class="callout caution">
+  <div class="callout-title">⛔ یک ایجنت به ازای هر home هرمس</div>
+  <p>دو پروسهٔ ایجنت را به یک پوشهٔ home هرمس اشاره ندهید. نوشتن حافظه خودکار است و در شروع نشست به پرامپت سیستمی برمی‌گردد، پس دو نویسنده روی یک home، مدخل‌های هم را با هم ترکیب می‌کنند تا وضعیتی بسازند که نه آن‌ها و نه شما نوشته‌اید. حافظه به‌طور طراحی‌شده به‌ازای <a href="../profiles.html">پروفایل</a> جداست — به ایجنت دوم پروفایل خودش را بدهید، و اگر به حافظهٔ مشترک نیاز دارند به‌جایش از یک <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory-providers" target="_blank" rel="noopener">ارائه‌دهندهٔ حافظهٔ خارجی</a> استفاده کنید.</p>
+</div>
+
+<div class="callout note">
+  <div class="callout-title">ℹ️ توجه</div>
+  <p>سقف‌های کاراکتری حافظه را متمرکز نگه می‌دارند. حافظه به‌طور خودکار فشرده <strong>نمی‌شود</strong>: وقتی یک نوشتن از سقف بگذرد، ابزار <code>memory</code> خطا برمی‌گرداند به‌جای اینکه بی‌صدا مدخلی را بیندازد. آن‌گاه ایجنت خودش جا باز می‌کند — در همان نوبت، مدخل‌ها را ادغام یا حذف می‌کند و دوباره امتحان می‌کند (به «<a href="#when-full">وقتی حافظه پُر می‌شود چه اتفاقی می‌افتد</a>» مراجعه کنید). توجه کنید <code>replace</code> هم مشمول سقف است: جایگزینیِ یک مدخل با نسخهٔ بلندتر همچنان می‌تواند سرریز کند، پس محتوای جدید باید کوتاه‌تر شود (یا مدخل دیگری حذف شود) تا جا شود.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> حافظه چگونه در پرامپت سیستمی ظاهر می‌شود</h2>
+<p>در شروع هر نشست، مدخل‌های حافظه از دیسک بارگذاری و به‌صورت یک بلوک منجمد در پرامپت سیستمی رندر می‌شوند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">نمونهٔ بلوک حافظه در پرامپت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>══════════════════════════════════════════════
+MEMORY (your personal notes) [67% — 1,474/2,200 chars]
+══════════════════════════════════════════════
+User's project is a Rust web service at ~/code/myapi using Axum + SQLx
+§
+This machine runs Ubuntu 22.04, has Docker and Podman installed
+§
+User prefers concise responses, dislikes verbose explanations</code></pre>
+</div>
+<p>قالب شامل این‌هاست:</p>
+<ul>
+  <li>یک سرصفحه که نشان می‌دهد کدام مخزن است (MEMORY یا USER PROFILE)</li>
+  <li>درصد مصرف و شمار کاراکترها تا ایجنت ظرفیت را بداند</li>
+  <li>مدخل‌های جدا با جداکننده‌های <code>§</code> (نشان بخش)</li>
+  <li>مدخل‌ها می‌توانند چندخطی باشند</li>
+</ul>
+<p><strong>الگوی اسنپ‌شات منجمد:</strong> تزریقِ پرامپت سیستمی یک بار در شروع نشست گرفته می‌شود و وسط نشست هرگز تغییر نمی‌کند. این عمدی است — حفظ کش پیشوندِ LLM برای کارایی. وقتی ایجنت وسط نشست مدخل حافظه اضافه/حذف می‌کند، تغییرها بلافاصله روی دیسک ماندگار می‌شوند اما تا شروع نشست بعدی در پرامپت سیستمی ظاهر نمی‌شوند. پاسخ‌های ابزار همیشه وضعیت زنده را نشان می‌دهند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> اکشن‌های ابزار memory</h2>
+<p>ایجنت از ابزار <code>memory</code> با این اکشن‌ها استفاده می‌کند:</p>
+<ul>
+  <li><strong>add</strong> — افزودن مدخل حافظهٔ جدید</li>
+  <li><strong>replace</strong> — جایگزینی یک مدخل موجود با محتوای به‌روزشده (با تطبیق زیررشته از طریق <code>old_text</code>)</li>
+  <li><strong>remove</strong> — حذف مدخلی که دیگر مرتبط نیست (با تطبیق زیررشته از طریق <code>old_text</code>)</li>
+</ul>
+<p>اکشن <code>read</code> وجود ندارد — محتوای حافظه در شروع نشست به‌طور خودکار به پرامپت سیستمی تزریق می‌شود. ایجنت خاطراتش را به‌عنوان بخشی از زمینهٔ گفتگوی خودش می‌بیند.</p>
+
+<h3>تطبیق زیررشته</h3>
+<p>اکشن‌های <code>replace</code> و <code>remove</code> از تطبیقِ زیررشتهٔ کوتاهِ یکتا استفاده می‌کنند — متن کامل مدخل لازم نیست. پارامتر <code>old_text</code> فقط باید زیررشته‌ای یکتا باشد که دقیقاً یک مدخل را شناسایی کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code># اگر حافظه شامل "User prefers dark mode in all editors" باشد
+memory(action="replace", target="memory",
+       old_text="dark mode",
+       content="User prefers light mode in VS Code, dark mode in terminal")</code></pre>
+</div>
+<p>اگر زیررشته با چند مدخل مطابقت یابد، خطایی برگردانده می‌شود که تطبیق دقیق‌تری می‌خواهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> توضیح دو مقصد</h2>
+
+<h3><code>memory</code> — یادداشت‌های شخصی ایجنت</h3>
+<p>برای اطلاعاتی که ایجنت باید دربارهٔ محیط، گردش‌کارها و درس‌های آموخته به خاطر بسپارد:</p>
+<ul>
+  <li>حقایق محیط (سیستم‌عامل، ابزارها، ساختار پروژه)</li>
+  <li>قراردادها و پیکربندی پروژه</li>
+  <li>رفتارهای عجیب ابزارها و راه‌حل‌های کشف‌شده</li>
+  <li>مدخل‌های دفترچهٔ کارهای تمام‌شده</li>
+  <li>مهارت‌ها و تکنیک‌هایی که جواب دادند</li>
+</ul>
+
+<h3><code>user</code> — پروفایل کاربر</h3>
+<p>برای اطلاعاتی دربارهٔ هویت کاربر، ترجیحات و سبک ارتباطی:</p>
+<ul>
+  <li>نام، نقش، منطقهٔ زمانی</li>
+  <li>ترجیحات ارتباطی (مختصر در برابر مفصل، ترجیح قالب)</li>
+  <li>حساسیت‌ها و چیزهایی که باید پرهیز شوند</li>
+  <li>عادت‌های گردش‌کار</li>
+  <li>سطح مهارت فنی</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> چه چیزی را ذخیره کنیم و چه را نه</h2>
+
+<h3>این‌ها را ذخیره کن (پیشگیرانه)</h3>
+<p>ایجنت خودکار ذخیره می‌کند — لازم نیست بخواهید. وقتی این‌ها را می‌آموزد ذخیره می‌کند:</p>
+<ul>
+  <li><strong>ترجیحات کاربر:</strong> «TypeScript را به JavaScript ترجیح می‌دهم» ← ذخیره در <code>user</code></li>
+  <li><strong>حقایق محیط:</strong> «این سرور دبیان ۱۲ با PostgreSQL 16 اجرا می‌کند» ← ذخیره در <code>memory</code></li>
+  <li><strong>اصلاحات:</strong> «برای دستورات داکر <code>sudo</code> نزن، کاربر در گروه docker است» ← ذخیره در <code>memory</code></li>
+  <li><strong>قراردادها:</strong> «پروژه tab استفاده می‌کند، عرض خط ۱۲۰، docstring به سبک گوگل» ← ذخیره در <code>memory</code></li>
+  <li><strong>کارهای تمام‌شده:</strong> «دیتابیس در ۲۰۲۶-۰۱-۱۵ از MySQL به PostgreSQL مهاجرت کرد» ← ذخیره در <code>memory</code></li>
+  <li><strong>درخواست‌های صریح:</strong> «به خاطر بسپر که چرخش کلید API من ماهانه است» ← ذخیره در <code>memory</code></li>
+</ul>
+
+<h3>این‌ها را رد کن</h3>
+<ul>
+  <li><strong>اطلاعات پیش‌پاافتاده:</strong> «کاربر دربارهٔ پایتون پرسید» — بیش از حد مبهم</li>
+  <li><strong>واقعیت‌های راحتِ کشف‌مجدد:</strong> «پایتون ۳.۱۲ تودرتویی f-string را پشتیبانی می‌کند» — قابل جستجوی وب</li>
+  <li><strong>سرریز دادهٔ خام:</strong> بلوک‌های کد بزرگ، فایل‌های لاگ، جدول‌های داده — برای حافظه بزرگ‌اند</li>
+  <li><strong>موقتیاتِ مخصوص-نشست:</strong> مسیرهای فایل موقت، زمینهٔ دیباگ یک‌باره</li>
+  <li><strong>اطلاعاتِ از-قبل-در-فایل‌های-زمینه:</strong> محتوای SOUL.md و AGENTS.md</li>
+</ul>
+</section>
+
+<section class="doc-sec" id="when-full">
+<h2><span class="secnum">۶</span> مدیریت ظرفیت</h2>
+<p>حافظه سقف‌های کاراکتری سفت‌وسختی دارد تا پرامپت‌های سیستمی کراندار بمانند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مخزن</th><th>سقف</th><th>مدخل‌های معمول</th></tr></thead>
+  <tbody>
+    <tr><td>memory</td><td>۲٬۲۰۰ کاراکتر</td><td>۸ تا ۱۵ مدخل</td></tr>
+    <tr><td>user</td><td>۱٬۳۷۵ کاراکتر</td><td>۵ تا ۱۰ مدخل</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>وقتی حافظه پُر می‌شود چه اتفاقی می‌افتد</h3>
+<p>وقتی سعی کنید مدخلی اضافه کنید که از سقف بگذرد، ابزار خطا برمی‌گرداند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{
+  "success": false,
+  "error": "Memory at 2,100/2,200 chars. Adding this entry (250 chars) would exceed the limit. Consolidate now: use 'replace' to merge overlapping entries into shorter ones or 'remove' stale or less important entries (see current_entries below), then retry this add — all in this turn.",
+  "current_entries": ["..."],
+  "usage": "2,100/2,200"
+}</code></pre>
+</div>
+<p>سپس ایجنت باید:</p>
+<ol>
+  <li>مدخل‌های فعلی را بخواند (در پاسخ خطا نمایش داده می‌شوند)</li>
+  <li>مدخل‌هایی که می‌توانند حذف یا ادغام شوند را شناسایی کند</li>
+  <li>با <code>replace</code> مدخل‌های مرتبط را در نسخه‌های کوتاه‌تر ادغام کند</li>
+  <li>سپس مدخل جدید را <code>add</code> کند</li>
+</ol>
+<p><strong>بهترین شیوه:</strong> وقتی حافظه بالای ۸۰٪ ظرفیت است (در سرصفحهٔ پرامپت سیستمی پیدا می‌شود)، پیش از افزودنِ تازه‌ها مدخل‌ها را یکدست کنید. مثلاً سه مدخل جداگانهٔ «پروژه X را استفاده می‌کند» را در یک مدخل جامعِ توصیف پروژه ادغام کنید.</p>
+
+<h3>نمونه‌های عملی از مدخل‌های خوب حافظه</h3>
+<p><strong>مدخل‌های فشرده و پرازاطلاع بهترین نتیجه را می‌دهند:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">نمونه‌ها</span><button class="copy-btn">کپی</button></div>
+  <pre><code># خوب: چند واقعیت مرتبط را یک‌جا می‌چپاند
+User runs macOS 14 Sonoma, uses Homebrew, has Docker Desktop and Podman. Shell: zsh with oh-my-zsh. Editor: VS Code with Vim keybindings.
+
+# خوب: قرارداد مشخص و قابل‌اقدام
+Project ~/code/api uses Go 1.22, sqlc for DB queries, chi router. Run tests with 'make test'. CI via GitHub Actions.
+
+# خوب: درس آموخته همراه با زمینه
+The staging server (10.0.1.50) needs SSH port 2222, not 22. Key is at ~/.ssh/staging_ed25519.
+
+# بد: بیش از حد مبهم
+User has a project.
+
+# بد: بیش از حد مفصل
+On January 5th, 2026, the user asked me to look at their project which is
+located at ~/code/api. I discovered it uses Go version 1.22 and...</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> جلوگیری از تکرار</h2>
+<p>سیستم حافظه مدخل‌های تکراریِ عیناً یکسان را خودکار رد می‌کند. اگر محتوایی که از قبل موجود است را اضافه کنید، با پیام «no duplicate added» موفقیت برگردانده می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> اسکن امنیتی</h2>
+<p>مدخل‌های حافظه پیش از پذیرفته‌شدن از الگوهای تزریق و استخراج اسکن می‌شوند، چون به پرامپت سیستمی تزریق می‌شوند. محتوای منطبق با الگوهای تهدید (تزریق پرامپت، استخراج اعتبارنامه، درِ پشتی SSH) یا دارای کاراکترهای یونیکد نامرئی مسدود می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> جستجوی نشست</h2>
+<p>فراتر از MEMORY.md و USER.md، ایجنت می‌تواند گفتگوهای گذشته‌اش را با ابزار <code>session_search</code> جستجو کند:</p>
+<ul>
+  <li>همهٔ نشست‌های CLI و پیام‌رسانی در SQLite (<code>~/.hermes/state.db</code>) با جستجوی تمام‌متن FTS5 ذخیره می‌شوند</li>
+  <li>کوئری‌های جستجو پیام‌های واقعی را از دیتابیس برمی‌گردانند — بدون خلاصه‌سازی LLM، بدون برش</li>
+  <li>ایجنت می‌تواند چیزهایی را که هفته‌ها پیش درباره‌شان صحبت کرده پیدا کند، حتی اگر در حافظهٔ فعالش نباشند</li>
+  <li>ایجنت همچنین می‌تواند داخل هر نشستی که پیدا می‌کند به جلو/عقب اسکرول کند</li>
+</ul>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes sessions list    # مرور نشست‌های گذشته</code></pre>
+</div>
+<p>برای سه شکل فراخوانی (کشف / اسکرول / مرور) و قالب پاسخ، به «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/sessions#session-search-tool" target="_blank" rel="noopener">ابزار جستجوی نشست</a>» مراجعه کنید.</p>
+
+<h3>session_search در برابر memory</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ویژگی</th><th>حافظهٔ پایدار</th><th>جستجوی نشست</th></tr></thead>
+  <tbody>
+    <tr><td><strong>ظرفیت</strong></td><td>مجموعاً حدود ۱٬۳۰۰ توکن</td><td>نامحدود (همهٔ نشست‌ها)</td></tr>
+    <tr><td><strong>سرعت</strong></td><td>آنی (در پرامپت سیستمی)</td><td>کوئری FTS5 حدود ۲۰ms، اسکرول حدود ۱ms</td></tr>
+    <tr><td><strong>هزینه</strong></td><td>هزینهٔ توکن در هر پرامپت</td><td>رایگان — بدون فراخوانی LLM</td></tr>
+    <tr><td><strong>مورد استفاده</strong></td><td>حقایق کلیدی همیشه در دسترس</td><td>یافتن گفتگوهای گذشتهٔ مشخص</td></tr>
+    <tr><td><strong>مدیریت</strong></td><td>دستی توسط ایجنت گزینش می‌شود</td><td>خودکار — همهٔ نشست‌ها ذخیره می‌شوند</td></tr>
+    <tr><td><strong>هزینهٔ توکن</strong></td><td>ثابت به‌ازای نشست (حدود ۱٬۳۰۰ توکن)</td><td>در-لحظه (وقتی لازم شد جستجو می‌شود)</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>حافظه</strong> برای حقایق حیاتی‌ای است که همیشه باید در زمینه باشند. <strong>جستجوی نشست</strong> برای کوئری‌های «هفتهٔ پیش دربارهٔ X حرف زدیم؟» است که ایجنت باید جزئیات گفتگوهای گذشته را به یاد بیاورد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> سفر یادگیری (<code>/journey</code>)</h2>
+<p>سفر یادگیری، نمای خط‌زمانیِ همهٔ چیزهایی است که هرمس آموخته — مهارت‌های ذخیره‌شده و مدخل‌های حافظه روی زمان رسم شده‌اند (قدیمی‌ترین بالا، جدیدترین پایین)، با یک اسکرابر «صورت‌فلکی» قابل‌پخش که انباشتگی را بازپخیر می‌کند. همان دادهٔ گراف، سه سطح را می‌راند:</p>
+<ul>
+  <li><strong>CLI کلاسیک / مستقل</strong> — <code>hermes journey</code> (نام‌های مستقل: <code>hermes learning</code>، <code>hermes memory-graph</code>) خط‌زمانی را در ترمینال رندر می‌کند. پرچم‌ها: <code>--play</code> انباشتگی را انیمیت می‌کند (<code>--fps</code> برای تنظیم)، <code>--width</code>/<code>--height</code> اندازهٔ رندر را بازنویسی می‌کنند، <code>--no-color</code> رنگ را خاموش می‌کند و <code>--json</code> دادهٔ خام گراف را می‌ریزد.</li>
+  <li><strong>TUI</strong> — <code>/journey</code> (نام‌های مستقل: <code>/learning</code>، <code>/memory-graph</code>) خط‌زمانی را به‌صورت اورلی باز می‌کند.</li>
+  <li><strong>اپ دسکتاپ</strong> — <code>/journey</code> پنل Star Map / memory-graph را باز می‌کند، یک بصری‌سازی تعاملی از همان گره‌ها.</li>
+</ul>
+<p>فراتر از دیدن، سفر همان جایی است که آنچه هرمس آموخته را <strong>هرس و اصلاح</strong> می‌کنید:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرمان</th><th>چه می‌کند</th></tr></thead>
+  <tbody>
+    <tr><td><code>hermes journey list</code></td><td>فهرست شناسهٔ گره‌ها — نام مهارت‌ها و شناسه‌های <code>memory:&lt;source&gt;:&lt;index&gt;</code> برای تکه‌های حافظه.</td></tr>
+    <tr><td><code>hermes journey delete &lt;node&gt; [-y]</code></td><td>حذف یک گره. مهارت‌ها <strong>آرشیو</strong> می‌شوند (قابل بازیابی)، تکه‌های حافظه حذف می‌شوند. <code>-y</code> تأیید را رد می‌کند.</td></tr>
+    <tr><td><code>hermes journey edit &lt;node&gt;</code></td><td>باز کردن محتوای گره (<code>SKILL.md</code> یک مهارت یا تکهٔ حافظه) در <code>$EDITOR</code>.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>همان زیرفرمان‌های <code>list</code> / <code>delete &lt;id&gt;</code> / <code>edit &lt;id&gt;</code> از فرمان چتِ <code>/journey</code> در CLI هم کار می‌کنند، و پنل دسکتاپ روی گره‌ها مستقیماً ویرایش/حذف دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> پیکربندی</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — در ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>memory:
+  memory_enabled: true
+  user_profile_enabled: true
+  memory_char_limit: 2200   # ~800 توکن
+  user_char_limit: 1375     # ~500 توکن
+  write_approval: false     # false = نوشتن آزاد (پیش‌فرض) | true = نیاز به تأیید</code></pre>
+</div>
+<p>غیرفعال‌کردن <strong>هر دو</strong> <code>memory_enabled</code> و <code>user_profile_enabled</code> مخزن‌های داخلی را کامل خاموش می‌کند: ابزار <code>memory</code> از طرحواره (schema) انداخته می‌شود و بلوک راهنمایش از پرامپت سیستمی حذف می‌شود، تا مدل هرگز دربارهٔ ابزاری که نمی‌تواند استفاده کند چیزی نشنود. یک ارائه‌دهندهٔ خارجیِ تنظیم‌شده با <code>memory.provider</code> (Hindsight، Mem0، Honcho، …) متأثر نمی‌شود و ابزارهای خودش را نگه می‌دارد — این را وقتی بخواهید که یک بک‌اند حافظهٔ شخص ثالث *به‌جای* فایل‌های داخلی. آوردن <code>memory</code> زیر <code>agent.disabled_toolsets</code> کلید سنگین‌تری است: ابزارهای ارائه‌دهندهٔ خارجی را هم پنهان می‌کند.</p>
+<p>با فقط <code>memory_enabled: false</code> (پروفایل کاربر روشن)، ابزار می‌ماند — پشتیبانِ مخزن پروفایل است — اما پرامپت سیستمی راهنمای کامل حافظه را با بلوک باریک‌ترِ فقط-پروفایل عوض می‌کند. طرحوارهٔ ابزار فقط مقصد <code>user</code> را اعلام می‌کند و نوشتن مستقیم یا مرحله‌ای به MEMORY.mdِ غیرفعال رد می‌شود. پیکربندی معکوس فقط <code>memory</code> را اعلام و نوشتن USER.md را رد می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> کنترل نوشتن‌های حافظه (<code>write_approval</code>)</h2>
+<p>به‌طور پیش‌فرض ایجنت آزادانه حافظه ذخیره می‌کند — از جمله از بازبینیِ خودبهبودی پس‌زمینه‌ای که بعد از یک نوبت اجرا می‌شود. اگر ترجیح می‌دهید اول ذخیره‌ها را تأیید کنید، <code>memory.write_approval: true</code> را تنظیم کنید. یک دروازهٔ سادهٔ روشن/خاموش است که روی <strong>هر دو</strong> نوبت پیش‌زمینه و بازبینی پس‌زمینه اعمال می‌شود:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th><code>write_approval</code></th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>false</code> (پیش‌فرض)</td><td>نوشتن آزاد — دروازه خاموش است (رفتار پیش از دروازه).</td></tr>
+    <tr><td><code>true</code></td><td>پیش از ذخیرهٔ هر چیزی تأیید لازم است. در CLI تعاملی، نوشتن‌های پیش‌زمینه درجا از شما می‌پرسند (مدخل‌ها به‌اندازهٔ کافی کوچک‌اند که کامل خوانده شوند). در هر جای دیگر — پلتفرم‌های پیام‌رسانی، اسکریپت‌ها و بازبینی خودبهبودی پس‌زمینه — نوشتن‌ها برای بازبینی <strong>مرحله‌بندی</strong> می‌شوند با <code>/memory pending</code>.</td></tr>
+  </tbody>
+</table>
+</div>
+<blockquote>
+<p>برای خاموش‌کردن کامل حافظه (نه صرفاً دروازه‌گذاری)، هم <code>memory_enabled: false</code> و هم <code>user_profile_enabled: false</code> را تنظیم کنید. وقتی هر دو مخزن داخلی غیرفعالند، ابزار <code>memory</code> داخلی به‌طور خودکار پنهان می‌شود.</p>
+</blockquote>
+<p>بازبینی نوشتن‌های مرحله‌شده از CLI یا هر پلتفرم پیام‌رسانی:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان‌ها</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/memory pending             # فهرست نوشتن‌های مرحله‌شدهٔ حافظه (خودکارها با برچسب [auto])
+/memory approve &lt;id&gt;        # اعمال یکی (یا 'all')
+/memory reject &lt;id&gt;         # انداختن یکی (یا 'all')
+/memory approval on         # روشن‌کردن دروازه (یا 'off') و ماندگارکردنش</code></pre>
+</div>
+<p>این پاسخِ «ایجنت یک فرض غلط دربارهٔ من ذخیره کرد» است: <code>write_approval: true</code> را تنظیم کنید، و هر ذخیره — به‌ویژه آن‌های خودانگیختهٔ پس‌زمینه — پیش از آنکه وارد پروفایلتان شود، منتظر بله/نهی شما می‌ماند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> اعلان‌های بازبینی پس‌زمینه (<code>display.memory_notifications</code>)</h2>
+<p>بعد از یک نوبت، بازبینیِ خودبهبودیِ پس‌زمینه ممکن است بی‌سروصدا حافظه‌ای ذخیره یا مهارتی را به‌روزرسانی کند. این حلقهٔ یادگیریِ آگاه-از-رضایتِ هرمس است: اصلاحات مکرر و درس‌های پایدار گردش‌کار به مدخل‌های فشردهٔ حافظه یا مهارت‌های رویه‌ای تبدیل می‌شوند، در حالی که <code>write_approval</code> می‌تواند آن نوشتن‌ها را پیش از اثرگذاری بر نشست‌های آینده برای بازبینی مرحله‌بندی کند. به‌طور پیش‌فرض یک خط کوتاه <code>💾 Memory updated</code> در چت نشان می‌دهد تا باخبر شوید. کنترل پرحرفیِ آن:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  memory_notifications: on    # off | on (پیش‌فرض) | verbose</code></pre>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مقدار</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>off</code></td><td>بدون اعلان چت. بازبینی همچنان اجرا و ذخیره می‌کند — فقط خطی برایش نمی‌بینید.</td></tr>
+    <tr><td><code>on</code> (پیش‌فرض)</td><td>خط عمومی، مثل <code>💾 Memory updated</code> یا <code>💾 Skill 'foo' patched</code>.</td></tr>
+    <tr><td><code>verbose</code></td><td>پیش‌نمایش فشردهٔ تغییر را هم می‌آورد، مثل <code>💾 Memory ➕ User prefers terse replies</code> یا تکه‌ای از دیف مهارت به شکل <code>"old" → "new"</code>.</td></tr>
+  </tbody>
+</table>
+</div>
+<blockquote>
+<p>این فقط <strong>اعلان چتِ گیت‌وی</strong> را تنظیم می‌کند. خود بازبینی و نوشتن به مخازن حافظه/مهارت شما از این تنظیم متأثر نمی‌شوند. به‌ازای-پلتفرم با <code>display.platforms.&lt;platform&gt;.memory_notifications</code> تنظیمش کنید.</p>
+</blockquote>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> اجرای بازبینی روی مدل ارزان‌تر (<code>auxiliary.background_review</code>)</h2>
+<p>بازبینی به‌طور پیش‌فرض روی <strong>مدل چت اصلی</strong> شما اجرا می‌شود و گفتگو را بازپخیر می‌کند — که از قبل در کش پرامپت گرم است، پس خواندن‌های کشِ ارزانی است. روی یک مدل اصلی گران می‌توانید بازبینی را به‌جایش روی مدلی ارزان‌تر اجرا کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>auxiliary:
+  background_review:
+    provider: openrouter
+    model: google/gemini-3-flash-preview   # auto (پیش‌فرض) = مدل چت اصلی</code></pre>
+</div>
+<p>وقتی به مدلی <strong>متفاوت</strong> از مدل اصلی‌تان اشاره‌اش می‌دهید، بازبینی برای هزینهٔ بسیار کمتر آنجا اجرا می‌شود (در بنچمارک‌ها حدود ۳ تا ۵ برابر). چون یک مدل متفاوت به‌هرحال نمی‌تواند کش پرامپت مدل اصلی شما را دوباره استفاده کند، انشعاب به‌طور خودکار به‌جای رونوشت کامل، یک <strong>چکیدهٔ</strong> فشرده از گفتگو (نوبت‌های اخیر عیناً + خلاصهٔ قدیمی‌ترها) را بازپخیر می‌کند — و مقدار نوشته‌شده به کش جدید را حداقل می‌سازد. کیفیت ثبت حفظ می‌شود: در تست‌ها، ثبت حافظه یکسان و ثبت مهارت تقریباً یکسان با بازبینی مدل-اصلی بود.</p>
+<p>روی <code>auto</code> بگذاریدش (یا مدل اصلی‌تان) — هیچ‌چیز عوض نمی‌شود؛ بازبینی با بازپخیر کاملِ کش-گرم روی مدل اصلی ادامه می‌دهد.</p>
+
+<h3>غیرفعال‌کردن بازبینی‌های خودکار (<code>enabled</code>)</h3>
+<p>انشعاب بازبینی می‌تواند روی میزبان‌های شلوغ سهم معناداری از کل توکن‌ها را بسوزاند. اپراتورها می‌توانند بدون صفرکردن بازه‌های یادآوری‌اش غیرفعالش کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>auxiliary:
+  background_review:
+    enabled: true              # false = پرش از انشعاب‌های خودکار پس از نوبت</code></pre>
+</div>
+<p>با <code>enabled: false</code>، انشعاب‌های خودکارِ پس از نوبت تولید نمی‌شوند؛ <code>/refine</code> دستی همچنان کار می‌کند.</p>
+<p>مصرف انشعاب در <code>session_model_usage</code> با <code>task='background_review'</code> ماندگار می‌شود و یک خط اتمام به <code>agent.log</code> نوشته می‌شود (<code>Background review complete: thread=bg-review calls=… in=… out=… result=…</code>).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> کنترل نوشتن‌های مهارت (<code>skills.write_approval</code>)</h2>
+<p>مهارت‌ها از همان دروازهٔ روشن/خاموش استفاده می‌کنند، اما تجربهٔ بازبینی‌شان فرق دارد چون یک <code>SKILL.md</code> برای خواندن در حباب چت زیادی بزرگ است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>skills:
+  write_approval: false     # false = نوشتن آزاد (پیش‌فرض) | true = نیاز به تأیید</code></pre>
+</div>
+<p>وقتی <code>write_approval: true</code> است، نوشتن‌های مهارت (ایجاد / ویرایش / patch / write_file / حذف) بدون توجه به مبدأ همیشه <strong>مرحله‌بندی</strong> می‌شوند. خلاصهٔ یک‌خطی را درجا بازبینی می‌کنید، اما دیف کامل برون‌خط می‌ماند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان‌ها</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/skills pending             # فهرست نوشتن‌های مرحله‌شدهٔ مهارت + خلاصهٔ یک‌خطی هرکدام
+/skills diff &lt;id&gt;           # دیف کامل یکسان‌شده (بهترین جا: CLI یا داشبورد)
+/skills approve &lt;id&gt;        # اعمال (یا 'all')
+/skills reject &lt;id&gt;         # انداختن (یا 'all')
+/skills approval on         # روشن‌کردن دروازه (یا 'off') و ماندگارکردنش</code></pre>
+</div>
+<p>روی پلتفرم پیام‌رسانی، مهارتی را از خلاصه + فراداده‌اش تأیید کنید، یا وقتی می‌خواهید کل تغییر را بخوانید <code>/skills diff</code> را در CLI / داشبورد / فایل مرحله‌شده زیر <code>~/.hermes/pending/skills/&lt;id&gt;.json</code> باز کنید. جزئیات کامل در «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skills#gating-agent-skill-writes-skillswrite_approval" target="_blank" rel="noopener">دروازه‌گذاری نوشتن‌های مهارت ایجنت</a>».</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> ارائه‌دهندگان حافظهٔ خارجی</h2>
+<p>برای حافظه‌ای عمیق‌تر و پایدارتر که از MEMORY.md و USER.md فراتر می‌رود، هرمس با ۸ پلاگین ارائه‌دهندهٔ حافظهٔ خارجی عرضه می‌شود — از جمله Honcho، OpenViking، Mem0، Hindsight، Holographic، RetainDB، ByteRover و Supermemory.</p>
+<p>ارائه‌دهندگان خارجی <strong>در کنار</strong> حافظهٔ داخلی اجرا می‌شوند (هرگز جایگزینش نمی‌شوند) و قابلیت‌هایی مثل گراف دانش، جستجوی معنایی، استخراج خودکار واقعیت و مدل‌سازی کاربر بین-نشستی اضافه می‌کنند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes memory setup      # انتخاب یک ارائه‌دهنده و پیکربندی‌اش
+hermes memory status     # بررسی فعال‌بودن چه چیزی</code></pre>
+</div>
+<p>برای جزئیات کامل هر ارائه‌دهنده، راهنمای نصب و مقایسه، به «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory-providers" target="_blank" rel="noopener">ارائه‌دهندگان حافظه</a>» مراجعه کنید.</p>
+</section>
+
+<div class="pager">
+  <a href="tools.html"><span class="dir">→ قبلی</span><span class="ttl">ابزارها و تول‌ست‌ها</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">نگهدارندهٔ مهارت‌ها (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory" target="_blank" rel="noopener">Persistent Memory</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>
