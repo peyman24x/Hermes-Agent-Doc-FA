@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سیستم مهارت‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skills" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌های اصلی<span class="sep">/</span><strong>سیستم مهارت‌ها</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>سیستم مهارت‌ها</h1>
+<p>مهارت‌ها سندهای دانشِ در-لحظه‌ای هستند که ایجنت می‌تواند هنگام نیاز بارگذاری کند. آن‌ها از الگوی <strong>افشای تدریجی</strong> پیروی می‌کنند تا مصرف توکن حداقل شود و با استاندارد باز <a href="https://agentskills.io/specification" target="_blank" rel="noopener">agentskills.io</a> سازگارند.</p>
+<p>همهٔ مهارت‌ها در <strong><code>~/.hermes/skills/</code></strong> زندگی می‌کنند — پوشهٔ اصلی و منبع حقیقت. در نصب تازه، مهارت‌های داخلی از مخزن کپی می‌شوند. مهارت‌های نصب‌شده از هاب و ساخته‌شده توسط ایجنت هم به همین‌جا می‌روند. ایجنت می‌تواند هر مهارتی را تغییر دهد یا حذف کند.</p>
+<p>همچنین می‌توانید هرمس را به <strong>پوشه‌های مهارت خارجی</strong> اشاره کنید — پوشه‌های اضافی که کنار پوشهٔ محلی اسکن می‌شوند. به «<a href="#external-dirs">پوشه‌های مهارت خارجی</a>» پایین مراجعه کنید.</p>
+<p>همچنین ببینید:</p>
+<ul>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/reference/skills-catalog" target="_blank" rel="noopener">کاتالوگ مهارت‌های داخلی</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/reference/optional-skills-catalog" target="_blank" rel="noopener">کاتالوگ رسمی مهارت‌های اختیاری</a></li>
+</ul>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> شروع با تختهٔ خالی</h2>
+<p>به‌طور پیش‌فرض هر پروفایل با کاتالوگ مهارت داخلی بکار می‌شود و هر <code>hermes update</code> مهارت‌های داخلیِ تازه را اضافه می‌کند. اگر پروفایلی با <strong>هیچ مهارت داخلی</strong> می‌خواهید — که در به‌روزرسانی‌ها هم خالی بماند — دو مسیر دارید:</p>
+<p><strong>هنگام نصب</strong> (برای پروفایل پیش‌فرض <code>~/.hermes</code>):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --no-skills</code></pre>
+</div>
+<p><strong>هنگام ساخت پروفایل</strong> (پروفایل‌های نام‌دار):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes profile create research --no-skills</code></pre>
+</div>
+<p><strong>روی پروفایلِ از-قبل-نصب‌شده</strong> (پیش‌فرض یا نام‌دار)، در زمان اجرا تغییرش دهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes skills opt-out            # توقف بکارگذاری آینده — هیچ‌چیز روی دیسک دست نمی‌خورد
+hermes skills opt-out --remove   # همچنین حذف مهارت‌های داخلی تغییر-نکرده (اول تأیید می‌گیرد)
+hermes skills opt-in --sync      # برگرداندن: حذف نشانگر و بکارگذاری مجدد همین حالا</code></pre>
+</div>
+<p>هر سه مسیر یک نشانگر <code>.no-bundled-skills</code> در پوشهٔ پروفایل می‌نویسند. تا وقتی نشانگر موجود است، نصب‌کننده، <code>hermes update</code> و هر همگام‌سازی مهارت، بکارگذاری مهارت داخلی را برای آن پروفایل رد می‌کنند. نشانگر را حذف کنید (یا <code>hermes skills opt-in</code> اجرا کنید) تا دوباره فعال شود.</p>
+
+<div class="callout note">
+  <div class="callout-title">ℹ️ به‌طور پیش‌فرض ایمن</div>
+  <p><code>hermes skills opt-out</code> فقط بکارگذاری <em>آینده</em> را متوقف می‌کند — هرگز چیزی که از قبل روی دیسک است را حذف نمی‌کند. پرچم اختیاری <code>--remove</code> مهارت‌های داخلی را <strong>فقط</strong> وقتی حذف می‌کند که تغییرنکرده باشند (بایت‌به‌بایت یکسان با نسخه‌ای که هرمس نصب کرده). مهارت‌هایی که ویرایش کرده‌اید، مهارت‌های نصب‌شده از هاب و مهارت‌هایی که خودتان نوشته‌اید همیشه نگه داشته می‌شوند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> استفاده از مهارت‌ها</h2>
+<p>هر مهارتِ نصب‌شده به‌طور خودکار به‌صورت فرمان اسلش در دسترس است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">در CLI یا هر پلتفرم پیام‌رسانی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/gif-search funny cats
+/axolotl help me fine-tune Llama 3 on my dataset
+/github-pr-workflow create a PR for the auth refactor
+/plan design a rollout for migrating our auth provider
+
+# فقط نام مهارت آن را بارگذاری می‌کند و ایجنت می‌پرسد چه می‌خواهید:
+/excalidraw</code></pre>
+</div>
+
+<h3>ترکیب چند مهارت در یک فرمان</h3>
+<p>می‌توانید چند مهارت را در یک پیام فراخوانی کنید با زنجیرکردن فرمان‌های اسلش در ابتدای پیام — هر توکنِ ابتداییِ <code>/skill</code> (تا ۵ تا) بارگذاری می‌شود و باقی، دستور شما می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/github-pr-workflow /test-driven-development fix issue #123 and open a PR</code></pre>
+</div>
+<p>تجزیه در اولین توکنی که مهارتِ نصب‌شده نیست متوقف می‌شود، پس آرگومان‌هایی که اتفاقی با <code>/</code> شروع می‌شوند (مثل مسیر فایل) هرگز بلعیده نمی‌شوند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/ocr-and-documents /tmp/scan.pdf extract the tables   # یک مهارت بارگذاری می‌شود؛ /tmp/scan.pdf آرگومان است</code></pre>
+</div>
+<p>برای ترکیب‌هایی که مکرراً استفاده می‌کنید، <a href="#bundles">باندل مهارت</a> را ترجیح دهید — همان اثر زیر یک فرمان کوتاه.</p>
+<p>مهارت داخلی <code>plan</code> نمونهٔ خوبی است. اجرای <code>/plan [request]</code> دستورالعمل‌های مهارت را بارگذاری می‌کند که به هرمس می‌گوید در صورت نیاز زمینه را بررسی کند، به‌جای اجرای کار یک برنامهٔ پیاده‌سازی مارک‌داون بنویسد و نتیجه را زیر <code>.hermes/plans/</code> نسبت به پوشهٔ کاری فعال/بک‌اند ذخیره کند.</p>
+<p>همچنین می‌توانید از طریق گفتگوی طبیعی با مهارت‌ها تعامل کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes chat --toolsets skills -q "What skills do you have?"
+hermes chat --toolsets skills -q "Show me the axolotl skill"</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> یادگیری مهارت از منابع (<code>/learn</code>)</h2>
+<p><code>/learn</code> راه سریع تبدیل چیزی است که از قبل می‌شناسید — یا یک دسته مرجع — به مهارتی قابل‌استفادهٔ مجدد، بدون دست‌نوشتن <code>SKILL.md</code>. باز ended است: به <em>هر چیزی که بتوانید توصیف کنید</em> اشاره کنید و ایجنت مواد را با ابزارهایی که از قبل دارد جمع می‌کند، سپس مهارتی می‌نویسد که از <a href="#format">استانداردهای نگارش داخلی</a> پیروی می‌کند (توضیح ≤۶۰ کاراکتر، ترتیب بخش‌های استاندارد، چارچوب‌بندی با ابزارهای هرمس، بدون فرمان‌های ابداعی).</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># یک پوشهٔ SDK یا مستندات محلی — خوانده با read_file / search_files
+/learn the REST client in ~/projects/acme-sdk, focus on auth + pagination
+
+# یک صفحهٔ مستندات آنلاین — دریافت با web_extract
+/learn https://docs.example.com/api/quickstart
+
+# گردش‌کاری که همین الان در این گفتگو با ایجنت انجام دادید
+/learn how I just deployed the staging server
+
+# یادداشت‌های پیست‌شده / یک رویهٔ توصیف‌شده
+/learn filing an expense: open the portal, New &gt; Expense, attach the receipt, submit
+
+# یک کتاب کامل، دسته مقاله یا پیکرهٔ بزرگ مستندات — به مهارتِ پایگاه-دانش تبدیل می‌شود
+/learn ~/books/designing-data-intensive-applications.pdf</code></pre>
+</div>
+
+<h3>منابع بزرگ می‌شوند مهارت‌های پایگاه-دانش</h3>
+<p>وقتی منبع یک کتاب، دسته‌ای از مقالات، یک مشخصه یا پوشهٔ مستندات بزرگ است، ایجنت آن را در یک فایل هل نمی‌دهد یا به خلاصه‌ای زیان‌بار فرو نمی‌کاهد. به‌جایش یک <strong>مهارت پایگاه-دانشِ گسترده</strong> می‌نویسد: یک <code>SKILL.md</code> باریک که مدل‌های ذهنیِ کلیدی منبع به‌همراه یک اندیس را حمل می‌کند، و به‌ازای هر فصل یا موضوع یک فایل تقطیرشده زیر <code>references/</code> (به‌علاوهٔ واژه‌نامه یا برگه‌تقلب وقتی منبع مستحقش باشد). فایل‌های مرجع تا وقتی پرسشی به یکی نیاز نداشته باشد هیزم مصرف نمی‌کنند — ایجنت آن‌ها را در لحظه با <code>skill_view</code> بارگذاری می‌کند، پس هزینهٔ پرسش متناسب با پاسخ می‌ماند نه با منبع. اجرای دوبارهٔ <code>/learn</code> با مواد جدید روی همان موضوع، آن را در همان مهارت تاش می‌کند به‌جای ساخت تکراری.</p>
+<p>تقطیر، ساختار را ترکیب می‌بندد — چارچوب‌ها، تعاریف، قواعد تصمیم، ضداندازه‌ها — و هرگز قطعاتی از متن منبع را بازتولید نمی‌کند.</p>
+<p>چون خودِ ایجنتِ زنده کار گردآوری را انجام می‌دهد، <code>/learn</code> در CLI، گیت‌وی پیام‌رسانی، TUI و داشبورد یکسان کار می‌کند — و روی هر بک‌اند ترمینال (محلی، داکر، راهن)، چون موتور دریافت جداگانه‌ای وجود ندارد. در <strong>داشبورد</strong>، صفحهٔ Skills دکمهٔ <strong>Learn a skill</strong> دارد که پنلی با فیلد پوشه، فیلد URL و جعبهٔ متن باز می‌کند؛ یک درخواست <code>/learn</code> می‌سازد و در چت اجرایش می‌کند.</p>
+<p>هیچ ردپای مدل-ابزاری وجود ندارد: <code>/learn</code> یک پرامپتِ هدایت‌شده-با-استانداردها می‌سازد و به‌عنوان یک نوبت عادی به ایجنت می‌دهد. ایجنت نتیجه را با ابزار <code>skill_manage</code> ذخیره می‌کند، پس <a href="#write-approval">دروازهٔ تأیید نوشتن</a> اگر روشن کرده باشید اعمال می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> افشای تدریجی</h2>
+<p>مهارت‌ها از الگوی بارگذاریِ بهینه-برای-توکن استفاده می‌کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">سطوح بارگذاری</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Level 0: skills_list()           → [{name, description, category}, ...]   (~3k tokens)
+Level 1: skill_view(name)        → Full content + metadata       (varies)
+Level 2: skill_view(name, path)  → Specific reference file       (varies)</code></pre>
+</div>
+<p>ایجنت فقط وقتی واقعاً نیاز دارد محتوای کامل مهارت را بارگذاری می‌کند.</p>
+</section>
+
+<section class="doc-sec" id="format">
+<h2><span class="secnum">۵</span> قالب SKILL.md</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">markdown</span><button class="copy-btn">کپی</button></div>
+  <pre><code>name: my-skill
+description: Brief description of what this skill does
+version: 1.0.0
+platforms: [macos, linux]     # اختیاری — محدودکردن به پلتفرم‌های OS مشخص
+metadata:
+  hermes:
+    tags: [python, automation]
+    category: devops
+    fallback_for_toolsets: [web]    # اختیاری — فعال‌سازی شرطی (پایین را ببینید)
+    requires_toolsets: [terminal]   # اختیاری — فعال‌سازی شرطی (پایین را ببینید)
+    config:                          # اختیاری — تنظیمات config.yaml
+      - key: my.setting
+        description: "What this controls"
+        default: "value"
+        prompt: "Prompt for setup"
+
+# Skill Title
+
+## When to Use
+Trigger conditions for this skill.
+
+## Procedure
+1. Step one
+2. Step two
+
+## Pitfalls
+- Known failure modes and fixes
+
+## Verification
+How to confirm it worked.</code></pre>
+</div>
+
+<h3>مهارت‌های مخصوص-پلتفرم</h3>
+<p>مهارت‌ها می‌توانند خودشان را با فیلد <code>platforms</code> به سیستم‌عامل‌های مشخصی محدود کنند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مقدار</th><th>تطبیق با</th></tr></thead>
+  <tbody>
+    <tr><td><code>macos</code></td><td>مک‌اواس (Darwin)</td></tr>
+    <tr><td><code>linux</code></td><td>لینوکس</td></tr>
+    <tr><td><code>windows</code></td><td>ویندوز</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms: [macos]            # فقط مک‌اواس (مثلاً iMessage، Apple Reminders، FindMy)
+platforms: [macos, linux]     # مک‌اواس و لینوکس</code></pre>
+</div>
+<p>وقتی تنظیم شده باشد، مهارت به‌طور خودکار از پرامپت سیستمی، <code>skills_list()</code> و فرمان‌های اسلش روی پلتفرم‌های ناسازگار پنهان می‌شود. اگر حذف شود، مهارت روی همهٔ پلتفرم‌ها بارگذاری می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> خروجی مهارت و تحویل رسانه</h2>
+<p>وقتی پاسخ یک مهارت (یا هر پاسخ ایجنت) شامل مسیر مطلقِ خالیِ یک فایل رسانه‌ای است — مثلاً <code>/home/user/screenshots/diagram.png</code> — گیت‌وی آن را خودکار تشخیص می‌دهد، از متنِ قابل‌مشاهده حذف می‌کند و فایل را بومی به چت کاربر تحویل می‌دهد (عکس تلگرام، پیوست دیسکورد و غیره) به‌جای اینکه مسیر خام در پیام بماند.</p>
+<p>به‌طور خاص برای صوت، دایرکتیو <code>[[audio_as_voice]]</code> فایل‌های صوتی را روی پلتفرم‌هایی که پشتیبانی می‌کنند (تلگرام، واتساپ) به حباب پیام صوتیِ بومی ارتقا می‌دهد.</p>
+
+<h3>تحمین تحویل سندگونه: <code>[[as_document]]</code></h3>
+<p>گاهی <strong>عکسِ</strong> پیش‌نمایش درون‌خطی را می‌خواهید: می‌خواهید فایل به‌صورت پیوست قابل‌دانلود تحویل شود، نه حباب تصویرِ بازفشرده‌شده. مثال کلاسیک، اسکرین‌شات یا نمودار باکیفیت است — ‏<code>sendPhoto</code> تلگرام آن را به ~۲۰۰ کیلوبایت در ۱۲۸۰ پیکسل بازفشرده می‌کند و خوانایی را نابود می‌کند. یک PNG یک‌تا‌دو‌مگابایتی ارسال‌شده با <code>sendDocument</code> بایت‌های اصلی را سالم نگه می‌دارد.</p>
+<p>اگر پاسخی (یا هر متنی داخلش — معمولاً آخرین خط) حاوی دایرکتیو تحت‌اللفظی <code>[[as_document]]</code> باشد، هر مسیر رسانه‌ایِ استخراج‌شده از آن پاسخ، به‌جای حباب تصویر به‌صورت پیوست سند/فایل تحویل داده می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">نمونه</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Here is your rendered chart:
+
+/home/user/.hermes/cache/chart-q4-2025.png
+
+[[as_document]]</code></pre>
+</div>
+<p>دایرکتیو پیش از تحویل حذف می‌شود، پس کاربران هرگز نمی‌بینندش. دانه‌بندی عمداً همه-یا-هیچ به‌ازای هر پاسخ است: یک بار <code>[[as_document]]</code> بدهید و هر مسیر تصویرِ همان پاسخ به‌صورت سند تحویل می‌شود. این آیینهٔ دامنهٔ <code>[[audio_as_voice]]</code> است.</p>
+<p>از داخل مهارت وقتی استفاده کنید که:</p>
+<ul>
+  <li>اسکرین‌شات یا نموداری تولید می‌کنید که کاربر به‌صورت فایلش می‌خواهد (برای ویرایش در ابزار دیگر، آرشیو، اشتراکِ سالم).</li>
+  <li>پیش‌نمایش زیان‌آورِ پیش‌فرض جزئیات را محو می‌کرد (متن ریز، نمودارهای پیکسل‌دقیق، رندرهای حساس-به-رنگ).</li>
+</ul>
+<p>پلتفرم‌های بدون مسیر سندِ جداگانه (مثلاً پیامک) به هر سازوکار پیوستی که دارند برمی‌گردند.</p>
+
+<h3 id="conditional">فعال‌سازی شرطی (مهارت‌های جانشین)</h3>
+<p>مهارت‌ها می‌توانند بر اساس ابزارهای موجود در نشست فعلی، خودکار ظاهر یا ناپدید شوند. این برای <strong>مهارت‌های جانشین (fallback)</strong> مفیدترین است — جایگزین‌های رایگان یا محلی که فقط باید وقتی ابزار پولی در دسترس نیست ظاهر شوند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>metadata:
+  hermes:
+    fallback_for_toolsets: [web]      # فقط وقتی این تول‌ست‌ها در دسترس نیستند نمایش بده
+    requires_toolsets: [terminal]     # فقط وقتی این تول‌ست‌ها در دسترس‌اند نمایش بده
+    fallback_for_tools: [web_search]  # فقط وقتی این ابزارهای خاص در دسترس نیستند نمایش بده
+    requires_tools: [terminal]        # فقط وقتی این ابزارهای خاص در دسترس‌اند نمایش بده</code></pre>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فیلد</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>fallback_for_toolsets</code></td><td>مهارت وقتی تول‌ست‌های فهرست‌شده <strong>موجودند</strong> پنهان است. وقتی غایب‌اند نشان داده می‌شود.</td></tr>
+    <tr><td><code>fallback_for_tools</code></td><td>همان، اما به‌جای تول‌ست، ابزارهای تکی را بررسی می‌کند.</td></tr>
+    <tr><td><code>requires_toolsets</code></td><td>مهارت وقتی تول‌ست‌های فهرست‌شده <strong>موجود نیستند</strong> پنهان است. وقتی حاضرند نشان داده می‌شود.</td></tr>
+    <tr><td><code>requires_tools</code></td><td>همان، اما برای ابزارهای تکی.</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>مثال:</strong> مهارت داخلی <code>duckduckgo-search</code> از <code>fallback_for_toolsets: [web]</code> استفاده می‌کند. وقتی <code>FIRECRAWL_API_KEY</code> تنظیم شده باشد، تول‌ست وب موجود است و ایجنت از <code>web_search</code> استفاده می‌کند — مهارت DuckDuckGo پنهان می‌ماند. اگر کلید API غایب باشد، تول‌ست وب در دسترس نیست و مهارت DuckDuckGo به‌طور خودکار به‌عنوان جانشین ظاهر می‌شود.</p>
+<p>مهارت‌های بدون هیچ فیلد شرطی دقیقاً مثل قبل رفتار می‌کنند — همیشه نمایش داده می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> راه‌اندازی امن هنگام بارگذاری</h2>
+<p>مهارت‌ها می‌توانند متغیرهای محیطیِ لازم را اعلام کنند بدون آنکه از کشف ناپدید شوند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>required_environment_variables:
+  - name: TENOR_API_KEY
+    prompt: Tenor API key
+    help: Get a key from https://developers.google.com/tenor
+    required_for: full functionality</code></pre>
+</div>
+<p>وقتی مقدار مفقودی برخورد شود، هرمس فقط وقتی که مهارت واقعاً در CLI محلی بارگذاری شده، امن از شما می‌پرسد. می‌توانید راه‌اندازی را رد کنید و به استفاده از مهارت ادامه دهید. سطوح پیام‌رسانی هرگز در چت راز نمی‌پرسند — به‌جایش می‌گویند از <code>hermes setup</code> یا <code>~/.hermes/.env</code> به‌صورت محلی استفاده کنید.</p>
+<p>پس از تنظیم، متغیرهای محیطیِ اعلام‌شده به‌طور <strong>خودکار</strong> به سندباکس‌های <code>execute_code</code> و <code>terminal</code> عبور داده می‌شوند — اسکریپت‌های مهارت می‌توانند مستقیم از <code>$TENOR_API_KEY</code> استفاده کنند. برای متغیرهای غیر-مهارتی، از گزینهٔ پیکربندی <code>terminal.env_passthrough</code> استفاده کنید. برای جزئیات به «عبور متغیرهای محیطی» در مستندات امنیت مراجعه کنید.</p>
+
+<h3>تنظیمات پیکربندی مهارت</h3>
+<p>مهارت‌ها همچنین می‌توانند تنظیمات غیررمزی (مسیرها، ترجیحات)ِ ذخیره‌شده در <code>config.yaml</code> اعلام کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>metadata:
+  hermes:
+    config:
+      - key: myplugin.path
+        description: Path to the plugin data directory
+        default: "~/myplugin-data"
+        prompt: Plugin data directory path</code></pre>
+</div>
+<p>تنظیمات زیر <code>skills.config</code> در config.yaml شما ذخیره می‌شوند. <code>hermes config migrate</code> برای تنظیمات پیکربندی‌نشده می‌پرسد و <code>hermes config show</code> آن‌ها را نمایش می‌دهد. وقتی مهارتی بارگذاری می‌شود، مقادیر پیکربندیِ حل‌شده‌اش به زمینه تزریق می‌شوند تا ایجنت به‌طور خودکار مقادیر پیکربندی‌شده را بداند.</p>
+<p>برای جزئیات به «تنظیمات مهارت» در مستندات پیکربندی و «ساخت مهارت‌ها — تنظیمات پیکربندی» در راهنمای توسعه‌دهنده مراجعه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> ساختار پوشهٔ مهارت‌ها</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>~/.hermes/skills/                  # منبع حقیقت واحد
+├── mlops/                         # پوشهٔ دسته
+│   ├── axolotl/
+│   │   ├── SKILL.md               # دستورالعمل اصلی (لازم)
+│   │   ├── references/            # مستندات اضافی
+│   │   ├── templates/             # قالب‌های خروجی
+│   │   ├── scripts/               # اسکریپت‌های کمکیِ قابل‌فراخوانی از مهارت
+│   │   ├── examples/              # نمونه‌خروجی‌های ارجاع‌شده
+│   │   └── assets/                # فایل‌های مکمل
+│   └── vllm/
+│       └── SKILL.md
+├── devops/
+│   └── deploy-k8s/                # مهارتِ ساخته‌شده توسط ایجنت
+│       ├── SKILL.md
+│       └── references/
+├── .hub/                          # وضعیت Skills Hub
+│   ├── lock.json
+│   ├── quarantine/
+│   └── audit.log
+└── .bundled_manifest              # مهارت‌های داخلیِ بکارگذاری‌شده را پیگیری می‌کند</code></pre>
+</div>
+<p>نصب‌های URL و گیت‌هابِ شخص‌ثالث شامل <code>SKILL.md</code> به‌علاوهٔ فایل‌های محلیِ دقیقی است که زیر <code>references/</code>، <code>templates/</code>، <code>scripts/</code>، <code>assets/</code> و <code>examples/</code> ارجاع می‌دهد. فایل‌های ارجاع‌نشدهٔ مخزن کپی نمی‌شوند. هرمس باندلِ کاملِ قرنطینه‌شده را اسکن می‌کند و URL منبع، هش دقیق محتوا، نسخهٔ اسکنر، یافته‌ها، مهر زمانی و وضعیت تازه-یا-کش‌شده را در <code>skills/.hub/lock.json</code> ثبت می‌کند.</p>
+
+<h3>اسکن مشورتی SkillEvaluator</h3>
+<p>علاوه بر اسکنر امنیتی داخلی (که سیاست نصب بالا را اجباری می‌کند)، هرمس می‌تواند بررسی‌های Tier 1 مربوط به <a href="https://github.com/NVIDIA/SkillEvaluator" target="_blank" rel="noopener">NVIDIA SkillEvaluator</a> را روی هر نصب هاب به‌عنوان نظر دوم اجرا کند. Tier 1 قطعی و بدون‌کلید است — تشخیص PII (ایمیل‌های لو رفته، مسیرهای شخصی، رشته‌های اتصال)، تشخیص قاچاق یونیکد، lint اسکریپت، انطباق لایسنس و اسکن امنیتی ایستا از طریق <a href="https://github.com/NVIDIA/SkillSpector" target="_blank" rel="noopener">NVIDIA SkillSpector</a>.</p>
+<p>اسکن <strong>فقط مشورتی</strong> است: یافته‌ها پیش از تأیید نصب همراه فایل و شمارهٔ خط چاپ می‌شوند و نصب ادامه می‌یابد. یافته‌هایی که شبیه اعتبارنامهٔ واقعی‌اند (کلیدهای خصوصی، کلیدهای دسترسی ابری، توکن‌ها، رشته‌های اتصالِ دارای اعتبار) قرمز هایلایت می‌شوند تا خطوط علامت‌خورده را قبل از تصمیم بازبینی کنید. یافته‌های کلاس PII اطلاعاتی‌اند — اسکنر بالادستی کلاس‌های مثبت-کاذب شناخته‌شده‌ای دارد (مثلاً نگارش SSH ‏<code>git@github.com</code> و ایمیل‌های نمونهٔ مستندات) پس هرگز چیزی را مسدود نمی‌کنند.</p>
+<p>برای فعال‌سازی، باینری‌های اسکنر اختیاری را نصب کنید (دومی بررسی <code>security</code> را قدرت می‌بخشد؛ بدون آن همان بررسی فقط «not run» گزارش می‌کند):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>uv tool install --python 3.13 \
+  "skillevaluator @ git+https://github.com/NVIDIA/SkillEvaluator.git@v0.1.0"
+uv tool install "git+https://github.com/NVIDIA/SkillSpector.git@v2.9.5"</code></pre>
+</div>
+<p>بدون باینری روی PATH اسکن خاموش رد می‌شود. برای خاموش‌کردن کامل:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>skills:
+  tier1_advisory: false</code></pre>
+</div>
+<p>دکمهٔ اسکن Browse-hub داشبورد همان دادهٔ مشورتی را در پاسخش (فیلد <code>tier1</code>) کنار حکم اسکنر داخلی برمی‌گرداند.</p>
+</section>
+
+<section class="doc-sec" id="external-dirs">
+<h2><span class="secnum">۹</span> پوشه‌های مهارت خارجی</h2>
+<p>اگر بیرون از هرمس مهارت نگه می‌دارید — مثلاً پوشهٔ مشترک <code>~/.agents/skills/</code> که چند ابزار هوش مصنوعی استفاده می‌کنند — می‌توانید به هرمس بگویید آن پوشه‌ها را هم اسکن کند.</p>
+<p><code>external_dirs</code> را زیر بخش <code>skills</code> در <code>~/.hermes/config.yaml</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>skills:
+  external_dirs:
+    - ~/.agents/skills
+    - /home/shared/team-skills
+    - ${SKILLS_REPO}/skills</code></pre>
+</div>
+<p>مسیرها از بازشدن <code>~</code> و جایگزینی متغیر محیطی <code>${VAR}</code> پشتیبانی می‌کنند.</p>
+
+<h3>چگونه کار می‌کند</h3>
+<ul>
+  <li><strong>محلی بساز، درجا به‌روز کن</strong>: مهارت‌های جدیدِ ایجنت‌ساخته در <code>~/.hermes/skills/</code> نوشته می‌شوند. مهارت‌های موجود همان‌جا که پیدا شده‌اند تغییر می‌کنند، شامل مهارت‌های زیر <code>external_dirs</code>، وقتی ایجنت از اکشن‌های <code>skill_manage</code> مثل <code>patch</code>، <code>edit</code>، <code>write_file</code>، <code>remove_file</code> یا <code>delete</code> استفاده می‌کند.</li>
+  <li><strong>پوشه‌های خارجی مرز حفاظت-از-نوشتن نیستند</strong>: اگر پوشهٔ مهارت خارجی برای پروسهٔ هرمس قابل‌نوشتن باشد، به‌روزرسانی‌های مهارتِ مدیریت‌شده توسط ایجنت می‌توانند فایل‌های آن پوشه را تغییر دهند. اگر مهارت‌های خارجیِ مشترک باید فقط‌خواندنی بمانند، از مجوزهای فایل‌سیستم یا راه‌اندازی جداگانهٔ پروفایل/تول‌ست استفاده کنید.</li>
+  <li><strong>اولویت محلی</strong>: اگر نام مهارت هم در پوشهٔ محلی و هم در پوشهٔ خارجی وجود داشته باشد، نسخهٔ محلی برنده است.</li>
+  <li><strong>یکپارچگی کامل</strong>: مهارت‌های خارجی در اندیس پرامپت سیستمی، <code>skills_list</code>، <code>skill_view</code> و به‌صورت فرمان‌های اسلش <code>/skill-name</code> ظاهر می‌شوند — تفاوتی با مهارت‌های محلی ندارند.</li>
+  <li><strong>مسیرهای ناموجود خاموش رد می‌شوند</strong>: اگر پوشهٔ پیکربندی‌شده وجود نداشته باشد، هرمس بدون خطا نادیده‌اش می‌گیرد. برای پوشه‌های مشترکِ اختیاری که ممکن است روی هر ماشینی نباشند مفید است.</li>
+</ul>
+
+<h3>مثال</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>~/.hermes/skills/               # محلی (اصلی، خواندنی-نوشتنی)
+├── devops/deploy-k8s/
+│   └── SKILL.md
+└── mlops/axolotl/
+    └── SKILL.md
+
+~/.agents/skills/               # خارجی (مشترک، تغییرپذیر اگر نوشتنی باشد)
+├── my-custom-workflow/
+│   └── SKILL.md
+└── team-conventions/
+    └── SKILL.md</code></pre>
+</div>
+<p>هر چهار مهارت در اندیس مهارت شما ظاهر می‌شوند. اگر مهارت جدیدی به نام <code>my-custom-workflow</code> محلی بسازید، نسخهٔ خارجی را سایه می‌اندازد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> مهارت‌های مخصوص-پروژه</h2>
+<p>مخازن می‌توانند مهارت‌های خودشان را داشته باشند که فقط برای نشست‌های شروع‌شده داخل آن پروژه فعال‌اند — همان الگویی که سایر چارچوب‌های ایجنت برای پیکربندی محلی-مخزن استفاده می‌کنند. وقتی هرمس را داخل یک چک‌اوت git اجرا می‌کنید، مهارت‌ها را در این‌ها جست‌وجو می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>&lt;project-root&gt;/.hermes/skills/    # مکان بومی هرمس
+&lt;project-root&gt;/.agents/skills/    # قرارداد بین-ابزاری (مشترک با سایر CLIهای ایجنت)</code></pre>
+</div>
+<p>ریشهٔ پروژه، نزدیک‌ترین پوشهٔ والدينِ دارای <code>.git</code> است (ورک‌تری‌ها و ساب‌ماژول‌ها حساب‌اند).</p>
+
+<h3>اعتماد به یک پروژه</h3>
+<p>مهارت‌ها سندهای رویه‌ای‌اند که ایجنت دنبالشان می‌رود، پس هرمس آن‌ها را از مخازنِ کلون‌شدهٔ دلخواه <strong>خودکار بارگذاری نمی‌کند</strong>. اولین باری که هرمس را در مخزنی با مهارت‌های پروژه اجرا می‌کنید، بنر اعلانی نشان می‌دهد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>◆ 3 project skill(s) found in /home/you/myproject but not loaded — run `hermes skills trust` to enable them.</code></pre>
+</div>
+<p>یک بار به مخزن اعتماد کنید (از داخلش، یا با پاس‌دادن مسیر):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes skills trust             # اعتماد به مخزن فعلی
+hermes skills trust ~/myproject # یا صریح
+hermes skills untrust           # لغو اعتماد</code></pre>
+</div>
+<p>ریشه‌های مورداعتماد در <code>skills.trusted_project_dirs</code> در <code>~/.hermes/config.yaml</code> ذخیره می‌شوند. برای خاموش‌کردن کامل قابلیت (نه اسکن، نه اعلان) <code>skills.project_discovery: false</code> را تنظیم کنید.</p>
+
+<h3>اولویت</h3>
+<p>مهارت‌های پروژه <strong>بالاترین سطح اولویت</strong> را دارند: <code>پروژه ← محلی (~/.hermes/skills/) ← external_dirs</code>. مهارت پروژه‌ای به نام <code>deploy</code> برای نشست‌های داخل آن مخزن، بر مهارت هم‌نامِ پروفایل یا داخلی غلبه می‌کند — نکته همین است: مهارت‌های همراه‌شده با مخزن در خانهٔ خودشان می‌برند، بدون دست‌زدن به پروفایل سراسری‌تان. مهارت‌های پروژه در اندیس مهارت ایجنت با برچسب <code>[project]</code> علامت می‌خورند تا منشأ دیده بماند.</p>
+<p>مثل پوشه‌های خارجی، پوشه‌های مهارت پروژه متعلق-به-مخزن تلقی می‌شوند: نگهداری خودمختار مهارت (کرتور) هرگز آن‌ها را تغییر نمی‌دهد و مهارت‌های جدیدِ ایجنت‌ساخته همیشه به <code>~/.hermes/skills/</code> می‌روند.</p>
+
+<h3>قرنطینهٔ هنگام اسکن</h3>
+<p>اعتماد، تصمیمی در سطح مخزن است، اما محتوای مهارت مخزن با هر <code>git pull</code> تغییر می‌کند. برای بستن همین شکاف، هر مهارت پروژه‌ای پیش از ورود به اندیس با همان اسکنر امنیتیِ نصب‌های Skills Hub اسکن می‌شود. مهارتی که حکم اسکنش <strong>خطرناک</strong> باشد (دایرکتیوهای تزریق پرامپت، فرمان‌های استخراج اعتبارنامه، ترفندهای متن-پنهان) قرنطینه می‌شود: در اندیس مهارت، <code>skills_list</code> و فرمان‌های اسلش ظاهر نمی‌شود و بارگذاری با نام را با خطایی توضیحی رد می‌کند. اسکن‌ها با هش محتوا زیر <code>~/.hermes/cache/project_skill_scans/</code> کش می‌شوند (هرگز داخل مخزن شما نه) و وقتی محتوای مهارت تغییر کند خودکار دوباره اجرا می‌شوند.</p>
+
+<h3>سطوح غیرتعاملی (کرون، API، ACP)</h3>
+<p>کارهای کرونی و سایر سطوح غیرتعاملی، تصمیم اعتمادِ تعاملی شما را به ارث می‌برند — هرگز نمی‌پرسند و هرگز خودکار اعتماد نمی‌کنند. ریشهٔ پروژه از پوشهٔ کاریِ آن سطح حل می‌شود (پوشهٔ کاریِ کار کرونی، با همان سازوکاری که ابزار ترمینال استفاده می‌کند). کار کرونی‌ای که <code>workdir</code> داخل مخزنی است که قبلاً اعتماد کرده‌اید، مهارت‌های پروژهٔ آن مخزن را بارگذاری می‌کند؛ کاری در مخزنِ نامعتبر یا تصمیم‌نگرفته هیچ‌کدام را بار نمی‌کند.</p>
+</section>
+
+<section class="doc-sec" id="bundles">
+<h2><span class="secnum">۱۱</span> باندل‌های مهارت</h2>
+<p>باندل‌های مهارت فایل‌های YAML کوچکی هستند که چند مهارت را زیر یک فرمان اسلش واحد گروه می‌کنند. وقتی <code>/&lt;bundle-name&gt;</code> را اجرا می‌کنید، هر مهارتِ فهرست‌شده در باندل یک‌جا بارگذاری می‌شود — مفید وقتی کار مشخصی همیشه از همان مجموعهٔ مهارت‌ها کنار هم سود می‌برد.</p>
+
+<h3>مثال سریع</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ساخت باندل برای کار ویژگی بک‌اند
+hermes bundles create backend-dev \
+  --skill github-code-review \
+  --skill test-driven-development \
+  --skill github-pr-workflow \
+  -d "Backend feature work — review, test, PR workflow"</code></pre>
+</div>
+<p>سپس در CLI یا هر پلتفرم گیت‌وی:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان در چت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/backend-dev refactor the auth middleware</code></pre>
+</div>
+<p>ایجنت هر سه مهارت را بارگذاری‌شده در یک پیام کاربر دریافت می‌کند، و هر متنی بعد از فرمان اسلش به‌عنوان دستور کاربر پیوست می‌شود.</p>
+
+<h3>طرح‌وارهٔ YAML</h3>
+<p>باندل‌ها در <strong><code>~/.hermes/skill-bundles/&lt;slug&gt;.yaml</code></strong> زندگی می‌کنند و این شکلی‌اند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>name: backend-dev
+description: Backend feature work — review, test, PR workflow.
+skills:
+  - github-code-review
+  - test-driven-development
+  - github-pr-workflow
+instruction: |
+  Always start by writing failing tests, then implement.
+  Open the PR through the standard workflow with co-author tags.</code></pre>
+</div>
+<p>فیلدها:</p>
+<ul>
+  <li><code>name</code> (اختیاری — پیش‌فرض از ساقهٔ نام فایل) — نام نمایشی باندل. برای فرمان اسلش به اسلاگ خط‌تیره‌ای نرمال می‌شود (<code>Backend Dev</code> ← <code>/backend-dev</code>).</li>
+  <li><code>description</code> (اختیاری) — متن کوتاه نمایش‌داده‌شده در <code>/bundles</code> و <code>hermes bundles list</code>.</li>
+  <li><code>skills</code> (لازم، فهرست غیرخالی) — نام مهارت‌ها یا مسیرهای نسبی به پوشهٔ مهارت‌هایتان. همان شناسه‌ای که به <code>/&lt;skill-name&gt;</code> می‌دادید.</li>
+  <li><code>instruction</code> (اختیاری) — راهنمای اضافی که به ابتدای محتوای مهارت‌های بارگذاری‌شده پیشوند می‌شود. برای تثبیت «همیشه چطور این‌ها را با هم استفاده می‌کنیم» مفید است.</li>
+</ul>
+
+<h3>مدیریت باندل‌ها</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># فهرست همهٔ باندل‌های نصب‌شده
+hermes bundles list
+
+# بازبینی یک باندل
+hermes bundles show backend-dev
+
+# ساخت تعاملی باندل (بدون پرچم --skill، هر خط یکی وارد کنید)
+hermes bundles create research
+
+# بازنویسی باندل موجود
+hermes bundles create backend-dev --skill ... --force
+
+# حذف یک باندل
+hermes bundles delete backend-dev
+
+# اسکن مجدد ~/.hermes/skill-bundles/ و گزارش تغییرات
+hermes bundles reload</code></pre>
+</div>
+<p>از داخل نشست چت، <code>/bundles</code> هر باندلِ نصب‌شده و مهارت‌هایش را فهرست می‌کند.</p>
+
+<h3>رفتار</h3>
+<ul>
+  <li><strong>باندل‌ها بر مهارت‌های تکی اولویت دارند</strong> وقتی اسلاگ‌ها تصادم می‌کنند. اگر باندلی را <code>research</code> نام‌گذاری کنید و مهارتی هم به نام <code>research</code> داشته باشید، <code>/research</code> باندل را فراخوانی می‌کند. این عمدی است — با نام‌گذاری‌اش به باندل رأی داده‌اید.</li>
+  <li><strong>مهارت‌های مفقود رد می‌شوند، نه مرگبار.</strong> اگر باندل <code>skill-foo</code> را فهرست کرده باشد و شما نصبش نکرده باشید، باندل همچنان مهارت‌های قابل‌حل را بار می‌کند و ایجنت یادداشتی می‌گیرد که چه چیزی رد شد.</li>
+  <li><strong>باندل‌ها در همهٔ سطوح کار می‌کنند</strong> — CLI تعاملی، TUI، چت داشبورد و همهٔ پلتفرم‌های گیت‌وی (تلگرام، دیسکورد، اسلک، …) — چون اعزام در همان جای فرمان‌های مهارت تکی متمرکز است.</li>
+  <li><strong>باندل‌ها کش پرامپت را باطل نمی‌کنند.</strong> در لحظهٔ فراخوانی یک پیام کاربرِ تازه تولید می‌کنند، همان‌طور که <code>/&lt;skill-name&gt;</code> می‌کند — بدون جهش در پرامپت سیستمی.</li>
+</ul>
+
+<h3>کِی باندل از نصب دستی هر مهارت بهتر است</h3>
+<p>از باندل استفاده کنید وقتی:</p>
+<ul>
+  <li>همیشه همان مهارت‌ها را برای کاری تکراری جفت می‌کنید (<code>/backend-dev</code>، <code>/release-prep</code>، <code>/incident-response</code>).</li>
+  <li>مدل ذهنی کوتاه‌تری از تایپ چند فرمان <code>/skill</code> پشت‌سرهم می‌خواهید.</li>
+  <li>می‌خواهید یک «پروفایل کاری» تیم‌گستر با کامیت‌کردن YAML باندل در مخزن دات‌فایل مشترک و سیم‌لینک‌کردنش به <code>~/.hermes/skill-bundles/</code> عرضه کنید.</li>
+</ul>
+<p>باندل فقط یک نام‌مستقل YAML است — برایتان مهارت نصب نمی‌کند. خود مهارت‌ها باید از قبل موجود باشند (در <code>~/.hermes/skills/</code> یا پوشهٔ مهارت خارجی). وگرنه فراخوانی باندل فقط مفقودها را رد می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> مهارت‌های مدیریت‌شده توسط ایجنت (ابزار skill_manage)</h2>
+<p>ایجنت می‌تواند از طریق ابزار <code>skill_manage</code> مهارت‌های خودش را بسازد، به‌روز کند و حذف کند. این <strong>حافظهٔ رویه‌ای</strong> ایجنت است — وقتی گردش‌کاری غیر بدیهی را کشف می‌کند، رویکردش را به‌عنوان مهارتی برای استفادهٔ مجدد ذخیره می‌کند.</p>
+<p>مهارت و حافظه در حلقهٔ خودبهبودی با هم کار می‌کنند: حافظه حقایق کوچکِ پایداری را ذخیره می‌کند که همیشه باید در زمینه باشند، در حالی که مهارت‌ها رویه‌های بلندتری را ذخیره می‌کنند که فقط وقتی مرتبط‌اند بارگذاری شوند. بازبینی پس‌زمینه می‌تواند پس از یک نشست تغییر مهارت را پیشنهاد یا مرحله‌بندی کند، اما دروازهٔ تأیید نوشتن به شما اجازه می‌دهد پیش از فرودِ آن تغییرات، بازبینی انسانی الزامی کنید.</p>
+
+<h3>ایجنت کِی مهارت می‌سازد</h3>
+<p>پرامپت سیستمی از ایجنت می‌خواهد گردش‌کارِ غیر بدیهی را با <code>skill_manage</code> برای استفادهٔ مجدد آینده ثبت کند. در عمل این‌ها را پوشش می‌دهد:</p>
+<ul>
+  <li>وقتی گردش‌کاری چندمرحله‌ایِ ارزش‌تکراری را درآورده</li>
+  <li>وقتی به خطاها یا بن‌بست‌ها خورد و مسیر کارکن را یافت</li>
+  <li>وقتی کاربر رویکردش را اصلاح کرد</li>
+</ul>
+
+<h3>اکشن‌ها</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>اکشن</th><th>برای</th><th>پارامترهای کلیدی</th></tr></thead>
+  <tbody>
+    <tr><td><code>create</code></td><td>مهارت جدید از صفر</td><td><code>name</code>، <code>content</code> (کل SKILL.md)، <code>category</code> اختیاری</td></tr>
+    <tr><td><code>patch</code></td><td>اصلاحات هدفمند (ترجیحی)</td><td><code>name</code>، <code>old_string</code>، <code>new_string</code></td></tr>
+    <tr><td><code>edit</code></td><td>بازنویسی‌های ساختاری بزرگ</td><td><code>name</code>، <code>content</code> (جایگزینی کامل SKILL.md)</td></tr>
+    <tr><td><code>delete</code></td><td>حذف کامل یک مهارت</td><td><code>name</code></td></tr>
+    <tr><td><code>write_file</code></td><td>افزودن/به‌روزرسانی فایل‌های پشتیبان</td><td><code>name</code>، <code>file_path</code>، <code>file_content</code></td></tr>
+    <tr><td><code>remove_file</code></td><td>حذف یک فایل پشتیبان</td><td><code>name</code>، <code>file_path</code></td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>اکشن <code>patch</code> برای به‌روزرسانی ترجیح دارد — از <code>edit</code> بهینه‌تر برای توکن است چون فقط متنِ تغییر یافته در فراخوانی ابزار ظاهر می‌شود.</p>
+</div>
+
+<h3 id="write-approval">دروازه‌گذاری نوشتن‌های مهارت ایجنت (<code>skills.write_approval</code>)</h3>
+<p>به‌طور پیش‌فرض ایجنت آزادانه مهارت می‌نویسد — از جمله از <a href="memory.html">بازبینی خودبهبودی پس‌زمینه</a> که بعد از هر نوبت اجرا می‌شود. اگر ترجیح می‌دهید اول هر نوشتن مهارت را تأیید کنید (مدل‌های کوچکی که آنچه آموختند را بد قضاوت می‌کنند، محیط‌های امنیتی، یا صرفاً خواستنِ چشم‌بودن روی حلقهٔ خودبهبودی)، دروازهٔ تأیید نوشتن را روشن کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>skills:
+  write_approval: false     # false = نوشتن آزاد (پیش‌فرض) | true = نیاز به تأیید</code></pre>
+</div>
+<p>وقتی <code>write_approval: true</code> است، هر نوشتنِ <code>skill_manage</code> (ایجاد / ویرایش / patch / حذف / write_file / remove_file) به‌جای commit <strong>مرحله‌بندی</strong> می‌شود — یک SKILL.md برای بازبینی درجا زیادی بزرگ است، پس مرحله‌بندی صرف‌نظر از اینکه نوشتن از نوبت پیش‌زمینه آمده یا بازبینی پس‌زمینه اعمال می‌شود. نوشتن‌های مرحله‌شده از ری‌استارت‌ها زیر <code>~/.hermes/pending/skills/</code> جان سالم به در می‌برند و با همان جریانِ آشنایِ تأیید/ردِ فرمان‌های خطرناک بازبینی می‌شوند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان‌ها</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/skills pending             # فهرست نوشتن‌های مرحله‌شدهٔ مهارت + خلاصهٔ یک‌خطی هرکدام
+/skills diff &lt;id&gt;           # دیف کامل یکسان‌شده (بهترین جا: CLI یا داشبورد)
+/skills approve &lt;id&gt;        # اعمال (یا 'all')
+/skills reject &lt;id&gt;         # انداختن (یا 'all')
+/skills approval on         # روشن‌کردن دروازه (یا 'off') و ماندگارکردنش</code></pre>
+</div>
+<p>سطح بازبینی در CLI تعاملی و پلتفرم‌های پیام‌رسانی کار می‌کند (خروجی diff برای حباب‌های چت بریده می‌شود — دیف کامل را در CLI یا فایل JSONِ pending بخوانید). نوشتن‌های حافظه همان دروازه را زیر <code>memory.write_approval</code> دارند — به «<a href="memory.html">کنترل نوشتن‌های حافظه</a>» مراجعه کنید.</p>
+<blockquote>
+<p>تنظیم جداگانهٔ <code>skills.guard_agent_created</code> یک اسکنر محتواست (ابتکارهای الگوی-خطرناک)، نه دروازهٔ تأیید — این دو مستقل‌اند. به «گارد روی نوشتن‌های مهارتِ ایجنت‌ساخته» در مستندات پیکربندی مراجعه کنید.</p>
+</blockquote>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> هاب مهارت‌ها (Skills Hub)</h2>
+<p>مرور، جستجو، نصب و مدیریت مهارت‌ها از رجیستری‌های آنلاین، skills.sh، اندپوینت‌های well-known مستقیم و مهارت‌های اختیاری رسمی.</p>
+
+<h3>فرمان‌های رایج</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes skills browse                              # مرور همهٔ مهارت‌های هاب (اول رسمی‌ها)
+hermes skills browse --source official            # مرور فقط مهارت‌های اختیاری رسمی
+hermes skills search kubernetes                   # جستجو در همهٔ منابع
+hermes skills search react --source skills-sh     # جستجو در دایرکتوری skills.sh
+hermes skills search https://mintlify.com/docs --source well-known
+hermes skills inspect openai/skills/k8s           # پیش‌نمایش پیش از نصب
+hermes skills install openai/skills/k8s           # نصب با اسکن امنیتی
+hermes skills install official/security/1password
+hermes skills install skills-sh/vercel-labs/json-render/json-render-react --force
+hermes skills install well-known:https://mintlify.com/docs/.well-known/skills/mintlify
+hermes skills install https://sharethis.chat/SKILL.md              # URL مستقیم (+ فایل‌های پشتیبان ارجاع‌شده)
+hermes skills install https://example.com/SKILL.md --name my-skill # نام‌گذاری وقتی frontmatter ندارد
+hermes skills list --source hub                   # فهرست مهارت‌های نصب‌شده از هاب
+hermes skills check                               # بررسی به‌روزرسانی بالادستی مهارت‌های هاب
+hermes skills update                              # نصب مجدد مهارت‌های دارای تغییر بالادستی
+hermes skills audit                               # اسکن امنیتی مجدد همهٔ مهارت‌های هاب
+hermes skills uninstall k8s                       # حذف یک مهارت هاب
+hermes skills reset google-workspace              # جداکردن مهارت داخلی از "تغییر-یافته توسط کاربر" (پایین)
+hermes skills reset google-workspace --restore    # همچنین بازیابی نسخهٔ داخلی، حذف ویرایش‌های محلی شما
+hermes skills publish skills/my-skill --to github --repo owner/repo
+hermes skills snapshot export setup.json          # صادرات پیکربندی مهارت
+hermes skills tap add myorg/skills-repo           # افزودن منبع گیت‌هاب سفارشی</code></pre>
+</div>
+
+<h3>منابع هاب پشتیبانی‌شده</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>منبع</th><th>مثال</th><th>نکته‌ها</th></tr></thead>
+  <tbody>
+    <tr><td><code>official</code></td><td><code>official/security/1password</code></td><td>مهارت‌های اختیاریِ همراه هرمس.</td></tr>
+    <tr><td><code>skills-sh</code></td><td><code>skills-sh/vercel-labs/agent-skills/vercel-react-best-practices</code></td><td>قابل‌جستجو با <code>hermes skills search &lt;query&gt; --source skills-sh</code>. هرمس مهارت‌های سبک-نام‌مستقل را وقتی اسلاگ skills.sh با پوشهٔ مخزن فرق دارد حل می‌کند.</td></tr>
+    <tr><td><code>well-known</code></td><td><code>well-known:https://mintlify.com/docs/.well-known/skills/mintlify</code></td><td>مهارت‌هایی که مستقیم از <code>/.well-known/skills/index.json</code> یک وب‌سایت سرو می‌شوند. جستجو با URL سایت یا مستندات.</td></tr>
+    <tr><td><code>url</code></td><td><code>https://sharethis.chat/SKILL.md</code></td><td>URL مستقیم HTTP(S) به SKILL.md به‌علاوهٔ فایل‌های پشتیبانِ صریحاً ارجاع‌شده. حل نام: frontmatter ← اسلاگ URL ← پرامپت تعاملی ← پرچم <code>--name</code>.</td></tr>
+    <tr><td><code>github</code></td><td><code>openai/skills/k8s</code></td><td>نصب مستقیم مخزن/مسیر گیت‌هاب و تَپ‌های سفارشی.</td></tr>
+    <tr><td><code>clawhub</code>، <code>lobehub</code>، <code>browse-sh</code></td><td>شناسه‌های مخصوص هر منبع</td><td>یکپارچه‌سازی‌های جامعه یا بازارچه.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>هاب‌ها و رجیستری‌های یکپارچه</h3>
+<p>هرمس در حال حاضر با این اکوسیستم‌های مهارت و منابع کشف یکپارچه است:</p>
+
+<h4>۱. مهارت‌های اختیاری رسمی (<code>official</code>)</h4>
+<p>این‌ها در خود مخزن هرمس نگهداری می‌شوند و با اعتماد داخلی نصب می‌شوند. کاتالوگ: «کاتالوگ مهارت‌های اختیاری رسمی» در بخش مرجع. سورس در مخزن: <code>optional-skills/</code>. مثال:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes skills browse --source official
+hermes skills install official/security/1password</code></pre>
+</div>
+
+<h4>۲. skills.sh‏ (<code>skills-sh</code>)</h4>
+<p>دایرکتوری عمومی مهارت‌های ورسل. هرمس می‌تواند مستقیم جستجو کند، صفحات جزئیات را بازبینی کند، اسلاگ‌های سبک-نام‌مستقل را حل کند و از مخزن منبع نصب کند. دایرکتوری: <a href="https://skills.sh/" target="_blank" rel="noopener">skills.sh</a>؛ مخزن CLI: <a href="https://github.com/vercel-labs/skills" target="_blank" rel="noopener">vercel-labs/skills</a>؛ مخزن رسمی مهارت‌های ورسل: <a href="https://github.com/vercel-labs/agent-skills" target="_blank" rel="noopener">vercel-labs/agent-skills</a>. مثال:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes skills search react --source skills-sh
+hermes skills inspect skills-sh/vercel-labs/json-render/json-render-react
+hermes skills install skills-sh/vercel-labs/json-render/json-render-react --force</code></pre>
+</div>
+
+<h4>۳. اندپوینت‌های well-known‏ (<code>well-known</code>)</h4>
+<p>کشفِ مبتنی-بر-URL از سایت‌هایی که <code>/.well-known/skills/index.json</code> منتشر می‌کنند. هاب مرکزیِ واحدی نیست — یک قرارداد کشف وب است. نمونهٔ اندپوینت زنده: <a href="https://mintlify.com/docs/.well-known/skills/index.json" target="_blank" rel="noopener">اندیس مهارت‌های مستندات Mintlify</a>؛ پیاده‌سازی مرجع سرور: <a href="https://github.com/vercel-labs/skills-handler" target="_blank" rel="noopener">vercel-labs/skills-handler</a>. مثال:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes skills search https://mintlify.com/docs --source well-known
+hermes skills inspect well-known:https://mintlify.com/docs/.well-known/skills/mintlify
+hermes skills install well-known:https://mintlify.com/docs/.well-known/skills/mintlify</code></pre>
+</div>
+
+<h4>۴. مهارت‌های مستقیم گیت‌هاب (<code>github</code>)</h4>
+<p>هرمس می‌تواند مستقیم از مخازن گیت‌هاب و تَپ‌های مبتنی-بر-گیت‌هاب نصب کند. وقتی مفید که مخزن/مسیر را از قبل می‌دانید یا منبع سفارشی خودتان را می‌خواهید اضافه کنید. تَپ‌های پیش‌فرض (بدون هیچ راه‌اندازی قابل مرور): <a href="https://github.com/openai/skills" target="_blank" rel="noopener">openai/skills</a>، <a href="https://github.com/anthropics/skills" target="_blank" rel="noopener">anthropics/skills</a>، <a href="https://github.com/huggingface/skills" target="_blank" rel="noopener">huggingface/skills</a>، <a href="https://github.com/NVIDIA/skills" target="_blank" rel="noopener">NVIDIA/skills</a> (مهارت‌های تأییدشدهٔ انویدیا با <code>skill.oms.sig</code> امضاشده + حکمرانی <code>skill-card.md</code>) و <a href="https://github.com/garrytan/gstack" target="_blank" rel="noopener">garrytan/gstack</a>. مثال:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes skills install openai/skills/k8s
+hermes skills tap add myorg/skills-repo</code></pre>
+</div>
+<p><strong>گروه‌بندی دسته‌ها (<code>skills.sh.json</code>).</strong> یک تَپ گیت‌هاب می‌تواند فایل <code>skills.sh.json</code> در ریشهٔ مخزنش داشته باشد مطابق <a href="https://skills.sh/schemas/skills.sh.schema.json" target="_blank" rel="noopener">طرح‌وارهٔ skills.sh</a>. <code>groupings</code> آن (هر کدام با یک <code>title</code> و فهرستی از نام مهارت‌ها) هنگام اندکس‌سازی خوانده می‌شوند و برچسب‌های دستهٔ نمایش‌داده‌شده در صفحهٔ Skills Hub می‌شوند — به‌جای حدسِ مشتق-از-تگ. این عمومی است: هر تَپی که فایل را داشته باشد دسته‌بندی واقعی می‌گیرد، بدون تغییر سمت هرمس.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "groupings": [
+    { "title": "Inference AI", "skills": ["dynamo-recipe-runner", "dynamo-router-sla"] },
+    { "title": "Decision Optimization", "skills": ["cuopt-developer", "cuopt-install"] }
+  ]
+}</code></pre>
+</div>
+
+<h4>۵. ClawHub‏ (<code>clawhub</code>)</h4>
+<p>بازارچهٔ مهارت‌های شخص‌ثالث که به‌عنوان منبع جامعه یکپارچه شده. سایت: <a href="https://clawhub.ai/" target="_blank" rel="noopener">clawhub.ai</a>؛ شناسهٔ منبع در هرمس: <code>clawhub</code>.</p>
+
+<h4>۶. LobeHub‏ (<code>lobehub</code>)</h4>
+<p>هرمس می‌تواند مدخل‌های ایجنت را از کاتالوگ عمومی LobeHub جستجو و به مهارت‌های هرمسِ قابل‌نصب تبدیل کند. سایت: <a href="https://lobehub.com/" target="_blank" rel="noopener">LobeHub</a>؛ اندیس عمومی ایجنت‌ها: <a href="https://chat-agents.lobehub.com/" target="_blank" rel="noopener">chat-agents.lobehub.com</a>؛ مخزن پشتیبان: <a href="https://github.com/lobehub/lobe-chat-agents" target="_blank" rel="noopener">lobehub/lobe-chat-agents</a>؛ شناسهٔ منبع: <code>lobehub</code>.</p>
+
+<h4>۷. browse.sh‏ (<code>browse-sh</code>)</h4>
+<p>هرمس با <a href="https://browse.sh" target="_blank" rel="noopener">browse.sh</a> یکپارچه است — کاتالوگ Browserbase با بیش از ۲۰۰ فایل SKILL.md اتوماسیون مرورگرِ مخصوص-هر-سایت (ایرب‌ان‌بی، آمازون، arXiv، ‏12306.cn، اِتسی، Xero و خیلی بیشتر). هر مهارت توصیف می‌کند چطور یک وب‌سایت را سرتاسری هدایت کنید و برای استفاده با ابزارهای مرورگر هرمس و هر مهارت اتوماسیون مرورگریِ نصب‌شده مناسب است. سایت: <a href="https://browse.sh/" target="_blank" rel="noopener">browse.sh</a>؛ ‏API کاتالوگ: <code>https://browse.sh/api/skills</code>؛ شناسهٔ منبع: <code>browse-sh</code>؛ سطح اعتماد: <code>community</code>.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes skills search airbnb --source browse-sh
+hermes skills inspect browse-sh/airbnb.com/search-listings-ddgioa
+hermes skills install browse-sh/airbnb.com/search-listings-ddgioa</code></pre>
+</div>
+<p>شناسه‌ها به شکل <code>browse-sh/&lt;hostname&gt;/&lt;task-id&gt;</code> هستند و با اسلاگِ ارائه‌شده توسط کاتالوگ browse.sh مطابقند. محتوا از طریق اندپوینت جزئیاتِ هر مهارت (<code>/api/skills/&lt;slug&gt;</code> ← <code>skillMdUrl</code>) حل می‌شود، نه از طریق <code>sourceUrl</code> گیت‌هاب کاتالوگ.</p>
+
+<h4>۸. URL مستقیم (<code>url</code>)</h4>
+<p>نصب SKILL.md مستقیم از هر URL ‏HTTP(S) — مفید وقتی نویسنده‌ای مهارت را روی سایت خودش میزبانی کرده (بدون فهرست هاب، بدون مسیر گیت‌هاب برای تایپ). هرمس فایل‌های صریحاً ارجاع‌شده زیر <code>references/</code>، <code>templates/</code>، <code>scripts/</code>، <code>assets/</code> و <code>examples/</code> را هم می‌گیرد، سپس باندل کامل را اسکن و نصب می‌کند. شناسهٔ منبع: <code>url</code>؛ شناسهٔ مهارت: خود URL (بدون پیشوند)؛ دامنه: SKILL.md به‌علاوهٔ فایل‌های پشتیبانِ دقیقِ ارجاع‌شده در پوشه‌های فهرست‌مجاز. هرمس فایل‌های بی‌ربط میزبان را بر نمی‌شمارد یا کپی نمی‌کند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes skills install https://sharethis.chat/SKILL.md
+hermes skills install https://example.com/my-skill/SKILL.md --category productivity</code></pre>
+</div>
+<p>حل نام، به ترتیب:</p>
+<ol>
+  <li>فیلد <code>name:</code> در frontmatter یاملی SKILL.md (توصیه‌شده — هر مهارت خوش‌ساختی یکی دارد).</li>
+  <li>نام پوشهٔ والد از مسیر URL (مثلاً <code>.../my-skill/SKILL.md</code> ← <code>my-skill</code>، یا <code>.../my-skill.md</code> ← <code>my-skill</code>)، وقتی شناسهٔ معتبری است (<code>^[a-z][a-z0-9_-]*$</code>).</li>
+  <li>پرامپت تعاملی روی ترمینالِ دارای TTY.</li>
+  <li>روی سطوح غیرتعاملی (فرمان اسلش <code>/skills install</code> داخل TUI، پلتفرم‌های گیت‌وی، اسکریپت‌ها)، خطایی تمیز که به بازنویسی <code>--name</code> اشاره می‌کند.</li>
+</ol>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># frontmatter نام ندارد و اسلاگ URL بی‌کمک است — یکی بدهید:
+hermes skills install https://example.com/SKILL.md --name sharethis-chat
+
+# یا داخل نشست چت:
+/skills install https://example.com/SKILL.md --name sharethis-chat</code></pre>
+</div>
+<p>سطح اعتماد همیشه <code>community</code> است — همان اسکن امنیتی مثل هر منبع دیگر اجرا می‌شود. URL به‌عنوان شناسهٔ نصب ذخیره می‌شود، پس <code>hermes skills update</code> وقتی خواستید نوسازی کنید خودکار از همان URL دوباره می‌گیرد.</p>
+
+<h3>اسکن امنیتی و <code>--force</code></h3>
+<p>همهٔ مهارت‌های نصب‌شده از هاب از یک <strong>اسکنر امنیتی</strong> عبور می‌کنند که استخراج داده، تزریق پرامپت، فرمان‌های مخرب، سیگنال‌های زنجیرهٔ تأمین و سایر تهدیدها را بررسی می‌کند.</p>
+<p><code>hermes skills inspect ...</code> حالا فرادادهٔ بالادستی را هم وقتی موجود است ظاهر می‌کند: URL مخزن، URL صفحهٔ جزئیات skills.sh، فرمان نصب، نصب‌های هفتگی، وضعیت‌های ممیزی امنیتی بالادستی، و URLهای اندکس/اندپوینت well-known.</p>
+<p>از <code>--force</code> استفاده کنید وقتی مهارت شخص‌ثالثی را بازبینی کرده‌اید و می‌خواهید مسدودسازیِ سیاستیِ غیرخطر را رد کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes skills install skills-sh/anthropics/skills/pdf --force</code></pre>
+</div>
+<p>رفتار مهم:</p>
+<ul>
+  <li><code>--force</code> می‌تواند مسدودسازی‌های سیاستیِ یافته‌های سبکِ احتیاط/هشدار را رد کند.</li>
+  <li><code>--force</code> حکم اسکنِ <code>dangerous</code> را رد <strong>نمی‌کند</strong>.</li>
+  <li>مهارت‌های اختیاری رسمی (<code>official/...</code>) دارای اعتماد درونی تلقی می‌شوند و پنل هشدار شخص‌ثالث نشان نمی‌دهند.</li>
+</ul>
+
+<h3>سطوح اعتماد</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>سطح</th><th>منبع</th><th>سیاست</th></tr></thead>
+  <tbody>
+    <tr><td><code>builtin</code></td><td>همراه هرمس عرضه می‌شود</td><td>همیشه مورداعتماد</td></tr>
+    <tr><td><code>official</code></td><td><code>optional-skills/</code> در مخزن</td><td>اعتماد درونی، بدون هشدار شخص‌ثالث</td></tr>
+    <tr><td><code>trusted</code></td><td>رجیستری‌ها/مخازن مورداعتماد مانند <code>openai/skills</code>، <code>anthropics/skills</code>، <code>huggingface/skills</code>، <code>NVIDIA/skills</code></td><td>سیاستی بخشنده‌تر از منابع جامعه</td></tr>
+    <tr><td><code>community</code></td><td>همه‌چیز دیگر (‏<code>skills.sh</code>، اندپوینت‌های well-known، مخازن گیت‌هاب سفارشی، اغلب بازارچه‌ها)</td><td>یافته‌های غیرخطر با <code>--force</code> ردکردنی‌اند؛ احکام <code>dangerous</code> مسدود می‌مانند</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>چرخهٔ به‌روزرسانی</h3>
+<p>هاب حالا به‌اندازهٔ کافی منشأ را پیگیری می‌کند تا نسخه‌های بالادستیِ مهارت‌های نصب‌شده را دوباره بررسی کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes skills check          # گزارش اینکه کدام مهارت‌های هابِ نصب‌شده بالادست تغییر کرده‌اند
+hermes skills update         # نصب مجدد فقط مهارت‌های دارای به‌روزرسانی
+hermes skills update react   # به‌روزرسانی یک مهارت هابِ مشخص
+hermes skills update react --force   # بازنویسی مهارتی که محلی ویرایش کرده‌اید</code></pre>
+</div>
+<p>این از شناسهٔ منبعِ ذخیره‌شده به‌علاوهٔ هش محتوای باندل بالادستیِ فعلی برای تشخیص انحراف استفاده می‌کند.</p>
+<p>مهارت‌هایی که محلی ویرایش کرده‌اید (محتوای روی-دیسک دیگر با هشی که هنگام نصب ثبت شده مطابق نیست) توسط <code>hermes skills update</code> <strong>رد می‌شوند</strong> تا تغییراتتان هرگز خاموش بازنویسی نشوند. <code>--force</code> بدهید تا به‌هرحال با نسخهٔ بالادستی جایگزین شوند.</p>
+
+<div class="callout tip">
+  <div class="callout-title">💡 محدودیت نرخ گیت‌هاب</div>
+  <p>عملیات هاب مهارت از API گیت‌هاب استفاده می‌کند که برای کاربران بدون احراز هویت سقف ۶۰ درخواست در ساعت دارد. اگر هنگام نصب یا جستجو خطای محدودیت نرخ دیدید، <code>GITHUB_TOKEN</code> را در فایل <code>.env</code> خود تنظیم کنید تا سقف به ۵٬۰۰۰ درخواست در ساعت برسد. پیام خطا در این حالت نکتهٔ عملی دارد.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> انتشار تَپ سفارشی مهارت</h2>
+<p>اگر می‌خواهید مجموعه‌ای گزینش‌شده از مهارت‌ها را به اشتراک بگذارید — برای تیم، سازمان یا عموم — می‌توانید به‌صورت <strong>تَپ (tap)</strong> منتشرشان کنید: یک مخزن گیت‌هاب که دیگر کاربران هرمس با <code>hermes skills tap add &lt;owner/repo&gt;</code> اضافه می‌کنند. بدون سرور، بدون ثبت‌نام در رجیستری، بدون خط لولهٔ انتشار. فقط یک پوشه از فایل‌های SKILL.md.</p>
+
+<h3>چیدمان مخزن</h3>
+<p>تَپ، هر مخزن گیت‌هابی است (عمومی یا خصوصی — خصوصی به <code>GITHUB_TOKEN</code> نیاز دارد) با این چیدمان:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>owner/repo
+├── skills/                       # مسیر پیش‌فرض؛ به‌ازای-تَپ قابل پیکربندی
+│   ├── my-workflow/
+│   │   ├── SKILL.md              # لازم
+│   │   ├── references/           # فایل‌های پشتیبان اختیاری
+│   │   ├── templates/
+│   │   └── scripts/
+│   ├── another-skill/
+│   │   └── SKILL.md
+│   └── third-skill/
+│       └── SKILL.md
+└── README.md                     # اختیاری اما مفید</code></pre>
+</div>
+<p>قواعد:</p>
+<ul>
+  <li>هر مهارت در پوشهٔ خودش زیر مسیر ریشهٔ تَپ زندگی می‌کند (پیش‌فرض <code>skills/</code>).</li>
+  <li>نام پوشه، اسلاگِ نصبِ مهارت می‌شود.</li>
+  <li>هر پوشهٔ مهارت باید یک <code>SKILL.md</code> با <a href="#format">frontmatter استاندارد</a> داشته باشد (<code>name</code>، <code>description</code>، به‌علاوهٔ <code>metadata.hermes.tags</code>، <code>version</code>، <code>author</code>، <code>platforms</code>، <code>metadata.hermes.config</code> اختیاری).</li>
+  <li>زیرپوشه‌هایی مثل <code>references/</code>، <code>templates/</code>، <code>scripts/</code>، <code>assets/</code> هنگام نصب کنار SKILL.md دانلود می‌شوند.</li>
+  <li>مهارت‌هایی که نام پوشه‌شان با <code>.</code> یا <code>_</code> شروع می‌شود نادیده گرفته می‌شوند.</li>
+</ul>
+<p>هرمس با فهرست‌کردن همهٔ زیرپوشه‌های مسیر تَپ و کاوش هر کدام برای SKILL.md مهارت‌ها را کشف می‌کند.</p>
+
+<h3>مثال مینیمال تَپ</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>my-org/hermes-skills
+└── skills/
+    └── deploy-runbook/
+        └── SKILL.md</code></pre>
+</div>
+<p><code>skills/deploy-runbook/SKILL.md</code>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">markdown</span><button class="copy-btn">کپی</button></div>
+  <pre><code>name: deploy-runbook
+description: Our deployment runbook — services, rollback, Slack channels
+version: 1.0.0
+author: My Org Platform Team
+metadata:
+  hermes:
+    tags: [deployment, runbook, internal]
+
+# Deploy Runbook
+
+Step 1: ...</code></pre>
+</div>
+<p>پس از push روی گیت‌هاب، هر کاربر هرمسی می‌تواند مشترک شود و نصب کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes skills tap add my-org/hermes-skills
+hermes skills search deploy
+hermes skills install my-org/hermes-skills/deploy-runbook</code></pre>
+</div>
+
+<h3>مسیرهای غیرپیش‌فرض</h3>
+<p>اگر مهارت‌هایتان زیر <code>skills/</code> نیستند (رایج وقتی زیردرخت <code>skills/</code> را به پروژهٔ موجودی اضافه می‌کنید)، مدخل تَپ را در <code>~/.hermes/skills/.hub/taps.json</code> ویرایش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{
+  "taps": [
+    {"repo": "my-org/platform-docs", "path": "internal/skills/"}
+  ]
+}</code></pre>
+</div>
+<p>‏CLI ‏<code>hermes skills tap add</code> تَپ‌های جدید را به <code>path: "skills/"</code> پیش‌فرض می‌برد؛ اگر مسیر دیگری لازم داشتید فایل را مستقیم ویرایش کنید. <code>hermes skills tap list</code> مسیر مؤثر هر تَپ را نشان می‌دهد.</p>
+
+<h3>نصب مستقیم مهارت‌های تکی (بدون افزودن تَپ)</h3>
+<p>کاربران همچنین می‌توانند یک مهارت تکی را از هر مخزن گیت‌هاب عمومی بدون افزودن کل مخزن به‌عنوان تَپ نصب کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes skills install owner/repo/skills/my-workflow</code></pre>
+</div>
+<p>مفید وقتی می‌خواهید یک مهارت را به اشتراک بگذارید بدون اینکه کاربر مشترک کل رجیستری شما شود.</p>
+
+<h3>سطوح اعتماد تَپ‌ها</h3>
+<p>تَپ‌های جدید به‌طور پیش‌فرض اعتماد <code>community</code> می‌گیرند. مهارت‌های نصب‌شده از آن‌ها از اسکن امنیتی استاندارد عبور می‌کنند و در اولین نصب پنل هشدار شخص‌ثالث نشان می‌دهند. اگر سازمان شما یا منبعیِ به‌طور-گسترده-مورداعتماد باید اعتماد بالاتری بگیرد، مخزنش را به <code>TRUSTED_REPOS</code> در <code>tools/skills_hub.py</code> اضافه کنید (نیازمند PR هستهٔ هرمس).</p>
+
+<h3>مدیریت تَپ</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes skills tap list                                # نمایش همهٔ تَپ‌های پیکربندی‌شده
+hermes skills tap add myorg/skills-repo               # افزودن (مسیر پیش‌فرض: skills/)
+hermes skills tap remove myorg/skills-repo            # حذف</code></pre>
+</div>
+<p>درون نشست در حال اجرا:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان‌ها</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/skills tap list
+/skills tap add myorg/skills-repo
+/skills tap remove myorg/skills-repo</code></pre>
+</div>
+<p>تَپ‌ها در <code>~/.hermes/skills/.hub/taps.json</code> ذخیره می‌شوند (در صورت نیاز ساخته می‌شود).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> به‌روزرسانی مهارت‌های داخلی (<code>hermes skills reset</code>)</h2>
+<p>هرمس با مجموعه‌ای از مهارت‌های داخلی در <code>skills/</code> داخل مخزن عرضه می‌شود. هنگام نصب و در هر <code>hermes update</code>، یک گذر همگام‌سازی آن‌ها را به <code>~/.hermes/skills/</code> کپی می‌کند و مانیفستی در <code>~/.hermes/skills/.bundled_manifest</code> ثبت می‌کند که هر نام مهارت را به هش محتوای هنگام همگام‌سازی نگاشت می‌کند (<strong>هش مبدأ</strong>).</p>
+<p>در هر همگام‌سازی، هرمس هش نسخهٔ محلی شما را دوباره محاسبه و با هش مبدأ مقایسه می‌کند:</p>
+<ul>
+  <li><strong>تغییرنکرده</strong> ← امن برای گرفتن تغییرات بالادستی؛ نسخهٔ داخلی جدید کپی و هش مبدأ جدید ثبت می‌شود.</li>
+  <li><strong>تغییرکرده</strong> ← <strong>تغییر-یافته-توسط-کاربر</strong> تلقی و برای همیشه رد می‌شود، تا ویرایش‌هایتان هرگز له نشوند.</li>
+</ul>
+<p>محافظت خوب است، اما یک لبهٔ تیز دارد. اگر مهارت داخلی را ویرایش کنید و بعداً بخواهید تغییراتتان را رها کرده و با کپی-پیست ساده از <code>~/.hermes/hermes-agent/skills/</code> به نسخهٔ داخلی برگردید، مانیفست هنوز <em>هش مبدأ قدیمی</em> را از آخرین همگام‌سازیِ موفق نگه داشته. محتوای کپی-پیستِ تازه (هش داخلیِ فعلی) با آن هش مبدأِ کهنه مطابق نیست، پس همگام‌سازی همچنان آن را تغییر-یافته-توسط-کاربر علامت می‌زند.</p>
+<p><code>hermes skills reset</code> راه فرار است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># امن: مدخل مانیفست این مهارت را پاک می‌کند. نسخهٔ فعلی شما حفظ می‌شود،
+# اما همگام‌سازی بعدی نسبت به همان دوباره خط‌پایه می‌گذارد و به‌روزرسانی‌های آینده عادی کار می‌کنند.
+hermes skills reset google-workspace
+
+# بازیابی کامل: نسخهٔ محلی شما را هم حذف و نسخهٔ داخلیِ فعلی را دوباره کپی می‌کند.
+# وقتی بخواهید مهارت بکر بالادستی برگردد از این استفاده کنید.
+hermes skills reset google-workspace --restore
+
+# غیرتعاملی (مثلاً در اسکریپت یا حالت TUI) — ردکردن تأیید --restore.
+hermes skills reset google-workspace --restore --yes</code></pre>
+</div>
+<p>همان فرمان در چت به‌صورت اسلش هم کار می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان‌ها</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/skills reset google-workspace
+/skills reset google-workspace --restore</code></pre>
+</div>
+<div class="callout note">
+  <div class="callout-title">ℹ️ پروفایل‌ها</div>
+  <p>هر پروفایل <code>.bundled_manifest</code> خودش را زیر HERMES_HOME خودش دارد، پس <code>hermes -p coder skills reset &lt;name&gt;</code> فقط آن پروفایل را تحت تأثیر می‌گذارد.</p>
+</div>
+
+<h3>فرمان‌های اسلش (داخل چت)</h3>
+<p>همهٔ همان فرمان‌ها با <code>/skills</code> کار می‌کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان‌ها</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/skills browse
+/skills search react --source skills-sh
+/skills search https://mintlify.com/docs --source well-known
+/skills inspect skills-sh/vercel-labs/json-render/json-render-react
+/skills install openai/skills/skill-creator --force
+/skills check
+/skills update
+/skills reset google-workspace
+/skills list</code></pre>
+</div>
+<p>مهارت‌های اختیاری رسمی همچنان از شناسه‌هایی مثل <code>official/security/1password</code> و <code>official/migration/openclaw-migration</code> استفاده می‌کنند.</p>
+</section>
+
+<div class="pager">
+  <a href="memory.html"><span class="dir">→ قبلی</span><span class="ttl">حافظهٔ پایدار</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">نگهدارندهٔ مهارت‌ها (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skills" target="_blank" rel="noopener">Skills System</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

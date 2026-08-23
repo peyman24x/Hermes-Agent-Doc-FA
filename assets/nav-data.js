@@ -42,7 +42,7 @@ window.HERMES_NAV = [
 { id:"features", cat:"🧠 قابلیت‌های اصلی", pages:[
   { p:"user-guide/features/overview.html",             t:"نگاه کلی قابلیت‌ها",                 d:1 },
   { p:"user-guide/features/tools.html",                t:"ابزارها و تول‌ست‌ها",                 d:1 },
-  { p:"user-guide/features/skills.html",               t:"سیستم مهارت‌ها (Skills)",            d:0 },
+  { p:"user-guide/features/skills.html",               t:"سیستم مهارت‌ها (Skills)",            d:1 },
   { p:"user-guide/features/curator.html",              t:"نگهدارندهٔ مهارت‌ها (Curator)",       d:0 },
   { p:"user-guide/features/memory.html",               t:"حافظه",                               d:1 },
   { p:"user-guide/features/memory-providers.html",     t:"ارائه‌دهندگان حافظهٔ خارجی",          d:0 },
