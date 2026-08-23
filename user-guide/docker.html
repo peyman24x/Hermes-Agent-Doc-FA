@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اجرای داکر — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/docker" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>اجرای داکر</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>اجرای Hermes Agent در داکر</h1>
+<p>هر دو سناریوی «اجرای هرمس داخل کانتینر» و «استفاده از داکر به‌عنوان بک‌اند ترمینال» — شروع سریع، گیت‌وی، داشبورد، چندپروفایلی، لاگ‌ها، ارتقا، اتصال به مدل‌های محلی و عیب‌یابی کامل.</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>بخش این صفحه</th></tr></thead>
+  <tbody>
+    <tr><td><a href="#sec-intro">۱. مقدمه: داکر و Hermes Agent</a> · <a href="#sec-quickstart">۲. شروع سریع</a> · <a href="#sec-gateway">۳. حالت گیت‌وی</a> · <a href="#sec-dashboard">۴. داشبورد</a> · <a href="#sec-cli">۵. اجرای تعاملی</a> · <a href="#sec-volumes">۶. حجم‌های پایدار</a></td></tr>
+    <tr><td><a href="#sec-immutable">۷. درخت نصب تغییرناپذیر</a> · <a href="#sec-profiles">۸. پشتیبانی چندپروفایلی</a> · <a href="#sec-logs">۹. لاگ‌ها کجا می‌روند؟</a> · <a href="#sec-envfwd">۱۰. متغیرهای محیطی</a> · <a href="#sec-backend">۱۱. بک‌اند ترمینال؟</a> · <a href="#sec-compose">۱۲. Docker Compose</a></td></tr>
+    <tr><td><a href="#sec-audio">۱۳. پل صوت لینوکس</a> · <a href="#sec-resources">۱۴. منابع</a> · <a href="#sec-dockerfile">۱۵. Dockerfile</a> · <a href="#sec-priv">۱۶. مدل دسترسی</a> · <a href="#sec-supervision">۱۷. نظارت گیت‌وی</a> · <a href="#sec-upgrade">۱۸. ارتقا</a></td></tr>
+    <tr><td><a href="#sec-skills">۱۹. مهارت‌ها و اعتبارنامه‌ها</a> · <a href="#sec-tools">۲۰. ابزارهای بیشتر</a> · <a href="#sec-inference">۲۱. استنتاج محلی</a> · <a href="#sec-trouble">۲۲. عیب‌یابی</a></td></tr>
+  </tbody>
+</table>
+</div>
+
+<section class="doc-sec" id="sec-intro">
+  <h2><span class="secnum">۱</span> مقدمه: داکر و Hermes Agent</h2>
+  <p>دو روش کاملاً متمایز برای پیوند داکر با Hermes Agent وجود دارد:</p>
+  <ul>
+    <li><strong>اجرای Hermes درون داکر</strong> — خودِ ایجنت داخل یک کانتینر اجرا می‌شود (تمرکز اصلی همین صفحه).</li>
+    <li><strong>داکر به‌عنوان بک‌اند ترمینال</strong> — ایجنت روی سیستم میزبان شما اجرا می‌شود، اما هر دستور را داخل یک کانتینر سندباکس داکرِ واحد و ماندگار اجرا می‌کند که در تمام طول عمر پروسهٔ Hermes، بین فراخوانی‌های ابزار، دستور <code>/new</code> و ساب‌ایجنت‌ها زنده می‌ماند (شرح کامل در بخش <a href="#sec-backend">«داکر به‌عنوان بک‌اند ترمینال»</a> و مستندات Configuration ← Docker Backend).</li>
+  </ul>
+  <p>این صفحه گزینهٔ اول را پوشش می‌دهد. کانتینر تمام داده‌های کاربر (پیکربندی، کلیدهای API، نشست‌ها، مهارت‌ها و حافظه‌ها) را در یک پوشهٔ واحد ذخیره می‌کند که از سیستم میزبان در مسیر <code>/opt/data</code> به کانتینر متصل (mount) شده است. خودِ ایمیج بی‌حالت (stateless) است و می‌توان آن را با دریافت (pull) نسخهٔ جدید ارتقا داد، بدون اینکه چیزی از پیکربندی از دست برود.</p>
+</section>
+
+<section class="doc-sec" id="sec-quickstart">
+  <h2><span class="secnum">۲</span> شروع سریع</h2>
+  <p>اگر این اولین بار است که Hermes Agent را اجرا می‌کنید، روی میزبان یک پوشهٔ داده بسازید و کانتینر را به‌صورت تعاملی اجرا کنید تا ویزارد راه‌اندازی (Setup Wizard) فعال شود:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>mkdir -p ~/.hermes
+docker run -it --rm \
+  -v ~/.hermes:/opt/data \
+  nousresearch/hermes-agent setup</code></pre>
+  </div>
+
+  <div class="callout warning">
+    <div class="callout-title">⚠️ از کنسول‌های مبتنی بر مرورگر VPS برای دستورات نصب استفاده نکنید</div>
+    <p>برخی ارائه‌دهندگان VPS (مثل Hetzner Cloud و چند مورد دیگر) کنسولی مبتنی بر مرورگر برای مدیریت سرورها ارائه می‌دهند. این کنسول‌ها کاراکترهای خاص را به‌درستی منتقل نمی‌کنند — مثلاً <code>:</code> ممکن است به‌صورت <code>;</code> برسد، <code>@</code> ممکن است نادرست نمایش داده شود و چیدمان‌های صفحه‌کلید غیرانگلیسی وضعیت بدتری دارند — که به‌طور خاموش آرگومان‌های <code>docker run</code> مانند <code>-v ~/.hermes:/opt/data</code> و <code>-e KEY=value</code> و کلیدها/توکن‌های API که پیست می‌کنید را خراب می‌کند.</p>
+    <p>به‌جای آن از طریق SSH وصل شوید (<code>ssh root@&lt;host&gt;</code>) تا با خیال راحت بتوانید دستورات را کپی/پیست کنید. اگر مجبورید از کنسول مرورگر استفاده کنید، دستورات را به‌جای پیست کردن، دستی تایپ کنید و قبل از زدن Enter، همهٔ <code>:</code>، <code>@</code>، <code>=</code> و <code>/</code>ها را در نتیجه دوباره بررسی کنید.</p>
+  </div>
+
+  <p>این کار شما را وارد ویزارد راه‌اندازی می‌کند که کلیدهای API را از شما می‌پرسد و آن‌ها را در <code>~/.hermes/.env</code> می‌نویسد. این کار فقط یک بار لازم است. به‌شدت توصیه می‌شود در همین مرحله یک سیستم چت را برای کار کردن گیت‌وی تنظیم کنید.</p>
+
+  <div class="callout tip">
+    <div class="callout-title">💡 نکته</div>
+    <p>داخل کانتینر، یک بار <code>hermes setup --portal</code> را اجرا کنید — توکنِ بازنشانی (refresh token) در والوم متصل‌شدهٔ <code>~/.hermes</code> باقی می‌ماند. برای اطلاعات بیشتر به بخش «Nous Portal» مراجعه کنید.</p>
+  </div>
+</section>
+
+<section class="doc-sec" id="sec-gateway">
+  <h2><span class="secnum">۳</span> اجرا در حالت گیت‌وی (Gateway)</h2>
+  <p>پس از پیکربندی، کانتینر را در پس‌زمینه به‌عنوان یک گیت‌وی دائمی اجرا کنید (تلگرام، دیسکورد، اسلک، واتساپ و غیره):</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker run -d \
+  --name hermes \
+  --restart unless-stopped \
+  -v ~/.hermes:/opt/data \
+  -p 8642:8642 \
+  nousresearch/hermes-agent gateway run</code></pre>
+  </div>
+
+  <p>پورت <code>8642</code> سرور API سازگار با OpenAI گیت‌وی و نقطهٔ پایانی سلامت (health endpoint) را در دسترس قرار می‌دهد. اگر فقط از پلتفرم‌های چت استفاده می‌کنید (تلگرام، دیسکورد و غیره) این پورت اختیاری است، اما اگر می‌خواهید داشبورد یا ابزارهای بیرونی به گیت‌وی دسترسی داشته باشند، ضروری است.</p>
+
+  <div class="callout note">
+    <div class="callout-title">🛡 گیت‌وی تحت نظارت (Supervised) اجرا می‌شود</div>
+    <p>داخل ایمیج رسمی داکر، دستور <code>gateway run</code> به‌طور خودکار توسط <code>s6-overlay</code> نظارت می‌شود: اگر پروسهٔ گیت‌وی از کار بیفتد، ظرف چند ثانیه و بدون از دست رفتن کانتینر دوباره راه‌اندازی می‌شود، و داشبورد (وقتی <code>HERMES_DASHBOARD=1</code> تنظیم شده باشد) هم در کنار آن نظارت می‌شود. خودِ پروسهٔ CMD مربوط به <code>gateway run</code> یک ضربانِ <code>sleep infinity</code> است که کانتینر را زنده نگه می‌دارد در حالی که s6 پروسهٔ واقعی گیت‌وی را مدیریت می‌کند — بنابراین <code>docker stop</code> همچنان همه‌چیز را تمیز خاموش می‌کند، اما <code>docker logs</code> خروجی گیت‌ویِ تحت نظارت را نشان می‌دهد.</p>
+    <p>در <code>docker logs</code> یک پیام یک‌خطی مبنی بر تأیید این ارتقا خواهید دید. برای خارج شدن از این حالت — و دریافت رفتار قدیمیِ «گیت‌وی پروسهٔ اصلی کانتینر است و خروج کانتینر یعنی خروج گیت‌وی» — از پرچم <code>--no-supervise</code> استفاده کنید یا <code>HERMES_GATEWAY_NO_SUPERVISE=1</code> را تنظیم کنید. این خروج از حالت برای تست‌های دودی CI که می‌خواهند کانتینر هم‌راستا با کد وضعیت گیت‌وی خارج شود مفید است؛ برای استقرارهای عملیاتی (پروداکشن)، حالت پیش‌فرضِ تحت نظارت به‌طور مطلق بهتر است.</p>
+    <p>این رفتار فقط به ایمیج مبتنی بر s6 اعمال می‌شود. ایمیج‌های قدیمی‌تر (مبتنی بر tini) همچنان <code>gateway run</code> را به‌عنوان پروسهٔ اصلی foreground اجرا می‌کنند.</p>
+  </div>
+
+  <p><strong>لاگ‌های گیت‌وی کجا می‌روند؟</strong> برای نقشهٔ کامل مسیریابی لاگ‌ها (گیت‌وی هر پروفایل، داشبورد، آشتی‌ساز بوت و <code>docker logs</code> کل کانتینر) به بخش <a href="#sec-logs">«لاگ‌ها کجا می‌روند؟»</a> مراجعه کنید.</p>
+
+  <h3 id="g-hardstop">توقف‌های سختِ حلقهٔ ابزار برای گیت‌وی‌های بدون نظارت</h3>
+  <p>تنظیم <code>tool_loop_guardrails.hard_stop_enabled</code> به‌طور پیش‌فرض <code>false</code> است که برای نشست‌های تعاملی CLI و TUI — جایی که یک انسان می‌تواند هشدارهای مکررِ فراخوانی ابزار را ببیند — منطقی است. اما در استقرارهای گیت‌وی یا سروریِ بدون نظارت، هشدارها به‌تنهایی ممکن است نتوانند ایجنتی را که در حلقهٔ تکراریِ فراخوانی ابزار گیر کرده متوقف کنند. اپراتورهایی که رفتار قطع‌کنندهٔ مدار (circuit-breaker) می‌خواهند، باید توقف‌های سخت را به‌طور صریح در فایل <code>config.yaml</code> پروفایل فعال کنند:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">yaml — config.yaml</span><button class="copy-btn">کپی</button></div>
+    <pre><code>tool_loop_guardrails:
+  hard_stop_enabled: true
+  hard_stop_after:
+    exact_failure: 5
+    idempotent_no_progress: 5</code></pre>
+  </div>
+
+  <h3 id="g-apiserver">فعال‌سازی سرور API روی شبکه</h3>
+  <p>نکته: سرور API مشروط به <code>API_SERVER_ENABLED=true</code> است. برای در دسترس قرار دادن آن فراتر از <code>127.0.0.1</code> داخل کانتینر، باید <code>API_SERVER_HOST=0.0.0.0</code> و یک <code>API_SERVER_KEY</code> هم تنظیم کنید (حداقل ۸ کاراکتر — یکی با دستور <code>openssl rand -hex 32</code> بسازید). مثال:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker run -d \
+  --name hermes \
+  --restart unless-stopped \
+  -v ~/.hermes:/opt/data \
+  -p 8642:8642 \
+  -e API_SERVER_ENABLED=true \
+  -e API_SERVER_HOST=0.0.0.0 \
+  -e API_SERVER_KEY="$(openssl rand -hex 32)" \
+  -e API_SERVER_CORS_ORIGINS='*' \
+  nousresearch/hermes-agent gateway run</code></pre>
+  </div>
+
+  <div class="callout caution">
+    <div class="callout-title">⛔ هشدار امنیتی</div>
+    <p>باز کردن هر پورتی روی ماشینِ متصل به اینترنت یک ریسک امنیتی است. نباید این کار را بکنید، مگر اینکه ریسک‌های آن را به‌طور کامل درک کرده باشید.</p>
+  </div>
+</section>
+
+<section class="doc-sec" id="sec-dashboard">
+  <h2><span class="secnum">۴</span> اجرای داشبورد</h2>
+  <p>داشبورد وب داخلی، به‌عنوان یک سرویس تحت نظارت s6-rc در کنار گیت‌وی و در همان کانتینر اجرا می‌شود. برای فعال شدن آن، <code>HERMES_DASHBOARD=1</code> را تنظیم کنید:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker run -d \
+  --name hermes \
+  --restart unless-stopped \
+  -v ~/.hermes:/opt/data \
+  -p 8642:8642 \
+  -p 9119:9119 \
+  -e HERMES_DASHBOARD=1 \
+  nousresearch/hermes-agent gateway run</code></pre>
+  </div>
+
+  <p>داشبورد توسط s6 نظارت می‌شود — اگر از کار بیفتد، <code>s6-supervise</code> پس از یک تأخیر کوتاه (backoff) به‌طور خودکار آن را دوباره راه‌اندازی می‌کند. خروجی stdout/stderr داشبورد به <code>docker logs &lt;container&gt;</code> هدایت می‌شود (بدون پیشوند؛ خروجی خودِ گیت‌وی اکنون در فایل s6-log مربوط به هر پروفایل جداگانه ذخیره می‌شود — به بخش <a href="#sec-logs">«لاگ‌ها کجا می‌روند؟»</a> مراجعه کنید — تا این دو جریان با هم تداخل نکنند).</p>
+
+  <h3 id="d-env">متغیرهای محیطی داشبورد</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>متغیر محیطی</th><th>توضیحات</th><th>پیش‌فرض</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>HERMES_DASHBOARD</code></td><td>روی <code>1</code> (یا <code>true</code> / <code>yes</code>) تنظیم کنید تا سرویس داشبوردِ تحت نظارت فعال شود</td><td>(تنظیم‌نشده — سرویس ثبت شده ولی خاموش می‌ماند)</td></tr>
+        <tr><td><code>HERMES_DASHBOARD_HOST</code></td><td>آدرس اتصال (bind) برای سرور HTTP داشبورد</td><td><code>0.0.0.0</code></td></tr>
+        <tr><td><code>HERMES_DASHBOARD_PORT</code></td><td>پورت سرور HTTP داشبورد</td><td><code>9119</code></td></tr>
+        <tr><td><code>HERMES_DASHBOARD_INSECURE</code></td><td>منسوخ / بدون اثر. در گذشته دروازهٔ احراز هویت را دور می‌زد؛ پس از تغییرات سخت‌گیرانهٔ امنیتی ژوئن ۲۰۲۶ دیگر احراز هویت را غیرفعال نمی‌کند. اتصالِ غیرحلقه‌محلی (non-loopback) همیشه به یک ارائه‌دهندهٔ احراز هویت نیاز دارد</td><td>(نادیده گرفته می‌شود — به‌جای آن یک ارائه‌دهنده پیکربندی کنید)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>داشبورد داخل کانتینر به‌طور پیش‌فرض به <code>0.0.0.0</code> متصل می‌شود — بدون این کار، پورتِ منتشرشدهٔ <code>-p 9119:9119</code> از میزبان در دسترس نبود. برای محدود کردن اتصال به loopback کانتینر (برای راه‌اندازی‌های sidecar یا پروکسی معکوس)، <code>HERMES_DASHBOARD_HOST=127.0.0.1</code> را تنظیم کنید.</p>
+
+  <h3 id="d-auth">دروازهٔ احراز هویت داشبورد</h3>
+  <p>دروازهٔ احراز هویت داشبورد به‌طور خودکار وقتی هر دو شرایط زیر برقرار باشند فعال می‌شود:</p>
+  <ul>
+    <li>آدرس اتصال، غیرحلقه‌محلی باشد (مثلاً پیش‌فرضِ <code>0.0.0.0</code> داخل کانتینر)، و</li>
+    <li>یک پلاگین <code>DashboardAuthProvider</code> ثبت شده باشد.</li>
+  </ul>
+  <p>سه روش داخلی برای برآورده کردن شرط دوم وجود دارد:</p>
+  <ul>
+    <li><strong>نام‌کاربری/رمزعبور</strong> — ساده‌ترین حالت برای کانتینرهای خودمیزبان (self-hosted) / داخلی / homelab روی یک شبکهٔ مطمئن یا پشت VPN: مقادیر <code>HERMES_DASHBOARD_BASIC_AUTH_USERNAME</code> + <code>HERMES_DASHBOARD_BASIC_AUTH_PASSWORD</code> را تنظیم کنید (و <code>HERMES_DASHBOARD_BASIC_AUTH_SECRET</code> را برای نشست‌های پایدار در برابر ری‌استارت). برای مواجههٔ مستقیم با اینترنت عمومی مناسب نیست.</li>
+    <li><strong>OAuth (Nous Portal)</strong> — برای استقرارهای میزبانی‌شده/عمومی: ارائه‌دهندهٔ <code>dashboard_auth/nous</code> هر زمان که <code>HERMES_DASHBOARD_OAUTH_CLIENT_ID</code> تنظیم شود فعال می‌گردد.</li>
+    <li><strong>OIDC خودمیزبان</strong> — برای احراز هویت در برابر ارائه‌دهندهٔ هویتِ خودتان از طریق OpenID Connect استاندارد: ارائه‌دهندهٔ <code>dashboard_auth/self_hosted</code> وقتی <code>HERMES_DASHBOARD_OIDC_ISSUER</code> + <code>HERMES_DASHBOARD_OIDC_CLIENT_ID</code> تنظیم شوند فعال می‌شود.</li>
+  </ul>
+  <p>هر کدام را که انتخاب کنید، دروازه پیش از آنکه فراخوان‌کننده بتواند به هر مسیر محافظت‌شده برسد، او را به صفحهٔ ورود هدایت می‌کند. برای جزئیات هر سه ارائه‌دهنده به بخش «داشبورد وب ← احراز هویت» مستندات مراجعه کنید.</p>
+  <p>اگر هیچ ارائه‌دهنده‌ای ثبت نشده باشد و اتصال هم غیرحلقه‌محلی باشد، داشبورد هنگام راه‌اندازی با خطایی مشخص — که به متغیر محیطیِ مفقود اشاره می‌کند — به‌طور ایمن متوقف می‌شود (fail closed). دیگر هیچ «راه فراری» وجود ندارد که داشبورد را بدون احراز هویت روی یک اتصال عمومی سرو کند: <code>HERMES_DASHBOARD_INSECURE=1</code> اکنون یک تنظیم منسوخ و بی‌اثر است (فقط یک هشدار ثبت می‌کند و نادیده گرفته می‌شود). یا یک ارائه‌دهنده پیکربندی کنید، یا <code>HERMES_DASHBOARD_HOST=127.0.0.1</code> را تنظیم کنید و از طریق تونل SSH یا Tailscale به داشبورد دسترسی پیدا کنید.</p>
+
+  <div class="callout warning">
+    <div class="callout-title">🔐 چرا --insecure حذف شد؟</div>
+    <p>داشبوردِ عمومیِ بدون احراز هویت، نقطهٔ ورودِ کمپینِ ماندگاری پیکربندی MCP در ژوئن ۲۰۲۶ بود: اسکنرهای اینترنتی به داشبوردهای در معرض دید (و سرورهای OpenAI API) رسیدند و ایجنت را وادار به کاشتنِ یک درِ پشتی کلید SSH کردند. دروازهٔ احراز هویت اکنون روی هر اتصالِ غیرحلقه‌محلی اجباری است. برای یک ماشین در شبکهٔ محلی مطمئن / homelab، ارائه‌دهندهٔ داخلیِ نام‌کاربری/رمزعبور (<code>HERMES_DASHBOARD_BASIC_AUTH_USERNAME</code> + <code>_PASSWORD</code>) ساده‌ترین راهِ برآورده کردن این الزام بدون نیاز به زیرساخت اضافه است.</p>
+  </div>
+
+  <h3 id="d-separate">اجرای داشبورد در کانتینری جداگانه</h3>
+  <p>اجرای داشبورد به‌عنوان کانتینری جداگانه پشتیبانی می‌شود، به شرط آن‌که آن کانتینر فضای نام PID و شبکهٔ میزبان را با هم به اشتراک بگذارد (مثلاً <code>network_mode: host</code> — همان‌طور که فایل <code>docker-compose.yml</code> خود مخزن این کار را می‌کند؛ به سرویس dashboard آن مراجعه کنید). تشخیصِ زنده‌بودنِ گیت‌وی به فضای نام PID مشترک با پروسهٔ گیت‌وی نیاز دارد، بنابراین این محدودیت فقط به داشبوردهایی اعمال می‌شود که در کانتینرهای شبکهٔ bridge ایزوله و بدون فضای نام PID مشترک اجرا می‌شوند.</p>
+</section>
+
+<section class="doc-sec" id="sec-cli">
+  <h2><span class="secnum">۵</span> اجرای تعاملی (گفتگوی CLI)</h2>
+  <p>برای باز کردن یک نشست گفتگوی تعاملی روی یک پوشهٔ دادهٔ در حال اجرا:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker run -it --rm \
+  -v ~/.hermes:/opt/data \
+  nousresearch/hermes-agent</code></pre>
+  </div>
+
+  <p>یا اگر قبلاً داخل کانتینرِ در حال اجرای خود ترمینال باز کرده‌اید (مثلاً از طریق Docker Desktop)، کافی است این را اجرا کنید:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>/opt/hermes/.venv/bin/hermes</code></pre>
+  </div>
+</section>
+
+<section class="doc-sec" id="sec-volumes">
+  <h2><span class="secnum">۶</span> حجم‌های پایدار (Persistent Volumes)</h2>
+  <p>حجمِ <code>/opt/data</code> تنها منبع حقیقت (single source of truth) برای تمام وضعیت Hermes است. این حجم به پوشهٔ <code>~/.hermes/</code> روی میزبان شما نگاشت می‌شود و شامل موارد زیر است:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>مسیر</th><th>محتوا</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>.env</code></td><td>کلیدها و رمزهای API</td></tr>
+        <tr><td><code>config.yaml</code></td><td>تمام پیکربندی Hermes</td></tr>
+        <tr><td><code>SOUL.md</code></td><td>شخصیت / هویت ایجنت</td></tr>
+        <tr><td><code>sessions/</code></td><td>تاریخچهٔ گفتگوها</td></tr>
+        <tr><td><code>memories/</code></td><td>مخزن حافظهٔ پایدار</td></tr>
+        <tr><td><code>skills/</code></td><td>مهارت‌های نصب‌شده</td></tr>
+        <tr><td><code>home/</code></td><td>پوشهٔ HOME هر پروفایل، برای زیرپروسه‌های ابزار Hermes (مانند git، ssh، gh، npm و CLIهای مهارت‌ها)</td></tr>
+        <tr><td><code>cron/</code></td><td>تعریف کارهای زمان‌بندی‌شده</td></tr>
+        <tr><td><code>hooks/</code></td><td>هوک‌های رویداد</td></tr>
+        <tr><td><code>logs/</code></td><td>لاگ‌های زمان اجرا</td></tr>
+        <tr><td><code>skins/</code></td><td>پوسته‌های سفارشی CLI</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="doc-sec" id="sec-immutable">
+  <h2><span class="secnum">۷</span> درخت نصب تغییرناپذیر</h2>
+  <p>در ایمیج‌های میزبانی‌شده و منتشرشده، مسیر <code>/opt/hermes</code> درختِ نصب برنامه است. مالک آن root است و برای کاربرِ زمانِ اجرا یعنی <code>hermes</code> فقط‌خواندنی است؛ بنابراین نوبت‌های ایجنت، نشست‌های گیت‌وی، عملیات داشبورد و دستورات معمولِ <code>docker exec hermes hermes ...</code> نمی‌توانند سورسِ هسته، <code>.venv</code> داخلی، <code>node_modules</code> یا بستهٔ TUI را در محل ویرایش کنند.</p>
+  <p>تمام وضعیتِ قابل‌تغییرِ Hermes باید زیر <code>/opt/data</code> باشد: پیکربندی، <code>.env</code>، پروفایل‌ها، مهارت‌ها، حافظه‌ها، نشست‌ها، لاگ‌ها، فایل‌های بارگذاری‌شده در داشبورد، پلاگین‌ها و سایر فایل‌های مدیریت‌شده توسط کاربر. ایمیج همچنین نوشتن فایل‌های <code>.pyc</code> در زمان اجرا و نصب‌های تنبلِ (lazy) وابستگی‌های Hermes در <code>/opt/hermes</code> را غیرفعال می‌کند؛ وابستگی‌های پلتفرمیِ اختیاریِ مورد نیازِ ایمیج منتشرشده باید از قبل داخل ایمیج پخته (baked) شوند یا از طریق ساختِ ایمیج جدید نصب گردند.</p>
+  <p>در ایمیج‌های میزبانی‌شده/منتشرشده، خودبهبودیِ ایجنت (self-improvement) محدود به مهارت‌ها، حافظه، پلاگین‌ها و پیکربندی زیر <code>/opt/data</code> است. سورس هستهٔ نصب‌شده زیر <code>/opt/hermes</code> تغییرناپذیر است؛ تغییرات هسته از طریق PR به مخزن اعمال می‌شود و با به‌روزرسانی ایمیج عرضه می‌گردد، نه با ویرایش زندهٔ نصبِ در حال اجرا.</p>
+  <p>اگر یک اپراتور نیاز به تعمیر یا بررسی فایل‌های خارج از <code>/opt/data</code> دارد، باید آگاهانه از شل root استفاده کند. شیمِ (shim) مربوط به hermes معمولاً دستور <code>docker exec hermes hermes ...</code> را به کاربر زمان اجرا بازمی‌گرداند؛ متغیر <code>HERMES_DOCKER_EXEC_AS_ROOT=1</code> را برای یک فراخوانی یک‌باره با دسترسی root تنظیم کنید، وقتی که صریحاً به معنای‌شناسیِ root نیاز دارید.</p>
+  <p>CLIهای مهارت‌ها که اعتبارنامه‌ها را زیر <code>~</code> ذخیره می‌کنند باید در برابر HOMEِ زیرپروسه راه‌اندازی اولیه شوند، نه فقط ریشهٔ والوم داده. مثلاً مهارت <code>xurl</code> وضعیت OAuth را در <code>~/.xurl</code> نگه می‌دارد؛ در چیدمان رسمی داکر، فراخوانی‌های ابزار Hermes آن را به‌صورت <code>/opt/data/home/.xurl</code> می‌خوانند، بنابراین احراز هویت دستی xurl را با <code>HOME=/opt/data/home</code> اجرا کنید و درستی آن را با <code>HOME=/opt/data/home xurl auth status</code> بررسی کنید.</p>
+
+  <div class="callout warning">
+    <div class="callout-title">⚠️ هشدار مهم</div>
+    <p>هرگز دو کانتینر گیت‌وی Hermes را همزمان روی همان پوشهٔ داده اجرا نکنید — فایل‌های نشست و مخازن حافظه برای دسترسی همزمانِ نوشتن طراحی نشده‌اند.</p>
+  </div>
+</section>
+
+<section class="doc-sec" id="sec-profiles">
+  <h2><span class="secnum">۸</span> پشتیبانی چندپروفایلی</h2>
+  <p>Hermes از چندین پروفایل پشتیبانی می‌کند — زیرپوشه‌های جداگانه در <code>~/.hermes/</code> که به شما امکان می‌دهند از یک نصب واحد، ایجنت‌های مستقل اجرا کنید (با SOUL، مهارت‌ها، حافظه، نشست‌ها و اعتبارنامه‌های متفاوت). داخل ایمیج رسمی داکر، درخت نظارت s6 هر پروفایل را به‌عنوان یک سرویس تحت نظارتِ درجه‌یک می‌بیند؛ بنابراین استقرار توصیه‌شده، یک کانتینر است که همهٔ پروفایل‌ها را میزبانی می‌کند.</p>
+  <p>هر پروفایلی که با <code>hermes profile create &lt;name&gt;</code> ساخته می‌شود، این‌ها را دریافت می‌کند:</p>
+  <ul>
+    <li>یک جایگاه سرویس s6 اختصاصی در <code>/run/service/gateway-&lt;name&gt;/</code> که به‌صورت پویا توسط زمان اجرا ثبت می‌شود — بدون نیاز به بازسازی کانتینر.</li>
+    <li>راه‌اندازی مجدد خودکار پس از خرابی، با تأخیرِ مدیریت‌شده توسط <code>s6-supervise</code>.</li>
+    <li>لاگ‌های چرخشیِ هر پروفایل در <code>${HERMES_HOME}/logs/gateways/&lt;name&gt;/current</code> (۱۰ آرشیو × ۱ مگابایت).</li>
+    <li>ماندگاری وضعیت در سراسر ری‌استارت‌های کانتینر: آشتی‌سازِ زمانِ بوت، فایل <code>gateway_state.json</code> را از هر پوشهٔ پروفایل می‌خواند و جایگاه سرویس را فقط برای پروفایل‌هایی که آخرین وضعیت ثبت‌شده‌شان «در حال اجرا» بوده بالا می‌آورد. تنها گیت‌ویی که خودتان صریحاً متوقف کرده‌اید (<code>hermes gateway stop</code>) در سراسر ری‌استارت خاموش می‌ماند — ری‌استارت کانتینر، ارتقای ایمیج یا خروج غیرمنتظره، وضعیت ثبت‌شده را «در حال اجرا» باقی می‌گذارد و بنابراین گیت‌وی در بوت بعدی به‌طور خودکار راه‌اندازی می‌شود.</li>
+  </ul>
+
+  <h3 id="p-lifecycle">فرمان‌های چرخهٔ حیات</h3>
+  <p>فرمان‌های چرخهٔ حیات را که روی میزبان اجرا می‌کردید، به همان شکل می‌توانید از داخل کانتینر هم اجرا کنید:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code># ساخت یک پروفایل — جایگاه s6 مربوط به gateway-&lt;name&gt; را ثبت می‌کند.
+docker exec hermes hermes profile create coder
+
+# شروع / توقف / ری‌استارت — به s6-svc فرمان می‌دهد؛ چرخهٔ حیات گیت‌وی از docker restart جان سالم به در می‌برد.
+docker exec hermes hermes -p coder gateway start
+docker exec hermes hermes -p coder gateway stop
+docker exec hermes hermes -p coder gateway restart
+
+# مشاهدهٔ وضعیت — داخل کانتینر عبارت `Manager: s6 (container supervisor)` را گزارش می‌کند.
+docker exec hermes hermes -p coder gateway status
+
+# حذف یک پروفایل — جایگاه s6 را هم برمی‌چیند.
+docker exec hermes hermes profile delete coder</code></pre>
+  </div>
+
+  <p>در پس‌زمینه، دستور <code>hermes gateway start/stop/restart</code> داخل کانتینر رهگیری و به <code>s6-svc</code> روی پوشهٔ سرویسِ درست هدایت می‌شود؛ نیازی نیست دستورات s6 را مستقیماً یاد بگیرید. برای مشاهدهٔ وضعیت خام ناظر، از <code>/command/s6-svstat /run/service/gateway-&lt;name&gt;</code> استفاده کنید (توجه: مسیر <code>/command/</code> فقط برای پروسه‌هایی که توسط درخت نظارت تولید شده‌اند در PATH قرار دارد — هنگام فراخوانی از <code>docker exec</code>، مسیر مطلق را بدهید).</p>
+
+  <h3 id="p-reach">دسترسی به بیش از یک پروفایل از خارج کانتینر</h3>
+  <p>دو سطحِ متفاوت برای رسیدن به گیت‌وی یک پروفایل از بیرون وجود دارد که رفتار متفاوتی هم دارند — آن‌ها را با هم اشتباه نگیرید:</p>
+  <ul>
+    <li><strong>Hermes Desktop (و داشبورد وب).</strong> اتصالِ Remote Gateway در اپلیکیشن Desktop با یک بک‌اندِ <code>hermes dashboard</code> صحبت می‌کند (پورت پیش‌فرض 9119 که با <code>HERMES_DASHBOARD=1</code> فعال می‌شود) — نه با سرور OpenAI API. یک بک‌اند داشبورد به همهٔ پروفایل‌های هم‌مکان سرویس می‌دهد: سوییچر پروفایلِ اپلیکیشن، پروفایل هدف را همراه هر درخواست می‌فرستد و بک‌اند، <code>HERMES_HOME</code> همان پروفایل را روی دیسک باز می‌کند. بنابراین برای Desktop به پورت دوم — یا اتصال دوم — برای هر پروفایل نیاز ندارید؛ یک اتصال به <code>:9119</code> از طریق سوییچر، همهٔ پروفایل‌ها را پوشش می‌دهد.</li>
+    <li><strong>کلاینت‌های API سازگار با OpenAI (مانند Open WebUI، LobeChat، <code>/v1/...</code>).</strong> این‌ها با سرور API هر پروفایل صحبت می‌کنند که برای همهٔ پروفایل‌ها پورت 8642 را می‌گیرد (که از <code>API_SERVER_PORT</code> یا <code>platforms.api_server.extra.port</code> خوانده می‌شود — تخصیص خودکار و کلیدِ <code>config.yaml/gateway.port</code> وجود ندارد). اگر می‌خواهید یک کلاینت به پروفایل دومِ مشخصی برسد، به آن پروفایل یک <code>API_SERVER_PORT</code> متمایز در <code>.env</code> خودش بدهید؛ در غیر این صورت گیت‌وی آن پروفایل هم سعی می‌کند پورت 8642 را بگیرد و با پروفایل پیش‌فرض تداخل می‌کند:</li>
+  </ul>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code># ساخت پروفایل (جایگاه s6 یعنی gateway-&lt;name&gt; را ثبت می‌کند)
+docker exec hermes hermes profile create work
+
+# هدایت سرور API آن به یک پورت آزاد (نوشتن در .env خودِ پروفایل)
+cat &gt;&gt; /opt/data/profiles/work/.env &lt;&lt;'EOF'
+API_SERVER_ENABLED=true
+API_SERVER_PORT=8643
+EOF
+
+docker exec hermes hermes -p work gateway restart</code></pre>
+  </div>
+
+  <p>مقدار <code>API_SERVER_PORT</code> را همیشه در <code>.env</code> خودِ هر پروفایل نگه دارید، هرگز در بلوک <code>environment:</code> سراسریِ کانتینر — یک مقدار سراسری، همهٔ پروفایل‌ها را مجبور به استفاده از یک پورت می‌کند و با هم تداخل پیدا می‌کنند. با شبکهٔ bridge، پورت اضافه را در <code>docker-compose.yml</code> منتشر کنید (<code>- "8643:8643"</code>)؛ با <code>network_mode: host</code> از قبل روی میزبان در دسترس است. اتصالِ پروفایل پیش‌فرض روی پورت 8642 دست‌نخورده می‌ماند.</p>
+
+  <h3 id="p-why">چرا «یک کانتینر با چند پروفایل»، نه «چند کانتینر»؟</h3>
+  <p>قبل از مهاجرت به s6، الگوی توصیه‌شده «یک کانتینر به ازای هر پروفایل» بود، چون ناظری داخل کانتینر برای مدیریت چند گیت‌وی وجود نداشت. با s6 به‌عنوان PID 1 دیگر چنین ضرورتی نیست و چیدمان تک‌کانتینری تقریباً در همهٔ ابعاد ساده‌تر است:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>معیار</th><th>یک کانتینر، چند پروفایل</th><th>یک کانتینر به ازای هر پروفایل</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>سربار دیسک</strong></td><td>یک ایمیج، یک venv داخلی، یک کش Playwright</td><td>N ایمیج / N کش</td></tr>
+        <tr><td><strong>سربار حافظه</strong></td><td>کش مفسر Python و node_modules مشترک</td><td>در هر کانتینر تکرار می‌شود</td></tr>
+        <tr><td><strong>ساخت پروفایل</strong></td><td><code>docker exec ... hermes profile create &lt;name&gt;</code> (چند ثانیه)</td><td>فراخوانی جدید <code>docker run</code> + تخصیص پورت + پیکربندی bind-mount</td></tr>
+        <tr><td><strong>بازیابی از خرابی هر پروفایل</strong></td><td>راه‌اندازی مجدد خودکار با s6-supervise</td><td><code>--restart unless-stopped</code> داکر (کندتر، کارهای خواهرِ در حال اجرا را از کار می‌اندازد)</td></tr>
+        <tr><td><strong>لاگ‌ها</strong></td><td>فایل چرخشیِ هر پروفایل با s6-log + لاگ ممیزیِ بوتِ کانتینر</td><td><code>docker logs &lt;name&gt;</code> به ازای هر کانتینر — بدون چرخش داخلی</td></tr>
+        <tr><td><strong>پشتیبان‌گیری</strong></td><td>یک پوشهٔ <code>~/.hermes</code></td><td>N پوشه که باید هماهنگ شوند</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>پروفایل پیش‌فرض (<code>default</code>) همیشه در اولین بوت ثبت می‌شود؛ بنابراین یک کانتینر تازه، درست از همان ابتدا با یک گیت‌وی تحت نظارت شروع به کار می‌کند. پروفایل‌های اضافی صرفاً افزودنی‌های زمانِ اجرا هستند.</p>
+
+  <h3 id="p-when">چه زمانی کانتینر جداگانه می‌خواهید؟</h3>
+  <p>پروفایل-داخل-کانتینر، حالت پیش‌فرض است. فقط وقتی برای هر پروفایل کانتینر جداگانه اجرا کنید که دلیل مشخصی داشته باشید:</p>
+  <ul>
+    <li><strong>ایزوله‌سازی منابع به ازای هر بار کاری</strong> — مثلاً یک نشستِ ابزار مرورگرِ رام‌نشده در پروفایل A نباید بتواند پروفایل B را با اتمام حافظه (OOM) از کار بیندازد. کانتینرها به شما <code>--memory</code> / <code>--cpus</code> جداگانه برای هر پروفایل می‌دهند.</li>
+    <li><strong>پین‌کردن مستقل ایمیج</strong> — تگ‌های ایمیج بالادستیِ متفاوت برای هر بار کاری.</li>
+    <li><strong>تفکیک شبکه</strong> — شبکه‌های داکر مجزا برای هر پروفایل (مثلاً یکی رو به مشتری، یکی داخلی).</li>
+    <li><strong>انطباق / شعاع تأثیر آسیب (blast radius)</strong> — اعتبارنامه‌های مجزا هرگز یک درخت پروسه در سطح سیستم‌عامل را به اشتراک نمی‌گذارند.</li>
+  </ul>
+  <p>در این موارد، به ازای هر پروفایل یک سرویس با <code>container_name</code>، <code>volumes</code> و <code>ports</code> متمایز تعریف کنید:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">yaml — docker-compose.yml</span><button class="copy-btn">کپی</button></div>
+    <pre><code>services:
+  hermes-work:
+    image: nousresearch/hermes-agent:latest
+    container_name: hermes-work
+    restart: unless-stopped
+    command: gateway run
+    ports:
+      - "8642:8642"
+    volumes:
+      - ~/.hermes-work:/opt/data
+
+  hermes-personal:
+    image: nousresearch/hermes-agent:latest
+    container_name: hermes-personal
+    restart: unless-stopped
+    command: gateway run
+    ports:
+      - "8643:8642"
+    volumes:
+      - ~/.hermes-personal:/opt/data</code></pre>
+  </div>
+
+  <p>هشدارِ بخش <a href="#sec-volumes">«حجم‌های پایدار»</a> همچنان اعتبار دارد: هرگز دو کانتینر را همزمان به همان پوشهٔ <code>~/.hermes</code> اشاره ندهید. ناظر s6 داخل هر کانتینر مجموعه پروفایل‌های خودش را مدیریت می‌کند؛ اشتراک‌گذاری یک والوم داده بین کانتینرها، فایل‌های نشست و مخازن حافظه را خراب می‌کند.</p>
+</section>
+
+<section class="doc-sec" id="sec-logs">
+  <h2><span class="secnum">۹</span> لاگ‌ها کجا می‌روند؟</h2>
+  <p>کانتینر s6 چهار سطحِ لاگ متمایز دارد و این که «چرا گیت‌وی من چیزی در docker logs نشان نمی‌دهد؟» یک موضوع رایج و غافلگیرکننده است. خلاصهٔ راهنما:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>منبع</th><th>کجا ذخیره می‌شود</th><th>نحوهٔ خواندن</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>گیت‌وی هر پروفایل (<code>hermes gateway run</code> و گیت‌وی‌های هر پروفایل زیر s6)</td>
+          <td>همزمان در دو جا: <code>docker logs &lt;container&gt;</code> (بلادرنگ، بدون پیشوند اضافه) و <code>${HERMES_HOME}/logs/gateways/&lt;profile&gt;/current</code> (چرخشی، با مُهر زمانی ISO-8601، ۱۰ آرشیو × ۱ مگابایت)</td>
+          <td><code>docker logs -f hermes</code> یا روی میزبان: <code>tail -F ~/.hermes/logs/gateways/default/current</code></td>
+        </tr>
+        <tr>
+          <td>داشبورد (وقتی <code>HERMES_DASHBOARD=1</code> باشد)</td>
+          <td><code>docker logs &lt;container&gt;</code> (بدون پیشوند)</td>
+          <td><code>docker logs -f hermes</code> — درهم‌آمیخته با خطوط گیت‌وی</td>
+        </tr>
+        <tr>
+          <td>آشتی‌ساز بوت (ثبت می‌کند کدام گیت‌وی‌های پروفایل در هر شروعِ کانتینر بازیابی شده‌اند)</td>
+          <td><code>${HERMES_HOME}/logs/container-boot.log</code> (لاگ ممیزیِ فقط-الحاقی)</td>
+          <td><code>tail -F ~/.hermes/logs/container-boot.log</code></td>
+        </tr>
+        <tr>
+          <td>لاگ‌های عمومی Hermes (<code>agent.log</code>، <code>errors.log</code>)</td>
+          <td><code>${HERMES_HOME}/logs/</code> (آگاه از پروفایل)</td>
+          <td><code>docker exec hermes hermes logs --follow [--level WARNING] [--session &lt;id&gt;]</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>دو نکتهٔ عملی که ارزش دانستن دارند:</p>
+  <ul>
+    <li>نسخهٔ فایلی در <code>logs/gateways/&lt;profile&gt;/current</code> همان چیزی است که از ری‌استارت کانتینر جان سالم به در می‌برد. <code>docker logs</code> فقط خروجیِ طول عمر کانتینرِ فعلی را نگه می‌دارد (و با <code>docker rm</code> پاک می‌شود)؛ اما فایل‌های چرخشی روی والومِ متصل‌شده به میزبان باقی می‌مانند.</li>
+    <li>شکلِ خط ممیزیِ آشتی‌سازِ بوت چنین است: <code>&lt;iso-timestamp&gt; profile=&lt;name&gt; prior_state=&lt;state&gt; action=&lt;registered|started&gt;</code>؛ بنابراین یک <code>grep profile=coder ~/.hermes/logs/container-boot.log</code> سریع نشان می‌دهد یک پروفایلِ مشخص آخرین بار کِی بازیابی شده و اینکه s6 آن را خودکار راه‌اندازی کرده یا نه.</li>
+  </ul>
+</section>
+
+<section class="doc-sec" id="sec-envfwd">
+  <h2><span class="secnum">۱۰</span> ارسال متغیرهای محیطی</h2>
+  <p>کلیدهای API از فایل <code>/opt/data/.env</code> داخل کانتینر خوانده می‌شوند. همچنین می‌توانید متغیرهای محیطی را مستقیم پاس بدهید:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker run -it --rm \
+  -v ~/.hermes:/opt/data \
+  -e ANTHROPIC_API_KEY="sk-ant-..." \
+  -e OPENAI_API_KEY="sk-..." \
+  nousresearch/hermes-agent</code></pre>
+  </div>
+
+  <p>پرچم‌های مستقیمِ <code>-e</code> بر مقادیر فایل <code>.env</code> اولویت دارند. این روش برای CI/CD یا یکپارچه‌سازی با مدیرِ رمزها (secrets manager) مفید است، جایی که نمی‌خواهید کلیدها روی دیسک ذخیره شوند.</p>
+</section>
+
+<section class="doc-sec" id="sec-backend">
+  <h2><span class="secnum">۱۱</span> دنبال «داکر به‌عنوان بک‌اند ترمینال» هستید؟</h2>
+  <p>این صفحه اجرای خودِ Hermes داخل داکر را پوشش می‌دهد. اگر می‌خواهید Hermes فراخوانی‌های <code>terminal</code> / <code>execute_code</code> ایجنت را داخل یک کانتینر سندباکس داکر اجرا کند (یک کانتینرِ طولانی‌عمرِ مشترک بین پروسه‌های Hermes — برای جزئیات به issue شمارهٔ #20561 مراجعه کنید)، آن یک بلوک پیکربندی جداگانه است: <code>terminal.backend: docker</code> به‌همراه <code>terminal.docker_image</code>، <code>terminal.docker_volumes</code>، <code>terminal.docker_forward_env</code>، <code>terminal.docker_env</code>، <code>terminal.docker_run_as_host_user</code>، <code>terminal.docker_extra_args</code>، <code>terminal.docker_persist_across_processes</code> و <code>terminal.docker_orphan_reaper</code>. برای مجموعهٔ کامل تنظیمات، از جمله قواعد چرخهٔ حیات کانتینر، به بخش «پیکربندی ← بک‌اند داکر» مستندات مراجعه کنید.</p>
+</section>
+
+<section class="doc-sec" id="sec-compose">
+  <h2><span class="secnum">۱۲</span> نمونهٔ Docker Compose</h2>
+  <p>برای استقرار پایدار همراه با هم گیت‌وی و داشبورد، استفاده از یک <code>docker-compose.yaml</code> مناسب است:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">yaml — docker-compose.yaml</span><button class="copy-btn">کپی</button></div>
+    <pre><code>services:
+  hermes:
+    image: nousresearch/hermes-agent:latest
+    container_name: hermes
+    restart: unless-stopped
+    command: gateway run
+    ports:
+      - "8642:8642"   # API گیت‌وی
+      - "9119:9119"   # داشبورد (فقط وقتی HERMES_DASHBOARD=1 باشد در دسترس است)
+    volumes:
+      - ~/.hermes:/opt/data
+    environment:
+      - HERMES_DASHBOARD=1
+      # برای پاس‌دادن متغیرهای محیطی خاص به‌جای فایل .env، خطوط زیر را از کامنت خارج کنید:
+      # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: "2.0"</code></pre>
+  </div>
+
+  <p>با <code>docker compose up -d</code> شروع کنید و لاگ‌ها را با <code>docker compose logs -f</code> ببینید. خروجی stdout گیت‌ویِ تحت نظارت هم‌زمان در <code>${HERMES_HOME}/logs/gateways/&lt;profile&gt;/current</code> روی والوم هم نوشته می‌شود — برای نقشهٔ کامل مسیریابی به بخش <a href="#sec-logs">«لاگ‌ها کجا می‌روند؟»</a> مراجعه کنید.</p>
+</section>
+
+<section class="doc-sec" id="sec-audio">
+  <h2><span class="secnum">۱۳</span> اختیاری: پل صوت دسکتاپ لینوکس</h2>
+  <p>کار کردن حالت صوتی (Voice Mode) در داکر به دو چیز جداگانه نیاز دارد: باید به Hermes اجازه داده شود دستگاه‌های صوتی را داخل کانتینر جستجو (probe) کند، و کانتینر هم باید بتواند به سرور صوتی میزبان شما دسترسی پیدا کند. راه‌اندازیِ زیر، لوله‌کشی صوتیِ میزبان را برای دسکتاپ‌های لینوکسی پوشش می‌دهد که یک سوکت سازگار با PulseAudio ارائه می‌دهند — از جمله بسیاری از پیکربندی‌های PipeWire.</p>
+
+  <div class="callout caution">
+    <div class="callout-title">⚠️ احتیاط</div>
+    <p>این یک راه‌حل مخصوص دسکتاپ لینوکس است، نه یک قابلیت عمومیِ Docker Desktop. زمانی مفید است که صوتِ میزبان از قبل درست کار می‌کند و شما حالت صوتی CLI را داخل کانتینر Hermes می‌خواهید. اگر Hermes همچنان پیام <code>Running inside Docker container -- no audio devices</code> را نمایش داد، از یک بیلد استفاده کنید که شامل پشتیبانیِ جستجوی صوتِ داکر برای <code>PULSE_SERVER</code> / <code>PIPEWIRE_REMOTE</code> باشد.</p>
+  </div>
+
+  <p>ابتدا، یک فایل پیکربندی ALSA در کنار فایل Compose خود بسازید:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">asound.conf</span><button class="copy-btn">کپی</button></div>
+    <pre><code>pcm.!default {
+    type pulse
+    hint {
+        show on
+        description "Default ALSA Output (PulseAudio)"
+    }
+}
+
+pcm.pulse {
+    type pulse
+}
+
+ctl.!default {
+    type pulse
+}</code></pre>
+  </div>
+
+  <p>سپس یک ایمیج مشتقِ کوچک با پلاگین ALSA PulseAudio بسازید:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">Dockerfile.audio</span><button class="copy-btn">کپی</button></div>
+    <pre><code>FROM nousresearch/hermes-agent:latest
+
+USER root
+RUN apt-get update \
+    &amp;&amp; apt-get install -y --no-install-recommends libasound2-plugins \
+    &amp;&amp; rm -rf /var/lib/apt/lists/*</code></pre>
+  </div>
+
+  <p>از آن ایمیج در Compose استفاده کنید و سوکت PulseAudio و کوکیِ کاربر میزبان را به کانتینر پاس دهید:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">yaml — docker-compose.yml</span><button class="copy-btn">کپی</button></div>
+    <pre><code>services:
+  hermes:
+    build:
+      context: .
+      dockerfile: Dockerfile.audio
+    image: hermes-agent-audio
+    container_name: hermes
+    restart: unless-stopped
+    command: gateway run
+    volumes:
+      - ~/.hermes:/opt/data
+      - /run/user/${HERMES_UID}/pulse:/run/user/${HERMES_UID}/pulse
+      - ~/.config/pulse/cookie:/tmp/pulse-cookie:ro
+      - ./asound.conf:/etc/asound.conf:ro
+    environment:
+      - HERMES_UID=${HERMES_UID}
+      - HERMES_GID=${HERMES_GID}
+      - XDG_RUNTIME_DIR=/run/user/${HERMES_UID}
+      - PULSE_SERVER=unix:/run/user/${HERMES_UID}/pulse/native
+      - PULSE_COOKIE=/tmp/pulse-cookie</code></pre>
+  </div>
+
+  <p>آن را با UID/GID کاربر میزبان راه‌اندازی کنید تا پروسهٔ کانتینر بتواند به سوکت صوتیِ مخصوصِ آن کاربر دسترسی داشته باشد:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>export HERMES_UID="$(id -u)"
+export HERMES_GID="$(id -g)"
+docker compose up -d --build</code></pre>
+  </div>
+
+  <p>برای بررسی اینکه PortAudio داخل کانتینر چه چیزی می‌بیند:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker exec hermes /opt/hermes/.venv/bin/python -c "import sounddevice as sd; print(sd.query_devices())"</code></pre>
+  </div>
+</section>
+
+<section class="doc-sec" id="sec-resources">
+  <h2><span class="secnum">۱۴</span> محدودیت‌های منابع</h2>
+  <p>کانتینر Hermes به منابع متوسطی نیاز دارد. حداقل‌های توصیه‌شده:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>منبع</th><th>حداقل</th><th>توصیه‌شده</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>حافظه</td><td>۱ گیگابایت</td><td>۲ تا ۴ گیگابایت</td></tr>
+        <tr><td>CPU</td><td>۱ هسته</td><td>۲ هسته</td></tr>
+        <tr><td>دیسک (والوم داده)</td><td>۵۰۰ مگابایت</td><td>۲ گیگابایت و بیشتر (با نشست‌ها/مهارت‌ها رشد می‌کند)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>اتوماسیون مرورگر (Playwright/Chromium) بیشترین حافظه را مصرف می‌کند. اگر ابزارهای مرورگر را نمی‌خواهید، ۱ گیگابایت کافی است. با ابزارهای مرورگرِ فعال، حداقل ۲ گیگابایت اختصاص دهید.</p>
+
+  <p>محدودیت‌ها را در داکر تنظیم کنید:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker run -d \
+  --name hermes \
+  --restart unless-stopped \
+  --memory=4g --cpus=2 \
+  -v ~/.hermes:/opt/data \
+  nousresearch/hermes-agent gateway run</code></pre>
+  </div>
+</section>
+
+<section class="doc-sec" id="sec-dockerfile">
+  <h2><span class="secnum">۱۵</span> Dockerfile چه کاری انجام می‌دهد؟</h2>
+  <p>ایمیج رسمی بر پایهٔ <code>debian:13.4</code> ساخته شده و شامل موارد زیر است:</p>
+  <ul>
+    <li><strong>Python 3.13</strong> با وابستگی‌های همگام‌شده از lockfile از طریق <code>uv sync --frozen --no-install-project</code> برای بسته‌های اختیاریِ از-پیش-نصب‌شده (all، messaging، هویت Anthropic/Bedrock/Azure، Hindsight، Matrix) و سپس یک نصبِ editable بدون وابستگی از خودِ Hermes.</li>
+    <li><strong>Node.js 26 + npm</strong> (برای اتوماسیون مرورگر، پل واتساپ، بسته‌های TUI/Desktop و ابزارهای ساخت workspace).</li>
+    <li><strong>Playwright همراه با Chromium</strong> (<code>npx playwright install --with-deps chromium --only-shell</code>).</li>
+    <li><strong>ripgrep، ffmpeg، git و xz-utils</strong> به‌عنوان ابزارهای سیستمی.</li>
+    <li><strong>docker-cli</strong> — تا ایجنت‌های در حال اجرا داخل کانتینر بتوانند دیمن داکرِ میزبان را هدایت کنند (برای فعال‌سازی، <code>/var/run/docker.sock</code> را bind-mount کنید) برای <code>docker build</code>، <code>docker run</code>، بازرسی کانتینر و غیره.</li>
+    <li><strong>openssh-client</strong> — بک‌اند ترمینال SSH را از داخل کانتینر ممکن می‌کند. بک‌اند SSH از باینری ssh سیستمی استفاده می‌کند؛ بدون این پکیج، در نصب‌های کانتینری به‌طور خاموش و بی‌صدا شکست می‌خورد.</li>
+    <li><strong>پل واتساپ</strong> (<code>scripts/whatsapp-bridge/</code>).</li>
+    <li><strong>s6-overlay نسخهٔ ۳ به‌عنوان PID 1</strong> (جایگزین tini قدیمی) — داشبورد و گیت‌وی‌های هر پروفایل را با راه‌اندازی مجدد خودکار پس از خرابی نظارت می‌کند، پروسه‌های زامبی را جمع می‌کند و سیگنال‌ها را به‌درستی عبور می‌دهد.</li>
+  </ul>
+  <p>ایمیج، مسیر <code>/opt/hermes</code> را در زمان اجرا به‌عنوان یک درخت نصبِ تغییرناپذیر در نظر می‌گیرد. بسته‌های اختیاری Python، ورک‌اسپیس‌های Node و فایل‌های TUI که باید داخل داکر در دسترس باشند، باید حین ساخت ایمیج داخل آن پخته شوند؛ نصب‌های تنبلِ زمانِ اجرا غیرفعال‌اند تا گیت‌وی‌های تحت نظارت و دستورات <code>docker exec hermes …</code> سعی نکنند فایل‌های وابستگی را در درخت سورسِ فقط‌خواندنی بنویسند.</p>
+
+  <p>ENTRYPOINT کانتینر یک دیسپچر کوچک است (<code>docker/entrypoint-dispatch.sh</code>). وقتی کانتینر PID 1 را در اختیار دارد (داکر/Podman معمولی)، <code>/init</code> مربوط به s6-overlay را اجرا (exec) می‌کند و درخت نظارتِ کاملِ توضیح‌داده‌شده در ادامه را در اختیارتان می‌گذارد. وقتی یک پلتفرم، entrypoint ایمیج را زیر PID-1 خودش می‌پیچد (Fly.io Machines، <code>docker run --init</code>، برخی راه‌اندازی‌های Nomad/Kubernetes)، دستور <code>/init</code> با خطای <code>s6-overlay-suexec: fatal: can only run as pid 1</code> سقوط می‌کرد — بنابراین دیسپچر به‌جای آن، بوت‌استرپِ مرحلهٔ ۲ را مستقیماً اجرا می‌کند و wrapper اصلی را بدون s6 اجرا می‌کند. در آن مسیر جایگزین، دستورِ درخواست‌شده همچنان اجرا می‌شود، اما سرویس‌های تحت نظارت (داشبورد و گیت‌وی‌های هر پروفایل) در دسترس نیستند.</p>
+
+  <p>در مسیر PID-1، <code>/init</code> این کارها را انجام می‌دهد:</p>
+  <ul>
+    <li><code>/etc/cont-init.d/01-hermes-setup</code> (همان <code>docker/stage2-hook.sh</code>) را به‌عنوان root اجرا می‌کند: نگاشت مجددِ اختیاری UID/GID، اصلاح مالکیت والوم، ایجاد فایل‌های <code>.env</code> / <code>config.yaml</code> / <code>SOUL.md</code> در اولین بوت، اجرای مهاجرت‌های غیرتعاملیِ طرحِ پیکربندی (مگر با <code>HERMES_SKIP_CONFIG_MIGRATION=1</code>)، و همگام‌سازی مهارت‌های داخلی.</li>
+    <li><code>/etc/cont-init.d/02-reconcile-profiles</code> (همان <code>hermes_cli.container_boot</code>) را اجرا می‌کند: پوشهٔ <code>$HERMES_HOME/profiles/&lt;name&gt;/</code> را می‌پیماید، جایگاه سرویس s6 گیت‌ویِ هر پروفایل را زیر <code>/run/service/gateway-&lt;profile&gt;/</code> بازسازی می‌کند، و فقط پروفایل‌هایی را خودکار راه‌اندازی می‌کند که آخرین وضعیت ثبت‌شده‌شان «در حال اجرا» بوده است (به بخش <a href="#sec-supervision">«نظارت بر گیت‌وی هر پروفایل»</a> مراجعه کنید).</li>
+    <li>سرویس‌های ایستای s6-rc یعنی <code>main-hermes</code> و <code>dashboard</code> را راه‌اندازی می‌کند.</li>
+    <li>CMD کانتینر را به‌عنوان برنامهٔ اصلی اجرا می‌کند (<code>/opt/hermes/docker/main-wrapper.sh</code>) که آرگومان‌هایی را که کاربر به <code>docker run</code> داده، این‌گونه مسیریابی می‌کند:
+      <ul>
+        <li>بدون آرگومان ← <code>hermes</code> (حالت پیش‌فرض)</li>
+        <li>اگر آرگومان اول یک فایل اجرایی روی PATH باشد (مثلاً <code>sleep</code> یا <code>bash</code>) ← مستقیماً همان اجرا می‌شود</li>
+        <li>هر چیز دیگر ← <code>hermes &lt;args&gt;</code> (عبورِ زیرفرمان)</li>
+      </ul>
+      کانتینر با خروجِ همین برنامهٔ اصلی، و همراه با همان کد خروج، خارج می‌شود.
+    </li>
+  </ul>
+
+  <div class="callout warning">
+    <div class="callout-title">💥 تغییر مهم (Breaking Change) نسبت به ایمیج‌های پیش از s6</div>
+    <p>ENTRYPOINT کانتینر اکنون دیسپچرِ <code>entrypoint-dispatch.sh</code> است (که تحت PID 1 به <code>/init</code> مربوط به s6-overlay واگذار می‌شود)، نه <code>/usr/bin/tini</code>. هر پنج الگوی مستندِ فراخوانی <code>docker run</code> (بدون آرگومان، <code>chat -q "…"</code>، <code>sleep infinity</code>، <code>bash</code>، <code>--tui</code>) دقیقاً مانند ایمیج مبتنی بر tini رفتار می‌کنند. اگر یک اسکریپت wrapper پایین‌دستی دارید که به رفتار سیگنالیِ مخصوص tini یا فراخوانی هاردکد‌شدهٔ <code>/usr/bin/tini --</code> وابسته بوده، به تگ ایمیج قبلی پین کنید.</p>
+  </div>
+</section>
+
+<section class="doc-sec" id="sec-priv">
+  <h2><span class="secnum">۱۶</span> مدل دسترسی (Privilege Model)</h2>
+  <p>entrypoint ایمیج را بازنویسی نکنید، مگر اینکه <code>/init</code> (یا به‌طور معادل، شیم قدیمی <code>docker/entrypoint.sh</code> که به هوک مرحلهٔ ۲ فوروارد می‌کند) را در زنجیرهٔ فرمان نگه دارید. <code>/init</code> مربوط به s6-overlay به‌عنوان root اجرا می‌شود تا بتواند در اولین بوت مالکیت والوم را تغییر دهد؛ سپس برای هر سرویس تحت نظارت و هم برای برنامهٔ اصلی، از طریق <code>s6-setuidgid</code> به کاربر <code>hermes</code> تنزل دسترسی می‌یابد. اجرای <code>hermes gateway run</code> به‌عنوان root داخل ایمیج رسمی به‌طور پیش‌فرض رد می‌شود، چون می‌تواند فایل‌های متعلق به root در <code>/opt/data</code> به جا بگذارد و راه‌اندازی‌های بعدیِ داشبورد یا گیت‌وی را بشکند. متغیر <code>HERMES_ALLOW_ROOT_GATEWAY=1</code> را فقط وقتی تنظیم کنید که آگاهانه این ریسک را می‌پذیرید.</p>
+
+  <h3 id="priv-exec">docker exec به‌طور خودکار به کاربر hermes تنزل می‌یابد</h3>
+  <p>دستور <code>docker exec hermes &lt;cmd&gt;</code> به‌طور پیش‌فرض به‌عنوان root داخل کانتینر اجرا می‌شود، اما ایمیج یک شیمِ نازک در <code>/opt/hermes/bin/hermes</code> (اولین مسیر روی PATH) دارد که فراخوان‌های root را تشخیص می‌دهد و به‌طور شفاف از طریق <code>s6-setuidgid hermes</code> دوباره اجرا می‌کند. بنابراین <code>docker exec hermes login</code>، <code>docker exec hermes profile create …</code>، <code>docker exec hermes setup</code> و غیره، همگی فایل‌هایی می‌نویسند که مالکشان UID 10000 است — یعنی برای گیت‌ویِ تحت نظارت قابلِ خواندن‌اند — بدون نیاز به پرچم اضافیِ <code>--user</code>. فراخوان‌های غیر root (خودِ پروسه‌های تحت نظارت، <code>docker exec --user hermes</code>، ساب‌ایجنت‌های kanban داخل کانتینر) به یک مسیر میان‌بر می‌خورند که باینری venv را مستقیماً اجرا می‌کند؛ پس روی مسیرهای پرتردد هیچ سربار اضافه‌ای وجود ندارد.</p>
+  <p>اگر به‌طور خاص به یک <code>docker exec</code> با دسترسی‌های root نیاز دارید (نشست‌های عیب‌یابی، بررسی وضعیت‌های فقط-root، فایل‌های خارج از <code>/opt/data</code> که مالکش root است)، می‌توانید در همان یک فراخوانی از این تنزل خارج شوید:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker exec -e HERMES_DOCKER_EXEC_AS_ROOT=1 hermes &lt;cmd&gt;</code></pre>
+  </div>
+
+  <p>شیم مقادیر <code>1</code> / <code>true</code> / <code>yes</code> را (بدون حساسیت به بزرگی و کوچکی حروف) می‌پذیرد. هر مقدار دیگری — از جمله غلط‌های تایپی مثل <code>=0</code> — به همان تنزلِ دسترسی منجر می‌شود؛ پس خروجِ خاموش و ناخواسته از این سازوکار ممکن نیست. اگر <code>s6-setuidgid</code> در دسترس نباشد (بیلدهای سفارشی که s6-overlay را حذف کرده‌اند)، شیم از اجرا به‌عنوان root خودداری کرده و با کد خروج 126 متوقف می‌شود تا خرابیِ مدل دسترسی به‌وضوح اعلام شود، و نه این‌که به دامِ تاریخی‌ای بازگردد که در آن <code>docker exec hermes login</code> فایل <code>auth.json</code> را با مالکیت <code>root:root</code> می‌نوشت و احراز هویت گیت‌ویِ تحت نظارت را با هر پیامِ پلتفرم چت می‌شکست.</p>
+</section>
+
+<section class="doc-sec" id="sec-supervision">
+  <h2><span class="secnum">۱۷</span> نظارت بر گیت‌وی هر پروفایل</h2>
+  <p>هر پروفایلی که با <code>hermes profile create &lt;name&gt;</code> ساخته می‌شود، به‌طور خودکار یک سرویس گیت‌ویِ تحت نظارتِ s6 که در <code>/run/service/gateway-&lt;name&gt;/</code> ثبت شده و راه‌اندازی مجددِ خودکارِ حفظ‌کنندهٔ وضعیت در سراسر ری‌استارت‌های کانتینر را دارد، دریافت می‌کند. برای گردش‌کارِ کاربرپسند و فرمان‌های چرخهٔ حیات به بخش <a href="#sec-profiles">«پشتیبانی چندپروفایلی»</a> مراجعه کنید.</p>
+  <p>مزایای نظارت نسبت به ایمیج پیش از s6:</p>
+  <ul>
+    <li>خرابی‌های گیت‌وی پس از یک تأخیر حدوداً ۱ ثانیه‌ای توسط <code>s6-supervise</code> به‌طور خودکار راه‌اندازی مجدد می‌شوند.</li>
+    <li>داشبورد، وقتی با <code>HERMES_DASHBOARD=1</code> فعال باشد، روی همان درخت نظارت تحت نظر است و همان رفتارِ راه‌اندازی مجدد خودکار را دریافت می‌کند.</li>
+    <li><code>docker restart</code>، ارتقاهای ایمیج (<code>docker compose up -d --force-recreate</code>) و خروج‌های غیرمنتظره، گیت‌وی‌های در حال اجرا را حفظ می‌کنند: آشتی‌سازِ cont-init فایل <code>$HERMES_HOME/profiles/&lt;name&gt;/gateway_state.json</code> را می‌خواند و اگر آخرین وضعیت ثبت‌شده «در حال اجرا» باشد، جایگاه سرویس را دوباره بالا می‌آورد. فقط یک <code>hermes gateway stop</code> صریح است که وضعیتِ «متوقف» ثبت می‌کند و گیت‌وی را در سراسر ری‌استارت خاموش نگه می‌دارد؛ سیگنال SIGTERM کانتینر/s6 که هنگام ری‌استارت یا ارتقا فرستاده می‌شود، به‌معنای «هنوز در حال اجرا» تلقی شده و گیت‌وی خودکار راه‌اندازی می‌شود.</li>
+    <li>لاگ‌های گیت‌ویِ هر پروفایل زیر <code>$HERMES_HOME/logs/gateways/&lt;profile&gt;/current</code> باقی می‌مانند (چرخشی توسط s6-log)، و اقدامات آشتی‌ساز به ازای هر بوت به <code>$HERMES_HOME/logs/container-boot.log</code> الحاق می‌شوند. برای نقشهٔ کامل مسیریابی به بخش <a href="#sec-logs">«لاگ‌ها کجا می‌روند؟»</a> مراجعه کنید.</li>
+    <li><code>hermes status</code> داخل کانتینر عبارت <code>Manager: s6 (container supervisor)</code> را گزارش می‌دهد. برای نمای خامِ ناظر از <code>/command/s6-svstat /run/service/gateway-&lt;name&gt;</code> استفاده کنید (توجه: <code>/command/</code> فقط برای پروسه‌های درخت نظارت روی PATH است؛ هنگام فراخوانی از docker exec مسیر مطلق را بدهید).</li>
+  </ul>
+</section>
+
+<section class="doc-sec" id="sec-upgrade">
+  <h2><span class="secnum">۱۸</span> ارتقا</h2>
+  <p>آخرین ایمیج را دریافت (pull) کنید و کانتینر را بازسازی کنید. پوشهٔ دادهٔ شما حفظ می‌شود، و کانتینر پیش از راه‌اندازی گیت‌وی، مهاجرت‌های غیرتعاملیِ طرحِ پیکربندی را روی <code>config.yaml</code> متصل‌شده در <code>$HERMES_HOME</code> اجرا می‌کند. وقتی مهاجرت لازم باشد، Hermes ابتدا نسخه‌های پشتیبانِ مُهردار‌شده با زمان را کنارِ <code>config.yaml</code> و <code>.env</code> می‌نویسد.</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker pull nousresearch/hermes-agent:latest
+docker rm -f hermes
+docker run -d \
+  --name hermes \
+  --restart unless-stopped \
+  -v ~/.hermes:/opt/data \
+  nousresearch/hermes-agent gateway run</code></pre>
+  </div>
+
+  <p>یا با Docker Compose:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker compose pull
+docker compose up -d</code></pre>
+  </div>
+
+  <p>متغیر <code>HERMES_SKIP_CONFIG_MIGRATION=1</code> را فقط در صورتی تنظیم کنید که بخواهید پیکربندی ماندگار را قبل از بازنویسی توسط ایمیج جدید، دستی بررسی یا مهاجرت دهید.</p>
+</section>
+
+<section class="doc-sec" id="sec-skills">
+  <h2><span class="secnum">۱۹</span> مهارت‌ها و فایل‌های اعتبارنامه</h2>
+  <p>وقتی از داکر به‌عنوان محیط اجرا استفاده می‌کنید (نه روش‌های بالا، بلکه وقتی ایجنت دستورات را داخل یک سندباکس داکر اجرا می‌کند — به بخش <a href="#sec-backend">«بک‌اند ترمینال»</a> مراجعه کنید)، Hermes برای همهٔ فراخوانی‌های ابزار از یک کانتینرِ طولانی‌عمرِ واحد استفاده می‌کند و پوشهٔ مهارت‌ها (<code>~/.hermes/skills/</code>) و هر فایل اعتبارنامه‌ای که مهارت‌ها اعلام کرده‌اند را به‌طور خودکار به‌صورت والوم‌های فقط‌خواندنی به آن کانتینر متصل (bind-mount) می‌کند. اسکریپت‌ها، قالب‌ها و فایل‌های مرجعِ مهارت‌ها بدون هیچ پیکربندی دستی داخل سندباکس در دسترس‌اند؛ و چون کانتینر در تمام طول عمر پروسهٔ Hermes باقی می‌ماند، هر وابستگی‌ای که نصب کنید یا فایلی که بنویسید، برای فراخوانی ابزار بعدی هم باقی می‌ماند.</p>
+  <p>همین فرایند همگام‌سازی برای بک‌اندهای SSH و Modal هم انجام می‌شود — مهارت‌ها و فایل‌های اعتبارنامه پیش از هر دستور از طریق rsync یا API مونتِ Modal بارگذاری می‌شوند.</p>
+</section>
+
+<section class="doc-sec" id="sec-tools">
+  <h2><span class="secnum">۲۰</span> نصب ابزارهای بیشتر در کانتینر</h2>
+  <p>ایمیج رسمی با مجموعه‌ای گزینش‌شده از ابزارها عرضه می‌شود (به بخش <a href="#sec-dockerfile">«Dockerfile چه کاری انجام می‌دهد؟»</a> مراجعه کنید)، اما نه هر ابزاری که یک ایجنت ممکن است بخواهد از قبل نصب شده است. پنج رویکرد توصیه‌شده وجود دارد، به ترتیبِ صعودی از نظر میزان تلاش و ماندگاری.</p>
+
+  <h3 id="t-npx">۱) ابزارهای npm یا Python — از npx یا uvx استفاده کنید</h3>
+  <p>برای هر ابزاری که در npm یا PyPI منتشر شده، به Hermes دستور دهید که آن را از طریق <code>npx</code> (برای npm) یا <code>uvx</code> (برای Python) اجرا کند و آن فرمان را در حافظهٔ پایدارش به خاطر بسپارد. اگر ابزار به فایل پیکربندی یا اعتبارنامه نیاز دارد، به آن دستور دهید این‌ها را زیر <code>/opt/data</code> قرار دهد (مثلاً <code>/opt/data/&lt;tool&gt;/config.yaml</code>).</p>
+  <p>وابستگی‌ها به‌هنگام نیاز دریافت و برای طول عمر کانتینر کش می‌شوند. پیکربندیِ نوشته‌شده زیر <code>/opt/data</code> از ری‌استارت‌های کانتینر جان سالم به در می‌برد، چون روی پوشهٔ میزبانِ متصل‌شده زندگی می‌کند. خودِ کشِ پکیج‌ها پس از <code>docker rm</code> از بین می‌رود، اما npx و uvx بارِ بعدی که ابزار اجرا شود، آن را به‌طور شفاف دوباره دریافت می‌کنند.</p>
+
+  <h3 id="t-apt">۲) ابزارهای دیگر (پکیج‌های apt، باینری‌ها) — نصب کنید و به خاطر بسپارید</h3>
+  <p>برای هر چیزی خارج از npm یا PyPI — پکیج‌های apt، باینری‌های از-پیش-ساخته، یا runtimeهای زبانی که از قبل در ایمیج نیستند — به Hermes نحوهٔ نصب را آموزش دهید (مثلاً <code>apt-get update &amp;&amp; apt-get install -y &lt;package&gt;</code>) و به آن بگویید فرمان نصب را به خاطر بسپارد. ابزار برای باقی عمر کانتینر باقی می‌ماند، و Hermes پس از ری‌استارت کانتینر، وقتی دفعهٔ بعد به آن ابزار نیاز داشت، فرمان نصب را دوباره اجرا می‌کند.</p>
+  <p>این روش برای ابزارهایی که نصبشان سریع است و گاه‌به‌گاه استفاده می‌شوند مناسب است. برای ابزارهایی که دائماً استفاده می‌شوند، رویکرد بعدی را ترجیح دهید.</p>
+
+  <h3 id="t-derived">۳) نصب‌های ماندگار — یک ایمیج مشتق بسازید</h3>
+  <p>وقتی یک ابزار باید در هر شروعِ کانتینر بی‌درنگ و بدون تأخیرِ نصبِ مجدد در دسترس باشد، ایمیجی جدید بسازید که از <code>nousresearch/hermes-agent</code> ارث می‌برد و ابزار را در یکی از لایه‌های خود نصب می‌کند:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">Dockerfile</span><button class="copy-btn">کپی</button></div>
+    <pre><code>FROM nousresearch/hermes-agent:latest
+
+USER root
+RUN apt-get update \
+    &amp;&amp; apt-get install -y --no-install-recommends &lt;your-package&gt; \
+    &amp;&amp; rm -rf /var/lib/apt/lists/*
+USER hermes</code></pre>
+  </div>
+
+  <p>آن را بسازید و به‌جای ایمیج رسمی استفاده کنید:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker build -t my-hermes:latest .
+docker run -d \
+  --name hermes \
+  --restart unless-stopped \
+  -v ~/.hermes:/opt/data \
+  -p 8642:8642 \
+  my-hermes:latest gateway run</code></pre>
+  </div>
+
+  <p>اسکریپت entrypoint و معنای‌شناسیِ <code>/opt/data</code> بدون تغییر به ارث می‌رسند، پس بقیهٔ این صفحه همچنان برایتان اعتبار دارد. یادتان باشد وقتی نسخهٔ بالادستیِ جدیدتری از <code>nousresearch/hermes-agent</code> منتشر شد، ایمیج خود را دوباره بسازید.</p>
+
+  <h3 id="t-sidecar">۴) ابزارهای پیچیده یا استک‌های چندسرویسی — یک کانتینر Sidecar اجرا کنید</h3>
+  <p>برای ابزارهایی که سرویسِ خودشان را با خود می‌آورند (یک پایگاه داده، وب‌سرور، صف پیام، یا مزرعهٔ مرورگر headless) یا برای زندگی داخل کانتینر Hermes بیش از حد سنگین‌اند، آن‌ها را به‌عنوان کانتینری جداگانه روی یک شبکهٔ داکرِ مشترک اجرا کنید. Hermes از طریق نامِ کانتینر به sidecar دسترسی پیدا می‌کند — همان‌طور که به یک سرور استنتاج محلی می‌رسد (به بخش <a href="#sec-inference">«اتصال به سرورهای استنتاج محلی»</a> مراجعه کنید).</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">yaml — docker-compose.yml</span><button class="copy-btn">کپی</button></div>
+    <pre><code>services:
+  hermes:
+    image: nousresearch/hermes-agent:latest
+    container_name: hermes
+    restart: unless-stopped
+    command: gateway run
+    ports:
+      - "8642:8642"
+    volumes:
+      - ~/.hermes:/opt/data
+    networks:
+      - hermes-net
+
+  my-tool:
+    image: example/my-tool:latest
+    container_name: my-tool
+    restart: unless-stopped
+    networks:
+      - hermes-net
+
+networks:
+  hermes-net:
+    driver: bridge</code></pre>
+  </div>
+
+  <p>از داخل کانتینر Hermes، سایدکار در آدرس <code>http://my-tool:&lt;port&gt;</code> (یا هر پروتکولی که سرویس می‌کند) در دسترس است. این الگو چرخهٔ حیات، محدودیت‌های منابع و آهنگ ارتقای هر سرویس را مستقل نگه می‌دارد و مانع از متورم‌شدن ایمیج Hermes با وابستگی‌هایی می‌شود که فقط یک ابزار به آن‌ها نیاز دارد.</p>
+
+  <h3 id="t-upstream">۵) ابزارهای مفید برای عموم — یک issue یا pull request باز کنید</h3>
+  <p>اگر احتمال می‌دهید ابزاری برای بیشترِ کاربران Hermes Agent مفید باشد، به‌جای حملِ آن در یک ایمیج مشتقِ خصوصی، کمک به پروژهٔ اصلی را در نظر بگیرید. یک issue یا pull request روی مخزن <code>hermes-agent</code> باز کنید و ابزار و مورد استفاده‌اش را توصیف کنید. ابزارهایی که در ایمیج رسمی گنجانده می‌شوند به همهٔ کاربران سود می‌رسانند و از سربارِ نگهداریِ یک انشعاب (fork) پایین‌دستی جلوگیری می‌کنند.</p>
+</section>
+
+<section class="doc-sec" id="sec-inference">
+  <h2><span class="secnum">۲۱</span> اتصال به سرورهای استنتاج محلی (vLLM، Ollama و غیره)</h2>
+  <p>وقتی Hermes در داکر اجرا می‌شود و سرور استنتاج شما (vLLM، Ollama، text-generation-inference و غیره) هم روی میزبان یا در کانتینر دیگری در حال اجراست، بخش شبکه‌سازی به توجه بیشتری نیاز دارد.</p>
+
+  <h3 id="i-compose">Docker Compose (توصیه‌شده)</h3>
+  <p>هر دو سرویس را روی یک شبکهٔ داکر مشترک قرار دهید. این مطمئن‌ترین رویکرد است:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">yaml — docker-compose.yml</span><button class="copy-btn">کپی</button></div>
+    <pre><code>services:
+  vllm:
+    image: vllm/vllm-openai:latest
+    container_name: vllm
+    command: &gt;
+      --model Qwen/Qwen2.5-7B-Instruct
+      --served-model-name my-model
+      --host 0.0.0.0
+      --port 8000
+    ports:
+      - "8000:8000"
+    networks:
+      - hermes-net
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+
+  hermes:
+    image: nousresearch/hermes-agent:latest
+    container_name: hermes
+    restart: unless-stopped
+    command: gateway run
+    ports:
+      - "8642:8642"
+    volumes:
+      - ~/.hermes:/opt/data
+    networks:
+      - hermes-net
+
+networks:
+  hermes-net:
+    driver: bridge</code></pre>
+  </div>
+
+  <p>سپس در فایل <code>~/.hermes/config.yaml</code> خود، از نام کانتینر به‌عنوان نام میزبان (hostname) استفاده کنید:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">yaml — config.yaml</span><button class="copy-btn">کپی</button></div>
+    <pre><code>model:
+  provider: custom
+  model: my-model
+  base_url: http://vllm:8000/v1
+  api_key: "none"</code></pre>
+  </div>
+
+  <p><strong>نکات کلیدی:</strong></p>
+  <ul>
+    <li>از نام کانتینر (<code>vllm</code>) به‌عنوان نام میزبان استفاده کنید — نه <code>localhost</code> یا <code>127.0.0.1</code>، چون این آدرس‌ها به خودِ کانتینر Hermes اشاره می‌کنند.</li>
+    <li>مقدار <code>model</code> باید با <code>--served-model-name</code>ای که به vLLM داده‌اید مطابقت داشته باشد.</li>
+    <li><code>api_key</code> را روی هر رشتهٔ غیرخالی بگذارید (vLLM وجود این هدر را لازم دارد اما به‌طور پیش‌فرض محتوایش را اعتبارسنجی نمی‌کند).</li>
+    <li>در انتهای <code>base_url</code> اسلش (trailing slash) نگذارید.</li>
+  </ul>
+
+  <h3 id="i-standalone">اجرای مستقل docker run (بدون Compose)</h3>
+  <p>اگر سرور استنتاج شما مستقیماً روی میزبان اجرا می‌شود (نه در داکر)، از <code>host.docker.internal</code> در مک/ویندوز استفاده کنید، یا در لینوکس از <code>--network host</code>:</p>
+
+  <p><strong>macOS / Windows:</strong></p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker run -d \
+  --name hermes \
+  -v ~/.hermes:/opt/data \
+  -p 8642:8642 \
+  nousresearch/hermes-agent gateway run
+
+# config.yaml
+model:
+  provider: custom
+  model: my-model
+  base_url: http://host.docker.internal:8000/v1
+  api_key: "none"</code></pre>
+  </div>
+
+  <p><strong>لینوکس (شبکهٔ میزبان):</strong></p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker run -d \
+  --name hermes \
+  --network host \
+  -v ~/.hermes:/opt/data \
+  nousresearch/hermes-agent gateway run
+
+# config.yaml
+model:
+  provider: custom
+  model: my-model
+  base_url: http://127.0.0.1:8000/v1
+  api_key: "none"</code></pre>
+  </div>
+
+  <p>با <code>--network host</code>، پرچم <code>-p</code> نادیده گرفته می‌شود — همهٔ پورت‌های کانتینر مستقیماً روی میزبان در معرض دسترس‌اند.</p>
+
+  <h3 id="i-verify">تأیید اتصال</h3>
+  <p>از داخل کانتینر Hermes بررسی کنید که سرور استنتاج در دسترس است:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker exec hermes curl -s http://vllm:8000/v1/models</code></pre>
+  </div>
+
+  <p>باید یک پاسخ JSON که مدلِ سرو‌شدهٔ شما را فهرست می‌کند ببینید. اگر این کار شکست خورد، موارد زیر را بررسی کنید:</p>
+  <ul>
+    <li>هر دو کانتینر روی همان شبکهٔ داکر هستند (<code>docker network inspect hermes-net</code>)</li>
+    <li>سرور استنتاج روی <code>0.0.0.0</code> گوش می‌دهد، نه <code>127.0.0.1</code></li>
+    <li>شمارهٔ پورت با هم مطابقت دارد</li>
+  </ul>
+
+  <h3 id="i-ollama">Ollama</h3>
+  <p>Ollama هم به همان شکل کار می‌کند. اگر Ollama روی میزبان اجرا می‌شود، از <code>host.docker.internal:11434</code> (مک/ویندوز) یا <code>127.0.0.1:11434</code> (لینوکس با <code>--network host</code>) استفاده کنید. اگر Ollama در کانتینر خودش و روی همان شبکهٔ داکر اجرا می‌شود:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">yaml — config.yaml</span><button class="copy-btn">کپی</button></div>
+    <pre><code>model:
+  provider: custom
+  model: llama3
+  base_url: http://ollama:11434/v1
+  api_key: "none"</code></pre>
+  </div>
+</section>
+
+<section class="doc-sec" id="sec-trouble">
+  <h2><span class="secnum">۲۲</span> عیب‌یابی</h2>
+
+  <h3 id="tr-exit">کانتینر بی‌درنگ خارج می‌شود</h3>
+  <p>لاگ‌ها را بررسی کنید: <code>docker logs hermes</code>. علل رایج:</p>
+  <ul>
+    <li>فایل <code>.env</code> مفقود یا نامعتبر است — اول به‌صورت تعاملی اجرا کنید تا راه‌اندازی کامل شود</li>
+    <li>تداخل پورت‌ها، در صورت اجرا با پورت‌های در معرض دسترس</li>
+  </ul>
+
+  <h3 id="tr-perm">خطاهای «Permission denied»</h3>
+  <p>هوک مرحلهٔ ۲ کانتینر، دسترسی‌ها را داخل هر سرویس تحت نظارت از طریق <code>s6-setuidgid</code> به کاربر غیر root یعنی <code>hermes</code> (با UID 10000) تنزل می‌دهد. اگر پوشهٔ <code>~/.hermes/</code> روی میزبان شما مالکِ UID متفاوتی است، متغیرهای <code>HERMES_UID</code>/<code>HERMES_GID</code> — یا نام‌های مستعارِ <code>PUID</code>/<code>PGID</code> برای هم‌ترازی با ایمیج‌های LinuxServer.io و NAS — را منطبق با کاربر میزبان تنظیم کنید، یا مطمئن شوید پوشهٔ داده قابل نوشتن است:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>chmod -R 755 ~/.hermes</code></pre>
+  </div>
+
+  <p>روی NAS (UGOS، Synology، unRAID) پوشهٔ داده معمولاً یک bind mount متعلق به UID میزبان است که کانتینر نمی‌تواند مالکش را تغییر دهد. در این حالت <code>PUID</code>/<code>PGID</code> (یا <code>HERMES_UID</code>/<code>HERMES_GID</code>) را روی آن کاربر میزبان تنظیم کنید تا زمانِ اجرا به‌عنوان مالکِ mount اجرا شود، نه به‌عنوان UID 10000:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker run -d \
+  --name hermes \
+  -e PUID=1000 -e PGID=10 \
+  -v /volume1/docker/hermes:/opt/data \
+  nousresearch/hermes-agent gateway run</code></pre>
+  </div>
+
+  <p>دستور <code>docker exec hermes &lt;cmd&gt;</code> هم به‌طور خودکار به UID 10000 تنزل می‌یابد — برای جزئیات و راهِ خروجِ به‌ازای-هر-فراخوانی، به بخش <a href="#priv-exec">«سقوط خودکار docker exec»</a> مراجعه کنید.</p>
+
+  <h3 id="tr-browser">ابزارهای مرورگر کار نمی‌کنند</h3>
+  <p>Playwright به حافظهٔ مشترک (shared memory) نیاز دارد. پرچم <code>--shm-size=1g</code> را به فرمان Docker run اضافه کنید:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker run -d \
+  --name hermes \
+  --shm-size=1g \
+  -v ~/.hermes:/opt/data \
+  nousresearch/hermes-agent gateway run</code></pre>
+  </div>
+
+  <h3 id="tr-reconnect">گیت‌وی پس از مشکلات شبکه دوباره وصل نمی‌شود</h3>
+  <p>پرچم <code>--restart unless-stopped</code> بیشتر خرابی‌های گذرا را مدیریت می‌کند. اگر گیت‌وی گیر کرده است، کانتینر را ری‌استارت کنید:</p>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker restart hermes</code></pre>
+  </div>
+
+  <h3 id="tr-health">بررسی سلامت کانتینر</h3>
+
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>docker logs --tail 50 hermes        # لاگ‌های اخیر
+docker run -it --rm nousresearch/hermes-agent:latest version   # بررسی نسخه
+docker stats hermes                  # مصرف منابع</code></pre>
+  </div>
+</section>
+
+<div class="pager">
+  <a href="../getting-started/platform-support.html"><span class="dir">→ قبلی</span><span class="ttl">پشتیبانی پلتفرم‌ها</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">امنیت (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/docker" target="_blank" rel="noopener">Docker</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

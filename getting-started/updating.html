@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>به‌روزرسانی و حذف — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/getting-started/updating" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>شروع کار<span class="sep">/</span><strong>به‌روزرسانی و حذف</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>به‌روزرسانی و حذف</h1>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> به‌روزرسانی</h2>
+<p>با یک فرمان به آخرین نسخه به‌روزرسانی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes update</code></pre>
+</div>
+<p>این فرمان آخرین کد را از <code>main</code> می‌گیرد، وابستگی‌ها را به‌روز می‌کند و از شما می‌پرسد گزینه‌های جدیدی که از آخرین به‌روزرسانی‌تان اضافه شده‌اند را پیکربندی کنید.</p>
+
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p><code>hermes update</code> گزینه‌های پیکربندی جدید را خودکار تشخیص می‌دهد و پیشنهاد افزودنشان را می‌دهد. اگر آن پیام را رد کردید، می‌توانید بعداً دستی <code>hermes config check</code> را برای دیدن گزینه‌های مفقود و سپس <code>hermes config migrate</code> را برای افزودن تعاملی آن‌ها اجرا کنید.</p>
+</div>
+
+<h3>هنگام به‌روزرسانی چه اتفاقی می‌افتد؟</h3>
+<p>وقتی <code>hermes update</code> را اجرا می‌کنید، این مراحل رخ می‌دهد:</p>
+<ol>
+  <li><strong>اسنپ‌شاتِ پیش از به‌روزرسانی</strong> — به‌طور پیش‌فرض یک اسنپ‌شات سبکِ وضعیت ذخیره می‌شود (شامل داده‌های جفت‌سازی، کارهای کرون، <code>config.yaml</code>، <code>.env</code>، <code>auth.json</code> و سایر فایل‌های وضعیتی که در زمان اجرا تغییر می‌کنند؛ فایل‌های تکیِ بالای ۱ گیگابایت رد می‌شوند تا یک دیتابیس نشست‌های بزرگ، به‌روزرسانی را کُند نکند). چون تعویض کد و ری‌استارت گیت‌وی به همهٔ پروفایل‌ها دست می‌زند، همین اسنپ‌شات برای <strong>هر پروفایلِ</strong> روی نصب گرفته می‌شود — هر کدام در پوشهٔ <code>state-snapshots/</code> خودش — و تور ایمنیِ کرونِ پس از به‌روزرسانی هر پروفایل را با اسنپ‌شات خودش بررسی می‌کند. با <code>updates.pre_update_backup</code> کنترل می‌شود (<code>quick</code> پیش‌فرض، <code>full</code> برای زیپ کاملِ <code>HERMES_HOME</code>، <code>off</code> برای غیرفعال‌کردن). از مسیر بازیابیِ اسنپ‌شاتِ توضیح‌داده‌شده در «اسنپ‌شات‌ها و بازگشت» قابل بازیابی است. اسنپ‌شات‌های سریع برای بازیابیِ از دست‌رفت فایل‌اند، نه بیمهٔ بازگشتِ کد — برای بازگشتِ منسجم به یک نقطهٔ زمانی از <code>--backup</code> (حالت full) استفاده کنید.</li>
+  <li><strong>Git pull</strong> — آخرین کد را از شاخهٔ <code>main</code> می‌گیرد و ساب‌ماژول‌ها را به‌روز می‌کند</li>
+  <li><strong>اعتبارسنجی نحوی پس از pull + بازگشت خودکار</strong> — بعد از pull، هرمس نُه فایلِ حیاتی‌ای را که هر فراخوانی <code>hermes</code> هنگام راه‌اندازی ایمپورت می‌کند کامپایل می‌کند. اگر هر کدام تجزیه نشود (مثلاً یک نشانگر تعارض merge یتیم، یا فایلی که تصادفی بریده شده)، هرمس <code>git reset --hard &lt;pre-pull-sha&gt;</code> را اجرا می‌کند تا نصب برگردد و شل شما قابل بوت بماند. بعد از رسیدن اصلاح بالادستی، <code>hermes update</code> را یک بار دیگر اجرا کنید.</li>
+  <li><strong>نصب وابستگی‌ها</strong> — <code>uv pip install -e ".[all]"</code> را برای گرفتن وابستگی‌های جدید یا تغییریافته اجرا می‌کند</li>
+  <li><strong>مهاجرت پیکربندی</strong> — گزینه‌های پیکربندی جدیدِ افزوده‌شده از نسخهٔ شما را تشخیص می‌دهد و از شما می‌خواهد تنظیمشان کنید</li>
+  <li><strong>ری‌استارت خودکار گیت‌وی</strong> — گیت‌وی‌های در حال اجرا پس از اتمام به‌روزرسانی نوسازی می‌شوند تا کد جدید فوراً اثر بگیرد. گیت‌وی‌های مدیریت‌شده با سرویس (systemd در لینوکس، launchd در مک) از طریق مدیر سرویس ری‌استارت می‌شوند. گیت‌وی‌های دستی وقتی خودکار دوباره اجرا می‌شوند که هرمس بتواند PID در حال اجرا را به یک پروفایل نگاشت کند.</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> به‌روزرسانی نسبت به شاخهٔ غیرپیش‌فرض: <code>--branch</code></h2>
+<p>به‌طور پیش‌فرض <code>hermes update</code> از <code>origin/main</code> پیروی می‌کند. با <code>--branch &lt;name&gt;</code> نسبت به شاخهٔ دیگری به‌روزرسانی کنید — مفید برای کانال‌های QA، شاخه‌های ویژگی یا تست نسخهٔ کاندید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes update --branch release-candidate
+hermes update --check --branch experimental   # فقط پیش‌نمایش میزان عقب‌ماندگی</code></pre>
+</div>
+<p>اگر چک‌اوت محلی‌تان روی شاخهٔ دیگری است، هرمس هر کارِ کامیت‌نشده را خودکار stash می‌کند، HEAD را به شاخهٔ هدف می‌برد و سپس pull می‌کند. شاخه‌هایی که به‌صورت محلی وجود ندارند به‌طور خودکار از <code>origin/&lt;name&gt;</code> ردیابی می‌شوند (<code>git checkout -B &lt;name&gt; origin/&lt;name&gt;</code>). شاخه‌هایی که هیچ‌جا وجود ندارند با تمیزی شکست می‌خورند — تغییرات stash‌شدهٔ شما پیش از خروج بازیابی می‌شود تا هرگز در وضعیت عجیبی رها نشوید. منطقِ همگام‌سازی fork-upstream که مخصوص <code>main</code> است روی شاخه‌های غیر-<code>main</code> به‌طور خودکار رد می‌شود.</p>
+
+<h3>چک‌اوتِ پارک‌شده روی شاخهٔ ویژگی</h3>
+<p>اگر چک‌اوت سورس روی یک شاخهٔ ویژگی رها شده باشد (به‌واسطهٔ ابزارها، یک آزمایش worktree یا checkout دستی)، <code>hermes update</code> هر وقت درخت کاری تمیز باشد به‌طور خودکار آن را به هدفِ به‌روزرسانی برمی‌گرداند:</p>
+<ul>
+  <li><strong>شاخه کاملاً merge شده</strong> (هر کامیت از قبل در <code>origin/main</code> موجود است — <code>git cherry</code> چیزی merge‌نشده گزارش نمی‌کند): به‌روزرسانی این را می‌گوید — <code>Checkout was parked on '&lt;branch&gt;' (fully merged) — switched back to main</code> — و پس از آن روی <code>main</code> می‌ماند.</li>
+  <li><strong>شاخه کامیت‌های merge‌نشده دارد</strong> ولی درخت تمیز است: به‌روزرسانی باز هم به <code>main</code> سوئیچ می‌کند تا به‌روزرسانی بتواند پیش برود — همین است که فراخوان‌های غیرتعاملی (دکمهٔ به‌روزرسانی دسکتاپ، <code>/update</code> گیت‌وی، کرون) بدان تکیه می‌کنند، چون راهی برای حل یک skip ندارند. کامیت‌های شما دست‌نخورده می‌مانند: <code>git checkout</code> هرگز کارِ کامیت‌شده را دور نمی‌ریزد، و به‌روزرسانی یک اعلان بلند با نام شاخه و تعداد کامیت‌ها، به‌همراه فرمان <code>git checkout &lt;branch&gt;</code> برای برداشتنِ دوبارهٔ کار چاپ می‌کند.</li>
+</ul>
+<p>اگر <em>عمداً</em> شاخهٔ سفارشی اجرا می‌کنید (وصله‌های محلیِ نگه‌داشته‌شده روی main)، <code>updates.parked_branch_strategy: update_in_place</code> را در <code>config.yaml</code> تنظیم کنید. آن‌گاه به‌روزرسانی <code>origin/main</code> را <strong>داخل</strong> شاخهٔ شما merge می‌کند به‌جای اینکه از آن خارج شود — چک‌اوت هرگز جابه‌جا نمی‌شود، کامیت‌های شما زنده می‌مانند و کدِ در حال اجرا جلو می‌رود. در صورت امکان fast-forward؛ در واگرایی یک merge واقعی پشت یک تگ ایمنیِ <code>pre-update-&lt;stamp&gt;</code>، و در تعارض با توقف تمیز (هیچ‌چیز تغییر نمی‌کند). <code>hermes update --switch-branch</code> برای یک اجرا دوباره به مسیر سوئیچ برمی‌گرداند — مفید روی شاخهٔ ویژگیِ عمیقی که نباید کامیت‌های mergeِ ناشی از به‌روزرسانی انباشته کند.</p>
+<p>وقتی شاخهٔ پارک‌شده <strong>تغییرات کامیت‌نشده</strong> دارد (درخت کثیف)، هرمس به آن دست <strong>نمی‌زند</strong>. به‌روزرسانی کد با هشدار بلندی که نام شاخه، میزان عقب‌ماندگی از <code>origin/main</code> و فرمان‌های دقیقِ حل را می‌گوید <strong>SKIPPED</strong> علامت می‌خورد — به‌جای اینکه وانمود کند به‌روزرسانی موفق بوده. خط اتمام همیشه شاخه و HEAD واقعی را نشان می‌دهد (<code>✓ Update complete! [main @ 30fcf9580]</code>) تا انحراف در یک نگاه دیده شود. <code>updates.auto_switch_parked_branch: false</code> را در <code>config.yaml</code> تنظیم کنید تا سوئیچ خودکار کاملاً غیرفعال شود (هشدار skip همچنان صادر می‌شود).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> تغییرات محلی در به‌روزرسانی‌های غیرتعاملی</h2>
+<p>وقتی <code>hermes update</code> را در ترمینال اجرا می‌کنید، هرمس تغییرات کامیت‌نشدهٔ درخت سورس را stash می‌کند، pull می‌زند و بعد <strong>می‌پرسد</strong> که آیا بازیابی شوند — دقیقاً مثل همیشه. برای به‌روزرسانی‌های تعاملی هیچ‌چیز عوض نمی‌شود.</p>
+<p>وقتی به‌روزرسانی <strong>بدون ترمینال</strong> اجرا می‌شود — از دکمهٔ «Update» اپ دسکتاپ/چت یا یک به‌روزرسانیِ trigger‌شده توسط گیت‌وی — پیامی برای پاسخ‌دادن وجود ندارد. تنظیم <code>updates.non_interactive_local_changes</code> تصمیم می‌گیرد با تغییرات stash‌شدهٔ شما چه شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>updates:
+  non_interactive_local_changes: stash   # پیش‌فرض: نگه‌داشتن + بازیابی خودکار
+  # non_interactive_local_changes: discard  # دورریختن ویرایش‌های محلی سورس</code></pre>
+</div>
+<ul>
+  <li><code>stash</code> (پیش‌فرض) — stash خودکار، pull و سپس بازیابی خودکار تغییرات شما روی کدِ به‌روزرسانی‌شده. هیچ‌چیز از دست نمی‌رود؛ اگر بازیابی به تعارض بخورد، در یک git stash برای بازیابی دستی نگه داشته می‌شوند.</li>
+  <li><code>discard</code> — stash خودکار و سپس انداختن stash پس از pull، تا به‌روزرسانی همیشه روی درختی تمیز فرود بیاید. فقط روی ماشین‌هایی استفاده کنید که هرگز نمی‌خواهید ویرایش محلیِ سورس هرمس نگه دارید. با stash-drop انجام می‌شود (نه <code>git reset --hard</code> + <code>git clean -fd</code>)، پس مسیرهای ignore‌شده مثل <code>node_modules</code>، <code>venv</code> و خروجی‌های بیلد هرگز دست نمی‌خورند.</li>
+</ul>
+<p>در اپ دسکتاپ این تنظیم در <strong>Settings ← Advanced ← In-App Update Local Changes</strong> است.</p>
+<p><strong>به‌روزرسانی‌های دسکتاپ هرگز خودکار بازیابی نمی‌کنند.</strong> به‌روزرسانِ دسکتاپ <code>hermes update --keep-stash</code> را اجرا می‌کند: ویرایش‌های محلی سورس همچنان stash می‌شوند تا به‌روزرسانی پیش برود، اما پس از آن <strong>دوباره اعمال نمی‌شوند</strong> — در <code>git stash</code> پارک می‌مانند و لاگ به‌روزرسانی، فرمان دقیق <code>git stash apply &lt;ref&gt;</code> برای برگرداندن‌شان را چاپ می‌کند. این مانع می‌شود ویرایش‌های محلی به‌طور خاموش سوار به‌روزرسانی‌های دسکتاپ شوند و نصبِ تازه‌به‌روز‌شده را بشکنند. (اگر <code>non_interactive_local_changes: discard</code> را انتخاب کرده‌اید، همان برنده است.) برای بازیابی دستیِ تغییرات پارک‌شده:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cd ~/.hermes/hermes-agent   # یا ریشهٔ نصب خودتان
+git stash list --format='%gd %H %s'   # یافتن مدخل hermes-update-autostash
+git stash apply stash@{0}</code></pre>
+</div>
+<p>می‌توانید <code>--keep-stash</code> را به <code>hermes update</code> ترمینالی هم بدهید اگر همین رفتارِ هرگز-بازیابی‌نکن را به‌صورت تعاملی می‌خواهید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> فقط پیش‌نمایش: <code>hermes update --check</code></h2>
+<p>می‌خواهید قبل از pull بدانید به‌روزرسانی‌ای هست؟ <code>hermes update --check</code> را اجرا کنید — کامیت‌ها را fetch و با <code>origin/main</code> مقایسه می‌کند. هیچ فایلی تغییر نمی‌کند و هیچ گیت‌وی‌ای ری‌استارت نمی‌شود. در اسکریپت‌ها و کارهای کرونی که به «آیا به‌روزرسانی هست» گره خورده‌اند مفید است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> پیش‌نمایش ناوگان: <code>hermes update --plan</code></h2>
+<p>قبل از به‌روزرسانی ماشینی که چند پروفایل یا سرویس اجرا می‌کند، <code>hermes update --plan</code> نقشهٔ کامل به‌روزرسانی را بدون تغییرِ هیچ‌چیز چاپ می‌کند: نوع نصب (چک‌اوت git، ایمیج داکر، مدیریت‌شده با Nix/apt)، هر سرویس هرمسِ در حال اجرا در همهٔ پروفایل‌ها به‌همراه ناظرش (systemd، launchd، دستی) و نسخهٔ کدی که واقعاً سرویس می‌دهد، و سازوکار ری‌استارتی که هر کدام دریافت خواهند کرد. روی نصب‌های مبتنی بر ایمیج یا مدیر-پکیج، نقشه گزارش می‌دهد که نصب در جا به‌روزرسانی‌شدنی نیست و فرمان به‌روزرسانی درست را نام می‌برد. فقط-خواندنی و روی ناوگانِ زنده امن است.</p>
+<p>همین فهرست در رسیدِ هر به‌روزرسانی واقعی هم جاسازی شده (<code>~/.hermes/logs/update_receipts/</code>)، تا بعد از یک به‌روزرسانی بتوانید آن‌چه به‌روزرسان دیده را با آن‌چه انجام داد مقایسه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> رسیدهای به‌روزرسانی و بررسی نسخهٔ ناوگان</h2>
+<p>هر اجرای <code>hermes update</code> رسیدی ماشین‌خوان در <code>~/.hermes/logs/update_receipts/</code> می‌نویسد (۲۰ تای آخر نگه داشته می‌شوند و <code>latest.json</code> همیشه به جدیدترین اشاره می‌کند): نقشهٔ ناوگانِ پیش از به‌روزرسانی، هر گامِ برداشته‌شده، هر چیزِ ردشده و چرایی‌اش، نتیجهٔ ری‌استارت گیت‌وی، و ماتریس نسخهٔ نهایی ناوگان. پس از مرحلهٔ ری‌استارت، به‌روزرسان کدِ در حال اجرای هر گیت‌ویِ زنده را با چک‌اوتِ تازه‌به‌روز‌شده مقایسه می‌کند و یک ماتریس به‌ازای-پروفایل چاپ می‌کند — گیت‌ویی که هنوز کدِ پیش از به‌روزرسانی سرویس می‌کند با فرمان دقیقِ ری‌استارت به‌طور بلند گزارش می‌شود، و به‌روزرسانی با کد غیرصفر خارج می‌شود تا اتوماسیون هرگز ناوگانِ چندنسخه‌ای را سالم تلقی نکند. هر دو <code>--plan</code> و بررسی ناوگان وقتی در دسترس باشد مستقیماً از طریق سوکت کنترل محلیِ هر گیت‌وی (<code>gateway.sock</code> در پوشهٔ دادهٔ پروفایل، یک named pipe در ویندوز) می‌پرسند، پس اطلاعات نسخه و ناظر از خود گیت‌وی می‌آید؛ گیت‌وی‌های نسخه‌های قدیمی‌تر همچنان از راه فایل‌های وضعیتشان کشف می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> پشتیبان کامل پیش از به‌روزرسانی: <code>--backup</code></h2>
+<p>برای پروفایل‌های ارزشمند (گیت‌وی‌های عملیاتی، نصب‌های تیمیِ مشترک) می‌توانید پشتیبان کاملِ پیش از pull از <code>HERMES_HOME</code> را فعال کنید (پیکربندی، احراز هویت، نشست‌ها، مهارت‌ها، جفت‌سازی):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes update --backup</code></pre>
+</div>
+<p>یا آن را برای همهٔ اجراها پیش‌فرض کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>updates:
+  pre_update_backup: full</code></pre>
+</div>
+<p><code>updates.pre_update_backup</code> یک تنظیم واحد با سه حالت است: <code>quick</code> (پیش‌فرض — همان اسنپ‌شات سبک وضعیت که بالاتر توضیح داده شد)، <code>full</code> (اسنپ‌شات سریع به‌علاوهٔ زیپ کامل <code>HERMES_HOME</code>؛ روی homeهای بزرگ می‌تواند چند دقیقه اضافه کند) و <code>off</code> (بدون هیچ پشتیبانِ پیش از به‌روزرسانی — <code>--no-backup</code> همین کار را برای یک اجرای واحد می‌کند). مقادیر بولی قدیمی هنوز کار می‌کنند: <code>true</code> یعنی <code>full</code> و <code>false</code> یعنی <code>off</code>.</p>
+
+<div class="callout tip">
+  <div class="callout-title">💡 به ماشین جدید می‌روید؟</div>
+  <p>پشتیبان‌های به‌روزرسانی از یک به‌روزرسانیِ درجا محافظت می‌کنند. اگر کل راه‌اندازی‌تان را به سخت‌افزار دیگری منتقل می‌کنید، به‌جایش از <code>hermes backup</code> + <code>hermes import</code> استفاده کنید — به «<a href="https://hermes-agent.nousresearch.com/docs/reference/faq#exporting-hermes-to-another-machine" target="_blank" rel="noopener">صادرات هرمس به ماشین دیگر</a>» و «<a href="https://hermes-agent.nousresearch.com/docs/reference/faq#hermes-backup-vs-hermes-profile-export" target="_blank" rel="noopener">hermes backup در برابر hermes profile export</a>» مراجعه کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> ویندوز: یک <code>hermes.exe</code> دیگر در حال اجراست</h2>
+<p>در ویندوز، <code>hermes update</code> اگر ببیند پروسهٔ دیگری از <code>hermes.exe</code> فایل اجراییِ نقطهٔ ورود venv را باز نگه داشته — معمولاً بک‌اندِ spawn‌شدهٔ Hermes Desktop، یک REPL بازِ <code>hermes</code> در ترمینال دیگر، یا یک گیت‌وی در حال اجرا — از اجرا سر باز می‌زند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی ترمینال</span><button class="copy-btn">کپی</button></div>
+  <pre><code>$ hermes update
+✗ Another hermes.exe is running:
+    PID 12345  hermes.exe
+
+  Updating now would fail to overwrite ...\venv\Scripts\hermes.exe because
+  Windows blocks REPLACE on a running executable.
+
+  Close Hermes Desktop, exit any open `hermes` REPLs, and
+  stop the gateway (`hermes gateway stop`) before retrying.
+  Override with `hermes update --force` if you've already
+  confirmed those processes will not write to the venv.</code></pre>
+</div>
+<p>پروسه‌های فهرست‌شده را ببندید و دوباره اجرا کنید. اگر مطمئنید پروسهٔ هم‌زمان مزاحمتی نمی‌کند (کم‌پیش — معمولاً فقط وقتی مفید است که یک shim آنتی‌ویروس اشتباه شناسایی کرده باشد)، <code>--force</code> را برای ردکردن این بررسی بدهید. در آن صورت به‌روزرسان همچنان تغییرنام <code>.exe</code> را با تأخیر نمایی retry می‌کند و روی قفلهای لجباز، جایگزینی را برای ری‌بوت بعدی از طریق <code>MoveFileEx(MOVEFILE_DELAY_UNTIL_REBOOT)</code> زمان‌بندی می‌کند تا به‌روزرسانی بتواند کامل شود.</p>
+<p>یک محافظ دوم و جداگانه از دست‌زدن به venv وقتی هر پروسه‌ای از مفسر پایتونِ آن در حال اجراست خودداری می‌کند (بک‌اند اپ دسکتاپ، یک گیت‌وی، یک REPL پایتون). آن پروسه‌ها فایل‌های پسوند نیتیو (<code>.pyd</code>) را قفل نگه می‌دارند و یک همگام‌سازی وابستگی که وسط راه با خطای access-denied بمیرد، نصب را بین دو نسخه رها می‌کند. این محافظ با <code>--force</code> دورزدنی <strong>نیست</strong>؛ اگر مطمئنید دارنده‌های تشخیص‌داده‌شده مثبت کاذب‌اند، از <code>hermes update --force-venv</code> صریح استفاده کنید.</p>
+
+<h3>بازسازی venv ویندوز تراکنشی است</h3>
+<p>وقتی نصب‌کنندهٔ ویندوز باید یک <code>venv</code> موجود را بازسازی کند، اول پوشهٔ قدیمی را به نام یکتای <code>venv.stale.*</code> منتقل می‌کند، سپس جایگزین را می‌سازد و تأیید می‌کند. درخت قدیمی فقط بعد از اتمام نصب وابستگی‌ها و موفقیتِ ایمپورت‌های پایه در درخت جدید حذف می‌شود — تا آن لحظه منبعِ بازگشت است (ثبت‌شده در <code>venv.pending-backup</code>).</p>
+<p>اگر انتقال کامل نشود، نصب‌کننده می‌ایستد و <code>venv</code> زنده را دست‌نخورده می‌گذارد. اگر <code>uv</code> شکست بخورد یا بدون ساختن مفسر موفقیت را گزارش کند، هر جایگزینِ ناقص به <code>venv.failed.*</code> منتقل و venv قبلی بازیابی می‌شود. این باعث می‌شود بررسی‌های سلامت و مسدودکننده پس از یک نصبِ ناموفق قابل استفاده بمانند.</p>
+<p>ممکن است یک پوشهٔ <code>venv.stale.*</code> یا <code>venv.failed.*</code> وقتی باقی بماند که پروسهٔ دیگری هنوز دستگیرهٔ فایلی را در اختیار داشته باشد. هرمس دسکتاپ، گیت‌وی‌ها و پروسه‌های پایتونیِ استفاده‌کننده از نصب را ببندید، سپس نصب/به‌روزرسانی را دوباره امتحان کنید؛ پوشه‌های پارک‌شده بعد از یک بازسازی موفق به‌صورت در حد توان پاک‌سازی می‌شوند.</p>
+<p>خروجی مورد انتظار چیزی شبیه این است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی ترمینال</span><button class="copy-btn">کپی</button></div>
+  <pre><code>$ hermes update
+Updating Hermes Agent...
+📥 Pulling latest code...
+Already up to date.  (or: Updating abc1234..def5678)
+📦 Updating dependencies...
+✅ Dependencies updated
+🔍 Checking for new config options...
+✅ Config is up to date  (or: Found 2 new options — running migration...)
+🔄 Restarting gateways...
+✅ Gateway restarted
+✅ Hermes Agent updated successfully!</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> اعتبارسنجی توصیه‌شده پس از به‌روزرسانی</h2>
+<p><code>hermes update</code> مسیر اصلی به‌روزرسانی را مدیریت می‌کند، اما یک اعتبارسنجی سریع تأیید می‌کند که همه‌چیز تمیز فرود آمده:</p>
+<ol>
+  <li><code>git status --short</code> — اگر درخت به‌طور غیرمنتظره کثیف است، قبل از ادامه بررسی کنید</li>
+  <li><code>hermes doctor</code> — پیکربندی، وابستگی‌ها و سلامت سرویس را بررسی می‌کند</li>
+  <li><code>hermes --version</code> — تأیید کنید نسخه طبق انتظار بالا رفته</li>
+  <li>اگر از گیت‌وی استفاده می‌کنید: <code>hermes gateway status</code></li>
+  <li>اگر <code>doctor</code> مشکلات npm audit گزارش کرد: <code>npm audit fix</code> را در پوشهٔ علامت‌خورده اجرا کنید</li>
+</ol>
+<div class="callout warning">
+  <div class="callout-title">⚠️ درخت کاریِ کثیف بعد از به‌روزرسانی</div>
+  <p>اگر <code>git status --short</code> بعد از <code>hermes update</code> تغییرات غیرمنتظره‌ای نشان داد، متوقف شوید و قبل از ادامه بررسی‌شان کنید. این معمولاً یعنی تغییرات محلی روی کدِ به‌روزرسانی‌شده دوباره اعمال شده‌اند، یا یک مرحلهٔ وابستگی، فایل‌های قفل (lockfile) را نوسازی کرده است.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> اگر ترمینال وسط به‌روزرسانی قطع شد</h2>
+<p><code>hermes update</code> از خودش در برابر از دست رفتن تصادفی ترمینال محافظت می‌کند:</p>
+<ul>
+  <li>به‌روزرسانی <code>SIGHUP</code> را نادیده می‌گیرد، پس بستن نشست SSH یا پنجرهٔ ترمینال دیگر آن را وسط نصب نمی‌کشد. پروسه‌های فرزندِ <code>pip</code> و <code>git</code> هم این محافظت را به ارث می‌برند، پس محیط پایتون نمی‌تواند به‌واسطهٔ یک اتصالِ رهاشده نیمه‌نصب باقی بماند.</li>
+  <li>همهٔ خروجی حین اجرای به‌روزرسانی به <code>~/.hermes/logs/update.log</code> هم آینه می‌شود. اگر ترمینالتان غیب شد، دوباره وصل شوید و لاگ را بررسی کنید تا ببینید به‌روزرسانی تمام شده یا نه و ری‌استارت گیت‌وی موفق بوده یا نه:
+    <div class="codebox">
+      <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+      <pre><code>tail -f ~/.hermes/logs/update.log</code></pre>
+    </div>
+  </li>
+  <li><code>Ctrl-C</code> (SIGINT) و خاموشی سیستم (SIGTERM) همچنان پاسخ داده می‌شوند — آن‌ها لغوهای عمدی‌اند، نه تصادفی.</li>
+</ul>
+<p>دیگر لازم نیست <code>hermes update</code> را در <code>screen</code> یا <code>tmux</code> بپیچید تا از افت ترمینال جان سالم به در ببرد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> بررسی نسخهٔ فعلی</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes --version</code></pre>
+</div>
+<p>آن را با آخرین انتشار در <a href="https://github.com/NousResearch/hermes-agent/releases" target="_blank" rel="noopener">صفحهٔ releases گیت‌هاب</a> مقایسه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> به‌روزرسانی از پلتفرم‌های پیام‌رسانی</h2>
+<p>می‌توانید مستقیم از تلگرام، دیسکورد، اسلک، واتساپ یا تیمز هم به‌روزرسانی کنید با فرستادن:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان در چت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/update</code></pre>
+</div>
+<p>این آخرین کد را می‌گیرد، وابستگی‌ها را به‌روز می‌کند و گیت‌وی‌های در حال اجرا را ری‌استارت می‌کند. بات در طول ری‌استارت کوتاهی آفلاین می‌شود (معمولاً ۵ تا ۱۵ ثانیه) و بعد ادامه می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> به‌روزرسانی دستی</h2>
+<p>اگر دستی نصب کرده‌اید (نه با نصب‌کنندهٔ سریع):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cd /path/to/hermes-agent
+# فعال‌سازی venvی که هنگام نصب ساختید (بیرون از درخت سورس)
+export VIRTUAL_ENV="$HOME/.hermes/venvs/hermes-dev"
+export PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# گرفتن آخرین کد
+git pull origin main
+
+# نصب مجدد (وابستگی‌های جدید را می‌گیرد)
+uv pip install -e ".[all]"
+
+# بررسی گزینه‌های پیکربندی جدید
+hermes config check
+hermes config migrate   # افزودن تعاملی گزینه‌های مفقود</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> دستورالعمل بازگشت (Rollback)</h2>
+<p>اگر یک به‌روزرسانی مشکل ایجاد کرد، می‌توانید به نسخهٔ قبلی برگردید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cd /path/to/hermes-agent
+
+# فهرست نسخه‌های اخیر
+git log --oneline -10
+
+# بازگشت به یک کامیت مشخص
+git checkout &lt;commit-hash&gt;
+uv pip install -e ".[all]"
+
+# ری‌استارت گیت‌وی در صورت اجرا بودن
+hermes gateway restart</code></pre>
+</div>
+<p>برای بازگشت به یک تگ انتشار مشخص (تگ قبلی خودتان را جایگزین کنید — مثلاً یک انتشار اخیر مثل <code>v2026.5.16</code>، یا هر تگ قدیمی‌تری از <code>git tag --sort=-version:refname</code>):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>git checkout vX.Y.Z
+uv pip install -e ".[all]"</code></pre>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>بازگشت ممکن است اگر گزینه‌های جدیدی اضافه شده باشند، ناسازگاری پیکربندی ایجاد کند. پس از بازگشت <code>hermes config check</code> را اجرا کنید و در صورت برخورد با خطا، گزینه‌های ناشناخته را از <code>config.yaml</code> حذف کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> نکته‌ای برای کاربران Nix</h2>
+<p>Nix دیگر مسیر نصبِ پشتیبانی‌شدهٔ رسمی نیست (فقط در حد توان) — به «<a href="https://hermes-agent.nousresearch.com/docs/getting-started/nix-setup" target="_blank" rel="noopener">راه‌اندازی Nix</a>» مراجعه کنید. اگر با Nix flake نصب کرده‌اید، به‌روزرسانی‌ها از طریق مدیر پکیج Nix مدیریت می‌شوند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># به‌روزرسانی ورودی flake
+nix flake update hermes-agent
+
+# یا بازسازی با آخرین نسخه
+nix profile upgrade hermes-agent</code></pre>
+</div>
+<p>نصب‌های Nix تغییرناپذیرند — بازگشت توسط سیستم نسل‌های (generation) Nix انجام می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>nix profile rollback</code></pre>
+</div>
+<p>برای جزئیات بیشتر به «<a href="https://hermes-agent.nousresearch.com/docs/getting-started/nix-setup" target="_blank" rel="noopener">راه‌اندازی Nix</a>» مراجعه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> حذف نصب</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes uninstall</code></pre>
+</div>
+<p>حذف‌کننده به شما گزینه می‌دهد فایل‌های پیکربندی‌تان (<code>~/.hermes/</code>) را برای یک نصب مجدد آینده نگه دارید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 به ماشین جدید می‌روید، نه اینکه کلاً حذف کنید؟</div>
+  <p>قبل از حذف هر چیزی، راه‌اندازی‌تان را با خودتان ببرید: <code>hermes backup</code> کل پوشهٔ <code>~/.hermes</code> شامل اعتبارنامه‌ها را ضبط می‌کند، در حالی که <code>hermes profile export</code> یک پروفایل واحد را — به‌طرز طراحی‌شده بدون اعتبارنامه‌ها — بسته‌بندی می‌کند (پس خروجیِ تنها، پشتیبان کامل نیست). به «<a href="https://hermes-agent.nousresearch.com/docs/reference/faq#hermes-backup-vs-hermes-profile-export" target="_blank" rel="noopener">hermes backup در برابر hermes profile export</a>» مراجعه کنید.</p>
+</div>
+
+<h3>حذف دستی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>rm -f ~/.local/bin/hermes
+rm -rf /path/to/hermes-agent
+rm -rf ~/.hermes            # اختیاری — اگر می‌خواهید دوباره نصب کنید نگه دارید</code></pre>
+</div>
+<div class="callout note">
+  <div class="callout-title">ℹ️ توجه</div>
+  <p>اگر گیت‌وی را به‌عنوان سرویس سیستمی نصب کرده‌اید، اول آن را متوقف و غیرفعال کنید:</p>
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>hermes gateway stop
+# لینوکس: systemctl --user disable hermes-gateway
+# مک: launchctl remove ai.hermes.gateway</code></pre>
+  </div>
+</div>
+</section>
+
+<div class="pager">
+  <a href="learning-path.html"><span class="dir">→ قبلی</span><span class="ttl">مسیر یادگیری</span></a>
+  <a class="next" href="platform-support.html"><span class="dir">بعدی ←</span><span class="ttl">پشتیبانی پلتفرم‌ها</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/getting-started/updating" target="_blank" rel="noopener">Updating &amp; Uninstalling</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

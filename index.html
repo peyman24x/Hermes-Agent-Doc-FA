@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root=".">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="مرجع فارسی مستندات Hermes Agent — ترجمهٔ کامل، حرفه‌ای و آفلاین مستندات رسمی">
+<title>مرجع فارسی Hermes Agent — مستندات کامل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent <small>— مستندات غیررسمی به فارسی</small></span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noopener">GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+    </div>
+  </div>
+</header>
+
+<div class="hero">
+  <h1>🪽 مرجع فارسی Hermes Agent</h1>
+  <p class="tagline">
+    ترجمهٔ فارسیِ کامل و حرفه‌ای مستندات رسمی <strong>Hermes Agent</strong> — ایجنت هوش مصنوعی خودبهبودشوندهٔ ساختهٔ Nous Research؛
+    ایجنتِ کدنویسی و انجام کار در ترمینال با حافظهٔ پایدار، مهارت‌های ساختنی توسط خود ایجنت، و گیت‌وی پیام‌رسانی روی بیش از ۲۱ پلتفرم.
+  </p>
+  <div class="install-cmd">curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash</div>
+  <div class="stats">
+    <div class="stat"><div class="num" id="stat-total">—</div><div class="lbl">صفحهٔ مستندات</div></div>
+    <div class="stat"><div class="num" id="stat-done">—</div><div class="lbl">ترجمه‌شده</div></div>
+    <div class="stat"><div class="num" id="stat-sections">—</div><div class="lbl">بخش موضوعی</div></div>
+  </div>
+  <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  <div class="prog-lbl" id="progLbl">در حال ترجمه…</div>
+</div>
+
+<div class="container" style="max-width:1200px">
+<main style="max-width:1200px;padding:0 0 2rem;flex:1">
+
+  <div class="callout note" style="max-width:900px;margin:0 auto 2rem">
+    <div class="callout-title">ℹ️ دربارهٔ این پروژه</div>
+    <p>این سایت، <strong>ترجمهٔ فارسی</strong> مستندات رسمی <a href="https://hermes-agent.nousresearch.com/docs/" target="_blank" rel="noopener">hermes-agent.nousresearch.com/docs</a> است که برای استفادهٔ جامعهٔ فارسی‌زبان آماده شده و به‌صورت کاملاً استاتیک (تک‌پوشه، بدون سرور) هم روی سیستم لوکال با دابل‌کلیک اجرا می‌شود و هم برای انتشار روی <strong>GitHub Pages</strong> یا <strong>Cloudflare Pages</strong> آماده است. ساختار بخش‌ها و ترتیب صفحات عیناً مطابق سایت اصلی است؛ دستورها و کدها بدون هیچ تغییری در جعبه‌های کدِ قابل‌کپی قرار گرفته‌اند و برای مرجعِ همیشه‌به‌روز، نسخهٔ لاتین معتبر است.</p>
+  </div>
+
+  <h2 style="justify-content:center">📚 کاتالوگ کامل مستندات</h2>
+  <div class="cat-grid" id="catGrid"></div>
+
+  <div class="callout tip" style="max-width:900px;margin:2rem auto">
+    <div class="callout-title">🚀 انتشار روی GitHub Pages یا Cloudflare Pages</div>
+    <p>کل پوشهٔ <code>hermes-docs-fa</code> را در یک مخزن گیت قرار دهید و GitHub Pages (یا Cloudflare Pages) را روی شاخهٔ اصلی فعال کنید — سایت کاملاً استاتیک است و به هیچ بیلد یا سروری نیاز ندارد. صفحاتی که هنوز ترجمه نشده‌اند در فهرست با برچسب «به‌زودی» مشخص‌اند و به‌تدریج اضافه می‌شوند.</p>
+  </div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی برای جامعهٔ فارسی‌زبان · پروژهٔ متن‌باز: <a href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noopener">NousResearch/hermes-agent</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالای صفحه">↑</button>
+
+<script>
+(function(){
+  /* رندر کاتالوگ و آمار از دادهٔ ناوبری */
+  var grid = document.getElementById('catGrid');
+  var total = 0, done = 0;
+  window.HERMES_NAV.forEach(function(group){
+    var card = document.createElement('div');
+    card.className = 'cat-card';
+    var gTotal = group.pages.length;
+    var gDone = group.pages.filter(function(p){return p.d;}).length;
+    total += gTotal; done += gDone;
+    var html = '<h3>' + group.cat + '<span class="cnt">' + gDone + ' / ' + gTotal + '</span></h3><ul>';
+    group.pages.forEach(function(pg){
+      if (pg.d) {
+        html += '<li><a href="' + pg.p + '">📄 <span>' + pg.t + '</span></a></li>';
+      } else {
+        html += '<li><span class="pend">📄 <span>' + pg.t + '</span> <span class="badge-status todo">به‌زودی</span></span></li>';
+      }
+    });
+    html += '</ul>';
+    card.innerHTML = html;
+    grid.appendChild(card);
+  });
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-done').textContent = done;
+  document.getElementById('stat-sections').textContent = window.HERMES_NAV.length;
+  var pct = total ? Math.round(done * 100 / total) : 0;
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progLbl').textContent = 'پیشرفت ترجمه: ' + done + ' از ' + total + ' صفحه (' + pct + '٪)';
+})();
+</script>
+<script src="assets/main.js"></script>
+</body>
+</html>

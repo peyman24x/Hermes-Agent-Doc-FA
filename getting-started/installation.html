@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نصب — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/getting-started/installation" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>شروع کار<span class="sep">/</span><strong>نصب</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>نصب</h1>
+<p>هرمس ایجنت (Hermes Agent) را در کمتر از دو دقیقه آمادهٔ کار کنید!</p>
+
+<div class="callout tip">
+  <div class="callout-title">💡 پشتیبانی پلتفرم‌ها</div>
+  <p>برای ماتریس کامل پشتیبانی (کدام سیستم‌عامل‌ها، روش‌های توزیع و قابلیت‌های وابسته به پلتفرم پشتیبانی می‌شوند) به صفحهٔ <a href="platform-support.html">پشتیبانی پلتفرم‌ها</a> مراجعه کنید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نصب سریع</h2>
+
+<h3>با نصب‌کنندهٔ Hermes Desktop در مک یا ویندوز (توصیه‌شده)</h3>
+<p>برای نصب آسانِ هم‌زمانِ اپلیکیشن‌های خط فرمان و دسکتاپ، <a href="https://hermes-agent.nousresearch.com/" target="_blank" rel="noopener">نصب‌کنندهٔ Hermes Desktop</a> را از وب‌سایت ما دانلود و اجرا کنید.</p>
+
+<h3>بدون Hermes Desktop</h3>
+<p>برای نصبِ فقط-خط‌فرمان بدون Hermes Desktop، این را اجرا کنید:</p>
+
+<h4>لینوکس / مک / WSL2 / اندروید (Termux)</h4>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash</code></pre>
+</div>
+
+<h4>ویندوز (بومی)</h4>
+<p>در PowerShell اجرا کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">powershell</span><button class="copy-btn">کپی</button></div>
+  <pre><code>iex (irm https://hermes-agent.nousresearch.com/install.ps1)</code></pre>
+</div>
+
+<p>اگر بعد از یک نصبِ فقط-خط‌فرمان بخواهید Hermes Desktop را هم نصب و اجرا کنید، کافی است این را بزنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes desktop</code></pre>
+</div>
+
+<h3>نصب‌کننده چه کاری انجام می‌دهد؟</h3>
+<p>نصب‌کننده همه‌چیز را خودکار انجام می‌دهد — تمام وابستگی‌ها (Python، Node.js، ripgrep و ffmpeg)، کلون مخزن، محیط مجازی، راه‌اندازی فرمان سراسری <code>hermes</code> و پیکربندی ارائه‌دهندهٔ LLM. در پایان کار، آمادهٔ گفتگو هستید.</p>
+
+<h4>چیدمان نصب</h4>
+<p>محل قرارگیری فایل‌ها به نصب‌کننده بستگی دارد؛ اینکه به‌عنوان کاربر عادی نصب می‌کنید یا به‌عنوان root:</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نصب‌کننده</th><th>محل کد</th><th>باینری <code>hermes</code></th><th>پوشهٔ داده</th></tr></thead>
+  <tbody>
+    <tr><td>به‌ازای-کاربر (نصب‌کنندهٔ git)</td><td><code>~/.hermes/hermes-agent/</code></td><td><code>~/.local/bin/hermes</code> (سیم‌لینک)</td><td><code>~/.hermes/</code></td></tr>
+    <tr><td>حالت root (<code>sudo curl … | sudo bash</code>)</td><td><code>/usr/local/lib/hermes-agent/</code></td><td><code>/usr/local/bin/hermes</code></td><td><code>/root/.hermes/</code> (یا <code>$HERMES_HOME</code>)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>چیدمانِ FHS در حالت root (<code>/usr/local/lib/…</code> و <code>/usr/local/bin/hermes</code>) همان‌جایی است که سایر ابزارهای توسعهٔ سراسریِ سیستم روی لینوکس نصب می‌شوند. این حالت برای استقرار روی ماشین‌های مشترک مفید است که در آن یک نصب سیستمی باید به همهٔ کاربران سرویس بدهد. پیکربندیِ به‌ازای-کاربر (احراز هویت، مهارت‌ها، نشست‌ها) همچنان زیر <code>~/.hermes/</code> هر کاربر یا <code>HERMES_HOME</code> صریح قرار می‌گیرد.</p>
+
+<h3>پس از نصب</h3>
+<p>شل را دوباره بارگذاری کنید و شروع به گفتگو کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>source ~/.bashrc   # یا: source ~/.zshrc
+hermes             # شروع گفتگو!</code></pre>
+</div>
+
+<p>برای پیکربندی مجدد تنظیمات مختلف در آینده، از فرمان‌های اختصاصی استفاده کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes model          # انتخاب ارائه‌دهنده و مدل LLM
+hermes tools          # پیکربندی ابزارهای فعال
+hermes gateway setup  # راه‌اندازی پلتفرم‌های پیام‌رسانی
+hermes config set     # تنظیم مقادیر پیکربندی تکی
+hermes config get     # مشاهدهٔ مقادیر پیکربندی تکی
+hermes setup          # یا اجرای ویزارد کامل راه‌اندازی برای پیکربندی همه‌چیز یک‌جا</code></pre>
+</div>
+
+<div class="callout tip">
+  <div class="callout-title">💡 سریع‌ترین مسیر: Nous Portal</div>
+  <p>یک اشتراک بیش از ۳۰۰ مدل را پوشش می‌دهد به‌علاوهٔ <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tool-gateway" target="_blank" rel="noopener">گیت‌وی ابزار</a> (جستجوی وب، تولید تصویر، TTS، مرورگر ابری). دیگر با کلیدهای جداگانهٔ هر ابزار سروکله نزنید:</p>
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>hermes setup --portal</code></pre>
+  </div>
+  <p>این فرمان شما را وارد حساب می‌کند، Nous را به‌عنوان ارائه‌دهندهٔ شما تنظیم می‌کند و گیت‌وی ابزار را در یک دستور فعال می‌کند.</p>
+</div>
+
+<div class="callout tip">
+  <div class="callout-title">💡 همین حالا هرمس را روی ماشین دیگری اجرا می‌کنید؟</div>
+  <p>لازم نیست راه‌اندازی‌تان را از صفر بسازید. یک پشتیبان کامل را با <code>hermes import</code> بازیابی کنید (به «<a href="https://hermes-agent.nousresearch.com/docs/reference/faq#exporting-hermes-to-another-machine" target="_blank" rel="noopener">صادرات هرمس به ماشین دیگر</a>» مراجعه کنید)، یا تنها یک ایجنت را با <code>hermes profile import</code> منتقل کنید (به «<a href="https://hermes-agent.nousresearch.com/docs/reference/faq#moving-a-single-profile-to-another-machine" target="_blank" rel="noopener">انتقال یک پروفایل به ماشین دیگر</a>» مراجعه کنید). توجه داشته باشید که خروجیِ پروفایل به‌طور عمدی شامل اعتبارنامه‌ها نیست، پس خروجیِ تنها، یک پشتیبان کامل نیست — «<a href="https://hermes-agent.nousresearch.com/docs/reference/faq#hermes-backup-vs-hermes-profile-export" target="_blank" rel="noopener">hermes backup در برابر hermes profile export</a>» توضیح می‌دهد از کدام استفاده کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پیش‌نیازها</h2>
+<p><strong>نصب‌کننده:</strong> در پلتفرم‌های غیر ویندوزی، تنها پیش‌نیاز <strong>Git</strong> است. در لینوکس، مطمئن شوید <code>curl</code> و <code>xz-utils</code> موجودند (نصب‌کننده، Node.js را به‌صورت آرشیو <code>.tar.xz</code> دانلود می‌کند). اپلیکیشن دسکتاپ به‌طور اضافه به <code>g++</code> (یا <code>build-essential</code> در دبیان/اوبونتو) برای کامپایل ماژول‌های نیتیو نیاز دارد. نصب‌کننده بقیهٔ موارد را خودکار مدیریت می‌کند:</p>
+<ul>
+  <li><strong>uv</strong> (مدیر پکیج سریع پایتون)</li>
+  <li><strong>Python 3.11</strong> (از طریق uv، بدون نیاز به sudo)</li>
+  <li><strong>Node.js v22</strong> (برای اتوماسیون مرورگر و پل واتساپ)</li>
+  <li><strong>ripgrep</strong> (جستجوی سریع فایل)</li>
+  <li><strong>ffmpeg</strong> (تبدیل فرمت صوت برای TTS)</li>
+</ul>
+
+<div class="callout note">
+  <div class="callout-title">ℹ️ توجه</div>
+  <p><strong>نیازی نیست</strong> پایتون، Node.js، ripgrep یا ffmpeg را دستی نصب کنید. نصب‌کننده تشخیص می‌دهد چه چیزی غایب است و آن را برایتان نصب می‌کند. فقط مطمئن شوید <code>git</code> در دسترس است (<code>git --version</code>). در لینوکس، <code>curl</code> و <code>xz-utils</code> نصب باشند (در دبیان/اوبونتو: <code>sudo apt install curl xz-utils</code>). برای اپلیکیشن دسکتاپ، <code>build-essential</code> را هم نصب کنید (<code>sudo apt install build-essential</code>).</p>
+</div>
+
+<div class="callout tip">
+  <div class="callout-title">💡 کاربران Nix</div>
+  <p>Nix دیگر یک مسیر نصبِ پشتیبانی‌شدهٔ رسمی نیست (فقط تلاشِ در حد توان). اگر از قبل از Nix استفاده می‌کنید (روی NixOS، مک یا لینوکس)، یک مسیر راه‌اندازی اختصاصی با Nix flake، ماژول تعریف‌محور NixOS و حالت کانتینر اختیاری وجود دارد. به راهنمای «<a href="https://hermes-agent.nousresearch.com/docs/getting-started/nix-setup" target="_blank" rel="noopener">راه‌اندازی Nix و NixOS</a>» مراجعه کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> نصب دستی / نصب توسعه‌دهنده</h2>
+<p>اگر می‌خواهید مخزن را کلون کنید و از سورس نصب کنید — برای مشارکت، اجرا از یک شاخهٔ خاص، یا کنترل کامل روی محیط مجازی — به بخش «راه‌اندازی توسعه» در راهنمای مشارکت مراجعه کنید: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/contributing#development-setup" target="_blank" rel="noopener">Contributing → Development Setup</a>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> نصب بدون Sudo / کاربر سرویس سیستمی</h2>
+<p>اجرای هرمس با یک کاربرِ بدون امتیازِ اختصاصی (مثلاً یک حساب سرویس systemd با نام <code>hermes</code>، یا هر کاربری که دسترسی <code>sudo</code> ندارد) پشتیبانی می‌شود. تنها چیزی در مسیر نصب که واقعاً به root نیاز دارد، مرحلهٔ <code>--with-deps</code> پلی‌رایت است که با <code>apt</code> کتابخانه‌های مشترک (<code>libnss3</code>، <code>libxkbcommon</code> و غیره) مورد نیاز کرومیوم را نصب می‌کند. نصب‌کننده تشخیص می‌دهد که sudo در دسترس است یا نه و در نبودِ آن به‌ نرم‌ی تنزل می‌کند — باینری کرومیوم را در کش پلی‌رایت خودِ کاربرِ سرویس نصب می‌کند و دقیق‌ترین فرمانی را که مدیر سیستم باید جداگانه اجرا کند چاپ می‌کند.</p>
+
+<p><strong>تقسیم‌بندی توصیه‌شده (دبیان/اوبونتو):</strong></p>
+<ol>
+  <li><strong>یک بار، به‌عنوان کاربر مدیریتیِ دارای sudo،</strong> کتابخانه‌های سیستمی مورد نیاز کرومیوم را نصب کنید:
+    <div class="codebox">
+      <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+      <pre><code>sudo npx playwright install-deps chromium</code></pre>
+    </div>
+    <p>(می‌توانید این را از هر جایی اجرا کنید — <code>npx</code> پلی‌رایت را در لحظه دریافت می‌کند.)</p>
+  </li>
+  <li><strong>به‌عنوان کاربر سرویسِ بدون امتیاز،</strong> نصب‌کنندهٔ معمولی را اجرا کنید. نبودِ sudo را تشخیص می‌دهد، <code>--with-deps</code> را رد می‌کند و کرومیوم را در کش محلی پلی‌رایت همان کاربر نصب می‌کند:
+    <div class="codebox">
+      <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+      <pre><code>curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash</code></pre>
+    </div>
+    <p>اگر می‌خواهید مرحلهٔ پلی‌رایت را به‌طور کامل رد کنید — مثلاً چون به‌صورت headless اجرا می‌کنید و اتوماسیون مرورگر نمی‌خواهید — پرچم <code>--skip-browser</code> را بدهید:</p>
+    <div class="codebox">
+      <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+      <pre><code>curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-browser</code></pre>
+    </div>
+    <p>نصب‌کننده همچنین <code>cua-driver</code> را از پیش نصب می‌کند تا تول‌ست «کنترل کامپیوتر» (Computer Use) بلافاصله پس از فعال‌سازی‌اش کار کند؛ با <code>--skip-computer-use</code> می‌توانید از آن صرف‌نظر کنید (آن‌گاه هنگام فعال‌سازی ابزار، در لحظهٔ نیاز نصب خواهد شد).</p>
+  </li>
+  <li><strong>فرمان <code>hermes</code> را برای شل‌های کاربر سرویس در دسترس کنید.</strong> نصب‌کننده لانچر را در <code>~/.local/bin/hermes</code> می‌نویسد. حساب‌های سرویس سیستمی اغلب PATH مینیمالی دارند که <code>~/.local/bin</code> را شامل نمی‌شود. یا آن را به محیط کاربر اضافه کنید، یا لانچر را در یک مسیر سیستمی سیم‌لینک کنید:
+    <div class="codebox">
+      <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+      <pre><code># گزینهٔ A — افزودن به پروفایل کاربر سرویس
+echo 'export PATH="$HOME/.local/bin:$PATH"' &gt;&gt; ~/.bashrc
+
+# گزینهٔ B — سیم‌لینک سراسری (به‌عنوان مدیر اجرا کنید)
+sudo ln -s /home/hermes/.hermes/hermes-agent/venv/bin/hermes /usr/local/bin/hermes</code></pre>
+    </div>
+  </li>
+  <li><strong>بررسی نهایی:</strong> <code>hermes doctor</code> باید بدون خطا اجرا شود. اگر خطای <code>ModuleNotFoundError: No module named 'dotenv'</code> گرفتید، یعنی فایل سورسِ <code>hermes</code> مخزن (<code>~/.hermes/hermes-agent/hermes</code>) را با پایتونِ سیستم اجرا کرده‌اید نه لانچر venv (<code>~/.hermes/hermes-agent/venv/bin/hermes</code>) — گام ۳ را اصلاح کنید.</li>
+  <li><strong>گیت‌وی پیام‌رسانی را از این حساب اجرا می‌کنید؟</strong> یک سرویس در سطح کاربر با خروج از سیستم متوقف می‌شود و تا وقتی lingering برای کاربر سرویس فعال نشود، هنگام بوت شروع نمی‌شود:
+    <div class="codebox">
+      <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+      <pre><code>sudo loginctl enable-linger &lt;service-user&gt;</code></pre>
+    </div>
+    <p>برای خود راه‌اندازی سرویس به «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/" target="_blank" rel="noopener">گیت‌وی پیام‌رسانی</a>» مراجعه کنید.</p>
+  </li>
+</ol>
+<p>همین الگو روی آرچ (نصب‌کننده از pacman با همان منطق تشخیص sudo استفاده می‌کند)، فدورا/RHEL و openSUSE هم کار می‌کند — این توزیع‌ها اصلاً از <code>--with-deps</code> پشتیبانی نمی‌کنند، پس مدیر سیستم همیشه کتابخانه‌های سیستمی را جداگانه نصب می‌کند. فرمان‌های مربوطهٔ <code>dnf</code>/<code>zypper</code> توسط نصب‌کننده چاپ می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> عیب‌یابی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مشکل</th><th>راه‌حل</th></tr></thead>
+  <tbody>
+    <tr><td><code>hermes: command not found</code></td><td>شل را دوباره بارگذاری کنید (<code>source ~/.bashrc</code>) یا PATH را بررسی کنید</td></tr>
+    <tr><td><code>API key not set</code></td><td><code>hermes model</code> را برای پیکربندی ارائه‌دهنده اجرا کنید، یا <code>hermes config set OPENROUTER_API_KEY your_key</code></td></tr>
+    <tr><td>پیکربندی گم‌شده پس از به‌روزرسانی</td><td><code>hermes config check</code> و سپس <code>hermes config migrate</code> را اجرا کنید</td></tr>
+  </tbody>
+</table>
+</div>
+<p>برای تشخیص‌های بیشتر، <code>hermes doctor</code> را اجرا کنید — دقیقاً می‌گوید چه چیزی کم است و چگونه درستش کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> تشخیص خودکار روش نصب</h2>
+<p>هرمس به‌طور خودکار تشخیص می‌دهد که از طریق نصب‌کنندهٔ git، داکر یا NixOS نصب شده است، و <code>hermes update</code> فرمان به‌روزرسانیِ منطبق با همان مسیر را چاپ می‌کند. هیچ متغیر محیطی برای تنظیم وجود ندارد — تشخیص بر اساس چیدمان نصب انجام می‌شود (چک‌اوت <code>~/.hermes/hermes-agent/</code>، مُهر ایمیج داکر، یا مسیر Nix store). <code>hermes doctor</code> نیز روش تشخیص‌شده را در خلاصهٔ محیط خود نشان می‌دهد.</p>
+</section>
+
+<div class="pager">
+  <a href="../index.html"><span class="dir">→ قبلی</span><span class="ttl">صفحهٔ اصلی</span></a>
+  <a class="next" href="quickstart.html"><span class="dir">بعدی ←</span><span class="ttl">شروع سریع — اولین گفتگو</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/getting-started/installation" target="_blank" rel="noopener">Installation</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مسیر یادگیری — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/getting-started/learning-path" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>شروع کار<span class="sep">/</span><strong>مسیر یادگیری</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>مسیر یادگیری</h1>
+<p>هرمس ایجنت کارهای زیادی می‌تواند بکند — دستیار CLI، بات تلگرام/دیسکورد، اتوماسیون کارها، آموزش RL و بیشتر. این صفحه به شما کمک می‌کند بر اساس سطح تجربه و هدفتان بفهمید از کجا شروع کنید و چه بخوانید.</p>
+
+<div class="callout tip">
+  <div class="callout-title">💡 از اینجا شروع کنید</div>
+  <p>اگر هنوز هرمس ایجنت را نصب نکرده‌اید، با <a href="installation.html">راهنمای نصب</a> شروع کنید و بعد <a href="quickstart.html">شروع سریع</a> را از اول تا آخر اجرا کنید. همهٔ مطالب زیر فرض می‌کنند یک نصب کاری دارید.</p>
+</div>
+
+<div class="callout tip">
+  <div class="callout-title">💡 راه‌اندازی اولیهٔ ارائه‌دهنده</div>
+  <p>کاربران تازه‌کار تقریباً همیشه <code>hermes setup --portal</code> را می‌خواهند — یک OAuth، هم یک مدل و هم چهار ابزار گیت‌وی ابزار (جستجو/تصویر/TTS/مرورگر) را پوشش می‌دهد. به «<a href="https://hermes-agent.nousresearch.com/docs/integrations/nous-portal" target="_blank" rel="noopener">Nous Portal</a>» مراجعه کنید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نحوهٔ استفاده از این صفحه</h2>
+<ul>
+  <li><strong>سطح خودتان را می‌دانید؟</strong> به جدول <a href="#by-level">سطح تجربه</a> بروید و ترتیب مطالعهٔ سطح خودتان را دنبال کنید.</li>
+  <li><strong>هدف مشخصی دارید؟</strong> به بخش <a href="#by-usecase">بر اساس مورد استفاده</a> بروید و سناریوی مطابق را پیدا کنید.</li>
+  <li><strong>فقط گشت‌وگذار می‌کنید؟</strong> جدول <a href="#key-features">قابلیت‌های کلیدی در یک نگاه</a> را برای یک نمای سریع از همهٔ توانایی‌ها ببینید.</li>
+</ul>
+</section>
+
+<section class="doc-sec" id="by-level">
+<h2><span class="secnum">۲</span> بر اساس سطح تجربه</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>سطح</th><th>هدف</th><th>مطالعهٔ پیشنهادی</th><th>زمان تقریبی</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>مبتدی</strong></td>
+      <td>راه‌اندازی، گفتگوهای پایه، استفاده از ابزارهای داخلی</td>
+      <td><a href="installation.html">نصب</a> ← <a href="quickstart.html">شروع سریع</a> ← <a href="https://hermes-agent.nousresearch.com/docs/user-guide/cli" target="_blank" rel="noopener">کار با CLI</a> ← <a href="https://hermes-agent.nousresearch.com/docs/user-guide/configuration" target="_blank" rel="noopener">پیکربندی</a></td>
+      <td>حدود ۱ ساعت</td>
+    </tr>
+    <tr>
+      <td><strong>متوسط</strong></td>
+      <td>راه‌اندازی بات‌های پیام‌رسانی، استفاده از قابلیت‌های پیشرفته مثل حافظه، کرون و مهارت‌ها</td>
+      <td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/sessions" target="_blank" rel="noopener">نشست‌ها</a> ← <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/" target="_blank" rel="noopener">پیام‌رسانی</a> ← <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tools" target="_blank" rel="noopener">ابزارها</a> ← <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skills" target="_blank" rel="noopener">مهارت‌ها</a> ← <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory" target="_blank" rel="noopener">حافظه</a> ← <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/cron" target="_blank" rel="noopener">کرون</a></td>
+      <td>حدود ۲ تا ۳ ساعت</td>
+    </tr>
+    <tr>
+      <td><strong>پیشرفته</strong></td>
+      <td>ساخت ابزار سفارشی، ساخت مهارت، آموزش مدل با RL، مشارکت در پروژه</td>
+      <td><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/architecture" target="_blank" rel="noopener">معماری</a> ← <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-tools" target="_blank" rel="noopener">افزودن ابزار</a> ← <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/creating-skills" target="_blank" rel="noopener">ساخت مهارت</a> ← <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/contributing" target="_blank" rel="noopener">مشارکت</a></td>
+      <td>حدود ۴ تا ۶ ساعت</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec" id="by-usecase">
+<h2><span class="secnum">۳</span> بر اساس مورد استفاده</h2>
+<p>سناریویی را انتخاب کنید که با کاری که می‌خواهید بکنید می‌خواند. هر کدام شما را به ترتیبِ درستِ مطالعه به مستندات مربوطه می‌برد.</p>
+
+<h3>«یک دستیار کدنویسی CLI می‌خواهم»</h3>
+<p>از هرمس ایجنت به‌عنوان دستیار تعاملی ترمینال برای نوشتن، بازبینی و اجرای کد استفاده کنید.</p>
+<ol>
+  <li><a href="installation.html">نصب</a></li>
+  <li><a href="quickstart.html">شروع سریع</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/cli" target="_blank" rel="noopener">کار با CLI</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/code-execution" target="_blank" rel="noopener">اجرای کد</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files" target="_blank" rel="noopener">فایل‌های زمینه</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/guides/tips" target="_blank" rel="noopener">نکات و ترفندها</a></li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>فایل‌ها را مستقیم با فایل‌های زمینه به گفتگو بدهید. هرمس ایجنت می‌تواند کد پروژه‌های شما را بخواند، ویرایش و اجرا کند.</p>
+</div>
+
+<h3>«یک بات تلگرام/دیسکورد می‌خواهم»</h3>
+<p>هرمس ایجنت را به‌عنوان بات روی پلتفرم پیام‌رسانی مورد علاقه‌تان مستقر کنید.</p>
+<ol>
+  <li><a href="installation.html">نصب</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/configuration" target="_blank" rel="noopener">پیکربندی</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/" target="_blank" rel="noopener">نمای کلی پیام‌رسانی</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram" target="_blank" rel="noopener">راه‌اندازی تلگرام</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord" target="_blank" rel="noopener">راه‌اندازی دیسکورد</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/voice-mode" target="_blank" rel="noopener">حالت صوتی</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/guides/use-voice-mode-with-hermes" target="_blank" rel="noopener">استفاده از حالت صوتی با هرمس</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/security" target="_blank" rel="noopener">امنیت</a></li>
+</ol>
+<p>برای نمونه‌های پروژهٔ کامل:</p>
+<ul>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/guides/daily-briefing-bot" target="_blank" rel="noopener">بات خلاصهٔ روزانه</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/guides/team-telegram-assistant" target="_blank" rel="noopener">دستیار تیمی تلگرام</a></li>
+</ul>
+
+<h3>«می‌خواهم کارها را خودکار کنم»</h3>
+<p>کارهای تکراری را زمان‌بندی کنید، کارهای گروهی اجرا کنید، یا اقدامات ایجنت را به هم زنجیر کنید.</p>
+<ol>
+  <li><a href="quickstart.html">شروع سریع</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/cron" target="_blank" rel="noopener">زمان‌بندی با کرون</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/batch-processing" target="_blank" rel="noopener">پردازش گروهی</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/delegation" target="_blank" rel="noopener">واگذاری</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/hooks" target="_blank" rel="noopener">هوک‌ها</a></li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>کارهای کرونی به هرمس اجازه می‌دهند کارها را طبق زمان‌بندی اجرا کند — خلاصه‌های روزانه، بررسی‌های دوره‌ای، گزارش‌های خودکار — بدون حضور شما.</p>
+</div>
+
+<h3>«یک تیم از بات‌های متخصص می‌خواهم»</h3>
+<p>بات‌هایی نام‌دار با مدل، حافظه، مهارت، روتین و گفتگوی خودشان بسازید، سپس آن‌ها را در گفتگوهای گروهی یا با <code>@mentions</code> کنار هم بیاورید.</p>
+<ol>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/desktop" target="_blank" rel="noopener">دسکتاپ</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/profiles" target="_blank" rel="noopener">پروفایل‌ها</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/bot-mode" target="_blank" rel="noopener">حالت بات</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/cron" target="_blank" rel="noopener">زمان‌بندی با کرون</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/multi-connection-desktop" target="_blank" rel="noopener">دسکتاپ چند-اتصاله</a></li>
+</ol>
+
+<h3>«می‌خواهم ابزار/مهارت سفارشی بسازم»</h3>
+<p>هرمس ایجنت را با ابزارهای خودتان و بسته‌های مهارتِ قابل‌استفادهٔ مجدد گسترش دهید.</p>
+<ol>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/plugins" target="_blank" rel="noopener">پلاگین‌ها</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت یک پلاگین هرمس</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tools" target="_blank" rel="noopener">نمای کلی ابزارها</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skills" target="_blank" rel="noopener">نمای کلی مهارت‌ها</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp" target="_blank" rel="noopener">پروتکل MCP</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/architecture" target="_blank" rel="noopener">معماری</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-tools" target="_blank" rel="noopener">افزودن ابزار</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/creating-skills" target="_blank" rel="noopener">ساخت مهارت</a></li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>برای اغلب ساختِ ابزار سفارشی، از پلاگین‌ها شروع کنید. صفحهٔ «افزودن ابزار» مخصوص توسعهٔ هستهٔ خود هرمس است، نه مسیر معمول کاربر/ابزار سفارشی.</p>
+</div>
+
+<h3>«می‌خواهم مدل آموزش دهم»</h3>
+<p>با یادگیری تقویتی (RL) رفتار مدل را با خط لولهٔ آموزش RL هرمس (مبتنی بر <a href="https://github.com/NousResearch/atropos" target="_blank" rel="noopener">Atropos</a>) فاین‌تیون کنید.</p>
+<ol>
+  <li><a href="quickstart.html">شروع سریع</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/configuration" target="_blank" rel="noopener">پیکربندی</a></li>
+  <li><a href="https://github.com/NousResearch/atropos" target="_blank" rel="noopener">محیط‌های RL آتروپوس</a> (بیرونی)</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/provider-routing" target="_blank" rel="noopener">مسیریابی ارائه‌دهنده</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/architecture" target="_blank" rel="noopener">معماری</a></li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>آموزش RL بهترین نتیجه را وقتی می‌دهد که از قبل مبانی نحوهٔ مدیریت گفتگوها و فراخوانی ابزار توسط هرمس را بلد باشید. اگر تازه‌کارید، اول مسیر مبتدی را طی کنید.</p>
+</div>
+
+<h3>«می‌خواهم به‌عنوان کتابخانهٔ پایتون استفاده کنم»</h3>
+<p>هرمس ایجنت را به‌صورت برنامه‌پذیر در اپلیکیشن‌های پایتون خودتان یکپارچه کنید.</p>
+<ol>
+  <li><a href="installation.html">نصب</a></li>
+  <li><a href="quickstart.html">شروع سریع</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/guides/python-library" target="_blank" rel="noopener">راهنمای کتابخانهٔ پایتون</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/architecture" target="_blank" rel="noopener">معماری</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tools" target="_blank" rel="noopener">ابزارها</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/sessions" target="_blank" rel="noopener">نشست‌ها</a></li>
+</ol>
+</section>
+
+<section class="doc-sec" id="key-features">
+<h2><span class="secnum">۴</span> قابلیت‌های کلیدی در یک نگاه</h2>
+<p>مطمئن نیستید چه چیزی موجود است؟ این یک فهرست سریع از قابلیت‌های عمده است:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>قابلیت</th><th>چه می‌کند</th><th>لینک</th></tr></thead>
+  <tbody>
+    <tr><td><strong>ابزارها</strong></td><td>ابزارهای داخلی که ایجنت می‌تواند فراخوانی کند (ورودی/خروجی فایل، جستجو، شل و غیره)</td><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tools" target="_blank" rel="noopener">ابزارها</a></td></tr>
+    <tr><td><strong>مهارت‌ها</strong></td><td>بسته‌های افزونه‌ایِ نصب‌شدنی که قابلیت جدید اضافه می‌کنند</td><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skills" target="_blank" rel="noopener">مهارت‌ها</a></td></tr>
+    <tr><td><strong>حافظه</strong></td><td>حافظهٔ پایدار بین نشست‌ها</td><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory" target="_blank" rel="noopener">حافظه</a></td></tr>
+    <tr><td><strong>حالت بات</strong></td><td>بات‌های متخصصِ نام‌دار با گفتگوهای پایدار، روتین‌ها، گفتگوهای گروهی و <code>@mentions</code></td><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/bot-mode" target="_blank" rel="noopener">حالت بات</a></td></tr>
+    <tr><td><strong>فایل‌های زمینه</strong></td><td>رساندن فایل‌ها و پوشه‌ها به گفتگوها</td><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files" target="_blank" rel="noopener">فایل‌های زمینه</a></td></tr>
+    <tr><td><strong>MCP</strong></td><td>اتصال به سرورهای ابزار بیرونی از طریق Model Context Protocol</td><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp" target="_blank" rel="noopener">MCP</a></td></tr>
+    <tr><td><strong>کرون</strong></td><td>زمان‌بندی کارهای تکراری ایجنت</td><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/cron" target="_blank" rel="noopener">کرون</a></td></tr>
+    <tr><td><strong>واگذاری</strong></td><td>تولید ایجنت‌های فرزند برای کار موازی</td><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/delegation" target="_blank" rel="noopener">واگذاری</a></td></tr>
+    <tr><td><strong>اجرای کد</strong></td><td>اجرای اسکریپت‌های پایتون که ابزارهای هرمس را برنامه‌پذیر صدا می‌زنند</td><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/code-execution" target="_blank" rel="noopener">اجرای کد</a></td></tr>
+    <tr><td><strong>مرورگر</strong></td><td>مرور و اسکرپ وب</td><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/browser" target="_blank" rel="noopener">مرورگر</a></td></tr>
+    <tr><td><strong>هوک‌ها</strong></td><td>کال‌بک‌ها و میان‌افزارهای رویدادمحور</td><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/hooks" target="_blank" rel="noopener">هوک‌ها</a></td></tr>
+    <tr><td><strong>پردازش گروهی</strong></td><td>پردازش چند ورودی به‌صورت انبوه</td><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/batch-processing" target="_blank" rel="noopener">پردازش گروهی</a></td></tr>
+    <tr><td><strong>مسیریابی ارائه‌دهنده</strong></td><td>مسیریابی درخواست‌ها بین چند ارائه‌دهندهٔ LLM</td><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/provider-routing" target="_blank" rel="noopener">مسیریابی</a></td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> در ادامه چه بخوانید؟</h2>
+<p>بر اساس جایی که الان هستید:</p>
+<ul>
+  <li><strong>تازه نصب تمام کرده‌اید؟</strong> ← به <a href="quickstart.html">شروع سریع</a> بروید تا اولین گفتگو را اجرا کنید.</li>
+  <li><strong>شروع سریع را تمام کردید؟</strong> ← <a href="https://hermes-agent.nousresearch.com/docs/user-guide/cli" target="_blank" rel="noopener">کار با CLI</a> و <a href="https://hermes-agent.nousresearch.com/docs/user-guide/configuration" target="_blank" rel="noopener">پیکربندی</a> را بخوانید تا راه‌اندازی‌تان را سفارشی کنید.</li>
+  <li><strong>با مباحث پایه راحتید؟</strong> ← <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tools" target="_blank" rel="noopener">ابزارها</a>، <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skills" target="_blank" rel="noopener">مهارت‌ها</a> و <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory" target="_blank" rel="noopener">حافظه</a> را بکاوبید تا تمام قدرت ایجنت آزاد شود.</li>
+  <li><strong>برای یک تیم راه‌اندازی می‌کنید؟</strong> ← <a href="https://hermes-agent.nousresearch.com/docs/user-guide/security" target="_blank" rel="noopener">امنیت</a> و <a href="https://hermes-agent.nousresearch.com/docs/user-guide/sessions" target="_blank" rel="noopener">نشست‌ها</a> را بخوانید تا کنترل دسترسی و مدیریت گفتگوها را بفهمید.</li>
+  <li><strong>آمادهٔ ساختن هستید؟</strong> ← وارد <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/architecture" target="_blank" rel="noopener">راهنمای توسعه‌دهنده</a> شوید تا با درون‌مایه آشنا شوید و شروع به مشارکت کنید.</li>
+  <li><strong>نمونه‌های عملی می‌خواهید؟</strong> ← بخش <a href="https://hermes-agent.nousresearch.com/docs/guides/tips" target="_blank" rel="noopener">راهنماها</a> را برای پروژه‌ها و نکات دنیای واقعی ببینید.</li>
+</ul>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته پایانی</div>
+  <p>لازم نیست همه‌چیز را بخوانید. مسیری را که با هدفتان می‌خواند انتخاب کنید، لینک‌ها را به ترتیب دنبال کنید و به‌سرعت بهره‌ور خواهید شد. همیشه می‌توانید به این صفحه برگردید تا قدم بعدی‌تان را پیدا کنید.</p>
+</div>
+</section>
+
+<div class="pager">
+  <a href="quickstart.html"><span class="dir">→ قبلی</span><span class="ttl">شروع سریع</span></a>
+  <a class="next" href="updating.html"><span class="dir">بعدی ←</span><span class="ttl">به‌روزرسانی و حذف</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/getting-started/learning-path" target="_blank" rel="noopener">Learning Path</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

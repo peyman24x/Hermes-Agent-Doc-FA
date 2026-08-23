@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پشتیبانی پلتفرم‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/getting-started/platform-support" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>شروع کار<span class="sep">/</span><strong>پشتیبانی پلتفرم‌ها</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>پشتیبانی پلتفرم‌ها</h1>
+<p>هرمس ایجنت از پلتفرم‌ها و روش‌های توزیع زیادی پشتیبانی می‌کند، اما نمی‌توانیم از هر روش نصبِ ممکن پشتیبانی کنیم.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> ردهٔ ۱ (Tier 1)</h2>
+<p>تلاش می‌کنیم نصب و به‌روزرسانی روی این‌ها هرگز نشکند. مشکلات و رگرسیون‌های ردهٔ ۱ اولویت اول ما هستند و بر سایر پلتفرم‌ها مقدم‌اند.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>سیستم‌عامل / معماری</th><th>روش‌های نصب</th><th>نکته‌ها</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>مک‌اواس</strong> (Apple Silicon)</td>
+      <td><a href="https://hermes-agent.nousresearch.com/" target="_blank" rel="noopener">Hermes Desktop</a>، <a href="installation.html">install.sh</a></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><strong>ویندوز ۱۰ / ۱۱</strong> (x86_64، aarch64)</td>
+      <td><a href="https://hermes-agent.nousresearch.com/" target="_blank" rel="noopener">Hermes Desktop</a>، <a href="installation.html">install.ps1</a></td>
+      <td>چند قابلیت <a href="https://hermes-agent.nousresearch.com/docs/user-guide/windows-native#feature-matrix" target="_blank" rel="noopener">در دسترس نیستند</a>.</td>
+    </tr>
+    <tr>
+      <td><strong>لینوکس / WSL2</strong> (x86_64، aarch64)</td>
+      <td><a href="installation.html">install.sh</a></td>
+      <td>روی آخرین اوبونتو و WSL2 تست می‌کنیم. اگر توزیع شما glibc، systemd دارد و استاندارد سلسله‌مراتب فایل‌سیستم (FHS) را رعایت می‌کند، احتمالاً خیلی خوب کار می‌کند.</td>
+    </tr>
+    <tr>
+      <td><strong>کانتینر داکر</strong> (x86_64، aarch64)</td>
+      <td><code>docker pull</code></td>
+      <td>نصب‌های داکری از <code>hermes update</code> پشتیبانی نمی‌کنند. به‌روزرسانی با اجرای ایمیج جدید انجام می‌شود.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> ردهٔ ۲ (Tier 2)</h2>
+<p>این پلتفرم‌ها فقط به‌صورت «در حد توان» و در همان درخت کد نگهداری می‌شوند. ممکن است انتشارها آن‌ها را بشکند و نمی‌توانیم قول بدهیم سریع تعمیرشان کنیم.</p>
+<p>پرِ fix کردن مشکلات‌شان پذیرفته می‌شود، اما اولویت‌شان پایین‌تر از رفع مشکلات پلتفرم‌های ردهٔ ۱ است.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>سیستم‌عامل / معماری</th><th>روش‌های نصب</th><th>نکته‌ها</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>اندروید (Termux)</strong> (aarch64)</td>
+      <td><a href="installation.html">install.sh</a></td>
+      <td>چند قابلیت <a href="https://hermes-agent.nousresearch.com/docs/getting-started/termux#known-limitations-on-phones" target="_blank" rel="noopener">در دسترس نیستند</a>.</td>
+    </tr>
+    <tr>
+      <td><strong>Nix</strong> (مک، لینوکس، NixOS)</td>
+      <td><a href="https://hermes-agent.nousresearch.com/docs/getting-started/nix-setup" target="_blank" rel="noopener">راهنمای Nix</a></td>
+      <td>به‌واسطهٔ دردسرهای بسته‌بندی Node.js مرتب می‌شکند. موفق باشید! ♥</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پشتیبانی‌نشده</h2>
+<p>این پلتفرم‌ها و روش‌های توزیع پشتیبانی <strong>نمی‌شوند</strong>. پیشنهاد می‌کنیم به روش توزیع یا پلتفرم پشتیبانی‌شده مهاجرت کنید. ممکن است همین الان هم خراب باشند و ممکن است در آینده بیشتر خراب شوند. پرِ fix کردن آن‌ها پذیرفته <em>نمی‌شود</em> و هر کدی که سازگاری با آن‌ها را نگه دارد ممکن است هر لحظه حذف شود.</p>
+<ul>
+  <li>نصب از طریق AUR (اگر کمک کند ممکن است وصله‌ها را بالادستی کنیم ♥)</li>
+  <li>مک‌اواس روی پردازنده‌های x86 (اینتل)</li>
+  <li>نصب از طریق <code>pypi</code> (مثل <code>uv tool install hermes-agent</code>، <code>pip install hermes-agent</code> و غیره)</li>
+  <li>نصب از طریق <code>brew</code> (<code>brew install hermes-agent</code>)</li>
+</ul>
+<p>اگر از روش توزیعِ پشتیبانی‌نشده استفاده می‌کنید، لطفاً <a href="installation.html">راهنمای نصب</a> را بخوانید تا ببینید چگونه به روش پشتیبانی‌شده سوییچ کنید.</p>
+</section>
+
+<div class="pager">
+  <a href="updating.html"><span class="dir">→ قبلی</span><span class="ttl">به‌روزرسانی و حذف</span></a>
+  <a class="next" href="../user-guide/docker.html"><span class="dir">بعدی ←</span><span class="ttl">اجرای داکر</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/getting-started/platform-support" target="_blank" rel="noopener">Platform Support</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+/* ═══════════════════════════════════════════════════════════
+   مرجع فارسی Hermes Agent — استایل مشترک سایت مستندات
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  --bg:#f3f6fa; --surface:#ffffff; --surface2:#f8fafc; --text:#1a2332; --muted:#5b6b7f;
+  --border:#dde5ee; --accent:#2563eb; --accent-2:#1d4ed8; --accent-soft:#eaf1fe;
+  --header-bg:rgba(255,255,255,.88); --shadow:0 1px 3px rgba(15,23,42,.08);
+  --code-bg:#0d1526; --code-text:#dbe7f3; --code-head:#111c33;
+  --inline-bg:#e9eff7; --inline-text:#174ea6;
+  --tip:#059669; --warn:#d97706; --caution:#dc2626; --note:#2563eb;
+  --ok:#16a34a; --todo:#94a3b8;
+  --sidebar-w:305px;
+}
+[data-theme="dark"]{
+  --bg:#0b1220; --surface:#121b2c; --surface2:#0f1727; --text:#dbe4f0; --muted:#93a4bb;
+  --border:#26344d; --accent:#60a5fa; --accent-soft:#182742;
+  --header-bg:rgba(11,18,32,.88); --shadow:0 1px 3px rgba(0,0,0,.4);
+  --inline-bg:#1b2942; --inline-text:#9ec5ff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:'Vazirmatn','Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:2;font-size:15.5px}
+a{color:var(--accent)}
+
+/* ───── هدر سایت ───── */
+header.topbar{position:sticky;top:0;z-index:60;background:var(--header-bg);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.topbar-inner{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:.75rem;padding:.55rem 1.25rem}
+.hamburger{display:none;background:none;border:1px solid var(--border);border-radius:.5rem;padding:.3rem .55rem;cursor:pointer;color:var(--text);font-size:1.1rem;line-height:1}
+.doc-brand{font-weight:800;font-size:.98rem;display:flex;align-items:center;gap:.55rem;min-width:0;text-decoration:none;color:var(--text)}
+.doc-brand:hover{color:var(--accent)}
+.doc-brand .logo{width:27px;height:27px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#0ea5e9);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:.82rem;flex-shrink:0}
+.doc-brand small{color:var(--muted);font-weight:500;font-size:.74rem}
+.top-actions{margin-inline-start:auto;display:flex;gap:.5rem;align-items:center}
+.icon-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:.5rem;padding:.32rem .75rem;cursor:pointer;font-family:inherit;font-size:.8rem;transition:.15s;text-decoration:none;display:inline-flex;align-items:center;gap:.3rem}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ───── بردکرامب ───── */
+.breadcrumb{max-width:1500px;margin:0 auto;padding:.7rem 1.25rem .1rem;font-size:.8rem;color:var(--muted)}
+.breadcrumb a{color:var(--muted);text-decoration:none}
+.breadcrumb a:hover{color:var(--accent)}
+.breadcrumb .sep{margin:0 .35rem;opacity:.5}
+
+/* ───── چیدمان ───── */
+.container{max-width:1500px;margin:0 auto;display:flex;align-items:flex-start}
+aside.sidebar{width:var(--sidebar-w);flex-shrink:0;position:sticky;top:47px;max-height:calc(100vh - 47px);overflow-y:auto;padding:1.1rem .9rem 3rem;border-inline-end:1px solid var(--border)}
+aside.sidebar::-webkit-scrollbar{width:6px}
+aside.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.nav-group{margin-bottom:.4rem}
+.nav-cat{display:flex;align-items:center;gap:.45rem;width:100%;background:none;border:none;color:var(--text);font-family:inherit;font-weight:800;font-size:.88rem;padding:.45rem .55rem;border-radius:.45rem;cursor:pointer;text-align:right}
+.nav-cat:hover{background:var(--accent-soft)}
+.nav-cat .arrow{transition:.2s;font-size:.7rem;color:var(--muted)}
+.nav-group.open .nav-cat .arrow{transform:rotate(90deg)}
+.nav-group ul{list-style:none;padding:0;margin:0;display:none}
+.nav-group.open>ul{display:block}
+.nav-pages a,.nav-pages span.pend{display:flex;align-items:center;gap:.45rem;padding:.22rem .55rem .22rem .45rem;color:var(--muted);text-decoration:none;border-radius:.4rem;font-size:.83rem;line-height:1.7}
+.nav-pages a:hover{background:var(--accent-soft);color:var(--accent)}
+.nav-pages a.active{background:var(--accent);color:#fff}
+.nav-pages span.pend{color:var(--muted);opacity:.55;cursor:default}
+.badge-status{font-size:.62rem;padding:.05rem .4rem;border-radius:.4rem;flex-shrink:0;font-weight:700}
+.badge-status.done{background:rgba(22,163,74,.14);color:var(--ok)}
+.badge-status.todo{background:rgba(148,163,184,.16);color:var(--todo)}
+.nav-pages a.active .badge-status.done{background:rgba(255,255,255,.25);color:#fff}
+
+main{flex:1;min-width:0;max-width:940px;padding:1.6rem clamp(1rem,4vw,3.2rem) 3.5rem;margin:0 auto}
+
+/* ───── تایپوگرافی ───── */
+h1{font-size:1.75rem;font-weight:800;line-height:1.6;margin:.3rem 0 .7rem}
+h2{font-size:1.38rem;font-weight:800;margin:0 0 1rem;padding-top:.4rem;display:flex;align-items:center;gap:.65rem;scroll-margin-top:75px}
+h3{font-size:1.12rem;font-weight:700;margin:1.8rem 0 .6rem;color:var(--accent);scroll-margin-top:75px}
+h4{font-size:1rem;font-weight:700;margin:1.3rem 0 .5rem}
+p{margin:.65rem 0}
+ul,ol{padding-inline-start:1.6rem;margin:.65rem 0}
+li{margin:.32rem 0}
+.subtitle{color:var(--muted);font-size:.95rem}
+section.doc-sec{margin-bottom:2.6rem;padding-bottom:1.6rem;border-bottom:1px solid var(--border)}
+section.doc-sec:last-of-type{border-bottom:none}
+.secnum{display:inline-flex;align-items:center;justify-content:center;min-width:2em;height:2em;padding:0 .45em;background:var(--accent-soft);color:var(--accent);border-radius:.55rem;font-size:.75em;font-weight:800;flex-shrink:0}
+code{direction:ltr;unicode-bidi:isolate;font-family:Consolas,'Cascadia Mono','Courier New',monospace;font-size:.86em;background:var(--inline-bg);color:var(--inline-text);padding:.1em .45em;border-radius:.35em}
+hr{border:none;border-top:1px dashed var(--border);margin:1.8rem 0}
+
+/* ───── جعبهٔ کد ───── */
+.codebox{direction:ltr;text-align:left;margin:1.25rem 0;border-radius:.65rem;overflow:hidden;border:1px solid rgba(120,145,180,.25);background:var(--code-bg);box-shadow:var(--shadow)}
+.code-head{display:flex;justify-content:space-between;align-items:center;padding:.4rem .5rem .4rem .9rem;background:var(--code-head);border-bottom:1px solid rgba(120,145,180,.15)}
+.code-lang{color:#8fa3bf;font-size:.74rem;font-family:Consolas,monospace;letter-spacing:.5px}
+.copy-btn{cursor:pointer;border:1px solid #33415c;background:#1a2740;color:#c3d3e8;padding:.2rem .8rem;border-radius:.45rem;font-family:'Vazirmatn',Tahoma,sans-serif;font-size:.75rem;transition:.15s}
+.copy-btn:hover{background:#24345a;border-color:#4a5f85}
+.copy-btn.ok{background:#14532d;border-color:#1e7a41;color:#bbf7d0}
+.codebox pre{margin:0;padding:1rem 1.15rem;overflow-x:auto;color:var(--code-text);font-family:Consolas,'Cascadia Mono','Courier New',monospace;font-size:.855rem;line-height:1.8}
+.codebox pre::-webkit-scrollbar{height:8px}
+.codebox pre::-webkit-scrollbar-thumb{background:#2b3b5c;border-radius:4px}
+
+/* ───── کالاوت‌ها ───── */
+.callout{border:1px solid var(--border);border-inline-start:4px solid var(--note);border-radius:.65rem;padding:.9rem 1.1rem;margin:1.3rem 0;background:var(--surface);box-shadow:var(--shadow)}
+.callout .callout-title{font-weight:800;margin-bottom:.3rem;display:flex;align-items:center;gap:.5rem}
+.callout.tip{border-inline-start-color:var(--tip)} .callout.tip .callout-title{color:var(--tip)}
+.callout.warning{border-inline-start-color:var(--warn)} .callout.warning .callout-title{color:var(--warn)}
+.callout.caution{border-inline-start-color:var(--caution)} .callout.caution .callout-title{color:var(--caution)}
+.callout.note{border-inline-start-color:var(--note)} .callout.note .callout-title{color:var(--note)}
+
+/* ───── جدول ───── */
+.table-wrap{overflow-x:auto;margin:1.3rem 0;border:1px solid var(--border);border-radius:.65rem;box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:.9rem;background:var(--surface)}
+th{background:var(--accent-soft);font-weight:800;padding:.6rem .9rem;border-bottom:2px solid var(--border);text-align:right;white-space:nowrap}
+td{padding:.55rem .9rem;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td code{white-space:nowrap}
+
+/* ───── ناوبری قبلی/بعدی ───── */
+.pager{display:flex;gap:1rem;margin-top:2.5rem}
+.pager a,.pager span.off{flex:1;border:1px solid var(--border);border-radius:.65rem;padding:.8rem 1rem;text-decoration:none;background:var(--surface);transition:.15s;display:block}
+.pager a:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.pager .dir{font-size:.72rem;color:var(--muted);display:block}
+.pager .ttl{font-weight:700;font-size:.9rem;color:var(--accent)}
+.pager span.off{opacity:.45}
+.pager .next{text-align:left}
+
+/* ───── صفحهٔ اصلی ───── */
+.hero{max-width:1100px;margin:0 auto;padding:3rem 1.5rem 2rem;text-align:center}
+.hero h1{font-size:2.2rem;margin-bottom:.6rem}
+.hero .tagline{color:var(--muted);font-size:1.05rem;max-width:760px;margin:0 auto 1.4rem}
+.hero .install-cmd{direction:ltr;display:inline-block;background:var(--code-bg);color:var(--code-text);border-radius:.6rem;padding:.7rem 1.2rem;font-family:Consolas,monospace;font-size:.82rem;box-shadow:var(--shadow)}
+.stats{display:flex;justify-content:center;gap:2.2rem;margin:1.8rem 0 .5rem;flex-wrap:wrap}
+.stat{text-align:center}
+.stat .num{font-size:1.6rem;font-weight:800;color:var(--accent)}
+.stat .lbl{font-size:.8rem;color:var(--muted)}
+.cat-grid{max-width:1200px;margin:1.5rem auto;padding:0 1.25rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:1rem}
+.cat-card{background:var(--surface);border:1px solid var(--border);border-radius:.85rem;padding:1.2rem 1.3rem;box-shadow:var(--shadow)}
+.cat-card h3{margin:0 0 .5rem;font-size:1.05rem;color:var(--text);display:flex;align-items:center;gap:.5rem}
+.cat-card .cnt{font-size:.72rem;color:var(--muted);font-weight:500;margin-inline-start:auto;background:var(--accent-soft);color:var(--accent);padding:.1rem .55rem;border-radius:.5rem}
+.cat-card ul{list-style:none;margin:0;padding:0}
+.cat-card li{margin:.1rem 0}
+.cat-card li a{display:flex;align-items:center;gap:.4rem;color:var(--text);text-decoration:none;font-size:.87rem;padding:.18rem .35rem;border-radius:.35rem}
+.cat-card li a:hover{background:var(--accent-soft);color:var(--accent)}
+.cat-card li span.pend{display:flex;align-items:center;gap:.4rem;color:var(--muted);opacity:.6;font-size:.87rem;padding:.18rem .35rem}
+.prog-track{max-width:520px;height:10px;background:var(--border);border-radius:99px;margin:1.2rem auto .4rem;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#2563eb,#0ea5e9);border-radius:99px;transition:.4s}
+.prog-lbl{font-size:.8rem;color:var(--muted);text-align:center}
+
+/* ───── متفرقه ───── */
+.page-meta{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;font-size:.78rem;color:var(--muted);margin-bottom:1.4rem}
+.page-meta a{color:var(--accent);text-decoration:none}
+.source-link{margin-inline-start:auto}
+#toTop{position:fixed;bottom:1.4rem;inset-inline-end:1.4rem;width:44px;height:44px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:1.15rem;cursor:pointer;opacity:0;pointer-events:none;transition:.25s;box-shadow:0 4px 14px rgba(37,99,235,.4);z-index:70}
+#toTop.show{opacity:1;pointer-events:auto}
+footer.page-footer{border-top:1px solid var(--border);padding:1.5rem;text-align:center;color:var(--muted);font-size:.83rem;background:var(--surface)}
+footer.page-footer a{color:var(--accent);text-decoration:none}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:55}
+body.nav-open .overlay{display:block}
+
+@media (max-width:1020px){
+  .hamburger{display:inline-flex}
+  aside.sidebar{position:fixed;top:0;bottom:0;inset-inline-end:0;width:300px;max-height:none;background:var(--surface);z-index:58;transform:translateX(100%);transition:transform .25s;padding-top:1.2rem}
+  body.nav-open aside.sidebar{transform:none;box-shadow:-8px 0 30px rgba(0,0,0,.25)}
+  h1{font-size:1.45rem}
+  .hero h1{font-size:1.7rem}
+}
+@media print{
+  header.topbar,aside.sidebar,#toTop,.overlay,.copy-btn,.pager,.page-meta{display:none !important}
+  body{background:#fff;font-size:12px}
+  main{max-width:100%;padding:0}
+  .codebox{background:#f4f6f9;border:1px solid #999}
+  .codebox pre{color:#111;white-space:pre-wrap;word-break:break-all}
+}

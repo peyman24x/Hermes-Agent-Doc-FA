@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شروع سریع — اولین گفتگو — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/getting-started/quickstart" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../index.html">خانه</a><span class="sep">/</span>شروع کار<span class="sep">/</span><strong>شروع سریع</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>شروع سریع — اولین گفتگو</h1>
+<p>این راهنما شما را از صفر به یک راه‌اندازی کاریِ هرمس می‌رساند که در استفادهٔ واقعی هم دوام می‌آورد. نصب می‌کنید، یک ارائه‌دهنده انتخاب می‌کنید، یک گفتگوی درست‌وحساب را تأیید می‌کنید، و دقیقاً می‌دانید وقتی چیزی خراب شد چه‌کار کنید.</p>
+
+<div class="callout note">
+  <div class="callout-title">🎬 ترجیح می‌دهید تماشا کنید؟ (نیازمند اینترنت)</div>
+  <p>گروه <strong>Onchain AI Garage</strong> یک آموزش جامع (Masterclass) از نصب، راه‌اندازی و فرمان‌های پایه تهیه کرده — همراه خوبی برای این صفحه است اگر دوست دارید ویدیویی پیش بروید. برای بیشتر، پلی‌لیست کامل <a href="https://www.youtube.com/playlist?list=PLmpUb_PWAkDxewld5ZYyKifuHxgIbiq2d" target="_blank" rel="noopener">Hermes Agent Tutorials &amp; Use Cases</a> را ببینید.</p>
+  <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;margin-top:1rem">
+    <iframe style="position:absolute;top:0;left:0;width:100%;height:100%" src="https://www.youtube-nocookie.com/embed/R3YOGfTBcQg" title="Hermes Agent Masterclass" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> این راهنما برای چه کسی است؟</h2>
+<ul>
+  <li>تازه‌کار هستید و کوتاه‌ترین مسیرِ رسیدن به یک راه‌اندازی کاری را می‌خواهید</li>
+  <li>ارائه‌دهنده‌تان را عوض می‌کنید و نمی‌خواهید وقتتان صرف خطاهای پیکربندی شود</li>
+  <li>هرمس را برای یک تیم، بات یا گردش‌کار همیشه‌روشن راه‌اندازی می‌کنید</li>
+  <li>از «نصب شد، ولی هنوز هیچ کاری نمی‌کند» خسته شده‌اید</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> سریع‌ترین مسیر</h2>
+<p>سطری را انتخاب کنید که با هدفتان می‌خواند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>هدف</th><th>اول این کار را بکنید</th><th>سپس این را</th></tr></thead>
+  <tbody>
+    <tr><td>فقط می‌خواهم هرمس روی ماشینم کار کند</td><td><code>hermes setup</code></td><td>یک گفتگوی واقعی اجرا کنید و پاسخ گرفتن را تأیید کنید</td></tr>
+    <tr><td>ارائه‌دهنده‌ام را از قبل می‌شناسم</td><td><code>hermes model</code></td><td>پیکربندی را ذخیره کنید، بعد شروع به گفتگو کنید</td></tr>
+    <tr><td>بات یا راه‌اندازی همیشه‌روشن می‌خواهم</td><td><code>hermes gateway setup</code> (بعد از کار کردن CLI)</td><td>تلگرام، دیسکورد، اسلک یا پلتفرم دیگری را وصل کنید</td></tr>
+    <tr><td>مدل محلی یا خودمیزبان می‌خواهم</td><td><code>hermes model</code> → اندپوینت سفارشی</td><td>اندپوینت، نام مدل و طول زمینه (context) را تأیید کنید</td></tr>
+    <tr><td>پشتیبان‌گیری چند-ارائه‌دهنده‌ای می‌خواهم</td><td>اول <code>hermes model</code></td><td>مسیریابی و fallback را فقط بعد از کار کردنِ گفتگوی پایه اضافه کنید</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>قاعدهٔ سرانگشتی:</strong> اگر هرمس نمی‌تواند یک گفتگوی عادی را کامل کند، هنوز قابلیت بیشتری اضافه نکنید. اول یک گفتگوی تمیز را کار بیندازید، بعد لایه‌های گیت‌وی، کرون، مهارت، صوت یا مسیریابی را اضافه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۱ — نصب Hermes Agent</h2>
+<h3>با نصب‌کنندهٔ Hermes Desktop در مک یا ویندوز (توصیه‌شده)</h3>
+<p>برای نصب آسانِ هم‌زمانِ اپلیکیشن‌های خط فرمان و دسکتاپ، <a href="https://hermes-agent.nousresearch.com/" target="_blank" rel="noopener">نصب‌کنندهٔ Hermes Desktop</a> را از وب‌سایت ما دانلود و اجرا کنید.</p>
+
+<h3>بدون Hermes Desktop</h3>
+<p>برای نصبِ فقط-خط‌فرمان، این را اجرا کنید:</p>
+
+<h4>لینوکس / مک / WSL2 / اندروید (Termux)</h4>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash</code></pre>
+</div>
+
+<h4>ویندوز (بومی)</h4>
+<p>در PowerShell اجرا کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">powershell</span><button class="copy-btn">کپی</button></div>
+  <pre><code>iex (irm https://hermes-agent.nousresearch.com/install.ps1)</code></pre>
+</div>
+
+<div class="callout tip">
+  <div class="callout-title">💡 اندروید / Termux</div>
+  <p>اگر روی گوشی نصب می‌کنید، به راهنمای اختصاصی «<a href="https://hermes-agent.nousresearch.com/docs/getting-started/termux" target="_blank" rel="noopener">Termux</a>» مراجعه کنید؛ شامل مسیر دستیِ تست‌شده، امکانات جانبیِ پشتیبانی‌شده و محدودیت‌های فعلی مخصوص اندروید.</p>
+</div>
+
+<p>پس از پایان نصب، شل را دوباره بارگذاری کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>source ~/.bashrc   # یا source ~/.zshrc</code></pre>
+</div>
+<p>برای جزئیات کامل نصب، پیش‌نیازها و عیب‌یابی، به <a href="installation.html">راهنمای نصب</a> مراجعه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۲ — انتخاب ارائه‌دهنده</h2>
+<p>مهم‌ترین گام راه‌اندازی همین است. با <code>hermes model</code> به‌صورت تعاملی انتخاب را انجام دهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes model</code></pre>
+</div>
+
+<div class="callout tip">
+  <div class="callout-title">💡 آسان‌ترین مسیر: Nous Portal</div>
+  <p>یک اشتراک بیش از ۳۰۰ مدل را پوشش می‌دهد به‌علاوهٔ <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tool-gateway" target="_blank" rel="noopener">گیت‌وی ابزار</a> (جستجوی وب، تولید تصویر، TTS، مرورگر ابری). روی یک نصب تازه:</p>
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code>hermes setup --portal</code></pre>
+  </div>
+  <p>این فرمان شما را وارد حساب می‌کند، Nous را به‌عنوان ارائه‌دهنده تنظیم می‌کند و گیت‌وی ابزار را در یک دستور فعال می‌کند.</p>
+</div>
+
+<div class="callout note">
+  <div class="callout-title">ℹ️ حالت‌های راه‌اندازی (Setup)</div>
+  <p>روی یک نصب تازه، <code>hermes setup</code> سه حالت پیشنهاد می‌دهد:</p>
+  <ul>
+    <li><strong>راه‌اندازی سریع (Nous Portal)</strong> — ورود OAuth رایگان، بدون کلید API؛ یک مدل به‌علاوهٔ ابزارهای گیت‌وی ابزار را تنظیم می‌کند. مسیر سریعِ توصیه‌شده.</li>
+    <li><strong>راه‌اندازی کامل</strong> — خودتان از میان همهٔ ارائه‌دهنده‌ها، ابزارها و گزینه‌ها عبور می‌کنید (کلیدهای خودتان را بیاورید).</li>
+    <li><strong>تختهٔ خالی (Blank Slate)</strong> — همه‌چیز جز حداقلِ لازم برای اجرای یک ایجنت <strong>خاموش</strong> شروع می‌شود: <strong>ارائه‌دهنده و مدل، تول‌ست عملیات فایل، و تول‌ست ترمینال</strong>. بدون وب، مرورگر، اجرای کد، بینایی، حافظه، واگذاری، کرون، مهارت، پلاگین یا سرور MCP — و فشرده‌سازی، چک‌پوینت، مسیریابی هوشمند و ثبت حافظه همگی غیرفعال‌اند. پس از اعمالِ خط پایهٔ مینیمال، یکی از دو مسیر را انتخاب می‌کنید: «همه‌چیز خاموش شروع کن» (همین حالا با ایجنت مینیمال تمام کنید) یا «از تمام پیکربندی‌ها عبور کن» (ابزارها، مهارت‌ها، پلاگین‌ها، MCP و پیام‌رسانی را خودتان فعال کنید). این حالت را انتخاب کنید وقتی یک ایجنت مینیمالِ کاملاً کنترل‌شده می‌خواهید و قصد دارید دقیقاً و فقط چیزی را که لازم دارید فعال کنید.</li>
+  </ul>
+  <p>حالت Blank Slate یک فهرست صریح <code>platform_toolsets.cli</code> به‌همراه <code>agent.disabled_toolsets</code> می‌نویسد، پس هیچ چیزی که انتخاب نکرده‌اید هرگز بارگذاری نمی‌شود — حتی بعد از <code>hermes update</code>. هر چیز را بعداً با <code>hermes tools</code> فعال کنید، مهارت‌ها را با <code>hermes skills opt-in --sync</code> بکارید، یا تنظیمات را با <code>hermes setup agent</code> تنظیم کنید.</p>
+</div>
+
+<p>پیش‌فرض‌های خوب:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ارائه‌دهنده</th><th>چیست</th><th>نحوهٔ راه‌اندازی</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Nous Portal</strong></td><td>اشتراکی، بدون نیاز به پیکربندی</td><td>ورود OAuth از طریق <code>hermes model</code></td></tr>
+    <tr><td><strong>OpenAI Codex</strong></td><td>اشتراک ChatGPT یا Codex، از مدل‌های Codex استفاده می‌کند</td><td>احراز هویت Device-code از <code>hermes model</code> → <strong>ChatGPT or Codex Subscription</strong></td></tr>
+    <tr><td><strong>Anthropic</strong></td><td>مدل‌های Claude به‌صورت مستقیم — پلن Max + اعتبار مصرف اضافه (OAuth)، یا کلید API برای پرداخت به‌ازای-توکن</td><td><code>hermes model</code> → ورود OAuth (نیازمند Max + اعتبار اضافه)، یا کلید API آنتروپیک</td></tr>
+    <tr><td><strong>OpenRouter</strong></td><td>مسیریابی چند-ارائه‌دهنده‌ای روی مدل‌های متعدد</td><td>کلید API خود را وارد کنید</td></tr>
+    <tr><td><strong>Fireworks AI</strong></td><td>API مستقیم مدلِ سازگار با OpenAI</td><td>تنظیم <code>FIREWORKS_API_KEY</code></td></tr>
+    <tr><td><strong>Z.AI</strong></td><td>مدل‌های GLM / میزبانی‌شده توسط Zhipu</td><td>تنظیم <code>GLM_API_KEY</code> / <code>ZAI_API_KEY</code> (همچنین <code>Z_AI_API_KEY</code> پذیرفته می‌شود)</td></tr>
+    <tr><td><strong>Kimi / Moonshot</strong></td><td>مدل‌های کدنویسی و گفتگوی میزبانی‌شدهٔ Moonshot</td><td>تنظیم <code>KIMI_API_KEY</code> (یا <code>KIMI_CODING_API_KEY</code> مخصوص Kimi-Coding)</td></tr>
+    <tr><td><strong>Kimi / Moonshot چین</strong></td><td>اندپوینت منطقهٔ چینِ Moonshot</td><td>تنظیم <code>KIMI_CN_API_KEY</code></td></tr>
+    <tr><td><strong>Arcee AI</strong></td><td>مدل‌های Trinity</td><td>تنظیم <code>ARCEEAI_API_KEY</code></td></tr>
+    <tr><td><strong>GMI Cloud</strong></td><td>API مستقیم چندمدلی</td><td>تنظیم <code>GMI_API_KEY</code></td></tr>
+    <tr><td><strong>Actual Computer</strong></td><td>سخت‌افزار خودتان به‌عنوان خوشهٔ استنتاج خصوصی — رلهٔ میزبانی‌شده یا دیمن محلی</td><td>تنظیم <code>ACTUAL_API_KEY</code> (رله) یا <code>ACTUAL_BASE_URL=http://127.0.0.1:8080</code> (محلی، بدون کلید)</td></tr>
+    <tr><td><strong>MiniMax (OAuth)</strong></td><td>مدل پیشرفتهٔ MiniMax با OAuth مرورگر — بدون کلید API (نام مدل در <code>hermes_cli/models.py</code> ممکن است بین نسخه‌ها تغییر کند)</td><td><code>hermes model</code> → MiniMax (OAuth)</td></tr>
+    <tr><td><strong>MiniMax</strong></td><td>اندپوینت بین‌المللی MiniMax</td><td>تنظیم <code>MINIMAX_API_KEY</code></td></tr>
+    <tr><td><strong>MiniMax چین</strong></td><td>اندپوینت منطقهٔ چینِ MiniMax</td><td>تنظیم <code>MINIMAX_CN_API_KEY</code></td></tr>
+    <tr><td><strong>Alibaba Cloud</strong></td><td>مدل‌های Qwen از طریق DashScope</td><td>تنظیم <code>DASHSCOPE_API_KEY</code> (پلن Qwen Coding همچنین <code>ALIBABA_CODING_PLAN_API_KEY</code> را می‌پذیرد)</td></tr>
+    <tr><td><strong>Hugging Face</strong></td><td>بیش از ۲۰ مدل باز از طریق روتر یکپارچه (Qwen، DeepSeek، Kimi و غیره)</td><td>تنظیم <code>HF_TOKEN</code></td></tr>
+    <tr><td><strong>AWS Bedrock</strong></td><td>Claude، Nova، Llama و DeepSeek از طریق Converse API بومی</td><td>نقش IAM یا <code>aws configure</code> (<a href="https://hermes-agent.nousresearch.com/docs/guides/aws-bedrock" target="_blank" rel="noopener">راهنما</a>)</td></tr>
+    <tr><td><strong>Azure Foundry</strong></td><td>مدل‌های میزبانی‌شده در Azure AI Foundry</td><td>تنظیم <code>AZURE_FOUNDRY_API_KEY</code> + <code>AZURE_FOUNDRY_BASE_URL</code></td></tr>
+    <tr><td><strong>Google AI Studio</strong></td><td>مدل‌های Gemini از طریق API مستقیم</td><td>تنظیم <code>GOOGLE_API_KEY</code> / <code>GEMINI_API_KEY</code></td></tr>
+    <tr><td><strong>xAI</strong></td><td>مدل‌های Grok از طریق API مستقیم</td><td>تنظیم <code>XAI_API_KEY</code></td></tr>
+    <tr><td><strong>xAI Grok OAuth</strong></td><td>اشتراک SuperGrok / Premium+، بدون کلید API</td><td><code>hermes model</code> → xAI Grok OAuth</td></tr>
+    <tr><td><strong>NovitaAI</strong></td><td>درگاه API چندمدلی</td><td>تنظیم <code>NOVITA_API_KEY</code></td></tr>
+    <tr><td><strong>StepFun</strong></td><td>مدل‌های Step Plan</td><td>تنظیم <code>STEPFUN_API_KEY</code></td></tr>
+    <tr><td><strong>Xiaomi MiMo</strong></td><td>مدل‌های میزبانی‌شدهٔ شیائومی</td><td>تنظیم <code>XIAOMI_API_KEY</code></td></tr>
+    <tr><td><strong>Tencent TokenHub</strong></td><td>مدل‌های میزبانی‌شدهٔ تنسنت</td><td>تنظیم <code>TOKENHUB_API_KEY</code></td></tr>
+    <tr><td><strong>Ollama Cloud</strong></td><td>مدل‌های مدیریت‌شدهٔ Ollama</td><td>تنظیم <code>OLLAMA_API_KEY</code></td></tr>
+    <tr><td><strong>LM Studio</strong></td><td>اپ دسکتاپ محلی که API سازگار با OpenAI ارائه می‌دهد</td><td>تنظیم <code>LM_API_KEY</code> (و <code>LM_BASE_URL</code> اگر غیرپیش‌فرض است)</td></tr>
+    <tr><td><strong>Qwen OAuth</strong></td><td>OAuth مرورگرِ Qwen Portal — بدون کلید API</td><td><code>hermes model</code> → Qwen OAuth</td></tr>
+    <tr><td><strong>Kilo Code</strong></td><td>مدل‌های میزبانی‌شدهٔ KiloCode</td><td>تنظیم <code>KILOCODE_API_KEY</code></td></tr>
+    <tr><td><strong>OpenCode Zen</strong></td><td>دسترسی پرداخت-به‌میزان-مصرف به مدل‌های منتخب</td><td>تنظیم <code>OPENCODE_ZEN_API_KEY</code></td></tr>
+    <tr><td><strong>OpenCode Go</strong></td><td>اشتراک ۱۰ دلار در ماه برای مدل‌های باز</td><td>تنظیم <code>OPENCODE_GO_API_KEY</code></td></tr>
+    <tr><td><strong>DeepSeek</strong></td><td>دسترسی مستقیم به API دیپ‌سیک</td><td>تنظیم <code>DEEPSEEK_API_KEY</code></td></tr>
+    <tr><td><strong>NVIDIA NIM</strong></td><td>مدل‌های Nemotron از build.nvidia.com یا NIM محلی</td><td>تنظیم <code>NVIDIA_API_KEY</code> (اختیاری: <code>NVIDIA_BASE_URL</code>)</td></tr>
+    <tr><td><strong>GitHub Copilot</strong></td><td>اشتراک GitHub Copilot (GPT-5.x، Claude، Gemini و غیره)</td><td>OAuth از طریق <code>hermes model</code>، یا <code>COPILOT_GITHUB_TOKEN</code> / <code>GH_TOKEN</code></td></tr>
+    <tr><td><strong>GitHub Copilot ACP</strong></td><td>بک‌اند ایجنت Copilot ACP (CLI محلی <code>copilot</code> را اجرا می‌کند)</td><td><code>hermes model</code> (نیازمند CLI <code>copilot</code> + <code>copilot login</code>)</td></tr>
+    <tr><td><strong>Vercel AI Gateway</strong></td><td>مسیریابی Vercel AI Gateway</td><td>تنظیم <code>AI_GATEWAY_API_KEY</code></td></tr>
+    <tr><td><strong>اندپوینت سفارشی</strong></td><td>vLLM، SGLang، Ollama یا هر API سازگار با OpenAI</td><td>تنظیم Base URL + کلید API</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>برای اغلب کاربران تازه‌کار: یک ارائه‌دهنده انتخاب کنید و پیش‌فرض‌ها را بپذیرید، مگر اینکه بدانید چرا می‌خواهید تغییرشان دهید. کاتالوگ کامل ارائه‌دهندگان به‌همراه متغیرهای محیطی و مراحل راه‌اندازی در صفحهٔ «<a href="https://hermes-agent.nousresearch.com/docs/integrations/providers" target="_blank" rel="noopener">ارائه‌دهندگان</a>» قرار دارد.</p>
+
+<div class="callout caution">
+  <div class="callout-title">⛔ حداقل زمینه (Context): ۶۴ هزار توکن</div>
+  <p>هرمس ایجنت به مدلی با حداقل <strong>۶۴٬۰۰۰ توکن</strong> زمینه نیاز دارد. مدل‌های با پنجرهٔ کوچک‌تر نمی‌توانند حافظهٔ کاریِ لازم برای گردش‌کارهای چندمرحله‌ایِ فراخوانی ابزار را حفظ کنند و هنگام راه‌اندازی رد می‌شوند. اغلب مدل‌های میزبانی‌شده (Claude، GPT، Gemini، Qwen، DeepSeek) به‌راحتی این حد را دارند. اگر مدل محلی اجرا می‌کنید، اندازهٔ زمینه را روی حداقل ۶۴K تنظیم کنید (مثلاً <code>--ctx-size 65536</code> برای llama.cpp یا <code>-c 65536</code> برای Ollama).</p>
+</div>
+
+<div class="callout tip">
+  <div class="callout-title">💡 بدون قفل‌شدگی</div>
+  <p>هر زمان خواستید می‌توانید با <code>hermes model</code> ارائه‌دهنده را عوض کنید. برای فهرست کامل همهٔ ارائه‌دهندگان و جزئیات راه‌اندازی به «<a href="https://hermes-agent.nousresearch.com/docs/integrations/providers" target="_blank" rel="noopener">ارائه‌دهندگان هوش مصنوعی</a>» مراجعه کنید.</p>
+</div>
+
+<h3>تنظیمات کجا ذخیره می‌شوند؟</h3>
+<p>هرمس رمزها را از پیکربندی عادی جدا نگه می‌دارد:</p>
+<ul>
+  <li><strong>رمزها و توکن‌ها</strong> ← <code>~/.hermes/.env</code></li>
+  <li><strong>تنظیمات غیررمزی</strong> ← <code>~/.hermes/config.yaml</code></li>
+</ul>
+<p>آسان‌ترین راهِ درست‌نوشتن مقادیر، استفاده از CLI است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes config set model anthropic/claude-opus-4.6
+hermes config set terminal.backend docker
+hermes config set OPENROUTER_API_KEY sk-or-...</code></pre>
+</div>
+<p>مقدار درست به‌طور خودکار به فایل درست می‌رود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۳ — اولین گفتگو را اجرا کنید</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes            # CLI کلاسیک
+hermes --tui      # TUI مدرن (توصیه‌شده)</code></pre>
+</div>
+<p>یک بنر خوش‌آمدگویی با مدل شما، ابزارهای موجود و مهارت‌ها خواهید دید. از پرامپتی استفاده کنید که مشخص و راحتِ تأیید باشد:</p>
+
+<div class="callout tip">
+  <div class="callout-title">💡 رابط خود را انتخاب کنید</div>
+  <p>هرمس با دو رابط ترمینال عرضه می‌شود: CLI کلاسیکِ <code>prompt_toolkit</code> و <a href="https://hermes-agent.nousresearch.com/docs/user-guide/tui" target="_blank" rel="noopener">TUI</a> جدیدتر با اورلی‌های مودال، انتخاب با موس و ورودی غیرمسدودکننده. هر دو یک نشست‌ها، فرمان‌های اسلش و پیکربندی مشترک دارند — هر کدام را با <code>hermes</code> و <code>hermes --tui</code> امتحان کنید.</p>
+</div>
+
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">پرامپت پیشنهادی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Summarize this repo in 5 bullets and tell me what the main entrypoint is.</code></pre>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">پرامپت پیشنهادی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Check my current directory and tell me what looks like the main project file.</code></pre>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">پرامپت پیشنهادی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Help me set up a clean GitHub PR workflow for this codebase.</code></pre>
+</div>
+
+<p><strong>ظاهرِ موفقیت چه هست؟</strong></p>
+<ul>
+  <li>بنر مدل/ارائه‌دهندهٔ انتخابیِ شما را نشان می‌دهد</li>
+  <li>هرمس بدون خطا پاسخ می‌دهد</li>
+  <li>در صورت نیاز می‌تواند از ابزار استفاده کند (ترمینال، خواندن فایل، جستجوی وب)</li>
+  <li>گفتگو برای بیش از یک نوبت به‌طور عادی ادامه پیدا می‌کند</li>
+</ul>
+<p>اگر این کار کرد، از سخت‌ترین بخش عبور کرده‌اید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۴ — کار کردن نشست‌ها را تأیید کنید</h2>
+<p>قبل از ادامه، مطمئن شوید ازسرگیری (resume) کار می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes --continue    # ازسرگیری جدیدترین نشست
+hermes -c            # شکل کوتاه</code></pre>
+</div>
+<p>باید شما را به همان نشستی که همین الان داشتید برگرداند. اگر برنگشت، بررسی کنید آیا در همان پروفایل هستید و آیا نشست واقعاً ذخیره شده است. این بعداً وقتی با چند راه‌اندازی یا چند ماشین سروکار دارید اهمیت پیدا می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> گام ۵ — قابلیت‌های کلیدی را امتحان کنید</h2>
+
+<h3>استفاده از ترمینال</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">پرامپت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>❯ What's my disk usage? Show the top 5 largest directories.</code></pre>
+</div>
+<p>ایجنت از طرف شما دستورات ترمینال را اجرا و نتایج را نشان می‌دهد.</p>
+
+<h3>فرمان‌های اسلش</h3>
+<p><code>/</code> را تایپ کنید تا فهرست تکمیل-خودکار همهٔ فرمان‌ها باز شود:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرمان</th><th>چه می‌کند</th></tr></thead>
+  <tbody>
+    <tr><td><code>/help</code></td><td>نمایش همهٔ فرمان‌های موجود</td></tr>
+    <tr><td><code>/tools</code></td><td>فهرست ابزارهای موجود</td></tr>
+    <tr><td><code>/model</code></td><td>تعویض تعاملی مدل</td></tr>
+    <tr><td><code>/personality pirate</code></td><td>امتحان یک شخصیت سرگرم‌کننده</td></tr>
+    <tr><td><code>/save</code></td><td>ذخیرهٔ گفتگو</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>ورودی چندخطی</h3>
+<p>برای افزودن خط جدید، <code>Alt+Enter</code>، <code>Ctrl+J</code> یا <code>Shift+Enter</code> را بزنید. <code>Shift+Enter</code> به ترمینالی نیاز دارد که آن را به‌صورت دنباله‌ای مجزا بفرستد (به‌طور پیش‌فرض Kitty / foot / WezTerm / Ghostty؛ iTerm2 / Alacritty / ترمینال VS Code پس از فعال‌سازی پروتکل کیبورد Kitty). <code>Alt+Enter</code> و <code>Ctrl+J</code> در همهٔ ترمینال‌ها کار می‌کنند.</p>
+
+<h3>قطع کردن ایجنت</h3>
+<p>اگر ایجنت زیادی طول می‌کشد، یک پیام جدید تایپ کرده و Enter بزنید — کار فعلی قطع و به دستور جدید شما سوئیچ می‌شود. <code>Ctrl+C</code> هم کار می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> گام ۶ — لایهٔ بعدی را اضافه کنید</h2>
+<p>فقط بعد از کار کردنِ گفتگوی پایه. هر چه لازم داشتید انتخاب کنید:</p>
+
+<h3>بات یا دستیار مشترک</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway setup    # پیکربندی تعاملی پلتفرم‌ها</code></pre>
+</div>
+<p>اتصال <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram" target="_blank" rel="noopener">تلگرام</a>، <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord" target="_blank" rel="noopener">دیسکورد</a>، <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/slack" target="_blank" rel="noopener">اسلک</a>، <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/whatsapp" target="_blank" rel="noopener">واتساپ</a>، <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/signal" target="_blank" rel="noopener">سیگنال</a>، <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/email" target="_blank" rel="noopener">ایمیل</a>، <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/homeassistant" target="_blank" rel="noopener">هوم‌اسیسنت</a> یا <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/teams" target="_blank" rel="noopener">مایکروسافت تیمز</a>.</p>
+
+<h3>اتوماسیون و ابزارها</h3>
+<ul>
+  <li><code>hermes tools</code> — تنظیم دسترسی ابزارها برای هر پلتفرم</li>
+  <li><code>hermes skills</code> — مرور و نصب گردش‌کارهای قابل‌استفادهٔ مجدد</li>
+  <li>کرون — فقط بعد از پایدار شدنِ راه‌اندازی بات یا CLI</li>
+</ul>
+
+<h3>ترمینال ایزوله (Sandbox)</h3>
+<p>برای ایمنی، ایجنت را در کانتینر داکر یا روی سرور راهن اجرا کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes config set terminal.backend docker    # ایزوله‌سازی با داکر
+hermes config set terminal.backend ssh       # سرور راهن</code></pre>
+</div>
+<p>برای سندباکس‌های داکری می‌توانید <strong>پروکسی خروجیِ تزریق اعتبارنامه</strong> را هم فعال کنید تا سندباکس هرگز کلیدهای واقعی API شما را نبیند — فقط توکن‌های ماتِ پروکسی که منحصراً از پشت یک دیمنِ محلیِ TLS-رهگیر کار می‌کنند. به «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/egress/iron-proxy" target="_blank" rel="noopener">پروکسی خروجی</a>» مراجعه کنید. راه‌اندازی: <code>hermes egress setup &amp;&amp; hermes egress start</code>؛ <code>hermes setup terminal</code> هم کاربران داکر را به آن راهنمایی می‌کند. Modal، SSH، Daytona و Singularity هنوز به آن متصل نشده‌اند.</p>
+
+<h3>حالت صوتی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># از پوشهٔ نصب هرمس (نصب‌کنندهٔ curl آن را در ~/.hermes/hermes-agent روی لینوکس/مک
+# یا %LOCALAPPDATA%\hermes\hermes-agent روی ویندوز قرار داده است):
+cd ~/.hermes/hermes-agent
+uv pip install --python ./venv/bin/python -e ".[voice]"
+# شامل faster-whisper برای تبدیل محلی و رایگان گفتار به متن است</code></pre>
+</div>
+<p>سپس در CLI: <code>/voice on</code>. برای ضبط <code>Ctrl+B</code> را بزنید. به «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/voice-mode" target="_blank" rel="noopener">حالت صوتی</a>» مراجعه کنید.</p>
+
+<h3>مهارت‌ها (Skills)</h3>
+<p>مهارت‌ها سندهای دستورالعملِ در-لحظه‌اند که به هرمس یاد می‌دهند یک کار مشخص را چطور انجام دهد — استقرار روی کوبرنتیز، باز کردن PR در گیت‌هاب، فاین‌تیون کردن یک مدل، جستجوی گیف. هر مهارت یک فایل <code>SKILL.md</code> با یک نام، یک توضیح و یک رویهٔ گام‌به‌گام است. ایجنت توضیح‌های کوتاه را رایگان می‌خواند و محتوای کامل مهارت را فقط وقتی بارگذاری می‌کند که یک کار واقعاً به آن نیاز داشته باشد؛ پس افزودن مهارت‌ها هر درخواست را متورم نمی‌کند.</p>
+<p>هرمس با کاتالوگی از مهارت‌های داخلی عرضه می‌شود که از قبل در <code>~/.hermes/skills/</code> نصب‌اند. می‌توانید از Skills Hub مهارت بیشتری اضافه کنید، یا خودتان بنویسید.</p>
+<p><strong>مرور و نصب از هاب:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes skills browse                      # فهرست همهٔ موارد موجود
+hermes skills search kubernetes           # یافتن مهارت با کلیدواژه
+hermes skills install openai/skills/k8s   # نصب یکی (ابتدا اسکن امنیتی اجرا می‌شود)</code></pre>
+</div>
+<p>آرگومان نصب، یک اسلاگ <code>source/path</code> از هاب است — <code>openai/skills/k8s</code> یعنی مهارت <code>k8s</code> از کاتالوگ OpenAI. <code>hermes skills browse</code> اسلاگ‌های دقیقِ مورد نیاز را نشان می‌دهد.</p>
+<p><strong>استفاده از مهارت</strong> — هر مهارتِ نصب‌شده به‌طور خودکار یک فرمان اسلش می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/k8s deploy the staging manifest          # اجرای مهارت همراه با یک درخواست
+/k8s                                       # بارگذاری و گذاشتن تصمیم به هرمس</code></pre>
+</div>
+<p>این هم در CLI و هم در هر پلتفرم پیام‌رسانیِ متصل کار می‌کند. لازم نیست همه‌چیز را از اول نصب کنید — ایجنت در طول گفتگوی عادی، وقتی کاری با یکی از مهارت‌ها بخواند، خودش مهارت داخلی درست را برمی‌دارد.</p>
+<p>برای نوشتن مهارت خودتان، پوشه‌های مهارت بیرونی و فهرست کامل منابع هاب، به «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skills" target="_blank" rel="noopener">سیستم مهارت‌ها</a>» مراجعه کنید.</p>
+
+<h3>سرورهای MCP</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — افزودن به ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  github:
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "ghp_xxx"</code></pre>
+</div>
+
+<h3>یکپارچه‌سازی با ادیتور (ACP)</h3>
+<p>پشتیبانی ACP همراه با بستهٔ استاندارد <code>[all]</code> عرضه می‌شود، پس نصب‌کنندهٔ curl از قبل شامل آن است. فقط اجرا کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes acp</code></pre>
+</div>
+<p>(اگر بدون <code>[all]</code> نصب کرده‌اید، اول <code>cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[acp]"</code> را اجرا کنید.)</p>
+<p>به «<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/acp" target="_blank" rel="noopener">یکپارچه‌سازی ادیتور ACP</a>» مراجعه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> حالت‌های رایج شکست</h2>
+<p>این‌ها مشکلاتی‌اند که بیشترین وقت را هدر می‌دهند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نشانه</th><th>علت محتمل</th><th>راه‌حل</th></tr></thead>
+  <tbody>
+    <tr><td>هرمس باز می‌شود ولی پاسخ‌های خالی یا خراب می‌دهد</td><td>احراز هویت ارائه‌دهنده یا انتخاب مدل اشتباه است</td><td><code>hermes model</code> را دوباره اجرا و ارائه‌دهنده، مدل و احراز هویت را تأیید کنید</td></tr>
+    <tr><td>اندپوینت سفارشی «کار می‌کند» ولی بی‌معنی برمی‌گرداند</td><td>Base URL، نام مدل اشتباه است یا واقعاً سازگار با OpenAI نیست</td><td>اندپوینت را اول در یک کلاینت جدا تأیید کنید</td></tr>
+    <tr><td>گیت‌وی بالا می‌آید ولی هیچ‌کس نمی‌تواند پیام بدهد</td><td>توکن بات، فهرست مجاز یا راه‌اندازی پلتفرم ناقص است</td><td><code>hermes gateway setup</code> را دوباره اجرا و <code>hermes gateway status</code> را بررسی کنید</td></tr>
+    <tr><td><code>hermes --continue</code> نشست قدیمی را پیدا نمی‌کند</td><td>پروفایل عوض شده یا نشست هرگز ذخیره نشده</td><td><code>hermes sessions list</code> را بررسی و در پروفایل درست بودن را تأیید کنید</td></tr>
+    <tr><td>مدل در دسترس نیست یا رفتار جایگزینِ عجیب</td><td>تنظیمات مسیریابی یا fallback ارائه‌دهنده بیش از حد تهاجمی است</td><td>تا پایدار شدن ارائه‌دهندهٔ پایه، مسیریابی را خاموش نگه دارید</td></tr>
+    <tr><td><code>hermes doctor</code> مشکلات پیکربندی را علامت می‌زند</td><td>مقادیر پیکربندی مفقود یا کهنه‌اند</td><td>پیکربندی را درست کنید و قبل از افزودن قابلیت، یک گفتگوی ساده را دوباره تست کنید</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> جعبه‌ابزار بازیابی</h2>
+<p>وقتی احساس خرابی کردید، به این ترتیب پیش بروید:</p>
+<ol>
+  <li><code>hermes doctor</code></li>
+  <li><code>hermes model</code></li>
+  <li><code>hermes setup</code></li>
+  <li><code>hermes sessions list</code></li>
+  <li><code>hermes --continue</code></li>
+  <li><code>hermes gateway status</code></li>
+</ol>
+<p>این دنباله شما را از «حسِ خرابی» سریع به یک حالت شناخته‌شده برمی‌گرداند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> مرجع سریع</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرمان</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>hermes</code></td><td>شروع گفتگو</td></tr>
+    <tr><td><code>hermes model</code></td><td>انتخاب ارائه‌دهنده و مدل LLM</td></tr>
+    <tr><td><code>hermes tools</code></td><td>پیکربندی ابزارهای فعال برای هر پلتفرم</td></tr>
+    <tr><td><code>hermes setup</code></td><td>ویزارد کامل راه‌اندازی (پیکربندی همه‌چیز یک‌جا)</td></tr>
+    <tr><td><code>hermes doctor</code></td><td>تشخیص مشکلات</td></tr>
+    <tr><td><code>hermes update</code></td><td>به‌روزرسانی به آخرین نسخه</td></tr>
+    <tr><td><code>hermes gateway</code></td><td>راه‌اندازی گیت‌وی پیام‌رسانی</td></tr>
+    <tr><td><code>hermes --continue</code></td><td>ازسرگیری آخرین نشست</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> گام‌های بعدی</h2>
+<ul>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/cli" target="_blank" rel="noopener">راهنمای CLI</a></strong> — تسلط بر رابط ترمینال</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/configuration" target="_blank" rel="noopener">پیکربندی</a></strong> — سفارشی‌سازی راه‌اندازی‌تان</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/" target="_blank" rel="noopener">گیت‌وی پیام‌رسانی</a></strong> — اتصال تلگرام، دیسکورد، اسلک، واتساپ، سیگنال، ایمیل، هوم‌اسیسنت، تیمز و بیشتر</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tools" target="_blank" rel="noopener">ابزارها و تول‌ست‌ها</a></strong> — کاوش قابلیت‌های موجود</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/integrations/providers" target="_blank" rel="noopener">ارائه‌دهندگان هوش مصنوعی</a></strong> — فهرست کامل ارائه‌دهندگان و جزئیات راه‌اندازی</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skills" target="_blank" rel="noopener">سیستم مهارت‌ها</a></strong> — گردش‌کارها و دانشِ قابل‌استفادهٔ مجدد</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/guides/tips" target="_blank" rel="noopener">نکات و بهترین شیوه‌ها</a></strong> — نکات کاربران حرفه‌ای</li>
+  <li><strong><a href="https://hermes-agent.nousresearch.com/docs/reference/faq#exporting-hermes-to-another-machine" target="_blank" rel="noopener">انتقال به ماشین دیگر</a></strong> — <code>hermes backup</code> کل راه‌اندازی‌تان را منتقل می‌کند (یا <a href="https://hermes-agent.nousresearch.com/docs/reference/faq#moving-a-single-profile-to-another-machine" target="_blank" rel="noopener">یک پروفایل واحد</a>)؛ نیازی به ساختن از صفر نیست</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="installation.html"><span class="dir">→ قبلی</span><span class="ttl">نصب</span></a>
+  <a class="next" href="learning-path.html"><span class="dir">بعدی ←</span><span class="ttl">مسیر یادگیری</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/getting-started/quickstart" target="_blank" rel="noopener">Quickstart</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
