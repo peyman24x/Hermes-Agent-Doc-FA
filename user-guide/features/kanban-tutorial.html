@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>آموزش کانبان — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban-tutorial" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>آموزش کانبان</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>آموزش کانبان</h1>
+<p>مروری گام‌به‌گام بر چهار مورد-کاربردی که سیستم کانبان هرمس برای آنها طراحی شده، با داشبورد باز در مرورگر. اگر هنوز <a href="kanban.html">نگاه کلی کانبان</a> را نخوانده‌اید، از آنجا شروع کنید — این آموزش فرض می‌کند می‌دانید تسک، run، assignee و dispatcher چه هستند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> راه‌اندازی</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes kanban init           # optional; first `hermes kanban &lt;anything&gt;` auto-inits
+hermes dashboard             # opens http://127.0.0.1:9119 in your browser
+# click Kanban in the left nav</code></pre>
+</div>
+<p>داشبورد راحت‌ترین جا برای <b>شما</b>ست تا سیستم را تماشا کنید. کارگرانِ ایجنتی که dispatcher به وجود می‌آورد هرگز داشبورد یا CLI را نمی‌بینند — آنها برد را از طریق تول‌ست اختصاصی <code>kanban_*</code> <a href="kanban.html#how-workers-interact-with-the-board">هدایت می‌کنند</a> ‏(<code>kanban_show</code>، ‏<code>kanban_list</code>، ‏<code>kanban_complete</code>، ‏<code>kanban_block</code>، ‏<code>kanban_heartbeat</code>، ‏<code>kanban_comment</code>، ‏<code>kanban_attach</code>، ‏<code>kanban_attach_url</code>، ‏<code>kanban_attachments</code>، ‏<code>kanban_create</code>، ‏<code>kanban_link</code>، ‏<code>kanban_unblock</code>). هر سه سطح — داشبورد، CLI، ابزارهای کارگر — از طریق همان پایگاه‌دادهٔ SQLite مخصوص هر برد مسیریابی می‌شوند ‏(<code>~/.hermes/kanban.db</code> برای برد پیش‌فرض و <code>~/.hermes/kanban/boards/&lt;slug&gt;/kanban.db</code> برای هر بردی که بعداً بسازید)، پس هر برد فارغ از اینکه تغییر از کدام سمت آمده باشد سازگار می‌ماند.</p>
+<p>این آموزش سراسر از برد <code>default</code> استفاده می‌کند. اگر صف‌های ایزولهٔ متعدد می‌خواهید ‏( یکی به‌ازای هر پروژه / مخزن / حوزه)، بخش <a href="kanban.html#boards-multi-project">بردها ‏(چند-پروژه‌ای)</a> را در نگاه کلی ببینید — همان جریان‌های CLI / داشبورد / کارگر برای هر برد اعمال می‌شود و کارگران فیزیکالاً نمی‌توانند تسک‌های بردهای دیگر را ببینند.</p>
+<div class="callout note">
+  <div class="callout-title">📌 قرارداد این آموزش</div>
+  <p>در سراسر آموزش، <b>بلوک‌های کدی با برچسب <code>bash</code> دستوراتی هستند که «شما» اجرا می‌کنید.</b> بلوک‌های کدی با برچسب <code># worker tool calls</code> چیزی‌اند که مدلِ کارگرِ spawn‌شده به‌صورت فراخوانی ابزار صادر می‌کند — اینها را نشان می‌دهیم تا حلقه را سر-تا-سر ببینید، نه اینکه خودتان قرار باشد اجرایشان کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> برد در یک نگاه</h2>
+<figure class="doc-figure">
+<img src="https://hermes-agent.nousresearch.com/docs/img/kanban-tutorial/01-board-overview.png" alt="Kanban board overview" loading="lazy">
+<figcaption>نمای کلی برد کانبان — تصویر از نسخهٔ اصلی مستندات</figcaption>
+</figure>
+<p>شش ستون، از چپ به راست:</p>
+<ul>
+  <li><b>Triage</b> — ایده‌های خام. به‌طور پیش‌فرض dispatcher روی تسک‌های اینجا <b>تجزیه‌گر ‏(decomposer)</b> را خودکار اجرا می‌کند: تجزیه‌گر داخلی از <code>auxiliary.kanban_decomposer</code> استفاده می‌کند، فهرست پروفایل‌ها + توضیحات شما را می‌خواند و گرافی از تسک‌های فرزند تولید می‌کند که به بهترین متخصص‌های مناسب مسیریابی می‌شوند. تسک اصلی به‌عنوان والد زنده نگه داشته می‌شود تا assignee اش ‏(<code>kanban.orchestrator_profile</code> یا پروفایل پیش‌فرض فعال وقتی تنظیم نشده) وقتی همه‌چیز تمام شد دوباره بیدار شود و تکمیل را قضاوت کند. برای تعویض حالت، حبهٔ <b>Orchestration: Auto/Manual</b> را بالای صفحهٔ کانبان بزنید. در حالت Manual روی کارت <b>⚗ Decompose</b> را کلیک کنید یا <code>hermes kanban decompose &lt;id&gt;</code> / ‏<code>/kanban decompose &lt;id&gt;</code> را اجرا کنید. برای تسک‌های تکی که fan-out نمی‌خواهند، <b>✨ Specify</b> یک بازنویسی spec یک‌باره انجام می‌دهد ‏(هدف، رویکرد، معیارهای پذیرش) و تسک را به <code>todo</code> ارتقا می‌دهد. مدل‌ها را زیر <code>auxiliary.kanban_decomposer</code> و <code>auxiliary.triage_specifier</code> در <code>config.yaml</code> پیکربندی کنید. بخش <a href="kanban.html#auto-vs-manual-orchestration">ارجاع خودکار در برابر دستی</a> را در راهنمای اصلی کانبان ببینید.</li>
+  <li><b>Todo</b> — ساخته‌شده ولی منتظر وابستگی‌ها، یا هنوز محول‌نشده.</li>
+  <li><b>Ready</b> — محول‌شده و منتظر ادعا توسط dispatcher.</li>
+  <li><b>In progress</b> — کارگری فعالانه در حال اجرای تسک است. با روشنبودن «Lanes by profile» ‏(پیش‌فرض) این ستون بر اساس assignee زیرگروه‌بندی می‌شود تا یک‌نگاهی ببینید هر کارگر چه می‌کند.</li>
+  <li><b>Blocked</b> — کارگری ورودی انسانی خواسته، یا مدارشکن عمل کرده است.</li>
+  <li><b>Done</b> — تکمیل‌شده.</li>
+</ul>
+<p>نوار بالا فیلترهایی برای جستجو، tenant و assignee دارد، به‌همراه کلید <code>Lanes by profile</code> و دکمهٔ <code>Nudge dispatcher</code> که همین حالا یک tick دیسپچ اجرا می‌کند به‌جای انتظار برای بازهٔ بعدی دیمن. کلیک روی هر کارت، کشوی آن را در سمت راست باز می‌کند.</p>
+<h3>نمای تخت</h3>
+<p>اگر لِین‌های پروفایل شلوغ‌اند، «Lanes by profile» را خاموش کنید تا ستون In Progress به یک فهرست تختِ مرتب‌شده بر اساس زمان claim جمع شود:</p>
+<figure class="doc-figure">
+<img src="https://hermes-agent.nousresearch.com/docs/img/kanban-tutorial/02-board-flat.png" alt="Board with lanes by profile off" loading="lazy">
+<figcaption>برد با لِین‌های پروفایل خاموش — تصویر از نسخهٔ اصلی</figcaption>
+</figure>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> داستان ۱ — توسعه‌دهندهٔ تنها در حال انتشار یک قابلیت</h2>
+<p>دارید یک قابلیت می‌سازید. جریان کلاسیک: طراحی اسکیما، پیاده‌سازی API، نوشتن تست‌ها. سه تسک با وابستگی والد→فرزند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>SCHEMA=$(hermes kanban create "Design auth schema" \
+    --assignee backend-dev --tenant auth-project --priority 2 \
+    --body "Design the user/session/token schema for the auth module." \
+    --json | jq -r .id)
+
+API=$(hermes kanban create "Implement auth API endpoints" \
+    --assignee backend-dev --tenant auth-project --priority 2 \
+    --parent $SCHEMA \
+    --body "POST /register, POST /login, POST /refresh, POST /logout." \
+    --json | jq -r .id)
+
+hermes kanban create "Write auth integration tests" \
+    --assignee qa-dev --tenant auth-project --priority 2 \
+    --parent $API \
+    --body "Cover happy path, wrong password, expired token, concurrent refresh."</code></pre>
+</div>
+<p>چون <code>API</code> والدش <code>SCHEMA</code> است و <code>tests</code> والدش <code>API</code>، فقط <code>SCHEMA</code> در وضعیت <code>ready</code> شروع می‌شود. دو مورد دیگر در <code>todo</code> می‌مانند تا والدهایشان کامل شوند. این موتور ارتقای وابستگی است که کارش را می‌کند — هیچ کارگر دیگری تا وقتی API ای برای تست نباشد سراغ نوشتن تست نمی‌رود.</p>
+<p>در tick بعدی dispatcher ‏(پیش‌فرض ۶۰ ثانیه، یا بلافاصله اگر <b>Nudge dispatcher</b> را بزنید) پروفایل <code>backend-dev</code> به‌عنوان کارگر با <code>HERMES_KANBAN_TASK=$SCHEMA</code> در env اش spawn می‌شود. حلقهٔ فراخوانی-ابزار کارگر از داخل ایجنت این‌طور دیده می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang"># worker tool calls</span><button class="copy-btn">کپی</button></div>
+  <pre><code># worker tool calls — NOT commands you run
+kanban_show()
+# → returns title, body, worker_context, parents, prior attempts, comments
+
+# (worker reads worker_context, uses terminal/file tools to design the schema,
+#  write migrations, run its own checks, commit — the real work happens here)
+
+kanban_heartbeat(note="schema drafted, writing migrations now")
+
+kanban_complete(
+    summary="users(id, email, pw_hash), sessions(id, user_id, jti, expires_at); "
+            "refresh tokens stored as sessions with type='refresh'",
+    metadata={
+        "changed_files": ["migrations/001_users.sql", "migrations/002_sessions.sql"],
+        "decisions": ["bcrypt for hashing", "JWT for session tokens",
+                      "7-day refresh, 15-min access"],
+    },
+)</code></pre>
+</div>
+<p>‏<code>kanban_show</code> مقدار <code>task_id</code> را به‌طور پیش‌فرض روی <code>$HERMES_KANBAN_TASK</code> می‌گذارد، پس کارگر لازم نیست شناسهٔ خودش را بداند. ‏<code>kanban_complete</code> خلاصه + metadata را روی سطر فعلی <code>task_runs</code> می‌نویسد، آن run را می‌بندد و تسک را به <code>done</code> منتقل می‌کند — همه در یک جهش اتمی از طریق <code>kanban_db</code>.</p>
+<p>وقتی <code>SCHEMA</code> به <code>done</code> می‌رسد، موتور وابستگی <code>API</code> را خودکار به <code>ready</code> ارتقا می‌دهد. کارگرِ API وقتی آن را برمی‌دارد <code>kanban_show()</code> را صدا می‌زند و خلاصه و metadata ی <code>SCHEMA</code> را پیوستِ تحویلِ والد می‌بیند — پس تصمیمات اسکیما را بدون بازخوانی یک سند طراحی طولانی می‌داند.</p>
+<p>روی برد روی تسک اسکیمای تکمیل‌شده کلیک کنید؛ کشو همه‌چیز را نشان می‌دهد:</p>
+<figure class="doc-figure">
+<img src="https://hermes-agent.nousresearch.com/docs/img/kanban-tutorial/03-drawer-schema-task.png" alt="Solo dev — completed schema task drawer" loading="lazy">
+<figcaption>کشوی تسک اسکیمای تکمیل‌شده — تصویر از نسخهٔ اصلی</figcaption>
+</figure>
+<p>بخش Run History پایین کشو افزودهٔ کلیدی است. یک تلاش: نتیجهٔ <code>completed</code>، کارگر <code>@backend-dev</code>، مدت، زمان و خلاصهٔ تحویل به‌طور کامل. حباب metadata ‏(<code>changed_files</code>، ‏<code>decisions</code>) هم روی run ذخیره می‌شود و به هر کارگر پایین‌دستی که این والد را بخواند نمایش داده می‌شود.</p>
+<p>می‌توانید هر لحظه از ترمینال همان داده را بررسی کنید — این دستورات «شما» هستید که به برد سرک می‌کشید، نه کارگر:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes kanban show $SCHEMA
+hermes kanban runs $SCHEMA
+# #  OUTCOME       PROFILE       ELAPSED  STARTED
+# 1  completed     backend-dev        0s  2026-04-27 19:34
+#     → users(id, email, pw_hash), sessions(id, user_id, jti, expires_at); refresh tokens ...</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> داستان ۲ — مزرعهٔ کارگران ‏(Fleet Farming)</h2>
+<p>سه کارگر دارید ‏(یک مترجم، یک رونویس‌کننده، یک کپی‌رایتر) و انبوهی تسک مستقل. می‌خواهید هر سه به‌موازات کار کنند و پیشرفت قابل‌مشاهده‌ای داشته باشند. ساده‌ترین مورد-کاربردی کانبان است و همان که طراحی اولیه برایش بهینه شده بود.</p>
+<p>کارها را بسازید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>for lang in Spanish French German; do
+    hermes kanban create "Translate homepage to $lang" \
+        --assignee translator --tenant content-ops
+done
+for i in 1 2 3 4 5; do
+    hermes kanban create "Transcribe Q3 customer call #$i" \
+        --assignee transcriber --tenant content-ops
+done
+for sku in 1001 1002 1003 1004; do
+    hermes kanban create "Generate product description: SKU-$sku" \
+        --assignee copywriter --tenant content-ops
+done</code></pre>
+</div>
+<p>گیت‌وی را روشن کنید و بروید سراغ کارتان — همان dispatcher تعبیه‌شده را میزبانی می‌کند که تسک‌های هر سه پروفایل متخصص را روی همان kanban.db برمی‌دارد:</p>
+<div class="codebox"><pre><code>hermes gateway start</code></pre></div>
+<p>حالا برد را روی <code>content-ops</code> فیلتر کنید ‏(یا فقط «Transcribe» را جستجو کنید) تا این را ببینید:</p>
+<figure class="doc-figure">
+<img src="https://hermes-agent.nousresearch.com/docs/img/kanban-tutorial/07-fleet-transcribes.png" alt="Fleet view filtered to transcribe tasks" loading="lazy">
+<figcaption>نمای مزرعه فیلترشده روی تسک‌های رونویسی — تصویر از نسخهٔ اصلی</figcaption>
+</figure>
+<p>دو رونویسی تمام‌شده، یکی در حال اجرا، دو مورد ready در انتظار tick بعدی dispatcher. ستون In Progress بر اساس پروفایل گروه‌بندی شده ‏(پیش‌فرض «Lanes by profile») پس تسک فعال هر کارگر را بدون گشتن در فهرستی مخلوط می‌بینید. dispatcher به‌محض تکمیل تسک فعلی، تسک ready بعدی را به running ارتقا می‌دهد. با سه دیمن که روی سه مخزن assignee موازی کار می‌کنند، کل صف محتوا بدون هیچ ورودی انسانی بیشتری تخلیه می‌شود.</p>
+<p><b>هرچه داستان ۱ دربارهٔ تحویل ساختاریافته گفت اینجا هم برقرار است.</b> کارگرِ مترجم هنگام اتمام یک تماس، ‏<code>kanban_complete(summary="translated 4 pages, style matched existing marketing voice", metadata={"duration_seconds": 720, "tokens_used": 2100})</code> صادر می‌کند — برای تحلیل‌ها و برای هر تسک پایین‌دستی که به آن وابسته است مفید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> داستان ۳ — خط‌لولهٔ نقش‌ها با تلاش مجدد</h2>
+<p>اینجاست که کانبان در مقابل یک فهرست TODO تخت ارزش واقعی‌اش را نشان می‌دهد. یک PM یک spec می‌نویسد. یک مهندس پیاده‌سازی می‌کند. یک بازبین تلاش اول را رد می‌کند. مهندس با تغییرات دوباره تلاش می‌کند. بازبین تأیید می‌کند.</p>
+<p>نمای داشبورد، فیلترشده روی <code>auth-project</code>:</p>
+<figure class="doc-figure">
+<img src="https://hermes-agent.nousresearch.com/docs/img/kanban-tutorial/08-pipeline-auth.png" alt="Pipeline view for a multi-role feature" loading="lazy">
+<figcaption>نمای خط‌لوله برای یک قابلیت چندنقشی — تصویر از نسخهٔ اصلی</figcaption>
+</figure>
+<p>اسکرین‌شات از مدل <b>کارت پایین‌دستیِ از-پیش-ساخته</b> استفاده می‌کند: کارت پیاده‌سازی یک فرزندِ بازبینِ اختصاصی دارد. در آن مدل مهندس باید وقتی پیاده‌سازی آماده است <code>kanban_complete</code> را صدا بزند تا فرزندِ بازبین بتواند <code>todo</code> را ترک کند. هرگز والدِ پیاده‌سازی را صرفاً برای درخواست بازبینی بلاک نکنید.</p>
+<p>برای گردش‌کارهایی که همان کارت مالکیت پیاده‌سازی و بازبینی را دارد، از چرخه‌حیات بازبینی درجه‌یک استفاده کنید. رقص کامل implement → review → changes → re-review چنین است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang"># worker tool calls</span><button class="copy-btn">کپی</button></div>
+  <pre><code># --- Engineer: first implementation attempt ---
+kanban_show()
+# (write code, run tests, prepare the candidate)
+kanban_request_review(
+    summary="implemented reset flow; candidate is ready for review",
+    metadata={"changed_files": ["auth/reset.py"], "tests_run": 8},
+    reviewer="reviewer",
+)
+# → the same card enters review; the implementation run closes as
+#   outcome='review_requested'
+
+# --- Reviewer: request concrete changes ---
+kanban_show()
+# (inspect the handoff and candidate)
+kanban_request_changes(
+    reason="Add password-strength validation and make reset tokens single-use."
+)
+# → the review run closes as outcome='changes_requested'; the card returns
+#   to backend-dev in ready/todo without touching block-loop accounting
+
+# --- Engineer: second implementation attempt ---
+kanban_show()  # prior review evidence is in worker_context
+# (apply feedback and re-run tests)
+kanban_request_review(
+    summary="added zxcvbn validation and single-use reset tokens",
+    metadata={
+        "changed_files": [
+            "auth/reset.py",
+            "auth/tests/test_reset.py",
+            "migrations/003_single_use_reset_tokens.sql",
+        ],
+        "tests_run": 11,
+        "review_iteration": 2,
+    },
+    reviewer="reviewer",
+)
+
+# --- Reviewer: approve ---
+kanban_complete(summary="review passed; acceptance criteria verified")
+# → done</code></pre>
+</div>
+<p>تاریخچهٔ run تسک اکنون <code>review_requested → changes_requested → review_requested → completed</code> را ثبت می‌کند. هر تلاش بازیگر، خلاصه، metadata و نتیجهٔ خودش را دارد، پس مهندس دوم دقیقاً می‌بیند بازبین چه چیزی را رد کرده و تأیید نهایی قابل ممیزی می‌ماند. ‏<code>kanban_block</code> برای تشدید واقعیِ خارجی رزرو شده ‏(نبود دسترسی، یک تصمیم محصول، زیرساخت در دسترس نیست)، نه بازخورد عادی بازبینی.</p>
+<p>اگر عمداً از مدل کارت-پایین‌دستیِ نشان‌داده‌شده در اسکرین‌شات استفاده می‌کنید، بازبین پس از تکمیل والدِ پیاده‌سازی، کارت «Review password reset PR» را باز می‌کند:</p>
+<figure class="doc-figure">
+<img src="https://hermes-agent.nousresearch.com/docs/img/kanban-tutorial/09-drawer-pipeline-review.png" alt="Reviewer's drawer view of the pipeline" loading="lazy">
+<figcaption>کشوی بازبین در خط‌لوله — تصویر از نسخهٔ اصلی</figcaption>
+</figure>
+<p>‏<code>worker_context</code> کارت بازبین شامل تحویلِ پیاده‌سازیِ تکمیل‌شده است. این یک گردش‌کار کارتِ جداست؛ آن را با <code>kanban_request_review</code> روی همان‌کارت ترکیب نکنید وگرنه لِین بازبینی دوباره‌سازی می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> داستان ۴ — مدارشکن و بازیابی از کرش</h2>
+<p>کارگرهای واقعی شکست می‌خورند. اعتبارنامهٔ جامانده، OOM kill، خطاهای گذرای شبکه. dispatcher دو خط دفاعی دارد: یک <b>مدارشکن</b> که بعد از N شکست متوالی خودکار بلاک می‌کند تا برد تا ابد تق‌تق نکند، و <b>آشکارسازی کرش</b> که تسکی را که PID کارگرش قبل از پایان TTL از بین رفته پس می‌گیرد.</p>
+<h3>مدارشکن — شکستی که همیشگی به نظر می‌رسد</h3>
+<p>تسک دیپلویی که نمی‌تواند کارگرش را spawn کند چون <code>AWS_ACCESS_KEY_ID</code> در env پروفایل تنظیم نشده:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes kanban create "Deploy to staging (missing creds)" \
+    --assignee deploy-bot --tenant ops \
+    --max-retries 3</code></pre>
+</div>
+<p>dispatcher تلاش می‌کند کارگر را spawn کند. Spawn شکست می‌خورد ‏(<code>RuntimeError: AWS_ACCESS_KEY_ID not set</code>). dispatcher ادعا را آزاد، شمارندهٔ شکست را زیاد و در tick بعد دوباره تلاش می‌کند. چون این مثال <code>--max-retries 3</code> ست کرده، مدار بعد از سه شکست متوالی قطع می‌شود: تسک با نتیجهٔ <code>gave_up</code> به <code>blocked</code> می‌رود. اگر فلگ را حذف کنید هرمس از <code>kanban.failure_limit</code> استفاده می‌کند ‏(پیش‌فرض: ۲). تا یک انسان رفع‌بلاکش کند دیگر تلاشی نمی‌شود.</p>
+<p>روی تسک بلاک‌شده کلیک کنید:</p>
+<figure class="doc-figure">
+<img src="https://hermes-agent.nousresearch.com/docs/img/kanban-tutorial/11-drawer-gave-up.png" alt="Circuit breaker — 2 spawn_failed + 1 gave_up" loading="lazy">
+<figcaption>مدارشکن — دو spawn_failed و یک gave_up — تصویر از نسخهٔ اصلی</figcaption>
+</figure>
+<p>سه run، همه با همان خطا در فیلد <code>error</code>. دوی اول <code>spawn_failed</code> ‏(قابل‌تلاش مجدد) و سومی <code>gave_up</code> ‏(پایانه) است. لاگ رویداد بالا کل توالی را نشان می‌دهد: ‏<code>created → claimed → spawn_failed → claimed → spawn_failed → claimed → gave_up</code>.</p>
+<p>روی ترمینال:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes kanban runs t_ef5d
+# #   OUTCOME        PROFILE        ELAPSED  STARTED
+# 1   spawn_failed   deploy-bot          0s  2026-04-27 19:34
+#       ! AWS_ACCESS_KEY_ID not set in deploy-bot env
+# 2   spawn_failed   deploy-bot          0s  2026-04-27 19:34
+#       ! AWS_ACCESS_KEY_ID not set in deploy-bot env
+# 3   gave_up        deploy-bot          0s  2026-04-27 19:34
+#       ! AWS_ACCESS_KEY_ID not set in deploy-bot env</code></pre>
+</div>
+<p>اگر تلگرام / دیسکورد / اسلک وصل باشد، روی رویداد <code>gave_up</code> یک نوتیفیکیشن گیت‌وی شلیک می‌شود تا وقفه را بدون سرک کشیدن به بشنوید.</p>
+<h3>بازیابی از کرش — کارگر وسط کار می‌میرد</h3>
+<p>گاهی spawn موفق است ولی پروسهٔ کارگر بعداً می‌میرد — segfault، ‏OOM، ‏<code>systemctl stop</code>. dispatcher ‏<code>kill(pid, 0)</code> را poll می‌کند و pid مرده را آشکار می‌سازد؛ ادعا آزاد، تسک به <code>ready</code> برمی‌گردد و tick بعدی آن را به یک کارگر تازه می‌دهد.</p>
+<p>مثال دادهٔ seed، مهاجرتی بود که حافظه‌اش تمام می‌شد:</p>
+<div class="codebox"><pre><code># Worker claims, starts scanning 2.4M rows, OOM kills it at ~2.3M
+# Dispatcher detects dead pid, releases claim, increments attempt counter
+# Retry with a chunked strategy succeeds</code></pre></div>
+<p>کشو تاریخچهٔ کامل دومرحله‌ای را نشان می‌دهد:</p>
+<figure class="doc-figure">
+<img src="https://hermes-agent.nousresearch.com/docs/img/kanban-tutorial/06-drawer-crash-recovery.png" alt="Crash and recovery — 1 crashed + 1 completed" loading="lazy">
+<figcaption>کرش و بازیابی — یک crashed و یک completed — تصویر از نسخهٔ اصلی</figcaption>
+</figure>
+<p>Run 1 — ‏<code>crashed</code> با خطای <code>OOM kill at row 2.3M (process 99999 gone)</code>. ‏Run 2 — ‏<code>completed</code> با <code>"strategy": "chunked with LIMIT + WHERE id &gt; last_id"</code> در metadata اش. کارگرِ درحال‌تلاش‌مجدد کرش run 1 را در زمینهٔ خود دیده و استراتژی امن‌تری برگزیده بود؛ metadata برای ناظر آینده ‏(یا نویسندهٔ postmortem) شفاف می‌کند چه چیزی عوض شد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> تحویل ساختاریافته — چرا summary و metadata مهم‌اند</h2>
+<p>در هر داستان بالا، کارگرها آخر کار <code>kanban_complete(summary=..., metadata=...)</code> را صدا زدند. این تزئین نیست — کانال اصلی تحویل میان مرحله‌های یک گردش‌کار است.</p>
+<p>وقتی کارگری روی تسک B spawn می‌شود و <code>kanban_show()</code> را صدا می‌زند، <code>worker_context</code> ای که برمی‌گردد شامل:</p>
+<ul>
+  <li><b>تلاش‌های قبلیِ</b> B ‏(runهای قبلی: نتیجه، خلاصه، خطا، metadata) تا کارگرِ درحال‌تلاش‌مجدد مسیر شکست‌خورده را تکرار نکند.</li>
+  <li><b>نتایج تسک‌های والد</b> — برای هر والد، خلاصه و metadata ی آخرین run تکمیل‌شده — تا کارگرهای پایین‌دست ببینند کار بالادستی چرا و چطور انجام شده.</li>
+</ul>
+<p>این جایگزین رقصِ «گشتن زیر کامنت‌ها و خروجی کار» است که سیستم‌های کانبان تخت گرفتارش می‌کند. PM معیارهای پذیرش را در metadata ی spec می‌نویسد و کارگر مهندس آنها را ساختاریافته در تحویلِ والد می‌بیند. مهندس ثبت می‌کند کدام تست‌ها را اجرا و چند مورد پاس شد، و کارگر بازبین قبل از باز کردن یک diff آن فهرست را در دست دارد.</p>
+<p>نگهبان close گروهی وجود دارد چون این داده per-run است. ‏<code>hermes kanban complete a b c --summary X</code> ‏(شما، از CLI) رد می‌شود — کپی-پیست کردن یک خلاصه برای سه تسک تقریباً همیشه غلط است. بستن گروهی بدون فلگ‌های تحویل برای حالت رایجِ «تمام کردم انبوهی کار اداری را» همچنان کار می‌کند. سطح ابزار اصلاً نوع گروهی را expose نمی‌کند؛ ‏<code>kanban_complete</code> همیشه تک-تسک-در-آن- واحد است به همان دلیل.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> پیگیری کارت done — رفع مشکل CI از طریق لینک والد</h2>
+<p>کارت پیاده‌سازی داستان ۱ حالا <code>done</code> است. دو ساعت بعد CI روی شاخهٔ merge‌شده شکست می‌خورد. کارت done را reopen نکنید — کارت‌های تکمیل‌شده تاریخ‌اند و تحویلشان رو-به-جلو جریان دارد. یک کارت اصلاحی بسازید با کارت done به‌عنوان <b>والد</b>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes kanban create "Fix CI: test_backoff_jitter flakes on 3.11" \
+    --assignee backend-dev \
+    --parent t_impl \
+    --workspace worktree --branch wt/ci-fix-backoff \
+    --body "CI run #4812 failed after t_impl completed.
+FAILED tests/test_retry.py::test_backoff_jitter - TimeoutError
+Acceptance: tests/test_retry.py green on 3.11 and 3.12."</code></pre>
+</div>
+<p>سه چیز اینجا کار می‌کند:</p>
+<ul>
+  <li><b>دیسپچ فوری.</b> چون والد از قبل <code>done</code> است، فرزند مستقیماً در <code>ready</code> ساخته می‌شود — dispatcher می‌تواند در tick بعدی ادعایش کند. ‏(فرزندِ والدی هنوز-باز در <code>todo</code> انتظار می‌کشید.)</li>
+  <li><b>زمینهٔ به‌ارث‌رسیده.</b> زمینهٔ کارگرِ اصلاحی بخشی از نوع <i>Parent task results</i> دارد که خلاصهٔ تکمیل و metadata ی <code>t_impl</code> را حمل می‌کند — فایل‌های تغییریافته و تصمیماتی که کارگر اصلی ثبت کرده — پس قبل از خواندن حتی یک خط کد می‌فهمد چرا کد این‌طور شکل گرفته.</li>
+  <li><b>شواهد تازه در بدنه.</b> لاگ CI موقع تکمیل <code>t_impl</code> وجود نداشت، پس نمی‌تواند در تحویلِ والد باشد — در بدنهٔ کارت جدید می‌رود، کنار معیارهای پذیرش صریح.</li>
+</ul>
+<p>برای کارت اصلاحی worktree/شاخهٔ تازه ترجیح دهید. checkout کردن شاخهٔ اصلی به کارگر <i>وضعیت</i> مخزن را می‌دهد اما هیچ‌کدام از <i>دلایل</i> را — تحویلِ والد آن‌ها را حمل می‌کند. معمولاً همان پروفایل assignee درست است: پروفیالی که کد را نوشته مهارت درست‌کردنش را دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> بازرسی تسکی که همین حالا در حال اجراست</h2>
+<p>برای کامل بودن — این هم کشوی تسکی هنوز در جریان ‏(پیاده‌سازی API از داستان ۱، ادعا‌شده توسط <code>backend-dev</code> ولی هنوز ناتمام):</p>
+<figure class="doc-figure">
+<img src="https://hermes-agent.nousresearch.com/docs/img/kanban-tutorial/10-drawer-in-flight.png" alt="Claimed, in-flight task" loading="lazy">
+<figcaption>تسک در-حالت-ادعا و در جریان — تصویر از نسخهٔ اصلی</figcaption>
+</figure>
+<p>وضعیت <code>Running</code> است. run فعال در بخش Run History با نتیجهٔ <code>active</code> و بدون <code>ended_at</code> ظاهر می‌شود. اگر این کارگر بمیرد یا timeout شود، dispatcher این run را با نتیجهٔ مناسب می‌بندد و روی ادعای بعدی یکی جدید باز می‌کند — سطر تلاش هرگز ناپدید نمی‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> گام‌های بعدی</h2>
+<ul>
+  <li><a href="kanban.html">نگاه کلی کانبان</a> — مدل دادهٔ کامل، واژگان رویداد و مرجع CLI.</li>
+  <li>‏<code>hermes kanban --help</code> — هر زیرفرمان، هر فلگ.</li>
+  <li>‏<code>hermes kanban watch --kinds completed,gave_up,timed_out</code> — استریم زندهٔ رویدادهای پایانه در سراسر برد.</li>
+  <li>‏<code>hermes kanban notify-subscribe &lt;task&gt; --platform telegram --chat-id &lt;id&gt;</code> — با پایان یک تسک مشخص، پینگ گیت‌وی بگیرید.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="built-in-plugins.html"><span class="dir">→ قبلی</span><span class="ttl">پلاگین‌های داخلی</span></a>
+  <a class="next" href="web-search.html"><span class="dir">بعدی ←</span><span class="ttl">جستجو و استخراج وب</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban-tutorial" target="_blank" rel="noopener">Kanban Tutorial</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

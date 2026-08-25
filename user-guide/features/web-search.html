@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جستجو و استخراج وب — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/web-search" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>جستجو و استخراج وب</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>جستجو و استخراج وب ‏(Web Search &amp; Extract)</h1>
+<p>هرمس ایجنت دو ابزار وبِ قابل‌فراخوانی-توسط-مدل دارد که چند ارائه‌دهنده پشت آنهاست:</p>
+<ul>
+  <li><b>‏<code>web_search</code></b> — وب را جستجو و نتایج رتبه‌بندی‌شده برمی‌گرداند</li>
+  <li><b>‏<code>web_extract</code></b> — محتوای خوانا را از یک یا چند URL واکشی و استخراج می‌کند</li>
+</ul>
+<p>هر دو از طریق یک انتخاب بک‌اند واحد پیکربندی می‌شوند. ارائه‌دهنده‌ها از طریق <code>hermes tools</code> انتخاب یا مستقیماً در <code>config.yaml</code> تنظیم می‌شوند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> بک‌اندها</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>متغیر محیطی</th><th>جستجو</th><th>استخراج</th><th>پلن رایگان</th></tr></thead>
+<tbody>
+<tr><td><b>Firecrawl</b> (پیش‌فرض)</td><td><code>FIRECRAWL_API_KEY</code> ‏(اختیاری — بدون‌کلید وقتی انتخاب شود)</td><td>✔</td><td>✔</td><td>۵۰۰ credit در ماه · کلود بدون‌کلید وقتی انتخاب شود</td></tr>
+<tr><td><b>SearXNG</b></td><td><code>SEARXNG_URL</code></td><td>✔</td><td>—</td><td>✔ رایگان ‏(self-hosted)</td></tr>
+<tr><td><b>Brave Search ‏(پلن رایگان)</b></td><td><code>BRAVE_SEARCH_API_KEY</code></td><td>✔</td><td>—</td><td>۲٬۰۰۰ کوئری در ماه</td></tr>
+<tr><td><b>DDGS ‏(DuckDuckGo)</b></td><td>— ‏(بدون کلید)</td><td>✔</td><td>—</td><td>✔ رایگان</td></tr>
+<tr><td><b>Tavily</b></td><td><code>TAVILY_API_KEY</code> ‏(اختیاری)</td><td>✔</td><td>✔</td><td>✔ عضو حلقهٔ بدون‌کلید · ۱٬۰۰۰ جستجو در ماه با کلید رایگان</td></tr>
+<tr><td><b>Exa</b></td><td><code>EXA_API_KEY</code> ‏(اختیاری)</td><td>✔</td><td>✔</td><td>✔ عضو حلقهٔ بدون‌کلید · ۱٬۰۰۰ جستجو در ماه با کلید</td></tr>
+<tr><td><b>Parallel</b></td><td><code>PARALLEL_API_KEY</code> ‏(اختیاری)</td><td>✔</td><td>✔</td><td>✔ عضو حلقهٔ بدون‌کلید · پولی با کلید</td></tr>
+<tr><td><b>Keenable</b></td><td><code>KEENABLE_API_KEY</code> ‏(اختیاری)</td><td>✔</td><td>✔</td><td>✔ عضو حلقهٔ بدون‌کلید · پولی با کلید</td></tr>
+<tr><td><b>xAI ‏(Grok)</b></td><td><code>XAI_API_KEY</code> یا ‏<code>hermes auth add xai-oauth</code></td><td>✔</td><td>—</td><td>پولی ‏(SuperGrok یا per-token)</td></tr>
+</tbody>
+</table>
+</div>
+<p>Brave Search، ‏DDGS و xAI <b>فقط-جستجو</b> هستند — هر کدام را که خواستید با Firecrawl/Tavily/Exa/Parallel جفت کنید تا <code>web_extract</code> هم داشته باشید. DDGS از پکیج پایتونی <a href="https://pypi.org/project/ddgs/" target="_blank" rel="noopener">ddgs</a> استفاده می‌کند؛ اگر نصب نیست <code>pip install ddgs</code> را اجرا کنید ‏(یا بگذارید هرمس در اولین استفاده lazy نصب کند). xAI ابزار سرور-سمتِ <code>web_search</code> ی Grok را روی Responses API اجرا می‌کند — نتایج LLM-ساخته هستند نه مبتنی بر ایندکس، پس عنوان‌ها، توضیحات و انتخاب URL همگی خروجی مدل‌اند ‏(بخش <a href="#xai-grok">هشدار مدل اعتماد</a> را ببینید).</p>
+<p><b>تفکیک هر-قابلیت:</b> می‌توانید برای جستجو و استخراج مستقلاً ارائه‌دهنده‌های متفاوت به کار ببرید — مثلاً SearXNG ‏(رایگان) برای جستجو و Firecrawl برای استخراج. بخش <a href="#per-capability-configuration">پیکربندی هر-قابلیت</a> را ببینید.</p>
+<div class="callout note">
+  <div class="callout-title">📌 همین‌طوری کار می‌کند — چرخش حلقهٔ رایگانِ بدون‌کلید</div>
+  <p>نصب تازه‌ای که <b>هیچ اعتبارنامهٔ وبی ندارد</b> همان ابتدا <code>web_search</code> و <code>web_extract</code> کارا می‌گیرد: درخواست‌ها به‌صورت round-robin بین تیرهای عمومی رایگان پنج فروشنده می‌چرخند — ‏<b>Exa، ‏Parallel، ‏Tavily، ‏Firecrawl و Keenable</b> — بار یکنواخت پخش می‌شود و درخواست rate-limit شده خودکار روی فروشندهٔ بعدی حلقه دوباره تلاش می‌کند ‏(چند-مرحله‌ای، تا یکی سرویس دهد یا همه throttled شوند). نه ثبت‌نام، نه کلید. این سطح اکیداً آخرین چاره است — هر بک‌اند پیکربندی‌شده یا کلید حاضر همیشه برنده است — و درخواست‌ها هیچ شناسهٔ کاربری حمل نمی‌کنند ‏(فقط یک session id تصادفی per-process که با ری‌استارت عوض می‌شود). برای سرویس تضمینی و بدون throttle یک ارائه‌دهندهٔ کلیددار راه‌اندازی کنید. کل این سطح با <code>web.keyless_fallback: false</code> خاموش می‌شود.</p>
+</div>
+<p><b>انتخاب صریح رایگان یا پولی:</b> در <code>hermes tools</code> هر یک از Exa، ‏Parallel و Keenable در دو ردیف ظاهر می‌شود — <b>Free ‏(بدون‌کلید)</b> و <b>Paid ‏(کلید API)</b>. انتخاب Free نقطهٔ پایانی ناشناس آن فروشنده را پین می‌کند ‏(حتی اگر بعداً کلید اضافه کنید)؛ انتخاب Paid مسیر کلیددار را پین می‌کند ‏(کلید غایب بعد از آن خطا می‌دهد نه اینکه بی‌سروصدا به سطح رایگان سقوط کند). انتخاب به‌صورت <code>web.provider_tier.&lt;name&gt;: free|paid</code> ذخیره می‌شود؛ برای حالت خودکار unset بگذارید ‏(کلید حاضر → paid، وگرنه حلقهٔ بدون‌کلید).</p>
+<div class="callout tip">
+  <div class="callout-title">💡 مشترکان Nous</div>
+  <p>اگر اشتراک پولی <a href="https://portal.nousresearch.com" target="_blank" rel="noopener">Nous Portal</a> دارید، جستجو و استخراج وب از طریق <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tool-gateway" target="_blank" rel="noopener">گیت‌وی ابزار ‏(Tool Gateway)</a> با Firecrawl مدیریت‌شده در دسترس است — بدون نیاز به کلید API. نصب‌های جدید می‌توانند <code>hermes setup --portal</code> را اجرا کنند تا وارد شوند و همهٔ ابزارهای گیت‌وی را یکجا روشن کنند؛ نصب‌های موجود فقط وب را از طریق <code>hermes tools</code> روشن کنند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> برخورد web_extract با صفحات طولانی</h2>
+<p>بک‌اندها markdown خام صفحه را برمی‌گردانند که می‌تواند عظیم باشد ‏(تالار گفتگو، سایت‌های مستندات، اخبار با کامنت‌های تعبیه‌شده). برای اینکه پنجرهٔ زمینه‌تان قابل‌استفاده بماند، <code>web_extract</code> یک <b>بودجهٔ نویسهٔ قطعی</b> اعمال می‌کند — هیچ خلاصه‌سازی LLM در کار نیست:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>اندازهٔ صفحه ‏(نویسه)</th><th>چه می‌شود</th></tr></thead>
+<tbody>
+<tr><td>در بودجه یا زیر آن ‏(پیش‌فرض ‎۱۵٬۰۰۰)</td><td>یکجا برگردانده می‌شود — markdown کامل به ایجنت می‌رسد</td></tr>
+<tr><td>بالای بودجه</td><td>پنجرهٔ سر+دم ‏(~۷۵٪ سر / ~۲۵٪ دم، برش روی مرز خطوط markdown) به‌علاوهٔ پانوشت صریح <code>[TRUNCATED]</code>. متن کامل تمیز روی دیسک ذخیره می‌شود و پانوشت مسیر فایل و فراخوانی دقیق <code>read_file</code> را برای ورق‌زدن میانهٔ حذف‌شده به ایجنت می‌گوید</td></tr>
+<tr><td>بالای ‎۲٬۰۰۰٬۰۰۰</td><td>متن ذخیره‌شده روی ‎۲ MB سقف می‌خورد</td></tr>
+</tbody>
+</table>
+</div>
+<p>بودجهٔ هر-صفحه از طریق <code>web.extract_char_limit</code> در <code>config.yaml</code> قابل‌تنظیم است ‏(پیش‌فرض <code>15000</code>، محدود به بازهٔ ۲٬۰۰۰ تا ۵۰۰٬۰۰۰) و ایجنت می‌تواند با آرگومان <code>char_limit</code> ابزار آن را برای یک فراخوانی بالا ببرد.</p>
+<h3>وقتی برش مزاحم می‌شود</h3>
+<p>اگر مشخصاً به DOM زنده نیاز دارید نه markdown استخراج‌شده — مثلاً صفحه‌ای سنگین-JS که استخراج از آن محتوای کمی برمی‌گرداند — به‌جایش از <code>browser_navigate</code> + ‏<code>browser_snapshot</code> استفاده کنید. ابزار مرورگر درخت دسترس‌پذیری زنده را برمی‌گرداند ‏(با سقف snapshot خودش روی صفحات عظیم).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> راه‌اندازی</h2>
+<h3>راه‌اندازی سریع با <code>hermes tools</code></h3>
+<p>‏<code>hermes tools</code> را اجرا کنید، به <b>Web Search &amp; Extract</b> بروید و یک ارائه‌دهنده انتخاب کنید. ویزارد URL یا کلید API لازم را می‌پرسد و در config شما می‌نویسد.</p>
+<div class="codebox"><pre><code>hermes tools</code></pre></div>
+<h3>Firecrawl ‏(پیش‌فرض)</h3>
+<p>جستجو و استخراج تمام‌عیار. برای بیشتر کاربران پیشنهاد می‌شود.</p>
+<div class="codebox"><pre><code># ~/.hermes/.env
+FIRECRAWL_API_KEY=fc-your-key-here</code></pre></div>
+<p>کلید را از <a href="https://firecrawl.dev" target="_blank" rel="noopener">firecrawl.dev</a> بگیرید. سطح رایگان ۵۰۰ credit در ماه دارد.</p>
+<p><b>Firecrawl خودمیزبان:</b> به‌جای API ابری به نمونهٔ خودتان اشاره دهید:</p>
+<div class="codebox"><pre><code># ~/.hermes/.env
+FIRECRAWL_API_URL=http://localhost:3002</code></pre></div>
+<p>وقتی <code>FIRECRAWL_API_URL</code> ست شده باشد کلید API اختیاری است ‏(احراز هویت سرور را با <code>USE_DB_AUTHENTICATION=false</code> غیرفعال کنید).</p>
+<h3>SearXNG ‏(رایگان، خودمیزبان)</h3>
+<p>‏SearXNG موتور فراجستجو متن‌باز و حرمت‌گذار حریم خصوصی است که نتایج بیش از ۷۰ موتور جستجو را تجمیع می‌کند. <b>کلید API لازم ندارد</b> — فقط هرمس را به یک نمونهٔ درحال‌اجرا اشاره دهید.</p>
+<p>‏SearXNG <b>فقط-جستجو</b> است — ‏<code>web_extract</code> ارائه‌دهندهٔ استخراج جداگانه می‌خواهد.</p>
+<h4 id="option-a">گزینهٔ A — خودمیزبان با Docker ‏(پیشنهادی)</h4>
+<p>یک نمونهٔ خصوصی بدون rate limit می‌دهد.</p>
+<p><b>۱. دایرکتوری کار بسازید:</b></p>
+<div class="codebox"><pre><code>mkdir -p ~/searxng/searxng
+cd ~/searxng</code></pre></div>
+<p><b>۲. یک docker-compose.yml بنویسید:</b></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ~/searxng/docker-compose.yml
+services:
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    ports:
+      - "8888:8080"
+    volumes:
+      - ./searxng:/etc/searxng:rw
+    environment:
+      - SEARXNG_BASE_URL=http://localhost:8888/
+    restart: unless-stopped</code></pre>
+</div>
+<p><b>۳. کانتینر را روشن کنید:</b></p>
+<div class="codebox"><pre><code>docker compose up -d</code></pre></div>
+<p><b>۴. قالب JSON API را فعال کنید:</b></p>
+<p>‏SearXNG به‌طور پیش‌فرض خروجی JSON را غیرفعال ارسال می‌کند. config تولیدشده را کپی و فعالش کنید:</p>
+<div class="codebox"><pre><code># Copy the auto-generated config out of the container
+docker cp searxng:/etc/searxng/settings.yml ~/searxng/searxng/settings.yml</code></pre></div>
+<p>فایل <code>~/searxng/searxng/settings.yml</code> را باز کنید. اگر <code>use_default_settings: true</code> حضور دارد، فایل فقط overrideهای شما را دارد و بقیهٔ تنظیمات از پیش‌فرض‌های داخلی به ارث می‌رسد. برای فعال کردن پاسخ‌های JSON برای هرمس این override را اضافه کنید:</p>
+<div class="codebox"><pre><code>search:
+  formats:
+    - html
+    - json</code></pre></div>
+<p>‏<code>settings.yml</code> شما باید چیزی شبیه این شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Read the documentation before extending the defaults:
+# https://docs.searxng.org/admin/settings/
+
+use_default_settings: true
+
+server:
+  secret_key: "abcdef12345678"
+  image_proxy: true
+
+search:
+  formats:
+    - html
+    - json</code></pre>
+</div>
+<p><b>۵. برای اعمال ری‌استارت کنید:</b></p>
+<div class="codebox"><pre><code>docker cp ~/searxng/searxng/settings.yml searxng:/etc/searxng/settings.yml
+docker restart searxng</code></pre></div>
+<p><b>۶. تأیید کنید کار می‌کند:</b></p>
+<div class="codebox"><pre><code>curl -s "http://localhost:8888/search?q=test&amp;format=json" | python3 -c \
+  "import sys,json; d=json.load(sys.stdin); print(f'{len(d[\"results\"])} results')"</code></pre></div>
+<p>باید چیزی شبیه <code>10 results</code> ببینید. اگر <code>403 Forbidden</code> گرفتید قالب JSON هنوز غیرفعال است — گام ۴ را دوباره بررسی کنید.</p>
+<p><b>۷. هرمس را پیکربندی کنید:</b></p>
+<div class="codebox"><pre><code># ~/.hermes/.env
+SEARXNG_URL=http://localhost:8888</code></pre></div>
+<p>سپس SearXNG را به‌عنوان بک‌اند جستجو در <code>~/.hermes/config.yaml</code> انتخاب کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>web:
+  search_backend: "searxng"</code></pre>
+</div>
+<p>یا از مسیر <code>hermes tools</code> ← Web Search &amp; Extract ← SearXNG ست کنید.</p>
+<h4>گزینهٔ B — استفاده از نمونهٔ عمومی</h4>
+<p>نمونه‌های عمومی SearXNG در <a href="https://searx.space/" target="_blank" rel="noopener">searx.space</a> فهرست شده‌اند. نمونه‌هایی که <b>قالب JSON فعال دارند</b> را فیلتر کنید ‏(در جدول نمایش داده می‌شود).</p>
+<div class="codebox"><pre><code># ~/.hermes/.env
+SEARXNG_URL=https://searx.example.com</code></pre></div>
+<div class="callout caution">
+  <div class="callout-title">⚠️ نمونه‌های عمومی</div>
+  <p>نمونه‌های عمومی rate limit دارند، آپ‌تایم متغیری دارند و ممکن است هر لحظه قالب JSON را ببندند. برای استفادهٔ عملیاتی، خودمیزبانی قویاً توصیه می‌شود.</p>
+</div>
+<h4>SearXNG را به یک ارائه‌دهندهٔ استخراج جفت کنید</h4>
+<p>‏SearXNG جستجو را انجام می‌دهد؛ برای <code>web_extract</code> ارائه‌دهندهٔ جداگانه لازم دارید. از کلیدهای هر-قابلیت استفاده کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ~/.hermes/config.yaml
+web:
+  search_backend: "searxng"
+  extract_backend: "firecrawl"   # or tavily, exa, parallel</code></pre>
+</div>
+<p>با این config هرمس برای همهٔ کوئری‌های جستجو از SearXNG و برای استخراج URL از Firecrawl استفاده می‌کند — ترکیب جستجوی رایگان با استخراج باکیفیت.</p>
+<h3>Tavily</h3>
+<p>جستجو و استخراج بهینه‌شده-برای-AI. Tavily را در <code>hermes tools</code> انتخاب کنید ‏(یا <code>web.backend: tavily</code> ست کنید) تا <b>بدون‌کلید</b> و بدون حساب استفاده شود ‏(rate-limit شده). وقتی سقف‌های بالاتر خواستید کلید API بگذارید.</p>
+<div class="codebox"><pre><code># optional — skip this for keyless access after selecting Tavily
+# ~/.hermes/.env
+TAVILY_API_KEY=tvly-your-key-here</code></pre></div>
+<p>کلید را از <a href="https://app.tavily.com/home" target="_blank" rel="noopener">app.tavily.com</a> بگیرید. بخش <a href="https://docs.tavily.com/documentation/keyless" target="_blank" rel="noopener">Tavily keyless</a> را ببینید.</p>
+<p>نصب‌های خالی Firecrawl را به‌عنوان پیش‌فرض نامی نگه می‌دارند. Tavily بدون‌کلید به‌طور خودکار انتخاب نمی‌شود.</p>
+<h3>Exa</h3>
+<p>جستجوی عصبی با درک معنایی. برای پژوهش و یافتن محتوای مفهوماً مرتبط خوب است.</p>
+<div class="codebox"><pre><code># ~/.hermes/.env
+EXA_API_KEY=your-exa-key-here</code></pre></div>
+<p>کلید را از <a href="https://exa.ai" target="_blank" rel="noopener">exa.ai</a> بگیرید. سطح رایگان ۱٬۰۰۰ جستجو در ماه دارد.</p>
+<h3>Parallel</h3>
+<p>جستجو و استخراج AI-native با قابلیت‌های پژوهش عمیق.</p>
+<div class="codebox"><pre><code># ~/.hermes/.env
+PARALLEL_API_KEY=your-parallel-key-here</code></pre></div>
+<p>دسترسی را از <a href="https://parallel.ai" target="_blank" rel="noopener">parallel.ai</a> بگیرید.</p>
+<h3 id="xai-grok">xAI ‏(Grok)</h3>
+<p>‏<code>web_search</code> را به ابزار سرور-سمتِ <a href="https://docs.x.ai/developers/tools/web-search" target="_blank" rel="noopener">web_search</a> ی Grok روی Responses API مسیریابی می‌کند. Grok خود جستجوی واقعی را اجرا و نتایج برتر را به‌صورت JSON ساختاریافته برمی‌گرداند.</p>
+<p>با هر مسیر اعتبارنامه‌ای کار می‌کند — بدون متغیر محیطی جدید، بدون ویزارد جدید:</p>
+<div class="codebox"><pre><code># ~/.hermes/.env (env-var path)
+XAI_API_KEY=sk-xai-your-key-here</code></pre></div>
+<p>یا برای مشترکان SuperGrok:</p>
+<div class="codebox"><pre><code>hermes auth add xai-oauth</code></pre></div>
+<p>سپس xAI را به‌عنوان بک‌اند جستجو انتخاب کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ~/.hermes/config.yaml
+web:
+  backend: "xai"</code></pre>
+</div>
+<p><b>تنظیمات اختیاری:</b></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>web:
+  backend: "xai"
+  xai:
+    model: grok-build-0.1        # reasoning model required by web_search (default)
+    allowed_domains:             # optional, max 5 — mutex with excluded_domains
+      - arxiv.org
+    excluded_domains:            # optional, max 5
+      - example-spam.com
+    timeout: 90                  # seconds (default)</code></pre>
+</div>
+<p><b>فقط-جستجو</b> — اگر <code>web_extract</code> هم می‌خواهید با Firecrawl / Tavily / Exa / Parallel جفتش کنید. روی خطای 401 ارائه‌دهنده یک بار نوسازی اجباری توکن OAuth انجام و دوباره تلاش می‌کند ‏(پوشش‌دهندهٔ ابطال وسط-بازه و توکن‌های مبهمی که بررسی proactive انقضا نمی‌تواند decode کند)؛ اعتبارنامه‌های env-var از تلاش مجدد عبور نمی‌کنند.</p>
+<div class="callout caution">
+  <div class="callout-title">⚠️ مدل اعتماد</div>
+  <p>برخلاف ارائه‌دهنده‌های مبتنی-بر-ایندکس ‏(Brave، ‏Tavily، ‏Exa) که نتایج موتور جستجو را کلمه‌به‌کلمه برمی‌گردانند، xAI یک LLM است که انتخاب می‌کند کدام URLها عرضه شوند و خودشان عنوان‌ها و توضیحات را می‌نویسد. <i>محتوای</i> کوئری روی خروجی اثر می‌گذارد، پس یک کوئری خرابکارانه ‏(مثلاً تزریق‌شده از ورودی نامعتبری که ایجنت برداشته) می‌تواند در اصل Grok را به سمت صدور URLهای انتخاب-مهاجم هُل دهد. با URLهای برگشتی مثل هر لینک مدل‌ساخته رفتار کنید — قبل از واکشی اعتبارسنجی کنید، مخصوصاً وقتی کوئری از ورودی غیرقابل‌اعتماد آمده.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پیکربندی</h2>
+<h3>بک‌اند واحد</h3>
+<p>یک ارائه‌دهنده برای همهٔ قابلیت‌های وب:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ~/.hermes/config.yaml
+web:
+  backend: "searxng"   # firecrawl | searxng | brave-free | ddgs | tavily | exa | parallel | xai</code></pre>
+</div>
+<h3 id="per-capability-configuration">پیکربندی هر-قابلیت</h3>
+<p>ارائه‌دهنده‌های متفاوت برای جستجو در برابر استخراج. اینطور می‌توانید جستجوی رایگان ‏(SearXNG) را با ارائه‌دهندهٔ استخراج پولی ترکیب کنید یا برعکس:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ~/.hermes/config.yaml
+web:
+  search_backend: "searxng"     # used by web_search
+  extract_backend: "firecrawl"  # used by web_extract</code></pre>
+</div>
+<p>وقتی کلیدهای هر-قابلیت خالی‌اند هر دو به <code>web.backend</code> سقوط می‌کنند. فقط وقتی هیچ‌وقت هیچ انتخاب وبی نوشته نشده باشد بک‌اند از هر کلید/URL حاضر auto-detect می‌شود — به‌محض وجود یک انتخاب، runtime همیشه از همان استفاده می‌کند و اضافه کردن یک کلید به <code>.env</code> ترافیک وب را تغییر مسیر نمی‌دهد.</p>
+<p><b>ترتیب اولویت ‏(هر-قابلیت):</b></p>
+<ol>
+  <li><code>web.search_backend</code> / ‏<code>web.extract_backend</code> ‏(صریحِ هر-قابلیت)</li>
+  <li><code>web.backend</code> ‏(fallback مشترک؛ ‏<code>nous</code> = Tool Gateway مدیریت‌شده)</li>
+  <li>آشکارسازی خودکار از متغیرهای محیطی ‏(فقط راه‌اندازی‌های هرگز-پیکربندی‌نشده)</li>
+</ol>
+<h3>آشکارسازی خودکار</h3>
+<p>اگر تا حالا <b>هرگز</b> بک‌اندی انتخاب نشده باشد ‏(نه <code>web.backend</code> نه کلید هر-قابلیتی توسط شما یا <code>hermes tools</code> نوشته شده)، هرمس بر اساس کدام اعتبارنامه‌ها ست‌اند، اولین موجود را برمی‌گزیند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>اعتبارنامهٔ حاضر</th><th>بک‌اند خودانتخاب</th></tr></thead>
+<tbody>
+<tr><td><code>TAVILY_API_KEY</code></td><td>tavily</td></tr>
+<tr><td><code>EXA_API_KEY</code></td><td>exa</td></tr>
+<tr><td><code>PARALLEL_API_KEY</code></td><td>parallel</td></tr>
+<tr><td><code>FIRECRAWL_API_KEY</code> یا ‏<code>FIRECRAWL_API_URL</code> ‏(یا آماده بودن Nous Tool Gateway)</td><td>firecrawl</td></tr>
+<tr><td><code>SEARXNG_URL</code></td><td>searxng</td></tr>
+<tr><td><code>BRAVE_SEARCH_API_KEY</code></td><td>brave-free</td></tr>
+<tr><td>importable بودن پکیج <code>ddgs</code></td><td>ddgs</td></tr>
+<tr><td><i>(هیچ‌چیز ست نشده)</i></td><td>حلقهٔ بدون‌کلید: exa / parallel / tavily / firecrawl / keenable ‏(round-robin)</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>حلقهٔ رایگانِ بدون‌کلید:</b> وقتی هیچ‌کدام از اعتبارنامه‌های بالا حاضر نیست، درخواست‌ها بین تیرهای عمومی رایگان پنج فروشنده ‏(Exa، ‏Parallel، ‏Tavily، ‏Firecrawl، ‏Keenable) می‌چرخند تا ابزارهای وب روی نصب تازه با صفر پیکربندی کار کنند — و درخواست rate-limit شده خودکار به فروشندهٔ بعدی حلقه failover می‌شود. برای توقف چرخش یک فروشنده را در <code>hermes tools</code> پین کنید ‏(حلقه بعدازآن فقط به‌عنوان زنجیرهٔ failover روی throttle ها به کار می‌رود). همهٔ تیرهای رایگان تحت بار انفجاری vendor-rate-limited اند؛ مصرف عادی پایدار راحت رد می‌شود. برای خاموش کردن سطح <code>web.keyless_fallback: false</code> — با خاموشی و نبود اعتبارنامه، ابزارهای وب تا پیکربندی یک ارائه‌دهنده غیرقابل‌دسترس‌اند.</p>
+<p><b>نجات یک‌بارهٔ بدون‌کلید برای بک‌اندهای کلیددار:</b> وقتی بک‌اند انتخابی/کلیددار شما یک فراخوانی را شکست بخورد ‏(کلید بد، outage، ‏5xx بالادستی)، همان فراخوانی خودکار روی حلقهٔ رایگانِ بدون‌کلید دوباره تلاش می‌کند به‌جای خطا دادن — نتیجه ثبت می‌کند کدام فروشنده سرویس داد و چرا ‏(<code>rescued_from</code> / <code>backend_error</code>). failover هرگز sticky نیست: خیلی زودتر از همین <code>web_search</code>/<code>web_extract</code> بعدی دوباره بک‌اند انتخابی‌تان امتحان می‌شود. با <code>web.keyless_rescue: false</code> غیرفعال شود ‏(هرگاه <code>keyless_fallback</code> خاموش باشد این هم خاموش است).</p>
+<p>xAI Web Search در زنجیرهٔ auto-detection <b>نیست</b> — ست بودن <code>XAI_API_KEY</code> ‏(یا ورود با xAI Grok OAuth) ترافیک وب را خودکار از xAI عبور نمی‌دهد، چون آن اعتبارنامه‌ها برای inference / TTS / تولید تصویر هم به کار می‌روند و ممکن است کاربر برای وب بک‌اند دیگری بخواهد. صریحاً با <code>web.backend: "xai"</code> شرکت کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> تأیید راه‌اندازی</h2>
+<p>‏<code>hermes setup</code> را اجرا کنید تا ببینید کدام بک‌اند وب آشکار شده:</p>
+<div class="codebox"><pre><code>✅ Web Search &amp; Extract (searxng)</code></pre></div>
+<p>یا از طریق CLI:</p>
+<div class="codebox"><pre><code># Activate the venv and run the web tools module directly
+source ~/.hermes/hermes-agent/.venv/bin/activate
+python -m tools.web_tools</code></pre></div>
+<p>این بک‌اند فعال و وضعیتش را چاپ می‌کند:</p>
+<div class="codebox"><pre><code>✅ Web backend: searxng
+   Using SearXNG (search only): http://localhost:8888</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> عیب‌یابی</h2>
+<h3>‏<code>web_search</code> مقدار <code>{"success": false}</code> برمی‌گرداند</h3>
+<ul>
+  <li>بررسی کنید <code>SEARXNG_URL</code> قابل‌رسیدگی است: ‏<code>curl -s "http://localhost:8888/search?q=test&amp;format=json"</code></li>
+  <li>اگر HTTP 403 گرفتید قالب JSON غیرفعال است — <code>json</code> را به فهرست <code>formats</code> در <code>settings.yml</code> اضافه و ری‌استارت کنید</li>
+  <li>اگر خطای اتصال گرفتید شاید کانتینر روشن نیست: ‏<code>docker ps | grep searxng</code></li>
+</ul>
+<h3>‏<code>web_extract</code> می‌گوید «search-only backend»</h3>
+<p>‏SearXNG نمی‌تواند محتوای URL استخراج کند. ‏<code>web.extract_backend</code> را به ارائه‌دهنده‌ای که استخراج پشتیبانی می‌کند بدهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>web:
+  search_backend: "searxng"
+  extract_backend: "firecrawl"  # or tavily / exa / parallel</code></pre>
+</div>
+<h3>‏SearXNG صفر نتیجه برمی‌گرداند</h3>
+<p>بعضی نمونه‌های عمومی بعضی موتورها یا دسته‌ها را بسته‌اند. امتحان کنید:</p>
+<ul>
+  <li>یک کوئری متفاوت</li>
+  <li>یک نمونهٔ عمومی دیگر از <a href="https://searx.space/" target="_blank" rel="noopener">searx.space</a></li>
+  <li>راه‌اندازی نمونهٔ اختصاصی خودتان برای نتایج قابل‌اعتماد</li>
+</ul>
+<h3>Rate limit شدن روی نمونهٔ عمومی</h3>
+<p>به نمونهٔ خودمیزبان سوئیچ کنید ‏(<a href="#option-a">گزینهٔ A</a> بالاتر). با Docker نمونهٔ خودتان هیچ rate limit ای ندارد.</p>
+<h3>‏<code>web_extract</code> محتوای بریده با پانوشت <code>[TRUNCATED]</code> برمی‌گرداند</h3>
+<p>برای صفحات بالای بودجهٔ نویسه طبیعی است. پانوشت فایل روی-دیسک حامل متن کامل تمیز و فراخوانی دقیق <code>read_file</code> را برای ورق‌زدن میانهٔ حذف‌شده نام می‌برد. برای دیدن بیشتر داخل خروجی، <code>web.extract_char_limit</code> را در <code>config.yaml</code> بالا ببرید یا <code>char_limit</code> بزرگ‌تری روی فراخوانی پاس دهید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> مهارت اختیاری: ‏<code>searxng-search</code></h2>
+<p>برای ایجنت‌هایی که باید مستقیماً با <code>curl</code> از SearXNG استفاده کنند ‏(مثلاً به‌عنوان fallback وقتی تول‌ست وب در دسترس نیست)، مهارت اختیاری <code>searxng-search</code> را نصب کنید:</p>
+<div class="codebox"><pre><code>hermes skills install official/research/searxng-search</code></pre></div>
+<p>این مهارت به ایجنت یاد می‌دهد چگونه:</p>
+<ul>
+  <li>API ی JSON ی SearXNG را با <code>curl</code> یا پایتون صدا بزند</li>
+  <li>بر اساس دسته فیلتر کند ‏(<code>general</code>، ‏<code>news</code>، ‏<code>science</code> و…)</li>
+  <li>صفحه‌بندی و حالت‌های خطا را مدیریت کند</li>
+  <li>وقتی SearXNG در دسترس نیست با لطف fallback کند</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="kanban-tutorial.html"><span class="dir">→ قبلی</span><span class="ttl">آموزش کانبان</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/web-search" target="_blank" rel="noopener">Web Search &amp; Extract</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>
