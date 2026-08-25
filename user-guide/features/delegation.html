@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>واگذاری به ایجنت فرزند — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/delegation" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>واگذاری به ایجنت فرزند</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>واگذاری به زیرایجنت ‏(Subagent Delegation)</h1>
+<p>ابزار <code>delegate_task</code> نمونه‌های فرزند AIAgent را با زمینهٔ مجزا، دسترسی ابزارِ به‌ارث‌رسیده و نشست‌های ترمینال خودشان spawn می‌کند. هر فرزند گفتگوی کاملاً تازه‌ای دارد و مستقل کار می‌کند — فقط خلاصهٔ نهایی‌اش وارد زمینهٔ والد می‌شود.</p>
+<p>فراخوانی‌های مدلِ سطح-بالا به‌طور خودکار در پس‌زمینه اجرا می‌شوند. هرمس فوراً یک handle برمی‌گرداند تا گفتگو ادامه یابد و بعد نتیجه را به‌عنوان پیام جدید پس می‌فرستد. یک زیرایجنت orchestrator منتظر کارگران خودش می‌ماند تا بتواند نتایجشان را قبل از برگشتن ترکیب کند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> تسک تکی</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>delegate_task(
+    goal="Debug why tests fail",
+    context="Error: assertion in test_foo.py line 42"
+)</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> دستهٔ موازی</h2>
+<p>به‌طور پیش‌فرض تا ۳ زیرایجنت همزمان ‏(قابل‌پیکربندی، بدون سقف قطعی):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>delegate_task(tasks=[
+    {"goal": "Research topic A", "context": "Focus on recent primary sources"},
+    {"goal": "Research topic B", "context": "Compare the leading explanations"},
+    {"goal": "Fix the build", "context": "Project root: /home/user/project"}
+])</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> نحوهٔ کار زمینهٔ زیرایجنت</h2>
+<div class="callout warning">
+  <div class="callout-title">⚠️ حیاتی: زیرایجنت‌ها هیچ نمی‌دانند</div>
+  <p>زیرایجنت‌ها با یک <b>گفتگوی کاملاً تازه</b> شروع می‌کنند. هیچ دانشی از تاریخچهٔ گفتگوی والد، فراخوانی‌های قبلی ابزار یا هر چیز دیگری که قبل از واگذاری بحث شده ندارند. تنها زمینهٔ زیرایجنت همان فیلدهای <code>goal</code> و <code>context</code> است که ایجنتِ والد هنگام فراخوانی <code>delegate_task</code> پر می‌کند.</p>
+</div>
+<p>یعنی ایجنت والد باید <b>همه‌چیزِ</b> موردنیاز زیرایجنت را داخل فراخوانی پاس دهد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code># BAD - subagent has no idea what "the error" is
+delegate_task(goal="Fix the error")
+
+# GOOD - subagent has all context it needs
+delegate_task(
+    goal="Fix the TypeError in api/handlers.py",
+    context="""The file api/handlers.py has a TypeError on line 47:
+    'NoneType' object has no attribute 'get'.
+    The function process_request() receives a dict from parse_body(),
+    but parse_body() returns None when Content-Type is missing.
+    The project is at /home/user/myproject and uses Python 3.11."""
+)</code></pre>
+</div>
+<p>زیرایجنت یک پرامپت سیستمی متمرکز ساخته‌شده از goal و context شما می‌گیرد که به آن دستور می‌دهد تسک را کامل کند و خلاصه‌ای ساختاریافته از کارِ انجام‌شده، یافته‌ها، فایل‌های تغییریافته و مسائل پیش‌آمده ارائه دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مثال‌های عملی</h2>
+<h3>پژوهش موازی</h3>
+<p>چند موضوع را همزمان پژوهش و خلاصه‌ها را جمع کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>delegate_task(tasks=[
+    {
+        "goal": "Research the current state of WebAssembly in 2025",
+        "context": "Focus on: browser support, non-browser runtimes, language support"
+    },
+    {
+        "goal": "Research the current state of RISC-V adoption in 2025",
+        "context": "Focus on: server chips, embedded systems, software ecosystem"
+    },
+    {
+        "goal": "Research quantum computing progress in 2025",
+        "context": "Focus on: error correction breakthroughs, practical applications, key players"
+    }
+])</code></pre>
+</div>
+<h3>بازبینی + اصلاح کد</h3>
+<p>یک گردش‌کار بازبینی-و-اصلاح را به زمینه‌ای تازه واگذار کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>delegate_task(
+    goal="Review the authentication module for security issues and fix any found",
+    context="""Project at /home/user/webapp.
+    Auth module files: src/auth/login.py, src/auth/jwt.py, src/auth/middleware.py.
+    The project uses Flask, PyJWT, and bcrypt.
+    Focus on: SQL injection, JWT validation, password handling, session management.
+    Fix any issues found and run the test suite (pytest tests/auth/)."""
+)</code></pre>
+</div>
+<h3>بازآرایی چندفایلی</h3>
+<p>تسک بازآرایی بزرگی که زمینهٔ والد را غرق می‌کرد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>delegate_task(
+    goal="Refactor all Python files in src/ to replace print() with proper logging",
+    context="""Project at /home/user/myproject.
+    Use the 'logging' module with logger = logging.getLogger(__name__).
+    Replace print() calls with appropriate log levels:
+    - print(f"Error: ...") -&gt; logger.error(...)
+    - print(f"Warning: ...") -&gt; logger.warning(...)
+    - print(f"Debug: ...") -&gt; logger.debug(...)
+    - Other prints -&gt; logger.info(...)
+    Don't change print() in test files or CLI output.
+    Run pytest after to verify nothing broke."""
+)</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> جزئیات حالت دسته‌ای</h2>
+<p>وقتی یک ایجنت سطح-بالا آرایهٔ <code>tasks</code> بدهد، هرمس یک handle پس‌زمینه برمی‌گرداند، زیرایجنت‌ها را موازی اجرا می‌کند و بعد از پایان همهٔ فرزندها یک نتیجهٔ تلفیقی پست می‌کند. زیرایجنت orchestrator در همان نوبت فعلی منتظر دسته‌اش می‌ماند تا بتواند نتایج را ترکیب کند.</p>
+<ul>
+  <li><b>حداکثر همزمانی:</b> ‏۳ تسک به‌طور پیش‌فرض ‏(قابل‌پیکربندی از طریق <code>delegation.max_concurrent_children</code> یا متغیر محیطی <code>DELEGATION_MAX_CONCURRENT_CHILDREN</code>؛ کف ۱، بدون سقف قطعی). دسته‌های بزرگ‌تر از حد، خطای ابزار برمی‌گردانند نه اینکه بی‌سروصدا کوتاه شوند.</li>
+  <li><b>استخر thread:</b> از <code>ThreadPoolExecutor</code> با سقف همزمانیِ پیکربندی‌شده به‌عنوان max workers استفاده می‌شود</li>
+  <li><b>نمایش پیشرفت:</b> در حالت CLI، نمای درختی فراخوانی‌های ابزار هر زیرایجنت را بلادرنگ همراه خطوط تکمیل هر-تسک نشان می‌دهد. در حالت گیت‌وی، پیشرفت دسته‌ای و به callback پیشرفت والد رله می‌شود</li>
+  <li><b>ترتیب نتایج:</b> نتایج بر اساس اندیس تسک مرتب می‌شوند تا با ترتیب ورودی بخوانند فارغ از ترتیب تکمیل</li>
+  <li><b>لغو:</b> پیام‌های پیگیری، یک دستهٔ پس‌زمینهٔ سطح-بالا را لغو نمی‌کنند. ‏<code>/stop</code> یا بستن/ریست کردن نشستِ مالک، فرزندان فعالش را لغو می‌کند. فرزندان همگامِ orchestrator همچنان از وضعیت interrupt والد پیروی می‌کنند</li>
+</ul>
+<p>واگذاری همگامِ تک‌تسکِ از طرف یک orchestrator مستقیم و بدون سربار استخر thread اجرا می‌شود.</p>
+<h3>تکمیل‌های پایدار پس‌زمینه</h3>
+<p>وقتی یک واگذاری پس‌زمینه تمام می‌شود، هرمس رویداد تکمیل آن را در <code>state.db</code> پروفایل فعال ذخیره می‌کند و بعد به صف عادی fresh-turn منتشر می‌سازد. اگر هرمس بعد از تکمیل ولی قبل از تحویل ری‌استارت شود، رویداد معلق بازیابی و از همان بررسی‌های مالکیت عبور داده می‌شود. مصرف‌کننده‌های رقیب از claim پایدار استفاده می‌کنند، پس فقط مصرف‌کننده‌ای که نوبت مصنوعی را موفقیت بپذیرد تحویل را تأیید می‌کند؛ تلاش‌های ناموفق claim را برای تلاش مجدد آزاد می‌کنند.</p>
+<p>این، اجرای فرزند را بعد از کرش از سر نمی‌گیرد. واگذاری‌ای که پروسهٔ مالکش وسط اجرا غیب شود <code>unknown</code> ثبت می‌شود، چون هرمس نمی‌تواند اثبات کند عوارض جانبی بیرونی‌اش رخ داده یا نه. رکوردهای معلق و تحویل‌شده محدود و مخصوص-پروفایل‌اند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> بازنویسی مدل</h2>
+<p>می‌توانید مدلی متفاوت برای زیرایجنت‌ها در <code>config.yaml</code> تنظیم کنید — برای واگذاری تسک‌های ساده به مدل‌های ارزان‌تر/سریع‌تر مفید است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># In ~/.hermes/config.yaml
+delegation:
+  model: "google/gemini-flash-2.0"    # Cheaper model for subagents
+  provider: "openrouter"              # Optional: route subagents to a different provider</code></pre>
+</div>
+<p>اگر حذف شود، زیرایجنت‌ها از همان مدل والد استفاده می‌کنند.</p>
+<h3>استراتژی هزینه: برنامه‌ریز frontier، کارگران کم‌هزینه</h3>
+<p>تجزیهٔ یک مسئله به زیرتسک‌های خوب-مشخص، قضاوت در سطح frontier می‌خواهد؛ اجرای یک زیرتسک که از قبل هدف روشن، زمینهٔ کامل و قرارداد خروجی دارد معمولاً نه. از سوی دیگر فرزندها هستند که توکن مصرف می‌کنند — یک دستهٔ موازی از زیرایجنت‌ها معمولاً اکثریت عظیم کل توکن‌های یک run را می‌سوزاند، پس مدلِ کارگر جایی است که هزینه واقعاً زندگی می‌کند. پین کردن <code>delegation.model</code> روی مدلی ارزان در حالی که نشست اصلی‌تان روی مدل frontier مانده، کیفیت برنامه‌ریزی را سر جای مهمش نگه می‌دارد و هزینه را جایی که حجم است کم می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ~/.hermes/config.yaml
+model:
+  default: "your-frontier-model"     # parent (planner) stays on the frontier model
+delegation:
+  model: "your-inexpensive-model"    # all delegate_task children run on this
+  provider: "openrouter"             # optional: route children to a different provider</code></pre>
+</div>
+<p>ترتیب حل: ‏<code>delegation.base_url</code> ‏(نقطهٔ پایانی مستقیم) اولویت دارد، بعد <code>delegation.provider</code> ‏(بستهٔ کامل اعتبارنامه از طریق سیستم ارائه‌دهندهٔ runtime)، و وقتی هیچ‌کدام ست نباشند فرزندان ارائه‌دهنده و اعتبارنامهٔ والد را به ارث می‌برند؛ ‏<code>delegation.model</code> در همهٔ حالات اعمال می‌شود و وقتی خالی باشد فرزندان مدل والد را به ارث می‌برند.</p>
+<p>توجه کنید این پین سراسری است: ‏<code>delegate_task</code> پارامتر مدل per-task ندارد، پس همهٔ فرزندان یک دسته روی مدل واگذاریِ پیکربندی‌شده اجرا می‌شوند. برای زیرتسک‌های حساس-به-کیفیت که مدل قوی‌تری لازم دارند یا <code>delegation.model</code> را برای آن نشست unset بگذارید یا تسک را به <a href="kanban.html#per-task-model-override">برد کانبان</a> بدهید که بازنویسی مدل per-task دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> دسترسی ابزارِ به‌ارث‌رسیده</h2>
+<p>‏<code>delegate_task</code> پارامتر رو-به-مدلِ <code>toolsets</code> ندارد. هر زیرایجنت تول‌ست‌های فعال والد را به ارث می‌برد تا مدل نتواند به فرزند قابلیتی بدهد که والد ندارد. اگر کارِ واگذارشده قابلیت اضافه لازم دارد قبل از شروع گفتگو ابزارهای والد را پیکربندی کنید.</p>
+<p>بعضی ابزارها برای زیرایجنت‌ها حتی وقتی والد آنها را دارد بلاک‌اند:</p>
+<ul>
+  <li>‏<code>delegate_task</code> — برای زیرایجنت‌های برگ ‏(پیش‌فرض) بلاک. برای فرزندان <code>role="orchestrator"</code> حفظ می‌شود، محدود به <code>max_spawn_depth</code> — بخش <a href="#depth-limit-and-nested-orchestration">سقف عمق و ارکستراسیون تو-در-تو</a>.</li>
+  <li>‏<code>clarify</code> — زیرایجنت‌ها نمی‌توانند با کاربر تعامل کنند</li>
+  <li>‏<code>memory</code> — بدون نوشتن در حافظهٔ پایدار مشترک</li>
+  <li>‏<code>send_message</code> — بدون عوارض جانبی بین-پلتفرمی</li>
+  <li>‏<code>cronjob</code> — بدون زمان‌بندی کار بیشتر به نام والد</li>
+</ul>
+<p>هر دو نقش <code>execute_code</code> ‏(فراخوانی برنامه‌نویسی‌شدهٔ ابزار) را حفظ می‌کنند تا فرزندان بتوانند کارهای مکانیکی را دسته‌ای انجام دهند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> حداکثر تکرارها</h2>
+<p>هر زیرایجنت یک سقف تکرار دارد ‏(پیش‌فرض: ۵۰) که کنترل می‌کند چند نوبت فراخوانی-ابزار می‌تواند داشته باشد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>delegate_task(
+    goal="Quick file check",
+    context="Check if /etc/nginx/nginx.conf exists and print its first 10 lines",
+    max_iterations=10  # Simple task, don't need many turns
+)</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> مهلت زمانی فرزند</h2>
+<p>به‌طور پیش‌فرض روی زیرایجنت‌ها <b>هیچ timeout ساعت-دیواری وجود ندارد</b>. فرزندان فقط از کاری که واقعاً انجام می‌دهند شکست می‌خورند — خطاهای API، خطاهای ابزار یا تمام شدن بودجهٔ تکرار — هرگز از کرنومترِ سطح-واگذاری. نسخه‌های قبلی سقف سخت داشتند ‏(۳۰۰ ثانیه، بعداً ۶۰۰) که مدام فرزندانِ مشغولِ مشروع را وسط کار می‌کشت: بازبینی‌های عمیق کد، fan-out های بزرگ پژوهشی و مدل‌های استدلالی کند به‌طور روتین بیش از ۱۰ دقیقه لازم دارند در حالی که تمام مدت پیشرفت پیوسته دارند.</p>
+<p>فرزندان واقعاً گیرکرده همچنان شناسایی می‌شوند: مانیتور کهنگی heartbeat وقتی فرزندی هیچ پیشرفتی نکند ‏(نه فراخوانی API، نه شروع ابزار، نه tick های timestamp فعالیت) refresh فعالیت والد را متوقف می‌گذارد تا timeout بی‌کاری گیت‌وی روی worker واقعاً گیرکرده شلیک کند. انتظار برای یک فراخوانی مدلِ در جریان همچنان پیشرفت حساب می‌شود — زیرایجنت‌ها هنگام انتظار روی ارائه‌دهنده ساعت فعالیت را refresh می‌کنند، پس یک completion کندِ محلی / long-prefill معطل‌مانده تلقی نمی‌شود.</p>
+<p>اگر با این حال سقف سخت می‌خواهید ‏(مثلاً کنترل هزینه روی واگذاری cron-محورِ بی‌نظارت)، per-install شرکت کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>delegation:
+  child_timeout_seconds: 0     # default: 0 = no timeout
+  # child_timeout_seconds: 1800  # opt-in hard cap (floor 30s)</code></pre>
+</div>
+<p>مقدار مثبت سقف سخت ساعت-دیواری روی هر فرزند اعمال می‌کند؛ ‏<code>0</code> یا مقدار منفی آن را غیرفعال می‌کند.</p>
+<p>وقتی سقف پیکربندی‌شده شلیک شود، نتیجهٔ فرزند متادیتای ساختاریافتهٔ timeout را کنار پیام خطا حمل می‌کند تا والد‌ها و هوک‌ها بتوانند کشتنِ کرنومتری را از شکست‌های دیگر بدون تجزیهٔ متن تشخیص دهند: ‏<code>timeout_seconds</code> ‏(سقف پیکربندی‌شده)، ‏<code>timed_out_after_seconds</code> ‏(ساعت‌دیواری واقعی) و <code>timeout_phase</code> ‏(<code>before_first_llm_call</code> وقتی فرزند هرگز به اولین درخواستش نرسید، وگرنه <code>after_llm_calls</code>). هر سه روی خطاهای غیر-timeout مقدار <code>null</code> دارند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 تخلیهٔ تشخیصی روی timeout صفر-فراخوانی</div>
+  <p>با سقف سختِ پیکربندی‌شده، اگر زیرایجنتی timeout شود که <b>صفر</b> فراخوانی API کرده ‏(معمولاً: ارائه‌دهندهٔ غیرقابل‌رسید، شکست احراز هویت، یا reject شدن schema ابزار)، ‏<code>delegate_task</code> یک تشخیص ساختاریافته در <code>~/.hermes/logs/subagent-timeout-&lt;session&gt;-&lt;timestamp&gt;.log</code> می‌نویسد شامل snapshot پیکربندی زیرایجنت، ردّ حل اعتبارنامه، هر پیام خطای زودهنگام و stack trace برای <b>همهٔ</b> threadهای زنده ‏(نه فقط فرزند) — چون فرزندی که منتظر یک helper thread تو-در-تو پارک شده بدون دید کامل از فراهم‌کنندهٔ کند قابل‌تفکیک نیست.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> آشکارسازی وقفه برای زیرایجنت‌های پس‌زمینه</h2>
+<p>واگذاری‌های پس‌زمینه ‏(<code>delegate_task(background=true)</code>) توسط یک <b>مانیتور وقفهٔ مبتنی-بر-پیشرفت</b> دیده می‌شوند — به‌طور پیش‌فرض روشن، بدون پیکربندی. برخلاف timeout ساعت-دیواری، هرگز فرزندی را که در حال پیشرفت است لمس نمی‌کند، هرقدر هم طول بکشد.</p>
+<p>مانیتور سیگنال‌های پیشرفتِ هر فرزند جدا‌شده را نمونه‌برداری می‌کند — تعداد فراخوانی API، ابزار فعلی و آخرین-timestamp فعالیت (که روی <b>هر توکن استریم‌شده</b>، گذار ابزار و مرز فراخوانی API تیک می‌خورد، پس فرزندی وسط استریم یک پاسخ طولانی همیشه زنده حساب می‌شود):</p>
+<ol>
+  <li><b>فرزندانِ درحال‌پیشرفت هرگز لمس نمی‌شوند.</b> هر سیگنال رو-به-جلوی ساعت را reset می‌کند.</li>
+  <li>فرزندی که پیشرفتش کاملاً منجمد شده و از آستانهٔ stale گذشته ‏(۴۵۰ ثانیه idle، ‏۱۲۰۰ ثانیه داخل یک ابزار — فرمان‌های ترمینال و واکشی‌های وبِ مشروعاً کند سقف بالاتر می‌گیرند) <b>interrupt</b> و پنجرهٔ لطف ۱۲۰ ثانیه‌ای می‌گیرد. فرزندی که به‌موقع جمع شود نتایج جزئی‌اش را از مسیر عادی تکمیل تحویل می‌دهد.</li>
+  <li>فرزندی که هرگز برنمی‌گردد force-finalize می‌شود با یک رویداد تکمیل پایانهٔ <code>stalled</code>، تا نشست مالک به‌جای سکوت یک سرنوشت بشنود و اسلات async برای کار جدید آزاد شود.</li>
+</ol>
+<p>رویداد <code>stalled</code> متادیتای ساختاریافته‌ای آینهٔ فیلدهای timeout مسیر همگام حمل می‌کند: ‏<code>stalled_after_quiet_seconds</code>، ‏<code>stall_threshold_seconds</code>، ‏<code>stall_phase</code> ‏(<code>idle</code> / <code>in_tool</code>) و <code>stall_grace_seconds</code>.</p>
+<p>این یک الگوی شکست قدیمی را بست که فرزند پس‌زمینهٔ گیرکرده نشستش را تا ری‌استارت پروسه مرده جلوه می‌داد. گیرِ underlying هم ‏(فرزندان معلق در اولین فراخوانی API بعد از چند-روز آپ‌تایم گیت‌وی) از ریشه اصلاح شد: فرزندان واگذاری الان درخواست‌های API سیمی-OpenAI را inline روی thread گفتگوی خودشان اجرا می‌کنند به‌جای یک worker thread تودرتو — همان لایه‌ای که گیر در آن زندگی می‌کرد. مانیتور وقفه به‌عنوان تور ایمنی برای بقیه موارد باقی است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> پایش زیرایجنت‌های درحال‌اجرا ‏(/agents)</h2>
+<p>‏TUI یک overlay ی <code>/agents</code> ‏(نام مستعار <code>/tasks</code>) دارد که fan-out بازگشتیِ <code>delegate_task</code> را به یک سطح ممیزی درجه‌یک تبدیل می‌کند:</p>
+<ul>
+  <li>نمای درختی زنده از زیرایجنت‌های درحال‌اجرا و به‌تازگی-تمام‌شده، گروه‌بندی بر اساس والد</li>
+  <li>جمع‌بندی هزینه، توکن و فایل-لمس‌شده به تفکیک شاخه</li>
+  <li>کنترل‌های kill و pause — لغو یک زیرایجنت مشخص وسط کار بدون قطع خواهربرادرهایش</li>
+  <li>بازبینی پس‌رویدادی: مرور تاریخچهٔ نوبت-به-نوبت هر زیرایجنت حتی بعد از برگشتن به والد</li>
+</ul>
+<p>CLI کلاسیک <code>/agents</code> را فقط به‌صورت خلاصهٔ متنی چاپ می‌کند؛ TUI جایی است که overlay می‌درخشد. بخش <a href="../tui.html#slash-commands">TUI — دستورات اسلش</a> را ببینید.</p>
+<p>روی CLI کلاسیک و همهٔ پلتفرم‌های گیت‌وی ‏(تلگرام، دیسکورد، اسلک و…)، ‏<code>/agents</code> همچنین <b>واگذاری‌های پس‌زمینه با فعالیت زندهٔ هر-فرزند</b> را فهرست می‌کند که مستقیم از هر فرزند درحال‌اجرا نمونه‌برداری شده:</p>
+<div class="codebox"><pre><code>Background delegations: 1 running
+- deleg_ab12cd34 · running · research the delegation stall monitor
+  - child 1: 4 api calls · in web_search · active 12s ago
+  - child 2: 7 api calls · between turns · active 3s ago</code></pre></div>
+<p>واگذاری‌ای که مانیتور وقفه پرچمش زده به‌صورت <code>stalling · no progress 450s — interrupting</code> نمایش می‌یابد و فرزندانِ ساکت-اما-سالم زمان سکوتشان را نشان می‌دهند تا «کند» را از «گیرکرده» یک‌نگاهی تشخیص دهید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> فرمان‌دادن به زیرایجنت درحال‌اجرا</h2>
+<p>قطع کردن یک فرزند، کارِ در-جریانش را دور می‌ریزد؛ اغلب فقط می‌خواهید مسیرش را عوض کنید.</p>
+<h3>از ایجنت والد ‏(رو-به-مدل)</h3>
+<p>ایجنت والد فرزندان درحال‌اجرایش را با همان ابزار <code>delegate_task</code> که آنها را spawn کرده هدایت می‌کند — بدون ابزار کنترلی جدا:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{"action": "list"}
+{"action": "steer", "subagent_id": "sa-0-1a2b3c4d", "message": "focus on pricing instead"}
+{"action": "stop",  "subagent_id": "sa-0-1a2b3c4d"}</code></pre>
+</div>
+<ul>
+  <li><b>‏<code>list</code></b> فرزندان زندهٔ گفتگو را برمی‌گرداند: ‏<code>subagent_id</code>، هدف، وضعیت، ‏<code>running_seconds</code>، ‏<code>accepting_steer</code> و مسیر transcript زنده. شناسه‌ها در پاسخ dispatch ی spawn هم به‌عنوان <code>subagent_ids</code> برمی‌گردند.</li>
+  <li><b>‏<code>steer</code></b> یک اصلاح مسیر در صفِ فرزندِ درحال‌اجرا قرار می‌دهد بدون توقف آن ‏(معناشناسی تحویل پایین‌تر).</li>
+  <li><b>‏<code>stop</code></b> فرزند را در مرز تکرار بعدی زودتر تمام می‌کند؛ نتیجهٔ جزئی همچنان به‌عنوان پیام عادی تکمیل به گفتگو برمی‌گردد.</li>
+</ul>
+<p>اکشن‌های کنترلی همگام در-نوبت اجرا می‌شوند ‏(هرگز به پس‌زمینه نمی‌روند)، به درخت spawn خود فراخواننده محدودند — یک گفتگو هرگز نمی‌تواند فرزندان نشست دیگر را ببیند یا کنترل کند — و هرگز سقف spawn هر-نوبت را مصرف نمی‌کنند، پس <code>stop</code> حتی بعد از پر شدن سقف هم کار می‌کند.</p>
+<h3>از TUI / گیت‌وی ‏(رو-به-نشست)</h3>
+<p>‏<code>steer_subagent(subagent_id, text)</code> در <code>tools/delegate_tool.py</code> آینهٔ سمت-هدایتِ <code>interrupt_subagent()</code> است: متن را از طریق همان سازوکار <a href="https://hermes-agent.nousresearch.com/docs/reference/slash-commands" target="_blank" rel="noopener">‎/steer‎</a> در فرزند زنده صف می‌کند — متن به آخرین نتیجهٔ ابزارِ فرزند در مرز تکرار بعدی الصاق می‌شود، فراخوانی ابزار در-جریان هرگز بریده نمی‌شود و فرزند آن را مثل یک پیام کاربر خارج-از-باندا می‌بیند. میزبان‌های برنامه‌نویسی‌شده از طریق RPC ی گیت‌ویِ <code>subagent.steer</code> محدود-به-نشست به آن می‌رسند که کنار <code>subagent.interrupt</code> نشسته:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{"method": "subagent.steer", "params": {"session_id": "owning-ui-session", "subagent_id": "sa-0-1a2b3c4d", "text": "focus on pricing instead"}}</code></pre>
+</div>
+<p>شناسه‌های زیرایجنت از <code>delegation.status</code> ‏(یا <code>list_active_subagents()</code>) می‌آیند — همان جایی که <code>subagent.interrupt</code> برمی‌دارد. گیت‌وی steer را فقط از همان نشست UI/گیت‌ویِ زنده‌ای که فرزند را spawn کرده می‌پذیرد. هویت نشستِ غایب، بیگانه، مبهم یا کهنه/بازیافتی رد می‌شود؛ دانستن یک شناسهٔ سراسری زیرایجنت اختیار نیست. فراخواننده‌های مستقیم درون-پروسه‌ای عمداً قرارداد helper بدون-محدودیت را نگه داشته‌اند.</p>
+<p><b>صف‌شده یعنی تحویل‌شده نیست، اما هرگز موفقیت مصنوعی نیست.</b> پاسخ <code>"queued"</code> یعنی متن قبل از مرز تکمیلِ فرزند پذیرفته شده، نه اینکه حتماً فرزند دیده باشد. پذیرش و تکمیل همگام‌اند: یا فرزند هنوز می‌تواند متن را مصرف کند، یا دقیقاً همان متن به‌عنوان <code>pending_steer</code> از نتیجه تخلیه می‌شود. فراخوانی‌های بعد از بسته‌شدن <code>"rejected"</code> برمی‌گردانند. اگر فرزندی steer را پذیرفته ولی جواب نهایی را قبلاً تولید کرده بود، ورودی تکمیلی که والد می‌گیرد آن را به‌عنوان <code>missed_steer</code> نگه می‌دارد با یادداشتی الحاقی به خلاصه:</p>
+<div class="codebox"><pre><code>[steer did not land — the subagent finished before it could be delivered: focus on pricing instead]</code></pre></div>
+<p>پس والد ‏(یا اپراتوری که آن را می‌راند) فرزند steered را از فرزندی که طبق دستورات قدیمی تمام شده تشخیص می‌دهد و به‌جای اطمینان به رسیده‌بودن، راهنما را به‌عنوان پیگیری دوباره صادر می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> رونوشت‌های زنده</h2>
+<p>هر dispatch ی <code>delegate_task</code> یک <b>لاگ فقط-الحاقیِ خوانا-برای-انسان به‌ازای هر تسک</b> هم می‌سازد تا شما ‏(یا ایجنت والد) بتوانید کار یک زیرایجنت را بلادرنگ تماشا کنید به‌جای انتظار برای خلاصهٔ تلفیقی:</p>
+<div class="codebox"><pre><code>&lt;hermes_home&gt;/cache/delegation/live/&lt;delegation_id&gt;/task-&lt;n&gt;.log</code></pre></div>
+<p>پاسخ dispatch مسیرها را به‌عنوان <code>live_transcripts</code> شامل می‌شود و فایل‌ها در زمان dispatch از قبل ساخته می‌شوند، پس همین حالا کار می‌کند:</p>
+<div class="codebox"><pre><code>tail -f ~/.hermes/cache/delegation/live/deleg_ab12cd34/task-0.log</code></pre></div>
+<p>هر خط timestamp دارد و متن دستیارِ فرزند، قطعات thinking، فراخوانی ابزار ‏(<code>-&gt; tool_name({args})</code>)، نتایج ابزار و نشانگر وضعیت نهایی را نشان می‌دهد. یک <code>manifest.json</code> در همان دایرکتوری دسته را توصیف می‌کند ‏(اهداف، تعداد تسک، وضعیت هر-تسک). لاگ‌ها بعد از تکمیل باقی می‌مانند — هم نقش رکورد عملیاتی تمام-وفاداری را در کنار خلاصه دارند — و دایرکتوری‌های قدیمی‌تر از ۷ روز در dispatch های جدید خودکار هرس می‌شوند. چون زیر <code>cache/delegation</code> زندگی می‌کنند از بک‌اندهای ترمینال راه‌دور ‏(Docker/Modal/SSH) هم خواندنی‌اند.</p>
+</section>
+
+<section class="doc-sec" id="depth-limit-and-nested-orchestration">
+<h2><span class="secnum">۱۴</span> سقف عمق و ارکستراسیون تو-در-تو</h2>
+<p>به‌طور پیش‌فرض واگذاری <b>تخت</b> است: والدی ‏(عمق ۰) فرزندانی ‏(عمق ۱) spawn می‌کند و آن فرزندان دیگر نمی‌توانند واگذار کنند. این از واگذاری بازگشتیِ مهارناپذیر جلوگیری می‌کند.</p>
+<p>برای گردش‌کارهای چندمرحله‌ای ‏(پژوهش ← ترکیب، یا ارکستراسیون موازی روی زیرمسئله‌ها)، والد می‌تواند فرزندان <b>orchestrator</b> بسازد که <i>می‌توانند</i> کارگران خودشان را spawn کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>delegate_task(
+    goal="Survey three code review approaches and recommend one",
+    role="orchestrator",  # Allows this child to spawn its own workers
+    context="...",
+)</code></pre>
+</div>
+<ul>
+  <li>‏<code>role="leaf"</code> ‏(پیش‌فرض): فرزند نمی‌تواند واگذار کند — دقیقاً رفتار واگذاری تخت.</li>
+  <li>‏<code>role="orchestrator"</code>: فرزند تول‌ست <code>delegation</code> را حفظ می‌کند. محدود به <code>delegation.max_spawn_depth</code> ‏(پیش‌فرض <b>۱</b> = تخت، پس <code>role="orchestrator"</code> روی پیش‌فرض‌ها no-op است). ‏<code>max_spawn_depth</code> را به ۲ بالا ببرید تا فرزندان orchestrator بتوانند نوه‌های برگ بسازند؛ برای درخت‌های عمیق‌تر ۳+. سقف بالایی نیست — هزینه حد عملی است.</li>
+  <li>‏<code>delegation.orchestrator_enabled: false</code>: کلید قطع سراسری که هر فرزندی را صرف‌نظر از پارامتر <code>role</code> به leaf اجبار می‌کند.</li>
+</ul>
+<p><b>هشدار هزینه:</b> با <code>max_spawn_depth: 3</code> و ‏<code>max_concurrent_children: 3</code> درخت می‌تواند به ‎۳×۳×۳ = ۲۷‎ ایجنت برگِ همزمان برسد. هر سطح اضافی هزینه را ضرب می‌کند — ‏<code>max_spawn_depth</code> را آگاهانه بالا ببرید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> طول عمر و دوام</h2>
+<div class="callout warning">
+  <div class="callout-title">⚠️ دوام تکمیل پس‌زمینه یعنی اجرای پایدار نیست</div>
+  <p>فراخوانی‌های رو-به-مدلِ سطح-بالای <code>delegate_task</code> هرجا نشست از تحویل بعدی پشتیبانی کند به‌طور خودکار در پس‌زمینه اجرا می‌شوند. هرمس فوراً handle می‌دهد و نتیجه بعد از پایان فرزند یا دسته به گفتگو برمی‌گردد. زیرایجنت‌های orchestrator در نوبت فعلی منتظر کارگران‌اند چون باید نتایج را قبل از برگشتن ترکیب کنند. نقاط پایانی stateless درخواست/پاسخ وقتی نمی‌توانند نتیجهٔ جداشده را بعداً تحویل دهند به اجرای همگام fallback می‌کنند.</p>
+  <ul>
+    <li>پیام‌های پیگیریِ عادی فرزندان پس‌زمینه را لغو نمی‌کنند. ‏<code>/stop</code> واگذاری‌های پس‌زمینهٔ درحال‌اجرا را لغو می‌کند و بستن/ریست نشست مالک فرزندان فعالش را دور می‌ریزد.</li>
+    <li>بستن/ریست صریح نشست، فرزندان پس‌زمینهٔ همان نشست را قطع می‌کند. بستن نمایشگر TUI ی یک نشستِ متعلق-به-گیت‌وی کارِ گیت‌وی را نمی‌کشد.</li>
+    <li>ری‌استارت پروسهٔ هرمس فرزندِ درحال‌اجرا را <b>از سر نمی‌گیرد</b>. تلاشش <code>unknown</code> ثبت می‌شود چون هرمس نمی‌تواند اثبات کند کدام عوارض جانبی رخ داده.</li>
+    <li>فرزندی که قبل از ری‌استارت تمام شده ولی نتیجه‌اش تحویل نشده بازیابی و از بررسی‌های عادی نشست مالک عبور داده می‌شود.</li>
+    <li>فرزندان لغوشده نتیجهٔ ساختاریافته برمی‌گردانند ‏(<code>status="interrupted"</code>، ‏<code>exit_reason="interrupted"</code>)، اما چون والد هم interrupt شده آن نتیجه اغلب هرگز وارد پاسخی قابل‌دید-برای-کاربر نمی‌شود.</li>
+  </ul>
+  <p>برای <b>اجرای پایدار</b> که باید از بستن نشست یا ری‌استارت پروسه جان سالم به در ببرد:</p>
+  <ul>
+    <li>‏<code>cronjob</code> ‏(action=<code>create</code>) — یک اجرای ایجنت جداگانه زمان‌بندی می‌کند؛ نسبت به interrupt های نوبت والد ایمن است.</li>
+    <li>‏<code>terminal(background=True, notify_on_complete=True)</code> — فرمان‌های شل بلندمدت که در حین کار ایجنت به اجرا ادامه می‌دهند.</li>
+  </ul>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> ویژگی‌های کلیدی</h2>
+<ul>
+  <li>هر زیرایجنت <b>نشست ترمینال خودش</b> را دارد ‏(جدای از والد)</li>
+  <li>زیرایجنت‌ها تول‌ست‌های فعال والد را به ارث می‌برند؛ مدل نمی‌تواند per-call آنها را انتخاب یا گسترده کند</li>
+  <li><b>واگذاری تو-در-تو انتخابی است</b> — فقط فرزندان <code>role="orchestrator"</code> می‌توانند واگذار کنند و فقط وقتی <code>max_spawn_depth</code> از پیش‌فرض ۱ ‏(تخت) بالا رفته باشد. غیرفعال‌سازی سراسری با <code>orchestrator_enabled: false</code>.</li>
+  <li>زیرایجنت‌های برگ <b>نمی‌توانند</b> صدا بزنند: ‏<code>delegate_task</code>، ‏<code>clarify</code>، ‏<code>memory</code>، ‏<code>send_message</code>، ‏<code>cronjob</code>. زیرایجنت‌های orchestrator ‏<code>delegate_task</code> را حفظ می‌کنند ولی بقیهٔ بلاک‌ها سرجایشان است. هر دو نقش <code>execute_code</code> ‏(فراخوانی برنامه‌نویسی‌شدهٔ ابزار) را نگه می‌دارند تا فرزندان کار مکانیکی را دسته‌ای کنند به‌جای سوزاندن تکرارهای استدلال.</li>
+  <li><b>لغو از مالکیت پیروی می‌کند</b> — ‏<code>/stop</code> یا بستن/ریست نشست مالک فرزندان پس‌زمینه‌اش را لغو می‌کند؛ نوادگان همگام زیر orchestratorها از وضعیت interrupt والد پیروی می‌کنند</li>
+  <li>فقط خلاصهٔ نهایی وارد زمینهٔ والد می‌شود و مصرف توکن کارا می‌ماند</li>
+  <li>زیرایجنت‌ها <b>کلید API، پیکربندی ارائه‌دهنده و استخر اعتبارنامهٔ</b> والد را به ارث می‌برند ‏(چرخش کلید روی rate limit ها را ممکن می‌کند)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۷</span> ایزوله‌سازی worktree</h2>
+<p>به‌طور پیش‌فرض زیرایجنت‌ها دایرکتوری کاری والد را شریک‌اند — برای پژوهش و کارهای پر-خواندن اشکالی ندارد، ولی فرزندان موازی که همان مخزن را ویرایش می‌کنند می‌توانند تصادم کنند. ‏<code>delegation.worktree_isolation: true</code> را ست کنید تا هر فرزند git worktree اختصاصی خودش را داشته باشد که از <code>HEAD</code> فعلی مخزن انشعاب یافته ‏(الهام از <code>--subagent-worktree-isolation</code> ی Muse Code):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>delegation:
+  worktree_isolation: true   # default: false</code></pre>
+</div>
+<p>با روشنبودن ایزوله‌سازی:</p>
+<ul>
+  <li>هر فرزند ترمینالش را در <code>&lt;repo&gt;/.worktrees/subagent-&lt;id&gt;</code> روی شاخهٔ اختصاصی <code>hermes-subagent/subagent-&lt;id&gt;</code> شروع می‌کند و پیام هدفش به آن می‌گوید همانجا کار کند و commit بزند.</li>
+  <li>checkout والد دست‌نخورده می‌ماند؛ فرزندان نمی‌توانند ویرایش‌های هم را له کنند.</li>
+  <li>وقتی فرزند تمام می‌شود، ورودی نتیجه‌اش فیلد <code>worktree</code> می‌گیرد گزارش‌دهندهٔ <code>path</code>، ‏<code>branch</code>، ‏<code>commits</code> ‏(جلوتر از پایه) و <code>dirty</code>. والد هر شاخه را بازبینی یا merge می‌کند ‏(<code>git log &lt;branch&gt;</code>، ‏<code>git merge &lt;branch&gt;</code>).</li>
+  <li>worktree ی رهاشده با <b>هیچ commit و درخت تمیز خودکار prune می‌شود</b> ‏(<code>pruned: true</code>)؛ هرچه کار نگه داشته نگه داشته می‌شود.</li>
+  <li>prune نیاز به اثبات دارد. اگر پروب بازرسی git شکست بخورد — یا خود finalization خطا بدهد — worktree و شاخه نگه داشته می‌شوند و ورودی <code>inspection_failed: true</code> به‌همراه یک <code>note</code> حمل می‌کند — ‏<code>commits</code>/<code>dirty</code> در این حالت پیش‌فرض‌اند نه اندازه‌گیری، پس worktree را بازرسی کنید به‌جای فرض اینکه فرزند هیچ تولید نکرده.</li>
+</ul>
+<p>دامنه: انتخابی، فقط-git و فقط-بک‌اند-ترمینال-محلی. در دایرکتوری غیر-git، روی بک‌اندهای docker/ssh/modal، یا اگر ساخت worktree شکست بخورد، این تنظیم بی‌سروصدا به رفتار امروزِ فضای‌کاری-مشترک تنزل می‌یابد — هرگز خطا نمی‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۸</span> delegation در برابر execute_code</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>عامل</th><th>delegate_task</th><th>execute_code</th></tr></thead>
+<tbody>
+<tr><td><b>استدلال</b></td><td>حلقهٔ کامل استدلال LLM</td><td>فقط اجرای کد پایتون</td></tr>
+<tr><td><b>زمینه</b></td><td>گفتگوی مجزای تازه</td><td>بدون گفتگو، فقط اسکریپت</td></tr>
+<tr><td><b>دسترسی ابزار</b></td><td>همهٔ ابزارهای غیربلاک همراه استدلال</td><td>۷ ابزار از طریق RPC، بدون استدلال</td></tr>
+<tr><td><b>موازی‌سازی</b></td><td>۳ زیرایجنت همزمان به‌طور پیش‌فرض ‏(قابل‌پیکربندی)</td><td>تک‌اسکریپت</td></tr>
+<tr><td><b>بهترین برای</b></td><td>تسک‌های پیچیده نیازمند قضاوت</td><td>خط‌لوله‌های مکانیکی چندمرحله‌ای</td></tr>
+<tr><td><b>هزینهٔ توکن</b></td><td>بالاتر ‏(حلقهٔ کامل LLM)</td><td>پایین‌تر ‏(فقط stdout برمی‌گردد)</td></tr>
+<tr><td><b>تعامل کاربر</b></td><td>هیچ ‏(زیرایجنت‌ها نمی‌توانند سؤال کنند)</td><td>هیچ</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>قاعدهٔ سرانگشتی:</b> وقتی زیرتسک به استدلال، قضاوت یا حل مسئله چندمرحله‌ای نیاز دارد از <code>delegate_task</code> استفاده کنید. برای پردازش دادهٔ مکانیکی یا گردش‌کارهای اسکریپتی <code>execute_code</code>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۹</span> پیکربندی</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># In ~/.hermes/config.yaml
+delegation:
+  max_iterations: 50                        # Max turns per child (default: 50)
+  # max_concurrent_children: 3              # Parallel children per batch (default: 3)
+  # worktree_isolation: false               # Give each child its own git worktree (see Worktree Isolation above)
+  # max_spawn_depth: 1                      # Tree depth (floor 1, no ceiling, default 1 = flat). Raise to 2 to allow orchestrator children to spawn leaves; 3+ for deeper trees.
+  # orchestrator_enabled: true              # Disable to force all children to leaf role.
+  model: "google/gemini-3-flash-preview"             # Optional provider/model override
+  provider: "openrouter"                             # Optional built-in provider
+  api_mode: anthropic_messages                       # optional; auto-detected from base_url for anthropic_messages endpoints
+
+# Or use a direct custom endpoint instead of provider:
+delegation:
+  model: "qwen2.5-coder"
+  base_url: "http://localhost:1234/v1"
+  api_key: "local-key"
+  # api_mode: "anthropic_messages"  # Optional. Wire protocol override for base_url ("chat_completions", "codex_responses", or "anthropic_messages"). Empty = auto-detect from URL (e.g. /anthropic suffix). Set explicitly for endpoints the heuristic can't classify (Azure AI Foundry, MiniMax, Zhipu GLM, LiteLLM proxies, …).</code></pre>
+</div>
+<p>وقتی <code>base_url</code> به نقطهٔ پایانی سازگار-با-Anthropic اشاره کند — مثلاً مسیری که به <code>/anthropic</code> ختم شود، مسیر Claude ی Azure Foundry، یا پروکسی <code>/anthropic</code> ی MiniMax — ‏<code>api_mode</code> به‌صورت خودکار <code>anthropic_messages</code> آشکار می‌شود تا زیرایجنت بدون هیچ تنظیمی قالب سیم درست را به کار ببرد. وقتی حدس auto-detect غلط است ‏(نادر) صریحاً <code>api_mode</code> را ست کنید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>ایجنت بر اساس پیچیدگی تسک خودکار واگذاری را مدیریت می‌کند. لازم نیست صریحاً بخواهید واگذار کند — هرجا منطقی باشد خودش انجامش می‌دهد.</p>
+</div>
+</section>
+
+<div class="pager">
+  <a href="web-search.html"><span class="dir">→ قبلی</span><span class="ttl">جستجو و استخراج وب</span></a>
+  <a class="next" href="x-search.html"><span class="dir">بعدی ←</span><span class="ttl">جستجوی X ‏(توییتر)</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/delegation" target="_blank" rel="noopener">Subagent Delegation</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

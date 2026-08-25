@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جستجوی X ‏(توییتر) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/x-search" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>جستجوی X ‏(توییتر)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>جستجوی X ‏(توییتر)</h1>
+<p>ابزار <code>x_search</code> به ایجنت اجازه می‌دهد پست‌ها، پروفایل‌ها و رشته‌های X ‏(توییتر) را مستقیماً جستجو کند. پشتوانه‌اش ابزار داخلیِ <code>x_search</code> ی xAI روی Responses API در <code>https://api.x.ai/v1/responses</code> است — خود Grok جستجو را سمت سرور اجرا و نتایج ترکیب‌شده با ارجاع به پست‌های مبدأ برمی‌گرداند.</p>
+<p><b>وقتی مشخصاً گفتگوها، واکنش‌ها یا ادعاهای فعلی را «در X» می‌خواهید از این به‌جای <code>web_search</code> استفاده کنید.</b> برای صفحات عمومی وب همان <code>web_search</code> / ‏<code>web_extract</code> را نگه دارید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> ‏<code>x_search</code> در برابر <code>xurl</code></h2>
+<p>هرمس می‌تواند دو سطح متفاوت X را در اختیار بگذارد:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>سطح</th><th>برای چه کاری</th><th>برای چه کاری نه</th></tr></thead>
+<tbody>
+<tr><td>‏<code>x_search</code></td><td>کشف فقط-خواندنیِ X عمومی: گفتگوی روز، واکنش‌ها، ادعاها، پروفایل‌ها، رشته‌ها و پاسخ‌های ترکیب‌شده با ارجاع.</td><td>پست دادن، ریپلای، لایک، DM، آپلود رسانه، حذف، یا اثبات اینکه یک حساب احراز-هویت‌شده وضعیتش عوض شده.</td></tr>
+<tr><td>مهارت <code>xurl</code></td><td>کار دقیق یا احراز-هویت‌شدهٔ X API: ‏<code>post</code>، ‏<code>reply</code>، ‏<code>read</code>، ‏<code>like</code>، ‏<code>dm</code>، تایم‌لاین‌ها، منشن‌ها، آپلود رسانه، خواندن‌های مخصوص حساب و نقطه‌پایان‌های خام v2.</td><td>پژوهش گستردهٔ Grok-ترکیب از X عمومی وقتی <code>x_search</code> موجود است و زمینهٔ حسابِ احراز-هویت‌شده لازم نیست.</td></tr>
+</tbody>
+</table>
+</div>
+<p>برای گردش‌کارهای ترکیبی از <code>x_search</code> برای کشف پست‌های عمومی نامزد استفاده کنید و بعد از روشن شدن پست/کاربر/اقدام هدف، به <code>xurl read</code> یا فرمان دقیق دیگرِ <code>xurl</code> سوئیچ کنید. هر اقدام تغییردهندهٔ وضعیت X باید با خروجی <code>xurl</code> یا پاسخ X API تأیید شود؛ پاسخ <code>x_search</code> هرگز مدرکی برای وقوع یک نوشتن نیست.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>اگر به هر حال اشتراک Portal را برای مدل xAI پرداخت می‌کنید، فراخوانی‌های Live Search روی همان کلید xAI پیکربندی‌شده برای چت صورتحساب می‌شوند. بخش <a href="https://hermes-agent.nousresearch.com/docs/integrations/nous-portal" target="_blank" rel="noopener">Nous Portal</a> را ببینید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> احراز هویت</h2>
+<p>‏<code>x_search</code> وقتی ثبت می‌شود که <b>یکی</b> از دو مسیر اعتبارنامهٔ xAI در دسترس باشد:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>اعتبارنامه</th><th>منبع</th><th>راه‌اندازی</th></tr></thead>
+<tbody>
+<tr><td><b>SuperGrok / X Premium+ OAuth</b></td><td>ورود مرورگری در <code>accounts.x.ai</code>، خودکار refresh می‌شود</td><td>‏<code>hermes auth add xai-oauth</code> — بخش <a href="https://hermes-agent.nousresearch.com/docs/guides/xai-grok-oauth" target="_blank" rel="noopener">xAI Grok OAuth ‏(SuperGrok / X Premium+)</a></td></tr>
+<tr><td><b>‏<code>XAI_API_KEY</code></b> ‏(ارجح)</td><td>کلید API پولی xAI</td><td>در <code>~/.hermes/.env</code> ست کنید</td></tr>
+</tbody>
+</table>
+</div>
+<p>هر دو به همان نقطهٔ پایانی با همان payload می‌زنند — تنها تفاوت bearer token است. <b>وقتی هر دو پیکربندی شده‌اند کلید صریحِ <code>XAI_API_KEY</code> برنده است</b> — bearer ی اشتراک OAuth مجوزِ <code>/v1/responses</code> را می‌دهد اما x_search را در حالت توضیحیِ تنزل‌یافتهٔ Grok بدون ارجاع جواب می‌دهد، در حالی که کلید API پست‌های واقعی برمی‌گرداند. توجه کنید این یعنی وقتی کلیدی ست باشد x_search روی صورتحساب مصرفی API اجرا می‌شود؛ ‏<code>XAI_API_KEY</code> را حذف کنید تا به سهمیهٔ اشتراک برگردید ‏(با هشدار پاسخِ تنزل‌یافته).</p>
+<p>‏<code>check_fn</code> ی ابزار هر بار که فهرست ابزار مدل بازسازی می‌شود، حل‌کنندهٔ اعتبارنامهٔ xAI را اجرا می‌کند. بازگشت <code>True</code> یعنی bearer قابل‌واکشی <b>و</b> غیرخالی <b>و</b> ‏(اگر منقضی شده بود) موفق در refresh. توکن‌های ابطال‌شده با refresh ناموفق ابزار را از schema پنهان می‌کنند؛ مدل اصلاً نمی‌تواند ببینیدش.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> فعال‌سازی ابزار</h2>
+<p>با حضور اعتبارنامه‌های xAI ‏(توکن OAuth یا <code>XAI_API_KEY</code>) خودکار فعال می‌شود. اگر نمی‌خواهیدش صریحاً از مسیر <code>hermes tools</code> ← Search ← x_search خاموشش کنید.</p>
+<div class="codebox"><pre><code>hermes tools
+# → 🐦 X (Twitter) Search   (press space to toggle on)</code></pre></div>
+<p>انتخابگر دو گزینهٔ اعتبارنامه پیشنهاد می‌کند:</p>
+<ol>
+  <li><b>xAI Grok OAuth ‏(SuperGrok / Premium+)</b> — اگر وارد نشده باشید مرورگر را به <code>accounts.x.ai</code> باز می‌کند</li>
+  <li><b>کلید API ی xAI</b> — مقدار <code>XAI_API_KEY</code> را می‌پرسد</li>
+</ol>
+<p>هر انتخاب gating را ارضا می‌کند. هر اعتبارنامه‌ای که از قبل دارید را بردارید؛ ابزار با هر دو یکسان کار می‌کند. اگر هر دو آخرش پیکربندی شدند موقع فراخوانی OAuth ترجیح داده می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پیکربندی</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ~/.hermes/config.yaml
+x_search:
+  # xAI model used for the Responses call.
+  # grok-4.5 is the recommended default; any Grok model
+  # with x_search tool access works.
+  model: grok-4.5
+
+  # Optional reasoning effort: low, medium, high, or xhigh. When omitted,
+  # the selected model's default applies. xhigh is supported only by
+  # models that document it, such as grok-4.20-multi-agent.
+  # reasoning_effort: low
+
+  # Request timeout in seconds. x_search can take 60–120s for
+  # complex queries — the default is generous. Minimum: 30.
+  timeout_seconds: 180
+
+  # Number of automatic retries on 5xx / ReadTimeout / ConnectionError.
+  # Each retry backs off (1.5x attempt seconds, capped at 5s).
+  retries: 2</code></pre>
+</div>
+<p>‏<code>reasoning_effort</code> به‌صورت <code>reasoning: {effort: ...}</code> به Responses API ی xAI فرستاده می‌شود. برای مدلی که استدلال قابل‌پیکربندی ندارد unset بگذارید. مقادیر نامعتبر قبل از هر فراخوانی API شکست می‌خورند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> پارامترهای ابزار</h2>
+<p>ایجنت <code>x_search</code> را با این آرگومان‌ها صدا می‌زند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>query</code></td><td>رشته ‏(الزامی)</td><td>چه چیزی در X جستجو شود.</td></tr>
+<tr><td><code>allowed_x_handles</code></td><td>آرایهٔ رشته</td><td>فهرست اختیاری handleها که <b>انحصاراً</b> شامل شوند ‏(حداکثر ۱۰). ‏<code>@</code> ابتدایی strip می‌شود.</td></tr>
+<tr><td><code>excluded_x_handles</code></td><td>آرایهٔ رشته</td><td>فهرست اختیاری handleها برای exclude ‏(حداکثر ۱۰). با <code>allowed_x_handles</code> متقابلاً انحصاری است.</td></tr>
+<tr><td><code>from_date</code></td><td>رشته</td><td>تاریخ شروع اختیاری <code>YYYY-MM-DD</code>.</td></tr>
+<tr><td><code>to_date</code></td><td>رشته</td><td>تاریخ پایان اختیاری <code>YYYY-MM-DD</code>.</td></tr>
+<tr><td><code>enable_image_understanding</code></td><td>boolean</td><td>از xAI بخواهد تصاویر پیوستِ پست‌های منطبق را تحلیل کند.</td></tr>
+<tr><td><code>enable_video_understanding</code></td><td>boolean</td><td>از xAI بخواهد ویدیوهای پیوستِ پست‌های منطبق را تحلیل کند.</td></tr>
+</tbody>
+</table>
+</div>
+<p>ابزار JSON ای با این محتوا برمی‌گرداند:</p>
+<ul>
+  <li>‏<code>answer</code> — پاسخ متنیِ ترکیب‌شده از Grok</li>
+  <li>‏<code>citations</code> — ارجاع‌های برگشتی در فیلد سطح-بالای Responses API</li>
+  <li>‏<code>inline_citations</code> — حاشیه‌نویسی‌های <code>url_citation</code> استخراج‌شده از بدنهٔ پیام ‏(هر کدام با <code>url</code>، ‏<code>title</code>، ‏<code>start_index</code>، ‏<code>end_index</code>)</li>
+  <li>‏<code>degraded</code> — ‏<code>true</code> وقتی یکی از فیلترهای تنگ‌کننده ‏(<code>allowed_x_handles</code>، ‏<code>excluded_x_handles</code>، ‏<code>from_date</code>، ‏<code>to_date</code>) ست شده <b>و</b> هر دو کانال ارجاع خالی برگشته‌اند. در آن حالت <code>answer</code> از دانش خودِ مدل ساخته شده نه ایندکس X، پس بدون-منبع تلقی‌اش کنید. در غیر این صورت <code>false</code> ‏(شامل حالت «هیچ فیلتری ست نشده» — یک پاسخ گستردهٔ بدون-منبع فقط یک پاسخ است، نه خطای فیلتر)</li>
+  <li>‏<code>degraded_reason</code> — رشتهٔ کوتاهی که نام می‌برد کدام فیلترها فعال بودند، یا <code>null</code> وقتی <code>degraded</code> مقدار <code>false</code> دارد</li>
+  <li>‏<code>credential_source</code> — ‏<code>"xai-oauth"</code> اگر OAuth حل شد، ‏<code>"xai"</code> اگر کلید API حل شد</li>
+  <li>‏<code>model</code>، ‏<code>query</code>، ‏<code>provider</code>، ‏<code>tool</code>، ‏<code>success</code></li>
+</ul>
+<h3>اعتبارسنجی تاریخ</h3>
+<p>‏<code>from_date</code> / ‏<code>to_date</code> قبل از فراخوانی HTTP سمت کلاینت اعتبارسنجی می‌شوند:</p>
+<ul>
+  <li>هر دو، اگر داده شوند، باید به‌صورت <code>YYYY-MM-DD</code> تجزیه شوند.</li>
+  <li>وقتی هر دو ست‌اند، ‏<code>from_date</code> باید قبل یا برابر <code>to_date</code> باشد.</li>
+  <li>‏<code>from_date</code> نباید از امروز UTC جلوتر باشد — در بازه‌ای که هنوز شروع نشده هیچ پستی وجود ندارد، پس فراخوانی قطعاً صفر ارجاع برمی‌گرداند.</li>
+  <li>‏<code>to_date</code> در آینده مجاز است ‏(فراخواننده ممکن است مشروعاً «از دیروز تا فردا» بخواهد تا پست‌ها را همین‌که می‌آیند بگیرد).</li>
+</ul>
+<p>شکست‌های اعتبارسنجی به‌صورت نتیجهٔ ابزار ساختاریافتهٔ <code>{"error": "..."}</code> ظاهر می‌شوند، هرگز به‌شکل فراخوانی HTTP به xAI.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> مثال</h2>
+<p>گفتگو با ایجنت:</p>
+<blockquote dir="rtl"><p>مردم در X دربارهٔ قابلیت‌های تصویری جدید Grok چه می‌گویند؟ روی پاسخ‌های @xai تمرکز کن.</p></blockquote>
+<p>ایجنت خواهد کرد:</p>
+<ol>
+  <li>فراخوانی <code>x_search</code> با ‏<code>query="reactions to new Grok image features"</code> و ‏<code>allowed_x_handles=["xai"]</code></li>
+  <li>دریافت یک پاسخ ترکیب‌شده به‌علاوهٔ فهرست ارجاع‌هایی که به پست‌های مشخص لینک می‌دهند</li>
+  <li>پاسخ دادن با جواب و منابع</li>
+</ol>
+<p>اگر درخواست بعدی کاربر «به بهترینش ریپلای بده» یا «آن پست را لایک کن» باشد، ایجنت باید به مهارت <code>xurl</code> سوئیچ کند، پست هدف دقیق را تأیید و اقدام X API را انجام دهد. ‏<code>x_search</code> یک ابزار کشف باقی می‌ماند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> عیب‌یابی</h2>
+<h3>«No xAI credentials available»</h3>
+<p>ابزار وقتی هر دو مسیر احراز هویت شکست بخورند این را نشان می‌دهد. یا <code>XAI_API_KEY</code> را در <code>~/.hermes/.env</code> ست کنید یا <code>hermes auth add xai-oauth</code> را اجرا و ورود مرورگری را کامل کنید. سپس نشستتان را ری‌استارت کنید تا ایجنت registry ابزار را دوباره بخواند.</p>
+<h3>«‏<code>x_search</code> is not enabled for this model»</h3>
+<p>مدل پیکربندی‌شدهٔ <code>x_search.model</code> به ابزار سمت-سرورِ <code>x_search</code> دسترسی ندارد. به <code>grok-4.5</code> ‏(پیش‌فرض) یا مدل Grok دیگری که پشتیبانی می‌کند سوئیچ کنید. فهرست فعلی را در <a href="https://docs.x.ai/" target="_blank" rel="noopener">مستندات xAI</a> ببینید.</p>
+<h3>ابزار در schema ظاهر نمی‌شود</h3>
+<p>دو علت ممکن:</p>
+<ol>
+  <li><b>تول‌ست فعال نیست.</b> ‏<code>hermes tools</code> را اجرا و مطمئن شوید <code>🐦 X (Twitter) Search</code> تیک خورده.</li>
+  <li><b>بدون اعتبارنامهٔ xAI.</b> ‏check_fn مقدار False برمی‌گرداند پس schema پنهان می‌ماند. با <code>hermes auth status</code> وضعیت ورود xai-oauth را تأیید کنید و بررسی کنید <code>XAI_API_KEY</code> ست است ‏(اگر مسیر کلید-API هستید).</li>
+</ol>
+<h3>‏<code>degraded: true</code> — پاسخ بدون ارجاع</h3>
+<p>وقتی از <code>allowed_x_handles</code>، ‏<code>excluded_x_handles</code> یا بازهٔ تاریخ استفاده کرده‌اید و پاسخ با <code>degraded: true</code> برمی‌گردد، یعنی ایندکس X ی xAI هیچ پست منطبقی نداشت ولی Grok همچنان از دادهٔ آموزشی خودش پاسخی ساخته. پاسخ بی‌منبع است — آن را نتیجهٔ واقعی X تلقی نکنید.</p>
+<p>علت‌های ارزش‌بررسی:</p>
+<ul>
+  <li><b>غلط املایی در handle.</b> ‏<code>@</code> را بردارید، املای نوشتار را دوباره چک کنید و مطمئن شوید حساب وجود دارد.</li>
+  <li><b>بازهٔ تاریخ خیلی تنگ</b> است یا از پست‌های امروز عبور می‌کند؛ بازش کنید و دوباره تلاش کنید.</li>
+  <li><b>شکاف ایندکس xAI.</b> بعضی حساب‌های فعال به‌طور متناوب حتی با پست‌دادن مرتب در <code>x_search</code> ظاهر نمی‌شوند. چند دقیقه بعد دوباره تلاش کنید، یا وقتی تایم‌لاین یک handle دقیق را لازم دارید از مهارت <code>xurl</code> برای خواندن مستقیم X API استفاده کنید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> ببینید نیز</h2>
+<ul>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/guides/xai-grok-oauth" target="_blank" rel="noopener">xAI Grok OAuth ‏(SuperGrok / Premium+)</a> — راهنمای راه‌اندازی OAuth</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/social-media/social-media-xurl" target="_blank" rel="noopener">مهارت xurl</a> — CLI رسمی X API برای اقدامات حساب احراز-هویت‌شده</li>
+  <li><a href="web-search.html">جستجو و استخراج وب</a> — برای جستجوی وب عمومی ‏(غیر-X)</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/reference/tools-reference" target="_blank" rel="noopener">مرجع ابزارها</a> — کاتالوگ کامل ابزارها</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="delegation.html"><span class="dir">→ قبلی</span><span class="ttl">واگذاری به ایجنت فرزند</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/x-search" target="_blank" rel="noopener">X (Twitter) Search</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

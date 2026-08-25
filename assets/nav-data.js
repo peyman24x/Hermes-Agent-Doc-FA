@@ -70,11 +70,11 @@ window.HERMES_NAV = [
   { p:"user-guide/features/wake-word.html",            t:"کلمهٔ بیدارباش «هِی هرمس»",           d:1 },
   { p:"user-guide/features/web-dashboard.html",        t:"داشبورد وب",                           d:1 },
   { p:"user-guide/features/web-search.html",           t:"جستجو و استخراج وب",                   d:1 },
-  { p:"user-guide/features/x-search.html",             t:"جستجوی X (توییتر)",                   d:0 }
+  { p:"user-guide/features/x-search.html",             t:"جستجوی X (توییتر)",                   d:1 }
 ]},
 { id:"automation", cat:"🤖 اتوماسیون", pages:[
   { p:"user-guide/features/cron.html",            t:"کارهای زمان‌بندی (Cron)",        d:1 },
-  { p:"user-guide/features/delegation.html",      t:"واگذاری به ایجنت فرزند",        d:0 },
+  { p:"user-guide/features/delegation.html",      t:"واگذاری به ایجنت فرزند",        d:1 },
   { p:"user-guide/features/kanban.html",          t:"کانبان چندایجنت",                d:1 },
   { p:"user-guide/features/kanban-tutorial.html", t:"آموزش کانبان",                   d:1 },
   { p:"user-guide/features/goals.html",           t:"اهداف پایدار",                   d:1 },
