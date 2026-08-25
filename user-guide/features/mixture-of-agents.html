@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ترکیب ایجنت‌ها ‏(MoA) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/mixture-of-agents" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>ترکیب ایجنت‌ها ‏(MoA)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>ترکیب ایجنت‌ها ‏(Mixture of Agents)</h1>
+<p>‏Mixture of Agents یک ارائه‌دهندهٔ مجازیِ مدل است. هر پریست MoA نام‌دار به‌صورت یک مدل قابل‌انتخاب زیر ارائه‌دهندهٔ <code>moa</code> ظاهر می‌شود.</p>
+<p>وقتی یک پریست MoA را انتخاب می‌کنید، aggregator ی پریست، مدلِ عامل است. همان مدلی که پاسخ دستیار را می‌نویسد و فراخوانی ابزار صادر می‌کند. مدل‌های مرجع اول اجرا می‌شوند و تحلیل‌هایی برای استفادهٔ aggregator فراهم می‌کنند.</p>
+<p>‏MoA وقتی به کار می‌آید که یک تسک سخت از دیدگاه‌های چند مدل سود ببرد ولی همچنان به حلقهٔ عادی ایجنت هرمس نیاز دارد: فراخوانی ابزار، تکرارهای پیگیری، interrupt ها، ماندگاری transcript و همان زمینهٔ نشستی مثل هر پیام دیگر.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> انتخاب پریست MoA به‌عنوان مدل شما</h2>
+<p>می‌توانید پریست را از طریق سطوح عادی انتخاب‌گر مدل برگزینید:</p>
+<div class="codebox"><pre><code>/model default --provider moa
+/model review --provider moa</code></pre></div>
+<p>پریست‌های MoA روی <b>هر سطح هرمس</b> قابل‌انتخاب‌اند، چون MoA یک ارائه‌دهندهٔ عادی در سیستم مدل است:</p>
+<ul>
+  <li><b>‏CLI / گیت‌وی / ‎TUI‎‎ ‎<code>/model</code></b> — ‏<code>/model &lt;preset&gt; --provider moa</code> یا ‏<code>/model --provider moa</code> برای پریست پیش‌فرض. ‏<code>/model &lt;preset&gt;</code> خالی هم وقتی کار می‌کند که نام دقیقاً با یک پریست پیکربندی‌شده بخورد.</li>
+  <li><b>‏<code>hermes model</code></b> و <b>انتخاب‌گر مدل داشبورد</b> — یک ردیف ارائه‌دهندهٔ <code>Mixture of Agents</code> ظاهر می‌شود با نام پریست‌هایتان به‌عنوان مدل‌هایش.</li>
+  <li><b>اپ GUI دسکتاپ</b> — منوی کشویی مدل بخش <code>MoA presets</code> را نشان می‌دهد؛ انتخاب یکی ‏(<code>MoA: &lt;preset&gt;</code>) مدل فعال را به آن پریست می‌برد. پنل تنظیمات دسکتاپ هم پریست‌ها را می‌سازد و ویرایش می‌کند.</li>
+</ul>
+<p>پس پریست‌های پیکربندی‌شده هرجا که مدل دیگری برمی‌دارید ظاهر می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> میان‌بر دستور اسلش</h2>
+<p>‏<code>/moa</code> شکرِ راحتیِ تک‌مصرفی است. یک پرامپت واحد را از طریق پریست MoA ی <b>پیش‌فرض</b> اجرا و بعد مدل قبلی شما را بازمی‌گرداند:</p>
+<div class="codebox"><pre><code>/moa design and implement a migration plan for this flaky test cluster</code></pre></div>
+<p>هرمس برای همان یک نوبت موقتاً به پریست MoA پیش‌فرض سوئیچ، پرامپت را می‌فرستد و بعد از آن مدل قبلی‌تان را برمی‌گرداند. کل آرگومان، پرامپت است — ‏<code>/moa</code> دیگر آن را اسم پریست تفسیر نمی‌کند.</p>
+<div class="codebox"><pre><code>/moa</code></pre></div>
+<p>‏<code>/moa</code> ی خالی ‏(بدون پرامپت) فقط راهنما چاپ می‌کند.</p>
+<p>برای <b>سوئیچ کردن</b> به یک پریست MoA تا پایان نشست، آن را از انتخاب‌گر مدل بردارید — پریست‌های MoA زیر ارائه‌دهندهٔ <code>Mixture of Agents</code> در همهٔ سطح‌های انتخاب مدل ظاهر می‌شوند ‏(بالا). ‏<code>/moa</code> عمداً سوئیچ مدل نیست تا یک پرامپت عادی هرگز نتواند تصادفی مدل شما را عوض کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> نحوهٔ کار در حلقهٔ ایجنت</h2>
+<p>برای هر فراخوانی مدل اصلی وقتی ارائه‌دهندهٔ <code>moa</code> انتخاب شده باشد، هرمس:</p>
+<ol>
+  <li>پریست انتخابی را با نام resolve می‌کند؛</li>
+  <li>مدل‌های مرجع پیکربندی‌شده را بدون schema های ابزار اجرا می‌کند ‏(آنها فقط متن user/assistant گفتگو را می‌گیرند — نه پرامپت سیستمی هرمس و نه transcript فراخوانی ابزار — تا فراخوانی‌های مرجع ارزان بمانند و از reject شدن توسط ارائه‌دهنده‌های سخت‌گیر جلوگیری شود)؛</li>
+  <li>خروجی‌های مرجع را به‌عنوان زمینهٔ خصوصی برای aggregator الصاق می‌کند؛</li>
+  <li>aggregator پیکربندی‌شده را با schema عادی ابزار هرمس صدا می‌زند؛</li>
+  <li>پاسخ aggregator را پاسخ واقعی مدل تلقی می‌کند؛</li>
+  <li>اگر aggregator ابزار صدا بزند، هرمس آن ابزارها را عادی اجرا می‌کند؛</li>
+  <li>در تکرار بعدی مدل، همان فرایند MoA دوباره روی گفتگوی به‌روزشده — شامل نتایج ابزار — اجرا می‌شود.</li>
+</ol>
+<p>چون MoA از طریق سیستم عادی مدل انتخاب می‌شود، خودبه‌خود با <code>/goal</code>، نشست‌های گیت‌وی، نشست‌های TUI و چت دسکتاپ ترکیب می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پیکربندی پریست‌ها</h2>
+<p>می‌توانید پریست‌های MoA نام‌دار را از اینجا پیکربندی کنید:</p>
+<ul>
+  <li>داشبورد ← Models ← Model Settings ← Mixture of Agents</li>
+  <li>اپ دسکتاپ ← Settings ← Model ← Mixture of Agents</li>
+  <li>‏<code>hermes moa configure [name]</code></li>
+  <li>‏<code>config.yaml</code></li>
+</ul>
+<p>config جفت‌های صریح provider/model را ذخیره می‌کند، پس می‌توانید ارائه‌دهنده‌ها را مخلوط کنید و چند مدل از یک ارائه‌دهنده به کار ببرید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>moa:
+  default_preset: default
+  presets:
+    default:
+      reference_models:
+        - provider: openai-codex
+          model: gpt-5.5
+        - provider: openrouter
+          model: deepseek/deepseek-v4-pro
+      aggregator:
+        provider: openrouter
+        model: anthropic/claude-opus-4.8
+      # Optional: pin sampling temperatures. When omitted (the default),
+      # temperature is NOT sent and each model uses its provider default —
+      # the same behavior as a single-model Hermes agent.
+      # reference_temperature: 0.6
+      # aggregator_temperature: 0.4
+      max_tokens: 4096
+      enabled: true</code></pre>
+</div>
+<p>پریست پیش‌فرض:</p>
+<ul>
+  <li>مرجع: ‏<code>openai-codex:gpt-5.5</code></li>
+  <li>مرجع: ‏<code>openrouter:deepseek/deepseek-v4-pro</code></li>
+  <li>aggregator / مدل عامل: ‏<code>openrouter:anthropic/claude-opus-4.8</code></li>
+</ul>
+<h3>تنظیم سرعت مشاوران با <code>reference_max_tokens</code></h3>
+<p>در هر نوبت، MoA ابتدا مدل‌های مرجع ‏(مشاوران) را موازی اجرا می‌کند و بعد aggregator عمل می‌کند. تولید مشاور غالبِ تأخیر هر-نوبت است — زمان دیواری نوبت قویاً با تعداد توکن‌هایی که مشاوران منتشر می‌کنند همبستگی دارد، چون نوبت منتظر کندترین مشاور می‌ماند تا نوشتنش تمام شود. به‌طور پیش‌فرض مشاوران <b>بدون سقف‌اند</b> ‏(<code>reference_max_tokens</code> ست نشده)، پس ممکن است مشورت‌هایی به بلندای مقاله بنویسند.</p>
+<p>‏<code>reference_max_tokens</code> را روی پریست ست کنید تا خروجی مشاور سقف بخورد و مشورت مختصر بگیرید. aggregator فقط gist قضاوت هر مشاور را لازم دارد، پس یک سقف ‏(مثلاً <code>600</code>) زمان دیواری هر-نوبت را به‌طور قابل‌اندازه‌گیری کم می‌کند با اثر کیفی اندک. فقط <b>مشاوران</b> را سقف می‌زند — خروجی aggregator عامل ‏(پاسخِ قابل‌دید برای کاربر) هرگز سقف نمی‌خورد.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>moa:
+  presets:
+    fast:
+      reference_models:
+        - provider: openrouter
+          model: anthropic/claude-opus-4.8
+        - provider: openrouter
+          model: openai/gpt-5.5
+      aggregator:
+        provider: openrouter
+        model: anthropic/claude-opus-4.8
+      reference_max_tokens: 600   # concise advice → faster turns</code></pre>
+</div>
+<p>برای رفتار قبلیِ بدون سقف unset ‏(یا <code>0</code>/خالی) بگذارید.</p>
+<h3>ضرب‌آهنگ مشاوران با <code>fanout</code></h3>
+<p>به‌طور پیش‌فرض مشاوران <b>یک بار در هر نوبت کاربر</b> اجرا می‌شوند ‏(<code>fanout: user_turn</code>) — روی اولین پیام نوبت مشورت سطح-برنامه ترکیب می‌کنند و بعد aggregator عامل به‌تنهایی بقیهٔ حلقهٔ ابزار را پیش می‌برد. ارزان‌ترین ضرب‌آهنگ است: هزینهٔ مشاور با تعداد فراخوانی‌های ابزارِ نوبت ضرب نمی‌شود. دو ضرب‌آهنگ جایگزین هزینه را با تازگی مشورت معامله می‌کنند:</p>
+<ul>
+  <li>‏<code>fanout: per_iteration</code> — مشاوران روی <b>هر تکرار ابزار</b> دوباره اجرا می‌شوند، پس مشورتشان همیشه آخرین نتایج ابزار را دنبال می‌کند — به هزینهٔ ضرب شدن تأخیر و خرج مشاور در تعداد فراخوانی‌های ابزار نوبت.</li>
+  <li>‏<code>fanout: every_n:3</code> — حد وسط: مشاوران روی <b>اولین</b> تکرار هر نوبت کاربر و بعد هر <b>سومین</b> تکرار ابزار اجرا می‌شوند ‏(هر <code>N ≥ 2</code> کار می‌کند). تکرارهای بین آن‌ها راهنمای کش‌شدهٔ آخرین run مشاور را دوباره مصرف می‌کنند، پس aggregator در هر قدم همچنان مشورت دارد — فقط هر N قدم به‌جای هر قدم refresh می‌شود. شمارنده روی هر پیام جدید کاربر reset می‌شود تا هر نوبت با مشورت تازه شروع شود. فرم نگاشتِ ‏<code>fanout: {mode: every_n, n: 3}</code> هم پذیرفته و به فرم رشته نرمال‌سازی می‌شود.</li>
+</ul>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>moa:
+  presets:
+    fresh:
+      reference_models:
+        - provider: openrouter
+          model: anthropic/claude-opus-4.8
+      aggregator:
+        provider: openrouter
+        model: openai/gpt-5.5
+      fanout: per_iteration   # advisors refresh on every tool iteration</code></pre>
+</div>
+<p>مقادیر ناشناخته یا بدفرم به <code>user_turn</code> برمی‌گردند.</p>
+<div class="callout note">
+  <div class="callout-title">📌 تغییر پیش‌فرض</div>
+  <p>قبل از ژوئیه ۲۰۲۶ ضرب‌آهنگ پیش‌فرض <code>per_iteration</code> بود. پیش‌فرض حالا <code>user_turn</code> است — ارزان‌ترین و کم‌اثرترین — تا بنچمارک هر-حالت هزینه‌ی پیش‌فرض گران‌تر را توجیه کند. پریست‌هایی که مشورت هر-قدم را می‌خواهند صریحاً <code>fanout: per_iteration</code> ست کنند.</p>
+</div>
+<h3>فیلتر حریم خصوصی برای خروجی مشاوران</h3>
+<p>خروجی مشاوران می‌تواند داده‌های حساس گفتگو — ایمیل‌ها، شماره تلفن‌های فرمت‌شده، کلیدهای API، ‏JWT ها — را در بلوک‌های مرجع نشان‌داده‌شده در UI، ردپاهای MoA ذخیره‌شده و پرامپت aggregator تکرار کند. ‏<code>moa.privacy_filter</code> ‏(به‌طور پیش‌فرض خاموش) آن سطوح را سانسور می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>moa:
+  privacy_filter: display   # or: full</code></pre>
+</div>
+<ul>
+  <li>‏<code>display</code> — فقط <b>سطوح قابل‌دید برای کاربر</b> را سانسور می‌کند: بلوک‌های مرجع برچسب‌دار رندرشده در UI و رکوردهایی که <code>save_traces</code> می‌نویسد. aggregator همچنان متن خام مشاور را می‌گیرد، پس کیفیت پاسخ تحت تأثیر نیست.</li>
+  <li>‏<code>full</code> — علاوه بر آن متن مشاورِ تزریق‌شده در پرامپت aggregator ‏(و ورودی ترکیبِ تک‌مصرفِ <code>/moa</code>) را هم سانسور می‌کند.</li>
+</ul>
+<p>شکل‌های اعتبارنامه ‏(پیشوندهای کلید API، ‏JWTها، کلیدهای خصوصی، رشته‌های اتصال DB) توسط سانسورکنندهٔ مرکزی secrets هرمس ماسک می‌شوند؛ فیلتر MoA سانسور ایمیل و شماره تلفن‌های واضحاً فرمت‌شده را روی آن اضافه می‌کند. الگوها عمداً برای مشورت سبک-بازبینی-کد محافظه‌کارند: رشته‌های رقم لخت، شماره خطوط، timestampها، ‏git SHA ها و آدرس‌های IP هرگز لمس نمی‌شوند — فقط فرمت‌های تلفن جدا‌دار مثل <code>(555) 123-4567</code> یا <code>555-123-4567</code> تطبیق می‌یابند.</p>
+<h3>تلاش استدلال per-slot</h3>
+<p>اسلات‌های مرجع و aggregator همچنین می‌توانند <code>reasoning_effort</code> ست کنند. وقتی می‌خواهید همان مدل در عمق‌های متفاوت مشارکت کند یا aggregator سخت‌تر از مراجع مشورتی فکر کند از این استفاده کنید. مقادیر معتبر با کنترل‌های عادی استدلال هرمس یکی است: ‏<code>none</code>، ‏<code>minimal</code>، ‏<code>low</code>، ‏<code>medium</code>، ‏<code>high</code>، ‏<code>xhigh</code>، ‏<code>max</code> و <code>ultra</code>.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>moa:
+  presets:
+    deep_review:
+      reference_models:
+        - provider: openai-codex
+          model: gpt-5.6-sol
+          reasoning_effort: low
+        - provider: openai-codex
+          model: gpt-5.6-sol
+          reasoning_effort: xhigh
+        - provider: xai-oauth
+          model: grok-4.5
+      aggregator:
+        provider: openai-codex
+        model: gpt-5.6-sol
+        reasoning_effort: high</code></pre>
+</div>
+<p>برای استفاده از پیش‌فرض ارائه‌دهنده/هرمس در آن اسلات، <code>reasoning_effort</code> را حذف کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> مدیریت پریست در ترمینال</h2>
+<div class="codebox"><pre><code>hermes moa list
+hermes moa configure              # update the default preset
+hermes moa configure review       # create or update a named preset
+hermes moa delete review</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> بنچمارک‌ها</h2>
+<p>روی HermesBench، یک پریست MoA دومدلی — ‏<code>claude-opus-4.8</code> به‌عنوان aggregator روی مرجعِ <code>gpt-5.5</code> — از هر دو مدلِ تنها امتیاز بالاتری می‌گیرد:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مدل</th><th>امتیاز HermesBench</th></tr></thead>
+<tbody>
+<tr><td><b>Aggregator ی Opus ‏(opus-4.8 + مرجع gpt-5.5) — MoA</b></td><td><b>۰٫۸۲۰۲</b></td></tr>
+<tr><td>‏<code>anthropic/claude-opus-4.8</code></td><td>۰٫۷۶۰۷</td></tr>
+<tr><td>‏<code>openai/gpt-5.5</code></td><td>۰٫۷۴۱۲</td></tr>
+</tbody>
+</table>
+</div>
+<p>پیکربندی MoA قوی‌ترین جزءش ‏(opus-4.8) را حدود ۶ واحد شکست می‌دهد؛ تأییدی بر اینکه تجمیع دیدگاه دوم کیفیت تسک‌های سخت را بالا می‌برد نه صرفاً میانگین‌گیری از دو مدل.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> کش پرامپت</h2>
+<p>‏MoA طوری ساخته شده که <b>کش پرامپتِ گفتگوی اصلی هرگز نشکند</b>. انتخاب یک پریست MoA یک انتخاب مدل عادی است: زمینهٔ گذشته را جهش نمی‌دهد، تول‌ست‌ها را عوض نمی‌کند و پرامپت سیستمی را وسط گفتگو بازسازی نمی‌کند. تاریخچهٔ گفتگو، پرامپت سیستمی و schema ابزار بایت-به-بایت پایدار می‌مانند، پس پیشوند کش‌شده‌ای که هر مدل دیگری به آن تکیه دارد دقیقاً مثل یک مدل ساده حفظ می‌شود. سوئیچ به یا از یک پریست MoA همان بی‌اعتبارسازی کشِ هر سوئیچ <code>/model</code> دیگر را دارد — نه بیشتر.</p>
+<p>هر دو نوع فراخوانی داخلی عادی کش می‌گیرند:</p>
+<ul>
+  <li><b>مدل‌های مرجع</b> نمای کوتاه‌شده و قطعیِ گفتگو را می‌گیرند ‏(بدون پرامپت سیستمی و transcript ابزار — حلقه را بالا ببینید). چون آن نما تابعی پایدار از تاریخچهٔ پایدار است، پیشوند پرامپتِ مدل مرجع بین تکرارها تکرار می‌شود و عادی کش می‌گیرد. مراجع، فراخوانی‌های مشورتیِ کوتاه بدون ابزارند.</li>
+  <li><b>Aggregator</b> مدل عامل است. خروجی‌های مرجع به <i>انتهای</i> آخرین نوبت کاربر به‌عنوان راهنمای خصوصی الصاق می‌شوند. چون آن متن در دم قرار دارد — زیر کل پیشوند پایدار ‏(پرامپت سیستمی + تاریخچهٔ قبل) — هیچ پیشوند کش‌شده‌ای را باطل نمی‌کند: aggregator روی همه‌چیز بالای تزریق hit می‌گیرد و فقط دُمِ تازه‌الصاق‌شده جدید است. دقیقاً رفتار هر نوبت عادی که هر پیام جدید کاربر هم توکن‌های دمیِ کش‌نشده است.</li>
+</ul>
+<p>پس MoA هیچ‌یک از دو نوع فراخوانی را قربانی کش پرامپت نمی‌کند. تنها هزینهٔ واقعی‌اش فراخوانی‌های مرجع اضافه به‌ازای هر تکرار است — برای دیدگاه‌های چندمدلی پول می‌دهید نه برای کش‌های شکسته. پیشوند بلندمدت گفتگو که با بقیهٔ هرمس مشترک است کاملاً سالم می‌ماند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> یادداشت‌ها</h2>
+<ul>
+  <li>‏MoA دیگر زیر <code>hermes tools</code> فهرست نمی‌شود؛ تول‌ستِ <code>moa</code> ای برای فعال کردن وجود ندارد.</li>
+  <li>ست کردن <code>enabled: false</code> روی یک پریست، fan-out مرجع آن پریست را غیرفعال می‌کند: aggregator به‌تنهایی عمل می‌کند، دقیقاً انگار آن را به‌عنوان مدل ساده انتخاب کرده باشید. این کلید خاموش per-preset است که در تنظیمات داشبورد و دسکتاپ ظاهر شده.</li>
+  <li>aggregator یک پریست نمی‌تواند پریست MoA دیگری باشد. درخت‌های بازگشتی MoA عمداً بلاک‌اند.</li>
+  <li>شکست اعتبارنامه روی یکی از مدل‌های مرجع نوبت را abort نمی‌کند. هرمس شکست را در زمینهٔ مرجع می‌گنجاند و با هر مدلی که جواب داده ادامه می‌دهد.</li>
+  <li>‏MoA تعداد فراخوانی مدل را بالا می‌برد. یک تکرار تک‌مدلی می‌تواند چند فراخوانی مرجع به‌علاوهٔ فراخوانی aggregator را درگیر کند.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="subscription-proxy.html"><span class="dir">→ قبلی</span><span class="ttl">پروکسی اشتراک</span></a>
+  <a class="next" href="pets.html"><span class="dir">بعدی ←</span><span class="ttl">اسکات‌های خانگی ‏(Pets)</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/mixture-of-agents" target="_blank" rel="noopener">Mixture of Agents</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

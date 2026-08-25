@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۸۶ از ۲۰۷ صفحه (۴۲٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۸۸ از ۲۰۷ صفحه (۴۳٪)** |
 
 ---
 
@@ -452,6 +452,13 @@ hermes-docs-fa/
 - زنجیرهٔ pager: …x-search ← tool-search ← tool-gateway ← subscription-proxy ← (به‌زودی)
 - پیشرفت: **۸۶ از ۲۰۷ صفحه فعال (۴۲٪)**
 
+### نشست ۵۳ — 2026-08-26 — 🧪 ترکیب ایجنت‌ها ‏(MoA) + 🐣 اسکات‌های خانگی
+- ترجمه و انتشار «ترکیب ایجنت‌ها (MoA)» (۸ بخش): ارائه‌دهندهٔ مجازی moa و انتخاب پریست از همهٔ سطح‌ها، میان‌بر تک‌مصرفی ‎/moa‎، حلقهٔ ۷گامی با مراجع بدون schema ابزار، پیکربندی پریست‌ها شامل reference_max_tokens برای مشاوران مختصر، سه ضرب‌آهنگ fanout ‏(user_turn پیش‌فرض جدید ژوئیه ۲۰۲۶ / per_iteration / every_n)، فیلتر حریم خصوصی display/full، reasoning_effort per-slot، مدیریت ترمینال، بنچمارک HermesBench ‏(MoA ۰٫۸۲۰۲ در برابر ۰٫۷۶۰۷ تک‌مدل) و تضمین سالم ماندن کش پرامپت روی هر دو نوع فراخوانی + یادداشت‌ها
+- ترجمه و انتشار «اسکات‌های خانگی» (۱۰ بخش): صرفاً تزئینی بودن و خاموشی پیش‌فرض، جدول نگاشت فعالیت→حالت ۶حالته، رندر kitty/Ghostty/WezTerm/iTerm2/sixel و fallback نیم‌بلوکی، شروع سریع CLI، جدول کامل فرمان‌های hermes pets، دستور ‎/pet‎، تولید اسکات با ‎/hatch‎ دومرحله‌ای + بک‌اندهای مرجع‌پذیر و HERMES_PET_IMAGE_PROVIDER، اپ دسکتاپ ‏(Cmd+K، roaming، تغییر اندازه Alt+wheel، واکنش‌های قلب، overlay جداشده با جدول حرکات)، پیکربندی display.pet و عیب‌یابی doctor
+- زنجیرهٔ pager: …subscription-proxy ← mixture-of-agents ← pets ← (به‌زودی)
+- اصلاحات: دو عبارت نویسه‌آمیخته «قابل-دید-for-user» در MoA
+- پیشرفت: **۸۸ از ۲۰۷ صفحه فعال (۴۳٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -544,6 +551,8 @@ hermes-docs-fa/
 | 84 | `user-guide/features/tool-search.html` | جستجوی ابزار |
 | 85 | `user-guide/features/tool-gateway.html` | گیت‌وی ابزار Nous |
 | 86 | `user-guide/features/subscription-proxy.html` | پروکسی اشتراک |
+| 87 | `user-guide/features/mixture-of-agents.html` | ترکیب ایجنت‌ها (MoA) |
+| 88 | `user-guide/features/pets.html` | اسکات‌های خانگی (Pets) |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

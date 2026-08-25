@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اسکات‌های خانگی ‏(Pets) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/pets" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>اسکات‌های خانگی ‏(Pets)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>اسکات‌های خانگی ‏(Pets / Petdex Mascots)</h1>
+<p>هرمس می‌تواند یک <b>اسکات</b> متحرک نشان دهد — اسپرایت ماسکوتی کوچک که به کاری که ایجنت انجام می‌دهد واکنش نشان می‌دهد ‏(بی‌کار، اجرای ابزار، فکر کردن، تمام کردن، شکست خوردن) در سراسر <b>CLI</b>، ‏<b>TUI</b> و <b>اپ دسکتاپ</b>. اسکات‌ها از گالری عمومی <a href="https://github.com/crafter-station/petdex" target="_blank" rel="noopener">petdex</a> می‌آیند.</p>
+<p>اسکات‌ها صرفاً تزئینی‌اند. <b>هیچ اثری روی کش پرامپت، توکن‌ها یا رفتار ایجنت ندارند</b> — اسپرایت فقط یک دغدغهٔ نمایشی است. قابلیت <b>به‌طور پیش‌فرض خاموش است</b> و تا نصب و انتخاب یک اسکات خوابیده می‌ماند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نحوهٔ کار</h2>
+<ul>
+  <li>اسکات‌ها در دایرکتوری <code>pets/</code> پروفایل شما نصب می‌شوند ‏(<code>&lt;HERMES_HOME&gt;/pets/&lt;slug&gt;/</code>)، پس هر <a href="../profiles.html">پروفایل</a> مجموعهٔ خودش را دارد.</li>
+  <li>انتخاب یک اسکات، <code>display.pet.slug</code> و ‏<code>display.pet.enabled</code> را در <code>config.yaml</code> می‌نویسد — هیچ‌چیز به‌عنوان secret یا متغیر محیطی ذخیره نمی‌شود.</li>
+  <li>هر سطح، فعالیتی را که از قبل رصد می‌کند زیر نظر دارد و به یکی از شش حالت انیمیشن نگاشت می‌کند. نگاشت یک‌جا زندگی می‌کند تا همهٔ سطوح یکسان رفتار کنند:</li>
+</ul>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فعالیت ایجنت</th><th>حالت اسکات</th></tr></thead>
+<tbody>
+<tr><td>یک ابزار/نوبت همین الان شکست خورد</td><td><code>failed</code></td></tr>
+<tr><td>یک برنامه تمام شد ‏(همهٔ todo ها انجام شد)</td><td><code>jump</code> ‏(جشن)</td></tr>
+<tr><td>یک نوبت تمیز تمام شد</td><td><code>wave</code></td></tr>
+<tr><td>یک ابزار در حال اجراست</td><td><code>run</code></td></tr>
+<tr><td>مدل در حال فکر کردن/خواندن است</td><td><code>review</code></td></tr>
+<tr><td>نوبت در جریان است ‏(نامشخص)</td><td><code>run</code></td></tr>
+<tr><td>منتظر شماست ‏(یک پرامپت clarify/تأیید باز است)</td><td><code>waiting</code> ‏(روی برگه‌های قدیمی ۸-سطری به <code>idle</code> برمی‌گردد)</td></tr>
+<tr><td>هیچ اتفاقی نمی‌افتد</td><td><code>idle</code></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> رندر</h2>
+<p>در ترمینال ‏(CLI/TUI) هرمس وقتی ترمینالتان یک پروتکل گرافیکی پشتیبانی کند ‏(<b>kitty</b>، ‏<b>Ghostty</b>، ‏<b>WezTerm</b>، ‏<b>iTerm2</b> یا <b>sixel</b>) اسپرایت را با وفاداری کامل رندر می‌کند. در غیر این صورت خودکار به رندر Unicode نیم‌بلوکیِ truecolor برمی‌گردد. داخل pipe یا redirect ‏(بدون TTY) رندر ترمینالی بنا به طراحی غیرفعال است.</p>
+<p>اپ دسکتاپ اسکات را به‌صورت اسپرایت شناور روی canvas رسم و از <b>Settings → Appearance</b> روشن/خاموش می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> شروع سریع ‏(CLI)</h2>
+<div class="codebox"><pre><code># Browse the gallery (filter by substring)
+hermes pets list
+hermes pets list cat
+
+# Install a pet and make it active in one step
+hermes pets install boba --select
+
+# Preview / animate it in your terminal (Ctrl+C to stop)
+hermes pets show
+
+# Check your setup
+hermes pets doctor</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> فرمان‌های <code>hermes pets</code></h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>هدف</th><th>فرمان</th></tr></thead>
+<tbody>
+<tr><td>گشت‌وگذار در گالری</td><td><code>hermes pets list [query] [--limit N]</code></td></tr>
+<tr><td>فهرست اسکات‌های نصب‌شده</td><td><code>hermes pets list --installed</code></td></tr>
+<tr><td>نصب یک اسکات</td><td><code>hermes pets install &lt;slug&gt; [--select] [--force]</code></td></tr>
+<tr><td>تنظیم اسکات فعال</td><td><code>hermes pets select [slug]</code> ‏(بدون slug برای انتخابگر)</td></tr>
+<tr><td>تغییر اندازه همه‌جا</td><td><code>hermes pets scale &lt;factor&gt;</code> ‏(مثلاً <code>0.5</code>، محدود ۰٫۱–۳٫۰)</td></tr>
+<tr><td>پیش‌نمایش/انیمیشن</td><td><code>hermes pets show [slug] [--state &lt;s&gt;] [--cycle] [--once] [--mode &lt;m&gt;] [--scale &lt;f&gt;]</code></td></tr>
+<tr><td>خاموش کردن اسکات</td><td><code>hermes pets off</code></td></tr>
+<tr><td>حذف اسکات نصب‌شده</td><td><code>hermes pets remove &lt;slug&gt;</code></td></tr>
+<tr><td>تشخیص مشکلات راه‌اندازی</td><td><code>hermes pets doctor</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>فلگ‌های <code>hermes pets show</code>:</p>
+<ul>
+  <li>‏<code>--state</code> — پخش یک حالت واحد ‏(<code>idle</code>، ‏<code>wave</code>، ‏<code>run</code>، ‏<code>failed</code>، ‏<code>review</code>، ‏<code>jump</code>).</li>
+  <li>‏<code>--cycle</code> — چرخش بین همهٔ حالت‌ها.</li>
+  <li>‏<code>--once</code> — یک بار پخش به‌جای loop.</li>
+  <li>‏<code>--mode</code> — بازنویسی پروتکل رندر ‏(<code>kitty</code>، ‏<code>iterm</code>، ‏<code>sixel</code>، ‏<code>unicode</code>، ‏<code>auto</code>).</li>
+  <li>‏<code>--scale</code> — بازنویسی مقیاس روی صفحه ‏(<code>0</code> = استفاده از config).</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> دستور اسلش <code>/pet</code></h2>
+<p>داخل CLI و TUI می‌توانید بدون ترک نشست اسکات را مدیریت کنید:</p>
+<ul>
+  <li>‏<code>/pet</code> — روشن/خاموش کردن اسکات ‏(اگر فعالی نباشد اولین اسکات نصب‌شده را به فرزندی می‌پذیرد).</li>
+  <li>‏<code>/pet list</code> — گشت‌وگذار در گالری.</li>
+  <li>‏<code>/pet scale &lt;factor&gt;</code> — تغییر اندازه همه‌جا ‏(مثلاً <code>/pet scale 0.5</code>).</li>
+  <li>‏<code>/pet &lt;slug&gt;</code> — به فرزندی پذیرفتن یک اسکات مشخص.</li>
+  <li>‏<code>/pet off</code> — خاموش کردن اسکات.</li>
+</ul>
+<p>در TUI، ‏<code>/pet list</code> یک overlay انتخابگر تعاملی باز می‌کند؛ در اپ دسکتاپ پالت اسکاتِ Cmd+K را باز می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> تولید یک اسکات ‏(/hatch)</h2>
+<p>علاوه بر نصب اسکات‌های آماده از گالری، هرمس می‌تواند از روی توضیح متنی یک <b>اسکات کاملاً نو تولید کند</b> — خط‌لوله اختصاصی تولید-اسپرایت با AI.</p>
+<ul>
+  <li>‏CLI/TUI: ‏<code>/hatch &lt;description&gt;</code> ‏(نام مستعار <code>/generate-pet</code>)، یا ‏<code>hermes pets</code> ← جریان generate.</li>
+  <li>اپ دسکتاپ: UI ی generate به سبک Pokédex — یک تخم‌مرغ متحرک، افکت hatch و انتخابگر draft.</li>
+</ul>
+<p>سازوکار تولید ‏(جریان دومرحله‌ای با هزینهٔ محدود):</p>
+<ol>
+  <li><b>Draftهای پایه</b> — چند نوع «این اسکات چه شکلی باشد» ارزان و فقط-پرامپتی تولید می‌شود. یکی را برمی‌دارید یا برای دور تازه remix/retry می‌کنید.</li>
+  <li><b>Hatch</b> — پایهٔ انتخابی به‌عنوان تصویر مرجع برای تولید یک سطر انیمیشن مستند به‌ازای هر حالت هرمس ‏(idle، تفکر، مصرف ابزار و…) به کار می‌رود که قطعیانه به فریم‌ها برش و در اطلس استاندارد petdex/Codex بسته‌بندی می‌شوند ‏(شبکهٔ ۸×۹ از خانه‌های ۱۹۲×۲۰۸). نتیجه یک spritesheet معتبر است که مال شماست — و می‌توانید <code>petdex submit</code> اش کنید.</li>
+</ol>
+<h3>بک‌اند تصویر</h3>
+<p>تولید از <a href="image-generation.html">ارائه‌دهندهٔ تولید تصویر</a> فعال استفاده می‌کند ولی <b>مستندسازی-با-تصویر-مرجع</b> لازم دارد تا هر سطر انیمیشن همان شخصیت پایه بماند. بک‌اندهای دارای قابلیت مرجع: ‏<b>Nous Portal</b>، ‏<b>OpenRouter</b>، ‏<b>OpenAI</b> ‏(<code>gpt-image-2</code>) و <b>Krea</b>. ‏OpenRouter/Nous به‌طور پیش‌فرض زنجیره‌ای کیفیت-محور از مدل‌ها اجرا می‌کنند.</p>
+<ul>
+  <li>ترتیب اولویت: ‏Nous Portal ← OpenAI ← OpenRouter.</li>
+  <li>اگر بک‌اند مرجع‌پذیری پیکربندی نشده باشد، تولید خطایی اقدام‌پذیر به سمت <code>hermes tools</code> ← Image Generation نشان می‌دهد. ‏(نصب/به-فرزندی-پذیرفتن اسکات‌های موجود گالری به بک‌اند تصویر نیاز ندارد.)</li>
+  <li>بک‌اند را با متغیر محیطی <code>HERMES_PET_IMAGE_PROVIDER</code> بازنویسی کنید ‏(مثلاً <code>HERMES_PET_IMAGE_PROVIDER=openrouter</code>).</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> اپ دسکتاپ</h2>
+<p>در اپ دسکتاپ دو راه برای مدیریت اسکات دارید:</p>
+<ul>
+  <li><b>Cmd+K ← «Pets…»</b> — مرور، جستجو، به-فرزندی-پذیرفتن و toggle بدون جدا شدن از کیبورد ‏(آینهٔ انتخاب‌گر تم).</li>
+  <li><b>Settings ← Appearance</b> — همان گالری به‌علاوهٔ یک <b>اسلایدر اندازه</b> که ماسکوت شناور را همان لحظه با کشیدن تغییر اندازه می‌دهد.</li>
+</ul>
+<p>هر دو ماسکوت شناور را در جا می‌پذیرند/toggle/تغییر-اندازه می‌دهند — تغییر اندازه فوری اعمال می‌شود؛ پذیرش اسکات جدید در چند لحظه روشنش می‌کند.</p>
+<h3>سرگردانی ‏(Roaming)</h3>
+<p>‏Settings ← Appearance یک کلید <b>Roam</b> دارد: با فعال شدن، اسکات وقتی ایجنت بی‌کار است خودش در پنجره می‌چرخد — روی سطوح قدم می‌زند، مکث می‌کند و بین نقاط می‌پرد. سرگردانی فقط وقتی اجرا می‌شود که اسکات داخل پنجره، فعال و ایجنت در سکون باشد؛ هر حالتِ ایجنت-رانده ‏(کار کردن، جشن گرفتن) فوراً کنترل را می‌گیرد. کلید به‌طور پیش‌فرض خاموش و بین ری‌استارت‌ها ماندگار است.</p>
+<h3>تغییر اندازه با Alt+wheel</h3>
+<p>‏<b>Alt</b> را نگه دارید و چرخ ماوس را روی اسکات بچرخانید تا در جا بزرگ/کوچک شود — هم در پنجره اپ و هم در overlay ی جداشده. overlay به سمت موقعیت مکان‌نما zoom می‌کند و مقیاس حاصل ماندگار می‌شود، پس از ری‌استارت جان سالم به در می‌برد و با اسکات داخل اپ همگام می‌ماند.</p>
+<h3>واکنش‌های حس خوب</h3>
+<p>به ایجنت چیزی محبت‌آمیز بگویید — «good bot»، «thank you»، «ily»، ‏<code>&lt;3</code> یا یک ایموجی قلب — و اسکات با قلب‌های شناور ‏(دسکتاپ) یا فلش قلب ‏(CLI/TUI) واکنش نشان می‌دهد. آشکارسازی یک واژگان منتخبِ بدون-توکن است که روی هر پیام کاربر به‌صورت محلی تطبیق می‌یابد ‏(بدون فراخوانی مدل)؛ روی محبت و قدردانیِ رو-به-ایجنت شلیک می‌کند نه هر احساس مثبت عمومی. همهٔ سطوح — اسکات CLI، ‏TUI، اسکات شناور دسکتاپ و overlay ی pop-out — از یک سیگنال مشترک واکنش نشان می‌دهند.</p>
+<h3>Overlay جداشده ‏(Pop-out)</h3>
+<p>اسکات شناور را <b>Shift-click</b> کنید تا در پنجره دسکتاپ شفاف و همیشه-رویزی خودش pop-out شود. آنجا حتی وقتی هرمس minimize است مرئی می‌ماند ‏(به سبک Codex)، پس یک نگاه می‌گوید ایجنت چه می‌کند.</p>
+<p>حرکات بعد از pop-out:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>حرکت</th><th>اقدام</th></tr></thead>
+<tbody>
+<tr><td><b>Drag</b></td><td>جابه‌جایی اسکات به هر جای صفحه، حتی بیرون اپ. محلش و وضعیت داخل/بیرونش بین ری‌استارت‌ها می‌ماند.</td></tr>
+<tr><td><b>Single-click</b></td><td>باز کردن یک composer کوچک برای فرستادن پرامپت به جدیدترین نشست — بدون بالا آوردن اپ.</td></tr>
+<tr><td><b>Double-click</b></td><td>toggle پنجره اپ: اگر جلو است minimize، اگر پنهان است restore.</td></tr>
+<tr><td><b>Shift-click</b></td><td>برگرداندن اسکات داخل پنجره.</td></tr>
+<tr><td><b>آیکن mail</b></td><td>فقط وقتی ظاهر می‌شود که نوبتی در غیاب شما تمام شده باشد؛ با کلیک، اپ روی جدیدترین thread بالا می‌آید ‏(و خوانده‌شده علامت می‌خورد).</td></tr>
+</tbody>
+</table>
+</div>
+<p>فقط اسکات pop-out شده <b>حباب گفتار</b> نشان می‌دهد ‏(<code>working…</code>، ‏<code>thinking…</code>، ‏<code>your turn</code> و…) — داخل پنجره خود اپ سطح نمایش است، پس اسکات آنجا ساکت می‌ماند.</p>
+<p>overlay یک عروسک محض از اسکات داخل اپ است — اتصال گیت‌وی جدا ندارد و هرگز در dock یا app switcher ظاهر نمی‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> پیکربندی</h2>
+<p>همهٔ تنظیمات زیر <code>display.pet</code> در <code>config.yaml</code> زندگی می‌کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  pet:
+    enabled: false        # master on/off (true once you select a pet)
+    slug: ""              # active pet; empty = first installed
+    render_mode: auto      # auto | kitty | iterm | sixel | unicode | off
+    scale: 0.33           # master size knob (relative to native 192x208 frames)
+    unicode_cols: 0       # hard override for terminal width (0 = derive from scale)</code></pre>
+</div>
+<ul>
+  <li><b>‏<code>scale</code></b> تنها پیچ اصلی اندازه است. یک عدد همهٔ سطوح را کوچک می‌کند: canvas دسکتاپ پیکسل‌هایش را با آن مقیاس می‌دهد و CLI/TUI عرض ستونی ترمینالشان را از آن مشتق می‌کنند. fallback نیم‌بلوکی به یک کفِ خوانایی clamp می‌شود — نمی‌تواند مثل رندر true-pixel ی kitty/GUI تا هر حد کوچک شود بی‌آنکه به mush تبدیل گردد، پس همان <code>scale</code> زیر kitty شارپ می‌افتد ولی در نیم‌بلوک‌ها کف می‌خورد.</li>
+  <li><b>‏<code>render_mode: auto</code></b> kitty/iTerm2/sixel را آشکار و به نیم‌بلوک‌های unicode برمی‌گردد. صریحاً ست کنید تا پروتکلی را اجبار کنید، یا <code>off</code> تا رندر ترمینالی خاموش ولی اسکات روی دسکتاپ بماند.</li>
+  <li><b>‏<code>unicode_cols</code></b> عرض ستونی ترمینال را مستقل از <code>scale</code> پین می‌کند؛ برای مشتق عرض از scale آن را <code>0</code> بگذارید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> عیب‌یابی</h2>
+<p>‏<code>hermes pets doctor</code> را اجرا کنید — گزارش می‌دهد:</p>
+<ul>
+  <li>دایرکتوری pets و اینکه کدام اسکات‌ها نصب‌اند،</li>
+  <li>‏<code>display.pet.enabled</code>، ‏<code>display.pet.slug</code> و اسکات فعالِ حل‌شده،</li>
+  <li>‏<code>render_mode</code> ی پیکربندی‌شده، پروتکل گرافیکی آشکارشدهٔ ترمینال و حالت مؤثر برای یک TTY،</li>
+  <li>importable بودن Pillow ‏(برای decode اسپرایت).</li>
+</ul>
+<p>وقتی اسکاتی نصب، انتخاب و فعال شده و Pillow موجود باشد <code>✓ ready</code> چاپ می‌کند.</p>
+<p>گیراندازی‌های رایج:</p>
+<ul>
+  <li>اسکات فقط وقتی نشان داده می‌شود که <b>نصب و انتخاب شده باشد</b> ‏(<code>enabled: true</code>).</li>
+  <li>داخل pipe/redirect ‏(بدون TTY) رندر ترمینالی بنا به طراحی غیرفعال است.</li>
+  <li>CLI ی npm ی petdex در <code>~/.codex/pets</code> نصب می‌کند؛ هرمس از مسیر مخصوص-پروفایل خودش یعنی <code>&lt;HERMES_HOME&gt;/pets/</code> استفاده می‌کند — از طریق <code>hermes pets</code> نصب کنید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> ببینید نیز</h2>
+<ul>
+  <li>مهارت <a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent" target="_blank" rel="noopener"><code>hermes-agent</code></a> به ایجنت اجازه می‌دهد به درخواست شما اسکات نصب و عوض کند ‏(فایل <code>references/petdex.md</code> اش را ببینید).</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="mixture-of-agents.html"><span class="dir">→ قبلی</span><span class="ttl">ترکیب ایجنت‌ها ‏(MoA)</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/pets" target="_blank" rel="noopener">Pets (Petdex Mascots)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>
