@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>گیت‌وی ابزار Nous — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tool-gateway" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>گیت‌وی ابزار Nous</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>گیت‌وی ابزار Nous ‏(Nous Tool Gateway)</h1>
+<p><b>یک اشتراک. هر ابزار از قبل ساخته‌شده.</b></p>
+<p>گیت‌وی ابزار با هر اشتراک پولی <a href="https://portal.nousresearch.com" target="_blank" rel="noopener">Nous Portal</a> ارائه می‌شود. فراخوانی‌های ابزار هرمس — جستجوی وب، تولید تصویر، تبدیل متن به گفتار و اتوماسیون مرورگر ابری — را از طریق زیرساختی که خود Nous اجرا می‌کند مسیریابی می‌کند، پس لازم نیست فقط برای کارا شدن ایجنتتان سراغ Firecrawl، ‏FAL، ‏OpenAI، ‏Browser Use یا هر شرکت دیگری بروید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 مدیریت اشتراک</div>
+  <p><a href="https://portal.nousresearch.com/manage-subscription" target="_blank" rel="noopener">شروع یا مدیریت اشتراک ←</a></p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چه چیزهایی شامل می‌شود</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>ابزار</th><th>چه می‌گیرید</th></tr></thead>
+<tbody>
+<tr><td>🔍</td><td><b>جستجو و استخراج وب</b></td><td>جستجوی وبِ درجه-ایجنت و استخراج تمام‌صفحه از طریق Firecrawl. نگران rate limit نباشید — گیت‌وی مقیاس‌پذیری را هندل می‌کند.</td></tr>
+<tr><td>🎨</td><td><b>تولید تصویر</b></td><td>نه مدل زیر یک نقطهٔ پایانی: ‏<b>FLUX 2 Klein 9B</b>، ‏<b>FLUX 2 Pro</b>، ‏<b>Z-Image Turbo</b>، ‏<b>Nano Banana Pro</b> ‏(Gemini 3 Pro Image)، ‏<b>GPT Image 1.5</b>، ‏<b>GPT Image 2</b>، ‏<b>Ideogram V3</b>، ‏<b>Recraft V4 Pro</b>، ‏<b>Qwen Image</b>. هر-تولید با یک فلگ انتخاب کنید یا اجازه دهید هرمس پیش‌فرض FLUX 2 Klein باشد.</td></tr>
+<tr><td>🔊</td><td><b>تبدیل متن به گفتار</b></td><td>صداهای TTS ی OpenAI متصل به ابزار <code>text_to_speech</code>. ویس‌نوت در تلگرام بیندازید، برای خط‌لوله‌ها صدا بسازید، هر چیزی را روایت کنید.</td></tr>
+<tr><td>🌐</td><td><b>اتوماسیون مرورگر ابری</b></td><td>نشست‌های Chromium بدون-سر از طریق Browser Use. ‏<code>browser_navigate</code>، ‏<code>browser_click</code>، ‏<code>browser_type</code>، ‏<code>browser_vision</code> — همهٔ primitiveهای راندن ایجنت، بدون نیاز به حساب Browserbase.</td></tr>
+</tbody>
+</table>
+</div>
+<p>هر چهار مورد pay-as-you-use هستند و روی اشتراک Nous شما صورتحساب می‌شوند. هر ترکیبی را به کار ببرید — گیت‌وی را برای وب و تصویر روشن کنید و کلید ElevenLabs خودتان را برای TTS نگه دارید، یا همه‌چیز را از Nous عبور دهید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> چرا اینجا هست</h2>
+<p>ساختن ایجنتی که واقعاً <i>کاری انجام دهد</i> یعنی به‌هم دوختن بیش از ۵ اشتراک API — هر کدام با ثبت‌نام، rate limit، صورتحساب و عادت‌های خودشان. گیت‌وی همهٔ آن را در یک حساب جمع می‌کند:</p>
+<ul>
+  <li><b>یک قبض.</b> به Nous پرداخت کنید؛ بقیه با ما.</li>
+  <li><b>یک ثبت‌نام.</b> نه حساب Firecrawl، نه FAL، نه Browser Use، نه OpenAI audio برای مدیریت.</li>
+  <li><b>یک کلید.</b> OAuth ی Nous Portal شما همهٔ ابزارها را پوشش می‌دهد.</li>
+  <li><b>همان کیفیت.</b> همان بک‌اندهایی که مسیر مستقیم-با-کلید استفاده می‌کند — فقط ما جلویشان ایستاده‌ایم.</li>
+</ul>
+<p>هر وقت خواستید کلیدهای خودتان را بیاورید — per-tool، هر لحظه. گیت‌وی قفل نیست، میان‌بر است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> شروع کنید</h2>
+<p>سه راه ورود هست — هر کدام که به وضعیت شما می‌خورد:</p>
+<div class="codebox"><pre><code>hermes setup --portal     # Fresh install: Nous OAuth + set Nous as provider + turn on the Tool Gateway in one go</code></pre></div>
+<div class="codebox"><pre><code>hermes model              # Switch your inference provider to Nous Portal — Hermes then offers to turn on the gateway for all tools</code></pre></div>
+<div class="codebox"><pre><code>hermes tools              # Enable the gateway per-tool — pick "Nous Subscription" for any tool you want</code></pre></div>
+<p>‏<code>hermes setup --portal</code> و <code>hermes model</code> مسیرهای یکجا هستند: یک بار وارد شوید، در صورت تمایل همهٔ ابزارها را به گیت‌وی بزنید. ‏<code>hermes tools</code> مسیر à la carte است — فقط ابزارهایی که می‌خواهید یکی‌یکی روشن کنید.</p>
+<p><b>لازم نیست اول وارد شوید.</b> با <code>hermes tools</code> بک‌اندهای مدیریت‌شده-توسط-Nous ‏(Web search، ‏Image، ‏Video، ‏TTS، ‏Browser) همیشه فهرست می‌شوند حتی اگر هرگز وارد Nous Portal نشده باشید. یکی را انتخاب کنید و هرمس اگر احراز هویت نباشید همان‌جا ورود Portal را اجرا می‌کند — نیازی به اجرای قبلی <code>hermes model</code> نیست. اگر OAuth ی Nous تان فعال است انتخابِ بک‌اند فوراً آن را روشن می‌کند بدون پرامپت اضافه. این مسیر فقط لاگین‌تان می‌کند و همان یک ابزار انتخابی را روشن می‌کند — ارائه‌دهندهٔ inference شما را عوض <b>نمی‌کند</b> و برای فعال کردن گیت‌وی روی بقیهٔ ابزارها پرامپت نمی‌دهد.</p>
+<p>هر لحظه بررسی کنید چه چیزی فعال است:</p>
+<div class="codebox"><pre><code>hermes portal info        # Portal auth + Tool Gateway routing summary
+hermes portal tools       # Gateway catalog with current routing per tool
+hermes status             # Full system status (Tool Gateway is one section)</code></pre></div>
+<p>‏<code>hermes portal info</code> بخشی مثل این نشان می‌دهد:</p>
+<div class="codebox"><pre><code>◆ Nous Tool Gateway
+  Nous Portal     ✓ managed tools available
+  Web tools       ✓ active via Nous subscription
+  Image gen       ✓ active via Nous subscription
+  TTS             ✓ active via Nous subscription
+  Browser         ○ active via Browser Use key</code></pre></div>
+<p>ابزارهایی با برچسب «active via Nous subscription» از گیت‌وی عبور می‌کنند. بقیه از کلیدهای خودتان استفاده می‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> شرایط استفاده</h2>
+<p>گیت‌وی ابزار یک قابلیت <b>اشتراک-پولی</b> است. حساب‌های رایگان Nous می‌توانند از Portal برای inference استفاده کنند ولی ابزارهای مدیریت‌شده شاملشان نمی‌شود — برای باز کردن گیت‌وی <a href="https://portal.nousresearch.com/manage-subscription" target="_blank" rel="noopener">پلنتان را ارتقا دهید</a>.</p>
+<p>بعضی حساب‌ها همچنین مشمول یک <b>استخر ابزار رایگان</b> هستند — سهم کوچکی از ابزارهای مدیریت‌شده که فراخوانی‌های گیت‌وی را بدون اشتراک پولی پوشش می‌دهد. وقتی استخر رایگان موجود باشد گیت‌وی آن را نمایش می‌دهد و در اولین استفاده یک پرامپت راه‌اندازی نشان می‌دهد تا شرکت کنید و همین حالا شروع کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> چک‌لیست فعال‌سازی</h2>
+<p>انتخاب یک مدل Nous ‏(<code>hermes model</code>) یک چک‌لیست per-tool از بک‌اندهای گیت‌وی پیشنهاد می‌کند. رفتارش به پیکربندی فعلی شما احترام می‌گذارد:</p>
+<ul>
+  <li>ابزارهایی که صریحاً به بک‌اند دیگری اشاره داده‌اید ‏(مثلاً <code>web.backend: searxng</code>، ‏<code>browser.cloud_provider: camofox</code>) <b>هرگز پیشنهاد نمی‌شوند</b> — انتخاب‌تان نمی‌تواند تصادفی بازنویسی شود.</li>
+  <li>ابزارهایی که فقط از طریق متغیر محیطی پیکربندی شده‌اند ‏(مثلاً <code>SEARXNG_URL</code>، ‏<code>CAMOFOX_URL</code>) <b>تیک‌خورده</b> پیشنهاد می‌شوند، با برچسبی که می‌گوید بک‌اند خودتان حفظ می‌شود.</li>
+  <li>فقط ابزارهای واقعاً پیکربندی‌نشده از قبل تیک می‌خورند.</li>
+  <li>رد کردن‌ها می‌ماند: اگر چک‌لیست را با ابزاری تیک‌نخورده ثبت کنید در تعویض‌های بعدی مدل Nous دیگر تیک‌خورده پیشنهاد نمی‌شود ‏(در <code>tool_gateway_declined_tools</code> داخل <code>config.yaml</code> ذخیره می‌شود؛ تیک زدن بعدی ردشدگی را پاک می‌کند).</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> ترکیب دلخواه</h2>
+<p>گیت‌وی per-tool است. فقط برای چیزی که می‌خواهید روشنش کنید:</p>
+<ul>
+  <li><b>همهٔ ابزارها از Nous</b> — ساده‌ترین؛ یک اشتراک، تمام.</li>
+  <li><b>گیت‌وی برای وب + تصویر، TTS از خودتان</b> — صدای ElevenLabs تان را نگه دارید، بقیه با Nous.</li>
+  <li><b>گیت‌وی فقط برای چیزهایی که کلیدشان را ندارید</b> — «برای Browserbase پول می‌دهم اما حوصلهٔ حساب Firecrawl ندارم» کاملاً جواب می‌دهد.</li>
+</ul>
+<p>هر ابزار را هر لحظه سوئیچ کنید:</p>
+<div class="codebox"><pre><code>hermes tools          # Interactive picker for each tool category</code></pre></div>
+<p>ابزار را انتخاب و <b>Nous Subscription</b> را به‌عنوان ارائه‌دهنده برگزینید ‏(یا هر ارائه‌دهندهٔ مستقیم دیگری). هیچ ویرایش config لازم نیست. اگر هنوز وارد Nous Portal نشده‌اید انتخابِ «Nous Subscription» ورود Portal را inline راه می‌اندازد — لازم نیست اول از <code>hermes model</code> احراز هویت کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> استفاده از مدل‌های تصویری منفرد</h2>
+<p>تولید تصویر برای سرعت به‌طور پیش‌فرض روی FLUX 2 Klein 9B است. با پاس دادن شناسهٔ مدل به ابزار <code>image_generate</code> per-call بازنویسی کنید:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مدل</th><th>شناسه</th><th>بهترین برای</th></tr></thead>
+<tbody>
+<tr><td>FLUX 2 Klein 9B</td><td><code>fal-ai/flux-2/klein/9b</code></td><td>سریع، پیش‌فرض خوب</td></tr>
+<tr><td>FLUX 2 Pro</td><td><code>fal-ai/flux-2-pro</code></td><td>FLUX با وفاداری بالاتر</td></tr>
+<tr><td>Z-Image Turbo</td><td><code>fal-ai/z-image/turbo</code></td><td>سبک‌پرداز، سریع</td></tr>
+<tr><td>Nano Banana Pro</td><td><code>fal-ai/nano-banana-pro</code></td><td>Google Gemini 3 Pro Image</td></tr>
+<tr><td>GPT Image 1.5</td><td><code>fal-ai/gpt-image-1.5</code></td><td>تولید تصویر OpenAI، متن+تصویر</td></tr>
+<tr><td>GPT Image 2</td><td><code>fal-ai/gpt-image-2</code></td><td>جدیدترین OpenAI</td></tr>
+<tr><td>Ideogram V3</td><td><code>fal-ai/ideogram/v3</code></td><td>پایبندی قوی به پرامپت + تایپوگرافی</td></tr>
+<tr><td>Recraft V4 Pro</td><td><code>fal-ai/recraft/v4/pro/text-to-image</code></td><td>سبک وکتوری، طراحی گرافیک</td></tr>
+<tr><td>Qwen Image</td><td><code>fal-ai/qwen-image</code></td><td>چندوجهی Alibaba</td></tr>
+</tbody>
+</table>
+</div>
+<p>مجموعه تکامل می‌یابد — ‏<code>hermes tools</code> ← Image Generation فهرست زندهٔ فعلی را نشان می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> مرجع پیکربندی</h2>
+<p>بیشتر کاربران هرگز به این نیاز پیدا نمی‌کنند — ‏<code>hermes model</code> و <code>hermes tools</code> همهٔ گردش‌کارها را تعاملی پوشش می‌دهند. این بخش برای نوشتن مستقیم config.yaml یا اسکریپت‌کردن راه‌اندازی‌هاست.</p>
+<h3>یک کلید انتخاب به‌ازای هر دستهٔ ابزار</h3>
+<p>هر دستهٔ ابزار یک کلید انتخاب-ارائه‌دهنده دارد که توسط picker ی <code>hermes tools</code> ‏(یا GUI دسکتاپ) نوشته می‌شود. انتخاب ردیف <b>Nous Subscription</b> مقدار <code>nous</code> را ذخیره می‌کند که آن دسته را از گیت‌وی ابزار مدیریت‌شده عبور می‌دهد. انتخاب ردیف BYOK نام فروشنده را ذخیره می‌کند ‏(<code>fal</code>، ‏<code>openai</code>، ‏<code>firecrawl</code>، ‏<code>browser-use</code> و…) که مستقیم با اعتبارنامه‌های خودتان می‌رود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>web:
+  backend: nous          # web search/extract via the Tool Gateway
+
+image_gen:
+  provider: nous         # image generation via the Tool Gateway
+
+tts:
+  provider: nous         # TTS via the Tool Gateway
+
+stt:
+  provider: nous         # speech-to-text via the Tool Gateway
+
+browser:
+  cloud_provider: nous   # cloud browser via the Tool Gateway</code></pre>
+</div>
+<p>runtime <b>همیشه از انتخاب ذخیره‌شده استفاده می‌کند</b> — حضور اعتبارنامه هرگز دسته‌ای را انتخاب یا تغییر مسیر نمی‌دهد. یک <code>FAL_KEY</code> نشسته در <code>.env</code> در حالی که <code>image_gen.provider: nous</code> است نادیده گرفته می‌شود؛ برعکس، ‏<code>image_gen.provider: fal</code> بدون ست بودن <code>FAL_KEY</code> خطای شفاف می‌دهد نه اینکه بی‌سروصدا به گیت‌وی سقوط کند:</p>
+<div class="codebox"><pre><code>image_gen is configured to use fal (set via hermes tools), but FAL_KEY is not set. Run 'hermes tools' to change it.</code></pre></div>
+<p>دسته‌هایی که <b>هرگز پیکربندی نشده‌اند</b> ‏(هیچ کلید انتخابی نوشته نشده) مثل قبل از اعتبارنامه‌های موجود autodetect می‌کنند. اما به‌محض وجود یک انتخاب، اضافه کردن کلیدی به <code>.env</code> مسیر را عوض نمی‌کند — فقط <code>hermes tools</code> ‏(یا ویرایش کلید انتخاب) عوضش می‌کند.</p>
+<h3>برگشت به کلیدهای خودتان</h3>
+<div class="codebox"><pre><code>hermes tools    # pick the tool → choose a direct provider (e.g. Firecrawl)</code></pre></div>
+<p>یا کلید انتخاب را مستقیم ست کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>web:
+  backend: firecrawl   # Hermes now uses FIRECRAWL_API_KEY from .env</code></pre>
+</div>
+<h3>فلگ قدیمی use_gateway ‏(منسوخ)</h3>
+<p>نسخه‌های قدیمی‌تر هرمس از بولین per-tool ی <code>use_gateway: true</code> برای عبور از گیت‌وی استفاده می‌کردند. آن فلگ <b>legacy</b> است: دیگر هرگز نوشته نمی‌شود و picker ی <code>hermes tools</code> هنگام بازنویسی انتخاب، آن را از config دسته حذف می‌کند. config های قدیمی که هنوز <code>use_gateway: true</code> دارند موقع خواندن به‌عنوان انتخاب <code>nous</code> تفسیر می‌شوند پس راه‌اندازی‌های فعلی کار می‌کنند. در config های جدید <code>use_gateway</code> نگذارید — به‌جایش ارائه‌دهنده را در <code>hermes tools</code> انتخاب کنید.</p>
+<h3>گیت‌وی خودمیزبان ‏(پیشرفته)</h3>
+<p>گیت‌وی سازگار-با-Nous خودتان را اجرا می‌کنید؟ نقاط پایانی را در <code>~/.hermes/.env</code> بازنویسی کنید:</p>
+<div class="codebox"><pre><code>TOOL_GATEWAY_DOMAIN=your-domain.example.com
+TOOL_GATEWAY_SCHEME=https
+TOOL_GATEWAY_USER_TOKEN=your-token        # normally auto-populated from Portal login
+FIRECRAWL_GATEWAY_URL=https://...         # override one endpoint specifically</code></pre></div>
+<p>این پیچ‌ومهره‌ها برای راه‌اندازی‌های زیرساخت سفارشی‌اند ‏(استقرار سازمانی، محیط توسعه). مشترکان عادی هرگز آنها را ست نمی‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> سؤالات متداول</h2>
+<h3>با تلگرام / دیسکورد / بقیهٔ گیت‌وی‌های پیام‌رسانی کار می‌کند؟</h3>
+<p>بله. گیت‌وی ابزار در لایهٔ اجرای ابزار عمل می‌کند نه CLI. هر رابطی که بتواند ابزار صدا بزند — CLI، ‏تلگرام، ‏دیسکورد، ‏اسلک، ‏IRC، ‏Teams، ‏سرور API، هرچه — به‌طور شفاف از آن بهره می‌برد.</p>
+<h3>اگر اشتراکم منقضی شود چه می‌شود؟</h3>
+<p>ابزارهایی که از گیت‌وی عبور می‌کنند تا تمدید کنید یا از طریق <code>hermes tools</code> کلیدهای API مستقیم جایگزین کنید از کار می‌افتند. هرمس خطای شفافی به سمت portal نشان می‌دهد.</p>
+<h3>می‌توانم مصرف یا هزینهٔ هر ابزار را ببینم؟</h3>
+<p>بله — <a href="https://portal.nousresearch.com" target="_blank" rel="noopener">داشبورد Nous Portal</a> مصرف را به تفکیک ابزار می‌شکند تا ببینید چه چیزی قبضتان را بالا می‌برد.</p>
+<h3>آیا Modal ‏(ترمینال serverless) شامل است؟</h3>
+<p>‏Modal به‌عنوان <b>افزونهٔ اختیاری</b> از طریق اشتراک Nous موجود است، نه بخشی از بستهٔ پیش‌فرض Tool Gateway. از طریق <code>hermes setup terminal</code> یا مستقیماً در <code>config.yaml</code> پیکربندی‌اش کنید وقتی sandbox راه‌دوری برای اجرای شل می‌خواهید.</p>
+<h3>با فعال کردن گیت‌وی باید کلیدهای API موجودم را حذف کنم؟</h3>
+<p>نه — در <code>.env</code> نگهشان دارید. وقتی انتخاب یک ابزار <b>Nous Subscription</b> است، کلیدهای مستقیمِ آن ابزار صرفاً نادیده گرفته می‌شوند. دوباره ارائه‌دهندهٔ مستقیم را در <code>hermes tools</code> بردارید و کلیدهایتان دوباره منبع می‌شوند. گیت‌وی قفل نیست.</p>
+</section>
+
+<div class="pager">
+  <a href="tool-search.html"><span class="dir">→ قبلی</span><span class="ttl">جستجوی ابزار</span></a>
+  <a class="next" href="subscription-proxy.html"><span class="dir">بعدی ←</span><span class="ttl">پروکسی اشتراک</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tool-gateway" target="_blank" rel="noopener">Nous Tool Gateway</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

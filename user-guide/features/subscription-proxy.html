@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پروکسی اشتراک — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/subscription-proxy" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>پروکسی اشتراک</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>پروکسی اشتراک ‏(Subscription Proxy)</h1>
+<p>پروکسی اشتراک یک سرور HTTP محلی است که به اپ‌های بیرونی — ‏OpenViking، ‏Karakeep، ‏Open WebUI، هر چیزی که chat completions سازگار-با-OpenAI حرف می‌زند — اجازه می‌دهد اشتراکِ ارائه‌دهندهٔ مدیریت‌شده-توسط-هرمس شما را به‌عنوان نقطهٔ پایانی LLM شان استفاده کنند. پروکسی اعتبارنامهٔ درست را الصاق می‌کند ‏(و خودکار refresh می‌کند) تا اپ هیچ‌وقت کلید API ایستا لازم نداشته باشد.</p>
+<p>این با <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server" target="_blank" rel="noopener">سرور API</a> فرق دارد:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>سرور API</th><th>پروکسی اشتراک</th></tr></thead>
+<tbody>
+<tr><td><b>چه چیزی سرویس می‌کند</b></td><td>ایجنت خودتان ‏(تول‌ست کامل، حافظه، مهارت‌ها)</td><td>استنتاج خام مدل</td></tr>
+<tr><td><b>مورد استفاده</b></td><td>«هرمس را بک‌اند چت کن»</td><td>«اشتراک Portal ام را از یک اپ دیگر استفاده کن»</td></tr>
+<tr><td><b>احراز هویت</b></td><td>‏<code>API_SERVER_KEY</code> ی شما</td><td>هر bearer ی ‏(پروکسی واقعی را الصاق می‌کند)</td></tr>
+<tr><td><b>فراخوانی ابزار</b></td><td>بله — ایجنت ابزار اجرا می‌کند</td><td>نه — فقط passthrough</td></tr>
+</tbody>
+</table>
+</div>
+<p>وقتی می‌خواهید <b>ایجنت</b> را بک‌اند کنید از سرور API استفاده کنید. وقتی فقط <b>مدل</b> را از طریق اشتراکتان می‌خواهید از پروکسی.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> شروع سریع</h2>
+<h3>۱. وارد ارائه‌دهنده‌تان شوید ‏(یک‌بار)</h3>
+<div class="codebox"><pre><code>hermes portal</code></pre></div>
+<p>این مرورگر را برای جریان OAuth ی Nous Portal باز می‌کند. هرمس توکن refresh را در <code>~/.hermes/auth.json</code> ذخیره می‌کند — همان جایی که همهٔ لاگین‌های ارائه‌دهندهٔ هرمس زندگی می‌کنند.</p>
+<h3>۲. پروکسی را روشن کنید</h3>
+<div class="codebox"><pre><code>hermes proxy start</code></pre></div>
+<div class="codebox"><pre><code>Starting Hermes proxy for Nous Portal
+  Listening on:  http://127.0.0.1:8645/v1
+  Forwarding to: (resolved per-request from your subscription)
+  Use any bearer token in the client — the proxy attaches your real credential.</code></pre></div>
+<p>بگذارید در پیش‌زمینه اجرا بماند. اگر می‌خواهید بعد از logout هم زنده بماند از <code>tmux</code>، ‏<code>nohup</code> یا یک unit ی systemd استفاده کنید.</p>
+<h3>۳. اپتان را به آن اشاره دهید</h3>
+<p>هر config سازگار-با-OpenAI همان سه‌تایی را می‌گیرد:</p>
+<div class="codebox"><pre><code>Base URL:   http://127.0.0.1:8645/v1
+API key:    anything (e.g. "sk-unused")
+Model:      Hermes-4-70B    # or Hermes-4.3-36B, Hermes-4-405B</code></pre></div>
+<p>پروکسی هدر <code>Authorization</code> ی اپ شما را نادیده می‌گیرد و اعتبارنامهٔ واقعی Portal تان را به درخواست upstream الصاق می‌کند. refresh ها وقتی bearer به انقضا نزدیک شود خودکار انجام می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> ارائه‌دهنده‌های موجود</h2>
+<div class="codebox"><pre><code>hermes proxy providers</code></pre></div>
+<p>فعلاً ارسال‌شده: ‏<code>nous</code> ‏(Nous Portal) و <code>xai</code> ‏(xAI / Grok). ارائه‌دهنده‌های OAuth بیشتر با پیاده‌سازی رابط <code>UpstreamAdapter</code> در <code>hermes_cli/proxy/adapters/</code> قابل‌اضافه‌اند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> بررسی وضعیت</h2>
+<div class="codebox"><pre><code>hermes proxy status</code></pre></div>
+<div class="codebox"><pre><code>Hermes proxy upstream adapters
+
+  [nous    ] Nous Portal — ready (bearer expires 2026-05-15T06:43:21Z)</code></pre></div>
+<p>اگر «not logged in» دیدید <code>hermes portal</code> را اجرا کنید. اگر «credentials need attention» دیدید توکن refresh تان ابطال شده ‏(نادر — وقتی رخ می‌دهد که از UI وب Portal خارج شده باشید) — کافی است دوباره <code>hermes portal</code> را اجرا کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مسیرهای مجاز</h2>
+<p>پروکسی فقط مسیرهایی را عبور می‌دهد که upstream واقعاً سرویس کند. برای Nous Portal:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مسیر</th><th>هدف</th></tr></thead>
+<tbody>
+<tr><td><code>/v1/chat/completions</code></td><td>Chat completions ‏(استریم + غیراستریم)</td></tr>
+<tr><td><code>/v1/completions</code></td><td>Text completions قدیمی</td></tr>
+<tr><td><code>/v1/embeddings</code></td><td>Embeddings</td></tr>
+<tr><td><code>/v1/models</code></td><td>فهرست مدل‌ها</td></tr>
+</tbody>
+</table>
+</div>
+<p>مسیرهای دیگر ‏(<code>/v1/images/generations</code>، ‏<code>/v1/audio/speech</code> و…) خطای 404 با پیام شفافِ اشاره‌کننده به مسیرهای مجاز برمی‌گردانند. این باعث می‌شود کلاینت‌های سرگردان درخواست‌های عجیب به upstream نشت ندهند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> پیکربندی OpenViking برای استفاده از Portal</h2>
+<p><a href="https://github.com/volcengine/OpenViking" target="_blank" rel="noopener">OpenViking</a> یک پایگاه‌دادهٔ زمینه است که برای VLM اش ‏(مدل بینایی/زبانِ استخراج حافظه‌ها) و مدل embedding به ارائه‌دهندهٔ LLM نیاز دارد. با پروکسی می‌توانید <code>vlm.api_base</code> اش را روی پروکسی محلی‌تان بگذارید:</p>
+<p>فایل <code>~/.openviking/ov.conf</code> را ویرایش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{
+  "vlm": {
+    "provider": "openai",
+    "model": "Hermes-4-70B",
+    "api_base": "http://127.0.0.1:8645/v1",
+    "api_key": "unused-proxy-attaches-real-creds"
+  }
+}</code></pre>
+</div>
+<p>سپس پروکسی را در یک ترمینال کنار <code>openviking-server</code> روشن کنید:</p>
+<div class="codebox"><pre><code># Terminal 1
+hermes proxy start
+
+# Terminal 2
+openviking-server</code></pre></div>
+<p>فراخوانی‌های VLM ی OpenViking حالا از اشتراک Portal شما عبور می‌کنند. سمت مدل embedding همچنان ارائه‌دهندهٔ خودش را می‌خواهد — Portal ‏<code>/v1/embeddings</code> را سرویس می‌کند ولی انتخاب مدل به سطح پلنتان بستگی دارد؛ ‏<code>portal.nousresearch.com/models</code> را چک کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> پیکربندی Karakeep ‏(یا هر اپ بوکمارک/خلاصه‌ساز)</h2>
+<p><a href="https://karakeep.app/" target="_blank" rel="noopener">Karakeep</a> برای خلاصه‌سازی بوکمارک‌ها API سازگار-با-OpenAI می‌گیرد. در config آن:</p>
+<div class="codebox"><pre><code># Karakeep .env
+OPENAI_API_BASE_URL=http://127.0.0.1:8645/v1
+OPENAI_API_KEY=any-non-empty-string
+INFERENCE_TEXT_MODEL=Hermes-4-70B</code></pre></div>
+<p>همین الگو برای Open WebUI، ‏LobeChat، ‏NextChat یا هر کلاینت دیگرِ سازگار-با-OpenAI کار می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> نمایش روی LAN</h2>
+<p>به‌طور پیش‌فرض پروکسی روی <code>127.0.0.1</code> bind می‌شود ‏(فقط localhost). برای اینکه ماشین‌های دیگر شبکه‌تان استفاده کنند:</p>
+<div class="codebox"><pre><code>hermes proxy start --host 0.0.0.0 --port 8645</code></pre></div>
+<p>⚠ <b>بدانید:</b> هر کسی در شبکه‌تان حالا می‌تواند از اشتراک Portal تان استفاده کند. پروکسی احراز هویت خودش را ندارد — هر bearer ی را می‌پذیرد. اگر فراتر از شبکهٔ مطمئنتان expose اش می‌کنید از فایروال، ‏VPN یا reverse proxy با احراز هویت مناسب استفاده کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> Rate limit ها</h2>
+<p>محدودیت‌های RPM/TPM ی سطح Portal تان روی کل پروکسی اعمال می‌شود. پروکسی fan-out یا pooling نمی‌کند — یک bearer واحد با سهمیهٔ کامل اشتراکتان است. مصرف را در <a href="https://portal.nousresearch.com" target="_blank" rel="noopener">portal.nousresearch.com</a> زیر نظر بگیرید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> معماری</h2>
+<p>پروکسی عمداً مینیمال است. به‌ازای هر درخواست:</p>
+<ol>
+  <li>دریافت <code>POST /v1/chat/completions</code> از اپ شما</li>
+  <li>یافتن اعتبارنامهٔ فعلی adapter ‏(refresh در صورت نزدیک بودن انقضا)</li>
+  <li>عبور verbatim بدنهٔ درخواست همراه <code>Authorization: Bearer &lt;minted-key&gt;</code></li>
+  <li>استریم پاسخ بدون تغییر به عقب ‏(SSE حفظ می‌شود)</li>
+</ol>
+<p>بدون تبدیل. بدون لاگ بدنهٔ درخواست‌ها. بدون حلقهٔ ایجنت. پروکسی یک passthrough الصاق-کنندهٔ اعتبارنامه است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> آینده: ارائه‌دهنده‌های OAuth بیشتر</h2>
+<p>سیستم adapter پلاگین‌پذیر است. افزودن ارائه‌دهندهٔ جدید ‏(مثلاً HuggingFace، نقطهٔ پایانی چت GitHub Copilot، ‏Anthropic از طریق OAuth) نیازمند پیاده‌سازی <code>UpstreamAdapter</code> در <code>hermes_cli/proxy/adapters/&lt;provider&gt;.py</code> و ثبت آن در <code>adapters/__init__.py</code> است. ارائه‌دهنده‌هایی که در سطح پروتکل سازگار-با-OpenAI نیستند ‏(مثلاً Anthropic Messages API) به لایهٔ تبدیل نیاز دارند که خارج از دامنهٔ شکل فعلی است.</p>
+</section>
+
+<div class="pager">
+  <a href="tool-gateway.html"><span class="dir">→ قبلی</span><span class="ttl">گیت‌وی ابزار Nous</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/subscription-proxy" target="_blank" rel="noopener">Subscription Proxy</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>
