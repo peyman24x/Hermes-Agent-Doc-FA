@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mattermost — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/mattermost" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>Mattermost</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی Mattermost</h1>
+<p>هرمس ایجنت با Mattermost به‌صورت بات یکپارچه می‌شود و اجازه می‌دهد از طریق پیام خصوصی یا کانال‌های تیم با دستیار هوش مصنوعی‌تان گفتگو کنید. Mattermost جایگزین متن‌بازِ خودمیزبانِ Slack است — روی زیرساخت خودتان اجرایش می‌کنید و کنترل کامل داده‌ها را دارید. بات از طریق REST API نسخهٔ v4 و WebSocket برای رویدادهای لحظه‌ای وصل می‌شود، پیام‌ها را از خط‌لولهٔ هرمس ایجنت ‏(شامل استفاده از ابزار، حافظه و استدلال) عبور می‌دهد و در لحظه پاسخ می‌دهد. متن، پیوست فایل، تصویر و فرمان اسلش را پشتیبانی می‌کند.</p>
+<p>کتابخانهٔ خارجی Mattermost لازم نیست — آداپتور از <code>aiohttp</code> استفاده می‌کند که از قبل وابستگی هرمس است.</p>
+<p>پیش از راه‌اندازی، بخشی که بیشتر افراد می‌خواهند بدانند: رفتار هرمس پس از ورود به نمونهٔ Mattermost شما چگونه است.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> رفتار هرمس</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>زمینه</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><strong>پیام‌های خصوصی ‏(DM)</strong></td><td>هرمس به همهٔ پیام‌ها پاسخ می‌دهد؛ نیازی به <code>@منشن</code> نیست. هر DM نشست مستقل خودش را دارد.</td></tr>
+    <tr><td><strong>کانال‌های عمومی/خصوصی</strong></td><td>هرمس وقتی <code>@منشن</code> شود پاسخ می‌دهد. بدون منشن، پیام نادیده گرفته می‌شود.</td></tr>
+    <tr><td><strong>تردها</strong></td><td>اگر <code>MATTERMOST_REPLY_MODE=thread</code> باشد، هرمس در تردی زیر پیام شما ریپلای می‌دهد. زمینهٔ ترد از کانال والد ایزوله می‌ماند.</td></tr>
+    <tr><td><strong>کانال‌های مشترک چندکاربره</strong></td><td>به‌طور پیش‌فرض هرمس تاریخچهٔ نشست را داخل کانال به‌ازای هر کاربر جدا می‌کند. دو نفر که در یک کانال حرف می‌زنند مگر صریحاً غیرفعالش کنید رونویسی مشترک ندارند.</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>اگر می‌خواهید هرمس به‌صورت گفتگوهای تردی ‏(تودرتوی زیر پیام اصلی‌تان) جواب بدهد، ‏<code>MATTERMOST_REPLY_MODE=thread</code> را بگذارید. پیش‌فرض <code>off</code> است که پیام‌های تخت در کانال می‌فرستد.</p>
+</div>
+
+<h3>مدل نشست در Mattermost</h3>
+<p>به‌طور پیش‌فرض:</p>
+<ul>
+  <li>هر DM نشست مستقل خودش را دارد</li>
+  <li>هر ترد فضای‌نام نشست خودش را دارد</li>
+  <li>هر کاربر در یک کانال مشترک، داخل همان کانال نشست خودش را دارد</li>
+</ul>
+<p>این با config.yaml کنترل می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>group_sessions_per_user: true</code></pre>
+</div>
+<p>فقط اگر صریحاً یک گفتگوی مشترک برای کل کانال می‌خواهید <code>false</code> کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>group_sessions_per_user: false</code></pre>
+</div>
+<p>نشست مشترک برای کانال مشارکتی مفید است ولی یعنی:</p>
+<ul>
+  <li>کاربران در رشد زمینه و هزینهٔ توکن شریک‌اند</li>
+  <li>یک کار سنگین-ابزارِ طولانیِ یک نفر می‌تواند زمینهٔ بقیه را متورم کند</li>
+  <li>اجرای در-جریانِ یک نفر می‌تواند پیام بعدیِ فرد دیگری در همان کانال را قطع کند</li>
+</ul>
+<p>این راهنما کل فرایند راه‌اندازی را قدم‌به‌قدم توضیح می‌دهد — از ساخت بات روی Mattermost تا ارسال اولین پیام.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: فعال‌سازی حساب‌های بات</h2>
+<p>قبل از ساخت بات باید حساب‌های بات روی سرور Mattermost شما فعال باشند.</p>
+<ol>
+  <li>به‌عنوان <strong>System Admin</strong> وارد Mattermost شوید.</li>
+  <li>به <strong>System Console ← Integrations ← Bot Accounts</strong> بروید.</li>
+  <li>‏<strong>Enable Bot Account Creation</strong> را <strong>true</strong> کنید.</li>
+  <li><strong>Save</strong> را کلیک کنید.</li>
+</ol>
+<div class="callout note">
+  <div class="callout-title">📌 نکته</div>
+  <p>اگر دسترسی System Admin ندارید، از مدیر Mattermost بخواهید حساب‌های بات را فعال و یکی برایتان بسازد.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: ساخت حساب بات</h2>
+<ol>
+  <li>در Mattermost منوی <strong>☰</strong> ‏(بالا-چپ) ← <strong>Integrations</strong> ← <strong>Bot Accounts</strong> را کلیک کنید.</li>
+  <li><strong>Add Bot Account</strong> را کلیک کنید.</li>
+  <li>جزئیات را پر کنید:
+    <ul>
+      <li><strong>Username</strong>: مثل <code>hermes</code></li>
+      <li><strong>Display Name</strong>: مثل <code>Hermes Agent</code></li>
+      <li><strong>Description</strong>: اختیاری</li>
+      <li><strong>Role</strong>: مقدار <code>Member</code> کافی است</li>
+    </ul>
+  </li>
+  <li><strong>Create Bot Account</strong> را کلیک کنید.</li>
+  <li>‏Mattermost توکن بات را نمایش می‌دهد. <strong>فوراً کپیش کنید.</strong></li>
+</ol>
+<div class="callout warning">
+  <div class="callout-title">⚠️ توکن فقط یک‌بار نمایش داده می‌شود</div>
+  <p>توکن بات فقط هنگام ساخت حساب بات یک‌بار نشان داده می‌شود. اگر گمش کردید باید از تنظیمات حساب بات بازتولیدش کنید. هرگز توکن را عمومی به اشتراک نگذارید یا به گیت کامیت نکنید — هر کسی با این توکن کنترل کامل بات را دارد.</p>
+</div>
+<p>توکن را جایی امن نگه دارید ‏(مثلاً مدیر رمز). در گام ۵ لازمش دارید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>می‌توانید به‌جای حساب بات از <strong>personal access token</strong> استفاده کنید. به <strong>Profile ← Security ← Personal Access Tokens ← Create Token</strong> بروید. این وقتی مفید است که بخواهید هرمس به‌عنوان کاربر خودتان پست کند نه یک کاربر بات جداگانه.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۳: افزودن بات به کانال‌ها</h2>
+<p>بات باید عضو هر کانالی باشد که می‌خواهید آنجا پاسخ دهد:</p>
+<ol>
+  <li>کانال موردنظر را باز کنید.</li>
+  <li>روی نام کانال کلیک کنید ← <strong>Add Members</strong>.</li>
+  <li>یوزرنیم بات‌تان ‏(مثل <code>hermes</code>) را جست‌وجو و اضافه کنید.</li>
+</ol>
+<p>برای DM ها کافی است با بات یک گفتگوی خصوصی باز کنید — بلافاصله می‌تواند پاسخ دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۴: یافتن شناسهٔ کاربری Mattermost</h2>
+<p>هرمس ایجنت از شناسهٔ کاربری Mattermost شما برای کنترل اینکه چه کسی با بات تعامل کند استفاده می‌کند. برای یافتنش:</p>
+<ol>
+  <li>روی <strong>آواتار</strong>‌تان ‏(گوشهٔ بالا-چپ) کلیک کنید ← <strong>Profile</strong>.</li>
+  <li>شناسهٔ کاربری در دیالوگ پروفایل نمایش داده می‌شود — برای کپی رویش کلیک کنید.</li>
+</ol>
+<p>شناسهٔ کاربری شما رشته‌ای الفبایی-عددیِ ۲۶کاراکتری مثل <code>3uo8dkh1p7g1mfk49ear5fzs5c</code> است.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>شناسهٔ کاربری شما یوزرنیم‌تان <strong>نیست</strong>. یوزرنیم همان چیزی است که بعد از <code>@</code> می‌آید ‏(مثل <code>@alice</code>). شناسهٔ کاربری شناسهٔ بلند الفبایی-عددی‌ای است که Mattermost داخلی استفاده می‌کند.</p>
+</div>
+<p><strong>روش جایگزین:</strong> شناسهٔ کاربری را از API هم می‌شود گرفت:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl -H "Authorization: Bearer YOUR_TOKEN" \
+  https://your-mattermost-server/api/v4/users/me | jq .id</code></pre>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>برای گرفتن <strong>Channel ID</strong>: روی نام کانال کلیک کنید ← <strong>View Info</strong>. شناسهٔ کانال در پنل اطلاعات نمایش داده می‌شود. اگر بخواهید کانال خانگی را دستی تنظیم کنید به آن نیاز دارید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۵: پیکربندی هرمس ایجنت</h2>
+<h3>گزینهٔ A: راه‌اندازی تعاملی ‏(توصیه‌شده)</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway setup</code></pre>
+</div>
+<p>هنگام پرسش <strong>Mattermost</strong> را انتخاب کنید و URL سرور، توکن بات و شناسهٔ کاربری را بچسبانید.</p>
+
+<h3>گزینهٔ B: پیکربندی دستی</h3>
+<p>این‌ها را به فایل <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># الزامی
+MATTERMOST_URL=https://mm.example.com
+MATTERMOST_TOKEN=***
+MATTERMOST_ALLOWED_USERS=3uo8dkh1p7g1mfk49ear5fzs5c
+
+# چند کاربر مجاز (با ویرگول)
+# MATTERMOST_ALLOWED_USERS=3uo8dkh1p7g1mfk49ear5fzs5c,8fk2jd9s0a7bncm1xqw4tp6r3e
+
+# اختیاری: حالت ریپلای (thread یا off، پیش‌فرض: off)
+# MATTERMOST_REPLY_MODE=thread
+
+# اختیاری: پاسخ بدون @منشن (پیش‌فرض: true = منشن لازم)
+# MATTERMOST_REQUIRE_MENTION=false
+
+# اختیاری: کانال‌های پاسخ-بدون-منشن (شناسه‌ها با ویرگول)
+# MATTERMOST_FREE_RESPONSE_CHANNELS=channel_id_1,channel_id_2</code></pre>
+</div>
+<p>تنظیم رفتاری اختیاری در <code>~/.hermes/config.yaml</code>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>group_sessions_per_user: true</code></pre>
+</div>
+<ul>
+  <li>‏<code>group_sessions_per_user: true</code> زمینهٔ هر شرکت‌کننده را داخل کانال‌ها و تردهای مشترک ایزوله نگه می‌دارد</li>
+</ul>
+
+<h3>شروع گیت‌وی</h3>
+<p>بعد از پیکربندی، گیت‌وی Mattermost را شروع کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway</code></pre>
+</div>
+<p>بات باید ظرف چند ثانیه به سرور Mattermost شما وصل شود. برای تست بهش پیام بدهید — DM یا در کانالی که افزوده شده.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>می‌توانید <code>hermes gateway</code> را در پس‌زمینه یا به‌صورت سرویس systemd برای عملکرد مداوم اجرا کنید. جزئیات در مستندات استقرار.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> کانال خانگی</h2>
+<p>می‌توانید یک «کانال خانگی» تعیین کنید که بات پیام‌های پیش‌فعال را به آن بفرستد ‏(مثل خروجی job های کرون، یادآوری‌ها و اعلان‌ها). دو راه دارد:</p>
+<h3>با فرمان اسلش</h3>
+<p><code>/sethome</code> را در هر کانال Mattermostی که بات حضور دارد تایپ کنید. همان کانال کانال خانگی می‌شود.</p>
+<h3>پیکربندی دستی</h3>
+<p>این را به <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MATTERMOST_HOME_CHANNEL=abc123def456ghi789jkl012mn</code></pre>
+</div>
+<p>شناسه را با Channel ID واقعی جایگزین کنید ‏(کلیک روی نام کانال ← View Info ← کپی شناسه).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> حالت ریپلای</h2>
+<p>تنظیم <code>MATTERMOST_REPLY_MODE</code> کنترل می‌کند هرمس پاسخ‌ها را چطور پست کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>حالت</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>off</code> ‏(پیش‌فرض)</td><td>هرمس پیام‌های تخت در کانال پست می‌کند مثل یک کاربر عادی.</td></tr>
+    <tr><td><code>thread</code></td><td>هرمس در تردی زیر پیام اصلی‌تان ریپلای می‌دهد. کانال‌ها را وقتی رفت‌وبرگشت زیاد است تمیز نگه می‌دارد.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>در <code>~/.hermes/.env</code> تنظیمش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MATTERMOST_REPLY_MODE=thread</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> رفتار منشن</h2>
+<p>به‌طور پیش‌فرض بات فقط با <code>@منشن</code> در کانال‌ها پاسخ می‌دهد. قابل تغییر است:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>MATTERMOST_REQUIRE_MENTION</code></td><td><code>true</code></td><td>برای پاسخ به همهٔ پیام‌های کانال‌ها <code>false</code> کنید ‏(DM ها همیشه کار می‌کنند).</td></tr>
+    <tr><td><code>MATTERMOST_FREE_RESPONSE_CHANNELS</code></td><td>—</td><td>شناسه‌های کانال جداشده با ویرگول که بات حتی وقتی require_mention روشن است بدون <code>@منشن</code> پاسخ می‌دهد.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>برای یافتن شناسهٔ کانال در Mattermost: کانال را باز کنید، روی سربرگ نام کانال کلیک و شناسه را در URL یا جزئیات کانال پیدا کنید.</p>
+<p>وقتی بات <code>@منشن</code> شود، منشن قبل از پردازش خودکار از متن پیام حذف می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> لیست‌مجاز کانال (<code>allowed_channels</code>)</h2>
+<p>بات را به مجموعهٔ ثابتی از کانال‌های Mattermost محدود کنید. با تنظیم، بات <strong>فقط</strong> در کانال‌هایی که شناسه‌شان در فهرست است پاسخ می‌دهد — پیام‌های هر کانال دیگری بی‌صدا نادیده گرفته می‌شوند حتی با @منشن.</p>
+<p><strong>‏DM ها از این فیلتر معاف‌اند</strong>، پس کاربران مجاز همیشه در پیام خصوصی به بات می‌رسند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mattermost:
+  allowed_channels:
+    - "abc123def456ghi789jkl012mno"   # ‎#ops
+    - "xyz987uvw654rst321opq098nml"   # ‎#incident-response</code></pre>
+</div>
+<p>یا با متغیر محیطی ‏(جداشده با ویرگول):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MATTERMOST_ALLOWED_CHANNELS="abc123def456ghi789jkl012mno,xyz987uvw654rst321opq098nml"</code></pre>
+</div>
+<p>رفتار:</p>
+<ul>
+  <li>خالی / تنظیم‌نشده ← بدون محدودیت ‏(کاملاً سازگار رو به عقب).</li>
+  <li>غیرخالی ← شناسهٔ کانال باید روی فهرست باشد وگرنه پیام قبل از هر gating دیگری ‏(شرط منشن، ‏<code>MATTERMOST_FREE_RESPONSE_CHANNELS</code> و...) رد می‌شود.</li>
+  <li>شناسهٔ کانال را از UI ‏Mattermost ← سربرگ کانال ← «View Info» یا از URL کانال بگیرید.</li>
+</ul>
+<p>همچنین ببینید: <a href="https://hermes-agent.nousresearch.com/docs/reference/slash-commands" target="_blank" rel="noopener">تفکیک فرمان ادمین/کاربر</a>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> عیب‌یابی</h2>
+
+<h3>بات به پیام‌ها پاسخ نمی‌دهد</h3>
+<p><strong>علت:</strong> بات عضو کانال نیست، یا <code>MATTERMOST_ALLOWED_USERS</code> شناسهٔ کاربری شما را ندارد.</p>
+<p><strong>راه‌حل:</strong> بات را به کانال اضافه کنید ‏(نام کانال ← Add Members ← جست‌وجوی بات). تأیید کنید شناسهٔ کاربری‌تان در <code>MATTERMOST_ALLOWED_USERS</code> است. گیت‌وی را ری‌استارت کنید.</p>
+
+<h3>خطاهای 403 Forbidden</h3>
+<p><strong>علت:</strong> توکن بات نامعتبر است یا بات حق پست در کانال ندارد.</p>
+<p><strong>راه‌حل:</strong> درستی <code>MATTERMOST_TOKEN</code> در فایل <code>.env</code> را چک کنید. مطمئن شوید حساب بات غیرفعال (deactivate) نشده. تأیید کنید بات به کانال اضافه شده. اگر personal access token استفاده می‌کنید مطمئن شوید حسابتان دسترسی‌های لازم را دارد.</p>
+
+<h3>قطعی‌های WebSocket / حلقهٔ اتصال‌مجدد</h3>
+<p><strong>علت:</strong> ناپایداری شبکه، ری‌استارت‌های سرور Mattermost یا مشکلات فایروال/پروکسی با اتصالات WebSocket.</p>
+<p><strong>راه‌حل:</strong> آداپتور خودکار با backoff نمایی reconnect می‌شود ‏(۲ ثانیه ← ۶۰ ثانیه). پیکربندی WebSocket سرورتان را چک کنید — پروکسی‌های معکوس ‏(nginx، ‏Apache) هدرهای upgrade وب‌سوکت لازم دارند. تأیید کنید هیچ فایروالی اتصالات WebSocket سرور Mattermost را نمی‌بندد.</p>
+<p>برای nginx مطمئن شوید پیکربندی شامل این است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">nginx</span><button class="copy-btn">کپی</button></div>
+  <pre><code>location /api/v4/websocket {
+    proxy_pass http://mattermost-backend;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_read_timeout 600s;
+}</code></pre>
+</div>
+
+<h3>«Failed to authenticate» هنگام شروع</h3>
+<p><strong>علت:</strong> توکن یا URL سرور اشتباه است.</p>
+<p><strong>راه‌حل:</strong> تأیید کنید <code>MATTERMOST_URL</code> به سرور Mattermost شما اشاره دارد ‏(با <code>https://</code>، بدون اسلش انتهایی). اعتبار <code>MATTERMOST_TOKEN</code> را چک کنید — با curl امتحانش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl -H "Authorization: Bearer YOUR_TOKEN" \
+  https://your-server/api/v4/users/me</code></pre>
+</div>
+<p>اگر اطلاعات کاربر بات برگرداند توکن معتبر است. اگر خطا برگرداند توکن را بازتولید کنید.</p>
+
+<h3>بات آفلاین است</h3>
+<p><strong>علت:</strong> گیت‌وی هرمس اجرا نیست یا اتصالش شکست خورده.</p>
+<p><strong>راه‌حل:</strong> چک کنید <code>hermes gateway</code> در حال اجراست. خروجی ترمینال را برای پیام‌های خطا ببینید. مسائل رایج: URL اشتباه، توکن منقضی، در دسترس نبودن سرور Mattermost.</p>
+
+<h3>«User not allowed» / بات شما را نادیده می‌گیرد</h3>
+<p><strong>علت:</strong> شناسهٔ کاربری شما در <code>MATTERMOST_ALLOWED_USERS</code> نیست.</p>
+<p><strong>راه‌حل:</strong> شناسه‌تان را به <code>MATTERMOST_ALLOWED_USERS</code> در <code>~/.hermes/.env</code> اضافه و گیت‌وی را ری‌استارت کنید. یادتان باشد: شناسهٔ کاربری رشتهٔ الفبایی-عددی ۲۶کاراکتری است نه <code>@yوزرنیم</code> شما.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> پرامپت به‌ازای-کانال</h2>
+<p>پرامپت‌های سیستمی زودگذر را به کانال‌های مشخص Mattermost اختصاص دهید. پرامپت در زمان اجرا در هر نوبت تزریق می‌شود — هرگز در تاریخچهٔ رونویسی ذخیره نمی‌شود — پس تغییرات فوراً اثر می‌کنند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mattermost:
+  channel_prompts:
+    "channel_id_abc123": |
+      You are a research assistant. Focus on academic sources,
+      citations, and concise synthesis.
+    "channel_id_def456": |
+      Code review mode. Be precise about edge cases and
+      performance implications.</code></pre>
+</div>
+<p>کلیدها شناسه‌های کانال Mattermost‌اند ‏(در URL کانال یا از API). همهٔ پیام‌های کانال منطبق پرامپت را به‌عنوان دستور سیستمی زودگذر دریافت می‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> امنیت</h2>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>همیشه <code>MATTERMOST_ALLOWED_USERS</code> را تنظیم کنید تا مشخص شود چه کسی با بات تعامل می‌کند. بدون آن، گیت‌وی به‌عنوان اقدام ایمنی همهٔ کاربران را پیش‌فرض رد می‌کند. فقط شناسهٔ کاربری افراد مورداطمینان را اضافه کنید — کاربران مجاز دسترسی کامل به قابلیت‌های ایجنت دارند شامل استفاده از ابزار و دسترسی سیستم.</p>
+</div>
+<p>برای اطلاعات بیشتر دربارهٔ امن‌سازی استقرار هرمس ایجنت، <a href="../security.html">راهنمای امنیت</a> را ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> یادداشت‌ها</h2>
+<ul>
+  <li><strong>دوستدار خودمیزبانی</strong>: با هر نمونهٔ خودمیزبان Mattermost کار می‌کند. نه حساب Mattermost Cloud می‌خواهد نه اشتراک.</li>
+  <li><strong>بدون وابستگی اضافه</strong>: آداپتور برای HTTP و WebSocket از <code>aiohttp</code> استفاده می‌کند که همراه هرمس ایجنت هست.</li>
+  <li><strong>سازگار با Team Edition</strong>: هم با Mattermost Team Edition ‏(رایگان) هم Enterprise Edition کار می‌کند.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="webhooks.html"><span class="dir">→ قبلی</span><span class="ttl">وب‌هوک‌ها</span></a>
+  <a class="next" href="matrix.html"><span class="dir">بعدی ←</span><span class="ttl">Matrix</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/mattermost" target="_blank" rel="noopener">Mattermost</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

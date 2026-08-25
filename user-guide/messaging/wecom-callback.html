@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeCom Callback ‏(اپ ساخته‌شدهٔ خودی) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/wecom-callback" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>WeCom Callback</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>‏WeCom Callback ‏(اپ ساخته‌شدهٔ خودی)</h1>
+<p>هرمس را به‌عنوان یک اپلیکیشن سازمانیِ ساخته‌شدهٔ خودی با مدل callback/webhook به WeCom ‏(وی‌چت سازمانی) وصل کنید.</p>
+<div class="callout note">
+  <div class="callout-title">📌 WeCom Bot در برابر WeCom Callback</div>
+  <p>هرمس دو حالت یکپارچه‌سازی WeCom دارد:</p>
+  <ul>
+    <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/wecom" target="_blank" rel="noopener"><strong>‏WeCom Bot</strong></a> — سبک بات، اتصال از طریق WebSocket. راه‌اندازی ساده‌تر، کار در چت گروهی.</li>
+    <li><strong>‏WeCom Callback</strong> ‏(این صفحه) — اپ ساخته‌شدهٔ خودی، دریافت XML رمزنگاری‌شده. در نوار کناری WeCom کاربران به‌عنوان اپ درجه‌یک دیده می‌شود. مسیریابی چند-کورپوری پشتیبانی می‌کند.</li>
+  </ul>
+</div>
+<blockquote><p><code>hermes gateway setup</code> را اجرا و <strong>WeCom Callback</strong> را انتخاب کنید تا راهنمای گام‌به‌گام ببینید.</p></blockquote>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نحوهٔ کار</h2>
+<ol>
+  <li>در کنسول مدیریت WeCom یک اپلیکیشن ساخته‌شدهٔ خودی ثبت می‌کنید</li>
+  <li>‏WeCom XML رمزنگاری‌شده را به endpoint callback شما push می‌کند</li>
+  <li>هرمس پیام را decrypt و برای ایجنت صف می‌کند</li>
+  <li>بلافاصله ACK می‌دهد ‏(بی‌صدا — هیچ چیزی به کاربر نمایش داده نمی‌شود)</li>
+  <li>ایجنت درخواست را پردازش می‌کند ‏(معمولاً ۳ تا ۳۰ دقیقه)</li>
+  <li>ریپلای به‌صورت پیش‌فعال از طریق API ‏<code>message/send</code> ویکام تحویل می‌شود</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پیش‌نیازها</h2>
+<ul>
+  <li>حساب سازمانی WeCom با دسترسی ادمین</li>
+  <li>بسته‌های پایتونی ‏<code>aiohttp</code> و <code>httpx</code> ‏(در نصب پیش‌فرض هستند)</li>
+  <li>سروری عمومی‌دسترس برای URL کال‌بک ‏(یا تونلی مثل ngrok)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> راه‌اندازی</h2>
+
+<h3>۱. ساخت اپ خودساخته در WeCom</h3>
+<ol>
+  <li>به <a href="https://work.weixin.qq.com/" target="_blank" rel="noopener">کنسول مدیریت WeCom</a> ← <strong>Applications</strong> ← <strong>Create App</strong> بروید</li>
+  <li>‏<strong>Corp ID</strong> را یادداشت کنید ‏(بالای کنسول ادمین نشان داده می‌شود)</li>
+  <li>در تنظیمات اپ، یک <strong>Corp Secret</strong> بسازید</li>
+  <li>‏<strong>Agent ID</strong> را از صفحهٔ نمای کلی اپ یادداشت کنید</li>
+  <li>تحت <strong>Receive Messages</strong>، URL کال‌بک را پیکربندی کنید:
+    <ul>
+      <li>URL: ‏<code>http://YOUR_PUBLIC_IP:8645/wecom/callback</code></li>
+      <li>Token: توکن تصادفی بسازید ‏(WeComp فراهم می‌کند)</li>
+      <li>EncodingAESKey: کلیدی تولید کنید ‏(WeComp فراهم می‌کند)</li>
+    </ul>
+  </li>
+</ol>
+
+<h3>۲. پیکربندی متغیرهای محیطی</h3>
+<p>به فایل .env اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>WECOM_CALLBACK_CORP_ID=your-corp-id
+WECOM_CALLBACK_CORP_SECRET=your-corp-secret
+WECOM_CALLBACK_AGENT_ID=1000002
+WECOM_CALLBACK_TOKEN=your-callback-token
+WECOM_CALLBACK_ENCODING_AES_KEY=your-43-char-aes-key
+
+# اختیاری
+# WECOM_CALLBACK_HOST=  # pin اختیاری؛ خالی = dual-stack (همهٔ interface ها، IPv4+IPv6)
+WECOM_CALLBACK_PORT=8645
+WECOM_CALLBACK_ALLOWED_USERS=user1,user2</code></pre>
+</div>
+
+<h3>۳. شروع گیت‌وی</h3>
+<div class="codebox"><pre><code>hermes gateway</code></pre></div>
+<p>‏(از ‏<code>hermes gateway start</code> فقط بعد از ثبت سرویس systemd/launchd توسط ‏<code>hermes gateway install</code> استفاده کنید.)</p>
+<p>آداپتور کال‌بک سرور HTTP روی پورت پیکربندی‌شده اجرا می‌کند. ویکام URL کال‌بک را با یک GET تأیید و بعد ارسال پیام‌ها با POST را شروع می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مرجع پیکربندی</h2>
+<p>این‌ها را در config.yaml زیر ‏<code>platforms.wecom_callback.extra</code> بگذارید یا از متغیرهای محیطی استفاده کنید:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>تنظیم</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>corp_id</code></td><td>—</td><td>Corp ID سازمانی ویکام ‏(الزامی)</td></tr>
+    <tr><td><code>corp_secret</code></td><td>—</td><td>رمز Corp برای اپ خودساخته ‏(الزامی)</td></tr>
+    <tr><td><code>agent_id</code></td><td>—</td><td>Agent ID اپ خودساخته ‏(الزامی)</td></tr>
+    <tr><td><code>token</code></td><td>—</td><td>توکن تأیید کال‌بک ‏(الزامی)</td></tr>
+    <tr><td><code>encoding_aes_key</code></td><td>—</td><td>کلید AES چهل‌وسه‌کاراکتری برای رمزنگاری کال‌بک ‏(الزامی)</td></tr>
+    <tr><td><code>host</code></td><td>تنظیم‌نشده ‏(dual-stack: همهٔ interface ها، IPv4+IPv6)</td><td>آدرس bind سرور HTTP کال‌بک</td></tr>
+    <tr><td><code>port</code></td><td><code>8645</code></td><td>پورت سرور HTTP کال‌بک</td></tr>
+    <tr><td><code>path</code></td><td><code>/wecom/callback</code></td><td>مسیر URL نقطهٔ پایانی کال‌بک</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> مسیریابی چند-اپی</h2>
+<p>برای سازمان‌هایی که چند اپ خودساخته دارند ‏(مثلاً بین دپارتمان‌ها یا زیرمجموعه‌های مختلف)، فهرست <code>apps</code> را در config.yaml پیکربندی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  wecom_callback:
+    enabled: true
+    extra:
+      host: "0.0.0.0"
+      port: 8645
+      apps:
+        - name: "dept-a"
+          corp_id: "ww_corp_a"
+          corp_secret: "secret-a"
+          agent_id: "1000002"
+          token: "token-a"
+          encoding_aes_key: "key-a-43-chars..."
+        - name: "dept-b"
+          corp_id: "ww_corp_b"
+          corp_secret: "secret-b"
+          agent_id: "1000003"
+          token: "token-b"
+          encoding_aes_key: "key-b-43-chars..."</code></pre>
+</div>
+<p>کاربران با ‏<code>corp_id:user_id</code> scope می‌شوند تا تداخل بین‌-کورپوری پیشگیری شود. وقتی کاربری پیام می‌فرستد، آداپتور ثبت می‌کند متعلق به کدام اپ ‏(کورپ) است و ریپلای‌ها را از طریق توکن دسترسی همان اپ مسیریابی می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> کنترل دسترسی</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># لیست مجاز کاربران خاص
+WECOM_CALLBACK_ALLOWED_USERS=zhangsan,lisi,wangwu
+
+# یا اجازه به همهٔ کاربران
+WECOM_CALLBACK_ALLOW_ALL_USERS=true</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> نقاط پایانی</h2>
+<p>آداپتور این‌ها را expose می‌کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متد</th><th>مسیر</th><th>هدف</th></tr></thead>
+  <tbody>
+    <tr><td>GET</td><td><code>/wecom/callback</code></td><td>دست‌دادن تأیید URL ‏(ویکام هنگام setup این را می‌فرستد)</td></tr>
+    <tr><td>POST</td><td><code>/wecom/callback</code></td><td>کال‌بک پیام رمزنگاری‌شده ‏(ویکام پیام‌های کاربران را اینجا می‌فرستد)</td></tr>
+    <tr><td>GET</td><td><code>/health</code></td><td>چک سلامت — ‏<code>{"status": "ok"}</code> برمی‌گرداند</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> رمزنگاری</h2>
+<p>همهٔ payload های کال‌بک با AES-CBC با EncodingAESKey رمزنگاری می‌شوند. آداپتور هندل می‌کند:</p>
+<ul>
+  <li><strong>ورودی:</strong> Decrypt کردن payload XML، تأیید امضای SHA1</li>
+  <li><strong>خروجی:</strong> ریپلای‌ها از طریق API پیش‌فعال ارسال می‌شوند ‏(نه پاسخ رمزنگاری‌شدهٔ کال‌بک)</li>
+</ul>
+<p>پیاده‌سازی رمزنگاری با SDK رسمی WXBizMsgCrypt تنسنت سازگار است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> محدودیت‌ها</h2>
+<ul>
+  <li><strong>بدون استریم</strong> — ریپلای‌ها بعد از اتمام کار ایجنت به‌صورت پیام کامل می‌رسند</li>
+  <li><strong>بدون نشانگر تایپ</strong> — مدل کال‌بک وضعیت تایپ را پشتیبانی نمی‌کند</li>
+  <li><strong>فقط متن</strong> — الان ورودی متن پشتیبانی می‌شود؛ ورودی تصویر/فایل/صوت هنوز پیاده نشده. ایجنت قابلیت رسانهٔ خروجی را از سرنخ پلتفرم ویکام می‌شناسد ‏(تصویر، سند، ویدیو، صوت).</li>
+  <li><strong>تأخیر پاسخ</strong> — نشست‌های ایجنت ۳ تا ۳۰ دقیقه طول می‌کشند؛ کاربر ریپلای را وقتی پردازش تمام شد می‌بیند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> عیب‌یابی</h2>
+
+<p><strong>اعتبارسنجی امضا شکست می‌خورد.</strong><br>
+‏WeComp هر درخواستی را با <strong>Token</strong>ی که در کنسول ادمین ثبت کرده‌اید امضا می‌کند. عدم‌تطبیق بین توکن پیکربندی‌شده در هرمس و توکن موردانتظار کنسول ادمین رایج‌ترین علت است. هر دو <strong>Token</strong> و <strong>EncodingAESKey</strong> را دوباره از کنسول کپی کنید — به‌راحتی بریده می‌شوند. فاصلهٔ سفید دور <code>=</code> در مقادیر ‏<code>~/.hermes/.env</code> هم چک‌های امضا را می‌شکند. بعد از اصلاح، ‏<code>hermes gateway run</code> را ری‌استارت کنید.</p>
+
+<p><strong>URL کال‌بک قابل‌دسترس نیست / مرحلهٔ تأیید شکست می‌خورد.</strong><br>
+‏WeComp به URL عمومی ثبت‌شده شما ضربه می‌زند. تأیید کنید:<br>
+۱. پروکسی معکوس / تونل شما ‏<code>/wecom/callback</code> را به پورت گیت‌وی فوروارد می‌کند.<br>
+۲. URL در کنسول ادمین HTTPS است ‏(ویکام HTTP خام را رد می‌کند).<br>
+۳. از بیرون شبکه‌تان، ‏<code>curl -i https://&lt;your-domain&gt;/wecom/callback</code> چیزی غیر از timeout برگرداند ‏(۴xx بدون query params کافی است — فقط یعنی شنونده قابل‌رسید است).</p>
+
+<p><strong>پورت قابل‌دسترس نیست / شنونده bind نشده.</strong><br>
+لاگ‌های ‏<code>hermes gateway run</code> را برای host/port بایندشده چک کنید. اگر آداپتور روی ‏<code>127.0.0.1</code> بایند شده باید جلویش پروکسی معکوس یا تونل بگذارید — سرورهای ویکام نمی‌توانند به loopback برسند. ‏<code>extra.host</code> را خالی بگذارید تا bind پیش‌فرض dual-stack ‏(همهٔ interface ها، IPv4+IPv6) اعمال شود، یا یک interface را در config.yaml pin کنید ‏(+ ‏<code>allowed_source_cidrs</code> اگر مستقیم expose می‌کنید)، یا loopback نگه دارید و از تونلی مثل Cloudflare Tunnel / nginx استفاده کنید.</p>
+</section>
+
+<div class="pager">
+  <a href="bluebubbles.html"><span class="dir">→ قبلی</span><span class="ttl">BlueBubbles ‏(iMessage)</span></a>
+  <a class="next" href="line.html"><span class="dir">بعدی ←</span><span class="ttl">LINE</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/wecom-callback" target="_blank" rel="noopener">WeCom Callback (Self-Built App)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

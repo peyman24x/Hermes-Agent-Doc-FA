@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft Teams — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/teams" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>Microsoft Teams</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی Microsoft Teams</h1>
+<p>هرمس ایجنت را به‌عنوان بات به Microsoft Teams وصل کنید. برخلاف Socket Mode اسلک، Teams پیام‌ها را با فراخوانی یک <strong>وب‌هوک عمومی HTTPS</strong> تحویل می‌دهد، پس نمونه‌تان نقطهٔ پایانی قابل‌دسترس عمومی می‌خواهد — یا تونل توسعه ‏(توسعهٔ محلی) یا دامنهٔ واقعی ‏(تولید).</p>
+<p>خلاصهٔ جلسه از رویدادهای Microsoft Graph می‌خواهید نه گفتگوی عادی بات؟ صفحهٔ اختصاصی را ببینید: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/teams-meetings" target="_blank" rel="noopener">جلسات Teams</a>.</p>
+<blockquote><p><code>hermes gateway setup</code> را اجرا و <strong>Microsoft Teams</strong> را انتخاب کنید تا راهنمای گام‌به‌گام ببینید.</p></blockquote>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نحوهٔ پاسخ بات</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>زمینه</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><strong>چت شخصی ‏(DM)</strong></td><td>بات به همهٔ پیام‌ها پاسخ می‌دهد. بدون نیاز به @منشن.</td></tr>
+    <tr><td><strong>چت گروهی</strong></td><td>بات فقط با @منشن پاسخ می‌دهد.</td></tr>
+    <tr><td><strong>کانال</strong></td><td>بات فقط با @منشن پاسخ می‌دهد.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>‏Teams منشن‌ها را به‌صورت پیام‌های عادی با تگ‌های ‏<code>&lt;at&gt;BotName&lt;/at&gt;</code> تحویل می‌دهد که هرمس قبل از پردازش خودکار حذفشان می‌کند.</p>
+<p>برای نصب‌های سورسی/محلی extra تیمز را بگنجانید تا آداپتور همراه‌بسته SDK مایکروسافت تیمز را import کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>uv sync --extra teams
+# یا برای نصب‌های قابل‌ویرایش:
+uv pip install -e ".[teams]"</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: نصب CLI ‏Teams</h2>
+<p>‏<code>@microsoft/teams.cli</code> ثبت بات را خودکار می‌کند — بدون نیاز به پرتال Azure.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>npm install -g @microsoft/teams.cli@preview
+teams login</code></pre>
+</div>
+<p>برای تأیید ورود و یافتن شناسهٔ آبجکت AAD خودتان ‏(لازم برای ‏<code>TEAMS_ALLOWED_USERS</code>):</p>
+<div class="codebox"><pre><code>teams status --verbose</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: expose کردن پورت وب‌هوک</h2>
+<p>‏Teams نمی‌تواند به ‏<code>localhost</code> پیام بدهد. برای توسعه محلی از هر ابزار تونلی URL عمومی HTTPS بگیرید. پورت پیش‌فرض ‏<code>3978</code> است — در صورت نیاز با ‏<code>TEAMS_PORT</code> عوضش کنید.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># devtunnel (مایکروسافت)
+devtunnel create hermes-bot --allow-anonymous
+devtunnel port create hermes-bot -p 3978 --protocol http  # اگر TEAMS_PORT را عوض کردید 3978 را جایگزین کنید
+devtunnel host hermes-bot
+
+# ngrok
+ngrok http 3978  # اگر TEAMS_PORT را عوض کردید 3978 را جایگزین کنید
+
+# cloudflared
+cloudflared tunnel --url http://localhost:3978  # اگر TEAMS_PORT را عوض کردید 3978 را جایگزین کنید</code></pre>
+</div>
+<p>URL ‏<code>https://</code> خروجی را کپی کنید — در گام بعد استفاده می‌شود. حین توسعه تونل را روشن نگه دارید.</p>
+<p>URL عمومی تونل HTTPS است ولی شنوندهٔ وب‌هوک محلی هرمس HTTP خام است. تونل TLS را خاتمه و HTTP را به پورت ‏<code>3978</code> فوروارد می‌کند؛ پورت محلی تونل را HTTPS پیکربندی نکنید.</p>
+<p>برای تولید، endpoint بات را به‌جایش روی دامنهٔ عمومی سرورتان تنظیم کنید ‏(<a href="#production">استقرار تولید</a> را ببینید).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۳: ساخت بات</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>teams app create \
+  --name "Hermes" \
+  --endpoint "https://&lt;your-tunnel-url&gt;/api/messages"</code></pre>
+</div>
+<p>‏CLI مقدارهای ‏<code>CLIENT_ID</code>، ‏<code>CLIENT_SECRET</code> و ‏<code>TENANT_ID</code> را به‌اضافهٔ لینک نصب برای گام ۶ چاپ می‌کند. رمز کلاینت را ذخیره کنید — دیگر نمایش داده نمی‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۴: پیکربندی متغیرهای محیطی</h2>
+<p>به ‏<code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># الزامی
+TEAMS_CLIENT_ID=&lt;your-client-id&gt;
+TEAMS_CLIENT_SECRET=&lt;your-client-secret&gt;
+TEAMS_TENANT_ID=&lt;your-tenant-id&gt;
+
+# محدودکردن دسترسی به کاربران خاص (توصیه‌شده)
+# شناسه‌های آبجکت AAD از `teams status --verbose`
+TEAMS_ALLOWED_USERS=&lt;your-aad-object-id&gt;</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۵: شروع گیت‌وی</h2>
+<p><strong>Docker</strong> ‏(باید از دایرکتوری حاوی ‏docker-compose.yml اجرا شود — معمولاً مخزون clone‌شدهٔ hermes-agent، نه ‏~):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cd /path/to/hermes-agent
+HERMES_UID=$(id -u) HERMES_GID=$(id -g) docker compose up -d gateway</code></pre>
+</div>
+<p><strong>نصب native / systemd</strong> ‏(نصب تک‌خطی معمولی hermes زیر ‏~/.hermes/hermes-agent):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway restart
+# یا پیش‌زمینه: hermes gateway run</code></pre>
+</div>
+<p>‏SDK تیمز اختیاری است؛ وقتی Teams فعال باشد گیت‌وی آن را در اولین شروع به‌صورت lazy داخل venv خود هرمس نصب می‌کند ‏(روی Ubuntu 24.04 از ‏pip سیستم استفاده نکنید — به PEP 668 ‏externally-managed-environment برمی‌خورد). نصب دستی در venv هرمس:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>~/.hermes/hermes-agent/venv/bin/pip install microsoft-teams-apps aiohttp
+# یا از clone ایجنت: uv sync --extra teams</code></pre>
+</div>
+<p>پورت پیش‌فرض وب‌هوک ‏<code>3978</code> است ‏(با ‏<code>TEAMS_PORT</code> override کنید). چک کنید اجراست:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl http://localhost:3978/health   # باید برگرداند: ok
+# Docker:
+docker logs -f hermes
+# Native:
+hermes gateway status -l</code></pre>
+</div>
+<p>دنبال این بگردید:</p>
+<div class="codebox"><pre><code>[teams] Webhook server listening on * (all interfaces, IPv4+IPv6):3978/api/messages</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> گام ۶: نصب اپ در Teams</h2>
+<div class="codebox"><pre><code>teams app get &lt;teamsAppId&gt; --install-link</code></pre></div>
+<p>لینک چاپ‌شده را در مرورگر باز کنید — مستقیم در کلاینت Teams باز می‌شود. بعد از نصب، به بات DM بدهید — آماده است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> مرجع پیکربندی</h2>
+<h3>متغیرهای محیطی</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>TEAMS_CLIENT_ID</code></td><td>شناسهٔ اپ ‏(کلاینت) Azure AD</td></tr>
+    <tr><td><code>TEAMS_CLIENT_SECRET</code></td><td>رمز کلاینت Azure AD</td></tr>
+    <tr><td><code>TEAMS_TENANT_ID</code></td><td>شناسهٔ tenant ‏Azure AD</td></tr>
+    <tr><td><code>TEAMS_ALLOWED_USERS</code></td><td>شناسه‌های آبجکت AAD مجازِ استفاده از بات، جداشده با ویرگول</td></tr>
+    <tr><td><code>TEAMS_ALLOW_ALL_USERS</code></td><td>‏<code>true</code> برای رد شدن از لیست مجاز و اجازه به همه</td></tr>
+    <tr><td><code>TEAMS_HOME_CHANNEL</code></td><td>Conversation ID برای تحویل پیام‌های کرون/پیش‌فعال</td></tr>
+    <tr><td><code>TEAMS_HOME_CHANNEL_NAME</code></td><td>نام نمایشی کانال خانگی</td></tr>
+    <tr><td><code>TEAMS_PORT</code></td><td>پورت وب‌هوک ‏(پیش‌فرض: ‏<code>3978</code>)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>config.yaml</h3>
+<p>یا از طریق config.yaml پیکربندی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  teams:
+    enabled: true
+    extra:
+      client_id: "your-client-id"
+      client_secret: "your-secret"
+      tenant_id: "your-tenant-id"
+      port: 3978</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> قابلیت‌ها</h2>
+
+<h3>کارت‌های تأیید تعاملی</h3>
+<p>وقتی ایجنت لازم است فرمان بالقوه خطرناکی اجرا کند، به‌جای اینکه از شما بخواهد ‏<code>/approve</code> تایپ کنید، کارت Adaptive با چهار دکمه می‌فرستد:</p>
+<ul>
+  <li><strong>Allow Once</strong> — تأیید همین فرمان مشخص</li>
+  <li><strong>Allow Session</strong> — تأیید این الگو تا آخر نشست</li>
+  <li><strong>Always Allow</strong> — تأیید همیشگی این الگو</li>
+  <li><strong>Deny</strong> — رد فرمان</li>
+</ul>
+<p>کلیک روی دکمه، تأیید را درجا حل و کارت را با تصمیم جایگزین می‌کند.</p>
+
+<h3>تحویل خلاصهٔ جلسات ‏(خط‌لولهٔ جلسات Teams)</h3>
+<p>وقتی افزونهٔ خط‌لولهٔ جلسات Teams فعال باشد ‏(<a href="msgraph-webhook.html">msgraph-webhook</a>)، این آداپتور تحویل خروجی خلاصه‌های جلسه را هم هندل می‌کند — یک سطح یکپارچه‌سازی Teams، نه دو. بعد از خلاصه‌شدن رونویسی جلسه، نویسنده خلاصه را به هدف Teams انتخابی‌تان پست می‌کند.</p>
+<p>تحویل خلاصهٔ خط‌لوله زیر ورودی پلتفرم <code>teams</code> کنار پیکربندی بات تنظیم می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  teams:
+    enabled: true
+    extra:
+      # پیکربندی موجود بات (client_id, client_secret, tenant_id, port) ...
+
+      # تحویل خلاصهٔ جلسه (فقط وقتی افزونه teams_pipeline فعال است)
+      delivery_mode: "graph"       # یا "incoming_webhook"
+      # برای delivery_mode: graph — یکی را انتخاب کنید:
+      chat_id: "19:meeting_..."    # پست در یک چت Teams
+      # team_id: "..."             # یا پست در یک کانال
+      # channel_id: "..."
+      # access_token: "..."        # اختیاری؛ به اعتبارنامه‌های اپ MSGRAPH_* برمی‌گردد
+      # برای delivery_mode: incoming_webhook:
+      # incoming_webhook_url: "https://outlook.office.com/webhook/..."</code></pre>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>حالت</th><th>کِی</th><th>موازنه</th></tr></thead>
+  <tbody>
+    <tr><td><code>incoming_webhook</code></td><td>«یک خلاصه ساده در این کانال پست کن» با URL ثابتِ تولیدشده توسط Teams.</td><td>بدون threading ریپلای، بدون واکنش؛ با هویت پیکربندی‌شدهٔ وب‌هوک نمایش داده می‌شود.</td></tr>
+    <tr><td><code>graph</code></td><td>پست‌های تردی کانال یا پست چت ۱:۱/گروهی تحت هویت بات از طریق Microsoft Graph.</td><td>نیازمند <a href="https://hermes-agent.nousresearch.com/docs/guides/microsoft-graph-app-registration" target="_blank" rel="noopener">ثبت اپ Graph</a> با دسترسی اپلیکیشنی ‏<code>ChannelMessage.Send</code> ‏(کانال) یا ‏<code>Chat.ReadWrite.All</code> ‏(چت).</td></tr>
+  </tbody>
+</table>
+</div>
+<p>اگر افزونهٔ ‏<code>teams_pipeline</code> <strong>فعال نباشد</strong> این تنظیمات بی‌اثرند — فقط وقتی سیم می‌خورند که runtime خط‌لوله به ورودی وب‌هوک Graph متصل شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="production"><span class="secnum">۱۰</span> استقرار تولید</h2>
+<p>برای سرور دائمی، TLS را در پروکسی معکوس خاتمه دهید و درخواست‌ها را به شنوندهٔ HTTP خام هرمس — معمولاً ‏<code>http://127.0.0.1:3978</code> — فوروارد کنید. endpoint عمومی HTTPS پروکسی را در Teams ثبت کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>teams app create \
+  --name "Hermes" \
+  --endpoint "https://your-domain.com/api/messages"</code></pre>
+</div>
+<p>اگر قبلاً بات ساخته‌اید و فقط endpoint را باید عوض کنید:</p>
+<div class="codebox"><pre><code>teams app update --id &lt;teamsAppId&gt; --endpoint "https://your-domain.com/api/messages"</code></pre></div>
+<p>مطمئن شوید endpoint عمومی HTTPS از اینترنت قابل‌رسید و دارای گواهی TLS معتبر است. Teams گواهی self-signed را رد می‌کند. شنونده هرمس را پشت پروکسی نگه دارید؛ پورت ‏<code>3978</code> خودش HTTPS سرو نمی‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> عیب‌یابی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مشکل</th><th>راه‌حل</th></tr></thead>
+  <tbody>
+    <tr><td>خطای ‏<code>Can't find a suitable configuration file</code> از ‏<code>docker compose</code></td><td>در مخزنی که ‏docker-compose.yml دارد نیستید، یا نصبتان native است — به‌جایش ‏<code>hermes gateway restart</code> یا اول ‏cd به clone</td></tr>
+    <tr><td>‏<code>requirements not met</code> / ‏<code>Teams SDK missing</code> / ‏<code>No adapter available for teams</code></td><td>گیت‌وی را ری‌استارت کنید تا lazy-install اجرا شود، یا در <strong>venv هرمس</strong> نصب کنید: ‏<code>~/.hermes/hermes-agent/venv/bin/pip install microsoft-teams-apps aiohttp</code>. ‏pip سیستم روی Ubuntu 24.04 شکست می‌خورد ‏(PEP 668) و به هر حال سرویس را تحت تأثیر نمی‌گذارد</td></tr>
+    <tr><td>endpoint ‏health کار می‌کند ولی بات جواب نمی‌دهد</td><td>چک کنید تونل هنوز روشن است و endpoint پیام‌رسانی بات با URL تونل مطابق است</td></tr>
+    <tr><td>لاگ‌ها هنگام ارسال پیام توسط Teams نشان می‌دهند ‏<code>"UNKNOWN / HTTP/1.0" 400</code></td><td>تونل یا پروکسی HTTPS را به شنوندهٔ HTTP خام هرمس فوروارد می‌کند. TLS را در پروکسی خاتمه و HTTP را به پورت ‏<code>3978</code> فوروارد کنید</td></tr>
+    <tr><td>‏<code>KeyError: 'teams'</code> در لاگ‌ها</td><td>کانتینر را ری‌استارت کنید — در نسخهٔ فعلی رفع شده</td></tr>
+    <tr><td>بات با خطاهای احراز جواب می‌دهد</td><td>تأیید کنید ‏<code>TEAMS_CLIENT_ID</code>، ‏<code>TEAMS_CLIENT_SECRET</code> و ‏<code>TEAMS_TENANT_ID</code> همه درست تنظیم‌اند</td></tr>
+    <tr><td>‏<code>No inference provider configured</code></td><td>چک کنید ‏<code>ANTHROPIC_API_KEY</code> ‏(یا کلید ارائه‌دهندهٔ دیگر) در ‏<code>~/.hermes/.env</code> تنظیم شده باشد</td></tr>
+    <tr><td>بات پیام می‌گیرد ولی نادیده می‌گیرد</td><td>احتمالاً شناسهٔ آبجکت AAD شما در ‏<code>TEAMS_ALLOWED_USERS</code> نیست. با ‏<code>teams status --verbose</code> پیدا کنید</td></tr>
+    <tr><td>URL تونل با ری‌استارت عوض می‌شود</td><td>‏URL های devtunnel اگر تونل نام‌دار بسازید پایدارند ‏(<code>devtunnel create hermes-bot</code>). ‏ngrok و cloudflared هر بار URL جدید می‌سازند مگر طرح پرداختی داشته باشید — با تغییر، endpoint بات را با ‏<code>teams app update</code> به‌روز کنید</td></tr>
+    <tr><td>‏Teams نشان می‌دهد «This bot is not responding»</td><td>وب‌هوک خطا برگردانده. traceback ها را در ‏<code>docker logs hermes</code> / ‏<code>hermes gateway status -l</code> چک کنید</td></tr>
+    <tr><td>‏<code>[teams] Failed to connect</code> در لاگ‌ها</td><td>SDK احرازشکست خورده. اعتبارنامه‌ها و تطبیق tenant ID با حساب ‏<code>teams login</code> را دوباره چک کنید</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> امنیت</h2>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p><strong>همیشه ‏<code>TEAMS_ALLOWED_USERS</code> را با شناسه‌های آبجکت AAD کاربران مجاز تنظیم کنید.</strong> بدون این، هر کسی بتواند بات شما را پیدا یا نصب کند با آن تعامل می‌کند.<br><br>
+  با ‏<code>TEAMS_CLIENT_SECRET</code> مثل رمز عبور رفتار کنید — به‌طور دوره‌ای از پرتال Azure یا CLI تیمز بچرخانیدش.</p>
+</div>
+<ul>
+  <li>اعتبارنامه‌ها را در ‏<code>~/.hermes/.env</code> با دسترسی ‏<code>600</code> ذخیره کنید ‏(<code>chmod 600 ~/.hermes/.env</code>)</li>
+  <li>بات فقط پیام‌های کاربران ‏<code>TEAMS_ALLOWED_USERS</code> را می‌پذیرد؛ پیام‌های غیرمجاز بی‌صدا دور ریخته می‌شوند</li>
+  <li>endpoint عمومی شما ‏(<code>/api/messages</code>) توسط Bot Framework تیمز احراز می‌شود — درخواست‌های بدون JWT معتبر رد می‌شوند</li>
+</ul>
+<p><strong>مستندات مرتبط:</strong> <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/teams-meetings" target="_blank" rel="noopener">جلسات Teams</a> · ‏<a href="https://hermes-agent.nousresearch.com/docs/guides/operate-teams-meeting-pipeline" target="_blank" rel="noopener">ادارهٔ خط‌لولهٔ جلسات Teams</a></p>
+</section>
+
+<div class="pager">
+  <a href="photon.html"><span class="dir">→ قبلی</span><span class="ttl">Photon iMessage</span></a>
+  <a class="next" href="dingtalk.html"><span class="dir">بعدی ←</span><span class="ttl">DingTalk</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/teams" target="_blank" rel="noopener">Microsoft Teams</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

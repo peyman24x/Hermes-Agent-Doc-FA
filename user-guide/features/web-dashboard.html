@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>داشبورد وب — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>داشبورد وب</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>داشبورد وب</h1>
+<p>داشبورد وب یک رابط مرورگری برای مدیریت نصب Hermes Agent شماست. به‌جای ویرایش فایل‌های YAML یا اجرای فرمان‌های CLI، می‌توانید تنظیمات را پیکربندی، کلیدهای API را مدیریت و نشست‌ها را از یک رابط وب تمیز مانیتور کنید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>احراز حالت-میزبانی از OAuth مربوط به Nous Portal استفاده می‌کند؛ اگر همچنین می‌خواهید داشبورد با یک بک‌اند واقعی حرف بزند ‏<code>hermes setup --portal</code> دروازهٔ مدل و ابزار را هم سیم‌کشی می‌کند. بخش Nous Portal را ببینید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> شروع سریع</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes dashboard</code></pre>
+</div>
+<p>این یک سرور وب محلی شروع و ‏<code>http://127.0.0.1:9119</code> را در مرورگرتان باز می‌کند. داشبورد کلاً روی ماشین شما اجرا می‌شود — هیچ داده‌ای از localhost خارج نمی‌شود.</p>
+<h3>گزینه‌ها</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فلگ</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>--port</code></td><td><code>9119</code></td><td>پورت اجرای سرور وب</td></tr>
+    <tr><td><code>--host</code></td><td><code>127.0.0.1</code></td><td>آدرس bind</td></tr>
+    <tr><td><code>--no-open</code></td><td>—</td><td>مرورگر خودکار باز نشود</td></tr>
+    <tr><td><code>--insecure</code></td><td>خاموش</td><td><strong>Deprecated / no-op.</strong> قبلاً احراز را روی bind غیر-loopback دور می‌زد؛ دیگر احراز را غیرفعال نمی‌کند — bind عمومی همیشه ارائه‌دهندهٔ احراز ‏(رمز یا OAuth) می‌خواهد</td></tr>
+    <tr><td><code>--isolated</code></td><td>خاموش</td><td>وقتی از یک alias پروفایل لانچ شود ‏(<code>worker dashboard</code>)، به‌جای مسیریابی به داشبورد ماشین یک سرور اختصاصی به‌ازای-پروفایل اجرا کند</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># پورت سفارشی
+hermes dashboard --port 8080
+
+# بایند به همهٔ interface ها (روی شبکه‌های مشترک با احتیاط)
+hermes dashboard --host 0.0.0.0
+
+# شروع بدون بازکردن مرورگر
+hermes dashboard --no-open</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> مدیریت چند پروفایل</h2>
+<p>داشبورد یک سطح مدیریت <strong>سطح-ماشین</strong> است: یک سرور همهٔ <a href="../profiles.html">پروفایل‌ها</a>ی روی ماشین را مدیریت می‌کند. یک سوییچر پروفایل در نوار کناری ‏(هر وقت بیش از یک پروفایل موجود باشد دیده می‌شود) تعیین می‌کند صفحات مدیریتی چه پروفایلی را بخوانند و بنویسند — Config، API Keys، Skills، ‏MCP، ‏Models و تب Chat همه از آن پیروی می‌کنند. وقتی پروفایلی غیر از مالِ خودِ داشبورد انتخاب شده باشد، بنر کهربایی‌رنگ نام پروفایلِ تحت-مدیریت را نشان می‌دهد تا هدف نوشتن هرگز مبهم نباشد.</p>
+<p>انتخاب در URL زندگی می‌کند ‏(<code>?profile=&lt;name&gt;</code>)، پس deep link هایی مثل ‏<code>http://127.0.0.1:9119/skills?profile=worker</code> با انتخاب پیش‌فرضِ سوییچر فرود می‌آیند و از refresh جان سالم می‌برند.</p>
+<p>لانچ داشبورد از alias یک پروفایل به‌جای شروع سرور دوم به داشبورد ماشین مسیریابی می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>worker dashboard
+# → در حال اجرا: مرورگر روی ?profile=worker باز می‌شود
+# → در حال اجرا نیست: داشبورد ماشین با "worker" پیش‌انتخاب‌شده شروع می‌شود</code></pre>
+</div>
+<p>‏<code>--isolated</code> را بدهید تا انصراف دهید و سروری اختصاصی محدود-به-آن-پروفایل اجرا کنید ‏(رفتار قبل از یکسان‌سازی — وقتی مفید است که عمداً داشبورد پروفایل‌های مختلف را با احراز متفاوت expose کنید).</p>
+<p>تب <strong>Chat</strong> هم از سوییچر پیروی می‌کند: چت scoped فرزند PTY خودش را با ‏<code>HERMES_HOME</code> پروفایل انتخاب‌شده spawn می‌کند، پس گفتگو با مدل، مهارت‌ها، حافظه و تاریخچهٔ نشست همان پروفایل اجرا می‌شود. تغییر پروفایل یک نشست ترمینال تازه شروع می‌کند.</p>
+<p>چه چیزی به‌ازای-پروفایل می‌ماند و سوییچر جذبش نمی‌کند: پروسه‌های گیت‌وی ‏(با ‏<code>hermes -p &lt;name&gt; gateway …</code> مدیریتشان کنید)، دیتابیس نشست هر پروفایل و زمان‌بندهای کرون ‏(صفحهٔ Cron خودش با فیلتر مخصوص بین پروفایل‌ها تجمیع می‌کند).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پیش‌نیازها</h2>
+<p>نصب پیش‌فرض ‏hermes-agent پشتهٔ HTTP یا helper ‏PTY را حمل نمی‌کند — آن‌ها extras اختیاری‌اند. <strong>داشبورد وب</strong> به FastAPI و Uvicorn نیاز دارد ‏(extra ‏<code>web</code>). تب <strong>Chat</strong> هم برای spawn کردن TUI جاسازی‌شده پشت شبه‌ترمینال به ‏<code>ptyprocess</code> نیاز دارد ‏(extra ‏<code>pty</code> روی POSIX). هر دو را نصب کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cd ~/.hermes/hermes-agent && uv pip install -e ".[web,pty]"</code></pre>
+</div>
+<p>‏extra ‏<code>web</code> مقدار FastAPI/Uvicorn را می‌کشد؛ ‏<code>pty</code> مقدار ‏<code>ptyprocess</code> ‏(POSIX) یا ‏<code>pywinpty</code> ‏(ویندوز native — توجه: خود TUI جاسازی‌شده همچنان WSL می‌خواهد) را. ‏<code>cd ~/.hermes/hermes-agent && uv pip install -e ".[all]"</code> هر دو extra را شامل است و ساده‌ترین مسیر است اگر پیام‌رسانی/صوت/و... هم می‌خواهید.</p>
+<p>وقتی ‏<code>hermes dashboard</code> را بدون وابستگی‌ها اجرا کنید می‌گوید چه نصب کنید. اگر فرانت هنوز build نشده و ‏<code>npm</code> موجود باشد، اولین launch خودکار build می‌شود.</p>
+<p>تب Chat جزء هر launch ‏<code>hermes dashboard</code> است — پنل چت جاسازی‌شدهٔ مرورگر ‏(اجرای TUI روی PTY/WebSocket) همیشه بدون فلگ اضافه در دسترس است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> صفحات</h2>
+
+<h3>Status ‏(وضعیت)</h3>
+<p>صفحهٔ فرود نمای زندهٔ نصب شما را نشان می‌دهد:</p>
+<ul>
+  <li><strong>نسخهٔ ایجنت</strong> و تاریخ ریلیز</li>
+  <li><strong>وضعیت گیت‌وی</strong> — running/stopped، ‏PID، پلتفرم‌های متصل و وضعیت‌شان</li>
+  <li><strong>نشست‌های فعال</strong> — تعداد نشست‌های فعال در ۵ دقیقهٔ اخیر</li>
+  <li><strong>نشست‌های اخیر</strong> — فهرست ۲۰ نشست آخر با مدل، تعداد پیام، مصرف توکن و پیش‌نمایش گفتگو</li>
+</ul>
+<p>صفحهٔ وضعیت هر ۵ ثانیه خودکار refresh می‌شود.</p>
+<h4>بنر فشار منابع</h4>
+<p>وقتی میزبان کمبود حافظه یا دیسک دارد بنری بالای داشبورد ظاهر می‌شود ‏(با همان poll وضعیت تغذیه می‌شود — بدون درخواست اضافه):</p>
+<ul>
+  <li><strong>«Your agent is almost out of memory and may restart»</strong> — حافظهٔ موجود سیستم به سطح <em>elevated</em> ‏(&lt; ‏۱۲۸ MiB یا &lt; ‏۱۵٪) یا <em>critical</em> ‏(&lt; ‏۶۴ MiB یا &lt; ‏۵٪) رسیده، طبق نمونه‌گیری ضربان ۳۰ثانیه‌ای گیت‌وی.</li>
+  <li><strong>«Your agent restarted unexpectedly, most likely because it ran out of memory»</strong> — دفتر چرخهٔ حیات خروج ناسالم زیر فشار حافظه در بوت قبل را ثبت کرده ‏(یک OOM kill مشکوک).</li>
+  <li><strong>هشدارهای دیسک</strong> — والوم نگهدارندهٔ ‏<code>~/.hermes</code> تقریباً پر است ‏(<em>elevated</em> زیر ۵۱۲ MB آزاد، ‏<em>critical</em> زیر ۲۵۶ MB آزاد).</li>
+</ul>
+<p>در هر لحظه فقط شدیدترین هشدار فعال نمایش داده می‌شود ‏(دیسک critical > حافظه critical > ری‌استارت OOM > دیسک elevated > حافظه elevated). رد کردن‌ها به بوت فعلی گیت‌وی scope دارند: ردکردن یک هشدار بعدیِ فعال را سطح می‌آورد، ری‌استارت گیت‌وی یا تشدید ‏(elevated ← critical) آن را دوباره باز می‌کند و ضربان کهنه به‌جای alert کاذب هیچ رندر نمی‌کند.</p>
+
+<h3>Chat ‏(چت)</h3>
+<p>تب <strong>Chat</strong> کل TUI هرمس ‏(همان رابطی که از ‏<code>hermes --tui</code> می‌گیرید) را مستقیم داخل مرورگر جاسازی می‌کند. هر کاری که در TUI ترمینال می‌کنید — فرمان‌های اسلش، انتخاب‌گر مدل، کارت‌های فراخوانی-ابزار، استریم مارک‌داون، پرامپت‌های clarify/sudo/تأیید، تم‌سازی — اینجا عیناً کار می‌کند، چون داشبورد باینری واقعی TUI را اجرا و خروجی ANSI‌اش را با <a href="https://xtermjs.org/" target="_blank" rel="noopener">xterm.js</a> با رندرر WebGL برای چیدمان سلولی پیکسل‌به‌پیکسل رندر می‌کند.</p>
+<p><strong>نحوهٔ کار:</strong></p>
+<ul>
+  <li>‏<code>/api/pty</code> یک WebSocket با توکن نشست داشبورد احراز می‌کند</li>
+  <li>سرور ‏<code>hermes --tui</code> را پشت یک شبه‌ترمینال POSIX spawn می‌کند</li>
+  <li>کلیدهای فشرده‌شده به PTY می‌روند؛ خروجی ANSI به مرورگر استریم می‌شود</li>
+  <li>رندرر WebGL ‏xterm.js هر سلول را روی شبکهٔ integer-pixel نقاشی می‌کند؛ ردیابی موس ‏(SGR 1006)، کاراکترهای عریض ‏(Unicode 11) و گلیف‌های خط‌کشی همه native رندر می‌شوند</li>
+  <li>تغییر اندازهٔ پنجره مرورگر TUI را با addon ‏<code>@xterm/addon-fit</code> resize می‌کند</li>
+</ul>
+<p><strong>ازسرگیری نشست موجود:</strong> از تب Sessions آیکون play ‏(▶) کنار هر نشستی را کلیک کنید. به ‏<code>/chat?resume=&lt;id&gt;</code> می‌پرد و TUI را با ‏<code>--resume</code> لانچ و کل تاریخچه را لود می‌کند.</p>
+<p><strong>سوییچر نشست ‏(ریل راست):</strong> تب Chat فهرست گفتگوی سبک ChatGPT خودش را در ریل نازکی کنار ترمینال دارد تا بدون ترک صفحه بین گفتگوها جابه‌جا شوید. ریل، انتخاب‌گر مدل را بالای فهرست نشست می‌گذارد؛ ترمینال بیشتر صفحه را می‌گیرد. فهرست جدیدترین نشست‌های پروفایل فعال را نشان می‌دهد — عنوان ‏(fallback به پیش‌نمایش پیام)، زمان نسبی آخرین فعالیت، تعداد پیام و کانال مبدأ برای نشست‌های غیر-CLI. کلیک روی هر ردیف همان‌جا resume‌اش می‌کند ‏(ترمینال با تاریخچهٔ آن گفتگو respawn می‌شود)؛ نشست فعال هایلایت است. <strong>New chat</strong> نشست تازه می‌سازد و کنترل refresh فهرست را دوباره می‌کشد. ریل برای سوئیچ فقط-خواندنی است — delete، rename، export و cleanup انبوه همچنان در تب <strong>Sessions</strong> زندگی می‌کنند. روی صفحه‌های باریک به پنل slide-over جمع می‌شود.</p>
+<p><strong>پیش‌نیازها:</strong></p>
+<ul>
+  <li>‏Node.js ‏(همان الزام ‏<code>hermes --tui</code>؛ بستهٔ TUI در اولین launch ساخته می‌شود)</li>
+  <li>‏<code>ptyprocess</code> — توسط extra ‏<code>pty</code> نصب می‌شود ‏(<code>cd ~/.hermes/hermes-agent && uv pip install -e ".[web,pty]"</code>، یا ‏<code>[all]</code> هر دو را می‌پوشاند)</li>
+  <li>کرنل POSIX ‏(لینوکس، ‏macOS یا WSL2). پنل ترمینال ‏<code>/chat</code> مشخصاً PTY ‏POSIX می‌خواهد — ‏Python ویندوز native معادلی ندارد، پس روی نصب ویندوز native بقیهٔ داشبورد ‏(نشست‌ها، job ها، متریک‌ها، ویرایشگر config) کار می‌کند ولی تب ‏<code>/chat</code> بنری نشان می‌دهد که برای آن قابلیت از WSL2 استفاده کنید.</li>
+</ul>
+<p>تب مرورگر را ببندید و PTY روی سرور تمیز برداشت می‌شود. بازکردن مجدد نشست تازه spawn می‌کند.</p>
+<p>برای اشاره‌دادن ‏Hermes Desktop به داشبوردی روی ماشین دیگر به‌جای بک‌اند همراه‌بسته‌اش، بخش «اتصال Hermes Desktop به بک‌اند راه‌دور» پایین را ببینید.</p>
+
+<h3>Config ‏(پیکربندی)</h3>
+<p>ویرایشگر فرم‌محور برای config.yaml. هر ۱۵۰+ فیلد پیکربندی از ‏DEFAULT_CONFIG خودکار کشف و در دسته‌های تب‌بندی‌شده سازمان می‌یابند:</p>
+<ul>
+  <li><strong>model</strong> — مدل پیش‌فرض، ارائه‌دهنده، base URL، تنظیمات استدلال</li>
+  <li><strong>terminal</strong> — بک‌اند ‏(local/docker/ssh/modal)، timeout، ترجیحات شل</li>
+  <li><strong>display</strong> — skin، پیشرفت ابزار، نمایش resume، تنظیمات spinner</li>
+  <li><strong>agent</strong> — حداکثر iteration ها، timeout گیت‌وی، service tier</li>
+  <li><strong>delegation</strong> — سقف زیرایجنت، سطح استدلال</li>
+  <li><strong>memory</strong> — انتخاب ارائه‌دهنده، تنظیمات تزریق زمینه</li>
+  <li><strong>approvals</strong> — حالت تأیید فرمان خطرناک ‏(smart/manual/off)</li>
+  <li>و بیشتر — هر بخش config.yaml فیلدهای فرم متناظر دارد</li>
+</ul>
+<p>فیلدهای دارای مقادیر معتبر شناخته ‏(بک‌اند terminal، skin، حالت approval و...) به‌صورت dropdown رندر می‌شوند. بولین‌ها toggle هستند. بقیه ورودی متنی.</p>
+<p><strong>اقدامات:</strong></p>
+<ul>
+  <li><strong>Save</strong> — تغییرات را فوراً در config.yaml می‌نویسد</li>
+  <li><strong>Reset to defaults</strong> — همهٔ فیلدها را به مقادیر پیش‌فرض برمی‌گرداند ‏(تا Save بزنید ذخیره نمی‌شود)</li>
+  <li><strong>Export</strong> — پیکربندی فعلی را JSON دانلود می‌کند</li>
+  <li><strong>Import</strong> — فایل پیکربندی JSON آپلود می‌کند تا مقادیر فعلی جایگزین شود</li>
+</ul>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>تغییرات Config در نشست بعدی ایجنت یا ری‌استارت گیت‌وی اعمال می‌شوند. داشبورد وب همان فایل config.yaml‌ای را ویرایش می‌کند که ‏<code>hermes config set</code> و گیت‌وی از آن می‌خوانند.</p>
+</div>
+
+<h3>API Keys ‏(کلیدهای API)</h3>
+<p>مدیریت فایل .env که کلیدهای API و اعتبارنامه‌ها در آن ذخیره می‌شوند. کلیدها بر اساس دسته گروه‌بندی می‌شوند:</p>
+<ul>
+  <li><strong>LLM Providers</strong> — OpenRouter، ‏Anthropic، ‏OpenAI، ‏DeepSeek و...</li>
+  <li><strong>Tool API Keys</strong> — Browserbase، ‏Firecrawl، ‏Tavily، ‏ElevenLabs و...</li>
+  <li><strong>Messaging Platforms</strong> — توکن‌های بات تلگرام، دیسکورد، اسلک و...</li>
+  <li><strong>Agent Settings</strong> — متغیرهای env غیر-محرمانه مثل ‏API_SERVER_ENABLED</li>
+</ul>
+<p>هر کلید نشان می‌دهد:</p>
+<ul>
+  <li>الان ست شده یا نه ‏(با پیش‌نمایش سانسورشدهٔ مقدار)</li>
+  <li>توضیح اینکه برای چیست</li>
+  <li>لینک صفحهٔ ثبت‌نام/کلید ارائه‌دهنده</li>
+  <li>فیلد ورودی برای ست یا به‌روزرسانی مقدار</li>
+  <li>دکمهٔ حذف</li>
+</ul>
+<p>کلیدهای پیشرفته/کم‌استفاده پیش‌فرض پشت یک toggle مخفی‌اند.</p>
+
+<h3>Sessions ‏(نشست‌ها)</h3>
+<p>مرور و بازرسی همهٔ نشست‌های ایجنت. هر ردیف عنوان نشست، آیکون پلتفرم مبدأ ‏(CLI، تلگرام، دیسکورد، اسلک، کرون)، نام مدل، تعداد پیام، تعداد فراخوانی ابزار و اینکه چقدر قبل فعال بوده را نشان می‌دهد. نشست‌های زنده با badge تپنده علامت می‌خورند.</p>
+<ul>
+  <li><strong>Filter</strong> — تب‌های ‏<strong>Chats / Automation / All</strong> فهرست را scope می‌کنند: *Chats* ‏(پیش‌فرض) گفتگوهای انسانی را نشان و نویز اتوماسیون را پنهان می‌کند ‏(نشست‌های cron/tool/API/ACP)؛ *Automation* فقط همان‌ها؛ *All* همه‌چیز. کشویی exact-source باز هم به یک کانال واحد محدود می‌کند ‏(مثلاً فقط تلگرام). جست‌وجو فیلتر فعال را رعایت می‌کند.</li>
+  <li><strong>Search</strong> — جست‌وجوی تمام‌متن در کل محتوای پیام‌ها با FTS5. نتایج snippet هایلایت‌شده نشان می‌دهند و هنگام باز شدن به اولین پیام منطبق auto-scroll می‌کنند.</li>
+  <li><strong>Stats</strong> — نوار خلاصه کل نشست‌ها، چندتا در مخزن فعال‌اند، تعداد آرشیوشده، کل پیام‌ها و تفکیک به‌ازای-منبع را نشان می‌دهد.</li>
+  <li><strong>Expand</strong> — کلیک روی نشست تاریخچهٔ کامل پیام‌هایش را لود می‌کند. پیام‌ها بر اساس نقش رنگ‌بندی ‏(user، ‏assistant، ‏system، ‏tool) و به‌صورت Markdown با syntax highlighting رندر می‌شوند.</li>
+  <li><strong>Tool calls</strong> — پیام‌های assistant دارای فراخوانی ابزار بلوک‌های تاشو با نام تابع و آرگومان‌های JSON نشان می‌دهند.</li>
+  <li><strong>Rename</strong> — ست یا پاک کردن عنوان نشست درجا ‏(آیکون مداد).</li>
+  <li><strong>Export</strong> — دانلود نشست ‏(متادیتا + تاریخچهٔ کامل پیام‌ها) به‌صورت JSON ‏(آیکون دانلود).</li>
+  <li><strong>Prune</strong> — دکمهٔ «Prune old sessions» در سربرگ نشست‌های پایان‌یافتهٔ قدیمی‌تر از N روز را حذف می‌کند.</li>
+  <li><strong>Delete</strong> — حذف نشست و تاریخچهٔ پیام‌هایش با آیکون سطل.</li>
+</ul>
+
+<h3>Logs ‏(لاگ‌ها)</h3>
+<p>مشاهدهٔ فایل‌های لاگ ایجنت، گیت‌وی و خطاها با فیلتر و tail زنده.</p>
+<ul>
+  <li><strong>File</strong> — جابه‌جایی بین لاگ‌های ‏agent، ‏errors و ‏gateway</li>
+  <li><strong>Level</strong> — فیلتر بر اساس سطح: ALL، ‏DEBUG، ‏INFO، ‏WARNING یا ERROR</li>
+  <li><strong>Component</strong> — فیلتر بر اساس مؤلفهٔ مبدأ: all، ‏gateway، ‏agent، ‏tools، ‏cli یا cron</li>
+  <li><strong>Lines</strong> — انتخاب تعداد خطوط نمایش ‏(۵۰، ‏۱۰۰، ‏۲۰۰ یا ۵۰۰)</li>
+  <li><strong>Auto-refresh</strong> — toggle ‏tail زنده که هر ۵ ثانیه خطوط جدید را poll می‌کند</li>
+  <li><strong>Color-coded</strong> — خطوط لاگ بر اساس شدت رنگ می‌گیرند ‏(قرمز خطا، زرد هشدار، dim دیباگ)</li>
+</ul>
+
+<h3>Analytics ‏(تحلیل‌ها)</h3>
+<p>تحلیل مصرف و هزینه محاسبه‌شده از تاریخچهٔ نشست‌ها. بازهٔ زمانی ‏(۷، ‏۳۰ یا ۹۰ روز) انتخاب کنید تا ببینید:</p>
+<ul>
+  <li><strong>کارت‌های خلاصه</strong> — کل توکن‌ها ‏(ورودی/خروجی)، درصد cache hit، کل هزینهٔ تخمینی یا واقعی و کل تعداد نشست با میانگین روزانه</li>
+  <li><strong>نمودار توکن روزانه</strong> — نمودار میله‌ای انباشتهٔ مصرف توکن ورودی/خروجی به‌ازای هر روز، با tooltip های hover نشان‌دهندهٔ تفکیک و هزینه</li>
+  <li><strong>جدول تفکیک روزانه</strong> — تاریخ، تعداد نشست، توکن ورودی، توکن خروجی، نرخ cache hit و هزینهٔ هر روز</li>
+  <li><strong>تفکیک به‌ازای-مدل</strong> — جدول هر مدل استفاده‌شده، تعداد نشستش، مصرف توکن و هزینهٔ تخمینی</li>
+</ul>
+
+<h3>Cron ‏(کرون)</h3>
+<p>ساخت و مدیریت کارهای cron زمان‌بندی‌شده که پرامپت‌های ایجنت را طبق برنامه تکراری اجرا می‌کنند.</p>
+<ul>
+  <li><strong>Create</strong> — پر کردن نام ‏(اختیاری)، پرامپت، عبارت cron ‏(مثل ‏<code>0 9 * * *</code>) و هدف تحویل ‏(local، ‏Telegram، ‏Discord، ‏Slack یا email)</li>
+  <li><strong>Job list</strong> — هر job نام، پیش‌نمایش پرامپت، عبارت زمان‌بندی، badge وضعیت ‏(enabled/paused/error)، هدف تحویل، آخرین اجرا و اجرای بعدی را نشان می‌دهد</li>
+  <li><strong>Pause / Resume</strong> — جابه‌جایی job بین حالت فعال و مکث</li>
+  <li><strong>Edit</strong> — باز کردن modal پیش‌پر‌شده برای تغییر پرامپت، زمان‌بندی، نام یا هدف تحویل</li>
+  <li><strong>Trigger now</strong> — اجرای فوری job خارج از برنامهٔ عادی‌اش</li>
+  <li><strong>Delete</strong> — حذف دائمی کار cron</li>
+</ul>
+
+<h3>Profiles ‏(پروفایل‌ها)</h3>
+<p>ساخت و مدیریت <a href="../profiles.html">پروفایل‌ها</a> — نمونه‌های ایزولهٔ هرمس با config، مهارت‌ها و نشست‌های خودشان.</p>
+<ul>
+  <li><strong>Profile cards</strong> — هرکدام مدل/ارائه‌دهنده، تعداد مهارت، وضعیت گیت‌وی، توضیح و badge ها ‏(active، default، alias) را نشان می‌دهد</li>
+  <li><strong>Create</strong> — نام + اختیارات clone-from-default / clone-everything / no-bundled-skills، توضیح و مدل؛ صفحهٔ اختصاصی Profile Builder ‏(<code>/profiles/new</code>) جریان کامل را دارد ‏(مدل، ‏MCPها، مهارت‌ها)</li>
+  <li><strong>Manage skills &amp; tools</strong> — به صفحهٔ Skills محدود-به-همان-پروفایل می‌پرد ‏(سوییچر پروفایل نوار کناری را ست می‌کند)</li>
+  <li><strong>Set as active</strong> — پیش‌فرض چسبانِ اجراهای <strong>آیندهٔ</strong> CLI/گیت‌وی را برمی‌گرداند ‏(مثل ‏<code>hermes profile use</code>). این چیزی که داشبورد مدیریت می‌کند را <em>عوض نمی‌کند</em> — آن کار سوییچر پروفایل است</li>
+  <li><strong>Edit model / description / SOUL</strong> — ویرایشگرهای درجا که داخل همان پروفایل می‌نویسند</li>
+  <li><strong>Rename / Delete</strong> — فقط پروفایل‌های نام‌دار</li>
+</ul>
+
+<h3>Skills ‏(مهارت‌ها)</h3>
+<p>مرور، جست‌وجو و toggle مهارت‌ها و تول‌ست‌های نصب‌شده، و نصب موارد جدید از hub. مهارت‌ها از ‏<code>~/.hermes/skills/</code> لود و بر اساس دسته گروه‌بندی می‌شوند.</p>
+<ul>
+  <li><strong>Search</strong> — فیلتر مهارت‌ها و تول‌ست‌های نصب‌شده بر اساس نام، توضیح یا دسته</li>
+  <li><strong>Category filter</strong> — کلیک قرص‌های دسته فهرست را محدود می‌کند ‏(مثل MLOps، ‏MCP، ‏Red Teaming، ‏AI)</li>
+  <li><strong>Toggle</strong> — فعال/غیرفعال کردن تک‌تک مهارت‌ها با یک سوییچ. تغییرات در نشست بعدی اعمال می‌شود.</li>
+  <li><strong>Toolsets</strong> — نمای جداگانه‌ای که تول‌ست‌های داخلی ‏(عملیات فایل، مرور وب و...) را با وضعیت active/inactive، الزامات setup و فهرست ابزارهای شامل نشان می‌دهد</li>
+  <li><strong>Browse hub</strong> — نمای سومی که skill hub را بین همهٔ منابع جست‌وجو می‌کند ‏(همان ‏<code>hermes skills search</code>)، هر نتیجه را با شناسه نصب می‌کند با لاگ نصب زنده و دکمهٔ «Update all» برای refresh مهارت‌های نصب‌شده می‌دهد.</li>
+</ul>
+
+<h3>MCP</h3>
+<p>مدیریت سرورهای <a href="mcp.html">MCP</a> بدون CLI. همان بلوک ‏<code>mcp_servers</code> در config.yaml که ‏<code>hermes mcp</code> می‌خواند.</p>
+<p><strong>سرورهای MCP شما:</strong></p>
+<ul>
+  <li><strong>Add</strong> — ثبت یک سرور HTTP/SSE ‏(URL) یا stdio ‏(فرمان + آرگومان‌ها)، با متغیرهای محیطی اختیاری ‏KEY=VALUE برای سرورهای stdio</li>
+  <li><strong>Enable / disable</strong> — روشن/خاموش کردن سرور بدون حذف. سرور خاموش در config می‌ماند تا بعداً دوباره فعالش کنید. در ری‌استارت بعدی گیت‌وی اعمال می‌شود.</li>
+  <li><strong>Test</strong> — اتصال به سرور، فهرست ابزارش و قطع — اتصال را قبل از اینکه ایجنت به آن وابسته شود تأیید می‌کند</li>
+  <li><strong>Remove</strong> — حذف سرور از پیکربندی</li>
+  <li>مقادیر env شبیه-رمز در نمای فهرست سانسور می‌شوند</li>
+</ul>
+<p><strong>Catalog:</strong> مرور سرورهای MCP تأیید-شدهٔ Nous ‏(کاتالوگ همراه‌بستهٔ ‏<code>optional-mcps/</code>) و نصب هرکدام با یک کلیک. ورودی‌هایی که کلید API می‌خواهند درجا می‌پرسند؛ مقادیر به .env می‌روند. همین کاتالوگی است که ‏<code>hermes mcp catalog</code>/<code>install</code> استفاده می‌کنند.</p>
+
+<h3>Webhooks ‏(وب‌هوک‌ها)</h3>
+<p>مدیریت <a href="../messaging/webhooks.html">اشتراک‌های وب‌هوک</a> داینامیک. پلتفرم webhook باید اول در تنظیمات پیام‌رسانی فعال شود؛ صفحه وقتی نیست سرنخی نشان می‌دهد.</p>
+<ul>
+  <li><strong>Create</strong> — نام، توضیح، فیلتر رویداد، هدف تحویل، حالت اختیاری تحویل-مستقیم و پرامپت ایجنت. هنگام ساخت صفحه URL مسیر و رمز HMAC یک‌بارمصرف قابل‌کپی را نشان می‌دهد.</li>
+  <li><strong>Enable / disable</strong> — روشن/خاموش کردن اشتراک. مسیرهای خاموش در فایل اشتراک‌ها می‌مانند ولی گیت‌وی رویدادهای ورودی‌شان را رد می‌کند ‏(403). گیت‌وی فایل را hot-reload می‌کند، پس تغییر روی رویداد بعدی اعمال می‌شود — بدون ری‌استارت.</li>
+  <li><strong>List</strong> — هر اشتراک URL، رویدادها و هدف تحویلش را نشان می‌دهد</li>
+  <li><strong>Delete</strong> — حذف اشتراک</li>
+</ul>
+
+<h3>Pairing ‏(جفت‌سازی)</h3>
+<p>تأیید و لغو کاربران پیام‌رسانی بدون CLI — نحوهٔ onboard کردن کاربران تلگرام/دیسکورد/و... توسط ادمین راه‌دور به یک گیت‌وی جفت‌شده. هم‌ترازی کامل با ‏<code>hermes pairing</code>.</p>
+<ul>
+  <li><strong>Pending requests</strong> — هرکدام پلتفرم، کد، کاربر و عمر را با دکمهٔ Approve نشان می‌دهد</li>
+  <li><strong>Approved users</strong> — هرکدام پلتفرم و کاربر را با دکمهٔ Revoke نشان می‌دهد</li>
+  <li><strong>Clear pending</strong> — انداختن همهٔ کدهای جفت‌سازی در انتظار</li>
+</ul>
+
+<h3>Channels ‏(کانال‌ها)</h3>
+<p>اتصال هرمس به هر پلتفرم پیام‌رسانی از مرورگر — هم‌ترازی کامل با ‏<code>hermes setup gateway</code>. صفحه هر کانال پشتیبانی‌شده ‏(تلگرام، دیسکورد، اسلک، ماتریکس، Mattermost، واتساپ، سیگنال، BlueBubbles/iMessage، ایمیل، SMS/Twilio، دینگ‌تاک، فیشو/لارک، ویکام، وی‌چت، QQ Bot، یوان‌بائو به‌اضافهٔ سرور API و endpoint های وب‌هوک) را با وضعیت اتصال زنده‌اش فهرست می‌کند.</p>
+<ul>
+  <li><strong>Configure</strong> — باز کردن فرم به‌ازای-پلتفرم با دقیقاً فیلدهایی که آن کانال لازم دارد ‏(توکن بات، توکن اپ، URL سرور، لیست مجاز و...). رمزها به‌صورت ورودی password رندر و سانسورشده ذخیره می‌شوند؛ خالی گذاشتن فیلد مقدار موجود را نگه می‌دارد. فیلدهای الزامی علامت‌گذاری و اعتبارسنجی می‌شوند. لینک «Setup guide» به مستندات اعتبارنامهٔ پلتفرم اشاره می‌کند.</li>
+  <li><strong>Enable / disable</strong> — روشن/خاموش کردن کانال. اعتبارنامه روی دیسک می‌ماند؛ فقط وضعیت فعال عوض می‌شود.</li>
+  <li><strong>Test</strong> — بررسی اینکه کانال پیکربندی، فعال و گزارشگر اتصال زنده از گیت‌وی است.</li>
+  <li><strong>Restart gateway</strong> — اعتبارنامه‌ها در ‏<code>~/.hermes/.env</code> و فلگ فعال در config.yaml نوشته می‌شوند؛ گیت‌وی هر کانال فعال را در ری‌استارت بعدی وصل می‌کند که می‌توانید مستقیماً از صفحه تریگرش کنید.</li>
+</ul>
+
+<h3>System ‏(سیستم)</h3>
+<p>پنل اداری تلفیقی برای عملیات سراسر-نصب:</p>
+<ul>
+  <li><strong>Host</strong> — آمار زندهٔ سیستم: OS/کرنل، معماری، hostname، نسخه‌های Python و هرمس، تعداد هسته + بار CPU، حافظه، مصرف دیسک خانهٔ هرمس، uptime و load average. ‏(CPU/حافظه/دیسک وقتی ‏psutil نصب است از psutil می‌آیند؛ فیلدهای هویت همیشه نشان داده می‌شوند.) نسخهٔ هرمس <strong>badge وضعیت به‌روزرسانی</strong> ‏(به‌روز / N commit عقب) و دکمهٔ <strong>Check for updates</strong> دارد. وقتی روی نصب گیت به‌روزرسانی موجود باشد دکمهٔ <strong>Update now</strong> دیالوگ تأییدی باز می‌کند — چند commit خواهید کشید — قبل از اجرای ‏<code>hermes update</code> در پس‌زمینه. روی نصب‌های Docker/Nix داشبورد نمی‌تواند به‌روزرسانی را درجا اعمال کند پس فرمان صحیح out-of-band را نشان می‌دهد.</li>
+  <li><strong>Nous Portal</strong> — وضعیت ورود، ارائه‌دهندهٔ inference فعال و جدول مسیریابی Tool Gateway ‏(کدام ابزارها از طریق Portal اجرا شوند vs محلی)، با لینک مدیریت اشتراک. آینهٔ فقط-خواندنی ‏<code>hermes portal</code>.</li>
+  <li><strong>Skill curator</strong> — وضعیت نگهداشت-پس‌زمینهٔ مهارت‌ها ‏(فعال/مکث، interval، آخرین اجرا) با pause/resume و دکمهٔ run-now. آینهٔ ‏<code>hermes curator</code>.</li>
+  <li><strong>Gateway</strong> — شروع، توقف و ری‌استارت گیت‌وی پیام‌رسانی با وضعیت زنده ‏(running/stopped، PID، state)</li>
+  <li><strong>Memory</strong> — انتخاب ارائه‌دهندهٔ حافظهٔ خارجی ‏(یا فقط داخلی) و ریست مخازن داخلی ‏MEMORY.md/USER.md</li>
+  <li><strong>Credential pool</strong> — افزودن و حذف کلیدهای API چرخشی که ایجنت round-robin می‌کند ‏(به‌ازای ارائه‌دهنده). کلیدها در فهرست سانسورند؛ مقدار خام فقط به ایجنت می‌رسد.</li>
+  <li><strong>Operations</strong> — اجرای ‏doctor، audit امنیتی، ساخت بکاپ، بازیابی از آرشیو بکاپ، به‌روزرسانی مهارت‌ها، نمایش تفکیک حجم پرامپت-سیستمی، تولید dump پشتیبانی یا مهاجرت پیکربندی تنظیمات بازنشسته. هرکدام یک اقدام پس‌زمینه spawn می‌کند که لاگ زنده‌اش داخل صفحه استریم می‌شود.</li>
+  <li><strong>Checkpoints</strong> — دیدن حجم مخزن سایهٔ ‏/rollback و هرس آن</li>
+  <li><strong>Shell hooks</strong> — فهرست هوک‌های پیکربندی‌شده با وضعیت رضایت+اجرایی‌بودن، <strong>ساخت</strong> هوک ‏(رویداد، فرمان، matcher، timeout، با grant رضایت انتخابی) و حذف. هوک‌ها فرمان دلخواه اجرا می‌کنند، پس فرم ساخت هشدار امنیتی حمل می‌کند و هوک فقط بعد از اعطای رضایت شلیک می‌شود.</li>
+</ul>
+<div class="callout warning">
+  <div class="callout-title">⚠️ امنیت</div>
+  <p>داشبورد وب فایل .env شما را می‌خواند و می‌نویسد که کلیدهای API و رمزها در آن است. پیش‌فرض روی ‏<code>127.0.0.1</code> بایند می‌شود — فقط از ماشین محلی‌تان قابل‌دسترس، بدون نیاز به ورود. بایند به هر آدرس غیر-loopback ‏(شامل ‏<code>0.0.0.0</code>) گیت <a href="#auth-gate">احراز</a> را فعال می‌کند: سرور تا وقتی ارائه‌دهندهٔ احراز ‏(رمزعبور یا OAuth) پیکربندی نشود از شروع امتناع می‌کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> فرمان اسلش ‏<code>/reload</code></h2>
+<p>PR داشبورد فرمان اسلش ‏<code>/reload</code> را هم به CLI تعاملی اضافه کرده. بعد از تغییر کلیدهای API از طریق داشبورد وب ‏(یا ویرایش مستقیم .env)، در یک نشست فعال CLI از ‏<code>/reload</code> استفاده کنید تا بدون ری‌استارت تغییرات گرفته شوند:</p>
+<div class="codebox"><pre><code>You → /reload
+  Reloaded .env (3 var(s) updated)</code></pre></div>
+<p>این ‏<code>~/.hermes/.env</code> را دوباره داخل محیط پروسهٔ در-حال-اجرا می‌خواند. وقتی کلید ارائه‌دهندهٔ جدیدی از داشبورد اضافه کرده‌اید و می‌خواهید فوراً استفاده شود مفید است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> REST API</h2>
+<p>داشبورد وب یک REST API expose می‌کند که فرانت مصرفش می‌کند. برای اتوماسیون مستقیم هم می‌توانید این endpoint ها را صدا بزنید:</p>
+<div class="callout tip">
+  <div class="callout-title">💡 endpoint های scoped-به-پروفایل</div>
+  <p>خانواده‌های endpoint مدیریتی — ‏<code>/api/config</code>، ‏<code>/api/env</code>، ‏<code>/api/skills</code>، ‏<code>/api/tools/toolsets</code>، ‏<code>/api/mcp</code> و ‏<code>/api/model/{info,options,auxiliary,set}</code> — پارامتر query اختیاری ‏<code>?profile=&lt;name&gt;</code> ‏(یا ‏"profile" در بدنهٔ JSON برای نوشتن‌ها) را می‌پذیرند که خواندن/نوشتن را به ‏HERMES_HOME آن پروفایل scope کند. حذف = پروفایل خودِ داشبورد. نام پروفایل ناشناخته ‏404 می‌دهد. ‏WebSocket ‏<code>/api/pty</code> همین پارامتر را می‌پذیرد تا چت زیر پروفایل انتخابی spawn شود.</p>
+</div>
+<h3>‏GET /api/status</h3>
+<p>نسخهٔ ایجنت، وضعیت گیت‌وی، وضعیت پلتفرم‌ها و تعداد نشست فعال را برمی‌گرداند.</p>
+<p>پاسخ دو بلوک منبع مشورتی هم حمل می‌کند ‏(هرگز بر حکم سلامت ‏components/overall اثری ندارند):</p>
+<ul>
+  <li><strong>‏<code>memory</code></strong> — تقطیرشده از ضربان ۳۰ثانیه‌ای گیت‌وی و دفتر چرخهٔ حیات. فیلدها: ‏<code>pressure</code> ‏(<code>ok</code>/<code>elevated</code>/<code>critical</code>/<code>unknown</code>)، ‏<code>gateway_rss_mb</code>، ‏<code>system_total_mb</code>، ‏<code>system_available_mb</code>، ‏<code>swap_used_mb</code>، ‏<code>sampled_at</code>، ‏<code>boot_id</code>، ‏<code>last_boot_unclean</code>، ‏<code>last_boot_suspected_oom</code>. فشار زیر ۱۲۸ MiB ‏(یا ۱۵٪) حافظهٔ موجود سیستم ‏elevated و زیر ۶۴ MiB ‏(یا ۵٪) ‏critical است — همان سطوحی که خروج ناسالم بعدی به‌عنوان OOM kill مشکوک فلگ می‌شود. ضربان‌های قدیمی‌تر از ۱۵۰ ثانیه ‏(یا مؤرخ-در-آینده) اعدادشان را نگه می‌دارند ولی فشار را به ‏unknown تنزل می‌دهند، تا آخرین نمونهٔ گیت‌وی مرده نتواند خودش را قرائت زنده جا بزند.</li>
+  <li><strong>‏<code>disk</code></strong> — یک نمونهٔ زندهٔ ‏<code>shutil.disk_usage()</code> از والوم نگهدارندهٔ ‏<code>~/.hermes</code>. فیلدها: ‏<code>pressure</code>، ‏<code>free_mb</code>، ‏<code>total_mb</code>، ‏<code>used_percent</code>، ‏<code>sampled_at</code>. فشار زیر ۵۱۲ MB آزاد ‏(یا ≥۸۵٪ مصرف با کمتر از ۴ GB ذخیره) ‏elevated و زیر ۲۵۶ MB آزاد ‏(یا ≥۹۵٪ مصرف با کمتر از ۱ GB ذخیره) ‏critical است.</li>
+</ul>
+<p>هر دو collector fail-safe هستند: هر خطای نمونه‌گیری بلوک را به ‏<code>{"pressure": "unknown"}</code> تنزل می‌دهد نه شکست endpoint وضعیت. اعداد درشت‌اند ‏(MB کامل، درصد کامل) چون ‏<code>/api/status</code> عمومی است.</p>
+<h3>سایر endpoint ها</h3>
+<ul>
+<li>‏<code>GET /api/sessions</code> — ۲۰ نشست اخیر با متادیتا ‏(مدل، شمارش توکن، timestamp ها، پیش‌نمایش)</li>
+<li>‏<code>GET /api/config</code> — محتوای فعلی config.yaml به‌صورت JSON</li>
+<li>‏<code>GET /api/config/defaults</code> — مقادیر پیش‌فرض پیکربندی</li>
+<li>‏<code>GET /api/config/schema</code> — schema هر فیلد پیکربندی — نوع، توضیح، دسته و گزینه‌های select در صورت وجود. فرانت با این برای هر فیلد ویجت ورودی درست را رندر می‌کند.</li>
+<li>‏<code>PUT /api/config</code> — ذخیرهٔ پیکربندی جدید. بدنه: ‏<code>{"config": {...}}</code></li>
+<li>‏<code>GET /api/env</code> — همهٔ متغیرهای محیطی شناخته‌شده با وضعیت ست/unset، مقادیر سانسورشده، توضیحات و دسته‌ها</li>
+<li>‏<code>PUT /api/env</code> — ست متغیر محیطی. بدنه: ‏<code>{"key": "VAR_NAME", "value": "secret"}</code></li>
+<li>‏<code>DELETE /api/env</code> — حذف متغیر محیطی. بدنه: ‏<code>{"key": "VAR_NAME"}</code></li>
+<li>‏<code>GET /api/sessions/{session_id}</code> — متادیتای یک نشست واحد</li>
+<li>‏<code>GET /api/sessions/{session_id}/messages</code> — یک صفحه محدود از تاریخچهٔ پیام‌ها شامل فراخوانی‌های ابزار و timestamp ها. پیش‌فرض ۵۰۰ پیام اخیر به ترتیب زمانی. برای صفحه‌بندی صریح ‏<code>limit</code> ‏(حداکثر ۵۰۰)، ‏<code>offset</code> و ‏<code>order=oldest|latest</code> را استفاده کنید.</li>
+<li>‏<code>GET /api/sessions/search</code> — جست‌وجوی تمام‌متن در محتوای پیام. پارامتر: ‏<code>q</code>. شناسه‌های نشست منطبق با snippet هایلایت‌شده برمی‌گرداند.</li>
+<li>‏<code>DELETE /api/sessions/{session_id}</code> — حذف نشست و تاریخچهٔ پیام‌هایش</li>
+<li>‏<code>GET /api/logs</code> — خطوط لاگ. پارامترها: ‏<code>file</code> ‏(agent/errors/gateway)، ‏<code>lines</code>، ‏<code>level</code>، ‏<code>component</code></li>
+<li>‏<code>GET /api/analytics/usage</code> — تحلیل مصرف توکن، هزینه و نشست. پارامتر: ‏<code>days</code> ‏(پیش‌فرض ۳۰). پاسخ شامل تفکیک روزانه و تجمیع به‌ازای-مدل.</li>
+<li>‏<code>GET /api/cron/jobs</code> — همهٔ کارهای cron پیکربندی‌شده با وضعیت، زمان‌بندی و تاریخچهٔ اجرا</li>
+<li>‏<code>POST /api/cron/jobs</code> — ساخت کار cron جدید. بدنه: ‏<code>{"prompt": "...", "schedule": "0 9 * * *", "name": "...", "deliver": "local"}</code></li>
+<li>‏<code>POST /api/cron/jobs/{job_id}/pause</code> — مکث کار کرون · ‏<code>/resume</code> — ازسرگیری · ‏<code>/trigger</code> — اجرای فوری خارج از برنامه</li>
+<li>‏<code>DELETE /api/cron/jobs/{job_id}</code> — حذف کار کرون</li>
+<li>‏<code>GET /api/skills</code> — همهٔ مهارت‌ها با نام، توضیح، دسته و وضعیت فعال</li>
+<li>‏<code>PUT /api/skills/toggle</code> — فعال/غیرفعال‌کردن مهارت. بدنه: ‏<code>{"name": "skill-name", "enabled": true}</code></li>
+<li>‏<code>GET /api/tools/toolsets</code> — همهٔ تول‌ست‌ها با برچسب، توضیح، فهرست ابزارها و وضعیت فعال/پیکربندی‌شده</li>
+</ul>
+<h3>endpoint های ادمین</h3>
+<p>این‌ها صفحات MCP، Channels، Webhooks، Pairing و System را قدرت می‌دهند. همه پشت همان گیت احراز بقیهٔ ‏<code>/api/</code> هستند.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متد و مسیر</th><th>هدف</th></tr></thead>
+  <tbody>
+    <tr><td><code>GET /api/mcp/servers</code></td><td>فهرست سرورهای MCP پیکربندی‌شده ‏(مقادیر env سانسورشده)</td></tr>
+    <tr><td><code>POST /api/mcp/servers</code></td><td>افزودن سرور. بدنه: ‏<code>{name, url?, command?, args?, env?, auth?}</code></td></tr>
+    <tr><td><code>POST /api/mcp/servers/{name}/test</code></td><td>اتصال، فهرست ابزارها، قطع</td></tr>
+    <tr><td><code>PUT /api/mcp/servers/{name}/enabled</code></td><td>فعال/غیرفعال‌کردن سرور</td></tr>
+    <tr><td><code>DELETE /api/mcp/servers/{name}</code></td><td>حذف سرور</td></tr>
+    <tr><td><code>GET /api/mcp/catalog</code></td><td>مرور کاتالوگ MCP تأییدشدهٔ Nous</td></tr>
+    <tr><td><code>POST /api/mcp/catalog/install</code></td><td>نصب ورودی کاتالوگ ‏(با env های لازم)</td></tr>
+    <tr><td><code>GET /api/messaging/platforms</code></td><td>فهرست هر کانال پیام‌رسانی با وضعیت + فیلدهای setup به‌ازای-پلتفرم</td></tr>
+    <tr><td><code>PUT /api/messaging/platforms/{id}</code></td><td>پیکربندی کانال. بدنه: ‏<code>{enabled?, env?, clear_env?}</code> ‏(env در .env نوشته، enabled در config.yaml)</td></tr>
+    <tr><td><code>POST /api/messaging/platforms/{id}/test</code></td><td>گزارش پیکربندی/فعال/متصل بودن کانال</td></tr>
+    <tr><td><code>GET /api/pairing</code></td><td>فهرست کاربران پیام‌رسانی در انتظار + تأییدشده</td></tr>
+    <tr><td><code>POST /api/pairing/approve</code></td><td>تأیید کد. بدنه: ‏<code>{platform, code}</code> · ‏<code>/revoke</code>: لغو کاربر · ‏<code>/clear-pending</code>: پاک‌کردن همهٔ کدها</td></tr>
+    <tr><td><code>GET /api/webhooks</code></td><td>فهرست اشتراک‌ها + وضعیت فعال-بودن پلتفرم</td></tr>
+    <tr><td><code>POST /api/webhooks</code></td><td>ساخت اشتراک ‏(رمز یک‌بارمصرف برمی‌گرداند) · ‏<code>DELETE /{name}</code>: حذف · ‏<code>PUT /{name}/enabled</code>: فعال/خاموش</td></tr>
+    <tr><td><code>GET /api/credentials/pool</code></td><td>فهرست کلیدهای چرخشی pooled ‏(سانسورشده) · ‏<code>POST</code>: افزودن کلید · ‏<code>DELETE /{provider}/{index}</code>: حذف ‏(ایندکس از ۱)</td></tr>
+    <tr><td><code>GET /api/memory</code></td><td>ارائه‌دهندهٔ فعال + ارائه‌دهنده‌های موجود + حجم فایل‌های داخلی</td></tr>
+    <tr><td><code>PUT /api/memory/provider</code></td><td>انتخاب ارائه‌دهنده ‏(خالی = فقط داخلی) · ‏<code>POST /api/memory/reset</code>: ریست حافظهٔ داخلی ‏(بدنه: target=all|memory|user)</td></tr>
+    <tr><td><code>POST /api/gateway/start · /stop · /restart</code></td><td>چرخهٔ حیات گیت‌وی ‏(پس‌زمینه‌ای)</td></tr>
+    <tr><td><code>POST /api/ops/doctor · /security-audit · /backup · /import</code></td><td>تشخیص و نگهداشت ‏(پس‌زمینه‌ای؛ دنبال‌کردن با ‏/api/actions/{name}/status)</td></tr>
+    <tr><td><code>GET /api/ops/hooks</code></td><td>هوک‌های شل پیکربندی‌شده + وضعیت لیست مجاز · ‏<code>POST/DELETE /api/ops/hooks</code>: ساخت/حذف هوک ‏(گیت‌خورده-با-رضایت)</td></tr>
+    <tr><td><code>GET /api/ops/checkpoints · POST .../prune</code></td><td>بازرسی/هرس مخزن ‎/rollback</td></tr>
+    <tr><td><code>GET /api/system/stats</code></td><td>آمار میزبان — OS، CPU، حافظه، دیسک، uptime</td></tr>
+    <tr><td><code>GET /api/hermes/update/check</code></td><td>گزارش موجود بودن به‌روزرسانی ‏(چند commit عقب، روش نصب) بدون اعمال. برای نصب‌های گیت عقب، فهرست ‏commits ‏(sha، summary، author، at) تغییرات را هم می‌دهد. ‏<code>?force=1</code> کش ۶ساعته را می‌شکند</td></tr>
+    <tr><td><code>GET /api/curator · PUT .../paused · POST .../run</code></td><td>وضعیت curator مهارت + مکث/ازسرگیری + اجرا</td></tr>
+    <tr><td><code>GET /api/portal</code></td><td>احراز Nous Portal + مسیریابی Tool Gateway ‏(فقط-خواندنی)</td></tr>
+    <tr><td><code>POST /api/ops/prompt-size · /dump · /config-migrate</code></td><td>تشخیص‌ها ‏(پس‌زمینه‌ای)</td></tr>
+    <tr><td><code>POST /api/skills/hub/install · /uninstall · /update</code></td><td>اقدامات skill hub ‏(پس‌زمینه‌ای) · ‏<code>GET /api/skills/hub/search</code>: جست‌وجو بین همهٔ منابع</td></tr>
+    <tr><td><code>GET /api/sessions/stats</code></td><td>آمار مخزن نشست</td></tr>
+    <tr><td><code>PATCH /api/sessions/{id}</code></td><td>تغییرنام / آرشیو نشست · ‏<code>GET /{id}/export</code>: خروجی JSON · ‏<code>POST /api/sessions/prune</code>: حذف نشست‌های پایان‌یافتهٔ قدیمی‌تر از N روز</td></tr>
+    <tr><td><code>PUT /api/cron/jobs/{id}</code></td><td>ویرایش پرامپت / زمان‌بندی / نام / deliver کار کرون</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec" id="auth-gate">
+<h2><span class="secnum">۷</span> احراز ‏(حالت گیت‌خورده)</h2>
+<p>وقتی داشبورد به آدرس عمومی یا غیر-loopback بایند شود — هر چیز غیر از ‏<code>127.0.0.1</code>/<code>localhost</code> — هرمس ایجنت گیت احراز را فعال می‌کند. هر درخواست باید کوکی نشست تأییدشده حمل کند وگرنه به صفحهٔ ورود برگردانده می‌شود. سه ارائه‌دهنده همراه‌بسته است:</p>
+<ul>
+  <li><strong><a href="#basic-provider">رمزعبور</a></strong> — ساده‌ترین راه گذاشتن احراز روی داشبورد خودمیزبان/on-prem/homelab. بدون ارائه‌دهندهٔ هویت خارجی. <strong>فقط روی شبکهٔ مطمئن یا پشت VPN — برای قرار گرفتن مستقیم در اینترنت عمومی نه.</strong></li>
+  <li><strong><a href="#nous-provider">OAuth ‏(Nous Portal)</a></strong> — برای استقرارهای میزبانی‌شده و هر داشبورد قابل‌رسید از اینترنت عمومی، و مسیر توصیه‌شده برای <a href="#desktop-remote">اتصال راه‌دور Hermes Desktop</a>. هر ورود علیه حسابتان در Nous تأیید می‌شود، پس ارائه‌دهندهٔ مناسب استفادهٔ رو-به-اینترنت همین است.</li>
+  <li><strong><a href="#oidc-provider">OIDC خودمیزبان</a></strong> — برای آوردن ارائه‌دهندهٔ هویت خودتان از طریق OpenID Connect استاندارد ‏(Keycloak، ‏Auth0، ‏Okta، ‏Google، ‏GitHub از طریق پل OIDC و...). بدون دخالت Nous Portal؛ برای اینترنت عمومی وقتی جلویش سرور OIDC منطبق باشد مناسب است.</li>
+</ul>
+<p>داشبوردهای متعلق-به-اپراتور که روی loopback بایند شده‌اند بی‌تأثیرند — بدون احراز، بدون صفحهٔ ورود.</p>
+
+<h3>کِی گیت فعال می‌شود</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فلگ‌ها</th><th>گیت احراز</th><th>کاربرد</th></tr></thead>
+  <tbody>
+    <tr><td><code>hermes dashboard</code> ‏(پیش‌فرض — بایند به ‏127.0.0.1)</td><td>خاموش</td><td>توسعه محلی</td></tr>
+    <tr><td><code>hermes dashboard --host 0.0.0.0</code></td><td><b>روشن</b></td><td>راه‌دور / تولید — با ارائه‌دهندهٔ رمزعبور یا OAuth محافظت کنید</td></tr>
+  </tbody>
+</table>
+</div>
+<p>گیت اگر و فقط اگر میزبان bind نه ‏<code>127.0.0.1</code> باشد نه ‏<code>::1</code> نه ‏<code>localhost</code> روشن است. بایند به ‏<code>0.0.0.0</code> ‏(یا هر آدرس RFC1918/LAN) گیت را فعال می‌کند. فلگ قدیمی ‏<code>--insecure</code> <strong>دیگر آن را خاموش نمی‌کند</strong> — برای سازگاری پذیرفته ولی با هشدار نادیده گرفته می‌شود.</p>
+<div class="callout warning">
+  <div class="callout-title">🚨 ‏--insecure بی‌اثر است — احراز را خاموش نمی‌کند</div>
+  <p>از سخت‌سازی ژوئن ۲۰۲۶، ‏<code>--insecure</code> دیگر احراز داشبورد را دور نمی‌زند: بایند غیر-loopback همیشه ارائه‌دهندهٔ احراز می‌خواهد ‏(رمزعبور یا OAuth). اگر داشبورد بدون احراز می‌خواهید، روی ‏<code>127.0.0.1</code> بایند و از طریق تونل SSH یا Tailscale برسید.</p>
+</div>
+
+<h3>معناشناسی fail-closed</h3>
+<p>اگر گیت فعال می‌شد ولی <strong>هیچ</strong> ‏DashboardAuthProvider ثبت نبود ‏(بدون افزونهٔ Nous، بدون افزونهٔ سفارشی)، ‏<code>hermes dashboard</code> با پیام خطای صریح از بایند امتناع می‌کند. هیچ fallback «deny-پیش‌فرض-ولی-قبول-همه‌چیز» وجود ندارد — داشبورد گیت‌خوردهٔ بدپیکربندی هرگز شروع نمی‌شود.</p>
+<p>وقتی ‏<code>hermes dashboard --host 0.0.0.0</code> را <strong>تعاملی</strong> ‏(ترمینال واقعی) اجرا کنید و هنوز ارائه‌دهنده‌ای پیکربندی نشده باشد، هرمس فقط شکست نمی‌خورد — همان‌جا پیشنهاد setup می‌دهد: انتخاب <strong>username &amp; password</strong> ‏(‏<code>dashboard.basic_auth</code> را در config.yaml می‌نویسد و ظرف چند ثانیه بالا هستید) یا <strong>OAuth</strong> ‏(شما را به ‏<code>hermes dashboard register</code> اشاره می‌دهد). فراخواننده‌های غیرتعاملی — Docker/s6، ‏CI، اجراهای pipe‌شده — پرامپت را رد و به خطای fail-closed بالا می‌خورند، پس استقرار بی‌نگهبان هم بدون احراز هرگز شروع نمی‌شود.</p>
+</section>
+
+<section class="doc-sec" id="nous-provider">
+<h2><span class="secnum">۸</span> ارائه‌دهندهٔ پیش‌فرض: Nous Research</h2>
+<p>افزونهٔ همراه‌بستهٔ ‏<code>plugins/dashboard_auth/nous</code> <strong>همیشه نصب</strong> و خودکار لود می‌شود. وقتی client ID پیکربندی شده باشد خودکار یک ‏DashboardAuthProvider به نام ‏<code>nous</code> ثبت می‌کند.</p>
+<p>چون هر ورود علیه Nous Portal تأیید و با حسابتان در Nous محافظت می‌شود، <strong>ارائه‌دهندهٔ Nous همان است که برای expose کردن داشبورد به اینترنت عمومی مناسب است.</strong></p>
+<h3>ثبت داشبورد</h3>
+<p>برای استفاده از ارائه‌دهندهٔ Nous به یک client ID مربوط به OAuth ‏(قالب ‏<code>agent:{id}</code>) نیاز دارید. دو راه:</p>
+<ul>
+  <li><strong>‏CLI — ‏<code>hermes dashboard register</code>.</strong> روی میزبانی که داشبورد در آن است اجرا کنید. ورود موجود Nous شما را حل می‌کند ‏(اگر وارد نشده‌اید اول ‏<code>hermes setup</code>)، یک کلاینت OAuth خودمیزبان با Portal ثبت و ‏<code>HERMES_DASHBOARD_OAUTH_CLIENT_ID</code> را در ‏<code>~/.hermes/.env</code> می‌نویسد. فلگ‌های اختیاری: ‏<code>--name</code> ‏(برچسب خوانا، وگرنه خودکار تولید می‌شود) و ‏<code>--redirect-uri</code> ‏(URL callback عمومی HTTPS برای میزبان رو-به-اینترنت).</li>
+</ul>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes dashboard register
+# ✓ Registered dashboard "swift_falcon"
+# …writes HERMES_DASHBOARD_OAUTH_CLIENT_ID to ~/.hermes/.env</code></pre>
+</div>
+<ul>
+  <li><strong>GUI — صفحهٔ Local Dashboards.</strong> ‏<a href="https://portal.nousresearch.com/local-dashboards" target="_blank" rel="noopener">‎/local-dashboards</a> را در Nous Portal باز کنید تا داشبوردهای خودمیزبان را از مرورگر ثبت، نام‌گذاری، مدیریت و لغو کنید. ‏client ID حاصل ‏<code>agent:{id}</code> را داخل ‏<code>HERMES_DASHBOARD_OAUTH_CLIENT_ID</code> ‏(env) یا ‏<code>dashboard.oauth.client_id</code> ‏(config.yaml) کپی کنید. همین‌جاست که داشبورد ثبت‌شده با CLI را هم لغو می‌کنید.</li>
+</ul>
+<h3>پیکربندی</h3>
+<p>افزونه از دو سطح می‌خواند و وقتی مقدار env غیرخالی باشد env برنده است.</p>
+<p><strong>config.yaml</strong> — سطح مرجع:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>dashboard:
+  oauth:
+    client_id: agent:01HXYZ…             # برای فعال شدن گیت لازم است</code></pre>
+</div>
+<p><strong>متغیرهای محیطی</strong> — override های اپراتور:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر env</th><th>override می‌کند</th><th>قالب</th><th>تأمین توسط</th></tr></thead>
+  <tbody>
+    <tr><td><code>HERMES_DASHBOARD_OAUTH_CLIENT_ID</code></td><td><code>dashboard.oauth.client_id</code></td><td><code>agent:{instance_id}</code></td><td><code>hermes dashboard register</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>طبق قاعدهٔ هرمس ایجنت ‏(<code>~/.hermes/.env</code> فقط برای کلیدهای API/رمزهاست) <strong>config.yaml مکان توصیه‌شده برای ست این مقادیر</strong> برای توسعه محلی، on-prem و هر استقراری که مستقیم کنترلش می‌کنید است. مسیر متغیر محیطی وجود دارد تا تزریق رمزِ پلتفرم میزبانی بتواند client_id های به‌ازای-deploy را بدون ویرایش config.yaml داخل ایمیج push کند — هدف اصلیش همین است.</p>
+<p>مقادیر env خالی unset تلقی می‌شوند تا رمزِ provision-شده-ولی-پر‌نشده نتواند تصادفاً سایه‌ای روی ورودی معتبر config.yaml بیندازد.</p>
+<p>اگر هیچ‌یک از دو منبع client_id ندهد، افزونه دلیل مشخص را گزارش و خطای fail-closed بایند داشبورد دقیقاً می‌گوید چه اصلاح کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Refusing to bind dashboard to 0.0.0.0 — the auth gate engages on
+non-loopback binds, but no auth providers are registered.
+
+Bundled providers reported these issues:
+  • nous: HERMES_DASHBOARD_OAUTH_CLIENT_ID is not set (and
+    dashboard.oauth.client_id in config.yaml is empty). …
+
+Configure an auth provider before exposing the dashboard:
+  • Password: set dashboard.basic_auth.username + password_hash in config.yaml
+  • OAuth: run `hermes dashboard register` (Nous Portal) or install a
+    DashboardAuthProvider plugin.
+There is no unauthenticated public-bind option — to keep it local, bind
+127.0.0.1 and tunnel in (SSH / Tailscale).</code></pre>
+</div>
+<h3>مثال کاربردی: Nous Research</h3>
+<p>از نصب وارد‌شدهٔ هرمس تا داشبورد گیت‌خورده-با-Nous در سه گام.</p>
+<p><strong>۱. ورود و ثبت داشبورد.</strong> ‏<code>hermes dashboard register</code> با ورود موجود Nous شما کلاینت OAuth تأمین و ‏<code>HERMES_DASHBOARD_OAUTH_CLIENT_ID</code> را در ‏<code>~/.hermes/.env</code> می‌نویسد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes setup            # اگر هنوز وارد Nous Portal نشده‌اید
+hermes dashboard register
+# ✓ Registered dashboard "swift_falcon"</code></pre>
+</div>
+<p><strong>۲. اجرای داشبورد روی آدرس قابل‌دسترس.</strong> بایند غیر-loopback گیت OAuth را فعال و ‏client_id همین الان نوشته‌شده ارائه‌دهندهٔ ‏<code>nous</code> را فعال می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes dashboard --host 0.0.0.0 --port 9119 --no-open</code></pre>
+</div>
+<p><strong>۳. ورود.</strong> ‏<code>http://&lt;host&gt;:9119/</code> را باز کنید، به ‏<code>/login</code> برگردانده می‌شوید. کلیک ‏<strong>Sign in with Nous Research</strong> ← احراز در Portal ← فرود روی داشبورد احرازشده. گیت را از هر ماشینی تأیید کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl -s http://&lt;host&gt;:9119/api/status | jq '.auth_required, .auth_providers'
+# true
+# ["nous"]</code></pre>
+</div>
+<p>‏<code>GET /api/auth/me</code> سپس نشست تأییدشده را برمی‌گرداند ‏(<code>provider: nous</code>). برای میزبان رو-به-اینترنت با ‏<code>--redirect-uri https://hermes.example.com/auth/callback</code> ثبت و ‏<code>HERMES_DASHBOARD_PUBLIC_URL</code> را بگذارید تا callback مربوط به OAuth به URL عمومی‌تان حل شود ‏(«override URL عمومی» را ببینید).</p>
+</section>
+
+<section class="doc-sec" id="basic-provider">
+<h2><span class="secnum">۹</span> ارائه‌دهندهٔ رمزعبور ‏(بدون IDP مربوط به OAuth)</h2>
+<p>اگر نمی‌خواهید ارائه‌دهندهٔ هویت OAuth سیم‌کشی کنید — استقرار خودمیزبانی «فقط یک رمز روی داشبوردم بگذار» — افزونهٔ همراه‌بستهٔ ‏<code>plugins/dashboard_auth/basic</code> یک ‏DashboardAuthProvider به نام ‏<code>basic</code> ثبت می‌کند که به‌جای redirect مربوط به OAuth با <strong>نام کاربری و رمزعبور</strong> احراز می‌کند.</p>
+<p>به همان گیتی که ارائه‌دهندهٔ OAuth وصله وصله می‌شود: گیت روی بایند غیر-loopback فعال می‌شود، صفحهٔ ورود برای این ارائه‌دهنده فرم اعتبارنامه رندر می‌کند ‏(نه دکمهٔ «Log in with X») و هر چیز بعد از ورود — کوکی‌های نشست، refresh شفاف، تیکت‌های WS، خروج، لاگ حسابرسی — عین مسیر OAuth است. نشست‌ها توکن‌های امضاشدهٔ HMAC بدون-وضعیت‌اند که ارائه‌دهنده خودش ضرب می‌کند، پس <strong>نه دیتابیسی هست نه IDP خارجی</strong>. hash رمز از ‏<code>scrypt</code> کتابخانهٔ استاندارد استفاده می‌کند ‏(بدون وابستگی شخص ثالث).</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ فقط روی شبکه‌های مطمئن — نه اینترنت عمومی</div>
+  <p>ارائه‌دهندهٔ رمزعبور برای داشبوردهای خودمیزبان/on-prem/homelab روی <strong>شبکهٔ مطمئن</strong> یا فقط-قابل‌رسید-از-طریق <strong>VPN</strong> طراحی شده. یک اعتبارنامهٔ مشترک واحد را بدون ارائه‌دهندهٔ هویت خارجی، ‏MFA یا حساب‌های به‌ازای-کاربر محافظت می‌کند، پس <strong>برای expose مستقیم داشبورد به اینترنت عمومی مناسب نیست</strong>. برای داشبورد رو-به-اینترنت از <a href="#nous-provider">ارائه‌دهندهٔ Nous Research</a> ‏(یا ‏<a href="#oidc-provider">OIDC خودمیزبان</a> خودتان) استفاده کنید.</p>
+</div>
+<h3>پیکربندی</h3>
+<p>مثل ارائه‌دهندهٔ Nous از config.yaml ‏(مرجع) می‌خواند و env غیرخالی برنده است. فقط وقتی ‏<code>username</code> به‌اضافهٔ ‏<code>password_hash</code> ‏(ترجیحی) یا ‏<code>password</code> پیکربندی شده باشند فعال می‌شود — وگرنه no-op است، پس کاربران OAuth و اپراتورهای loopback بی‌تأثیرند.</p>
+<p><strong>config.yaml:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>dashboard:
+  basic_auth:
+    username: admin
+    # Preferred — no plaintext at rest. Compute with:
+    #   python -c "from plugins.dashboard_auth.basic import hash_password; print(hash_password('PW'))"
+    password_hash: "scrypt$16384$8$1$…$…"
+    # ...or a plaintext password (hashed in-memory at load; less safe at rest):
+    # password: "s3cret"
+    secret: "&lt;32+ random bytes, base64 or hex&gt;"  # token-signing key
+    session_ttl_seconds: 43200                    # optional; access-token lifetime (default 12h)</code></pre>
+</div>
+<p><strong>Override های محیطی:</strong></p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر env</th><th>override می‌کند</th><th>یادداشت‌ها</th></tr></thead>
+  <tbody>
+    <tr><td><code>HERMES_DASHBOARD_BASIC_AUTH_USERNAME</code></td><td><code>dashboard.basic_auth.username</code></td><td>برای فعال شدن لازم</td></tr>
+    <tr><td><code>HERMES_DASHBOARD_BASIC_AUTH_PASSWORD_HASH</code></td><td><code>dashboard.basic_auth.password_hash</code></td><td>ترجیحی ‏(بدون plaintext در حالت سکون)</td></tr>
+    <tr><td><code>HERMES_DASHBOARD_BASIC_AUTH_PASSWORD</code></td><td><code>dashboard.basic_auth.password</code></td><td>plaintext؛ <strong>بر password_hash پیکربندی برنده می‌شود</strong> تا چرخش با env ممکن باشد</td></tr>
+    <tr><td><code>HERMES_DASHBOARD_BASIC_AUTH_SECRET</code></td><td><code>dashboard.basic_auth.secret</code></td><td>کلید امضای توکن</td></tr>
+    <tr><td><code>HERMES_DASHBOARD_BASIC_AUTH_TTL_SECONDS</code></td><td><code>dashboard.basic_auth.session_ttl_seconds</code></td><td>عمر access-token</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout caution">
+  <div class="callout-title">⚠️ secret صریح بگذارید برای نشست‌های پایدار</div>
+  <p>وقتی ‏<code>secret</code> خالی باشد کلید امضای تصادفی به‌ازای-پروسه تولید می‌شود. برای یک پروسه اوکی است ولی یعنی <strong>هر نشست با ری‌استارت باطل می‌شود</strong> و نشست‌ها <strong>بین چند worker گسترده نمی‌شوند</strong>. برای استقرارهای چند-worker/پایدار-در-برابر-ری‌استارت secret صریح بگذارید.</p>
+</div>
+<p>نقطهٔ پایانی ‏<code>/auth/password-login</code> به‌ازای IP کلاینت rate-limit دارد ‏(پیش‌فرض ۱۰ تلاش/دقیقه ← HTTP 429) و برای هم کاربر ناشناخته هم رمز غلط یک ‏<code>401 Invalid credentials</code> عمومی واحد برمی‌گرداند تا oracle شمارش-یوزرنیم نشود.</p>
+<h3>مثال کاربردی: رمزعبور</h3>
+<p>از هیچ تا داشبورد گیت‌خورده-با-رمز روی شبکهٔ مطمئن در سه گام.</p>
+<p><strong>۱. ست اعتبارنامه‌ها در ‏<code>~/.hermes/.env</code>.</strong> رمز را hash کنید تا plaintext در حالت سکون نباشد و secret امضای پایدار بگذارید تا نشست‌ها از ری‌استارت جان ببرند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Compute a scrypt hash of your chosen password:
+HASH=$(python -c "from plugins.dashboard_auth.basic import hash_password; print(hash_password('choose-a-strong-password'))")
+
+cat >> ~/.hermes/.env &lt;&lt;EOF
+HERMES_DASHBOARD_BASIC_AUTH_USERNAME=admin
+HERMES_DASHBOARD_BASIC_AUTH_PASSWORD_HASH=$HASH
+HERMES_DASHBOARD_BASIC_AUTH_SECRET=$(openssl rand -base64 32)
+EOF
+chmod 600 ~/.hermes/.env</code></pre>
+</div>
+<p><strong>۲. اجرای داشبورد روی آدرس قابل‌دسترس.</strong> بایند غیر-loopback گیت را فعال و username+hash ارائه‌دهندهٔ ‏<code>basic</code> را فعال می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes dashboard --host 0.0.0.0 --port 9119 --no-open</code></pre>
+</div>
+<p><strong>۳. ورود.</strong> ‏<code>http://&lt;host&gt;:9119/</code> را باز کنید، به ‏<code>/login</code> برگردانده می‌شوید — یک <strong>فرم اعتبارنامه</strong> ‏(نه دکمهٔ Sign in with X). ‏<code>admin</code>/رمزتان را وارد کنید ← فرود روی داشبورد احرازشده. گیت را از هر ماشینی تأیید کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl -s http://&lt;host&gt;:9119/api/status | jq '.auth_required, .auth_providers'
+# true
+# ["basic"]</code></pre>
+</div>
+<p>‏<code>GET /api/auth/me</code> نشست تأییدشده را برمی‌گرداند ‏(<code>provider: basic</code>). این را پشت VPN نگه دارید — هشدار بالا؛ برای میزبان عمومی به‌جایش ارائه‌دهندهٔ <a href="#nous-provider">Nous Research</a> یا ‏<a href="#oidc-provider">OIDC خودمیزبان</a>.</p>
+<h3>نوشتن ارائه‌دهندهٔ رمزعبور خودتان</h3>
+<p>‏<code>basic</code> فقط یک پیاده‌سازی از یک نقطهٔ توسعه است. هر افزونه‌ای می‌تواند ارائه‌دهندهٔ رمزعبور ثبت کند: روی زیرکلاس ‏DashboardAuthProvider خودتان ‏<code>supports_password = True</code> بگذارید و ‏<code>complete_password_login(*, username, password) -> Session</code> را پیاده کنید ‏(در رد شدن ‏InvalidCredentialsError، اگر مخزن پشتیبانتان پایین است ProviderError). متدهای ‏start_login/complete_login مربوط به OAuth می‌توانند stub ‏NotImplementedError بمانند برای ارائه‌دهندهٔ صرفاً-رمزی. این مسیر LDAP-bind، دیتابیس اعتبارنامه یا هر طرح احراز غیر-redirect است — فریم‌ورک فرم، مسیر، کوکی‌ها و refresh را برایتان هندل می‌کند.</p>
+</section>
+
+<section class="doc-sec" id="oidc-provider">
+<h2><span class="secnum">۱۰</span> ارائه‌دهندهٔ OIDC خودمیزبان</h2>
+<p>اگر ارائه‌دهندهٔ هویت خودتان را اجرا می‌کنید، افزونهٔ همراه‌بستهٔ ‏<code>plugins/dashboard_auth/self_hosted</code> داشبورد را با <strong>OpenID Connect استاندارد</strong> علیه آن احراز می‌کند — بدون کد per-IDP، بدون دخالت Nous Portal. با هر سرور OIDC منطبق تأیید و کار می‌کند:</p>
+<blockquote><p><strong>Authentik · Keycloak · Zitadel · Authelia · Auth0 · Okta · Google · …</strong></p></blockquote>
+<p>مثل ارائه‌دهندهٔ Nous خودکار لود و فقط وقتی پیکربندی شده باشد خودش را ثبت می‌کند، پس برای داشبوردهای loopback بی‌اثر است.</p>
+<h3>پیکربندی</h3>
+<p>یک <strong>issuer</strong> و یک ‏<strong>client_id</strong> پیکربندی کنید ‏(کلاینت عمومی PKCE — بدون client secret). افزونه مقدارهای ‏<code>authorization_endpoint</code>، ‏<code>token_endpoint</code> و ‏<code>jwks_uri</code> مربوط به IDP را از ‏<code>{issuer}/.well-known/openid-configuration</code> می‌گیرد، پس هرگز URL های endpoint را هاردکد نمی‌کنید.</p>
+<p><strong>config.yaml</strong> — سطح مرجع:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>dashboard:
+  oauth:
+    provider: self-hosted
+    self_hosted:
+      issuer: https://auth.example.com/application/o/hermes/   # required
+      client_id: hermes-dashboard                              # required
+      scopes: "openid profile email"                           # optional (this is the default)</code></pre>
+</div>
+<p><strong>متغیرهای محیطی</strong> — override های اپراتور ‏(env وقتی غیرخالی باشد بر config.yaml مقدم است؛ مقدار خالی unset تلقی می‌شود):</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر env</th><th>override می‌کند</th><th>یادداشت‌ها</th></tr></thead>
+  <tbody>
+    <tr><td><code>HERMES_DASHBOARD_OIDC_ISSUER</code></td><td><code>dashboard.oauth.self_hosted.issuer</code></td><td>URL issuer مربوط به OIDC — لازم</td></tr>
+    <tr><td><code>HERMES_DASHBOARD_OIDC_CLIENT_ID</code></td><td><code>dashboard.oauth.self_hosted.client_id</code></td><td>client id عمومی — لازم</td></tr>
+    <tr><td><code>HERMES_DASHBOARD_OIDC_SCOPES</code></td><td><code>dashboard.oauth.self_hosted.scopes</code></td><td>پیش‌فرض ‏openid profile email</td></tr>
+  </tbody>
+</table>
+</div>
+<p>در IDP خود یک اپلیکیشن/کلاینت <strong>عمومی</strong> با grant ‏authorization-code + ‏PKCE ‏(S256) ثبت و callback داشبورد را به‌عنوان redirect URI مجاز اضافه کنید. callback مقدار ‏<code>&lt;public URL داشبورد&gt;/auth/callback</code> است ‏(نحوهٔ مشتق URL عمومی پشت پروکسی را در «override URL عمومی» ببینید).</p>
+<h3>چه چیزی را تأیید می‌کند</h3>
+<p>ارائه‌دهنده <strong>ID token</strong> مربوط به OpenID Connect ‏(RS256/ES256) را نسبت به ‏jwks_uri کشف‌شده تأیید می‌کند، با claim های ‏iss و aud قفل‌شده به issuer و client_id پیکربندی‌شده‌تان. claim های استاندارد OIDC به نشست داشبورد نگاشت می‌شوند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فیلد نشست</th><th>claim(ها)</th></tr></thead>
+  <tbody>
+    <tr><td><code>user_id</code></td><td><code>sub</code> ‏(الزامی)</td></tr>
+    <tr><td><code>email</code></td><td><code>email</code></td></tr>
+    <tr><td><code>display_name</code></td><td>‏<code>name</code> ← ‏<code>preferred_username</code> ← ‏<code>nickname</code> ← ‏<code>email</code></td></tr>
+    <tr><td><code>org_id</code></td><td>‏<code>org_id</code>/<code>organization</code>، وگرنه ‏groups الحاق‌شده</td></tr>
+  </tbody>
+</table>
+</div>
+<p>ID token همان چیزی است که هویت را برقرار می‌کند — access token مات تلقی می‌شود ‏(spec مربوط به OIDC نیازمند JWT بودنش نیست). URL های endpoint باید HTTPS باشند ‏(‏http مربوط به loopback برای IDP های توسعه-محلی اجازه دارد) و issuer اعلام‌شدهٔ سند کشف باید با پیکربندی‌شده‌تان بخواند ‏(اختلاف اسلش انتهایی تحمل می‌شود). refresh token ها وقتی IDP ضربشان کند برای re-auth بی‌صدا از طریق grant استاندارد ‏refresh_token استفاده می‌شوند؛ خروج وقتی اعلام شده ‏revocation_endpoint مربوط به RFC 7009 را صدا می‌زند.</p>
+<blockquote><p><strong>کلاینت‌های محرمانه</strong> ‏(دارای client_secret) هنوز پشتیبانی نمی‌شوند — کلاینت عمومی + ‏PKCE را پیکربندی کنید که انتخاب معمول برای داشبورد رو-به-مرورگر است.</p></blockquote>
+<h3>مثال کاربردی: Keycloak</h3>
+<p><a href="https://www.keycloak.org/" target="_blank" rel="noopener">Keycloak</a> یکی از راحت‌ترین سرورهای OIDC خودمیزبان برای تست محلی است — در حالت dev به‌صورت یک کانتینر اجرا می‌شود ‏(DB درون-حافظه) و کشف OIDC درسی expose می‌کند. این راهنما در چند دقیقه از هیچ به ورود کارا داشبورد می‌رسد.</p>
+<p><strong>۱. اجرای Keycloak با realm از-قبل-پیکربندی‌شده.</strong> این خروجی realm را به‌عنوان ‏<code>realm-hermes.json</code> ذخیره کنید — یک realm ‏<code>hermes</code>، یک <strong>کلاینت عمومی PKCE</strong> ‏(<code>hermes-dashboard</code>) و کاربر تست تعریف می‌کند که همه هنگام بوت import می‌شوند پس چیزی در UI ادمین برای کلیک نیست:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{
+  "realm": "hermes",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "hermes-dashboard",
+      "name": "Hermes Agent Dashboard",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "protocol": "openid-connect",
+      "redirectUris": ["http://localhost:9119/auth/callback"],
+      "webOrigins": ["http://localhost:9119"],
+      "attributes": { "pkce.code.challenge.method": "S256" }
+    }
+  ],
+  "users": [
+    {
+      "username": "testuser",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "testuser@example.com",
+      "firstName": "Test",
+      "lastName": "User",
+      "credentials": [
+        { "type": "password", "value": "testpassword", "temporary": false }
+      ]
+    }
+  ]
+}</code></pre>
+</div>
+<p>شروعش کنید ‏(Keycloak ‏۲۶+)، mount کردن آن فایل داخل دایرکتوری import:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>docker run --rm -p 8080:8080 \
+  -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+  -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
+  -v "$PWD/realm-hermes.json:/opt/keycloak/data/import/realm-hermes.json:ro" \
+  quay.io/keycloak/keycloak:26.0 \
+  start-dev --import-realm</code></pre>
+</div>
+<p>وقتی بالا رفت، realm کشف OIDC استاندارد را در ‏<code>http://localhost:8080/realms/hermes/.well-known/openid-configuration</code> advertise می‌کند ‏(issuer ‏<code>http://localhost:8080/realms/hermes</code>). کنسول ادمین روی ‏<code>http://localhost:8080/</code> است ‏(admin/admin).</p>
+<p><strong>۲. اشاره دادن داشبورد به آن.</strong> افزونهٔ خودمیزبان issuer ‏http مربوط به loopback را اجازه می‌دهد ‏(HTTPS برای هر issuer غیر-loopback الزامی است)، پس Keycloak محلی عیناً کار می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>export HERMES_DASHBOARD_OIDC_ISSUER="http://localhost:8080/realms/hermes"
+export HERMES_DASHBOARD_OIDC_CLIENT_ID="hermes-dashboard"
+export HERMES_DASHBOARD_PUBLIC_URL="http://localhost:9119"
+hermes dashboard --host 0.0.0.0 --port 9119 --no-open</code></pre>
+</div>
+<p>‏<code>HERMES_DASHBOARD_PUBLIC_URL</code> به داشبورد می‌گوید callback مربوط به OAuth‌اش ‏<code>http://localhost:9119/auth/callback</code> است — همان redirect URI که realm بالا ثبت کرد. بایند به ‏<code>0.0.0.0</code> ‏(غیر-loopback) همان چیزی است که گیت OAuth را فعال می‌کند.</p>
+<p><strong>۳. ورود.</strong> ‏<code>http://localhost:9119/</code> را باز کنید، به ‏<code>/login</code> برگردانده می‌شوید. کلیک ‏<strong>Sign in with Self-Hosted OIDC</strong> ← احراز در Keycloak به‌عنوان ‏testuser/testpassword ← فرود روی داشبورد احرازشده. نوار کناری ‏<code>Logged in as Test User via self-hosted</code> نشان می‌دهد و ‏<code>GET /api/auth/me</code> نشست تأییدشده را برمی‌گرداند ‏(<code>provider: self-hosted</code>، ‏<code>email: testuser@example.com</code>).</p>
+<blockquote><p>اگر روی host/port دیگری بایند یا مرور کنید ‏<code>…/auth/callback</code> مربوط به آن origin را به ‏<strong>Valid redirect URIs</strong> کلاینت در کنسول ادمین Keycloak بیفزایید ‏(Clients ← hermes-dashboard ← Settings). همین الگو برای Authentik، ‏Zitadel، ‏Authelia و سایر سرورهای OIDC کار می‌کند — فقط URL issuer و UI ثبت کلاینت فرق می‌کند.</p></blockquote>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> override URL عمومی</h2>
+<p>به‌طور پیش‌فرض داشبورد URL callback مربوط به OAuth را از درخواست بازسازی می‌کند — ‏<code>X-Forwarded-Host</code> + ‏<code>X-Forwarded-Proto</code> + ‏<code>X-Forwarded-Prefix</code> ‏(وقتی uvicorn با ‏<code>proxy_headers=True</code> پیکربندی شده که ‏start_server زیر گیت فعالش می‌کند). این پشت پروکسی معکوسی که هر سه هدر را درست ست کند از جعبه کار می‌کند.</p>
+<p>برای deploy های پشت پروکسی‌هایی که این هدرها را مطمئن فوروارد نمی‌کنند ‏(setup های دستی nginx، ingress های on-prem، deploy های custom-domain با زنجیرهٔ پروکسی ناقص) مقدار ‏<code>dashboard.public_url</code> ‏(یا ‏<code>HERMES_DASHBOARD_PUBLIC_URL</code>) را روی <strong>URL عمومی کاملِ</strong> رسیدن به داشبورد بگذارید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>dashboard:
+  public_url: "https://dashboard.example.com/hermes"</code></pre>
+</div>
+<p>با تنظیم شدن، URL callback مربوط به OAuth عیناً ‏<code>&lt;public_url&gt;/auth/callback</code> می‌شود — ‏X-Forwarded-Prefix روی آن مسیر کد نادیده گرفته می‌شود چون اپراتور صریحاً URL عمومی را اعلام کرده. عمدی است: انباشتن prefix رویش، در حالت رایجی که prefix از قبل داخل public_url baked شده، دوبار-prefix می‌کرد.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>سطح</th><th>مسیر override</th><th>کِی</th></tr></thead>
+  <tbody>
+    <tr><td><code>dashboard.public_url</code> در config.yaml</td><td><code>HERMES_DASHBOARD_PUBLIC_URL</code></td><td>توسعه محلی / on-prem ‏(مرجع)</td></tr>
+    <tr><td>متغیر env ‏HERMES_DASHBOARD_PUBLIC_URL</td><td>—</td><td>رمزهای پلتفرم میزبانی / CI</td></tr>
+    <tr><td>‹تنظیم‌نشده›</td><td>—</td><td>پیش‌فرض — بازسازی از هدرهای ‏X-Forwarded-*</td></tr>
+  </tbody>
+</table>
+</div>
+<p>اعتبارسنجی مقادیر بدون scheme ‏<code>http://</code>/<code>https://</code>، بدون host یا حاوی quote/angle/whitespace/کاراکتر کنترلی را رد می‌کند. مقدار بدفرم بی‌صدا به بازسازی-هدر برمی‌گردد تا جریان ورود به کار ادامه دهد به‌جای dispatch کردن کاربر به URL خصمانه.</p>
+<blockquote><p><strong>یادداشت:</strong> ‏public_url فقط URL callback مربوط به OAuth را override می‌کند. فلگ ‏Secure کوکی همچنان توسط ‏request.url.scheme کنترل می‌شود ‏(X-Forwarded-Proto زیر proxy_headers)، پس public_url با ‏http روی deploy عمومیِ TLS-خاتمه‌یافته کوکی‌های non-Secure تولید می‌کند. این دام اپراتوری است — public_url را با TLS termination صحیح بالادستی جفت کنید.</p></blockquote>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> جریان OAuth، کوکی‌ها، خروج و حسابرسی</h2>
+<p>ارائه‌دهنده <a href="https://github.com/NousResearch/nous-account-service/blob/main/docs/agent-dashboard-oauth-contract.md" target="_blank" rel="noopener">قرارداد OAuth مربوط به Nous Portal v1</a> را پیاده می‌کند — grant authorization-code با ‏PKCE ‏(S256):</p>
+<ol>
+  <li>کاربر بدون کوکی نشست به ‏<code>/</code> ضربه می‌زند ← گیت به ‏<code>/login</code> redirect می‌کند.</li>
+  <li>صفحهٔ ورود دکمهٔ «Continue with Nous Research» نشان می‌دهد ← ‏<code>/auth/login?provider=nous</code>.</li>
+  <li>سرور وضعیت PKCE را در کوکی کوتاه‌عمر stash و کاربر را به ‏<code>https://portal.nousresearch.com/oauth/authorize?…</code> redirect می‌کند.</li>
+  <li>کاربر در Portal احراز و در ‏<code>/auth/callback?code=…&amp;state=…</code> فرود می‌آید.</li>
+  <li>سرور کد را در ‏<code>POST /api/oauth/token</code> به access token تبدیل، امضای JWT را نسبت به JWKS مربوط به Portal ‏(<code>/.well-known/jwks.json</code>) تأیید و کوکی ‏<code>hermes_session_at</code> را ست می‌کند.</li>
+  <li>کاربر به ‏<code>/</code> ‏(یا مسیر deep-link اصلی از طریق پارامتر query ‏<code>next=`</code>) برگردانده می‌شود.</li>
+</ol>
+<p>‏Access token ها TTL ‏۱۵ دقیقه دارند. <strong>در قرارداد v1 هیچ refresh token‌ای نیست</strong> — وقتی توکن منقضی شود wrapper ‏fetch مربوط به SPA پاکت 401 را تشخیص و تمام-صفحه به ‏<code>/login</code> navigate می‌کند تا جریان دوباره اجرا شود.</p>
+<h3>کوکی‌های ست‌شده</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نام</th><th>عمر</th><th>یادداشت‌ها</th></tr></thead>
+  <tbody>
+    <tr><td><code>hermes_session_at</code></td><td>Token TTL ‏(۱۵ دقیقه)</td><td>HttpOnly، ‏SameSite=Lax، ‏Secure-هنگام-HTTPS</td></tr>
+    <tr><td><code>hermes_session_pkce</code></td><td>۱۰ دقیقه</td><td>HttpOnly؛ verifier مربوط به PKCE + سرنخ ارائه‌دهنده را در طول رفت‌وبرگشت نگه می‌دارد</td></tr>
+    <tr><td><code>hermes_session_rt</code></td><td>در v1 استفاده‌نشده</td><td>رزروشده برای سازگاری رو-به-جلو؛ وقتی ‏refresh_token خالی است نوشته نمی‌شود</td></tr>
+  </tbody>
+</table>
+</div>
+<p>هر سه ‏<code>Path=/</code> و ‏<code>SameSite=Lax</code> هستند. فلگ ‏Secure وقتی داشبورد از HTTPS رسیده باشد ست می‌شود ‏(تشخیص با scheme مربوط به URL درخواست — X-Forwarded-Proto از TLS terminator بالادستی زیر ‏proxy_headers=True را رعایت می‌کند).</p>
+<h3>خروج</h3>
+<p>ویجت نوار کناری ‏<code>Logged in as &lt;user_id…&gt; via nous</code> را با آیکون خروج نشان می‌دهد. کلیکش ‏<code>/auth/logout</code> را POST می‌کند که همهٔ کوکی‌های احراز-داشبورد را پاک و به ‏<code>/login</code> برمی‌گرداند.</p>
+<h3>لاگ حسابرسی</h3>
+<p>هر شروع ورود، موفقیت، شکست و شکست تأیید نشست به‌صورت خط JSON در ‏<code>$HERMES_HOME/logs/dashboard-auth.log</code> نوشته می‌شود. فیلدهای حساس ‏(access_token، ‏refresh_token، ‏code، ‏code_verifier، ‏state، هدر Authorization) قبل از لاگ سانسور می‌شوند.</p>
+<h3>ارائه‌دهنده‌های سفارشی</h3>
+<p>برای وصله‌کردن ارائه‌دهندهٔ OAuth غیر-Nous ‏(مثل Google، ‏GitHub، ‏OIDC سفارشی) افزونه‌ای بسازید که یک ‏DashboardAuthProvider ثبت کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python — ~/.hermes/plugins/dashboard-auth-myidp/__init__.py</span><button class="copy-btn">کپی</button></div>
+  <pre><code>from hermes_cli.dashboard_auth import DashboardAuthProvider, Session, LoginStart
+
+class MyIdPProvider(DashboardAuthProvider):
+    name = "myidp"
+    display_name = "My Identity Provider"
+
+    def start_login(self, *, redirect_uri): ...
+    def complete_login(self, *, code, state, code_verifier, redirect_uri): ...
+    def verify_session(self, *, access_token): ...
+    def refresh_session(self, *, refresh_token): ...
+    def revoke_session(self, *, refresh_token): ...
+
+def register(ctx):
+    ctx.register_dashboard_auth_provider(MyIdPProvider())</code></pre>
+</div>
+<p>صفحهٔ ورود همهٔ ارائه‌دهنده‌های ثبت‌شده را فهرست می‌کند؛ چند ارائه‌دهنده قابل انباشتن است و کاربر در ‏<code>/login</code> یکی را انتخاب می‌کند.</p>
+<h3>احراز غیرتعاملی ‏(bearer-token)</h3>
+<p>در کنار ورود تعاملی انسانی ‏(کوکی‌های نشست + refresh)، ABC مربوط به DashboardAuthProvider یک قابلیت <strong>غیرتعاملی، سرویس-به-سرویس</strong> را با ‏<code>supports_token = True</code> + ‏<code>verify_token(token=...)</code> پشتیبانی می‌کند. وقتی ارائه‌دهنده انتخابش کند، ‏<code>Authorization: Bearer &lt;token&gt;</code> ورودی تأیید و در موفقیت یک ‏TokenPrincipal به درخواست الصاق می‌شود ‏(<code>request.state.token_principal</code>) برای endpoint هایی که آن ارائه‌دهنده token-authable علامتشان زده — بدون کوکی، بدون redirect، بدون refresh.</p>
+<p>اولین مصرف‌کنندهٔ همراه‌بسته ارائه‌دهندهٔ <strong>drain</strong> است ‏(<code>plugins/dashboard_auth/drain</code>): ‏nous-account-service رمز به‌ازای-ایجنت را از طریق ‏<code>HERMES_DASHBOARD_DRAIN_SECRET</code> تأمین و ارائه‌دهنده bearer token های ورودی را با مقایسهٔ constant-time علیه آن تأیید و ‏<code>/api/gateway/drain</code> را به‌عنوان token-authable ثبت می‌کند. ‌<strong>fail-closed است</strong> — رمز ضعیف/کوتاه ‏(&lt; ‏۲۵۶ بیت) هنگام ثبت رد و endpoint خاموش می‌ماند؛ وقتی env تنظیم نباشد no-op است. کلیدهای رفتاری ‏(<code>scope</code>، ‏<code>min_secret_chars</code>) زیر ‏<code>dashboard.drain_auth</code> در config.yaml زندگی می‌کنند.</p>
+<p>ارائه‌دهنده‌های سفارشی می‌توانند ‏<code>supports_token</code>/<code>verify_token</code> را به همان شکل پیاده کنند تا endpoint های machine-authable خودشان را expose کنند.</p>
+<h3>تأیید روشن بودن گیت</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Quick env-var path.
+HERMES_DASHBOARD_OAUTH_CLIENT_ID=agent:test \
+  hermes dashboard --host 0.0.0.0
+
+# Or the equivalent via config.yaml (recommended for local dev / on-prem):
+#
+#   dashboard:
+#     oauth:
+#       client_id: agent:test
+#
+# then just:
+hermes dashboard --host 0.0.0.0
+
+# Hit /api/status to see the gate state:
+curl -s http://127.0.0.1:9119/api/status | jq '.auth_required, .auth_providers'
+# true
+# ["nous"]</code></pre>
+</div>
+<p>React StatusPage داشبورد همان فیلدها را زیر «Web server» نشان می‌دهد. یک AuthWidget در نوار کناری بعد از ورود هویت فعلی را surface می‌کند.</p>
+</section>
+
+<section class="doc-sec" id="desktop-remote">
+<h2><span class="secnum">۱۳</span> اتصال Hermes Desktop به بک‌اند راه‌دور</h2>
+<p>‏Hermes Desktop می‌تواند بک‌اند هرمس در حال اجرا روی ماشین دیگری ‏(VPS، سرور خانگی، Mini پشت Tailscale) را رانندگی کند. داخل اپ زیر ‏<strong>Settings ← Gateways ← Remote gateway</strong> است که یک <strong>Remote URL</strong> و راهی برای <strong>Sign in</strong> می‌خواهد. ‏(برای خود اپ دسکتاپ — نصب، تنظیمات، چت — صفحهٔ <a href="../desktop.html">Hermes Desktop</a> را ببینید.)</p>
+<p>داشبورد راه‌دور را با یکی از ارائه‌دهنده‌های احراز همراه‌بسته محافظت می‌کنید و اپ دسکتاپ علیه هرکدام که بک‌اند advertise کند وارد می‌شود. برای بک‌اندی که فراتر از ماشین خودتان قابل‌رسید است — VPS، میزبان عمومی، هر چیز رو-به-اینترنت — ارائه‌دهندهٔ توصیه‌شده <strong>OAuth ‏(Nous Portal)</strong> است ‏(با <a href="#nous-provider"><code>hermes dashboard register</code></a> ثبت و با *Sign in with Nous Research* وارد شوید). ارائه‌دهندهٔ همراه‌بستهٔ <a href="#basic-provider">رمزعبور</a> سریع‌ترین گزینه وقتی بک‌اند روی LAN مطمئن است یا فقط از VPN قابل‌رسید است، ولی <strong>برای expose مستقیم اینترنت عمومی مناسب نیست</strong>. بایند داشبورد به آدرس غیر-loopback گیت احرازش را فعال می‌کند؛ بعد از ورود Desktop نشست را برای WebSocket چت خودکار بازمصرف می‌کند — توکنی برای کپی یا paste نیست.</p>
+<p>دستورالعمل پایین از مسیر رمزعبور استفاده می‌کند چون سریع‌ترین راه‌اندازی روی شبکهٔ مطمئن است؛ برای مسیر OAuth بخش «ارائه‌دهندهٔ پیش‌فرض: Nous Research» را ببینید.</p>
+<h3>روی بک‌اند ‏(ماشین راه‌دور)</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># 1. Set the dashboard login credentials in ~/.hermes/.env (secrets file, 0600).
+cat >> ~/.hermes/.env &lt;&lt;'EOF'
+HERMES_DASHBOARD_BASIC_AUTH_USERNAME=admin
+HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=choose-a-strong-password
+# Recommended: a stable signing secret so sessions survive restarts.
+HERMES_DASHBOARD_BASIC_AUTH_SECRET=$(openssl rand -base64 32)
+EOF
+chmod 600 ~/.hermes/.env
+
+# 2. Run the dashboard bound to a reachable address. The non-loopback bind
+#    engages the auth gate; the username/password provider handles login.
+hermes dashboard --no-open --host 0.0.0.0 --port 9119</code></pre>
+</div>
+<p>plaintext در حالت سکون نمی‌خواهید؟ به‌جایش ‏<code>HERMES_DASHBOARD_BASIC_AUTH_PASSWORD_HASH</code> با hash ‏scrypt استفاده کنید — سطح کامل در بخش «ارائه‌دهندهٔ رمزعبور».</p>
+<p>اگر داشبورد را سرویس systemd اجرا می‌کنید ‏<code>~/.hermes/.env</code> وقتی unit دارای ‏<code>EnvironmentFile=%h/.hermes/.env</code> باشد خودکار گرفته می‌شود، پس اعتبارنامه‌ها هنگام بوت در محیط هستند.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>داشبورد .env شما را می‌خواند و می‌نویسد ‏(کلیدهای API، رمزها) و می‌تواند فرمان‌های ایجنتی اجرا کند. setup <strong>رمزعبور</strong> نشان‌داده‌شده برای شبکهٔ مطمئن است — هرگز داشبورد محافظت‌شده-با-رمز را مستقیم به اینترنت باز expose نکنید. پشت VPN بگذارید. ‏<a href="https://tailscale.com/" target="_blank" rel="noopener">Tailscale</a> گزینهٔ تمیز است: به IP tailscale ماشین بایند کنید ‏(<code>--host &lt;tailscale-ip&gt;</code>) و ‏<code>http://&lt;tailscale-ip&gt;:9119</code> را به‌عنوان Remote URL استفاده کنید. فقط دستگاه‌های روی tailnet‌تان به آن می‌رسند. برای رسیدن به بک‌اند از اینترنت عمومی به‌جایش ارائه‌دهندهٔ <strong>OAuth ‏(Nous Portal)</strong> را استفاده کنید.</p>
+</div>
+<h3>داخل Hermes Desktop</h3>
+<p><strong>Settings ← Gateways ← Remote gateway:</strong></p>
+<ul>
+  <li><strong>Remote URL</strong> — ‏<code>http://&lt;backend-host&gt;:9119</code> ‏(prefix های مسیر مثل ‏<code>/hermes</code> اگر با پروکسی معکوس جلویش بگذارید پشتیبانی می‌شوند)</li>
+  <li><strong>Sign in</strong> — اپ گیت‌وی رمزعبور را تشخیص و دکمهٔ <strong>Sign in</strong> نشان می‌دهد؛ کلیک و وارد کردن اعتبارنامه‌های گام ۱</li>
+  <li><strong>Save and reconnect</strong> — shell دسکتاپ را روی بک‌اند راه‌دور سوار می‌کند</li>
+</ul>
+<p>نشست خودکار refresh و وقتی ‏<code>HERMES_DASHBOARD_BASIC_AUTH_SECRET</code> روی بک‌اند ست باشد از ری‌استارت‌ها جان می‌برد.</p>
+<h3>override متغیر محیطی</h3>
+<p>به‌جای تنظیم درون-اپ، می‌توانید قبل از لانچ با متغیر env دسکتاپ را به بک‌اند اشاره دهید. وقتی ‏<code>HERMES_DESKTOP_REMOTE_URL</code> ست باشد URL ذخیره‌شدهٔ درون-اپ را override می‌کند ‏(پنل Gateway settings badge «env override» نشان و ویرایش را غیرفعال می‌کند)؛ همچنان با username/password از همان پنل <strong>Sign in</strong> می‌کنید.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر env</th><th>مقدار</th></tr></thead>
+  <tbody>
+    <tr><td><code>HERMES_DESKTOP_REMOTE_URL</code></td><td><code>http://&lt;backend-host&gt;:9119</code></td></tr>
+  </tbody>
+</table>
+</div>
+<h3>عیب‌یابی</h3>
+<ul>
+  <li><strong>«Remote gateway incomplete»</strong> — URL راه‌دور وارد نکرده‌اید.</li>
+  <li><strong>ورود با 401 / «Invalid credentials» شکست می‌خورد</strong> — username یا password با ‏<code>HERMES_DASHBOARD_BASIC_AUTH_USERNAME</code>/<code>PASSWORD</code> بک‌اند نمی‌خواند. بک‌اند برای کاربر ناشناخته و رمز غلط همان خطای عمومی را برمی‌گرداند، پس هر دو را چک کنید. گیت را با ‏<code>curl -s http://&lt;host&gt;:9119/api/status | jq '.auth_required, .auth_providers'</code> تأیید کنید — باید ‏<code>true</code> و شامل ‏<code>"basic"</code> گزارش کند.</li>
+  <li><strong>دکمهٔ «Sign in» ندارد — به‌جایش توکن نشست می‌خواهد</strong> — ارائه‌دهندهٔ رمزعبور فعال نیست ‏(<code>/api/status</code> مقدار ‏<code>"basic"</code> را فهرست نخواهد کرد). مطمئن شوید username و رمز ‏(یا hash) ست و پروسهٔ داشبورد آنها را لود کرده.</li>
+  <li><strong>هر ری‌استارت sign-out می‌شوید</strong> — ‏<code>HERMES_DASHBOARD_BASIC_AUTH_SECRET</code> را روی مقدار پایدار بگذارید؛ وگرنه کلید امضا به‌ازای هر بوت بازتولید می‌شود.</li>
+  <li><strong>Connection refused / timeout</strong> — بک‌اند به ‏<code>127.0.0.1</code> ‏(پیش‌فرض) بایند شده به‌جای آدرس قابل‌دسترس، یا فایروال/VPN پورت را بسته. به ‏<code>0.0.0.0</code> یا IP tailscale بایند و پورت را به شبکهٔ مطمئن‌تان باز کنید.</li>
+</ul>
+<p>(همچنین بخش «اتصال Hermes Desktop به بک‌اند راه‌دور» ابتدای صفحه، زیر تب Chat، نکات گیت را پوشش می‌دهد — probe ‏«remote backend ready» دسکتاپ فقط ‏<code>GET /api/status</code> عمومی را می‌زند، ولی WebSocket چت واقعی به ‏<code>/api/ws</code> و ‏<code>/api/pty</code> احراز ‏+ تطبیق Host/peer می‌خواهد.)</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> CORS</h2>
+<p>سرور وب CORS را فقط به origin های localhost محدود می‌کند:</p>
+<ul>
+  <li>‏<code>http://localhost:9119</code> / ‏<code>http://127.0.0.1:9119</code> ‏(تولید)</li>
+  <li>‏<code>http://localhost:3000</code> / ‏<code>http://127.0.0.1:3000</code></li>
+  <li>‏<code>http://localhost:5173</code> / ‏<code>http://127.0.0.1:5173</code> ‏(سرور dev ‏Vite)</li>
+</ul>
+<p>اگر سرور را روی پورت سفارشی اجرا کنید آن origin خودکار اضافه می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> توسعه</h2>
+<p>اگر به فرانت داشبورد وب مشارکت می‌دهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Terminal 1: start the backend API
+hermes dashboard --no-open
+
+# Terminal 2: start the Vite dev server with HMR
+cd web/
+npm install
+npm run dev</code></pre>
+</div>
+<p>سرور dev ‏Vite روی ‏<code>http://localhost:5173</code> درخواست‌های ‏<code>/api</code> را به بک‌اند FastAPI روی ‏<code>http://127.0.0.1:9119</code> پروکسی می‌کند.</p>
+<p>فرانت با React 19، ‏TypeScript، ‏Tailwind CSS v4 و کامپوننت‌های سبک-shadcn/ui ساخته شده. build های تولیدی به ‏<code>hermes_cli/web_dist/</code> خروجی می‌روند که سرور FastAPI به‌عنوان SPA ایستا سروشان می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> Build خودکار هنگام Update</h2>
+<p>وقتی ‏<code>hermes update</code> را اجرا کنید اگر ‏<code>npm</code> موجود باشد فرانت وب خودکار rebuild می‌شود. این داشبورد را با به‌روزرسانی‌های کد همگام نگه می‌دارد. اگر ‏<code>npm</code> نصب نباشد update ساخت فرانت را رد و ‏<code>hermes dashboard</code> آن را در اولین launch می‌سازد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۷</span> تم‌ها و افزونه‌ها</h2>
+<p>داشبورد با هشت تم داخلی عرضه می‌شود و با تم‌های تعریف-شده-توسط-کاربر، تب‌های افزونه و مسیرهای REST بک‌اند قابل توسعه است — همه drop-in، بدون clone مخزن.</p>
+<p><strong>تعویض تم به‌صورت زنده</strong> از نوار سربرگ — آیکون palette کنار سوییچر زبان را کلیک کنید. انتخاب در config.yaml زیر ‏<code>dashboard.theme</code> ماندگار و هنگام لود صفحه بازیابی می‌شود.</p>
+<p><strong>تغییر فونت مستقل</strong> از همان picker — بخش <strong>Font</strong> زیر فهرست تم، فونت UI هر تم فعلی را override می‌کند. انتخاب بین تعویض تم‌ها ماندگار است ‏(config.yaml ← ‏<code>dashboard.font</code>)؛ ‏<strong>Theme default</strong> را انتخاب کنید تا پاک و به فونت خود تم فعال برگردد.</p>
+<p>تم‌های داخلی:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>تم</th><th>شخصیت</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Hermes Teal</strong> ‏(<code>default</code>)</td><td>سبزآبی تیره + کرم، فونت سیستم، فاصله‌گذاری راحت</td></tr>
+    <tr><td><strong>Hermes Teal ‏(Large)</strong> ‏(<code>default-large</code>)</td><td>مثل پیش‌فرض با متن ۱۸px و فاصله‌گذاری جادارتر</td></tr>
+    <tr><td><strong>Nous Blue</strong> ‏(<code>nous-blue</code>)</td><td>اکسنت‌های آبی برند Nous با فاصله‌گذاری airy</td></tr>
+    <tr><td><strong>Midnight</strong> ‏(<code>midnight</code>)</td><td>آبی-بنفش عمیق، ‏Inter + ‏JetBrains Mono</td></tr>
+    <tr><td><strong>Ember</strong> ‏(<code>ember</code>)</td><td>زرشکی گرم + برنز، ‏Spectral serif + ‏IBM Plex Mono</td></tr>
+    <tr><td><strong>Mono</strong> ‏(<code>mono</code>)</td><td>خاکستری، ‏IBM Plex، فشرده</td></tr>
+    <tr><td><strong>Cyberpunk</strong> ‏(<code>cyberpunk</code>)</td><td>سبز نئونی روی سیاه، ‏Share Tech Mono</td></tr>
+    <tr><td><strong>Rosé</strong> ‏(<code>rose</code>)</td><td>صورتی + عاج، ‏Fraunces serif، جادار</td></tr>
+  </tbody>
+</table>
+</div>
+<p>برای ساخت تم خودتان، افزودن تب افزونه، تزریق داخل slot های shell یا expose کردن مسیرهای REST خاص-افزونه <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/extending-the-dashboard" target="_blank" rel="noopener">توسعه داشبورد</a> را ببینید — راهنمای کامل شامل:</p>
+<ul>
+  <li>schema YAML تم — palette، ‏typography، ‏layout، ‏assets، ‏componentStyles، ‏colorOverrides، ‏customCSS</li>
+  <li>واریانت‌های layout — ‏<code>standard</code>، ‏<code>cockpit</code>، ‏<code>tiled</code></li>
+  <li>manifest افزونه، ‏SDK، ‏slot های shell، slot های page-scoped ‏(تزریق ویجت داخل صفحات داخلی بدون override کردنشان)، مسیرهای FastAPI بک‌اند</li>
+  <li>یک walkthrough کامل ترکیبی تم+افزونه ‏(دموی cockpit ‏Strike Freedom)</li>
+  <li>کشف، reload و عیب‌یابی</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="cron.html"><span class="dir">→ قبلی</span><span class="ttl">کارهای زمان‌بندی‌شده ‏(کرون)</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard" target="_blank" rel="noopener">Web Dashboard</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

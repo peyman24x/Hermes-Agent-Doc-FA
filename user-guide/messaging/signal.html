@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سیگنال — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/signal" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>سیگنال</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی سیگنال</h1>
+<p>هرمس از طریق دیمن <a href="https://github.com/AsamK/signal-cli" target="_blank" rel="noopener">signal-cli</a> در حالت HTTP به سیگنال وصل می‌شود. آداپتور پیام‌ها را از طریق SSE ‏(Server-Sent Events) در لحظه استریم و پاسخ‌ها را با JSON-RPC می‌فرستد.</p>
+<p>سیگنال حریم-خصوصی‌محورترین پیام‌رسان جریان اصلی است — رمزنگاری سرتاسری پیش‌فرض، پروتکل متن‌باز، حداقل جمع‌آوری متادیتا. این آن را برای گردش‌کارهای ایجنتیِ حساس به امنیت ایده‌آل می‌کند.</p>
+<div class="callout note">
+  <div class="callout-title">📌 بدون وابستگی پایتون جدید</div>
+  <p>آداپتور سیگنال برای همهٔ ارتباطات از <code>httpx</code> استفاده می‌کند ‏(از قبل وابستگی هستهٔ هرمس). هیچ بستهٔ پایتون اضافه‌ای لازم نیست. فقط باید signal-cli را بیرونی نصب کنید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li><strong>signal-cli</strong> — کلاینت سیگنال مبتنی بر جاوا ‏(<a href="https://github.com/AsamK/signal-cli" target="_blank" rel="noopener">GitHub</a>)</li>
+  <li>‏runtime ‏<strong>جاوا ۱۷+</strong> — توسط signal-cli لازم است</li>
+  <li><strong>یک شماره تلفن</strong> با سیگنال نصب‌شده ‏(برای اتصال به‌عنوان دستگاه ثانویه)</li>
+</ul>
+
+<h3>نصب signal-cli</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># macOS
+brew install signal-cli
+
+# Linux (دانلود آخرین ریلیز)
+VERSION=$(curl -Ls -o /dev/null -w %{url_effective} \
+  https://github.com/AsamK/signal-cli/releases/latest | sed 's/^.*\/v//')
+curl -L -O "https://github.com/AsamK/signal-cli/releases/download/v${VERSION}/signal-cli-${VERSION}.tar.gz"
+sudo tar xf "signal-cli-${VERSION}.tar.gz" -C /opt
+sudo ln -sf "/opt/signal-cli-${VERSION}/bin/signal-cli" /usr/local/bin/</code></pre>
+</div>
+<div class="callout caution">
+  <div class="callout-title">⚠️ توجه</div>
+  <p>signal-cli در مخازن apt یا snap <strong>نیست</strong>. نصب لینوکسی بالا مستقیم از <a href="https://github.com/AsamK/signal-cli/releases" target="_blank" rel="noopener">ریلیزهای GitHub</a> دانلود می‌کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: اتصال حساب سیگنال</h2>
+<p>signal-cli به‌عنوان یک <strong>دستگاه متصل</strong> کار می‌کند — مثل WhatsApp Web ولی برای سیگنال. گوشی شما دستگاه اصلی می‌ماند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># تولید URI اتصال (کد QR یا لینک نمایش می‌دهد)
+signal-cli link -n "HermesAgent"</code></pre>
+</div>
+<ol>
+  <li>‏<strong>Signal</strong> را روی گوشی باز کنید</li>
+  <li>به <strong>Settings ← Linked Devices</strong> بروید</li>
+  <li><strong>Link New Device</strong> را بزنید</li>
+  <li>کد QR را اسکن یا URI را وارد کنید</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: اجرای دیمن signal-cli</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ‎+1234567890 را با شماره سیگنال خودتان جایگزین کنید (قالب E.164)
+signal-cli --account +1234567890 daemon --http 127.0.0.1:8080</code></pre>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>این را در پس‌زمینه نگه دارید. می‌توانید از <code>systemd</code>، ‏<code>tmux</code>، ‏<code>screen</code> استفاده کنید یا به‌صورت سرویس اجرایش کنید.</p>
+</div>
+<p>تأیید اجرا:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl http://127.0.0.1:8080/api/v1/check
+# باید برگرداند: {"versions":{"signal-cli":...}}</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۳: پیکربندی هرمس</h2>
+<p>ساده‌ترین راه:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway setup</code></pre>
+</div>
+<p><strong>Signal</strong> را از منوی پلتفرم انتخاب کنید. ویزارد:</p>
+<ol>
+  <li>چک می‌کند signal-cli نصب باشد</li>
+  <li>‏HTTP URL را می‌پرسد ‏(پیش‌فرض: <code>http://127.0.0.1:8080</code>)</li>
+  <li>اتصال به دیمن را تست می‌کند</li>
+  <li>شماره تلفن حساب شما را می‌پرسد</li>
+  <li>کاربران مجاز و سیاست‌های دسترسی را پیکربندی می‌کند</li>
+</ol>
+
+<h3>پیکربندی دستی</h3>
+<p>به <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># الزامی
+SIGNAL_HTTP_URL=http://127.0.0.1:8080
+SIGNAL_ACCOUNT=+1234567890
+
+# امنیت (توصیه‌شده)
+SIGNAL_ALLOWED_USERS=+1234567890,+0987654321    # شماره‌های E.164 یا UUID جدا با ویرگول
+
+# اختیاری
+SIGNAL_GROUP_ALLOWED_USERS=groupId1,groupId2     # فعال‌سازی گروه‌ها (حذف = خاموش، * = همه)
+SIGNAL_HOME_CHANNEL=+1234567890                  # هدف تحویل پیش‌فرض کارهای کرون</code></pre>
+</div>
+<p>سپس گیت‌وی را شروع کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway              # پیش‌زمینه
+hermes gateway install      # نصب به‌عنوان سرویس کاربر
+sudo hermes gateway install --system   # فقط لینوکس: سرویس سیستمی زمان‌بوت</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> کنترل دسترسی</h2>
+<h3>دسترسی DM</h3>
+<p>دسترسی DM همان الگوی همهٔ پلتفرم‌های دیگر هرمس را دنبال می‌کند:</p>
+<ol>
+  <li><strong>‏<code>SIGNAL_ALLOWED_USERS</code> تنظیم شده</strong> ← فقط آن کاربران می‌توانند پیام دهند</li>
+  <li><strong>لیست مجاز تنظیم نشده</strong> ← کاربران ناشناس کد جفت‌سازی DM می‌گیرند ‏(تأیید با <code>hermes pairing approve signal CODE</code>)</li>
+  <li><strong>‏<code>SIGNAL_ALLOW_ALL_USERS=true</code></strong> ← هر کسی می‌تواند پیام دهد ‏(با احتیاط)</li>
+</ol>
+
+<h3>دسترسی گروه</h3>
+<p>دسترسی گروه با متغیر محیطی <code>SIGNAL_GROUP_ALLOWED_USERS</code> کنترل می‌شود:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>پیکربندی</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td>تنظیم نشده ‏(پیش‌فرض)</td><td>همهٔ پیام‌های گروه نادیده گرفته می‌شوند. بات فقط به DM پاسخ می‌دهد.</td></tr>
+    <tr><td>تنظیم‌شده با شناسه‌های گروه</td><td>فقط گروه‌های فهرست‌شده پایش می‌شوند ‏(مثل <code>groupId1,groupId2</code>).</td></tr>
+    <tr><td>تنظیم روی <code>*</code></td><td>بات در هر گروهی که عضو است پاسخ می‌دهد.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> قابلیت‌ها</h2>
+
+<h3>پیوست‌ها</h3>
+<p>آداپتور ارسال و دریافت رسانه را در هر دو جهت پشتیبانی می‌کند.</p>
+<p><strong>ورودی</strong> ‏(کاربر ← ایجنت):</p>
+<ul>
+  <li><strong>تصاویر</strong> — PNG، ‏JPEG، ‏GIF، ‏WebP ‏(تشخیص خودکار با magic bytes)</li>
+  <li><strong>صوت</strong> — MP3، ‏OGG، ‏WAV، ‏M4A ‏(پیام‌های صوتی اگر Whisper پیکربندی شده رونویسی می‌شوند)</li>
+  <li><strong>اسناد</strong> — PDF، ‏ZIP و سایر انواع فایل</li>
+</ul>
+<p><strong>خروجی</strong> ‏(ایجنت ← کاربر):</p>
+<p>ایجنت می‌تواند فایل‌های رسانه را از طریق تگ‌های <code>MEDIA:</code> در پاسخ‌ها بفرستد. روش‌های تحویل پشتیبانی‌شده:</p>
+<ul>
+  <li><strong>تصاویر</strong> — ‏<code>send_multiple_images</code> و <code>send_image_file</code> تصاویر PNG، ‏JPEG، ‏GIF، ‏WebP را به‌صورت پیوست بومی سیگنال می‌فرستند</li>
+  <li><strong>صوت</strong> — ‏<code>send_voice</code> فایل‌های صوتی ‏(OGG، ‏MP3، ‏WAV، ‏M4A، ‏AAC) را پیوست می‌کند</li>
+  <li><strong>ویدیو</strong> — ‏<code>send_video</code> فایل‌های ویدیویی MP4 را می‌فرستد</li>
+  <li><strong>اسناد</strong> — ‏<code>send_document</code> هر نوع فایلی را می‌فرستد ‏(PDF، ‏ZIP و غیره)</li>
+</ul>
+<p>همهٔ رسانه‌های خروجی از API استاندارد پیوست سیگنال می‌گذرند. برخلاف بعضی پلتفرم‌ها، سیگنال در سطح پروتکل بین پیام صوتی و پیوست فایل تمایز نمی‌گذارد.</p>
+<p>سقف حجم پیوست: <strong>۱۰۰ مگابایت</strong> ‏(هر دو جهت).</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p><strong>سرورهای سیگنال آپلود پیوست را rate-limit می‌کنند</strong>؛ آداپتور برای ارسال چند تصویر از زمان‌بندی‌کننده‌ای استفاده می‌کند که تصاویر را دسته‌های ۳۲تایی batch کرده و آپلودها را مطابق سیاست سرور سیگنال throttle می‌کند.</p>
+</div>
+
+<h3>قالب‌بندی بومی، نقل‌قول ریپلای و واکنش‌ها</h3>
+<p>پیام‌های سیگنال با <strong>قالب‌بندی بومی</strong> رندر می‌شوند نه کاراکترهای تحت‌اللفظی مارک‌داون. آداپتور مارک‌داون ‏(<code>**bold**</code>، ‏<code>*italic*</code>، ‏<code>`code`</code>، ‏<code>~~strike~~</code>، ‏<code>||spoiler||</code>، تیترها) را به <code>bodyRanges</code> سیگنال تبدیل می‌کند تا متن با استایل واقعی روی کلاینت گیرنده نشان داده شود نه کاراکترهای مرئی <code>**</code> / ‏<code>`</code>.</p>
+<p><strong>نقل‌قول ریپلای.</strong> وقتی هرمس به پیام مشخصی ریپلای می‌دهد، الان یک ریپلای بومی پست می‌کند که پیام اصلی را نقل می‌کند — همان UI که کاربران سیگنال هنگام استفاده از «Reply» می‌بینند. برای ریپلای‌های تولیدشده در پاسخ به پیام ورودی خودکار است.</p>
+<p><strong>واکنش‌ها.</strong> ایجنت می‌تواند از طریق API استاندارد واکنش به پیام‌ها react کند؛ واکنش‌ها در سیگنال به‌صورت ایموجی روی پیام مرجع ظاهر می‌شوند نه متن اضافه.</p>
+<p>هیچ‌کدام پیکربندی اضافه نمی‌خواهد — در build های اخیر signal-cli به‌طور پیش‌فرض فعال است. اگر نسخهٔ signal-cli خیلی قدیمی باشد، هرمس به تحویل متنی ساده سقوط و یک هشدار یک‌بارمصرف لاگ می‌کند.</p>
+
+<h3>نشانگر تایپ</h3>
+<p>بات حین پردازش پیام‌ها نشانگر تایپ می‌فرستد و هر ۸ ثانیه refresh می‌شود.</p>
+
+<h3>نمایش پیشرفت ابزار</h3>
+<p>سیگنال ویرایش پیام‌های ارسال‌شده را پشتیبانی نمی‌کند. بنابراین هرمس حباب‌های پیشرفت ابزار گیت‌وی را روی سیگنال سرکوب می‌کند، حتی وقتی <code>/verbose</code> فعال است و حالت غیر-<code>off</code> برای پلتفرم ذخیره شده.</p>
+<p>فعالیت ابزار را همچنان در CLI می‌بینید و ریپلای‌های نهایی سیگنال خروجی عادی دستیار را شامل می‌شوند. اگر پیشرفت زندهٔ به‌ازای-ابزار در چت لازم دارید، از پیام‌رسانی با پشتیبانی ویرایش پیام استفاده کنید.</p>
+
+<h3>سانسور شماره تلفن</h3>
+<p>همهٔ شماره‌های تلفن در لاگ‌ها خودکار سانسور می‌شوند:</p>
+<ul>
+  <li>‏<code>+15551234567</code> ← ‏<code>+155****4567</code></li>
+  <li>این هم روی لاگ‌های گیت‌وی هرمس اعمال می‌شود هم روی سیستم سانسور سراسری</li>
+</ul>
+
+<h3>یادداشت به خود (راه‌اندازی تک‌شماره‌ای)</h3>
+<p>اگر signal-cli را به‌عنوان <strong>دستگاه ثانویهٔ متصل</strong> روی شماره تلفن خودتان اجرا کنید ‏(نه شمارهٔ بات جدا)، می‌توانید از طریق قابلیت «Note to Self» سیگنال با هرمس تعامل کنید.</p>
+<p>فقط از گوشی‌تان به خودتان پیام بدهید — signal-cli دریافتش می‌کند و هرمس در همان گفتگو پاسخ می‌دهد.</p>
+<p><strong>نحوهٔ کار:</strong></p>
+<ul>
+  <li>پیام‌های «Note to Self» به‌صورت پاکت <code>syncMessage.sentMessage</code> می‌رسند</li>
+  <li>آداپتور تشخیص می‌دهد این‌ها خطاب به حساب خود بات‌اند و به‌عنوان پیام ورودی عادی پردازششان می‌کند</li>
+  <li>محافظت از پژواک ‏(ردیابی timestamp ارسال) حلقهٔ بی‌نهایت را می‌شکند — ریپلای‌های خود بات خودکار فیلتر می‌شوند</li>
+</ul>
+<p><strong>پیکربندی اضافه لازم نیست.</strong> تا وقتی <code>SIGNAL_ACCOUNT</code> با شماره تلفن‌تان بخواند خودکار کار می‌کند.</p>
+
+<h3>پایش سلامت</h3>
+<p>آداپتور اتصال SSE را پایش و در این موارد خودکار reconnect می‌کند:</p>
+<ul>
+  <li>قطع اتصال ‏(با backoff نمایی: ‏۲ ثانیه ← ۶۰ ثانیه)</li>
+  <li>۱۲۰ ثانیه بی‌فعالیتی ‏(به signal-cli پینگ می‌زند تا تأیید شود)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> عیب‌یابی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مشکل</th><th>راه‌حل</th></tr></thead>
+  <tbody>
+    <tr><td><strong>«Cannot reach signal-cli»</strong> هنگام راه‌اندازی</td><td>مطمئن شوید دیمن signal-cli اجراست: ‏<code>signal-cli --account +YOUR_NUMBER daemon --http 127.0.0.1:8080</code></td></tr>
+    <tr><td><strong>پیام‌ها دریافت نمی‌شوند</strong></td><td>چک کنید <code>SIGNAL_ALLOWED_USERS</code> شمارهٔ فرستنده را در قالب E.164 دارد ‏(با پیشوند <code>+</code>)</td></tr>
+    <tr><td><strong>«signal-cli not found on PATH»</strong></td><td>signal-cli را نصب و در PATH بگذارید، یا از Docker استفاده کنید</td></tr>
+    <tr><td><strong>اتصال مدام قطع می‌شود</strong></td><td>لاگ‌های signal-cli را برای خطا چک کنید. مطمئن شوید جاوا ۱۷+ نصب است.</td></tr>
+    <tr><td><strong>پیام‌های گروه نادیده گرفته می‌شوند</strong></td><td>‏<code>SIGNAL_GROUP_ALLOWED_USERS</code> را با شناسه‌های گروه مشخص، یا <code>*</code> برای همهٔ گروه‌ها تنظیم کنید.</td></tr>
+    <tr><td><strong>بات به هیچ‌کس پاسخ نمی‌دهد</strong></td><td>‏<code>SIGNAL_ALLOWED_USERS</code> را پیکربندی کنید، از جفت‌سازی DM استفاده کنید، یا اگر دسترسی گسترده‌تر می‌خواهید همهٔ کاربران را از طریق سیاست گیت‌وی صریحاً مجاز کنید.</td></tr>
+    <tr><td><strong>پیام‌های تکراری</strong></td><td>مطمئن شوید فقط یک نمونه signal-cli روی شماره تلفن‌تان گوش می‌دهد</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> امنیت</h2>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p><strong>همیشه کنترل‌های دسترسی را پیکربندی کنید.</strong> بات به‌طور پیش‌فرض دسترسی ترمینال دارد. بدون <code>SIGNAL_ALLOWED_USERS</code> یا جفت‌سازی DM، گیت‌وی به‌عنوان اقدام ایمنی همهٔ پیام‌های ورودی را رد می‌کند.</p>
+</div>
+<ul>
+  <li>شماره‌های تلفن در همهٔ خروجی لاگ سانسور می‌شوند</li>
+  <li>برای onboarding امن کاربران جدید از جفت‌سازی DM یا لیست‌مجاز صریح استفاده کنید</li>
+  <li>گروه‌ها را مگر واقعاً پشتیبانی گروه لازم دارید خاموش نگه دارید، یا فقط گروه‌های مورداطمینان را مجاز کنید</li>
+  <li>رمزنگاری سرتاسری سیگنال محتوای پیام را در انتقال محافظت می‌کند</li>
+  <li>دادهٔ نشست signal-cli در <code>~/.local/share/signal-cli/</code> اعتبارنامهٔ حساب را دارد — مثل رمز عبور ازش محافظت کنید</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> مرجع متغیرهای محیطی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>لازم</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>SIGNAL_HTTP_URL</code></td><td>بله</td><td>—</td><td>نقطهٔ پایانی HTTP مربوط به signal-cli</td></tr>
+    <tr><td><code>SIGNAL_ACCOUNT</code></td><td>بله</td><td>—</td><td>شماره تلفن بات ‏(E.164)</td></tr>
+    <tr><td><code>SIGNAL_ALLOWED_USERS</code></td><td>خیر</td><td>—</td><td>شماره‌های تلفن/UUID جدا با ویرگول</td></tr>
+    <tr><td><code>SIGNAL_GROUP_ALLOWED_USERS</code></td><td>خیر</td><td>—</td><td>شناسه‌های گروه قابل پایش، یا <code>*</code> برای همه ‏(حذف = غیرفعال‌شدن گروه‌ها)</td></tr>
+    <tr><td><code>SIGNAL_ALLOW_ALL_USERS</code></td><td>خیر</td><td><code>false</code></td><td>اجازه تعامل به هر کاربر ‏(رد شدن از لیست مجاز)</td></tr>
+    <tr><td><code>SIGNAL_HOME_CHANNEL</code></td><td>خیر</td><td>—</td><td>هدف تحویل پیش‌فرض کارهای کرون</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<div class="pager">
+  <a href="whatsapp.html"><span class="dir">→ قبلی</span><span class="ttl">واتساپ</span></a>
+  <a class="next" href="sms.html"><span class="dir">بعدی ←</span><span class="ttl">پیامک ‏(Twilio)</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/signal" target="_blank" rel="noopener">Signal</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

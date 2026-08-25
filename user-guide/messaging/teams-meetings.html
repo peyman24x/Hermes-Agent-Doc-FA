@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جلسات Teams — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/teams-meetings" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>جلسات Microsoft Teams</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>جلسات Microsoft Teams</h1>
+<p>وقتی می‌خواهید هرمس رویدادهای جلسهٔ Microsoft Graph را دریافت کند، اول رونویسی‌ها را بگیرد، در صورت نیاز به دانلود ضبط به‌اضافهٔ STT برگردد و خلاصهٔ ساختاریافته را به مقصدهای پایین‌دستی تحویل دهد، از خط‌لولهٔ جلسات Teams استفاده کنید.</p>
+<p>پیش‌نیازها: راه‌اندازی پایهٔ بات/اعتبارنامه را در ‏<a href="teams.html">Microsoft Teams</a> ببینید.</p>
+<blockquote><p><code>hermes gateway setup</code> را اجرا و <strong>Teams Meetings</strong> را انتخاب کنید تا راهنمای گام‌به‌گام ببینید.</p></blockquote>
+<p>این صفحه روی setup و فعال‌سازی تمرکز دارد:</p>
+<ul>
+  <li>اعتبارنامه‌های Graph</li>
+  <li>پیکربندی شنوندهٔ وب‌هوک</li>
+  <li>حالت‌های تحویل Teams</li>
+  <li>شکل پیکربندی خط‌لوله</li>
+</ul>
+<p>برای عملیات روز-دوم، چک‌های go-live و کاربرگ اپراتور از راهنمای اختصاصی استفاده کنید: ‏<a href="https://hermes-agent.nousresearch.com/docs/guides/operate-teams-meeting-pipeline" target="_blank" rel="noopener">ادارهٔ خط‌لولهٔ جلسات Teams</a>.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> این قابلیت چه می‌کند</h2>
+<p>خط‌لوله:</p>
+<ol>
+  <li>رویدادهای وب‌هوک Microsoft Graph را دریافت می‌کند</li>
+  <li>جلسه را حل و اول آرتیفکت‌های رونویسی را ترجیح می‌دهد</li>
+  <li>وقتی رونویسی قابل‌استفاده نیست به دانلود ضبط + STT برمی‌گردد</li>
+  <li>وضعیت ماندگار job ها و رکوردهای sink را محلی ذخیره می‌کند</li>
+  <li>می‌تواند خلاصه‌ها را در Notion، Linear و Microsoft Teams بنویسد</li>
+</ol>
+<p>اکشن‌های اپراتوری در CLI می‌مانند ‏(زیرفرمان ‏<code>teams-pipeline</code> توسط افزونهٔ ‏<code>teams_pipeline</code> ثبت می‌شود — با ‏<code>hermes plugins enable teams_pipeline</code> یا ‏<code>plugins.enabled: [teams_pipeline]</code> در config.yaml فعالش کنید):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes teams-pipeline validate
+hermes teams-pipeline list
+hermes teams-pipeline maintain-subscriptions</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پیش‌نیازها</h2>
+<p>قبل از فعال‌کردن خط‌لوله جلسات مطمئن شوید:</p>
+<ul>
+  <li>نصب کاری از هرمس دارید</li>
+  <li>راه‌اندازی موجود <a href="teams.html">بات Microsoft Teams</a> را دارید اگر تحویل خروجی Teams می‌خواهید</li>
+  <li>اعتبارنامه‌های اپلیکیشن Microsoft Graph با دسترسی‌های لازم برای منابع جلسه‌ای که قصد اشتراک دارید</li>
+  <li>URL عمومی HTTPS که Microsoft Graph بتواند برای تحویل وب‌هوک صدا بزند</li>
+  <li>‏<code>ffmpeg</code> نصب است اگر fallback ضبط+STT می‌خواهید</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۱: افزودن اعتبارنامه‌های Microsoft Graph</h2>
+<p>اعتبارنامه‌های فقط-اپ Graph را به ‏<code>~/.hermes/.env</code> بیفزایید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MSGRAPH_TENANT_ID=&lt;tenant-id&gt;
+MSGRAPH_CLIENT_ID=&lt;client-id&gt;
+MSGRAPH_CLIENT_SECRET=&lt;client-secret&gt;</code></pre>
+</div>
+<p>این اعتبارنامه‌ها استفاده می‌شوند توسط:</p>
+<ul>
+  <li>زیربنای کلاینت Graph</li>
+  <li>فرمان‌های نگهداشت اشتراک</li>
+  <li>حل جلسه و گرفتن آرتیفکت‌ها</li>
+  <li>تحویل خروجی Teams مبتنی بر Graph وقتی توکن دسترسی Teams اختصاصی نمی‌دهید</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۲: فعال‌سازی شنوندهٔ وب‌هوک Graph</h2>
+<p>شنوندهٔ وب‌هوک یک پلتفرم گیت‌وی به نام ‏<code>msgraph_webhook</code> است. حداقل آن را فعال و مقدار client state بگذارید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MSGRAPH_WEBHOOK_ENABLED=true
+MSGRAPH_WEBHOOK_PORT=8646
+MSGRAPH_WEBHOOK_CLIENT_STATE=&lt;random-shared-secret&gt;
+MSGRAPH_WEBHOOK_ACCEPTED_RESOURCES=communications/onlineMeetings</code></pre>
+</div>
+<p>میزبان bind از ‏<code>extra.host</code> پلتفرم در config.yaml خوانده می‌شود ‏(متغیر env ‏<code>MSGRAPH_WEBHOOK_HOST</code> وجود ندارد — <a href="msgraph-webhook.html">مرجع شنوندهٔ وب‌هوک</a> را ببینید).</p>
+<p>شنونده expose می‌کند:</p>
+<ul>
+  <li>‏<code>/msgraph/webhook</code> برای اعلان‌های Graph</li>
+  <li>‏<code>/health</code> برای چک سلامت ساده</li>
+</ul>
+<p>باید endpoint عمومی HTTPS خود را به این شنونده مسیریابی کنید. مثلاً اگر دامنهٔ عمومی شما ‏<code>https://ops.example.com</code> باشد URL اعلان Graph شما معمولاً:</p>
+<div class="codebox"><pre><code>https://ops.example.com/msgraph/webhook</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۳: پیکربندی تحویل Teams و رفتار خط‌لوله</h2>
+<p>خط‌لوله جلسات پیکربندی runtime‌اش را از ورودی موجود پلتفرم <code>teams</code> می‌خواند. تنظیمات خاص-خط‌لوله زیر ‏<code>teams.extra.meeting_pipeline</code> زندگی می‌کنند. تحویل خروجی Teams روی همان سطح پیکربندی عادی پلتفرم Teams می‌ماند.</p>
+<p>مثال config.yaml:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  msgraph_webhook:
+    enabled: true
+    extra:
+      host: 127.0.0.1
+      port: 8646
+      client_state: "replace-me"
+      accepted_resources:
+        - "communications/onlineMeetings"
+
+  teams:
+    enabled: true
+    extra:
+      client_id: "your-teams-client-id"
+      client_secret: "your-teams-client-secret"
+      tenant_id: "your-teams-tenant-id"
+
+      # تحویل خلاصهٔ خروجی
+      delivery_mode: "graph" # یا incoming_webhook
+      team_id: "team-id"
+      channel_id: "channel-id"
+      # incoming_webhook_url: "https://..."
+
+      meeting_pipeline:
+        transcript_min_chars: 80
+        transcript_required: false
+        transcription_fallback: true
+        ffmpeg_extract_audio: true
+        notion:
+          enabled: false
+        linear:
+          enabled: false</code></pre>
+</div>
+<p>اگر شنونده را به میزبانی غیر-loopback مثل ‏<code>0.0.0.0</code> بایند کردید باید ‏<code>allowed_source_cidrs</code> را هم روی بازه‌های egress وب‌هوک مایکروسافت بگذارید. bind های loopback ‏(<code>127.0.0.1</code>/<code>::1</code>) همان setup مقصدیِ تونل توسعه و پروکسی معکوس محلی هستند.</p>
+
+<h3>حالت‌های تحویل Teams</h3>
+<p>خط‌لوله دو حالت تحویل خلاصهٔ Teams داخل افزونهٔ موجود Teams دارد.</p>
+<h4><code>incoming_webhook</code></h4>
+<p>وقتی یک پست وب‌هوکی ساده در Teams می‌خواهید بدون ساخت پیام کانال از طریق Graph.</p>
+<p>پیکربندی لازم:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  teams:
+    enabled: true
+    extra:
+      delivery_mode: "incoming_webhook"
+      incoming_webhook_url: "https://..."</code></pre>
+</div>
+<h4><code>graph</code></h4>
+<p>وقتی می‌خواهید هرمس خلاصه را از طریق Microsoft Graph داخل یک چت یا کانال Teams پست کند.</p>
+<p>هدف‌های پشتیبانی‌شده:</p>
+<ul>
+  <li>‏<code>chat_id</code></li>
+  <li>‏<code>team_id</code> + ‏<code>channel_id</code></li>
+  <li>‏<code>team_id</code> + fallback ‏<code>home_channel</code> پلتفرم موجود Teams</li>
+</ul>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  teams:
+    enabled: true
+    extra:
+      delivery_mode: "graph"
+      team_id: "team-id"
+      channel_id: "channel-id"</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۴: شروع گیت‌وی</h2>
+<p>بعد از به‌روزرسانی پیکربندی هرمس را عادی شروع کنید:</p>
+<div class="codebox"><pre><code>hermes gateway run</code></pre></div>
+<p>یا اگر هرمس را در Docker اجرا می‌کنید گیت‌وی را همان‌طور که برای استقرارتان انجام می‌دهید شروع کنید.</p>
+<p>شنونده را چک کنید:</p>
+<div class="codebox"><pre><code>curl http://localhost:8646/health</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> گام ۵: ساخت اشتراک‌های Graph</h2>
+<p>برای ساخت و بازرسی اشتراک‌ها از CLI افزونه استفاده کنید.</p>
+<p>مثال‌ها:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes teams-pipeline subscribe \
+  --resource communications/onlineMeetings/getAllTranscripts \
+  --notification-url https://ops.example.com/msgraph/webhook \
+  --client-state "$MSGRAPH_WEBHOOK_CLIENT_STATE"
+
+hermes teams-pipeline subscribe \
+  --resource communications/onlineMeetings/getAllRecordings \
+  --notification-url https://ops.example.com/msgraph/webhook \
+  --client-state "$MSGRAPH_WEBHOOK_CLIENT_STATE"</code></pre>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ اشتراک‌های Graph ظرف ۷۲ ساعت منقضی می‌شوند</div>
+  <p>‏Microsoft Graph اشتراک‌های وب‌هوک را روی ۷۲ ساعت سقف می‌زند و خودکار تمدیدشان نمی‌کند. قبل از go-live <strong>باید</strong> زمان‌بندی ‏<code>hermes teams-pipeline maintain-subscriptions</code> را راه بیندازید وگرنه اعلان‌ها سه روز بعد از هر ساخت دستی اشتراک بی‌صدا متوقف می‌شوند. بخش «خودکارسازی تمدید اشتراک» ‏(الزامی برای تولید) را در کتاب عملیات اپراتور ببینید — سه گزینه ‏(کرون هرمس، timer سیستم‌دی، crontab خام).</p>
+</div>
+<p>برای نگهداشت اشتراک و جریان‌های اپراتوری روز-دوم با راهنما ادامه دهید: ‏<a href="https://hermes-agent.nousresearch.com/docs/guides/operate-teams-meeting-pipeline" target="_blank" rel="noopener">ادارهٔ خط‌لولهٔ جلسات Teams</a>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> اعتبارسنجی</h2>
+<p>اسنپ‌شات اعتبارسنجی داخلی را اجرا کنید:</p>
+<div class="codebox"><pre><code>hermes teams-pipeline validate</code></pre></div>
+<p>چک‌های همراه مفید:</p>
+<div class="codebox"><pre><code>hermes teams-pipeline token-health
+hermes teams-pipeline subscriptions</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> عیب‌یابی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مشکل</th><th>چه چیزی را چک کنیم</th></tr></thead>
+  <tbody>
+    <tr><td>اعتبارسنجی وب‌هوک Graph شکست می‌خورد</td><td>درستی و قابل‌دسترس بودن URL عمومی را تأیید و مطمئن شوید Graph دقیقاً مسیر ‏<code>/msgraph/webhook</code> را صدا می‌زند</td></tr>
+    <tr><td>job ها در ‏<code>hermes teams-pipeline list</code> ظاهر نمی‌شوند</td><td>تأیید کنید ‏<code>msgraph_webhook</code> فعال است و اشتراک‌ها به URL اعلان درست اشاره دارند</td></tr>
+    <tr><td>اولویت-رونویسی هرگز موفق نمی‌شود</td><td>دسترسی‌های Graph برای منابع رونویسی و موجود بودن آرتیفکت رونویسی برای آن جلسه را چک کنید</td></tr>
+    <tr><td>fallback ضبط شکست می‌خورد</td><td>نصب بودن ‏ffmpeg و دسترسی اپ Graph به آرتیفکت‌های ضبط را تأیید کنید</td></tr>
+    <tr><td>تحویل خلاصهٔ Teams شکست می‌خورد</td><td>‏delivery_mode، شناسه‌های هدف و پیکربندی احراز Teams را دوباره چک کنید</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> مستندات مرتبط</h2>
+<ul>
+  <li><a href="teams.html">راه‌اندازی بات Microsoft Teams</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/guides/operate-teams-meeting-pipeline" target="_blank" rel="noopener">ادارهٔ خط‌لولهٔ جلسات Teams</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="feishu.html"><span class="dir">→ قبلی</span><span class="ttl">Feishu / Lark</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات فرعی (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/teams-meetings" target="_blank" rel="noopener">Microsoft Teams Meetings</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

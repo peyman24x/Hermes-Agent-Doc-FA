@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۲۲ از ۲۰۷ صفحه (۱۱٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۶۱ از ۲۰۷ صفحه (۲۹٪)** |
 
 ---
 
@@ -221,6 +221,202 @@ hermes-docs-fa/
 
 ---
 
+
+### نشست ۱۷ — ۲۰۲۶-۰۸-۲۳ (بخش هفدهم) — 🎛 پیکربندی (بخش ۱و۲ از ۳)
+- شروع ترجمهٔ غول **user-guide/configuration.html** (۲٬۶۱۴ خط منبع). طبق برنامهٔ سه‌بخشی:
+  - ✅ **بخش ۱و۲ (سکشن ۱-۲۹)**: ساختار پوشه، مدیریت، اولویت، محدودیت nofile، جایگزینی env + SecretRef + تایم‌اوت‌های ارائه‌دهنده، رفتار به‌روزرسانی، **بک‌اندهای ترمینال کامل** (۷ بک‌اند + جدول overview + home_mode + docker کامل با چرخهٔ حیات جدول‌دار + ۱۷ متغیر محیطی + والوم‌ها + فوروارد اعتبار + run_as_host_user + mount_cwd + sync راهن-به-میزبان)، شل پایدار، تنظیمات مهارت + گارد + write_approval، حافظه، برش زمینه/ایمنی خواندن/سقف خروجی + سرریز، غیرفعال‌سازی تول‌ست، ورک‌تری، **فشرده‌سازی زمینه کامل** (۲۰ کلید با توضیح کامل + راه‌اندازی‌ها)، لیز نوبت، نگهبان گیر، تشدید اتصال، کش ایجنت، موتور زمینه، بودجه تکرار، بودجه دیوار-ساعتی، verify-on-stop، اهداف، تایم‌اوت‌های API، فشار زمینه، استخر اعتبار، کش پرامپت، **مدل‌های کمکی کامل** (انتخاب‌گر تعاملی، فقط-استریم، الگوی جهانی، مرجع کامل YAML، fallback_chain، هم‌زمانی، OpenRouter/Pareto، ارائه‌دهندگان + جدول، راه‌اندازی‌ها، env قدیمی).
+  - ⏳ **بخش ۳ (سکشن ۳۰-۵۹)** برای نوبت بعد: reasoning effort، tool-use enforcement، execution discipline، guardrails، TTS، display، privacy، STT، voice، streaming، isolation، quick commands، code execution، web backends، browser، timezone، discord، security، blocklist، approvals، checkpoints، delegation، clarify، context files، working dir، network، onboarding، dashboard + pager.
+- ⚠️ صفحه تا تکمیل بخش ۳ در nav-data با d:0 می‌ماند (قاعدهٔ کامل‌بودن قبل از فعال‌سازی).
+
+---
+
+
+### نشست ۱۸ — ۲۰۲۶-۰۸-۲۳ (بخش هجدهم) — 🎛 پیکربندی تکمیل و فعال شد
+- **بخش ۳ و پایانی** user-guide/configuration.html ترجمه شد (سکشن ۳۰-۵۹): سطح استدلال + بازنویسی به‌ازای-مدل، اجبار استفاده از ابزار، انضباط اجرا، گاردریل‌های حلقه + سقف‌های فراری + گاردهای ضد-تعلیق + stub‌سازی، ‏TTS کامل (۱۱ ارائه‌دهنده)، display کامل (خلاصهٔ نوبت، جریان توکن اسپینر، راستی‌آزمای جهش-فایل، زبان UI، focus، پانوشت اجرا، پلتفرم‌ها)، privacy/PII، ‏STT کامل + پرامپت رونویسی، حالت صوتی، استریم CLI/گیت‌وی، ایزوله‌سازی نشست، DM غیرمجاز، فرمان‌های سریع، تأخیر انسانی، اجرای کد، بک‌اندهای وب (۵ ارائه‌دهنده)، مرورگر + دیالوگ، منطقهٔ زمانی، دیسکورد، امنیت + فهرست رد وب، تأییدهای هوشمند + قطع‌کننده + deny + سیاست سفارشی، چک‌پوینت، واگذاری کامل، شفاف‌سازی، فایل‌های زمینه، پوشهٔ کاری، شبکه، آنبوردینگ، داشبورد.
+- صفحه در nav-data فعال شد (d:1)؛ pagerها: مدل‌ها ← **پیکربندی** ← چک‌پوینت. ← مجموع: **۲۳ صفحه**.
+- 🏆 بزرگ‌ترین صفحهٔ پروژه (۲٬۶۱۴ خط منبع، ~۵۵۰۰ خط HTML خروجی، ۵۹ سکشن، ~۱۰۰ codebox، ~۲۰ جدول) در ۳ نوبت با وفاداری کامل ترجمه شد.
+
+---
+
+
+### نشست ۱۹ — ۲۰۲۶-۰۸-۲۳ (بخش نوزدهم) — 🗂 کرتور
+- ترجمهٔ **user-guide/features/curator.html** (۱۳ بخش: نحوهٔ اجرا + رفتار اولین اجرا، دو فازِ گذر خودکار/ادغام LLM، پیکربندی + aux model، ‏CLI کامل (۲۴ فرمان)، پشتیبان/بازگشت، دفتر ممیزی + بازگشت تکی‌جهش، ‏TTL purge، معنای ایجنت‌ساخته + adopt، پین‌کردن + داخلی‌های محافظت‌شده، تلمتری، گزارش‌ها + نقشهٔ تغییرنام، بازیابی، غیرفعال‌سازی). ← مجموع: **۲۴ صفحه (۱۲٪)**.
+- pager: مهارت‌ها ← **کرتور**. قابلیت‌های اصلی به ۵/۳۱ رسید.
+
+---
+
+
+### نشست ۲۰ — ۲۰۲۶-۰۸-۲۳ (بخش بیستم) — 💬 گیت‌وی پیام‌رسانی
+- ترجمهٔ **user-guide/messaging/index.html** (۱۶ بخش: جدول کامل مقایسهٔ ۲۷ پلتفرم × ۷ قابلیت + Relay، معماری، توکن‌های سکوت، راه‌اندازی + فرمان‌های گیت‌وی + watchdog، جدول کامل ۲۴ فرمان چت، مدیریت نشست + دفتر تحویل + سیاست‌های ریست، بازنویسی به‌ازای-کانال، امنیت کامل (فهرست‌های مجاز + جفت‌سازی + مدیر/کاربر)، بازهدایت + سه حالت busy_input، شفاف‌سازی چندانتخابی، اعلان‌های پیشرفت + حالت log + عبارت‌های وضعیت + مهر زمانی، نشست‌های پس‌زمینه + اعلان پروسه، مدیریت سرویس کامل systemd/launchd + هشدار ExecStopPost، جدول تول‌ست‌ها، بهره‌برداری چندپلتفرمی: /platform + قطع‌کنندهٔ مدار + اعلان ری‌استارت + تایپینگ + ازسرگیری + پیشفرض‌های موبایل + پاکسازی). ← مجموع: **۲۵ صفحه (۱۲٪)**. بخش پیام‌رسان‌ها باز شد (۱/۳۵).
+
+---
+
+
+### نشست ۲۱ — ۲۰۲۶-08-23 (بخش بیست‌ویکم) — 📱 تلگرام
+- ترجمهٔ **user-guide/messaging/telegram.html** (۱۷ سکشن — محبوب‌ترین پلتفرم: BotFather + سفارشی‌سازی + نشانگر وضعیت + منوی فرمان، حریم خصوصی + مشاهده بدون پاسخ، یافتن شناسه + پیکربندی + MEDIA با جدول پسوندها، وب‌هوک با جدول + Fly.io، پراکسی، کانال خانگی + صوت ورودی/خروجی + ffmpeg، **فایل‌های ۲۰MB+ با سرور محلی Bot API** ‏(۶ گام کامل + local_mode)، گروه‌ها + exclusive_bot_mentions + عیب‌یابی، **تاپیک‌های DM خصوصی** ‏(dm_topics + /topic چندنشستی)، پیوند مهارت تاپیک گروهی، استریم + پیام ریچ + پیش‌نمایش لینک، فهرست مجاز گروه + guest_mode، کنترل دسترسی اسلش، امکانات تکمیلی + عیب‌یابی). ← مجموع: **۲۶ صفحه (۱۳٪)**.
+
+---
+
+
+### نشست ۲۲ — ۲۰۲۶-08-24 (بخش بیست‌ودوم) — 🎮 دیسکورد
+- ترجمهٔ **user-guide/messaging/discord.html** ‏(۲۱ سکشن — بزرگ‌ترین صفحهٔ پیام‌رسانی: جدول رفتار هرمس + مدل گیت‌وی + مدل نشست + وقفه/هم‌زمانی + سلامت WebSocket، ۸ گام راه‌اندازی ‏(اپلیکیشن، بات، Intents ممتاز، توکن، URL دعوت با جدول دسترسی‌ها، دعوت، یافتن شناسه، پیکربندی)، مرجع پیکربندی کامل: **جدول ۲۶ متغیر env** + هشدار بات-به-بات + همهٔ کلیدهای config.yaml به‌ازای-کلید ‏(require_mention تا reasoning_style)، کنترل دسترسی اسلش، انتخاب‌گر مدل، فرمان اسلش بومی مهارت‌ها، ارسال MEDIA + دریافت فایل دلخواه، clarify، کانال خانگی، صوت + voice_fx میکسر، فروم‌ها، عیب‌یابی ۷ سناریو، امنیت + RBAC نقشی + کنترل منشن). ← مجموع: **۲۷ صفحه (۱۳٪)**.
+
+---
+
+
+- **بازرسی سراسری نشست ۲۲:** اسکنر خودکار همهٔ ۲۷ صفحه ‏(لینک داخلی، توازن تگ، data-root، CJK)؛ یافته و اصلاح: «顶层» در security، «نام‌مستفر→نام مستعار» ×۵ در profiles، دو لینک discord به صفحات ترجمه‌نشده ← انگلیسی. «小助手» در profiles عمدی است ‏(مثال یونیکد منبع).
+
+---
+
+
+### نشست ۲۳ — ۲۰۲۶-08-24 (بخش بیست‌وسوم) — 💼 اسلک + بازرسی سراسری
+- **بازرسی مهندسی سراسری:** اسکنر خودکار روی هر ۲۸ صفحه ‏(لینک داخلی شکسته، توازن تگ با HTMLParser، data-root، CJK، غلط‌ها، سازگاری nav-data دوطرفه). یافته/اصلاح: «顶层» security، «نام‌مستفر» ×۵ profiles، لینک‌های voice-mode/guides در discord ← انگلیسی. «小助手» profiles عمدی است.
+- ترجمهٔ **user-guide/messaging/slack.html** ‏(۲۱ سکشن — Socket Mode: نمای کلی + ۹ گام راه‌اندازی ‏(مانیفست خودکار هرمس با --agent-view/--long-description/--slashes-only، جدول ۱۳ scope + اختیاری assistant:write، رویدادها + Messages Tab)، فرمان‌های اسلش بومی + Agent view + پیشوند ‎!cmd در تردها + پاسخ زودگذر + clarify Block Kit، جدول رفتار بات، مرجع config کامل ‏(reply_to_mode تا cron_continuable_surface + جدول کلیدها)، typing_status_text + live_status + استریم بومی chat.startStream + native_task_cards، **جدول ۶ گزینهٔ منشن** + MPIM سطح مشترک، allow_bots + حلقه‌های ack، reaction_triggers، smoke-check ایجنت همتا، allowed_channels، چند-ورک‌اسپیس + فایل slack_tokens.json، پرامپت/مهارت به‌ازای-کانال، عیب‌یابی ۱۲ سناریو + چک‌لیست ۸ موردی، امنیت). ← مجموع: **۲۸ صفحه (۱۴٪)**.
+
+---
+
+
+### نشست ۲۴ — ۲۰۲۶-08-24 (بخش بیست‌وچهارم) — 🟢 واتساپ
+- ترجمهٔ **user-guide/messaging/whatsapp.html** ‏(۱۱ سکشن — پل Baileys با هشدارهای ریسک مسدودی + تمایز از Cloud API، دو حالت، پیش‌نیازها، ویزارد QR، شمارهٔ دوم ‏(Google Voice/سیم/VoIP)، پیکربندی + unauthorized_dm_behavior، ماندگاری نشست، جفت‌سازی مجدد، صوت + send_read_receipts، قالب‌بندی ‏(chunking 4096 + جدول تبدیل مارک‌داون + نظرسنجی/clarify/لوکیشن بومی + debounce)، عیب‌یابی ۹ سناریو، امنیت). ← مجموع: **۲۹ صفحه (۱۴٪)**.
+
+---
+
+
+### نشست ۲۵ — ۲۰۲۶-08-24 (بخش بیست‌وپنجم) — 🔒 سیگنال — 🎉 ۳۰ صفحه
+- ترجمهٔ **user-guide/messaging/signal.html** ‏(۹ سکشن — دیمن signal-cli با SSE/JSON-RPC، پیش‌نیازها + نصب، اتصال حساب به‌عنوان دستگاه ثانویه، اجرای دیمن HTTP، پیکربندی + جدول دسترسی گروه، پیوست‌ها دوطرفه + سقف ۱۰۰MB + throttle، قالب‌بندی بومی bodyRanges + نقل‌قول ریپلای + واکنش‌ها، نشانگر تایپ، سرکوب پیشرفت ابزار، سانسور شماره، Note to Self + محافظت پژواک، پایش سلامت SSE، عیب‌یابی ۷ سناریو، امنیت، مرجع ۶ متغیر env). ← مجموع: **۳۰ صفحه (۱۵٪)**.
+
+---
+
+
+### نشست ۲۶ — ۲۰۲۶-08-24 (بخش بیست‌وششم) — 📱 پیامک
+- ترجمهٔ **user-guide/messaging/sms.html** ‏(۹ سکشن — Twilio API + اعتبارنامهٔ مشترک با مهارت تلفنی، پیش‌نیازها، اعتبارنامه‌ها، پیکربندی تعاملی/دستی، وب‌هوک + تونل cloudflared/ngrok + الزام SMS_WEBHOOK_URL برای امضا، جدول ۱۱ متغیر env، رفتار مخصوص ‏(متن ساده، سقف ۱۶۰۰، ضدپژواک، سانسور)، امنیت ‏(HMAC-SHA1 + لیست مجاز)، عیب‌یابی). ← مجموع: **۳۱ صفحه (۱۵٪)**.
+
+---
+
+
+### نشست ۲۷ — ۲۰۲۶-08-24 (بخش بیست‌وهفتم) — 📧 ایمیل
+- ترجمهٔ **user-guide/messaging/email.html** ‏(۸ سکشن — IMAP/SMTP بدون وابستگی + تمایز از مهارت Himalaya، پیش‌نیازها + Gmail/Outlook/سایر، پیکربندی، دریافت ‏(UNSEEN، فیلتر noreply/Auto-Submitted) و ارسال با threading صحیح، MEDIA پیوست، skip_attachments، کنترل دسترسی سخت‌گیرانه، عیب‌یابی ۷ سناریو، امنیت، مرجع ۱۰ متغیر env). ← مجموع: **۳۲ صفحه (۱۶٪)**.
+
+---
+
+
+### نشست ۲۸ — ۲۰۲۶-08-24 (بخش بیست‌وهشتم) — 💬 IRC + 📲 ntfy — پیام‌رسان‌ها ۱۰/۳۵
+- ترجمهٔ **user-guide/messaging/irc.html** ‏(۶ سکشن — آداپتور بدون وابستگی روی asyncio استاندارد، gateway-config.yaml + جدول ۱۰ متغیر env، کنترل دسترسی nick/NickServ، کانال vs DM، تقسیم PRIVMSG و قفل اعتبارنامهٔ scoped).
+- ترجمهٔ **user-guide/messaging/ntfy.html** ‏(۱۰ سکشن — pub-sub پوش HTTP سبک، **مدل هویت تاپیک‌محور** با ۳ راه مرز اعتماد، شروع سریع از گوشی، کرون + hermes send، خودمیزبانی Docker/go، مارک‌داون X-Markdown، فقط-خروجی، محدودیت‌ها، عیب‌یابی ۴ سناریو با fatal codes).
+← مجموع: **۳۴ صفحه (۱۶٪)**.
+
+---
+
+
+### نشست ۲۹ — ۲۰۲۶-08-24 (بخش بیست‌ونهم) — 🔌 هرمس رله
+- ترجمهٔ **user-guide/messaging/relay.html** ‏(۵ سکشن — سیستم کانکتور آزمایشی بدون نگهداری اعتبارنامهٔ پلتفرم، شبکه فقط-خروجی، ثبت‌نام enroll با توکن تک‌مصرف + مسیرهای Nous Portal / IdP خودمیزبان / metadata-server، فلگ‌ها + جدول ۹ تنظیم، قابلیت‌های مذاکره‌شده در handshake ‏(استریم، رسانه دوجهته با بازمیزبانی ۲۵MB، پرامپت بومی، واکنش ack، تردها، wake)، عیب‌یابی ۷ سناریو با کدهای 401/403/4401). ← مجموع: **۳۵ صفحه (۱۷٪)**.
+
+---
+
+
+### نشست ۳۰ — ۲۰۲۶-08-24 (بخش سی‌اُم) — 🪝 وب‌هوک‌ها
+- ترجمهٔ **user-guide/messaging/webhooks.html** ‏(۱۲ سکشن — سرور HTTP با اعتبارسنجی HMAC، شروع سریع + راه‌اندازی، جدول ۱۰ ویژگی مسیر + مثال کامل، فیلترهای payload با ۸ عملگر + فیلتر اسکریپتی ‏(stdin JSON / [SILENT])، قالب‌های dot-notation + ‎{__raw__}‎، تحویل تاپیک فروم، بازبینی PR گیت‌هاب گام‌به‌گام، گیت‌لب، جدول ۱۷ مقصد تحویل، **حالت تحویل مستقیم deliver_only** ‏(صفر توکن LLM + جدول کدهای پاسخ)، اشتراک‌های داینامیک CLI، تول‌ست به‌ازای-مسیر با منطق ضد self-grant، امنیت ‏(HMAC V1/V2 + replay، رمز الزامی، rate limit، idempotency، سقف بدنه، مدل اعتماد «احراز≠اعتماد»)، عیب‌یابی). ← مجموع: **۳۶ صفحه (۱۷٪)**.
+
+---
+
+
+### نشست ۳۱ — ۲۰۲۶-08-24 (بخش سی‌ویکم) — 💠 Mattermost
+- ترجمهٔ **user-guide/messaging/mattermost.html** ‏(۱۴ سکشن — جایگزین خودمیزبان Slack با REST v4 + WebSocket بدون کتابخانهٔ خارجی، جدول رفتار + مدل نشست، فعال‌سازی حساب بات + ساخت + توکن یک‌بارمصرف + personal access token، یافتن User ID ‏(۲۶ کاراکتر) از UI/API، پیکربندی، کانال خانگی، reply mode، رفتار منشن، لیست‌مجاز کانال، عیب‌یابی ۶ سناریو شامل nginx websocket upgrade، پرامپت به‌ازای-کانال، امنیت). ← مجموع: **۳۷ صفحه (۱۸٪)**.
+
+---
+
+
+### نشست ۳۲ — ۲۰۲۶-08-24 (بخش سی‌ودوم) — 🌐 Matrix
+- ترجمهٔ **user-guide/messaging/matrix.html** ‏(۱۳ سکشن — بزرگ‌ترین صفحهٔ باقی‌ماندهٔ پیام‌رسانی: جدول رفتار + ماتریس قابلیت + مدل نشست + پیکربندی منشن/تردینگ + ایزوله‌سازی اتاق پروژه session_scope، ۴ گام راه‌اندازی، مقاوم‌سازی استقرار خصوصی + محافظت حلقهٔ پل، **E2EE کامل**: libolm + حالت‌های off/optional/required + ابزارهای مخصوص Matrix + تأیید cross-signing + بازیابی crypto.db حذف‌شده ‏(دستی با sqlite/admin API)، لیست‌مجاز اتاق، فرمان‌های ‎!‎-سازگار، عیب‌یابی گسترده شامل اختلاف ساعت NTP و **مهاجرت ۶گامی E2EE**، **حالت پروکسی macOS ARM64** ‏(کانتینر Docker برای رمزنگاری + میزبان native)، امنیت، یادداشت‌ها شامل MSC3245). ← مجموع: **۳۸ صفحه (۱۸٪)**.
+
+---
+
+
+### نشست ۳۳ — ۲۰۲۶-08-24 (بخش سی‌وسوم) — 🏠 Home Assistant — 🎉 ۱۹٪
+- ترجمهٔ **user-guide/messaging/homeassistant.html** ‏(۶ سکشن — دوگانه: پلتفرم گیت‌وی WebSocket + چهار ابزار LLM ‏(ha_list_entities/ha_get_state/ha_list_services/ha_call_service با پارامترها و مثال‌ها)، توکن طولانی‌عمر، فیلتر رویداد الزامی ‏(watch_domains/entities/all + ignore + cooldown)، جدول قالب رویداد به‌ازای دامنه، اعلان ماندگار HA، مدیریت اتصال، امنیت ‏(دامنه‌های مسدود shell_command/hassio/rest_command + اعتبارسنجی الگوی entity_id)، سه نمونه اتوماسیون، عیب‌یابی). ← مجموع: **۳۹ صفحه (۱۹٪)**.
+
+---
+
+
+### نشست ۳۴ — ۲۰۲۶-08-24 (بخش سی‌وچهارم) — 🧩 raft + buzz + qqbot + a2a — 🎉 ۲۱٪
+- ترجمهٔ **raft** ‏(۵ سکشن — پل کانال-بیداری محلی با payload بدون‌محتوای قراردادی و تقسیم کار پل/آداپتور/ایجنت)،
+  **buzz** ‏(۷ سکشن — جامعهٔ Nostr بلوک با CLI خروجی + WS ورودی NIP-42، پیش‌فرض‌های توصیه‌شدهٔ تمیز نگهداشتن کانال، حالت خصوصی/جامعه)،
+  **qqbot** ‏(۷ سکشن — API رسمی v2 با WebSocket گیت‌وی، STT دومرحله‌ای ASR داخلی QQ → ارائه‌دهندهٔ سازگار-با-OpenAI)،
+  **a2a** ‏(۸ سکشن — پروتکل باز Agent2Agent دوجهته: ابزارهای خروجی a2a_discover/call/orchestrate + سرور ورودی Agent Card/JSON-RPC/SSE/push، مدل امنیت localhost-first با توکن به‌ازای-همتا و ضدحلقه).
+← مجموع: **۴۳ صفحه (۲۱٪)**.
+
+---
+
+- **اصلاح نشست ۳۴:** دو لینک a2a به delegation/kanban ‏(ترجمه‌نشده) ← انگلیسی؛ اسکنر دسته‌ای آن را گرفت.
+
+---
+
+
+### نشست ۳۵ — ۲۰۲۶-08-24 (بخش سی‌وپنجم) — 🧩 دستهٔ ۵تایی دوم — 🎉 ۲۳٪
+- ترجمهٔ **msgraph-webhook** ‏(۶ سکشن — شنوندهٔ اعلان تغییر Graph با clientState به‌عنوان احراز اصلی + لیست مجاز CIDR مایکروسافت + جدول کدهای وضعیت)،
+  **simplex** ‏(۱۱ سکشن — پیام‌رسان بدون شناسهٔ پایدار، مجوز contactId/نام نمایشی + جفت‌سازی DM، پیوست XFTP دوجهته)،
+  **bluebubbles** ‏(۷ سکشن — iMessage روی مک با وب‌هوک، Tapback/تایپ/تیک با Private API، خطاب چت با ایمیل/شماره)،
+  **wecom-callback** ‏(۱۰ سکشن — اپ سازمانی وی‌چت با XML رمزنگاری AES-CBC سازگار WXBizMsgCrypt، مسیریابی چند-کورپوری apps[]، تأخیر ۳–۳۰ دقیقه‌ای)،
+  **line** ‏(۱۱ سکشن — Messaging API ژاپن/تایوان/تایلند، توکن ریپلای تک‌مصرف + دکمهٔ postback برای LLM کند با ماشین حالت PENDING→READY→DELIVERED، سقف ۵۰۰۰ کاراکتر و chunking هوشمند).
+← مجموع: **۴۸ صفحه (۲۳٪)**.
+
+---
+
+
+### نشست ۳۶ — ۲۰۲۶-08-24 (بخش سی‌وششم) — 🧩 دستهٔ چهارصفحه‌ای — 🎉 ۲۵٪
+- ترجمهٔ **photon** ‏(۸ سکشن — iMessage مدیریتی با Node sidecar و gRPC spectrum-ts، خط اشتراکی رایگان vs اختصاصی، محدودیت‌های سهمیه)،
+  **teams** ‏(۱۲ سکشن — CLI رسمی @microsoft/teams.cli بدون پرتال Azure، تونل + endpoint /api/messages، کارت‌های تأیید Adaptive چهاردکمه‌ای، تحویل خلاصهٔ جلسات graph/incoming_webhook، استقرار تولید، عیب‌یابی ۱۱ سناریو)،
+  **dingtalk** ‏(۱۰ سکشن — Stream Mode بدون URL عمومی، ورود QR device-flow + افشای برند openClaw، AI Card ها، واکنش 🤔/🥳، سقف ۲۰k کاراکتر)،
+  **open-webui** ‏(۱۰ سکشن — فرانت وب خودمیزبان روی سرور API هرمس، Docker/compose، Chat Completions vs Responses، چندکاربره با پروفایل‌ها + پورت‌های 8650+، Docker لینوکس).
+← مجموع: **۵۲ صفحه (۲۵٪)**.
+
+---
+
+
+### نشست ۳۷ — ۲۰۲۶-08-24 (بخش سی‌وهفتم) — 🇨🇳 سه‌گانهٔ تنسنت — پیام‌رسان‌ها ۳۱/۳۵
+- ترجمهٔ **wecom** ‏(۱۰ سکشن — دروازهٔ WebSocket AI Bot بدون endpoint عمومی، ساخت با اسکن QR، لیست مجاز فرستنده به‌ازای-گروه با wildcard، decrypt خودکار AES-256-CBC، آپلود chunked سه‌مرحله‌ای + تنزل خودکار رسانه، reply-mode همبسته)،
+  **weixin** ‏(۱۳ سکشن — iLink Bot API شخصی با هشدار جامع محدودیت هویت بات در گروه‌های عادی، long-polling، CDN رمزنگاری AES-128-ECB دوجهته، ماندگاری context_token، تکه‌تکه‌کردن هوشمند ۴۰۰۰ کاراکتری، قفل توکن تک-نمونه)،
+  **yuanbao** ‏(۱۱ سکشن — پلتفرم سازمانی تنسنت با احراز HMAC، قالب direct:/group:، auto-sethome، فوروارد تاریخچهٔ چت WeChat، پارامترهای اتصال ثابت).
+← مجموع: **۵۵ صفحه (۲۷٪)**. باقی‌ماندهٔ پیام‌رسان‌ها: feishu (۵۸۸) + teams-meetings + relay-مربوطه‌ها.
+
+---
+
+
+### نشست ۳۸ — ۲۰۲۶-08-24 (بخش سی‌وهشتم) — 🕊️ feishu + 📋 teams-meetings — پیام‌رسان‌ها ۳۳/۳۵
+- ترجمهٔ **feishu** ‏(۲۲ سکشن — بزرگ‌ترین صفحهٔ چینی: دو حالت اتصال websocket/webhook + گیت توکن تأیید روی چالش url_verification، جدول‌های scope الزامی/توصیه‌شده، انتشار نسخه، **اکشن کارت تعاملی با خطای ۲۰۰۳۴۰ و سه پیکربندی الزامی**، ریپلای هوشمند کامنت اسناد با کنترل دسترسی سه‌طبقه exact/wildcard/top-level و CLI pairing، رویداد دعوت جلسه تصویری، جدول رسانه ورودی/خروجی + مسیریابی آپلود بر اساس پسوند، fallback دومرحله‌ای post، batch متن/رسانه + سریال‌سازی به‌ازای-چت، rate limit ۱۲۰/min + ردیابی ناهنجاری، tuning WS، ACL گروهی ۵سیاسته، dedupe ماندگار ۲۴ساعته، مرجع ۲۱ env)،
+  **teams-meetings** ‏(۱۰ سکشن — خط‌لولهٔ خلاصهٔ جلسات Graph با اولویت رونویسی → ضبط+STT، اشتراک‌های getAllTranscripts/getAllRecordings، هشدار انقضای ۷۲ ساعته اشتراک، حالت‌های تحویل graph/incoming_webhook).
+← مجموع: **۵۷ صفحه (۲۸٪)**.
+
+---
+
+
+### نشست ۳۹ — ۲۰۲۶-08-24 (بخش سی‌ونهم) — 🧩 افزونه‌ها
+- ترجمهٔ **user-guide/features/plugins.html** ‏(۱۷ سکشن — نمای سریع + مثال کمینه hello-world، جدول قابلیت‌های ctx.*، کشف + زیر-دسته‌های پوشه‌ای، انتخابی‌بودن + آنچه لیست مجاز گیت نمی‌زند، ترنسپورت‌های تأیید با fail-closed، مهاجرت grandfathering، ۲۶ هوک چرخه-حیات، چهار نوع افزونه، جدول interface های قابل‌افزودن، NixOS اعلامی، مدیریت CLI + لینک‌های hermes:// یک‌کلیکی Desktop، قابلیت‌ها/رضایت + جدول کلیدهای قدیمی + هشدار «سندباکس نیست»، اکشن‌های پلتفرمی v1، ایندکس جامعه + هشدار ایندکس≠audit، بسته‌های افزونه با زنجیره‌تأمین pin-SHA، اسکن امنیتی سه‌حکمی زمان‌نصب، UI تعاملی + سه وضعیت، تزریق پیام CLI/گیت‌وی، صدازدن MCP با لیست مجاز به‌ازای-سرور). ← مجموع: **۵۸ صفحه (۲۸٪)**.
+
+---
+
+- **اصلاح نشست ۳۹:** شمارندهٔ «قابلیت‌های اصلی» در README از ۵/۳۱ به ۶/۳۱ همگام شد.
+
+---
+
+
+### نشست ۴۰ — ۲۰۲۶-08-24 (بخش چهلم) — 🔌 MCP — 🎉 ۲۹٪
+- ترجمهٔ **user-guide/features/mcp.html** ‏(۲۰ سکشن — شروع سریع، کاتالوگ یک‌کلیکی Nous با انتخاب چک‌لیستی ابزارها + مدل اعتماد + سازگاری نسخهٔ manifest + جانشینی ${ENV_VAR} و متغیرهای سبک Cursor + suggest:، دو نوع سرور stdio/HTTP + OAuth 2.1 با سه دام مستند ‏(WAF و 127.0.0.1 / ارائه‌دهندگان بدون DCR مثل Google Drive / race reload پیکربندی)، mTLS سه‌شکلی، هدر هویت به‌ازای-کاربر، مرجع کلیدها + بازیافت سرورهای سنگین-حافظه، preset codex، پیشوند ثبت ابزار + حذف کاراکترهای TAG نامرئی و _meta فروشنده، wrapper های قابلیت-آگاه، فیلتر include/exclude/glob + تقدم + فیلتر کاربردی‌ها، کشف داینامیک tools/list_changed، مدل امنیت env، نمونه‌های کاربرد، عیب‌یابی، فراخوانی موازی، sampling با rate limit، elicitation حالت-فرم، **اجرای هرمس به‌عنوان سرور MCP** ‏(۱۰ ابزار پل کانال)). ← مجموع: **۵۹ صفحه (۲۹٪)**.
+
+---
+
+
+### نشست ۴۱ — ۲۰۲۶-08-24 (بخش چهلم و یکم) — ⏰ کرون — 🎉 ۶۰ صفحه
+- ترجمهٔ **user-guide/features/cron.html** ‏(۲۲ سکشن — قابلیت‌ها + سه tip مدل/pin استدلال + هشدار ضدبازگشت، ساخت با /cron و CLI و زبان طبیعی، اعتبارسنجی پیش-از-dispatch ‏(blocked_config، بدون توکن)، نگهبان رانش مدل، مهارت‌های الصاقی، workdir پروژه + سریال‌سازی، ویرایش + ارجاع نامی، چرخهٔ حیات، زمان‌بندی اداره‌شده-با-ایجنت ‏(جدول تخت + بدون تحویل معلق)، نحوهٔ کار تیک ۶۰ثانیه‌ای + دفتر اجرا + سرکش شکست مکرر، **جدول ~۲۵ هدف تحویل** شامل bot-chat/all/تاپیک تلگرام، پیچیدن پاسخ، کارهای قابل-ادامه + سطح تخت اسلک + DM ها، سرکوب [SILENT]، timeout های اسکریپت/رسانه/bot-chat، حالت بدون-ایجنت با پاکسازی env، زنجیره context_from + continuity، بازیابی ارائه‌دهنده، last_fire_error + جبران misfire، قالب‌های زمان‌بندی، مدیریت programmatik + اجرای ناهمگام، تول‌ست‌ها + گیت wakeAgent با سه دستورالعمل $0، ذخیرهٔ job، پرامپت خودبسنده، امنیت). ← مجموع: **۶۰ صفحه (۲۹٪)**.
+
+---
+
+
+### نشست ۴۲ — ۲۰۲۶-08-24 (بخش چهلم و دوم) — 📊 داشبورد وب — قابلیت‌ها ۹/۳۱
+- ترجمهٔ **user-guide/features/web-dashboard.html** ‏(۱۷ سکشن — شروع سریع + فلگ‌ها، مدیریت چند پروفایل با سوییچر URL-محور و بنر کهربایی، پیش‌نیازها web/pty، **۱۵ صفحه**: Status با بنر فشار منابع سه‌سطحی، Chat جاسازی TUI روی PTY/xterm.js WebGL + سوییچر نشست، Config فرم‌محور، API Keys، Sessions با FTS5، Logs، Analytics، Cron، Profiles، Skills، MCP، Webhooks، Pairing، Channels، System، فرمان ‎/reload، REST API کامل + جدول endpoint های ادمین، احراز گیت‌خورده fail-closed: ارائه‌دهندهٔ Nous OAuth + ثبت dashboard register، ارائه‌دهندهٔ رمزعبور scrypt با جدول env، OIDC خودمیزبان + مثال کامل Keycloak، override public_url، جریان OAuth/کوکی/حسابرسی، auth غیرتعاملی bearer، اتصال Desktop به بک‌اند راه‌دور، CORS، توسعه، build خودکار، هشت تم). تصاویر اسکرین‌شات سایت اصلی حذف شدند. ← مجموع: **۶۱ صفحه (۲۹٪)**.
+
+---
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -248,16 +444,55 @@ hermes-docs-fa/
 | 20 | `user-guide/configuring-models.html` | پیکربندی مدل‌ها |
 | 21 | `user-guide/checkpoints-and-rollback.html` | چک‌پوینت و بازگشت |
 | 22 | `user-guide/desktop.html` | اپلیکیشن دسکتاپ |
+| 23 | `user-guide/configuration.html` | پیکربندی (۵۹ سکشن!) |
+| 24 | `user-guide/features/curator.html` | نگهدارندهٔ مهارت‌ها |
+| 25 | `user-guide/messaging/index.html` | نمای کلی گیت‌وی پیام‌رسان |
+| 26 | `user-guide/messaging/telegram.html` | تلگرام |
+| 27 | `user-guide/messaging/discord.html` | دیسکورد |
+| 28 | `user-guide/messaging/slack.html` | اسلک |
+| 29 | `user-guide/messaging/whatsapp.html` | واتساپ ‏(پل Baileys) |
+| 30 | `user-guide/messaging/signal.html` | سیگنال |
+| 31 | `user-guide/messaging/sms.html` | پیامک ‏(Twilio) |
+| 32 | `user-guide/messaging/email.html` | ایمیل ‏(IMAP/SMTP) |
+| 33 | `user-guide/messaging/irc.html` | IRC |
+| 34 | `user-guide/messaging/ntfy.html` | ntfy |
+| 35 | `user-guide/messaging/relay.html` | هرمس رله ‏(Connector) |
+| 36 | `user-guide/messaging/webhooks.html` | وب‌هوک‌ها |
+| 37 | `user-guide/messaging/mattermost.html` | Mattermost |
+| 38 | `user-guide/messaging/matrix.html` | Matrix |
+| 39 | `user-guide/messaging/homeassistant.html` | Home Assistant |
+| 40 | `user-guide/messaging/raft.html` | Raft |
+| 41 | `user-guide/messaging/buzz.html` | Buzz ‏(Nostr) |
+| 42 | `user-guide/messaging/qqbot.html` | QQ Bot |
+| 43 | `user-guide/messaging/a2a.html` | A2A ‏(ایجنت-به-ایجنت) |
+| 44 | `user-guide/messaging/msgraph-webhook.html` | شنوندهٔ وب‌هوک Microsoft Graph |
+| 45 | `user-guide/messaging/simplex.html` | SimpleX Chat |
+| 46 | `user-guide/messaging/bluebubbles.html` | BlueBubbles ‏(iMessage) |
+| 47 | `user-guide/messaging/wecom-callback.html` | WeCom Callback ‏(اپ خودساخته) |
+| 48 | `user-guide/messaging/line.html` | LINE |
+| 49 | `user-guide/messaging/photon.html` | Photon iMessage |
+| 50 | `user-guide/messaging/teams.html` | Microsoft Teams |
+| 51 | `user-guide/messaging/dingtalk.html` | DingTalk |
+| 52 | `user-guide/messaging/open-webui.html` | Open WebUI |
+| 53 | `user-guide/messaging/wecom.html` | WeCom Bot ‏(وی‌چت سازمانی) |
+| 54 | `user-guide/messaging/weixin.html` | Weixin ‏(WeChat) |
+| 55 | `user-guide/messaging/yuanbao.html` | Yuanbao |
+| 56 | `user-guide/messaging/feishu.html` | Feishu / Lark |
+| 57 | `user-guide/messaging/teams-meetings.html` | جلسات Microsoft Teams |
+| 58 | `user-guide/features/plugins.html` | افزونه‌ها ‏(Plugins) |
+| 59 | `user-guide/features/mcp.html` | MCP ‏(Model Context Protocol) |
+| 60 | `user-guide/features/cron.html` | کارهای زمان‌بندی‌شده ‏(کرون) |
+| 61 | `user-guide/features/web-dashboard.html` | داشبورد وب |
 
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|
 | 🚀 شروع کار | **۶/۷** | فقط `nix-setup` (۱۲۱۳ خط — سخت‌ترین صفحهٔ باقی‌ماندهٔ این بخش) |
-| ⚙️ کار با Hermes | ۱۲/۲۸ | configuration (۲۶۱۴ خط، بزرگ‌ترین صفحهٔ پروژه)، cli، security (۸۱۷)، sessions (۹۰۴)، profiles |
-| 🧠 قابلیت‌های اصلی | ۴/۳۱ | skills (۱۰۱۲)، mcp (۹۲۰)، web-dashboard (۱۱۵۷)، plugins (۷۹۵) |
+| ⚙️ کار با Hermes | ۱۳/۲۸ | configuration (۲۶۱۴ خط، بزرگ‌ترین صفحهٔ پروژه)، cli، security (۸۱۷)، sessions (۹۰۴)، profiles |
+| 🧠 قابلیت‌های اصلی | ۵/۳۱ | skills (۱۰۱۲)، mcp (۹۲۰)، web-dashboard (۱۱۵۷)، plugins (۷۹۵) |
 | 🤖 اتوماسیون | ۰/۸ | cron (۹۹۱)، hooks (۱۸۹۹ — بزرگ)، delegation |
 | 🎬 رسانه و وب | ۰/۵ | voice-mode، browser |
-| 💬 پیام‌رسان‌ها | ۰/۳۵ | index/overview (۸۰۶)، telegram (۱۳۲۴)، discord (۹۲۷)، slack (۱۰۱۳) |
+| 💬 پیام‌رسان‌ها | ۳۳/۳۵ | index/overview (۸۰۶)، telegram (۱۳۲۴)، discord (۹۲۷)، slack (۱۰۱۳) |
 | 🔌 یکپارچه‌سازی | ۰/۱۱ | providers (۱۵۸۲)، nous-portal، mcp* |
 | 📚 راهنماها | ۰/۳۵ | tips، local-ollama-setup |
 | 🛠 توسعه‌دهنده | ۰/۳۴ | plugins__index (۱۶۷۷)، architecture |

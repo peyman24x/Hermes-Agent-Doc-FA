@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A2A (ایجنت-به-ایجنت) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/a2a" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>A2A ‏(ایجنت-به-ایجنت)</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>‏A2A ‏(Agent-to-Agent)</h1>
+<p><a href="https://a2a-protocol.org" target="_blank" rel="noopener">A2A</a> پروتکل باز Agent2Agent است ‏(v1.0، تحت نظارت بنیاد لینوکس) برای ارتباط بین ایجنت‌های هوش مصنوعی مستقل. افزونهٔ A2A هرمس <strong>در هر دو جهت</strong> کار می‌کند: ایجنت شما می‌تواند ایجنت‌های A2A دیگر را به‌عنوان ابزار صدا بزند و ایجنت‌های دیگر می‌توانند از طریق HTTP به هرمس شما کار بسپارند.</p>
+<p>با هر همتای سازگار-با-A2A تعامل دارد — یک هرمس دیگر، ‏LangChain، ‏CrewAI، ایجنت‌های Google ADK یا هر چیز ساخته‌شده روی ‏<code>a2a-sdk</code> رسمی.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> کِی از A2A استفاده کنیم</h2>
+<ul>
+  <li><strong>هرمس ↔ هرمس بین ماشین‌ها</strong> — ایجنت دسکتاپ‌تان کارها را به یک هرمس روی سرور بسپارد یا برعکس؛ هرکدام حافظه، ابزار و اعتبارنامهٔ خودشان را دارند.</li>
+  <li><strong>واگذاری به ایجنت‌های متخصص</strong> — همتایی که روی Agent Card خود مهارت‌های ‏<code>web_search</code>/<code>research</code>/<code>coding</code> را اعلان کند وسط گفتگو کشف و فراخوانی می‌شود.</li>
+  <li><strong>تبدیل‌شدن به سرویس قابل-فراخوانی</strong> — هرمس خود را expose کنید تا ایجنت‌های سایر فریم‌ورک‌ها بهش کار بفرستند.</li>
+</ul>
+<p>وقتی چند ایجنت روی <strong>همان ماشین</strong> می‌خواهید، ‏<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/delegation" target="_blank" rel="noopener">واگذاری</a> ‏(زیرایجنت‌های درون-پروسه) یا <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban" target="_blank" rel="noopener">تخته کانبان</a> ‏(صف کار ماندگار چند-پروفایلی) را ترجیح دهید — ‏A2A برای عبور از مرزهای پروسه/ماشین/فریم‌ورک است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> فعال‌سازی</h2>
+<div class="codebox"><pre><code>hermes gateway setup      # A2A را انتخاب کنید</code></pre></div>
+<p>یا در config.yaml:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  platforms:
+    a2a:
+      enabled: true
+      extra:
+        port: 9900</code></pre>
+</div>
+<p>ابزارهای کلاینت خروجی به‌عنوان تول‌ست <code>a2a</code> عرضه می‌شوند، <strong>به‌طور پیش‌فرض خاموش</strong> — به‌ازای پلتفرم فعالش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes tools enable a2a --platform cli        # نشست‌های CLI/TUI
+hermes tools enable a2a --platform telegram   # یا هر پلتفرم پیام‌رسانی
+hermes tools enable a2a --platform a2a        # اجازه به کارهای ورودی A2A برای صدا زدن همتاها (زنجیره‌سازی ایجنت)</code></pre>
+</div>
+<p>ابزارها در همهٔ انواع پروسه در دسترس‌اند — CLI، ‏TUI، گیت‌وی و کرون — بدون نیاز به فعال بودن پلتفرم ورودی.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> خروجی: صدا زدن ایجنت‌های دیگر</h2>
+<p>با تول‌ست <code>a2a</code> فعال، ایجنت این‌ها را می‌گیرد:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ابزار</th><th>کارکرد</th></tr></thead>
+  <tbody>
+    <tr><td><code>a2a_discover(url)</code></td><td>دریافت و خلاصه‌سازی Agent Card همتا</td></tr>
+    <tr><td><code>a2a_call(agent, message, context_id?)</code></td><td>ارسال کار و گرفتن پاسخ؛ چندنوبتی با ‏<code>context_id</code></td></tr>
+    <tr><td><code>a2a_list()</code></td><td>همتاهای پیکربندی‌شده، گفتگوهای ذخیره‌شده، متریک‌ها</td></tr>
+    <tr><td><code>a2a_history(context_id)</code></td><td>بازیابی گفتگوی ماندگار A2A</td></tr>
+    <tr><td><code>a2a_orchestrate(capability, message, mode?)</code></td><td>پخش کار به همهٔ همتاهای اعلان‌کنندهٔ یک قابلیت ‏(<code>all</code> / ‏<code>first</code> / ‏<code>best</code>)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>همتاهای شناخته‌شده را در config.yaml پیکربندی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>a2a_agents:
+  researcher:
+    url: "http://research-box.local:9900"
+    auth: { type: bearer, token: "..." }
+    timeout: 120
+    capabilities: [web_search, research]</code></pre>
+</div>
+<p>سپس فقط بپرسید: «از ایجنت researcher بخواه پست‌های امروز arXiv را خلاصه کند.» URL مستقیم هم کار می‌کند — ‏<code>a2a_call</code> هر endpoint سازگار-با-A2A را می‌پذیرد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> ورودی: قابل-فراخوانی بودن</h2>
+<p>با فعال بودن پلتفرم، هرمس این‌ها را سرو می‌دهد:</p>
+<ul>
+  <li><strong>‏Agent Card</strong> روی ‏<code>GET /.well-known/agent-card.json</code> ‏(مسیر مرجع v1.0؛ مسیر قدیمی ‏<code>agent.json</code> هم جواب می‌دهد) — نام ایجنت، مهارت‌ها ‏(مشتق از تول‌ست‌های فعال) و الزامات احراز را اعلان می‌کند.</li>
+  <li><strong>JSON-RPC 2.0</strong> روی ‏<code>POST /</code> — روش‌های مرجع v1.0 ‏(<code>SendMessage</code>، ‏<code>SendStreamingMessage</code>، ‏<code>GetTask</code>، ‏<code>ListTasks</code>، ‏<code>CancelTask</code>، ‏<code>SubscribeToTask</code>، CRUD پیکربندی اعلان push) به‌اضافهٔ alias های مسیری قبل-از-1.0 ‏(<code>message/send</code> و...).</li>
+  <li><strong>استریم SSE</strong> برای ‏<code>SendStreamingMessage</code> با فریم‌های محصور JSON-RPC مطابق مشخصات.</li>
+  <li><strong>اعلان‌های push</strong> ‏(وب‌هوک) برای کارهای طولانی، با امضای HMAC-SHA256.</li>
+</ul>
+<p>کارهای ورودی به یک <strong>نشست زندهٔ گیت‌وی</strong> تزریق می‌شوند — همان ایجنت، حافظه و ابزارهایی که سایر کانال‌ها را سرویس می‌دهند — و ریپلای نهایی به‌عنوان نتیجهٔ کار به فراخواننده برمی‌گردد. گفتگوها با ‏<code>contextId</code> مربوط به A2A کلید می‌خورند، پس همتا می‌تواند تبادل چندنوبتی داشته باشد.</p>
+<p>تعامل‌پذیری با ‏<code>a2a-sdk</code> رسمی پایتون تأیید شده ‏(حل card، ‏<code>SendMessage</code>، استریم).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> مدل امنیت</h2>
+<p>امن به‌طور پیش‌فرض؛ هر گام گشادشدن صریح است:</p>
+<ul>
+  <li><strong>بدون توکن ⇒ فقط localhost.</strong> سرور روی ‏<code>127.0.0.1</code> بایند می‌شود. در معرض گذاشتن راه‌دور توکن bearer <strong>و</strong> ‏<code>A2A_HOST</code> صریح می‌خواهد.</li>
+  <li><strong>توکن به‌ازای-همتا</strong> — ‏<code>A2A_PEER_TOKENS="alice:tok1,bob:tok2"</code> به هر همتا اعتبارنامهٔ خودش را می‌دهد؛ نام احرازشده پیشران سقف نرخ، اعتماد و audit است.</li>
+  <li><strong>فیلتر prompt-injection</strong> — متن ورودی فیلتر و به‌عنوان ورودی غیرقابل‌اعتمادِ همتا قاب می‌شود. همتاهای راه‌دور نمی‌توانند فرمان‌های اسلش اپراتوری را invoke کنند.</li>
+  <li><strong>سانسور خروجی</strong> — رشته‌های شبیه-اعتبارنامه ‏(کلیدهای API، ‏JWT، توکن‌ها) از پاسخ‌ها پاک می‌شوند.</li>
+  <li><strong>لاگ حسابرسی</strong> — هر تبادل به ‏<code>~/.hermes/a2a_audit.jsonl</code> الصاق می‌شود.</li>
+  <li><strong>ضدحلقه</strong> — سقف نوبت به‌ازای-زمینه مانع ping-pong بی‌پایان دو ایجنت می‌شود.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> مرجع پیکربندی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر env</th><th>پیش‌فرض</th><th>معنی</th></tr></thead>
+  <tbody>
+    <tr><td><code>A2A_PEER_TOKENS</code></td><td>—</td><td>اعتبارنامه‌های به‌ازای-همتا ‏<code>name:token,…</code> ‏(ترجیحی)</td></tr>
+    <tr><td><code>A2A_BEARER_TOKEN</code></td><td>—</td><td>توکن مشترک؛ هویت به IP فراخواننده برمی‌گردد</td></tr>
+    <tr><td><code>A2A_HOST</code></td><td><code>127.0.0.1</code></td><td>میزبان bind — فقط وقتی توکن تنظیم باشد گشاد می‌شود</td></tr>
+    <tr><td><code>A2A_PORT</code></td><td><code>9900</code></td><td>پورت ورودی</td></tr>
+    <tr><td><code>A2A_AGENT_NAME</code></td><td>مشتق از hostname</td><td>نام روی Agent Card</td></tr>
+    <tr><td><code>A2A_PUBLIC_URL</code></td><td>—</td><td>URL مسیریابی‌پذیر اعلان‌شده روی کارت ‏(پروکسی معکوس / k8s)</td></tr>
+    <tr><td><code>A2A_TRUSTED_PEERS</code></td><td>—</td><td>لیست مجاز هویت‌های احرازشده</td></tr>
+    <tr><td><code>A2A_ALLOW_ALL_USERS</code></td><td><code>false</code></td><td>اجازه به هر همتای احرازشده ‏(فقط توسعه)</td></tr>
+    <tr><td><code>A2A_RATE_LIMIT</code></td><td><code>60</code></td><td>درخواست/دقیقه به‌ازای هر هویت</td></tr>
+    <tr><td><code>A2A_MAX_PINGPONG_TURNS</code></td><td><code>5</code></td><td>سقف نوبت ضدحلقه به‌ازای هر زمینه ‏(حداکثر ۲۰)</td></tr>
+    <tr><td><code>A2A_REPLY_TIMEOUT</code></td><td><code>300</code></td><td>ثانیه انتظار برای ریپلای ایجنت</td></tr>
+    <tr><td><code>A2A_PUSH_SECRET</code></td><td>bearer token</td><td>رمز HMAC برای امضای اعلان‌های push</td></tr>
+    <tr><td><code>A2A_ADVERTISED_TOOLSETS</code></td><td>همهٔ ثبت‌شده‌ها</td><td>محدودکردن اینکه کدام مهارت‌ها روی Agent Card ظاهر شوند</td></tr>
+  </tbody>
+</table>
+</div>
+<p>پشت پروکسی معکوس یا Kubernetes Service مقدار ‏<code>A2A_PUBLIC_URL</code> را بگذارید ‏(یا به ‏<code>X-Forwarded-Host</code>/<code>X-Forwarded-Proto</code> اتکا کنید) تا Agent Card URLی را اعلان کند که همتاها واقعاً بتوانند به آن callback بزنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> تست سریع</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># از ماشین / ایجنت دیگر:
+curl http://your-host:9900/.well-known/agent-card.json
+
+curl -X POST http://your-host:9900/ \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer &lt;token&gt;' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"SendMessage",
+       "params":{"message":{"messageId":"m1","role":"ROLE_USER",
+                 "parts":[{"text":"What tools do you have?"}]}}}'</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> عیب‌یابی</h2>
+<ul>
+  <li><strong>همتاها به URL کارت نمی‌رسند</strong> — کارت آدرس bind شما را اعلان کرده بود؛ ‏<code>A2A_PUBLIC_URL</code> را روی URL خارجیِ مسیریابی‌پذیر بگذارید.</li>
+  <li><strong>‏<code>401 Unauthorized</code></strong> — عدم‌تطبیق توکن؛ ‏<code>A2A_PEER_TOKENS</code>/<code>A2A_BEARER_TOKEN</code> سمت سرور و بلوک ‏<code>auth:</code> همتا را چک کنید.</li>
+  <li><strong>سرور روی غیر-localhost بایند نمی‌شود</strong> — عمدی است: اول bearer token بگذارید بعد ‏<code>A2A_HOST=0.0.0.0</code>.</li>
+  <li><strong>ریپلای‌ها در کارهای طولانی timeout می‌شوند</strong> — ‏<code>A2A_REPLY_TIMEOUT</code> را بالا ببرید، یا فراخواننده را وادار کنید پیکربندی اعلان push ثبت و ‏<code>GetTask</code> را poll کند.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="qqbot.html"><span class="dir">→ قبلی</span><span class="ttl">QQ Bot</span></a>
+  <a class="next" href="msgraph-webhook.html"><span class="dir">بعدی ←</span><span class="ttl">Microsoft Graph Webhook</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/a2a" target="_blank" rel="noopener">A2A (Agent-to-Agent)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

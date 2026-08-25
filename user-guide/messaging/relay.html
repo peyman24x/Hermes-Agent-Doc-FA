@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>هرمس رله — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/relay" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>هرمس رله ‏(Connector)</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>هرمس رله ‏(Connector)</h1>
+<div class="callout warning">
+  <div class="callout-title">⚠️ آزمایشی</div>
+  <p>‏Relay <strong>آزمایشی است</strong>. قرارداد سیمی، طرح احراز و پیکربندی ممکن است حین اعتبارسنجی سیستم بدون چرخهٔ منسوخ‌سازی تغییر کنند.</p>
+</div>
+<p>هرمس Relay خودش یک پلتفرم چت نیست — یک <strong>سیستم کانکتور</strong> است که به گیت‌وی شما اجازه می‌دهد یک یا چند پلتفرم پیام‌رسانی واقعی را ‏(دیسکورد، تلگرام، اسلک، واتساپ و...) جلو بیفتد <strong>بدون نگهداری هرگونه اعتبارنامهٔ پلتفرم</strong>. یک سرویس جداگانه — <em>کانکتور</em> — مالک توکن‌های بات و سوکت‌های پلتفرم است. گیت‌وی شما به کانکتور از طریق یک WebSocket احراز‌شدهٔ واحد <strong>به سمت بیرون</strong> شماره می‌گیرد، در دست‌دادن (handshake) توصیفگر قابلیت می‌گیرد و بعد رویدادهای پیام نرمال‌شده ‏(ورودی) و اکشن‌ها ‏(خروجی) را روی همان سوکت تبادل می‌کند.</p>
+<p>ویژگی‌های کلیدی:</p>
+<ul>
+  <li><strong>شبکه فقط-خروجی.</strong> گیت‌وی هرگز پورت ورودی باز نمی‌کند. پیام‌های ورودی روی همان WebSocketی که گیت‌وی گرفته برمی‌گردند، پس relay پشت NAT و روی میزبان‌های بدون IP عمومی کار می‌کند.</li>
+  <li><strong>بدون رمز پلتفرم روی گیت‌وی.</strong> توکن‌های بات روی کانکتور زندگی می‌کنند. URLهای رسانهٔ محافظت‌شده با احرازِ پلتفرم سمت کانکتور دوباره میزبانی می‌شوند، پس اعتبارنامه‌های پلتفرم هرگز روی سیم عبور نمی‌کنند.</li>
+  <li><strong>بی‌اعتنا به پلتفرم.</strong> گیت‌وی یاد می‌گیرد پلتفرم جلویی چه کارهایی بلد است ‏(سقف طول پیام، لهجهٔ مارک‌داون، پشتیبانی ویرایش/ترد/استریم و مجموعه دقیق عملیات) از توصیفگر handshake نه از منطق هاردکدشدهٔ پلتفرمی.</li>
+</ul>
+<p>رابط رسمی گیت‌وی ⇄ کانکتور در مخزن، فایل <code>docs/relay-connector-contract.md</code> است.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> کِی از Relay استفاده کنیم</h2>
+<p>‏Relay برای استقرارهایی است که یک سرویس کانکتورِ میزبانی‌شده یا مشترک سمت پلتفرم را مدیریت می‌کند — مثلاً میزبانی چند-مستأجری که یک بات مشترک جلوی ایجنت‌های خیلی کاربران است، یا راه‌اندازی‌هایی که نمی‌خواهید توکن‌های بات روی ماشین گیت‌وی باشند. اگر خودتان بات‌هایتان را مستقیم اجرا می‌کنید، به‌جایش از آداپتورهای بومی پلتفرم استفاده کنید ‏(<a href="telegram.html">تلگرام</a>، ‏<a href="discord.html">دیسکورد</a> و...).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> ثبت‌نام ‏(Enrollment)</h2>
+<p>گیت‌وی خودمیزبان با یک رمز به‌ازای-گیت‌وی به کانکتور احراز می‌شود. ‏<code>hermes gateway enroll</code> یک <strong>توکن ثبت‌نام تک‌مصرف</strong> ‏(که کانکتور هنگام provision مسیر مستأجر شما ضرب و همراه پیکربندی گیت‌وی تحویل می‌شود) را برای آن رمز بازخرید می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway enroll \
+  --token &lt;enrollment-token&gt; \
+  --connector-url wss://connector.example.com/relay</code></pre>
+</div>
+<p>چه می‌کند:</p>
+<ol>
+  <li>یک توکن دسترسی تازهٔ Nous Portal از لاگین موجودتان حل می‌کند ‏(<code>~/.hermes/auth.json</code>) — این ثابت می‌کند سازمان Nous ‏(مستأجر) متعلق به شماست. اگر <code>gateway.idp.token_url</code> پیکربندی شده باشد به‌جایش IdP خودتان استفاده می‌شود ‏(مسیر air-gapped / IdP خودمیزبان، بدون دخالت Nous Portal): با پیکربندی <code>client_id</code>/<code>client_secret</code> یک grant عمومی OAuth2 client-credentials اجرا می‌کند؛ بدون هیچ‌کدام URL به‌عنوان نقطهٔ پایانی توکن محیطی پردازش می‌شود ‏(GET ساده که بدنهٔ پاسخش توکن است — الگوی metadata-server مثل ‏<code>$DOMINO_API_PROXY/access-token</code>). پیکربندی فقط یکی از دو اعتبارنامه خطاست.</li>
+  <li>توکن ثبت‌نام و یک شناسهٔ گیت‌وی را با POST به نقطهٔ پایانی <code>/relay/enroll</code> کانکتور روی TLS می‌فرستد.</li>
+  <li>کانکتور توکن را تأیید ‏(امضا، تک‌مصرف، تطبیق مستأجر)، یک رمز به‌ازای-گیت‌وی به‌اضافهٔ کلید تحویل به‌ازای-مستأجر ضرب و آن‌ها را یک‌بار برمی‌گرداند.</li>
+  <li>اعتبارنامه‌ها را در <code>~/.hermes/.env</code> ذخیره می‌کند: ‏<code>GATEWAY_RELAY_ID</code>، ‏<code>GATEWAY_RELAY_SECRET</code>، ‏<code>GATEWAY_RELAY_DELIVERY_KEY</code> ‏(به‌اضافهٔ <code>GATEWAY_RELAY_URL</code> / ‏<code>GATEWAY_RELAY_WAKE_URL</code> اگر داده شده باشند).</li>
+</ol>
+<p>بعدش برای خواندن محیط جدید گیت‌وی را ری‌استارت کنید.</p>
+
+<h3>فلگ‌ها</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فلگ</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>--token</code></td><td>توکن ثبت‌نام تک‌مصرف. با <code>GATEWAY_RELAY_ENROLL_TOKEN</code> هم قابل تنظیم است.</td></tr>
+    <tr><td><code>--connector-url</code></td><td>URL پایه یا relay کانکتور ‏(<code>wss://…/relay</code> یا <code>https://…</code>). با <code>GATEWAY_RELAY_URL</code> یا <code>gateway.relay_url</code> در config.yaml هم تنظیم می‌شود.</td></tr>
+    <tr><td><code>--gateway-id</code></td><td>شناسهٔ پایدار این نمونهٔ گیت‌وی ‏(برای دقت kill-switch). پیش‌فرض: ‏<code>gw-&lt;hostname&gt;</code>.</td></tr>
+    <tr><td><code>--wake-url</code></td><td>URL قابل‌رسید اختیاری که کانکتور وقتی کار بافریافته برای گیت‌وی idle می‌رسد با GET بی‌payload بیدارش می‌کند. به‌صورت <code>GATEWAY_RELAY_WAKE_URL</code> ذخیره می‌شود. بدون آن هم گیت‌وی در اتصال‌مجدد بعدی پیام‌های بافرشده را تخلیه می‌کند.</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 نصب‌های مدیریت‌شده</div>
+  <p>‏<code>hermes gateway enroll</code> در نصب‌های مدیریت‌شده/میزبانی‌شده از اجرا امتناع می‌کند — آنجا پلتفرم میزبانی رمز relay را مستقیم داخل محیط کانتینر provision می‌کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پیکربندی</h2>
+<p>‏Relay وقتی فعال می‌شود که URL relay کانکتور پیکربندی شده باشد — فلگ قابلیت جدایی ندارد. استقرارهایی که تنظیمش نکنند بی‌تأثیرند.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>تنظیم</th><th>کجا</th><th>معنی</th></tr></thead>
+  <tbody>
+    <tr><td><code>GATEWAY_RELAY_URL</code></td><td>env ‏(<code>~/.hermes/.env</code>)</td><td>URL WebSocket relay کانکتور. حضورش پلتفرم relay را فعال می‌کند.</td></tr>
+    <tr><td><code>gateway.relay_url</code></td><td>config.yaml</td><td>همان بالا، فرم فایل پیکربندی ‏(env مقدم است).</td></tr>
+    <tr><td><code>GATEWAY_RELAY_ID</code></td><td>env</td><td>شناسهٔ این نمونهٔ گیت‌وی ‏(نوشتهٔ enroll).</td></tr>
+    <tr><td><code>GATEWAY_RELAY_SECRET</code></td><td>env</td><td>رمز به‌ازای-گیت‌وی برای احراز ارتقای WebSocket ‏(نوشتهٔ enroll).</td></tr>
+    <tr><td><code>GATEWAY_RELAY_DELIVERY_KEY</code></td><td>env</td><td>کلید تحویل به‌ازای-مستأجر ‏(نوشتهٔ enroll؛ برای سازگاری رو به جلو حفظ می‌شود).</td></tr>
+    <tr><td><code>GATEWAY_RELAY_WAKE_URL</code> / ‏<code>gateway.relay_wake_url</code></td><td>env / config.yaml</td><td>هدف wake-poke اختیاری برای گیت‌وی‌های idle/معلق.</td></tr>
+    <tr><td><code>GATEWAY_RELAY_PLATFORMS</code></td><td>env</td><td>فهرست پلتفرم‌هایی که این گیت‌وی روی یک اتصال جلو می‌افتد، جداشده با ویرگول ‏(مثل <code>discord,telegram</code>). معمولاً توسط deployment/orchestrator مهر می‌خورد.</td></tr>
+    <tr><td><code>GATEWAY_RELAY_BOT_IDS</code></td><td>env</td><td>نگاشت JSON هویت‌های بات به‌ازای-پلتفرم، مثل <code>{"discord": {"botId": "…"}}</code>. جفتِ <code>GATEWAY_RELAY_PLATFORMS</code>.</td></tr>
+    <tr><td><code>gateway.idp.token_url</code></td><td>config.yaml</td><td>با تنظیم، ثبت‌نام/provision به‌جای Nous Portal علیه IdP خودتان احراز می‌شود: OAuth2 client-credentials وقتی <code>gateway.idp.client_id</code>/<code>client_secret</code> هم هست؛ وگرنه نقطهٔ پایانی توکن محیطی ‏(GET ساده که توکن خام یا <code>{"access_token": …}</code> برمی‌گرداند).</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> قابلیت‌های پشتیبانی‌شده</h2>
+<p>آنچه واقعاً روی اتصال relay کار می‌کند در handshake مذاکره می‌شود: کانکتور فهرست <code>supported_ops</code> را اعلان می‌کند و گیت‌وی فقط عملیاتی را استفاده می‌کند که کانکتور صریحاً اعلان کرده باشد ‏(کانکتورهای قدیمی‌تر به مجموعهٔ legacy ‏<code>send</code>/<code>edit</code>/<code>typing</code>/<code>follow_up</code> سقوط می‌کنند). فلگ‌های قابلیت به‌ازای-پلتفرم ‏(استریم مبتنی بر ویرایش، تردها، استریم draft، لهجهٔ مارک‌داون، سقف طول پیام) هم از توصیفگر handshake می‌آیند. مشمول همان مذاکره، relay این‌ها را پشتیبانی می‌کند:</p>
+<ul>
+  <li><strong>پیام متنی و استریم</strong> — ارسال، ریپلای و استریم تدریجی مبتنی بر ویرایش وقتی پلتفرم جلویی ویرایش پیام دارد؛ وگرنه خروجی به یک پیام به‌ازای هر بخش تنزل می‌یابد.</li>
+  <li><strong>رسانه در هر دو جهت</strong> — تصویر، صدا، صوت، ویدیو و سند خروجی به کانکتور آپلود ‏(یا با URL عمومی ارجاع) و از مسیر آپلود بومی هر پلتفرم تحویل داده می‌شوند، همراه کپشن. پیوست‌های ورودی برای ایجنت به فایل محلی می‌شوند؛ URLهای پلتفرمیِ محافظت‌شده با احراز، سمت کانکتور دوباره میزبانی می‌شوند تا اعتبارنامه‌های پلتفرم هرگز به گیت‌وی نرسند. بازمیزبانی رسانه سقف ۲۵ مگابایت و انقضا ‏(~۱ ساعت) دارد.</li>
+  <li><strong>پرامپت‌های تعاملی بومی</strong> — تأییدهای exec، تأییدیه‌ها و پرسش‌های clarify با <strong>کنترل‌های بومی پلتفرم</strong> رندر می‌شوند ‏(دکمه‌های دیسکورد، کیبورد inline تلگرام، اکشن‌های Block Kit اسلک، پیام‌های دکمه‌ای/فهرستی واتساپ) به‌جای fallback های متن‌شماره‌دار. فشار دکمه به‌عنوان پاسخ پرامپتِ احراز‌شده از کاربر واقعی کلیک‌کننده برمی‌گردد، پس گیت‌های مجوز گیت‌وی دقیقاً مثل یک ریپلای تایپی اعمال می‌شوند. انقضای پرامپت سمت گیت‌وی اجرا می‌شود.</li>
+  <li><strong>چرخهٔ حیات واکنش-ack</strong> — واکنش‌های وضعیت-پردازش بات ‏(👀 حین کار، ✅/❌ در پایان) روی relay کار می‌کنند. واکنش‌ها best-effort هستند: شکست واکنش هرگز نوبت را شکست نمی‌دهد.</li>
+  <li><strong>چرخهٔ حیات ترد</strong> — ساخت تردهای handoff و تغییر نام تردها ‏(شامل نام‌گذاری معنایی LLM) از طریق عملیات انتزاعیِ <code>thread_create</code> / ‏<code>thread_rename</code>، با محافظ no-clobber تا rename دستی انسان برنده شود. در دسترس بودن بسته به پلتفرم است ‏(مثلاً تردهای اسلک قابل rename نیستند؛ واتساپ اصلاً ترد ندارد).</li>
+  <li><strong>نشانگرهای تایپ</strong> — گیت‌وی حین پردازش تایپ ‏(و توقف-تایپ) را از طریق کانکتور خارج می‌کند.</li>
+  <li><strong>متادیتای چت</strong> — جست‌وجوهای <code>get_chat_info</code> وقتی اعلان شده باشند به کانکتور پروکسی می‌شوند.</li>
+  <li><strong>تحویل بافر و wake</strong> — وقتی گیت‌وی idle می‌شود یا قطع می‌شود، کانکتور پیام‌های ورودی را ماندگار بافر و در اتصال‌مجدد به‌ترتیب بازپخش می‌کند ‏(گیت‌خورده با ack، بدون گم‌شدن یا تکرار). اگر wake URL ثبت شده باشد، کانکتور با رسیدن کار بافریافته برای گیت‌وی خواب، آن را poke می‌کند.</li>
+</ul>
+<p>جلوفتن چند-پلتفرمه پشتیبانی می‌شود: یک گیت‌وی می‌تواند روی یک اتصال relay واحد چند پلتفرم را جلو بیفتد ‏(مثل دیسکورد <em>و</em> تلگرام)، و هر پیام خروجی برای پلتفرم هدفش تگ بخورد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> عیب‌یابی</h2>
+<p><strong>ثبت‌نام با 401 شکست خورد</strong> — کانکتور نتوانست توکن هویت شما را تأیید کند. با <code>hermes auth add nous</code> ‏(یا <code>hermes setup</code>) دوباره وارد شوید و تلاش مجدد کنید.</p>
+<p><strong>ثبت‌نام با 403 شکست خورد</strong> — توکن ثبت‌نام نامعتبر، منقضی، قبلاً مصرف‌شده یا متعلق به مستأجر دیگر است. توکن‌های ثبت‌نام تک‌مصرف‌اند؛ از کسی که مسیر مستأجرتان را provision کرد توکن تازه بخواهید.</p>
+<p><strong>«Could not reach the connector»</strong> — URL کانکتور را چک کنید. هم URL شماره‌گیری ‏<code>wss://…/relay</code> هم URL پایهٔ <code>https://…</code> را می‌توانید بچسبانید؛ CLI خودکار بین‌شان تبدیل می‌کند.</p>
+<p><strong>‏<code>enroll</code> از اجرا امتناع می‌کند</strong> — در نصب مدیریت‌شده/میزبانی‌شده هستید که رمز relay را پلتفرم میزبانی provision کرده. ثبت‌نام خودی فقط برای گیت‌وی‌های خودمیزبان است.</p>
+<p><strong>پلتفرم relay بعد از اینکه قبلاً کار می‌کرد غیرفعال نشان داده می‌شود</strong> — بسته‌شدن WebSocket با کد 4401 <em>بعد از</em> handshake موفق یعنی رمز گیت‌وی لغو شده ‏(مثلاً نمونه deprovision شده). گیت‌وی عمداً reconnect را متوقف و relay را غیرفعال گزارش می‌کند نه اینکه retry کند. کد 4401 <em>قبل از</em> هر handshake موفق، race گذرای هنوز-provision-نشده تلقی و عادی تلاش مجدد می‌شود.</p>
+<p><strong>بعد از ثبت‌نام هیچ چیز تغییر نکرد</strong> — گیت‌وی مقادیر ‏<code>GATEWAY_RELAY_*</code> را هنگام شروع می‌خواند. ری‌استارتش کنید ‏(<code>hermes gateway restart</code>).</p>
+<p><strong>یک قابلیت ‏(دکمه‌ها، رسانه، تردها...) بی‌صدا به متن ساده تنزل می‌کند</strong> — کانکتورِ پلتفرم شما آن عملیات را در ‏<code>supported_ops</code> دست‌دادنش اعلان نکرده. گیت‌وی عمداً به رفتار متنی سقوط می‌کند به‌جای فرستادن عملیاتی که کانکتور نمی‌تواند هندل کند.</p>
+</section>
+
+<div class="pager">
+  <a href="ntfy.html"><span class="dir">→ قبلی</span><span class="ttl">ntfy</span></a>
+  <a class="next" href="webhooks.html"><span class="dir">بعدی ←</span><span class="ttl">وب‌هوک‌ها</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/relay" target="_blank" rel="noopener">Hermes Relay</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

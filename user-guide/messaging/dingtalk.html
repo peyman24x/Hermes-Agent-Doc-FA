@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DingTalk — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/dingtalk" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>DingTalk</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی DingTalk</h1>
+<p>هرمس ایجنت به‌عنوان چت‌بات با DingTalk ‏(钉钉) یکپارچه می‌شود و اجازه می‌دهد از طریق پیام خصوصی یا چت گروهی با دستیار هوش مصنوعی‌تان گفتگو کنید. بات از طریق Stream Mode دینگ‌تاک وصل می‌شود — اتصال WebSocket طولانی‌عمر که هیچ URL عمومی یا سرور وب‌هوکی نمی‌خواهد — و با پیام‌های مارک‌داونی از طریق API وب‌هوک نشست دینگ‌تاک جواب می‌دهد.</p>
+<p>پیش از راه‌اندازی، بخشی که بیشتر افراد می‌خواهند بدانند: رفتار هرمس پس از ورود به ورک‌اسپیس دینگ‌تاک شما چگونه است.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> رفتار هرمس</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>زمینه</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><strong>‏DM ها ‏(چت ۱:۱)</strong></td><td>هرمس به همهٔ پیام‌ها پاسخ می‌دهد. نیازی به منشن نیست. هر DM نشست مستقل دارد.</td></tr>
+    <tr><td><strong>چت‌های گروهی</strong></td><td>هرمس وقتی منشن شود پاسخ می‌دهد. بدون منشن، پیام نادیده گرفته می‌شود.</td></tr>
+    <tr><td><strong>گروه‌های مشترک چندکاربره</strong></td><td>به‌طور پیش‌فرض هرمس تاریخچهٔ نشست را داخل گروه به‌ازای هر کاربر جدا می‌کند. دو نفر که در یک گروه حرف می‌زنند مگر صریحاً غیرفعالش کنید رونویسی مشترک ندارند.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>مدل نشست در DingTalk</h3>
+<p>به‌طور پیش‌فرض:</p>
+<ul>
+  <li>هر DM نشست مستقل خودش را دارد</li>
+  <li>هر کاربر در چت گروهی مشترک، داخل همان گروه نشست خودش را دارد</li>
+</ul>
+<p>این با config.yaml کنترل می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>group_sessions_per_user: true</code></pre>
+</div>
+<p>فقط اگر صریحاً یک گفتگوی مشترک برای کل گروه می‌خواهید <code>false</code> کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>group_sessions_per_user: false</code></pre>
+</div>
+<p>این راهنما کل فرایند راه‌اندازی را قدم‌به‌قدم توضیح می‌دهد — از ساخت بات دینگ‌تاک تا ارسال اولین پیام.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پیش‌نیازها</h2>
+<p>بسته‌های پایتونی لازم را نصب کنید:</p>
+<div class="codebox"><pre><code>cd ~/.hermes/hermes-agent && uv pip install -e ".[dingtalk]"</code></pre></div>
+<p>یا تکی:</p>
+<div class="codebox"><pre><code>pip install dingtalk-stream httpx alibabacloud-dingtalk</code></pre></div>
+<ul>
+  <li>‏<code>dingtalk-stream</code> — SDK رسمی دینگ‌تاک برای Stream Mode ‏(پیام‌رسانی لحظه‌ای مبتنی بر WebSocket)</li>
+  <li>‏<code>httpx</code> — کلاینت HTTP ناهمگام برای ارسال ریپلای از طریق وب‌هوک‌های نشست</li>
+  <li>‏<code>alibabacloud-dingtalk</code> — SDK OpenAPI دینگ‌تاک برای AI Card ها، واکنش ایموجی و دانلود رسانه</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۱: ساخت اپ دینگ‌تاک</h2>
+<ol>
+  <li>به <a href="https://open-dev.dingtalk.com/" target="_blank" rel="noopener">کنسول توسعه‌دهندگان DingTalk</a> بروید.</li>
+  <li>با حساب ادمین دینگ‌تاک وارد شوید.</li>
+  <li>روی <strong>Application Development</strong> ← <strong>Custom Apps</strong> ← <strong>Create App via H5 Micro-App</strong> کلیک کنید ‏(یا <strong>Robot</strong> بسته به نسخهٔ کنسول).</li>
+  <li>پر کنید:
+    <ul>
+      <li><strong>App Name</strong>: مثل ‏<code>Hermes Agent</code></li>
+      <li><strong>Description</strong>: اختیاری</li>
+    </ul>
+  </li>
+  <li>بعد از ساخت به <strong>Credentials &amp; Basic Info</strong> بروید و <strong>Client ID</strong> ‏(AppKey) و <strong>Client Secret</strong> ‏(AppSecret) را پیدا کنید. هر دو را کپی کنید.</li>
+</ol>
+<div class="callout warning">
+  <div class="callout-title">⚠️ اعتبارنامه فقط یک‌بار نمایش داده می‌شود</div>
+  <p>‏Client Secret فقط هنگام ساخت اپ یک‌بار نمایش داده می‌شود. اگر گمش کردید باید بازتولیدش کنید. هرگز این اعتبارنامه‌ها را عمومی به اشتراک نگذارید یا به گیت کامیت نکنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۲: فعال‌سازی قابلیت ربات</h2>
+<ol>
+  <li>در صفحهٔ تنظیمات اپ به <strong>Add Capability</strong> ← <strong>Robot</strong> بروید.</li>
+  <li>قابلیت ربات را فعال کنید.</li>
+  <li>تحت <strong>Message Reception Mode</strong> مقدار <strong>Stream Mode</strong> را انتخاب کنید ‏(توصیه‌شده — بدون URL عمومی).</li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>‏Stream Mode پیکربندی توصیه‌شده است. اتصال WebSocket طولانی‌عمرِ شروع‌شده از ماشین شما استفاده می‌کند، پس IP عمومی، دامنه یا endpoint وب‌هوک لازم ندارد. پشت NAT، فایروال و روی ماشین‌های محلی کار می‌کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۳: یافتن شناسهٔ کاربری دینگ‌تاک</h2>
+<p>هرمس ایجنت از شناسهٔ کاربری دینگ‌تاک شما برای کنترل اینکه چه کسی با بات تعامل کند استفاده می‌کند. شناسه‌های کاربری دینگ‌تاک رشته‌های الفبایی-عددی تنظیمشده توسط ادمین سازمان‌تان هستند.</p>
+<p>برای یافتن شناسه‌تان:</p>
+<ol>
+  <li>از ادمین سازمان دینگ‌تاک بپرسید — شناسه‌ها در کنسول ادمین دینگ‌تاک زیر <strong>Contacts ← Members</strong> پیکربندی می‌شوند.</li>
+  <li>روش جایگزین: بات ‏<code>sender_id</code> هر پیام ورودی را لاگ می‌کند. گیت‌وی را شروع، به بات پیام بدهید و بعد شناسه‌تان را در لاگ‌ها چک کنید.</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۴: پیکربندی هرمس ایجنت</h2>
+<h3>گزینهٔ A: راه‌اندازی تعاملی ‏(توصیه‌شده)</h3>
+<div class="codebox"><pre><code>hermes gateway setup</code></pre></div>
+<p>هنگام پرسش <strong>DingTalk</strong> را انتخاب کنید. ویزارد setup از یکی از دو مسیر مجوز می‌دهد:</p>
+<ul>
+  <li><strong>جریان دستگاهی QR-code ‏(توصیه‌شده).</strong> QR چاپ‌شده در ترمینال را با اپ موبایل دینگ‌تاک اسکن کنید — ‏Client ID و Client Secret خودکار برگردانده و در ‏<code>~/.hermes/.env</code> نوشته می‌شوند. بدون رفت‌وآمد به کنسول توسعه‌دهنده.</li>
+  <li><strong>چسباندن دستی.</strong> اگر قبلاً اعتبارنامه دارید ‏(یا اسکن QR راحت نیست)، هنگام پرسش Client ID، ‏Client Secret و شناسه‌های کاربر مجاز را بچسبانید.</li>
+</ul>
+<div class="callout note">
+  <div class="callout-title">📌 افشای برند openClaw</div>
+  <p>چون ‏<code>verification_uri_complete</code> دینگ‌تاک در لایهٔ API به هویت openClaw هاردکد شده، QR فعلاً تا زمانی که Alibaba / DingTalk-Real-AI قالب اختصاصی هرمس را سمت سرور ثبت کند زیر رشتهٔ مبدأ ‏<code>openClaw</code> مجوز می‌دهد. این صرفاً نحوهٔ نمایش صفحهٔ رضایت دینگ‌تاک است — باتی که می‌سازید کاملاً متعلق به خودتان و خصوصی به tenant شماست.</p>
+</div>
+
+<h3>گزینهٔ B: پیکربندی دستی</h3>
+<p>این‌ها را به فایل ‏<code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># الزامی
+DINGTALK_CLIENT_ID=your-app-key
+DINGTALK_CLIENT_SECRET=your-app-secret
+
+# امنیت: محدودکردن تعامل با بات
+DINGTALK_ALLOWED_USERS=user-id-1
+
+# چند کاربر مجاز (با ویرگول)
+# DINGTALK_ALLOWED_USERS=user-id-1,user-id-2
+
+# اختیاری: گیت چت گروهی (مثل Slack/Telegram/Discord/WhatsApp)
+# DINGTALK_REQUIRE_MENTION=true
+# DINGTALK_FREE_RESPONSE_CHATS=cidABC==,cidDEF==
+# DINGTALK_MENTION_PATTERNS=^小马
+# DINGTALK_HOME_CHANNEL=cidXXXX==
+# DINGTALK_ALLOW_ALL_USERS=true</code></pre>
+</div>
+<p>تنظیم رفتاری اختیاری در config.yaml:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>group_sessions_per_user: true
+
+gateway:
+  platforms:
+    dingtalk:
+      extra:
+        # منشن در گروه‌ها قبل از ریپلای بات لازم باشد (هم‌ترازی با Slack/Telegram/Discord).
+        # DM ها این را نادیده می‌گیرند — بات همیشه در چت ۱:۱ جواب می‌دهد.
+        require_mention: true
+
+        # لیست مجاز به‌ازای-پلتفرم. با تنظیم فقط این شناسه‌های کاربر دینگ‌تاک حق تعامل دارند
+        # (همان معناشناسی DINGTALK_ALLOWED_USERS ولی scope اینجا به‌جای .env).
+        allowed_users:
+          - user-id-1
+          - user-id-2</code></pre>
+</div>
+<ul>
+  <li>‏<code>group_sessions_per_user: true</code> زمینهٔ هر شرکت‌کننده را داخل چت‌های گروهی مشترک ایزوله نگه می‌دارد</li>
+  <li>‏<code>require_mention: true</code> مانع پاسخ بات به هر پیام گروهی می‌شود — فقط وقتی کسی @منشنش کند جواب می‌دهد</li>
+  <li>‏<code>allowed_users</code> زیر ‏<code>dingtalk.extra</code> جایگزینی برای ‏<code>DINGTALK_ALLOWED_USERS</code> است؛ یکی را بگذارید ‏(اگر هر دو تنظیم شوند فقط کاربران حاضر در هر دو فهرست مجازند)</li>
+</ul>
+
+<h3>شروع گیت‌وی</h3>
+<p>بعد از پیکربندی، گیت‌وی دینگ‌تاک را شروع کنید:</p>
+<div class="codebox"><pre><code>hermes gateway</code></pre></div>
+<p>بات باید ظرف چند ثانیه به Stream Mode دینگ‌تاک وصل شود. برای تست بهش پیام بدهید — DM یا در گروهی که افزوده شده.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>می‌توانید ‏<code>hermes gateway</code> را در پس‌زمینه یا به‌صورت سرویس systemd برای عملکرد مداوم اجرا کنید. جزئیات در مستندات استقرار.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> قابلیت‌ها</h2>
+
+<h3>‏AI Card ها</h3>
+<p>هرمس می‌تواند به‌جای پیام مارک‌داونی ساده با AI Card های دینگ‌تاک ریپلای دهد. کارت‌ها نمایش غنی‌تر و ساختاریافته‌تری دارند و از به‌روزرسانی استریم حین تولید پاسخ ایجنت پشتیبانی می‌کنند.</p>
+<p>برای فعال‌کردن AI Card ها شناسهٔ قالب کارت را در config.yaml تنظیم کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  dingtalk:
+    enabled: true
+    extra:
+      card_template_id: "your-card-template-id"</code></pre>
+</div>
+<p>شناسهٔ قالب کارت را در کنسول توسعه‌دهندگان دینگ‌تاک زیر تنظیمات AI Card اپ‌تان پیدا می‌کنید. با فعال‌شدن AI Card ها همهٔ ریپلای‌ها به‌صورت کارت با به‌روزرسانی متنی استریم ارسال می‌شوند.</p>
+
+<h3>واکنش‌های ایموجی</h3>
+<p>هرمس خودکار برای نشان دادن وضعیت پردازش روی پیام‌هایتان واکنش ایموجی می‌گذارد:</p>
+<ul>
+  <li>🤔Thinking — وقتی بات شروع به پردازش پیام شما می‌کند اضافه می‌شود</li>
+  <li>🥳Done — وقتی پاسخ کامل شد ‏(جایگزین واکنش Thinking)</li>
+</ul>
+<p>این واکنش‌ها هم در DM هم در چت گروهی کار می‌کنند.</p>
+
+<h3>تنظیمات نمایش</h3>
+<p>رفتار نمایش دینگ‌تاک را مستقل از سایر پلتفرم‌ها سفارشی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  platforms:
+    dingtalk:
+      show_reasoning: false   # نمایش استدلال/تفکر مدل در ریپلای‌ها
+      streaming: true         # پاسخ‌های استریم (با AI Card کار می‌کند)
+      tool_progress: all      # نمایش پیشرفت اجرای ابزار (all/new/off)
+      interim_assistant_messages: true  # نمایش پیام‌های میان‌متن توضیحی</code></pre>
+</div>
+<p>برای تجربهٔ تمیزتر پیشرفت ابزار و پیام‌های میانی را خاموش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  platforms:
+    dingtalk:
+      tool_progress: off
+      interim_assistant_messages: false</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> عیب‌یابی</h2>
+
+<h3>بات به پیام‌ها پاسخ نمی‌دهد</h3>
+<p><strong>علت:</strong> قابلیت ربات فعال نیست یا ‏<code>DINGTALK_ALLOWED_USERS</code> شناسهٔ شما را ندارد.</p>
+<p><strong>راه‌حل:</strong> تأیید کنید قابلیت ربات در تنظیمات اپ فعال و Stream Mode انتخاب شده. چک کنید شناسه‌تان در ‏<code>DINGTALK_ALLOWED_USERS</code> باشد. گیت‌وی را ری‌استارت کنید.</p>
+
+<h3>خطای «dingtalk-stream not installed»</h3>
+<p><strong>علت:</strong> بستهٔ پایتونی ‏<code>dingtalk-stream</code> نصب نیست.</p>
+<p><strong>راه‌حل:</strong></p>
+<div class="codebox"><pre><code>pip install dingtalk-stream httpx</code></pre></div>
+
+<h3>خطای «DINGTALK_CLIENT_ID and DINGTALK_CLIENT_SECRET required»</h3>
+<p><strong>علت:</strong> اعتبارنامه‌ها در محیط یا فایل .env تنظیم نیستند.</p>
+<p><strong>راه‌حل:</strong> تأیید کنید ‏<code>DINGTALK_CLIENT_ID</code> و ‏<code>DINGTALK_CLIENT_SECRET</code> درست در ‏<code>~/.hermes/.env</code> تنظیم‌اند. ‏Client ID همان AppKey و ‏Client Secret همان AppSecret از کنسول توسعه‌دهندگان است.</p>
+
+<h3>قطع Stream / حلقهٔ اتصال‌مجدد</h3>
+<p><strong>علت:</strong> ناپایداری شبکه، نگهداشت پلتفرم دینگ‌تاک یا مشکلات اعتبارنامه.</p>
+<p><strong>راه‌حل:</strong> آداپتور خودکار با backoff نمایی reconnect می‌شود ‏(۲ ← ۵ ← ۱۰ ← ۳۰ ← ۶۰ ثانیه). اعتبار اعتبارنامه‌ها و غیرفعال نبودن اپ را چک کنید. مطمئن شوید شبکه‌تان اتصالات WebSocket خروجی را اجازه می‌دهد.</p>
+
+<h3>بات آفلاین است</h3>
+<p><strong>علت:</strong> گیت‌وی هرمس اجرا نیست یا اتصال شکست خورده.</p>
+<p><strong>راه‌حل:</strong> چک کنید ‏<code>hermes gateway</code> در حال اجراست. خروجی ترمینال را برای پیام خطا ببینید. مسائل رایج: اعتبارنامه اشتباه، اپ غیرفعال، نصب نبودن ‏<code>dingtalk-stream</code> یا ‏<code>httpx</code>.</p>
+
+<h3>«No session_webhook available»</h3>
+<p><strong>علت:</strong> بات خواست جواب بدهد ولی URL وب‌هوک نشست نداشت. معمولاً وقتی اتفاق می‌افتد که وب‌هوک منقضی شده یا بین دریافت پیام و ارسال ریپلای، بات ری‌استارت شده.</p>
+<p><strong>راه‌حل:</strong> پیام جدیدی به بات بدهید — هر پیام ورودی وب‌هوک نشست تازه‌ای برای ریپلای فراهم می‌کند. این محدودیت عادی دینگ‌تاک است؛ بات فقط می‌تواند به پیام‌هایی که اخیراً دریافت کرده ریپلای بدهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> امنیت</h2>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>همیشه ‏<code>DINGTALK_ALLOWED_USERS</code> را تنظیم کنید تا مشخص شود چه کسی با بات تعامل می‌کند. بدون آن، گیت‌وی به‌عنوان اقدام ایمنی همهٔ کاربران را پیش‌فرض رد می‌کند. فقط شناسهٔ کاربری افراد مورداطمینان را اضافه کنید — کاربران مجاز دسترسی کامل به قابلیت‌های ایجنت دارند شامل استفاده از ابزار و دسترسی سیستم.</p>
+</div>
+<p>برای اطلاعات بیشتر دربارهٔ امن‌سازی استقرار هرمس ایجنت، <a href="../security.html">راهنمای امنیت</a> را ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> یادداشت‌ها</h2>
+<ul>
+  <li><strong>‏Stream Mode</strong>: هیچ URL عمومی، نام دامنه یا سرور وب‌هوکی لازم نیست. اتصال از ماشین شما با WebSocket شروع می‌شود، پس پشت NAT و فایروال کار می‌کند.</li>
+  <li><strong>‏AI Card ها</strong>: به‌صورت اختیاری با کارت‌های AI غنی به‌جای مارک‌داون خام ریپلای دهید. از طریق ‏<code>card_template_id</code> پیکربندی می‌شود.</li>
+  <li><strong>واکنش‌های ایموجی</strong>: واکنش‌های خودکار 🤔Thinking/🥳Done برای وضعیت پردازش.</li>
+  <li><strong>پاسخ‌های مارک‌داونی</strong>: ریپلای‌ها با فرمت مارک‌داون دینگ‌تاک برای نمایش متن غنی قالب می‌گیرند.</li>
+  <li><strong>پشتیبانی رسانه</strong>: تصاویر و فایل‌های پیام ورودی خودکار حل و توسط ابزارهای بینایی قابل‌پردازش‌اند.</li>
+  <li><strong>حذف تکرار پیام</strong>: آداپتور پیام‌ها را با پنجرهٔ ۵ دقیقه‌ای dedupe می‌کند تا همان پیام دوبار پردازش نشود.</li>
+  <li><strong>اتصال‌مجدد خودکار</strong>: اگر اتصال stream قطع شود آداپتور با backoff نمایی خودکار برمی‌گردد.</li>
+  <li><strong>سقف طول پیام</strong>: پاسخ‌ها به ۲۰٬۰۰۰ کاراکتر به‌ازای هر پیام سقف می‌خورند. پاسخ‌های بلندتر بریده می‌شوند.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="teams.html"><span class="dir">→ قبلی</span><span class="ttl">Microsoft Teams</span></a>
+  <a class="next" href="open-webui.html"><span class="dir">بعدی ←</span><span class="ttl">Open WebUI</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/dingtalk" target="_blank" rel="noopener">DingTalk</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

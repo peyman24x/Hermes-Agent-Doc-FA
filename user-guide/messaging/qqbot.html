@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QQ Bot — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/qqbot" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>QQ Bot</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>QQ Bot</h1>
+<p>هرمس را از طریق <strong>‏API رسمی QQ Bot ‏(v2)</strong> به QQ وصل کنید — پشتیبانی از پیام خصوصی ‏(C2C)، منشن @ گروهی، گیلد و پیام مستقیم با رونویسی صوت.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نمای کلی</h2>
+<p>آداپتور QQ Bot از <a href="https://bot.q.qq.com/wiki/develop/api-v2/" target="_blank" rel="noopener">API رسمی QQ Bot</a> استفاده می‌کند تا:</p>
+<ul>
+  <li>پیام‌ها را از طریق اتصال دائمی <strong>WebSocket</strong> به دروازهٔ QQ دریافت کند</li>
+  <li>ریپلای‌های متنی و مارک‌داونی از طریق <strong>REST API</strong> بفرستد</li>
+  <li>تصاویر، پیام‌های صوتی و پیوست‌های فایل را دانلود و پردازش کند</li>
+  <li>پیام‌های صوتی را با ASR داخلی Tencent یا ارائه‌دهندهٔ STT قابل‌پیکربندی رونویسی کند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پیش‌نیازها</h2>
+<ol>
+  <li><strong>اپلیکیشن QQ Bot</strong> — در <a href="https://q.qq.com" target="_blank" rel="noopener">q.qq.com</a> ثبت‌نام کنید:
+    <ul>
+      <li>اپلیکیشن جدیدی بسازید و <strong>App ID</strong> و <strong>App Secret</strong> را یادداشت کنید</li>
+      <li>intent های لازم را فعال کنید: پیام‌های C2C، پیام‌های @ گروهی، پیام‌های گیلد</li>
+      <li>بات را برای تست در حالت sandbox پیکربندی کنید یا برای تولید publish کنید</li>
+    </ul>
+  </li>
+  <li><strong>وابستگی‌ها</strong> — آداپتور ‏<code>aiohttp</code> و <code>httpx</code> می‌خواهد:
+    <div class="codebox"><pre><code>pip install aiohttp httpx</code></pre></div>
+  </li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پیکربندی</h2>
+<h3>راه‌اندازی تعاملی</h3>
+<div class="codebox"><pre><code>hermes gateway setup</code></pre></div>
+<p><strong>QQ Bot</strong> را از فهرست پلتفرم‌ها انتخاب و طبق پرسش‌ها پیش بروید.</p>
+<h3>پیکربندی دستی</h3>
+<p>متغیرهای محیطی الزامی را در ‏<code>~/.hermes/.env</code> تنظیم کنید:</p>
+<div class="codebox"><pre><code>QQ_APP_ID=your-app-id
+QQ_CLIENT_SECRET=your-app-secret</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> متغیرهای محیطی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>توضیح</th><th>پیش‌فرض</th></tr></thead>
+  <tbody>
+    <tr><td><code>QQ_APP_ID</code></td><td>App ID بات QQ ‏(الزامی)</td><td>—</td></tr>
+    <tr><td><code>QQ_CLIENT_SECRET</code></td><td>App Secret بات QQ ‏(الزامی)</td><td>—</td></tr>
+    <tr><td><code>QQBOT_HOME_CHANNEL</code></td><td>OpenID برای تحویل کرون/اعلان</td><td>—</td></tr>
+    <tr><td><code>QQBOT_HOME_CHANNEL_NAME</code></td><td>نام نمایشی کانال خانگی</td><td><code>Home</code></td></tr>
+    <tr><td><code>QQ_ALLOWED_USERS</code></td><td>‏OpenID های کاربر جداشده با ویرگول برای دسترسی DM</td><td>open ‏(همهٔ کاربران)</td></tr>
+    <tr><td><code>QQ_GROUP_ALLOWED_USERS</code></td><td>‏OpenID های گروه جداشده با ویرگول برای دسترسی گروهی</td><td>—</td></tr>
+    <tr><td><code>QQ_ALLOW_ALL_USERS</code></td><td>‏<code>true</code> برای اجازه به همهٔ DM ها</td><td><code>false</code></td></tr>
+    <tr><td><code>QQ_PORTAL_HOST</code></td><td>override میزبان portal QQ ‏(برای مسیریابی سندباکس روی ‏<code>sandbox.q.qq.com</code>)</td><td><code>q.qq.com</code></td></tr>
+    <tr><td><code>QQ_STT_API_KEY</code></td><td>کلید API ارائه‌دهندهٔ صوت-به-متن</td><td>—</td></tr>
+    <tr><td><code>QQ_STT_BASE_URL</code></td><td>‏(مستقیم خوانده نمی‌شود — به‌جایش ‏<code>platforms.qqbot.extra.stt.baseUrl</code> را در config.yaml بگذارید)</td><td>n/a</td></tr>
+    <tr><td><code>QQ_STT_MODEL</code></td><td>نام مدل STT</td><td><code>glm-asr</code></td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> پیکربندی پیشرفته</h2>
+<p>برای کنترل دقیق‌تر تنظیمات پلتفرم را به config.yaml اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  qqbot:
+    enabled: true
+    extra:
+      app_id: "your-app-id"
+      client_secret: "your-secret"
+      markdown_support: true       # فعال‌سازی مارک‌داون QQ (msg_type 2). فقط-config؛ معادل env ندارد.
+      dm_policy: "open"          # open | allowlist | disabled
+      allow_from:
+        - "user_openid_1"
+      group_policy: "open"       # open | allowlist | disabled
+      group_allow_from:
+        - "group_openid_1"
+      stt:
+        provider: "zai"          # zai (GLM-ASR)، openai (Whisper) و غیره
+        baseUrl: "https://open.bigmodel.cn/api/coding/paas/v4"
+        apiKey: "your-stt-key"
+        model: "glm-asr"</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> پیام‌های صوتی ‏(STT)</h2>
+<p>رونویسی صوت دو مرحله دارد:</p>
+<ol>
+  <li><strong>ASR داخلی QQ</strong> ‏(رایگان، همیشه اول امتحان می‌شود) — QQ فیلد ‏<code>asr_refer_text</code> را داخل پیوست پیام صوتی فراهم می‌کند که از تشخیص گفتار خود Tencent استفاده می‌کند</li>
+  <li><strong>ارائه‌دهندهٔ STT پیکربندی‌شده</strong> ‏(fallback) — اگر ASR متن برنگرداند، آداپتور یک API سازگار-با-OpenAI صدا می‌زند:
+    <ul>
+      <li><strong>‏Zhipu/GLM ‏(zai)</strong>: ارائه‌دهندهٔ پیش‌فرض، مدل ‏<code>glm-asr</code></li>
+      <li><strong>‏OpenAI Whisper</strong>: ‏<code>QQ_STT_BASE_URL</code> و ‏<code>QQ_STT_MODEL</code> را تنظیم کنید</li>
+      <li>هر endpoint سازگار-با-OpenAI دیگری</li>
+    </ul>
+  </li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> عیب‌یابی</h2>
+
+<h3>بات بلافاصله قطع می‌شود ‏(قطع سریع)</h3>
+<p>معمولاً یعنی:</p>
+<ul>
+  <li><strong>‏App ID / Secret نامعتبر</strong> — اعتبارنامه‌ها را در q.qq.com دوباره چک کنید</li>
+  <li><strong>دسترسی‌های جاافتاده</strong> — مطمئن شوید intent های لازم برای بات فعال‌اند</li>
+  <li><strong>بات فقط-سندباکس</strong> — اگر بات در حالت sandbox است فقط می‌تواند پیام‌های کانال تست sandbox خود QQ را بگیرد</li>
+</ul>
+
+<h3>پیام‌های صوتی رونویسی نمی‌شوند</h3>
+<ol>
+  <li>چک کنید ‏<code>asr_refer_text</code> داخلی QQ در دادهٔ پیوست موجود باشد</li>
+  <li>اگر ارائه‌دهندهٔ STT سفارشی دارید، تأیید کنید ‏<code>QQ_STT_API_KEY</code> درست تنظیم شده</li>
+  <li>پیام‌های خطای STT را در لاگ‌های گیت‌وی چک کنید</li>
+</ol>
+
+<h3>پیام‌ها تحویل نمی‌شوند</h3>
+<ul>
+  <li>تأیید کنید <strong>intents</strong> بات در q.qq.com فعال‌اند</li>
+  <li>اگر دسترسی DM محدود است ‏<code>QQ_ALLOWED_USERS</code> را چک کنید</li>
+  <li>برای پیام‌های گروهی، مطمئن شوید بات <strong>@منشن</strong> شده ‏(سیاست گروه ممکن است لیست مجاز بخواهد)</li>
+  <li>‏<code>QQBOT_HOME_CHANNEL</code> را برای تحویل کرون/اعلان چک کنید</li>
+</ul>
+
+<h3>خطاهای اتصال</h3>
+<ul>
+  <li>مطمئن شوید ‏<code>aiohttp</code> و ‏<code>httpx</code> نصب‌اند: ‏<code>pip install aiohttp httpx</code></li>
+  <li>اتصال شبکه به ‏<code>api.sgroup.qq.com</code> و دروازهٔ WebSocket را چک کنید</li>
+  <li>پیام‌های خطای تفصیلی و رفتار reconnect را در لاگ‌های گیت‌وی بازبینی کنید</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="buzz.html"><span class="dir">→ قبلی</span><span class="ttl">Buzz</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">A2A</span></span>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/qqbot" target="_blank" rel="noopener">QQ Bot</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

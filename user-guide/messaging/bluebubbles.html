@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlueBubbles ‏(iMessage) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/bluebubbles" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>BlueBubbles ‏(iMessage)</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>‏BlueBubbles ‏(iMessage)</h1>
+<p>هرمس را از طریق <a href="https://bluebubbles.app/" target="_blank" rel="noopener">BlueBubbles</a> به iMessage اپل وصل کنید — سرور متن‌باز رایگان macOS که iMessage را به هر دستگاهی پل می‌زند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li>یک <strong>مک</strong> ‏(همیشه روشن) با اجرای ‏<a href="https://bluebubbles.app/" target="_blank" rel="noopener">BlueBubbles Server</a></li>
+  <li>‏Apple ID وارد‌شده در Messages.app روی همان مک</li>
+  <li>‏BlueBubbles Server نسخهٔ ۱.۰.۰+ ‏(وب‌هوک‌ها این نسخه را می‌خواهند)</li>
+  <li>اتصال شبکه بین هرمس و سرور BlueBubbles</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> راه‌اندازی</h2>
+
+<h3>۱. نصب BlueBubbles Server</h3>
+<p>از <a href="https://bluebubbles.app/" target="_blank" rel="noopener">bluebubbles.app</a> دانلود و نصب کنید. ویزارد راه‌اندازی را کامل کنید — با Apple ID وارد شوید و روش اتصال را پیکربندی کنید ‏(شبکهٔ محلی، ‏Ngrok، ‏Cloudflare یا DNS داینامیک).</p>
+
+<h3>۲. گرفتن Server URL و رمز</h3>
+<p>در BlueBubbles Server ← <strong>Settings ← API</strong> این‌ها را یادداشت کنید:</p>
+<ul>
+  <li><strong>Server URL</strong> ‏(مثل ‏<code>http://192.168.1.10:1234</code>)</li>
+  <li><strong>Server Password</strong></li>
+</ul>
+
+<h3>۳. پیکربندی هرمس</h3>
+<p>ویزارد راه‌اندازی را اجرا کنید:</p>
+<div class="codebox"><pre><code>hermes gateway setup</code></pre></div>
+<p><strong>BlueBubbles (iMessage)</strong> را انتخاب و URL سرور و رمز را وارد کنید.</p>
+<p>یا متغیرهای محیطی را مستقیم در ‏<code>~/.hermes/.env</code> بگذارید:</p>
+<div class="codebox"><pre><code>BLUEBUBBLES_SERVER_URL=http://192.168.1.10:1234
+BLUEBUBBLES_PASSWORD=your-server-password</code></pre></div>
+
+<h4>اختیاری: منشن اجباری در چت‌های گروهی</h4>
+<p>به‌طور پیش‌فرض هرمس به همهٔ DM ها/پیام‌های گروه مجازِ BlueBubbles/iMessage پاسخ می‌دهد. برای انتخابی‌کردن چت گروهی گیت منشن را فعال کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  bluebubbles:
+    enabled: true
+    extra:
+      require_mention: true</code></pre>
+</div>
+<p>با ‏<code>require_mention: true</code>، ‏DM ها عادی کار می‌کنند ولی پیام‌های چت گروهی مگر الگوی منشن بخوانند نادیده گرفته می‌شوند. اگر الگوی سفارشی نگذارید، هرمس برای واریانت‌های «Hermes» و «‎@Hermes agent» پیش‌فرض‌های محافظه‌کارانه دارد.</p>
+<p>برای نام ایجنت سفارشی، الگوهای regex بگذارید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  bluebubbles:
+    extra:
+      require_mention: true
+      mention_patterns:
+        - '(?&lt;![\w@])@?amos\b[,:\-]?'</code></pre>
+</div>
+
+<h3>۴. مجوز کاربران</h3>
+<p>یک رویکرد انتخاب کنید:</p>
+<p><strong>جفت‌سازی DM ‏(توصیه‌شده):</strong><br>
+وقتی کسی به iMessage شما پیام دهد، هرمس خودکار کد جفت‌سازی می‌فرستد. تأیید کنید:</p>
+<div class="codebox"><pre><code>hermes pairing approve bluebubbles &lt;CODE&gt;</code></pre></div>
+<p>با ‏<code>hermes pairing list</code> کدهای در انتظار و کاربران تأییدشده را ببینید.</p>
+<p><strong>پیش-مجوز کاربران خاص</strong> ‏(در ‏<code>~/.hermes/.env</code>):</p>
+<div class="codebox"><pre><code>BLUEBUBBLES_ALLOWED_USERS=user@icloud.com,+15551234567</code></pre></div>
+<p><strong>دسترسی باز</strong> ‏(در ‏<code>~/.hermes/.env</code>):</p>
+<div class="codebox"><pre><code>BLUEBUBBLES_ALLOW_ALL_USERS=true</code></pre></div>
+
+<h3>۵. شروع گیت‌وی</h3>
+<div class="codebox"><pre><code>hermes gateway run</code></pre></div>
+<p>هرمس به سرور BlueBubbles شما وصل، وب‌هوک ثبت و گوش‌دادن به پیام‌های iMessage را شروع می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> نحوهٔ کار</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>iMessage → Messages.app → BlueBubbles Server → Webhook → Hermes
+Hermes → BlueBubbles REST API → Messages.app → iMessage</code></pre>
+</div>
+<ul>
+  <li><strong>ورودی:</strong> BlueBubbles وقتی پیام جدید می‌رسد رویدادهای وب‌هوک به شنوندهٔ محلی می‌فرستد. بدون polling — تحویل آنی.</li>
+  <li><strong>خروجی:</strong> هرمس از طریق REST API بلابابلز پیام می‌فرستد.</li>
+  <li><strong>رسانه:</strong> تصویر، پیام صوتی، ویدیو و سند در هر دو جهت پشتیبانی می‌شود. پیوست‌های ورودی دانلود و محلی کش می‌شوند تا ایجنت پردازششان کند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> متغیرهای محیطی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>لازم</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>BLUEBUBBLES_SERVER_URL</code></td><td>بله</td><td>—</td><td>URL سرور BlueBubbles</td></tr>
+    <tr><td><code>BLUEBUBBLES_PASSWORD</code></td><td>بله</td><td>—</td><td>رمز سرور</td></tr>
+    <tr><td><code>BLUEBUBBLES_WEBHOOK_HOST</code></td><td>خیر</td><td><code>127.0.0.1</code></td><td>آدرس bind شنوندهٔ وب‌هوک</td></tr>
+    <tr><td><code>BLUEBUBBLES_WEBHOOK_PORT</code></td><td>خیر</td><td><code>8645</code></td><td>پورت شنوندهٔ وب‌هوک</td></tr>
+    <tr><td><code>BLUEBUBBLES_WEBHOOK_PATH</code></td><td>خیر</td><td><code>/bluebubbles-webhook</code></td><td>مسیر URL وب‌هوک</td></tr>
+    <tr><td><code>BLUEBUBBLES_HOME_CHANNEL</code></td><td>خیر</td><td>—</td><td>شماره/ایمیل مقصد تحویل کرون</td></tr>
+    <tr><td><code>BLUEBUBBLES_ALLOWED_USERS</code></td><td>خیر</td><td>—</td><td>کاربران مجاز جداشده با ویرگول</td></tr>
+    <tr><td><code>BLUEBUBBLES_ALLOW_ALL_USERS</code></td><td>خیر</td><td><code>false</code></td><td>اجازه به همهٔ کاربران</td></tr>
+    <tr><td><code>BLUEBUBBLES_REQUIRE_MENTION</code></td><td>خیر</td><td><code>false</code></td><td>الزام الگوی منشن قبل از پاسخ در چت‌های گروهی</td></tr>
+    <tr><td><code>BLUEBUBBLES_MENTION_PATTERNS</code></td><td>خیر</td><td>واژه‌های بیداری هرمس</td><td>آرایه JSON یا الگوهای regex جداشده با خط‌جدید/ویرگول برای تطبیق منشن گروهی</td></tr>
+  </tbody>
+</table>
+</div>
+<p>علامت‌گذاری خودکار پیام‌ها به‌عنوان خوانده‌شده با کلید ‏<code>send_read_receipts</code> زیر ‏<code>platforms.bluebubbles.extra</code> در config.yaml کنترل می‌شود ‏(پیش‌فرض: <code>true</code>). متغیر محیطی معادلی ندارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> قابلیت‌ها</h2>
+
+<h3>پیام متنی</h3>
+<p>ارسال و دریافت iMessage. مارک‌داون برای تحویل تمیزِ متن ساده خودکار حذف می‌شود.</p>
+
+<h3>رسانه غنی</h3>
+<ul>
+  <li><strong>تصاویر:</strong> عکس‌ها به‌صورت بومی در گفتگوی iMessage ظاهر می‌شوند</li>
+  <li><strong>پیام‌های صوتی:</strong> فایل‌های صوتی به‌عنوان پیام صوتی iMessage</li>
+  <li><strong>ویدیوها:</strong> پیوست ویدیویی</li>
+  <li><strong>اسناد:</strong> فایل‌ها به‌عنوان پیوست iMessage</li>
+</ul>
+
+<h3>واکنش‌های Tapback</h3>
+<p>واکنش‌های Love، like، dislike، laugh، emphasize و question. نیازمند <a href="https://docs.bluebubbles.app/helper-bundle/installation" target="_blank" rel="noopener">helper ‏Private API</a> بلابابلز.</p>
+
+<h3>نشانگر تایپ</h3>
+<p>حین پردازش ایجنت «typing...» در گفتگوی iMessage نشان داده می‌شود. Private API لازم دارد.</p>
+
+<h3>تیک خوانده‌شدن</h3>
+<p>پس از پردازش پیام‌ها خودکار خوانده‌شده علامت می‌خورند. Private API لازم دارد.</p>
+
+<h3>خطاب چت‌ها</h3>
+<p>می‌توانید چت‌ها را با ایمیل یا شماره تلفن خطاب کنید — هرمس خودکار آنها را به GUID های چت بلابابلز حل می‌کند. لازم نیست از فرمت خام GUID استفاده کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> Private API</h2>
+<p>بعضی قابلیت‌ها <a href="https://docs.bluebubbles.app/helper-bundle/installation" target="_blank" rel="noopener">helper ‏Private API</a> بلابابلز را می‌خواهند:</p>
+<ul>
+  <li>واکنش‌های Tapback</li>
+  <li>نشانگرهای تایپ</li>
+  <li>تیک خوانده‌شدن</li>
+  <li>ساخت چت جدید با آدرس</li>
+</ul>
+<p>بدون Private API، پیام‌رسانی متنی پایه و رسانه همچنان کار می‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> عیب‌یابی</h2>
+
+<h3>«Cannot reach server»</h3>
+<ul>
+  <li>درستی URL سرور و روشن بودن مک را تأیید کنید</li>
+  <li>چک کنید BlueBubbles Server اجراست</li>
+  <li>اتصال شبکه را مطمئن شوید ‏(فایروال، port forwarding)</li>
+</ul>
+
+<h3>پیام‌ها نمی‌رسند</h3>
+<ul>
+  <li>چک کنید وب‌هوک در BlueBubbles Server ← Settings ← API ← Webhooks ثبت شده باشد</li>
+  <li>تأیید کنید URL وب‌هوک از مک قابل‌دسترس است</li>
+  <li>خطاهای وب‌هوک را در ‏<code>hermes logs gateway</code> چک کنید ‏(یا ‏<code>hermes logs -f</code> برای دنبال‌کردن زنده)</li>
+</ul>
+
+<h3>«Private API helper not connected»</h3>
+<ul>
+  <li>helper ‏Private API را نصب کنید: ‏<a href="https://docs.bluebubbles.app/helper-bundle/installation" target="_blank" rel="noopener">docs.bluebubbles.app</a></li>
+  <li>پیام‌رسانی پایه بدون آن کار می‌کند — فقط واکنش‌ها، تایپ و تیک خوانده‌شدن لازمش دارند</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="simplex.html"><span class="dir">→ قبلی</span><span class="ttl">SimpleX Chat</span></a>
+  <a class="next" href="wecom-callback.html"><span class="dir">بعدی ←</span><span class="ttl">WeCom Callback</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/bluebubbles" target="_blank" rel="noopener">BlueBubbles (iMessage)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>افزونه‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/plugins" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>افزونه‌ها ‏(Plugins)</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>افزونه‌ها ‏(Plugins)</h1>
+<p>هرمس سیستم افزونه‌ای برای افزودن ابزار، هوک و یکپارچه‌سازی سفارشی بدون دست‌زدن به کد هسته دارد.</p>
+<p>اگر می‌خواهید یک ابزار سفارشی برای خودتان، تیم‌تان یا یک پروژه بسازید، معمولاً همین مسیر درست است. صفحهٔ <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-tools" target="_blank" rel="noopener">افزودن ابزارها</a> راهنمای توسعه‌دهندگان مخصوص ابزارهای هستهٔ داخلی هرمس است که در ‏<code>tools/</code> و ‏<code>toolsets.py</code> زندگی می‌کنند.</p>
+<p><strong>← <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت افزونهٔ هرمس</a></strong> — راهنمای گام‌به‌گام با مثال کاملِ کارا.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نمای سریع</h2>
+<p>یک پوشه داخل ‏<code>~/.hermes/plugins/</code> بیندازید با یک ‏<code>plugin.yaml</code> و کد پایتون:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>~/.hermes/plugins/my-plugin/
+├── plugin.yaml      # manifest
+├── __init__.py      # register() — اتصال schema ها به هندلرها
+├── schemas.py       # schema های ابزار (آنچه LLM می‌بیند)
+└── tools.py         # هندلرهای ابزار (آنچه هنگام فراخوانی اجرا می‌شود)</code></pre>
+</div>
+<p>هرمس را شروع کنید — ابزارهایتان کنار ابزارهای داخلی ظاهر می‌شوند. مدل بلافاصله می‌تواند صدایشان بزند.</p>
+
+<h3>مثال کمینهٔ کارا</h3>
+<p>این یک افزونهٔ کامل است که ابزار ‏<code>hello_world</code> اضافه و هر فراخوانی ابزار را از طریق هوک لاگ می‌کند.</p>
+<p><strong>‏<code>~/.hermes/plugins/hello-world/plugin.yaml</code></strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>name: hello-world
+version: "1.0"
+description: A minimal example plugin</code></pre>
+</div>
+<p><strong>‏<code>~/.hermes/plugins/hello-world/__init__.py</code></strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>"""Minimal Hermes plugin — registers a tool and a hook."""
+
+import json
+
+
+def register(ctx):
+    # --- Tool: hello_world ---
+    schema = {
+        "name": "hello_world",
+        "description": "Returns a friendly greeting for the given name.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Name to greet",
+                }
+            },
+            "required": ["name"],
+        },
+    }
+
+    def handle_hello(params, **kwargs):
+        del kwargs
+        name = params.get("name", "World")
+        return json.dumps({"success": True, "greeting": f"Hello, {name}!"})
+
+    ctx.register_tool(
+        name="hello_world",
+        toolset="hello_world",
+        schema=schema,
+        handler=handle_hello,
+    )
+
+    # --- Hook: log every tool call ---
+    def on_tool_call(tool_name, params, result):
+        print(f"[hello-world] tool called: {tool_name}")
+
+    ctx.register_hook("post_tool_call", on_tool_call)</code></pre>
+</div>
+<p>هر دو فایل را داخل ‏<code>~/.hermes/plugins/hello-world/</code> بیندازید، هرمس را ری‌استارت کنید و مدل بلافاصله می‌تواند ‏<code>hello_world</code> را صدا بزند. هوک بعد از هر فراخوانی ابزار یک خط لاگ چاپ می‌کند.</p>
+<p>توصیف رو-به-مدلِ ابزار باید در ‏<code>schema["description"]</code> باشد. مقدار اختیاری ‏<code>ctx.register_tool(description=...)</code> متادیتای جداگانهٔ رجیستری ‏ToolEntry است: اگر حذف شود به توصیف schema پیش‌فرض می‌شود ولی هرمس آن را داخل schema فاقد ‏description کپی برنمی‌گرداند. متن را ترجیحاً یک‌بار در schema تعریف کنید. اگر هر دو را دادید همگام نگهشان دارید؛ مدل مقدار schema را می‌بیند.</p>
+<p>افزونه‌های محلی-پروژه زیر ‏<code>./.hermes/plugins/</code> به‌طور پیش‌فرض خاموش‌اند. فقط برای مخازن مطمئن با گذاشتن ‏<code>HERMES_ENABLE_PROJECT_PLUGINS=true</code> قبل از شروع هرمس فعالشان کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> افزونه‌ها چه کارهایی می‌توانند بکنند</h2>
+<p>هر API ‏<code>ctx.*</code> پایین داخل تابع ‏<code>register(ctx)</code> افزونه در دسترس است.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>قابلیت</th><th>چطور</th></tr></thead>
+  <tbody>
+    <tr><td>افزودن ابزار</td><td>‏<code>ctx.register_tool(name=..., toolset=..., schema=..., handler=...)</code></td></tr>
+    <tr><td>افزودن هوک</td><td>‏<code>ctx.register_hook("post_tool_call", callback)</code></td></tr>
+    <tr><td>افزودن فرمان اسلش</td><td>‏<code>ctx.register_command(name, handler, description)</code> — ‏<code>/name</code> را به CLI و نشست‌های گیت‌وی اضافه می‌کند</td></tr>
+    <tr><td>dispatch ابزار از فرمان‌ها</td><td>‏<code>ctx.dispatch_tool(name, args)</code> — ابزار ثبت‌شده را با زمینهٔ والد-ایجنت خودکار-سیم‌شده invoke می‌کند</td></tr>
+    <tr><td>افزودن فرمان CLI</td><td>‏<code>ctx.register_cli_command(name, help, setup_fn, handler_fn)</code> — ‏<code>hermes &lt;plugin&gt; &lt;subcommand&gt;</code> اضافه می‌کند</td></tr>
+    <tr><td>تزریق پیام</td><td>‏<code>ctx.inject_message(content, role="user", session_key=...)</code> — «تزریق پیام» را ببینید</td></tr>
+    <tr><td>حمل فایل‌های داده</td><td>‏<code>Path(__file__).parent / "data" / "file.yaml"</code></td></tr>
+    <tr><td>همراه‌کردن مهارت‌ها</td><td>‏<code>ctx.register_skill(name, path)</code> — namespace شده به ‏<code>plugin:skill</code>، لود با ‏<code>skill_view("plugin:skill")</code></td></tr>
+    <tr><td>گیت روی env</td><td>‏<code>requires_env: [API_KEY]</code> در plugin.yaml — حین ‏<code>hermes plugins install</code> پرسیده می‌شود</td></tr>
+    <tr><td>توزیع با pip</td><td>‏<code>[project.entry-points."hermes_agent.plugins"]</code></td></tr>
+    <tr><td>ثبت پلتفرم گیت‌وی ‏(دیسکورد، تلگرام، IRC و...)</td><td>‏<code>ctx.register_platform(name, label, adapter_factory, check_fn, ...)</code> — راهنمای افزودن آداپتورهای پلتفرم</td></tr>
+    <tr><td>ثبت بک‌اند تولید تصویر</td><td>‏<code>ctx.register_image_gen_provider(provider)</code> — راهنمای افزونه‌های ارائه‌دهندهٔ تولید تصویر</td></tr>
+    <tr><td>ثبت بک‌اند تولید ویدیو</td><td>‏<code>ctx.register_video_gen_provider(provider)</code> — راهنمای افزونه‌های ارائه‌دهندهٔ تولید ویدیو</td></tr>
+    <tr><td>ثبت موتور فشرده‌سازی زمینه</td><td>‏<code>ctx.register_context_engine(engine)</code> — راهنمای افزونه‌های موتور زمینه</td></tr>
+    <tr><td>مسیریابی پرامپت‌های تأیید انسانی</td><td>‏<code>ctx.register_approval_transport(name, present_fn)</code> — «ترنسپورت‌های تأیید» را ببینید</td></tr>
+    <tr><td>ثبت بک‌اند حافظه</td><td>زیرکلاس ‏<code>MemoryProvider</code> در ‏<code>plugins/memory/&lt;name&gt;/__init__.py</code> — راهنمای افزونه‌های ارائه‌دهندهٔ حافظه ‏(سیستم کشف جدایی استفاده می‌کند)</td></tr>
+    <tr><td>اجرای فراخوانی LLM متعلق-به-میزبان</td><td>‏<code>ctx.llm.complete(...)</code> / ‏<code>ctx.llm.complete_structured(...)</code> — قرض‌دادن مدل فعال و احراز کاربر برای یک تکمیل یک‌باره با اعتبارسنجی اختیاری JSON schema</td></tr>
+    <tr><td>صدازدن ابزار MCP ‏(با گیت قابلیت)</td><td>‏<code>ctx.call_mcp(server, tool, arguments, timeout=30)</code> — «صدازدن سرورهای MCP از افزونه‌ها» را ببینید</td></tr>
+    <tr><td>ثبت بک‌اند inference ‏(ارائه‌دهندهٔ LLM)</td><td>‏<code>register_provider(ProviderProfile(...))</code> در ‏<code>plugins/model-providers/&lt;name&gt;/__init__.py</code> — راهنمای افزونه‌های ارائه‌دهندهٔ مدل ‏(سیستم کشف جدایی)</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> کشف افزونه‌ها</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>منبع</th><th>مسیر</th><th>کاربرد</th></tr></thead>
+  <tbody>
+    <tr><td>همراه‌بسته</td><td><code>&lt;repo&gt;/plugins/</code></td><td>با هرمس عرضه می‌شود — افزونه‌های داخلی را ببینید</td></tr>
+    <tr><td>کاربر</td><td><code>~/.hermes/plugins/</code></td><td>افزونه‌های شخصی</td></tr>
+    <tr><td>پروژه</td><td><code>.hermes/plugins/</code></td><td>افزونه‌های خاص-پروژه ‏(<code>HERMES_ENABLE_PROJECT_PLUGINS=true</code> لازم دارد)</td></tr>
+    <tr><td>pip</td><td><code>hermes_agent.plugins</code> entry_points</td><td>بسته‌های توزیع‌شده</td></tr>
+    <tr><td>Nix</td><td><code>services.hermes-agent.extraPlugins</code> / ‏<code>extraPythonPackages</code></td><td>نصب‌های اعلامی NixOS — راهنمای Nix Setup</td></tr>
+  </tbody>
+</table>
+</div>
+<p>منابع بعدی در تداخل نام بر قبلی‌ها مقدم‌اند، پس افزونهٔ کاربری هم‌نام با افزونهٔ همراه‌بسته جایگزینش می‌شود.</p>
+
+<h3>زیر-دسته‌های افزونه</h3>
+<p>داخل هر منبع، هرمس زیر-پوشه‌های زیر-دسته‌ای را هم می‌شناسد که افزونه‌ها را به سیستم‌های کشف تخصصی مسیریابی می‌کنند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>زیر-پوشه</th><th>چه چیزی دارد</th><th>سیستم کشف</th></tr></thead>
+  <tbody>
+    <tr><td><code>plugins/</code> ‏(ریشه)</td><td>افزونه‌های عمومی — ابزار، هوک، فرمان اسلش، فرمان CLI، مهارت‌های همراه‌بسته</td><td>‏<code>PluginManager</code> ‏(kind: ‏<code>standalone</code> یا ‏<code>backend</code>)</td></tr>
+    <tr><td><code>plugins/platforms/&lt;name&gt;/</code></td><td>آداپتورهای کانال گیت‌وی ‏(<code>ctx.register_platform()</code>)</td><td>‏<code>PluginManager</code> ‏(kind: ‏<code>platform</code>، یک سطح پایین‌تر)</td></tr>
+    <tr><td><code>plugins/image_gen/&lt;name&gt;/</code></td><td>بک‌اندهای تولید تصویر ‏(<code>ctx.register_image_gen_provider()</code>)</td><td>‏<code>PluginManager</code> ‏(kind: ‏<code>backend</code>، یک سطح پایین‌تر)</td></tr>
+    <tr><td><code>plugins/memory/&lt;name&gt;/</code></td><td>ارائه‌دهنده‌های حافظه ‏(زیرکلاس MemoryProvider)</td><td><strong>لودر مستقل</strong> در ‏<code>plugins/memory/__init__.py</code> ‏(kind: ‏<code>exclusive</code> — در هر لحظه یکی فعال)</td></tr>
+    <tr><td><code>plugins/context_engine/&lt;name&gt;/</code></td><td>موتورهای فشرده‌سازی زمینه ‏(<code>ctx.register_context_engine()</code>)</td><td><strong>لودر مستقل</strong> در ‏<code>plugins/context_engine/__init__.py</code> ‏(در هر لحظه یکی فعال)</td></tr>
+    <tr><td><code>plugins/model-providers/&lt;name&gt;/</code></td><td>پروفایل‌های ارائه‌دهندهٔ LLM ‏(<code>register_provider(ProviderProfile(...))</code>)</td><td><strong>لودر مستقل</strong> در ‏<code>providers/__init__.py</code> ‏(lazy؛ در اولین فراخوانی ‏get_provider_profile اسکن می‌شود)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>افزونه‌های کاربر در ‏<code>~/.hermes/plugins/model-providers/&lt;name&gt;/</code> و ‏<code>~/.hermes/plugins/memory/&lt;name&gt;/</code> بر افزونه‌های همراه‌بستهٔ هم‌نام مقدم‌اند — آخرین-نویسنده-برنده در ‏<code>register_provider()</code>/<code>register_memory_provider()</code>. پوشه را بیندازید و بدون هیچ ویرایش مخزنی داخلی را جایگزین می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> افزونه‌ها انتخابی‌اند ‏(با چند استثنا)</h2>
+<p><strong>افزونه‌های عمومی و بک‌اندهای نصب‌شده توسط کاربر به‌طور پیش‌فرض خاموش‌اند</strong> — کشف پیدایشان می‌کند ‏(پس در ‏<code>hermes plugins</code> و ‏<code>/plugins</code> دیده می‌شوند) ولی هیچ چیزی با هوک یا ابزار لود نمی‌شود تا نام افزونه را به ‏<code>plugins.enabled</code> در config.yaml بیفزایید. این مانع اجرای کد شخص ثالث بدون رضایت صریح شماست.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>plugins:
+  enabled:
+    - my-tool-plugin
+    - disk-cleanup
+  disabled:       # لیست-رد اختیاری — اگر نامی در هر دو بود همیشه این برنده است
+    - noisy-plugin</code></pre>
+</div>
+<p>سه راه تغییر وضعیت:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes plugins                    # کلید تعاملی (SPACE برای تیک/برداشتن تیک)
+hermes plugins enable &lt;name&gt;      # افزودن به لیست مجاز
+hermes plugins disable &lt;name&gt;     # حذف از لیست مجاز + افزودن به disabled</code></pre>
+</div>
+<p>بعد از ‏<code>hermes plugins install owner/repo</code> سؤال می‌شود ‏<code>Enable 'name' now? [y/N]</code> — پیش‌فرض خیر. برای نصب‌های اسکریپتی پرامپت را با ‏<code>--enable</code> یا ‏<code>--no-enable</code> رد کنید.</p>
+<p>برای نصب بازتولیدپذیر، یک commit کامل تغییرناپذیر pin کنید ‏(تگ‌ها، شاخه‌ها و SHA های مخفف پذیرفته نمی‌شوند):</p>
+<div class="codebox"><pre><code>hermes plugins install owner/repo --ref 0123456789abcdef0123456789abcdef01234567</code></pre></div>
+<p>هرمس commit را detached checkout، تأیید می‌کند ‏HEAD دقیقاً با SHA درخواستی بخواند و منبع مرجع، revision نصب‌شده و وضعیت pin را در پروفایل فعلی ثبت می‌کند. ‏<code>hermes plugins update</code> از جابه‌جا کردن افزونهٔ pinned امتناع می‌کند؛ با ‏<code>hermes plugins install &lt;source&gt; --force --ref &lt;new-commit&gt;</code> صریحاً commit دقیق جدید انتخاب کنید. متادیتای نصبِ محلی-پروفایل هیچ مقدار پیکربندی، محیط، رمز یا grant قابلیتی ندارد.</p>
+
+<h3>چه چیزی لیست مجاز گیت نمی‌زند</h3>
+<p>چند دسته از افزونه‌ها از ‏<code>plugins.enabled</code> می‌گذرند — بخشی از سطح داخلی هرمس‌اند و اگر به‌طور پیش‌فرض گیت شوند عملکردهای پایه می‌شکند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نوع افزونه</th><th>به‌جایش چگونه فعال می‌شود</th></tr></thead>
+  <tbody>
+    <tr><td><strong>افزونه‌های پلتفرمی همراه‌بسته</strong> ‏(IRC، ‏Teams و... زیر ‏plugins/platforms/)</td><td>خودکار لود می‌شوند تا همهٔ کانال‌های گیت‌وی عرضه‌شده در دسترس باشند. روشن‌شدن واقعی کانال با ‏<code>gateway.platforms.&lt;name&gt;.enabled</code> در config.yaml است.</td></tr>
+    <tr><td><strong>بک‌اندهای همراه‌بسته</strong> ‏(ارائه‌دهنده‌های image-gen زیر ‏plugins/image_gen/ و...)</td><td>خودکار لود می‌شوند تا بک‌اند پیش‌فرض «از جعبه کار کند». انتخاب با ‏<code>&lt;category&gt;.provider</code> در config.yaml است ‏(مثل ‏<code>image_gen.provider: openai</code>).</td></tr>
+    <tr><td><strong>ارائه‌دهنده‌های حافظه</strong> ‏(<code>plugins/memory/</code>)</td><td>همه کشف می‌شوند؛ دقیقاً یکی فعال است که با ‏<code>memory.provider</code> در config.yaml انتخاب می‌شود.</td></tr>
+    <tr><td><strong>موتورهای زمینه</strong> ‏(<code>plugins/context_engine/</code>)</td><td>همه کشف می‌شوند؛ یکی فعال است که با ‏<code>context.engine</code> در config.yaml انتخاب می‌شود.</td></tr>
+    <tr><td><strong>ارائه‌دهنده‌های مدل</strong> ‏(<code>plugins/model-providers/</code>)</td><td>همهٔ ارائه‌دهنده‌های همراه‌بسته در اولین فراخوانی ‏get_provider_profile کشف و ثبت می‌شوند. کاربر در هر لحظه یکی را با ‏--provider یا config.yaml انتخاب می‌کند.</td></tr>
+    <tr><td><strong>افزونه‌های ‏backend نصب‌شده با pip</strong></td><td>انتخابی با ‏<code>plugins.enabled</code> ‏(مثل افزونه‌های عمومی).</td></tr>
+    <tr><td><strong>پلتفرم‌های نصب‌شده توسط کاربر</strong> ‏(زیر ‏~/.hermes/plugins/platforms/)</td><td>انتخابی با ‏<code>plugins.enabled</code> — آداپتورهای گیت‌وی شخص ثالث رضایت صریح می‌خواهند.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>خلاصه: <strong>زیربنای همراه‌بستهٔ «همیشه-کارا» خودکار لود می‌شود؛ افزونه‌های عمومی شخص ثالث انتخابی‌اند.</strong> لیست مجاز ‏<code>plugins.enabled</code> دقیقاً گیتِ کد دلخواهی است که کاربر داخل ‏<code>~/.hermes/plugins/</code> می‌اندازد.</p>
+
+<h3>ترنسپورت‌های تأیید</h3>
+<p>یک ترنسپورت تأیید تغییر می‌دهد <strong>یک انسان کجا می‌بیند و جواب می‌دهد</strong> به یک درخواست تأیید ابزارِ موجود هرمس. تصمیم نمی‌گیرد آیا فرمانی نیاز به تأیید دارد و API سیاست-مجوز هم نیست.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>def present(request):
+    # Deliver request.command and request.description to your UI, wait for
+    # its authenticated human response, then return a request-bound decision.
+    choice = send_to_my_ui_and_wait(request)  # once/session/always/deny
+    return request.respond(choice)
+
+
+def register(ctx):
+    ctx.register_approval_transport("my-ui", present)</code></pre>
+</div>
+<p>‏<code>present</code> می‌تواند sync یا async باشد. هرمس روی worker محدود اجرایش می‌کند و ‏<code>approvals.timeout</code> مرجع را حتی اگر افزونه نگذارد اجرا می‌کند. درخواست تغییرناپذیر است و متن نمایشیِ سانسورشده، کلاس ارائهٔ میزبانش ‏(<code>cli</code> یا ‏<code>gateway</code>)، timeout میزبان، گزینه‌های مجاز و شناسه/digest مبهم درخواست را دارد.<br>
+نتیجهٔ ‏<code>request.respond(choice)</code> را برگردانید؛ دیکشنری‌های unbound و شناسه/digest های قدیمی یا عوض‌شده رد می‌شوند. افزونه نمی‌تواند scope‌ای برگرداند که میزبان پیشنهاد نکرده ‏(مثلاً ‏<code>always</code> روی درخواست فقط-یک‌بار).</p>
+<p>ثبت به‌تنهایی هیچ نمی‌کند. فعال‌کردن افزونه و انتخاب صریح ترنسپورتش دو مرحلهٔ رضایت جدا هستند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>plugins:
+  enabled: [my-approval-plugin]
+
+security:
+  approval:
+    transport: my-ui
+    transport_fallback: deny     # پیش‌فرض</code></pre>
+</div>
+<p>استثناهای ترنسپورت، timeout ها، ثبت‌های ناموجود، گزینه‌های نامعتبر و پاسخ‌های کهنه به‌طور پیش‌فرض رد می‌شوند. برای اینکه عمداً پرامپت روی سطح عادی CLI/TUI/گیت‌وی/ACP وقتی ترنسپورت انتخابی شکست خورد نشان داده شود، ‏<code>transport_fallback: builtin</code> بگذارید. بدون همین انتخاب صریح، هرمس هرگز پرامپت را روی سطح دیگری materialize نمی‌کند.</p>
+<p>هرمس همچنان مالک بلوک‌های سخت‌گیرانه، حفاظت sudo-stdin، قواعد رد کاربر، اتصال درخواست، scope های مجاز، ماندگاری، هوک‌ها و مجوز نهایی است. فرمان‌های hardline قبل از هر callback ترنسپورت بلاک می‌شوند. عمداً <strong>هیچ سیاست تأیید افزونه‌ای، callback اجازه-خودکار یا سیاست الزامی ‏pre_tool_call</strong> در این interface نیست. قابلیت سیاست-تأیید آینده ممکن است از مدل رضایت-قابلیت افزونه استفاده کند ولی انتخاب ترنسپورت آن را نمی‌دهد.</p>
+
+<h3>مهاجرت کاربران موجود</h3>
+<p>وقتی به نسخه‌ای از هرمس ارتقا دهید که افزونه‌های انتخابی دارد ‏(اسکیمای پیکربندی v21+)، هر افزونهٔ کاربری نصب‌شده زیر ‏<code>~/.hermes/plugins/</code> که در ‏<code>plugins.disabled</code> نباشد <strong>خودکار grandfathered</strong> به ‏<code>plugins.enabled</code> می‌شود. setup فعلی‌تان به کار ادامه می‌دهد. افزونه‌های standalone همراه‌بسته NOT ‏grandfathered می‌شوند — حتی کاربران فعلی باید صریحاً انتخاب کنند. ‏(افزونه‌های پلتفرمی/بک‌اند همراه‌بسته هرگز نیازی به grandfathering نداشتند چون هیچ‌وقت گیت نشده بودند.)</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> هوک‌های موجود</h2>
+<p>افزونه‌ها می‌توانند ۲۶ رویداد چرخه-حیات را ثبت کنند که الان ‏<code>hermes_cli.plugins.VALID_HOOKS</code> می‌پذیرد. کاتالوگ هوک‌های رویداد مرجع زمان‌بندی دقیق، هندل برگشتی، فیلدهای payload و یادداشت‌های حریم خصوصی است.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>دستهٔ توصیفی</th><th>هوک‌های عرضه‌شده</th></tr></thead>
+  <tbody>
+    <tr><td><strong>هدایتی/کنترلی</strong></td><td>‏<code>pre_tool_call</code>، ‏<code>pre_llm_call</code>، ‏<code>pre_verify</code>، ‏<code>pre_gateway_dispatch</code></td></tr>
+    <tr><td><strong>تبدیل</strong></td><td>‏<code>transform_tool_result</code>، ‏<code>transform_terminal_output</code>، ‏<code>transform_llm_output</code>، ‏<code>pre_transcription</code></td></tr>
+    <tr><td><strong>ناظر</strong></td><td>‏<code>post_tool_call</code>، ‏<code>post_llm_call</code>، ‏<code>pre_api_request</code>، ‏<code>post_api_request</code>، ‏<code>api_request_error</code>، ‏<code>on_stream_start</code>، ‏<code>on_stream_delta</code>، ‏<code>on_stream_end</code>، ‏<code>on_interim_message</code>، ‏<code>on_session_start</code>، ‏<code>on_session_end</code>، ‏<code>on_session_finalize</code>، ‏<code>on_session_reset</code>، ‏<code>on_skill_lifecycle</code>، ‏<code>subagent_start</code>، ‏<code>subagent_stop</code>، ‏<code>pre_approval_request</code>، ‏<code>post_approval_response</code>، ‏<code>pre_command</code>، ‏<code>kanban_task_claimed</code>، ‏<code>kanban_task_completed</code>، ‏<code>kanban_task_blocked</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>این دسته‌ها رفتار فعلی را توصیف می‌کنند نه قواعد نام‌گذاری آینده را. middleware افزونه رجیستری/سطح جداگانه‌ای باقی است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> انواع افزونه</h2>
+<p>هرمس چهار نوع افزونه دارد:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نوع</th><th>چه می‌کند</th><th>انتخاب</th><th>محل</th></tr></thead>
+  <tbody>
+    <tr><td><strong>افزونه‌های عمومی</strong></td><td>ابزار، هوک، فرمان اسلش، فرمان CLI اضافه می‌کنند</td><td>چندانتخابی ‏(فعال/غیرفعال)</td><td>‏<code>~/.hermes/plugins/</code></td></tr>
+    <tr><td><strong>ارائه‌دهنده‌های حافظه</strong></td><td>حافظهٔ داخلی را جایگزین یا تقویت می‌کنند</td><td>تک‌انتخابی ‏(یکی فعال)</td><td>‏<code>plugins/memory/</code></td></tr>
+    <tr><td><strong>موتورهای زمینه</strong></td><td>فشرده‌ساز داخلی زمینه را جایگزین می‌کنند</td><td>تک‌انتخابی ‏(یکی فعال)</td><td>‏<code>plugins/context_engine/</code></td></tr>
+    <tr><td><strong>ارائه‌دهنده‌های مدل</strong></td><td>بک‌اند inference را اعلام می‌کنند ‏(OpenRouter، ‏Anthropic و...)</td><td>چندثبتی، انتخاب با ‏<code>--provider</code> / ‏config.yaml</td><td>‏<code>plugins/model-providers/</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>ارائه‌دهنده‌های حافظه و موتورهای زمینه <strong>افزونه‌های provider</strong> هستند — در هر لحظه فقط یکی از هر نوع می‌تواند فعال باشد. ارائه‌دهنده‌های مدل هم افزونه‌اند ولی خیلی‌شان هم‌زمان لود می‌شوند؛ کاربر در هر لحظه یکی را با ‏<code>--provider</code> یا config.yaml انتخاب می‌کند. افزونه‌های عمومی به هر ترکیبی می‌توانند فعال شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> interface های قابل‌افزودن — برای هر کدام کجا برویم</h2>
+<p>جدول بالا چهار دستهٔ افزونه را نشان می‌دهد ولی داخل «افزونه‌های عمومی» ‏<code>PluginContext</code> چند نقطهٔ توسعه متمایز expose می‌کند — و هرمس توسعه‌های خارج از سیستم افزونهٔ پایتون را هم می‌پذیرد ‏(بک‌اندهای محرک-config، فرمان‌های هوک‌شده-به-شل، سرورهای خارجی و...). برای یافتن doc مناسب آنچه می‌خواهید بسازید این جدول را ببینید:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>می‌خواهید اضافه کنید…</th><th>چطور</th><th>راهنمای نگارش</th></tr></thead>
+  <tbody>
+    <tr><td><strong>ابزاری</strong> که LLM بتواند صدایش بزند</td><td>افزونهٔ پایتونی — ‏<code>ctx.register_tool()</code></td><td>ساخت افزونهٔ هرمس · افزودن ابزارها</td></tr>
+    <tr><td><strong>هوک چرخه-حیات</strong> ‏(قبل/بعد LLM، شروع/پایان نشست، فیلتر ابزار)</td><td>افزونهٔ پایتونی — ‏<code>ctx.register_hook()</code></td><td>مرجع هوک‌ها · ساخت افزونهٔ هرمس</td></tr>
+    <tr><td><strong>فرمان اسلش</strong> برای CLI / گیت‌وی</td><td>افزونهٔ پایتونی — ‏<code>ctx.register_command()</code></td><td>ساخت افزونهٔ هرمس · توسعهٔ CLI</td></tr>
+    <tr><td><strong>زیرفرمانی</strong> برای ‏<code>hermes &lt;thing&gt;</code></td><td>افزونهٔ پایتونی — ‏<code>ctx.register_cli_command()</code></td><td>توسعهٔ CLI</td></tr>
+    <tr><td><strong>مهارت همراه‌بسته</strong> که افزونه‌تان حمل می‌کند</td><td>افزونهٔ پایتونی — ‏<code>ctx.register_skill()</code></td><td>ساخت مهارت‌ها</td></tr>
+    <tr><td><strong>بک‌اند inference</strong> ‏(ارائه‌دهندهٔ LLM: سازگار-OpenAI، ‏Codex، ‏Anthropic-Messages، ‏Bedrock)</td><td>افزونهٔ provider — ‏<code>register_provider(ProviderProfile(...))</code> در ‏<code>plugins/model-providers/&lt;name&gt;/</code></td><td><strong>افزونه‌های ارائه‌دهندهٔ مدل</strong> · افزودن ارائه‌دهنده‌ها</td></tr>
+    <tr><td><strong>کانال گیت‌وی</strong> ‏(دیسکورد / تلگرام / IRC / Teams و...)</td><td>افزونهٔ پلتفرمی — ‏<code>ctx.register_platform()</code> در ‏<code>plugins/platforms/&lt;name&gt;/</code></td><td>افزودن آداپتورهای پلتفرم</td></tr>
+    <tr><td><strong>بک‌اند حافظه</strong> ‏(Honcho، ‏Mem0، ‏Supermemory و...)</td><td>افزونهٔ حافظه — زیرکلاس ‏<code>MemoryProvider</code> در ‏<code>plugins/memory/&lt;name&gt;/</code></td><td>افزونه‌های ارائه‌دهندهٔ حافظه</td></tr>
+    <tr><td><strong>استراتژی فشرده‌سازی زمینه</strong></td><td>افزونهٔ موتور-زمینه — ‏<code>ctx.register_context_engine()</code></td><td>افزونه‌های موتور زمینه</td></tr>
+    <tr><td><strong>بک‌اند تولید تصویر</strong> ‏(DALL·E، ‏SDXL و...)</td><td>افزونهٔ backend — ‏<code>ctx.register_image_gen_provider()</code></td><td>افزونه‌های ارائه‌دهندهٔ تولید تصویر</td></tr>
+    <tr><td><strong>بک‌اند تولید ویدیو</strong> ‏(Veo، ‏Kling، ‏Pixverse، ‏Grok-Imagine، ‏Runway و...)</td><td>افزونهٔ backend — ‏<code>ctx.register_video_gen_provider()</code></td><td>افزونه‌های ارائه‌دهندهٔ تولید ویدیو</td></tr>
+    <tr><td><strong>بک‌اند TTS</strong> ‏(هر CLI — Piper، ‏VoxCPM، ‏Kokoro، ‏xtts، اسکریپت‌های voice-cloning و...)</td><td>محرک-config ‏(توصیه‌شده) — اعلام زیر ‏<code>tts.providers.&lt;name&gt;</code> با ‏<code>type: command</code> در config.yaml. یا افزونهٔ backend پایتونی — ‏<code>ctx.register_tts_provider()</code> برای موتورهای Python-SDK / استریم که بیشتر از قالب شل می‌خواهند.</td><td>راه‌اندازی TTS</td></tr>
+    <tr><td><strong>بک‌اند STT</strong> ‏(هر CLI — whisper.cpp، باینری whisper سفارشی، CLI محلی ASR)</td><td>محرک-config ‏(توصیه‌شده) — اعلام زیر ‏<code>stt.providers.&lt;name&gt;</code> با ‏<code>type: command</code> در config.yaml، یا گذاشتن ‏<code>HERMES_LOCAL_STT_COMMAND</code> برای دریچهٔ تک‌فرمانی قدیمی. یا افزونهٔ backend پایتونی — ‏<code>ctx.register_transcription_provider()</code> برای موتورهای Python-SDK ‏(OpenRouter، ‏SenseAudio، ‏Gemini-STT و...).</td><td>راه‌اندازی STT</td></tr>
+    <tr><td><strong>ابزارهای خارجی با MCP</strong> ‏(filesystem، ‏GitHub، ‏Linear، ‏Notion، هر سرور MCP)</td><td>محرک-config — اعلام ‏<code>mcp_servers.&lt;name&gt;</code> با ‏<code>command:</code>/<code>url:</code> در config.yaml. هرمس ابزارهای سرور را خودکار کشف و کنار داخلی‌ها ثبت می‌کند.</td><td>MCP</td></tr>
+    <tr><td><strong>منابع مهارت اضافه</strong> ‏(مخازن GitHub سفارشی، ایندکس‌های خصوصی مهارت)</td><td>CLI — ‏<code>hermes skills tap add &lt;repo&gt;</code></td><td>Skills Hub</td></tr>
+    <tr><td><strong>هوک‌های رویداد گیت‌وی</strong> ‏(شلیک روی ‏gateway:startup، ‏session:start، ‏agent:end، ‏command:*)</td><td>انداختن ‏<code>HOOK.yaml</code> + ‏<code>handler.py</code> داخل ‏<code>~/.hermes/hooks/&lt;name&gt;/</code></td><td>هوک‌های رویداد</td></tr>
+    <tr><td><strong>هوک‌های شل</strong> ‏(اجرای فرمان شل روی رویدادها — اعلان‌ها، لاگ حسابرسی، alert دسکتاپ)</td><td>محرک-config — اعلام زیر ‏<code>hooks:</code> در config.yaml</td><td>هوک‌های شل</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 یادداشت</div>
+  <p>همه‌چیز افزونهٔ پایتونی نیست. بعضی سطوح توسعه عمداً از <strong>فرمان‌های شل محرک-config</strong> استفاده می‌کنند ‏(TTS، ‏STT، هوک‌های شل) تا هر CLI موجودتان بدون نوشتن پایتون تبدیل به افزونه شود. بعضی دیگر <strong>سرورهای خارجی‌اند</strong> ‏(MCP) که ایجنت به آن‌ها وصل و ابزارشان را خودکار ثبت می‌کند. و بعضی <strong>پوشه‌های drop-in</strong>‌اند ‏(هوک‌های گیت‌وی) با فرمت manifest خودشان. سطح مناسب با سبک یکپارچه‌سازی موردنیازتان را انتخاب کنید؛ راهنماهای نگارش بالای جدول هرکدام placeholder ها، کشف و مثال‌ها را پوشش می‌دهند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> افزونه‌های اعلامی NixOS</h2>
+<p>در NixOS افزونه‌ها می‌توانند به‌صورت اعلامی از طریق گزینه‌های ماژول نصب شوند — بدون ‏<code>hermes plugins install</code>. جزئیات کامل در راهنمای Nix Setup.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">nix</span><button class="copy-btn">کپی</button></div>
+  <pre><code>services.hermes-agent = {
+  # Directory plugin (source tree with plugin.yaml)
+  extraPlugins = [ (pkgs.fetchFromGitHub { ... }) ];
+  # Entry-point plugin (pip package)
+  extraPythonPackages = [ (pkgs.python312Packages.buildPythonPackage { ... }) ];
+  # Enable in config
+  settings.plugins.enabled = [ "my-plugin" ];
+};</code></pre>
+</div>
+<p>افزونه‌های اعلامی با پیشوند ‏<code>nix-managed-</code> symlink می‌شوند — با افزونه‌های نصب‌شدهٔ دستی هم‌زیستی دارند و با حذف از پیکربندی Nix خودکار پاک می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> مدیریت افزونه‌ها</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes plugins                               # UI تعاملی واحد
+hermes plugins list                          # جدول: enabled / disabled / not enabled
+hermes plugins search &lt;term&gt;                 # جست‌وجوی ایندکس افزونهٔ جامعه
+hermes plugins install &lt;name&gt;                # نصب با نام ایندکس (حل‌شده به repo @ ref پین‌شده)
+hermes plugins install user/repo             # نصب از Git، سپس پرسش Enable? [y/N]
+hermes plugins install user/repo --enable    # نصب و فعال‌سازی (بدون پرسش)
+hermes plugins install user/repo --no-enable # نصب ولی خاموش بماند (بدون پرسش)
+hermes plugins update my-plugin              # کشیدن آخرین (ویرایش‌های محلی autostash و اعمال مجدد می‌شوند)
+hermes plugins remove my-plugin              # حذف نصب
+hermes plugins enable my-plugin              # افزودن به لیست مجاز
+hermes plugins disable my-plugin             # حذف از لیست مجاز + افزودن به disabled
+hermes plugins capabilities [my-plugin]      # قابلیت‌های اعلام‌شده در برابر اعطاشده</code></pre>
+</div>
+
+<h3>لینک‌های نصب یک‌کلیکی ‏(Desktop)</h3>
+<p>‏Hermes Desktop طرح URL ‏<code>hermes://</code> را ثبت می‌کند، پس وب‌سایت، README یا پیام چت می‌تواند مستقیم به نصب افزونه لینک دهد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes://plugin/install?repo=owner/repo            # لینک اصلی نصب
+hermes://plugin/install?repo=owner/repo&amp;enable=1   # فعال‌سازی افزونه ایجنت بعد از نصب
+hermes://plugin/install?repo=owner/repo&amp;force=1    # جایگزینی نصب موجود</code></pre>
+</div>
+<p>کلیک، هرمس را باز و یک <strong>دیالوگ تأیید</strong> نشان می‌دهد — شناسهٔ repo، یادداشت «قبل از نصب» و لینک‌های browse و clone گیت‌هاب — سپس repo را shallow-clone می‌کند تا تشخیص دهد چه حمل می‌کند ‏(<strong>افزونهٔ agent</strong> — پایتون بک‌اند، <strong>افزونهٔ desktop</strong> — UI اپ، یا هر دو). مؤلفه‌ها را با چک‌باکس انتخاب و تأیید می‌کنید. تا تأیید شما چیزی نصب نمی‌شود؛ لینک‌های deep هرگز خودکار نصب نمی‌کنند و نصب افزونه‌های agent همان <a href="#scan">اسکن امنیتی زمان‌نصب</a> ‏<code>hermes plugins install</code> را طی می‌کنند.</p>
+<p>مخازن هیبریدی ‏(نیمه-agent + نیمه-desktop در یک repo) یک لینک و یک دیالوگ دارند. همین modal بدون لینک هم از مسیر ‏<strong>Settings ← Plugins ← Install from Git</strong> در دسترس است. URL های قدیمی ‏<code>hermes://plugin-agent/…</code> و ‏<code>hermes://plugin-desktop/…</code> به همان دیالوگ می‌روند. در build های dev ‏(<code>npm run dev</code>) طرح می‌شود ‏<code>hermes-dev://</code>.</p>
+<p>وب‌سایت‌ها SDK لازم ندارند — anchor معمولی کافی است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">html</span><button class="copy-btn">کپی</button></div>
+  <pre><code>&lt;a href="hermes://plugin/install?repo=owner/repo&amp;enable=1"&gt;Install in Hermes&lt;/a&gt;</code></pre>
+</div>
+<p>سرورهای MCP فرم لینک معادل دارند — لینک «Add to Hermes» را در مرجع پیکربندی MCP ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> قابلیت‌های افزونه و رضایت</h2>
+<p>افزونه‌ها می‌توانند سطوح ممتاز میزبانی که می‌خواهند را در plugin.yaml‌شان اعلام کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>name: my-plugin
+capabilities:
+  - tools.override        # جایگزینی ابزارهای داخلی
+  - llm.model_override    # انتخاب مدل برای فراخوانی‌های LLM متعلق-به-میزبان</code></pre>
+</div>
+<p>وقتی افزونه‌ای قابلیت اعلام کند، ‏<code>hermes plugins install</code> ‏(و ‏<code>hermes plugins enable</code>) فهرست را با توضیح یک‌خطی ریسک نشان و یک‌بار می‌پرسد. رضایت، grant را زیر ‏<code>plugins.entries.&lt;id&gt;.granted_capabilities</code> همراه hash رضایت و timestamp ثبت می‌کند. رد کردن، افزونه را با آن قابلیت‌های خاموش فعال نگه می‌دارد — افزونهٔ خوش‌رفتار با ‏<code>ctx.has_capability()</code> probe می‌کند و با ملایمت تنزل می‌یابد.</p>
+<p><strong>رضایت مجدد به‌روزرسانی:</strong> اگر به‌روزرسانی افزونه‌ای قابلیتی اعلام کند که اعطا نکرده‌اید، ‏<code>hermes plugins update</code> افزوده‌ها را نشان و دوباره می‌پرسد. قابلیت‌های جدید خاموش می‌مانند تا رضایت بدهید — به‌روزرسانی افزونه هرگز نمی‌تواند دسترسی‌اش را بی‌صدا پهن کند.</p>
+<p><strong>نشست‌های غیرتعاملی fail-closed می‌شوند:</strong> نصب/به‌روزرسانی بدون TTY نصب را تمام می‌کند ولی قابلیت‌های اعلام‌شده <em>اعطا نمی‌شوند</em>. برای اعطای بعدی ‏<code>hermes plugins enable &lt;id&gt;</code> را تعاملی اجرا کنید.</p>
+<p>هر وقت وضعیت را بازرسی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes plugins capabilities             # همهٔ افزونه‌ها با قابلیت‌های declared/granted
+hermes plugins capabilities my-plugin   # یک افزونه، declared vs granted</code></pre>
+</div>
+<p>شناسه‌های قابلیت یک‌به‌یک به گیت‌های پیکربندی قدیمیِ هر-قابلیت نگاشت می‌شوند که همچنان کار می‌کنند ولی به نفع جریان رضایت <strong>deprecated</strong> شده‌اند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>قابلیت</th><th>کلید قدیمی ‏(plugins.entries.&lt;id&gt;.…)</th></tr></thead>
+  <tbody>
+    <tr><td><code>tools.override</code></td><td><code>allow_tool_override</code></td></tr>
+    <tr><td><code>llm.provider_override</code></td><td><code>llm.allow_provider_override</code></td></tr>
+    <tr><td><code>llm.model_override</code></td><td><code>llm.allow_model_override</code></td></tr>
+    <tr><td><code>llm.agent_id_override</code></td><td><code>llm.allow_agent_id_override</code></td></tr>
+    <tr><td><code>llm.profile_override</code></td><td><code>llm.allow_profile_override</code></td></tr>
+    <tr><td><code>llm.task_override</code></td><td><code>llm.allow_task_override</code></td></tr>
+    <tr><td><code>gateway.platform_actions</code></td><td><code>allow_platform_actions</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>گیت وقتی باز است که <em>یا</em> قابلیت اعطا شده <em>یا</em> کلید قدیمی تنظیم شده باشد — پیکربندی‌های موجود بدون تغییر کار می‌کنند.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ سندباکس نیست</div>
+  <p>قابلیت‌ها یک <strong>لایهٔ رضایت و حسابرسی‌اند</strong> نه ایزوله‌سازی. افزونه‌ها مثل پایتون عادی درون-پروسه اجرا می‌شوند: افزونهٔ مخرب می‌تواند از هر گیت اینجا عبور کند. اعطای قابلیت بیان اعتماد به نویسندهٔ افزونه است — audit کد نیست و هرمس کد افزونه را بازبینی نکرده. فقط افزونه‌ها را از منابع مورداطمینان نصب کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> اکشن‌های پلتفرمی</h2>
+<p>‏<code>ctx.platform_actions</code> به افزونه مجموعه‌فعل حداقلیِ گیت‌خورده-با-قابلیت برای عمل روی پلتفرم‌های چت متصل از طریق رجیستری زندهٔ آداپتور گیت‌وی می‌دهد — جایگزین تأییدشده برای monkeypatching آداپتور. <strong>پیش‌فرض خاموش است</strong>: هر فراخوانی قابلیت ‏<code>gateway.platform_actions</code> را دوباره چک می‌کند ‏(کلید قدیمی ‏<code>plugins.entries.&lt;id&gt;.allow_platform_actions</code>) و فراخوانی بدون اعطا به‌جای عمل، خطای ساختاریافته برمی‌گرداند.</p>
+<p>افعال v1 ‏(هر دو async، هر دو dict ساده برمی‌گردانند و هیچ‌کدام هرگز به dispatch هوک exception نمی‌پراکنند):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>result = await ctx.platform_actions.add_reaction(
+    platform="telegram", chat_id="-100123", message_id="456", emoji="👍",
+)
+result = await ctx.platform_actions.set_thread_title(
+    platform="discord", chat_id="123", thread_id="456", title="New title",
+)
+if not result["ok"]:
+    print(result["error"], result.get("detail"))</code></pre>
+</div>
+<p>موفقیت ‏<code>{"ok": True, "action": &lt;verb&gt;}</code> است. شکست‌ها ‏<code>{"ok": False, "error": &lt;code&gt;, "detail": &lt;str&gt;}</code> با کدهای خطای پایدارند: ‏<code>capability_not_granted</code>، ‏<code>invalid_argument</code>، ‏<code>gateway_unavailable</code>، ‏<code>unknown_platform</code>، ‏<code>adapter_not_registered</code>، ‏<code>adapter_disconnected</code>، ‏<code>unsupported_platform_action</code>، ‏<code>action_failed</code>. اکشن‌ها قبل از عمل تأیید می‌کنند آداپتور هدف موجود و متصل است؛ آداپتور قطع یا غایب به خطای ساختاریافته تنزل می‌یابد هرگز exception نمی‌شود.</p>
+<p>پلتفرم‌های پشتیبان v1: تلگرام و دیسکورد. ‏add_reaction تلگرام واکنش بات را <em>تنظیم</em> می‌کند ‏(Bot API واکنش قبلی بات را جایگزین می‌کند نه انباشته). هر اکشن — مجاز یا رد — با شناسهٔ افزونه، فعل، پلتفرم و نتیجه لاگ می‌شود.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ یادداشت امنیتی</div>
+  <p>اکشن‌های پلتفرمی یک <strong>قدرت پیام‌رسانی-به‌عنوان-بات‌اند</strong>: افزونهٔ دارای grant می‌تواند در هر چتی که بات گیت‌وی به آن می‌رسد — نه فقط چت محرک هوک — react کند و تردها را rename کند. ‏<code>gateway.platform_actions</code> را فقط به افزونه‌های مورداطمینان بدهید و افزونه‌هایی را ترجیح دهید که دقیقاً مستند کرده‌اند چه اکشن‌هایی می‌زنند. دسترسی خام payload/handle SDK پلتفرم عمداً <strong>جزء</strong> این سطح نیست — طبق اصلاح طراحی دور-۲ شمارهٔ ۶۴۱۷۶ قابلیت خودش را ‏(<code>gateway.raw_events</code>) با برچسب «بدون تضمین پایداری» و طراحی جدا می‌خواهد و هنوز منتشر نشده.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> کشف افزونه‌های جامعه</h2>
+<p>‏<code>hermes plugins search &lt;term&gt;</code> در <strong>ایندکس افزونهٔ جامعه</strong> جست‌وجو می‌کند — کاتالوگ JSON استاتیک و ماشین‌خوانِ افزونه‌های جامعه. تطبیق فازی روی نام، توضیح و تگ‌هاست:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes plugins search telegram               # جست‌وجوی فازی
+hermes plugins search                        # مرور کل ایندکس
+hermes plugins search --capability platform  # فیلتر بر اساس قابلیت اعلام‌شده
+hermes plugins search media --json           # خروجی ماشین‌خوان
+hermes plugins search --refresh              # رد شدن از کش محلی ۲۴ساعته</code></pre>
+</div>
+<p>بعد از یافتن افزونه، با نام لخت نصبش کنید — نام از طریق ایندکس به ‏<code>owner/repo</code> به‌اضافهٔ commit پین‌شدهٔ ایندکس حل می‌شود:</p>
+<div class="codebox"><pre><code>hermes plugins install hermes-media-studio</code></pre></div>
+<p>اگر نامی با بیش از یک ورودی بخواند، کاندیداها فهرست و چیزی نصب نمی‌شود. شناسه‌های صریح ‏<code>owner/repo</code> یا URL گیت هرگز به ایندکس دست نمی‌زنند و دقیقاً مثل قبل کار می‌کنند. ‏<code>--ref &lt;sha&gt;</code> صریح همیشه بر پین ایندکس مقدم است.</p>
+<p><strong>نحوهٔ گرفتن ایندکس.</strong> ایندکس در URL مرجعی زندگی می‌کند ‏(<code>https://raw.githubusercontent.com/NousResearch/hermes-plugin-index/main/index.json</code>، قابل override با ‏<code>hermes config set plugins.index_url &lt;url&gt;</code>). دریافت‌ها ۲۴ ساعت زیر ‏<code>~/.hermes/cache/plugin_index.json</code> کش می‌شوند؛ وقتی مقصد راه‌دور غیرقابل‌دسترس است از کش کهنه و وقتی اصلاً کشی نیست از کپی seed همراه‌بسته استفاده می‌شود — پس search کاملاً آفلاین کار می‌کند.</p>
+<p><strong>قالب ورودی ایندکس.</strong> هر ورودی یک آبجکت JSON است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{
+  "name": "hermes-media-studio",
+  "description": "Generative media workspace plugin.",
+  "author": "NousResearch",
+  "tags": ["media", "image-gen"],
+  "repo": "NousResearch/hermes-media-studio",
+  "ref": "&lt;40-char commit SHA&gt;",
+  "subdir": null,
+  "homepage": "https://github.com/NousResearch/hermes-media-studio",
+  "capabilities": ["tools", "dashboard"],
+  "api_version": 1,
+  "added_at": "2026-08-12"
+}</code></pre>
+</div>
+<p>‏<code>repo</code> شناسهٔ گیت‌هابی ‏<code>owner/name</code> است، ‏<code>ref</code> یک commit SHA تغییرناپذیر را pin می‌کند و ‏<code>subdir</code> اختیاری monorepo ها را پشتیبانی می‌کند. فایل seed همراه‌بسته ‏(<code>hermes_cli/data/plugin_index.json</code> در مخزن) مرجع قالب است.</p>
+<p><strong>ارسال افزونه.</strong> ایندکس به‌عنوان فایل JSON ساده نگه داشته می‌شود — pull request به مخزن hermes-plugin-index بفرستید و ورودی‌تان را اضافه کنید ‏(نام، توضیح، نویسنده، تگ‌ها، ‏owner/repo و SHA commit پین‌شده). بازبینی فقط <em>متادیتای</em> ورودی را پوشش می‌دهد.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ ایندکس‌شده ≠ بازرسی‌شده</div>
+  <p>حضور در ایندکس جامعه یعنی متادیتای ورودی بازبینی شده — <strong>audit کد نیست</strong>. نصب همچنان از جریان عادی رضایت/بازبینی می‌گذرد ‏(نصب افزونه‌ها پیش‌فرض خاموش، فعال‌سازی گام صریح، و حق override ابزار grant جدا می‌خواهد). قبل از فعال‌کردن افزونه سورسش را بازبینی کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> بسته‌های افزونه ‏(Plugin Packs)</h2>
+<p><strong>بستهٔ افزونه</strong> فایل YAML اعلامی و اشتراک‌پذیری است ‏(<code>hermes-pack.yaml</code>) که مجموعه‌ای از افزونه‌ها را pin می‌کند — مثل به‌اشتراک‌گذاشتن یک modpack. نصب بسته به نصب‌های pinned معمولی fan-out می‌کند؛ در runtime هیچ چیز جدیدی وجود ندارد.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>name: voice-assistant-pack
+description: STT + streaming TTS + approval relay
+author: hyper
+version: 1.0.0
+plugins:
+  - name: hermes-media-studio            # نام لخت ایندکس جامعه…
+    ref: e8d59971d2b7901405b39dac7b03bdd616272d0d
+  - repo: owner/approval-relay           # …یا owner/repo صریح (یا URL گیت)
+    ref: 8f3c2d1a9b4e5f6071829304a5b6c7d8e9f00112
+    subdir: plugins/relay                # مسیر monorepo اختیاری
+config:                                  # اختیاری، فقط seed های غیر-محرمانه
+  hermes-media-studio:
+    default_model: flux-3
+skills: []                               # فقط فهرست اعلامی (هنوز خودکار نصب نمی‌شود)</code></pre>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes plugins pack show ./hermes-pack.yaml     # بازبینی dry-run
+hermes plugins pack install ./hermes-pack.yaml  # بازبینی → تأیید → نصب
+hermes plugins pack export > hermes-pack.yaml   # snapshot نصب فعلی
+hermes plugins pack export --enabled-only       # فقط plugins.enabled</code></pre>
+</div>
+<p><strong>وضعیت زنجیرهٔ تأمین.</strong> ‏<code>ref</code> هر ورودی باید دقیقاً SHA ‏commit چهل‌کاراکتری باشد — تگ‌ها و نام شاخه‌ها با خطایی که ورودی را نام می‌برد رد می‌شوند، همان قاعدهٔ ایندکس جامعه. نصب بسته دقیقاً از همان مسیر نصب پین‌شدهٔ ‏<code>hermes plugins install --ref &lt;sha&gt;</code> می‌رود و همان provenance را در ‏<code>plugins/.install-metadata.json</code> ثبت می‌کند، پس دو نصب از یک بسته یکسان حل می‌شوند. بسته‌ها روی <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">فیلدهای manifest v2</a> ‏(<code>manifest_version</code>، ‏<code>api_version</code>، ‏<code>requires_plugins</code>) ساخته می‌شوند — manifest خود هر افزونه همچنان از مسیر نصب عادی اعتبارسنجی می‌شود.</p>
+<p><strong>رضایت هیچ‌وقت bulk اعطا نمی‌شود.</strong> ‏<code>pack install</code> صفحهٔ بازبینی اجباری نشان می‌دهد ‏(هر افزونه، منبع، ref پین‌شده و قابلیت‌های اعلامی‌اش)، بعد <strong>یک</strong> تأیید برای محتوای بسته می‌گیرد. بعد از آن قابلیت‌های اعلامی هر افزونه از پرامپت رضایت-قابلیت استاندارد به‌ازای-افزونه می‌گذرد — عیناً مثل یک ‏<code>hermes plugins install</code> تکی. ‏<code>--yes</code> وجود ندارد و نشست‌های غیرتعاملی نمی‌توانند بسته نصب کنند.</p>
+<p><strong>رمزها هرگز داخل بسته سفر نمی‌کنند.</strong> ‏seed های ‏<code>config:</code> به کلیدهای غیر-محرمانهٔ ‏<code>plugins.entries.&lt;id&gt;</code> محدودند — نام‌های کلید شبیه-رمز ‏(<code>*token*</code>، ‏<code>*key*</code>، ‏<code>*password*</code> و...)، grant های قابلیت و گیت‌های اعتماد قدیمی ‏<code>allow_*</code> هنگام نصب رد و هنگام export حذف می‌شوند. افزونه‌هایی که رمز می‌خواهند در ‏<code>requires_env</code> خودشان اعلام می‌کنند که مثل همیشه حین نصب پرسیده می‌شود. مقادیر موجود کاربر در ‏<code>plugins.entries.&lt;id&gt;</code> همیشه بر seed های بسته مقدم‌اند.</p>
+<p><strong>شکست جزئی.</strong> هر افزونه مستقل نصب می‌شود؛ شکست‌ها به‌ازای افزونه گزارش، بقیه ادامه می‌یابند و فرمان اگر افزونه‌ای شکست بخورد با کد غیرصفر خارج می‌شود.</p>
+<p><strong>نکات export.</strong> ‏<code>pack export</code> فقط افزونه‌هایی با provenance گیت شناخته ‏(نصب‌شده با ‏<code>hermes plugins install</code>) را شامل می‌شود. افزونه‌های فقط-محلی در YAML خروجی به‌صورت کامنت هشدار می‌آیند نه ورودی قابل‌نصب.</p>
+<p>فهرست ‏<code>skills:</code> parse و هنگام نصب نمایش داده می‌شود ولی هنوز خودکار نصب نمی‌شود — فعلاً دستی نصبشان کنید ‏(<code>hermes skills</code>). سیم‌کشی شناسه‌های skill-hub به نصب بسته، درز پیگیری‌شدهٔ مستند است.</p>
+</section>
+
+<section class="doc-sec" id="scan">
+<h2><span class="secnum">۱۴</span> اسکن امنیتی زمان‌نصب</h2>
+<p>هر ‏<code>hermes plugins install</code> و ‏<code>hermes plugins update</code> قبل از فعال‌شدن یک اسکن امنیتی استاتیک روی درخت افزونه اجرا می‌کند ‏(الهام از اسکن امنیتی skill و افزونهٔ Claude Cowork). اسکنر همان موتور الگو-تهدید Skills Hub Guard را بازمصرف می‌کند — خروج برداشتگاه‌های اعتبارنامه، reverse shell، فرمان‌های مخرب، مکانیزم‌های persistence، اجرای مبهم و prompt injection در فایل‌های مستندات — با معافیت‌های آگاه-از-افزونه: افزونهٔ provider که کلید API <strong>خودش</strong> را از محیط می‌خواند ‏(الگوی مستند ‏<code>requires_env</code>) فلگ نمی‌شود.</p>
+<p>سه حکم، مطابق pass/warn/fail کاورک:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>حکم</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><strong>safe</strong></td><td>عادی نصب می‌شود، بدون خروجی اضافه</td></tr>
+    <tr><td><strong>caution</strong></td><td>یافته‌ها نشان داده می‌شوند؛ تأیید می‌کنید ‏<code>Install anyway? [y/N]</code> ‏(یا ‏<code>--force</code>)</td></tr>
+    <tr><td><strong>dangerous</strong></td><td>بلوک می‌شود. ‏<code>--force</code> آن را <strong>override نمی‌کند</strong></td></tr>
+  </tbody>
+</table>
+</div>
+<p>روی ‏<code>hermes plugins update</code>، حکم dangerous روی درخت به‌روزرسانی‌شده افزونه را تا بازبینی یافته‌ها و فعال‌سازی مجدد شما غیرفعال می‌کند.</p>
+<p>اسکن پیش‌فرض روشن است؛ در config.yaml خاموشش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>plugins:
+  scan_on_install: false</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> UI تعاملی</h2>
+<p>اجرای ‏<code>hermes plugins</code> بدون آرگومان یک صفحه تعاملی ترکیبی باز می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Plugins
+  ↑↓ navigate  SPACE toggle  ENTER configure/confirm  ESC done
+
+  General Plugins
+ → [✓] my-tool-plugin — Custom search tool
+   [ ] webhook-notifier — Event hooks
+   [ ] disk-cleanup — Auto-cleanup of ephemeral files [bundled]
+
+  Provider Plugins
+     Memory Provider          ▸ honcho
+     Context Engine           ▸ compressor</code></pre>
+</div>
+<ul>
+  <li><strong>بخش General Plugins</strong> — چک‌باکس‌ها، تغییر با SPACE. تیک‌دار = داخل ‏<code>plugins.enabled</code>، بی‌تیک = داخل ‏<code>plugins.disabled</code> ‏(خاموش صریح).</li>
+  <li><strong>بخش Provider Plugins</strong> — انتخاب فعلی را نشان می‌دهد. ENTER را بزنید تا وارد picker رادیویی شوید و یک ارائه‌دهندهٔ فعال انتخاب کنید.</li>
+  <li>افزونه‌های همراه‌بسته با تگ ‏<code>[bundled]</code> در همان فهرست ظاهر می‌شوند.</li>
+</ul>
+<p>انتخاب‌های افزونهٔ provider در config.yaml ذخیره می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>memory:
+  provider: "honcho"      # رشتهٔ خالی = فقط داخلی
+
+context:
+  engine: "compressor"    # فشرده‌ساز داخلی پیش‌فرض</code></pre>
+</div>
+
+<h3>فعال در برابر غیرفعال در برابر هیچ‌کدام</h3>
+<p>افزونه‌ها یکی از سه وضعیت را دارند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>وضعیت</th><th>معنی</th><th>داخل plugins.enabled؟</th><th>داخل plugins.disabled؟</th></tr></thead>
+  <tbody>
+    <tr><td><code>enabled</code></td><td>نشست بعدی لود می‌شود</td><td>بله</td><td>خیر</td></tr>
+    <tr><td><code>disabled</code></td><td>خاموش صریح — حتی اگر در enabled هم باشد لود نمی‌شود</td><td>‹بی‌اهمیت›</td><td>بله</td></tr>
+    <tr><td><code>not enabled</code></td><td>کشف‌شده ولی هرگز انتخاب نشده</td><td>خیر</td><td>خیر</td></tr>
+  </tbody>
+</table>
+</div>
+<p>پیش‌فرض افزونهٔ تازه‌نصب یا همراه‌بسته ‏<code>not enabled</code> است. ‏<code>hermes plugins list</code> هر سه حالت متمایز را نشان می‌دهد تا بدانید چه چیزی صریحاً خاموش شده و چه چیزی فقط منتظر فعال‌سازی است.</p>
+<p>در نشست در حال اجرا، ‏<code>/plugins</code> نشان می‌دهد کدام افزونه‌ها الان لودند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> تزریق پیام‌ها</h2>
+<p>افزونه‌ها می‌توانند با ‏<code>ctx.inject_message()</code> پیامی به گفتگوی CLI یا نشست گیت‌وی شناخته تزریق کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code># گفتگوی فعال CLI
+ctx.inject_message("New data arrived from the webhook", role="user")
+
+# گفتگوی موجود گیت‌وی
+ctx.inject_message(
+    "New data arrived from the webhook",
+    role="user",
+    session_key="agent:main:telegram:dm:123456789",
+)</code></pre>
+</div>
+<p><strong>امضا:</strong> ‏<code>ctx.inject_message(content: str, role: str = "user", *, session_key: str | None = None) -> bool</code></p>
+<p>در حالت CLI:</p>
+<ul>
+  <li>اگر ایجنت <strong>idle</strong> باشد ‏(منتظر ورودی کاربر)، پیام به‌عنوان ورودی بعدی صف و نوبت جدید شروع می‌شود.</li>
+  <li>اگر ایجنت <strong>میان-نوبت</strong> باشد ‏(فعلاً در حال اجرا)، پیام عملیات فعلی را قطع می‌کند — مثل اینکه کاربر پیام جدید تایپ و Enter بزند.</li>
+  <li>برای نقش‌های غیر-<code>"user"</code> محتوا با ‏<code>[role]</code> پیشوند می‌گیرد ‏(مثل ‏<code>[system] ...</code>).</li>
+  <li>اگر پیام موفقانه صف شد ‏<code>True</code> برمی‌گرداند.</li>
+</ul>
+<p>در حالت گیت‌وی:</p>
+<ul>
+  <li>‏<code>session_key</code> الزامی است و باید نشست موجود گیت‌وی را مشخص کند. کلید مسیریابی پایدار است نه شناسهٔ نشست CLI.</li>
+  <li>هرمس پلتفرم، چت، ترد، پروفایل و تاریخچهٔ گفتگوی ذخیره‌شدهٔ همان نشست را بازمصرف می‌کند. افزونه‌ها نمی‌توانند از طریق این API مسیر چت جدیدی بدهند.</li>
+  <li>هرمس قبل از dispatch مسیر ذخیره‌شده را دوباره علیه قواعد مجوز فعلی گیت‌وی چک می‌کند.</li>
+  <li>مسیرهایی که فقط به تصمیم احرازِ لحظه-آداپتور یا بالادستی تکیه داشتند رد می‌شوند مگر هرمس بتواند آنها را از لیست‌های مجاز فعلی هسته، pairing یا پیکربندی صریح allow-all دوباره اعتبارسنجی کند.</li>
+  <li>متن تزریق‌شده همیشه ورودی گفتگویی است. نمی‌تواند فرمان اسلش invoke، ابزار تأیید یا پرامپت‌های در انتظار تأیید/شفاف‌سازی را حل کند.</li>
+  <li>تا وقتی dispatch در انتظار است، مسیر و گفتگو قفل می‌شوند. اگر بازیابی topic مسیر را عوض کند یا نشست قبل از شروع هندل بچرخد هرمس درخواست را دور می‌ریزد.</li>
+  <li>درخواست وارد مسیر عادی پیام آداپتور پلتفرم می‌شود. نشست‌های فعال از صف busy-session موجود استفاده می‌کنند نه شروع نوبت رقیب.</li>
+  <li>وقتی گیت‌وی زنده درخواست را برای dispatch ناهمگام می‌پذیرد ‏<code>True</code> برمی‌گرداند. این تأیید نمی‌کند نوبت ایجنت یا تحویل پلتفرمی تمام شده.</li>
+  <li>وقتی ‏<code>session_key</code> حذف شده، مجوز اعطا نشده یا گیت‌وی زنده‌ای درخواست را نمی‌پذیرد ‏<code>False</code> برمی‌گرداند. کلیدهای نشست ناشناخته یا غیرقابل-مسیریابی که بعد از پذیرش ناهمگام پیدا شوند در لاگ گیت‌وی نوشته می‌شوند.</li>
+</ul>
+<p>این افزونه‌هایی مثل viewer های کنترل-از-راه‌دور، پل‌های پیام‌رسانی یا گیرنده‌های وب‌هوک را ممکن می‌کند پیام‌ها را از منابع خارجی به گفتگو بدهند.</p>
+<p>تزریق گیت‌وی می‌تواند پاسخ ایجنت را به یک پلتفرم پیام‌رسانی خارجی بفرستد. به‌طور پیش‌فرض برای هر افزونه خاموش است. به‌ازای هر افزونه در config.yaml اعطا کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>plugins:
+  entries:
+    my-plugin:
+      allow_gateway_injection: true</code></pre>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>تزریق گیت‌وی را فقط به افزونه‌های مورداطمینان اعطا کنید. هرمس این مجوز API میزبان را چک و به مسیرهای نشست موجود محدود می‌کند ولی افزونه‌های پایتونی درون-پروسه اجرا می‌شوند و این تنظیم سندباکس نیست.</p>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 یادداشت</div>
+  <p>این API افزونه endpoint HTTP عمومی یا فرمان CLI برای پروسه‌های خارجی expose نمی‌کند. افزونه باید از قبل ‏session_key هدف گیت‌وی را بشناسد، مثلاً از پیکربندی مطمئن خودش یا وضعیت نشستِ قبلاً نگهداری‌شده.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۷</span> صدازدن سرورهای MCP از افزونه‌ها</h2>
+<p>‏<code>ctx.call_mcp()</code> اجازه می‌دهد افزونه ابزاری روی یکی از سرورهای MCP پیکربندی‌شدهٔ کاربر را — همگام، از داخل هر هوک یا هندل ابزار — صدا بزند و از طریق کلاینت native MCP موجود هرمس مسیریابی شود ‏(همان اتصالات، گیت‌های trust-tier، مدارشکن و منطق reconnect ابزارهای MCP فراخوانی‌شده-با-مدل؛ هرگز کلاینت موازی).</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>result = ctx.call_mcp(
+    "knowledge_rag",            # نام سرور از mcp.servers
+    "query_knowledge",          # ابزار روی همان سرور
+    {"query": "deploy runbook"},
+    timeout=30,                 # ثانیه؛ محدود به ۱–۶۰۰
+)
+if result["ok"]:
+    print(result["result"])
+else:
+    print("MCP error:", result["error"])</code></pre>
+</div>
+<p><strong>امضا:</strong> ‏<code>ctx.call_mcp(server: str, tool: str, arguments: dict | None = None, timeout: float = 30) -> dict</code></p>
+<p>پاکت پایدار برمی‌گرداند: ‏<code>{"ok": True, "result": ...}</code> ‏(+ ‏<code>structuredContent</code> وقتی سرور بدهد) یا ‏<code>{"ok": False, "error": "..."}</code>. نتایج بالای ~۶۴ کیلوبایت بریده و با ‏<code>"truncated": True</code> فلگ می‌شوند.</p>
+
+<h3>امنیت: پیش‌فرض خاموش، لیست مجاز به‌ازای-سرور</h3>
+<p>افزونه <strong>به‌طور پیش‌فرض هیچ دسترسی MCP ندارد</strong>. اپراتور باید هر سرور را صریحاً در config.yaml اعطا کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>plugins:
+  entries:
+    my-plugin:
+      mcp_allowlist: ["knowledge_rag", "github"]</code></pre>
+</div>
+<ul>
+  <li>صدازدن سروری خارج از فهرست ‏<code>PermissionError</code> می‌دهد و کلید پیکربندی دقیقی که باید ست شود را نام می‌برد.</li>
+  <li>اعطا به‌ازای-سرور و به‌ازای-افزونه است — هرگز اقتدار محیطی روی همهٔ سرورهای پیکربندی‌شده، و wildcard ‏«"*"» پذیرفته نمی‌شود.</li>
+  <li>هر فراخوانی timeout اجراشده دارد ‏(پیش‌فرض ۳۰ ثانیه) تا سرور MCP معلق نتواند خط‌لوله هوک یا ابزارِ فراخواننده را stall کند.</li>
+  <li>سرورهای MCP محتوای غیرقابل‌اعتماد برمی‌گردانند. ‏<code>result</code> را داده تلقی کنید نه دستورالعمل — بدون اعتبارسنجی وارد تصمیمات ممتازش نکنید ‏(تأییدها، اجرای فرمان).</li>
+</ul>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>اعطای ‏<code>mcp_allowlist</code> به افزونه همان دسترسی مدل به آن سرور MCP را می‌دهد — شامل هر ابزار دارای-قابلیت-نوشتنی که سرور expose کند ‏(مشروط به گیت‌های tier ‏trust سرور). فقط سرورهایی را اعطا کنید که افزونه واقعاً لازم دارد.</p>
+</div>
+<p><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">راهنمای کامل</a> را برای قراردادهای هندلر، قالب schema، رفتار هوک، هندل خطا و اشتباهات رایج ببینید.</p>
+</section>
+
+<div class="pager">
+  <a href="memory.html"><span class="dir">→ قبلی</span><span class="ttl">حافظه</span></a>
+  <a class="next" href="mcp.html"><span class="dir">بعدی ←</span><span class="ttl">MCP ‏(Model Context Protocol)</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/plugins" target="_blank" rel="noopener">Plugins</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

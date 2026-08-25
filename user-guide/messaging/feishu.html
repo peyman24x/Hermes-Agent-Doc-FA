@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feishu / Lark — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/feishu" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>Feishu / Lark</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی Feishu / Lark</h1>
+<p>هرمس ایجنت با Feishu و Lark به‌عنوان یک بات کاملاً امکان‌دار یکپارچه می‌شود. بعد از اتصال می‌توانید در پیام خصوصی یا چت گروهی با ایجنت حرف بزنید، نتایج کارهای کرون را در یک چت خانگی بگیرید و متن، تصویر، صوت و پیوست فایل را از مسیر عادی گیت‌وی بفرستید.</p>
+<p>یکپارچه‌سازی هر دو حالت اتصال را پشتیبانی می‌کند:</p>
+<ul>
+  <li>‏<code>websocket</code> — توصیه‌شده؛ هرمس اتصال خروجی را باز می‌کند و endpoint وب‌هوک عمومی لازم ندارید</li>
+  <li>‏<code>webhook</code> — وقتی می‌خواهید Feishu/Lark رویدادها را روی HTTP به گیت‌وی‌تان push کند مفید است</li>
+</ul>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> رفتار هرمس</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>زمینه</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td>پیام خصوصی</td><td>هرمس به همهٔ پیام‌ها پاسخ می‌دهد.</td></tr>
+    <tr><td>چت گروهی</td><td>هرمس فقط وقتی بات در چت @منشن شود پاسخ می‌دهد.</td></tr>
+    <tr><td>چت گروهی مشترک</td><td>به‌طور پیش‌فرض تاریخچهٔ نشست داخل یک چت مشترک به‌ازای هر کاربر ایزوله است.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>این رفتار چت-مشترک با config.yaml کنترل می‌شود:</p>
+<div class="codebox"><pre><code>group_sessions_per_user: true</code></pre></div>
+<p>فقط اگر صریحاً یک گفتگوی مشترک به‌ازای هر چت می‌خواهید ‏<code>false</code> کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: ساخت اپ Feishu / Lark</h2>
+<h3>توصیه‌شده: ساخت با اسکن QR ‏(یک فرمان)</h3>
+<div class="codebox"><pre><code>hermes gateway setup</code></pre></div>
+<p><strong>Feishu / Lark</strong> را انتخاب و کد QR را با اپ موبایل Feishu یا Lark اسکن کنید. هرمس خودکار اپلیکیشن بات با دسترسی‌های درست می‌سازد و اعتبارنامه‌ها را ذخیره می‌کند.</p>
+
+<h3>روش جایگزین: راه‌اندازی دستی</h3>
+<p>اگر ساخت با اسکن در دسترس نباشد ویزارد به ورودی دستی برمی‌گردد:</p>
+<ol>
+  <li>کنسول توسعه‌دهندهٔ Feishu یا Lark را باز کنید:
+    <ul>
+      <li>‏Feishu: ‏<a href="https://open.feishu.cn/" target="_blank" rel="noopener">https://open.feishu.cn/</a></li>
+      <li>‏Lark: ‏<a href="https://open.larksuite.com/" target="_blank" rel="noopener">https://open.larksuite.com/</a></li>
+    </ul>
+  </li>
+  <li>اپ جدیدی بسازید.</li>
+  <li>در ‏<strong>Credentials &amp; Basic Info</strong> مقدارهای ‏<strong>App ID</strong> و ‏<strong>App Secret</strong> را کپی کنید.</li>
+  <li>قابلیت <strong>Bot</strong> را برای اپ فعال کنید.</li>
+  <li>‏<code>hermes gateway setup</code> را اجرا، ‏<strong>Feishu / Lark</strong> را انتخاب و هنگام پرسش اعتبارنامه‌ها را وارد کنید.</li>
+</ol>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>رمز اپ را خصوصی نگه دارید. هر کسی با آن می‌تواند خودش را جای اپ شما جا بزند.</p>
+</div>
+
+<h3>پیکربندی دسترسی‌ها</h3>
+<p>در کنسول توسعه‌دهندهٔ Feishu به ‏<strong>Permission Management</strong> بروید و scope های زیر را اضافه کنید. در صفحهٔ دسترسی‌ها می‌توانید bulk-import کنید.</p>
+<p><strong>دسترسی‌های الزامی:</strong></p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Scope</th><th>هدف</th></tr></thead>
+  <tbody>
+    <tr><td><code>im:message</code></td><td>دریافت و خواندن پیام‌ها</td></tr>
+    <tr><td><code>im:message:send_as_bot</code></td><td>ارسال پیام به‌عنوان بات</td></tr>
+    <tr><td><code>im:resource</code></td><td>دسترسی به تصاویر، فایل‌ها و صدای فرستاده‌شدهٔ کاربران</td></tr>
+    <tr><td><code>im:chat</code></td><td>دسترسی به متادیتای چت/گروه</td></tr>
+    <tr><td><code>im:chat:readonly</code></td><td>خواندن فهرست چت‌ها و عضویت</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>دسترسی‌های توصیه‌شده ‏(برای عملکرد کامل):</strong></p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Scope</th><th>هدف</th></tr></thead>
+  <tbody>
+    <tr><td><code>im:message.reactions:readonly</code></td><td>دریافت رویدادهای واکنش ایموجی</td></tr>
+    <tr><td><code>admin:app.info:readonly</code></td><td>تشخیص خودکار هویت بات برای گیت منشن</td></tr>
+    <tr><td><code>contact:user.id:readonly</code></td><td>حل شناسه‌های کاربر برای تطبیق لیست مجاز</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>پیکربندی رویدادها</h3>
+<p>در ‏<strong>Events and Callbacks</strong>:</p>
+<ol>
+  <li>حالت اتصال را روی ‏<strong>Long Connection (WebSocket)</strong> ‏(توصیه‌شده) بگذارید یا URL وب‌هوک را پیکربندی کنید</li>
+  <li>در بخش ‏<strong>Event Configuration</strong> مشترک شوید:
+    <ul>
+      <li>‏<code>im.message.receive_v1</code> — برای دریافت پیام‌ها الزامی</li>
+    </ul>
+  </li>
+</ol>
+
+<h3>انتشار اپ</h3>
+<p>بعد از پیکربندی دسترسی‌ها و رویدادها به ‏<strong>Version Management</strong> بروید و نسخهٔ جدیدی از اپ منتشر کنید. دسترسی‌ها تا انتشار و تأیید یک نسخه اثر نمی‌کنند ‏(برای اپ‌های سازمانی ممکن است تأیید ادمین لازم باشد).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: انتخاب حالت اتصال</h2>
+
+<h3>توصیه‌شده: حالت WebSocket</h3>
+<p>حالت WebSocket را وقتی هرمس روی لپ‌تاپ، ایستگاه کار یا سرور خصوصی شما اجراست استفاده کنید. بدون نیاز به URL عمومی. SDK رسمی Lark یک اتصال WebSocket خروجی دائمی با اتصال‌مجدد خودکار باز و نگه می‌دارد.</p>
+<div class="codebox"><pre><code>FEISHU_CONNECTION_MODE=websocket</code></pre></div>
+<p><strong>الزامات:</strong> بستهٔ پایتونی ‏<code>websockets</code> باید نصب باشد. SDK چرخهٔ حیات اتصال، ضربان‌ها و اتصال‌مجدد خودکار را داخلی هندل می‌کند.</p>
+<p><strong>نحوهٔ کار:</strong> آداپتور کلاینت WebSocket مربوط به SDK لارک را در یک thread اجرای پس‌زمینه اجرا می‌کند. رویدادهای ورودی ‏(پیام‌ها، واکنش‌ها، اکشن‌های کارت) به حلقهٔ اصلی asyncio dispatch می‌شوند. در قطع، SDK خودش تلاش به اتصال‌مجدد می‌کند.</p>
+
+<h3>اختیاری: حالت Webhook</h3>
+<p>حالت webhook را فقط وقتی استفاده کنید که هرمس را از قبل پشت یک endpoint HTTP قابل‌دسترس اجرا می‌کنید.</p>
+<div class="codebox"><pre><code>FEISHU_CONNECTION_MODE=webhook</code></pre></div>
+<p>در حالت webhook هرمس یک سرور HTTP ‏(با ‏<code>aiohttp</code>) راه می‌اندازد و نقطهٔ پایانی فیشو را سرو می‌کند:</p>
+<div class="codebox"><pre><code>/feishu/webhook</code></pre></div>
+<p><strong>الزامات:</strong> بستهٔ پایتونی ‏<code>aiohttp</code> باید نصب باشد.</p>
+<p>آدرس bind و مسیر سرور وب‌هوک قابل سفارشی‌سازی است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>FEISHU_WEBHOOK_HOST=127.0.0.1   # پیش‌فرض: 127.0.0.1
+FEISHU_WEBHOOK_PORT=8765         # پیش‌فرض: 8765
+FEISHU_WEBHOOK_PATH=/feishu/webhook  # پیش‌فرض: /feishu/webhook</code></pre>
+</div>
+<p>وقتی فیشو چالش تأیید URL می‌فرستد ‏(<code>type: url_verification</code>)، وب‌هوک خودکار پاسخ می‌دهد تا setup اشتراک در کنسول توسعه‌دهنده کامل شود. پاسخ چالش وقتی ‏<code>FEISHU_VERIFICATION_TOKEN</code> تنظیم باشد به آن گیت می‌خورد — درخواست‌های چالش با توکن غایب یا نامطابق رد می‌شوند تا یک مقصد راه‌دورِ احرازنشده نتواند کنترل endpoint را با بازتاب دادن دادهٔ چالشِ تحت-کنترل-مهاجم اثبات کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۳: پیکربندی هرمس</h2>
+<h3>گزینهٔ A: راه‌اندازی تعاملی</h3>
+<div class="codebox"><pre><code>hermes gateway setup</code></pre></div>
+<p><strong>Feishu / Lark</strong> را انتخاب و پرسش‌ها را پر کنید.</p>
+
+<h3>گزینهٔ B: پیکربندی دستی</h3>
+<p>این‌ها را به ‏<code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>FEISHU_APP_ID=cli_xxx
+FEISHU_APP_SECRET=secret_xxx
+FEISHU_DOMAIN=feishu
+FEISHU_CONNECTION_MODE=websocket
+
+# اختیاری ولی قویاً توصیه‌شده
+FEISHU_ALLOWED_USERS=ou_xxx,ou_yyy
+FEISHU_HOME_CHANNEL=oc_xxx</code></pre>
+</div>
+<p>‏<code>FEISHU_DOMAIN</code> این‌ها را می‌پذیرد:</p>
+<ul>
+  <li>‏<code>feishu</code> برای فیشوی چین</li>
+  <li>‏<code>lark</code> برای لارک بین‌المللی</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۴: شروع گیت‌وی</h2>
+<div class="codebox"><pre><code>hermes gateway</code></pre></div>
+<p>سپس از داخل Feishu/Lark به بات پیام دهید تا زنده بودن اتصال تأیید شود.</p>
+
+<h3>چت خانگی</h3>
+<p>‏<code>/set-home</code> را در یک چت Feishu/Lark بزنید تا همانجا به‌عنوان کانال خانگیِ نتایج کارهای کرون و اعلان‌های بین-پلتفرمی علامت بخورد.</p>
+<p>می‌توانید از قبل هم پیکربندی کنید:</p>
+<div class="codebox"><pre><code>FEISHU_HOME_CHANNEL=oc_xxx</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> امنیت</h2>
+
+<h3>لیست مجاز کاربران</h3>
+<p>برای تولید، لیستی از Open ID های فیشو تنظیم کنید:</p>
+<div class="codebox"><pre><code>FEISHU_ALLOWED_USERS=ou_xxx,ou_yyy</code></pre></div>
+<p>اگر لیست مجاز را خالی بگذارید هر کسی که به بات برسد شاید بتواند استفاده‌اش کند. در چت گروهی لیست مجاز قبل از پردازش پیام علیه ‏open_id فرستنده چک می‌شود.</p>
+
+<h3>کلید رمزنگاری وب‌هوک</h3>
+<p>در حالت webhook برای فعال‌کردن اعتبارسنجی امضای payload های وب‌هوک ورودی کلید رمزنگاری بگذارید:</p>
+<div class="codebox"><pre><code>FEISHU_ENCRYPT_KEY=your-encrypt-key</code></pre></div>
+<p>این کلید در بخش ‏<strong>Event Subscriptions</strong> پیکربندی اپ فیشو‌تان پیدا می‌شود. با تنظیم شدن آداپتور هر درخواست وب‌هوک را با الگوریتم امضا تأیید می‌کند:</p>
+<div class="codebox"><pre><code>SHA256(timestamp + nonce + encrypt_key + body)</code></pre></div>
+<p>هش محاسبه‌شده با هدر ‏<code>x-lark-signature</code> با مقایسهٔ timing-safe تطبیق می‌یابد. درخواست‌های دارای امضای نامعتبر یا غایب با HTTP 401 رد می‌شوند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>در حالت WebSocket اعتبارسنجی امضا توسط خود SDK هندل می‌شود، پس ‏<code>FEISHU_ENCRYPT_KEY</code> اختیاری است. در حالت webhook برای تولید قویاً توصیه می‌شود.</p>
+</div>
+
+<h3>توکن تأیید</h3>
+<p>لایهٔ احراز اضافی که فیلد <code>token</code> داخل payload های وب‌هوک را چک می‌کند:</p>
+<div class="codebox"><pre><code>FEISHU_VERIFICATION_TOKEN=your-verification-token</code></pre></div>
+<p>این توکن هم در بخش Event Subscriptions اپ فیشو‌تان است. با تنظیم شدن هر payload وب‌هوک ورودی باید ‏<code>token</code> منطبقی داخل آبجکت header اش داشته باشد. توکن‌های نامطابق با HTTP 401 رد می‌شوند.</p>
+<p>هر دو ‏<code>FEISHU_ENCRYPT_KEY</code> و ‏<code>FEISHU_VERIFICATION_TOKEN</code> را می‌توان با هم برای دفاع چندلایه به کار برد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> سیاست پیام گروهی</h2>
+<p>متغیر محیطی ‏<code>FEISHU_GROUP_POLICY</code> کنترل می‌کند هرمس در چت‌های گروهی پاسخ بدهد یا نه و چگونه:</p>
+<div class="codebox"><pre><code>FEISHU_GROUP_POLICY=allowlist   # پیش‌فرض</code></pre></div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مقدار</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>open</code></td><td>هرمس به منشن‌های هر کاربری در هر گروهی جواب می‌دهد.</td></tr>
+    <tr><td><code>allowlist</code></td><td>هرمس فقط به منشن‌های کاربران فهرست‌شده در ‏<code>FEISHU_ALLOWED_USERS</code> جواب می‌دهد.</td></tr>
+    <tr><td><code>disabled</code></td><td>هرمس همهٔ پیام‌های گروهی را کلاً نادیده می‌گیرد.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>در همهٔ حالت‌ها بات باید صریحاً در گروه @منشن ‏(یا ‎@all) شود تا پیام پردازش شود. پیام خصوصی همیشه از این گیت می‌گذرد.</p>
+<p>‏<code>FEISHU_REQUIRE_MENTION=false</code> را بگذارید تا هرمس کل ترافیک گروه را بدون الزام منشن بخواند:</p>
+<div class="codebox"><pre><code>FEISHU_REQUIRE_MENTION=false</code></pre></div>
+<p>برای کنترل به‌ازای-چت، مقدار ‏<code>require_mention</code> را روی یک ورودی ‏<code>group_rules</code> بگذارید — «کنترل دسترسی به‌ازای-گروه» پایین را ببینید.</p>
+
+<h3>هویت بات</h3>
+<p>هرمس ‏<code>open_id</code> و نام نمایشی بات را هنگام شروع خودکار تشخیص می‌دهد. فقط وقتی تشخیص خودکار به API فیشو نرسد یا اپ‌تان از شناسه‌های کاربر tenant-scoped استفاده کند باید دستی تنظیمشان کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>FEISHU_BOT_OPEN_ID=ou_xxx     # فقط وقتی تشخیص خودکار شکست خورد
+FEISHU_BOT_USER_ID=xxx        # اگر اپ شما sender_id_type=user_id دارد الزامی است
+FEISHU_BOT_NAME=MyBot         # فقط وقتی تشخیص خودکار شکست خورد</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> پیام‌رسانی بات-به-بات</h2>
+<p>به‌طور پیش‌فرض هرمس پیام‌های سایر بات‌ها را نادیده می‌گیرد. وقتی می‌خواهید هرمس در هماهنگی A2A شرکت کند یا از بات‌های دیگر همان گروه اعلان بگیرد پیام‌رسانی بات-به-بات را فعال کنید.</p>
+<div class="codebox"><pre><code>FEISHU_ALLOW_BOTS=mentions   # پیش‌فرض: none</code></pre></div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مقدار</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>none</code></td><td>نادیده گرفتن همهٔ پیام‌های سایر بات‌ها ‏(پیش‌فرض).</td></tr>
+    <tr><td><code>mentions</code></td><td>فقط وقتی بات همتا هرمس را @منشن کند قبول می‌شود.</td></tr>
+    <tr><td><code>all</code></td><td>پذیرش همهٔ پیام‌های بات همتا.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>به‌صورت ‏<code>feishu.allow_bots</code> در config.yaml هم قابل تنظیم است ‏(با تنظیم هر دو، env برنده است).</p>
+<p>بات‌های همتا لازم نیست به ‏<code>FEISHU_ALLOWED_USERS</code> اضافه شوند — آن لیست فقط روی فرستندگان انسان اعمال می‌شود.</p>
+<p>برای نمایش نام بات‌های همتا scope ‏<code>application:bot.basic_info:read</code> را بدهید؛ بدون آن بات‌های همتا همچنان درست مسیریابی می‌شوند ولی به‌صورت ‏<code>open_id</code>شان دیده می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> اکشن‌های کارت تعاملی</h2>
+<p>وقتی کاربران روی دکمه‌ها کلیک کنند یا با کارت‌های تعاملی ارسالی بات تعامل کنند، آداپتور این‌ها را به‌عنوان رویداد فرمان مصنوعی ‏<code>/card</code> مسیریابی می‌کند:</p>
+<ul>
+  <li>کلیک دکمه تبدیل می‌شود به: ‏<code>/card button {"key": "value", ...}</code></li>
+  <li>payload ‏<code>value</code> اکشن از تعریف کارت به‌صورت JSON گنجانده می‌شود.</li>
+  <li>اکشن‌های کارت با پنجرهٔ ۱۵ دقیقه‌ای dedupe می‌شوند تا دوباره پردازش نشوند.</li>
+</ul>
+<p>پرامپت‌های به‌روزرسانی محرک-گیت‌وی به‌جای fallback به ریپلای متنی خام از کارت بومی ‏<code>Yes</code>/<code>No</code> فیشو استفاده می‌کنند. وقتی ‏<code>hermes update --gateway</code> تأیید لازم دارد، آداپتور پاسخ انتخابی را در فایل ‏<code>.update_response</code> هرمس ثبت و کارت را درجا با وضعیت حل‌شده جایگزین می‌کند.</p>
+<p>رویدادهای اکشن کارت با ‏<code>MessageType.COMMAND</code> dispatch می‌شوند، پس از خط‌لوله عادی پردازش فرمان عبور می‌کنند.</p>
+<p>به همین ترتیب <strong>تأیید فرمان</strong> کار می‌کند — وقتی ایجنت لازم است فرمان خطرناکی اجرا کند، کارت تعاملی با دکمه‌های Allow Once / Session / Always / Deny می‌فرستد. کاربر دکمه‌ای را کلیک می‌کند و callback اکشن کارت تصمیم تأیید را به ایجنت برمی‌گرداند.</p>
+
+<h3>پیکربندی الزامی اپ فیشو</h3>
+<p>کارت‌های تعاملی <strong>سه</strong> مرحلهٔ پیکربندی در کنسول توسعه‌دهندهٔ فیشو می‌خواهند. جا افتادن هرکدام باعث خطای <strong>۲۰۰۳۴۰</strong> هنگام کلیک کاربر روی دکمه‌های کارت می‌شود.</p>
+<ol>
+  <li><strong>مشترک‌شدن در رویداد اکشن کارت:</strong><br>
+     در ‏<strong>Event Subscriptions</strong> مقدار ‏<code>card.action.trigger</code> را به رویدادهای مشترک‌شده بیفزایید.</li>
+  <li><strong>فعال‌سازی قابلیت Interactive Card:</strong><br>
+     در ‏<strong>App Features &gt; Bot</strong> مطمئن شوید کلید ‏<strong>Interactive Card</strong> روشن است. این به فیشو می‌گوید اپ شما می‌تواند callback های اکشن کارت دریافت کند.</li>
+  <li><strong>پیکربندی Card Request URL ‏(فقط حالت webhook):</strong><br>
+     در ‏<strong>App Features &gt; Bot &gt; Message Card Request URL</strong> مقدار URL را روی همان endpoint وب‌هوک رویدادتان بگذارید ‏(مثل ‏<code>https://your-server:8765/feishu/webhook</code>). در حالت WebSocket این خودکار توسط SDK هندل می‌شود.</li>
+</ol>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>بدون هر سه مرحله، فیشو کارت‌های تعاملی را موفقانه <em>می‌فرستد</em> ‏(ارسال فقط دسترسی ‏<code>im:message:send</code> می‌خواهد) ولی کلیک روی هر دکمه خطای ۲۰۰۳۴۰ برمی‌گرداند. کارت ظاهراً کار می‌کند — خطا فقط وقتی کاربر با آن تعامل کند سطح پیدا می‌کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> ریپلای هوشمند کامنت اسناد</h2>
+<p>فراتر از چت، آداپتور می‌تواند به @منشن‌های گذاشته‌شده روی <strong>اسناد Feishu/Lark</strong> هم جواب دهد. وقتی کاربری روی یک سند کامنت می‌گذارد ‏(انتخاب متن محلی یا کامنت کل-سند) و بات را @منشن می‌کند، هرمس سند به‌اضافهٔ رشتهٔ کامنت اطراف را می‌خواند و ریپلای LLM را درجا روی همان رشته پست می‌کند.</p>
+<p>محرک با رویداد ‏<code>drive.notice.comment_add_v1</code>، هندلر:</p>
+<ul>
+  <li>محتوای سند و تایم‌لاین کامنت را موازی می‌گیرد ‏(۲۰ پیام برای رشته‌های کل-سند، ۱۲ برای رشته‌های انتخاب-محلی).</li>
+  <li>ایجنت را با تول‌ست‌های ‏<code>feishu_doc</code> + ‏<code>feishu_drive</code> محدود به همان نشست تک‌کامنت اجرا می‌کند.</li>
+  <li>ریپلای‌ها را در ۴۰۰۰ کاراکتر تکه و به‌عنوان ریپلای‌های تردی پست برمی‌گرداند.</li>
+  <li>نشست‌های به‌ازای-سند را ۱ ساعت با سقف ۵۰ پیام کش می‌کند تا کامنت‌های بعدی روی همان سند زمینه داشته باشند.</li>
+</ul>
+
+<h3>کنترل دسترسی سه‌طبقه</h3>
+<p>ریپلای کامنت-اسند <strong>فقط-اعطای-صریح</strong> است — هیچ حالت ضمنی allow-all وجود ندارد. دسترسی‌ها به این ترتیب حل می‌شوند ‏(اولین تطبیق برنده است، به‌ازای هر فیلد):</p>
+<ol>
+  <li><strong>سند دقیق</strong> — قیدشده به توکن یک سند مشخص.</li>
+  <li><strong>Wildcard</strong> — قیدی که الگویی از اسناد را تطبیق می‌دهد.</li>
+  <li><strong>سطح‌بالا</strong> — قاعدهٔ پیش‌فرض برای ورک‌اسپیس.</li>
+</ol>
+<p>دو سیاست به‌ازای هر قاعده موجود است:</p>
+<ul>
+  <li><strong>‏<code>allowlist</code></strong> — فهرست ایستای کاربران / tenant ها.</li>
+  <li><strong>‏<code>pairing</code></strong> — فهرست ایستا ∪ مخزن تأییدشدهٔ runtime. مفید برای rollout هایی که مدیران می‌توانند دسترسی را زنده اعطا کنند.</li>
+</ul>
+<p>قواعد در ‏<code>~/.hermes/feishu_comment_rules.json</code> زندگی می‌کنند ‏(اعطاهای pairing در ‏<code>~/.hermes/feishu_comment_pairing.json</code>) با hot-reload کش‌شده با mtime — ویرایش‌ها روی رویداد کامنت بعدی اثر می‌کنند بدون ری‌استارت گیت‌وی.</p>
+<p>CLI:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># بازرسی قواعد فعلی و وضعیت pairing
+python -m gateway.platforms.feishu_comment_rules status
+
+# شبیه‌سازی چک دسترسی برای سند + کاربر مشخص
+python -m gateway.platforms.feishu_comment_rules check &lt;fileType:fileToken&gt; &lt;user_open_id&gt;
+
+# مدیریت اعطاهای pairing در runtime
+python -m gateway.platforms.feishu_comment_rules pairing list
+python -m gateway.platforms.feishu_comment_rules pairing add &lt;user_open_id&gt;
+python -m gateway.platforms.feishu_comment_rules pairing remove &lt;user_open_id&gt;</code></pre>
+</div>
+
+<h3>پیکربندی الزامی اپ فیشو</h3>
+<p>روی دسترسی‌های چت/کارتی که قبلاً داده شده، رویداد کامنت drive را اضافه کنید:</p>
+<ul>
+  <li>مشترک ‏<code>drive.notice.comment_add_v1</code> در ‏<strong>Event Subscriptions</strong> شوید.</li>
+  <li>scope های ‏<code>docs:doc:readonly</code> و ‏<code>drive:drive:readonly</code> را بدهید تا هندلر بتواند محتوای سند را بخواند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> رویدادهای دعوت جلسه</h2>
+<p>می‌توانید بات هرمس Feishu/Lark را مثل دعوت یک شرکت‌کننده انسانی به یک جلسه تصویری دعوت کنید. وقتی بات رویداد دعوت جلسه را بگیرد، هرمس می‌تواند خودکار یک نوبت ایجنت شروع کند که تلاش به پیوستن به جلسه می‌کند.</p>
+<p>محرک با رویداد ‏<code>vc.bot.meeting_invited_v1</code>، جریان این است:</p>
+<ul>
+  <li>کاربری بات را به یک جلسه تصویری Feishu/Lark دعوت می‌کند.</li>
+  <li>‏Feishu/Lark رویداد دعوت جلسه را به هرمس می‌فرستد.</li>
+  <li>هرمس دعوت‌کننده، موضوع جلسه و شماره جلسه را استخراج می‌کند.</li>
+  <li>اگر دعوت‌کننده توسط لیست مجاز عادی گیت‌وی یا سیاست pairing مجاز باشد، ایجنت شماره جلسه را می‌گیرد و تلاش به پیوستن خودکار می‌کند.</li>
+  <li>اگر دعوت بدفرم باشد یا ایجنت نتواند بپیوندد، هرمس رویداد را دور می‌ریزد یا با توضیح موجزی به دعوت‌کننده جواب می‌دهد.</li>
+</ul>
+<p>دعوت‌های بدفرمِ بدون هم دعوت‌کننده هم ‏<code>meeting_no</code> نادیده گرفته می‌شوند.</p>
+
+<h3>پیکربندی الزامی اپ فیشو</h3>
+<p>روی دسترسی‌های چت/کارتی قبلاً داده‌شده، رویداد دعوت جلسه تصویری را اضافه کنید:</p>
+<ul>
+  <li>مشترک ‏<code>vc.bot.meeting_invited_v1</code> در ‏<strong>Event Subscriptions</strong> شوید.</li>
+  <li>scope دسترسی Video Conferencing را که کنسول توسعه‌دهندهٔ Feishu/Lark برای آن رویداد پیشنهاد می‌دهد فعال کنید.</li>
+  <li>‏<code>im:message</code> و ‏<code>im:message:send_as_bot</code> را روشن نگه دارید تا هرمس بتواند به دعوت‌کننده جواب دهد.</li>
+  <li>مطمئن شوید لیست مجاز کاربر گیت‌وی یا سیاست pairing دعوت‌کننده را مجاز می‌کند. دعوت‌های جلسه چک‌های دسترسی عادی گیت‌وی را دور نمی‌زنند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> پشتیبانی رسانه</h2>
+
+<h3>ورودی ‏(دریافت)</h3>
+<p>آداپتور این انواع رسانه را از کاربران دریافت و کش می‌کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نوع</th><th>پسوندها</th><th>نحوهٔ پردازش</th></tr></thead>
+  <tbody>
+    <tr><td><strong>تصاویر</strong></td><td>‏.jpg، ‏.jpeg، ‏.png، ‏.gif، ‏.webp، ‏.bmp</td><td>دانلود با API فیشو و کش محلی</td></tr>
+    <tr><td><strong>صوت</strong></td><td>‏.ogg، ‏.mp3، ‏.wav، ‏.m4a، ‏.aac، ‏.flac، ‏.opus، ‏.webm</td><td>دانلود و کش؛ فایل‌های متنی کوچک خودکار استخراج می‌شوند</td></tr>
+    <tr><td><strong>ویدیو</strong></td><td>‏.mp4، ‏.mov، ‏.avi، ‏.mkv، ‏.webm، ‏.m4v، ‏.3gp</td><td>دانلود و کش به‌عنوان document</td></tr>
+    <tr><td><strong>فایل‌ها</strong></td><td>‏.pdf، ‏.doc، ‏.docx، ‏.xls، ‏.xlsx، ‏.ppt، ‏.pptx و بیشتر</td><td>دانلود و کش به‌عنوان document</td></tr>
+  </tbody>
+</table>
+</div>
+<p>رسانهٔ پیام‌های rich-text ‏(post) شامل تصاویر درون‌خطی و پیوست‌های فایل هم استخراج و کش می‌شود.</p>
+<p>برای اسناد متنی کوچک ‏(.txt، ‏.md) محتوای فایل خودکار داخل متن پیام تزریق می‌شود تا ایجنت بدون ابزار مستقیم بخواندش.</p>
+
+<h3>خروجی ‏(ارسال)</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متد</th><th>چه چیزی می‌فرستد</th></tr></thead>
+  <tbody>
+    <tr><td><code>send</code></td><td>پیام متنی یا post غنی ‏(تشخیص خودکار بر اساس محتوای مارک‌داون)</td></tr>
+    <tr><td><code>send_image</code> / ‏<code>send_image_file</code></td><td>آپلود تصویر در فیشو سپس ارسال به‌صورت حباب تصویر بومی ‏(با کپشن اختیاری)</td></tr>
+    <tr><td><code>send_document</code></td><td>آپلود فایل به API فیشو سپس ارسال به‌صورت پیوست فایل</td></tr>
+    <tr><td><code>send_voice</code></td><td>آپلود فایل صوتی به‌عنوان پیوست فایل فیشو</td></tr>
+    <tr><td><code>send_video</code></td><td>آپلود ویدیو و ارسال به‌عنوان پیام رسانه‌ای بومی</td></tr>
+    <tr><td><code>send_animation</code></td><td>‏GIF ها به پیوست فایل تنزل می‌یابند ‏(فیشو حباب GIF بومی ندارد)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>مسیریابی آپلود فایل خودکار بر اساس پسوند:</p>
+<ul>
+  <li>‏<code>.ogg</code>، ‏<code>.opus</code> ← آپلود به‌عنوان صوت ‏opus</li>
+  <li>‏<code>.mp4</code>، ‏<code>.mov</code>، ‏<code>.avi</code>، ‏<code>.m4v</code> ← آپلود به‌عنوان رسانه ‏mp4</li>
+  <li>‏<code>.pdf</code>، ‏<code>.doc(x)</code>، ‏<code>.xls(x)</code>، ‏<code>.ppt(x)</code> ← آپلود با نوع سندشان</li>
+  <li>بقیه ← آپلود به‌عنوان فایل stream عمومی</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> رندر مارک‌داون و fallback به Post</h2>
+<p>وقتی متن خروجی قالب‌بندی مارک‌داون داشته باشد ‏(تیتر، ضخیم، فهرست، بلوک کد، لینک و...)، آداپتور خودکار آن را به‌عنوان پیام <strong>post</strong> فیشو با تگ ‏<code>md</code> تعبیه‌شده می‌فرستد نه متن خام. این رندر غنی در کلاینت فیشو را ممکن می‌کند.</p>
+<p>اگر API فیشو payload پست را رد کند ‏(مثلاً به‌خاطر ساختارهای مارک‌داون پشتیبان‌نشده)، آداپتور خودکار به ارسال متن خام با حذف مارک‌داون برمی‌گردد. این fallback دومرحله‌ای تضمین می‌کند پیام‌ها همیشه تحویل شوند.</p>
+<p>پیام‌های متنی خام ‏(مارک‌داون تشخیص‌داده‌نشده) به‌عنوان نوع سادهٔ ‏<code>text</code> فرستاده می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> واکنش‌های وضعیت پردازش</h2>
+<p>حین کار ایجنت، بات روی پیام شما واکنش ‏<code>Typing</code> نشان می‌دهد. با رسیدن ریپلای پاک می‌شود یا اگر پردازش شکست بخورد با ‏<code>CrossMark</code> جایگزین می‌شود.</p>
+<p>برای خاموشی ‏<code>FEISHU_REACTIONS=false</code>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> محافظ رگبار و batch کردن</h2>
+<p>آداپتور debounce برای رگبار سریع پیام‌ها دارد تا ایجنت غرق نشود:</p>
+
+<h3>batch کردن متن</h3>
+<p>وقتی کاربر چند پیام متنی پشت‌سرهم بفرستد قبل از dispatch در یک رویداد ادغام می‌شوند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>تنظیم</th><th>متغیر env</th><th>پیش‌فرض</th></tr></thead>
+  <tbody>
+    <tr><td>دورهٔ سکوت</td><td><code>HERMES_FEISHU_TEXT_BATCH_DELAY_SECONDS</code></td><td>۰٫۶ ثانیه</td></tr>
+    <tr><td>حداکثر پیام به‌ازای batch</td><td><code>HERMES_FEISHU_TEXT_BATCH_MAX_MESSAGES</code></td><td>۸</td></tr>
+    <tr><td>حداکثر کاراکتر به‌ازای batch</td><td><code>HERMES_FEISHU_TEXT_BATCH_MAX_CHARS</code></td><td>۴۰۰۰</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>batch کردن رسانه</h3>
+<p>چند پیوست رسانه‌ای فرستاده‌شده پشت‌سرهم ‏(مثل کشیدن چند تصویر) در یک رویداد واحد ادغام می‌شوند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>تنظیم</th><th>متغیر env</th><th>پیش‌فرض</th></tr></thead>
+  <tbody>
+    <tr><td>دورهٔ سکوت</td><td><code>HERMES_FEISHU_MEDIA_BATCH_DELAY_SECONDS</code></td><td>۰٫۸ ثانیه</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>سریال‌سازی به‌ازای-چت</h3>
+<p>پیام‌های داخل یک چت سریالی پردازش می‌شوند ‏(یکی در لحظه) تا انسجام گفتگو حفظ شود. هر چت قفل خودش را دارد، پس پیام‌های چت‌های مختلف هم‌زمان پردازش می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> سقف نرخ ‏(حالت Webhook)</h2>
+<p>در حالت webhook آداپتور سقف نرخ به‌ازای-IP برای مقابله با سوءاستفاده اجرا می‌کند:</p>
+<ul>
+  <li><strong>پنجره:</strong> پنجرهٔ لغزان ۶۰ ثانیه‌ای</li>
+  <li><strong>سقف:</strong> ۱۲۰ درخواست به‌ازای پنجره به‌ازای سه‌تایی ‏(app_id، مسیر، IP)</li>
+  <li><strong>سقف ردیابی:</strong> تا ۴۰۹۶ کلید یکتا ردیابی می‌شود ‏(جلوگیری از رشد نامحدود حافظه)</li>
+</ul>
+<p>درخواست‌های فراتر از سقف HTTP 429 ‏(Too Many Requests) می‌گیرند.</p>
+
+<h3>ردیابی ناهنجاری وب‌هوک</h3>
+<p>آداپتور پاسخ‌های خطای متوالی به‌ازای هر IP را ردیابی می‌کند. بعد از ۲۵ خطای متوالی از یک IP در پنجرهٔ ۶ ساعته، هشدار لاگ می‌شود. کمک می‌کند کلاینت‌های بدپیکربندی یا تلاش‌های probe شناسایی شوند.</p>
+<p>محافظت‌های اضافی وب‌هوک:</p>
+<ul>
+  <li><strong>سقف حجم بدنه:</strong> حداکثر ۱ مگابایت</li>
+  <li><strong>timeout خواندن بدنه:</strong> ۳۰ ثانیه</li>
+  <li><strong>اجبار Content-Type:</strong> فقط ‏<code>application/json</code> پذیرفته می‌شود</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۷</span> تنظیم WebSocket</h2>
+<p>در حالت ‏<code>websocket</code> رفتار reconnect و ping قابل سفارشی‌سازی است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  feishu:
+    extra:
+      ws_reconnect_interval: 120   # ثانیه بین تلاش‌های reconnect (پیش‌فرض: 120)
+      ws_ping_interval: 30         # ثانیه بین ping های WebSocket (اختیاری؛ پیش‌فرض SDK اگر خالی)</code></pre>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>تنظیم</th><th>کلید config</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td>فاصلهٔ اتصال‌مجدد</td><td><code>ws_reconnect_interval</code></td><td>۱۲۰ ثانیه</td><td>مدت انتظار بین تلاش‌های اتصال‌مجدد</td></tr>
+    <tr><td>فاصلهٔ ping</td><td><code>ws_ping_interval</code></td><td><em>(پیش‌فرض SDK)</em></td><td>فراوانی ping های keepalive وب‌سوکت</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۸</span> کنترل دسترسی به‌ازای-گروه</h2>
+<p>فراتر از ‏<code>FEISHU_GROUP_POLICY</code> سراسری، می‌توانید با ‏<code>group_rules</code> در config.yaml قواعد دقیق به‌ازای هر چت گروهی بگذارید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  feishu:
+    extra:
+      default_group_policy: "open"     # پیش‌فرض گروه‌های خارج از group_rules
+      admins:                          # کاربرانی که می‌توانند تنظیمات بات را مدیریت کنند
+        - "ou_admin_open_id"
+      group_rules:
+        "oc_group_chat_id_1":
+          policy: "allowlist"          # open | allowlist | blacklist | admin_only | disabled
+          allowlist:
+            - "ou_user_open_id_1"
+            - "ou_user_open_id_2"
+        "oc_group_chat_id_2":
+          policy: "admin_only"
+        "oc_group_chat_id_3":
+          policy: "blacklist"
+          blacklist:
+            - "ou_blocked_user"
+        "oc_free_chat":
+          policy: "open"
+          require_mention: false       # override FEISHU_REQUIRE_MENTION برای همین چت</code></pre>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>سیاست</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>open</code></td><td>هر کسی در گروه می‌تواند از بات استفاده کند</td></tr>
+    <tr><td><code>allowlist</code></td><td>فقط کاربران ‏<code>allowlist</code> گروه حق استفاده دارند</td></tr>
+    <tr><td><code>blacklist</code></td><td>همه به‌جز کاربران ‏<code>blacklist</code> گروه حق استفاده دارند</td></tr>
+    <tr><td><code>admin_only</code></td><td>فقط کاربران فهرست سراسری ‏<code>admins</code> در این گروه حق استفاده دارند</td></tr>
+    <tr><td><code>disabled</code></td><td>بات همهٔ پیام‌های این گروه را نادیده می‌گیرد</td></tr>
+  </tbody>
+</table>
+</div>
+<p>‏<code>require_mention: false</code> را روی یک ورودی ‏<code>group_rules</code> بگذارید تا شرط @منشن برای آن چت خاص رد شود. در صورت حذف، چت مقدار سراسری ‏<code>FEISHU_REQUIRE_MENTION</code> را ارث می‌برد.</p>
+<p>گروه‌های خارج از ‏<code>group_rules</code> به ‏<code>default_group_policy</code> برمی‌گردند ‏(پیش‌فرض همان مقدار ‏<code>FEISHU_GROUP_POLICY</code>).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۹</span> حذف تکرار</h2>
+<p>پیام‌های ورودی با شناسهٔ پیام با TTL ‏۲۴ ساعت dedupe می‌شوند. وضعیت dedupe بین ری‌استارت‌ها در ‏<code>~/.hermes/feishu_seen_message_ids.json</code> ماندگار می‌شود.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>تنظیم</th><th>متغیر env</th><th>پیش‌فرض</th></tr></thead>
+  <tbody>
+    <tr><td>حجم کش</td><td><code>HERMES_FEISHU_DEDUP_CACHE_SIZE</code></td><td>۲۰۴۸ رکورد</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲۰</span> همهٔ متغیرهای محیطی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>لازم</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>FEISHU_APP_ID</code></td><td>✅</td><td>—</td><td>App ID فیشو/لارک</td></tr>
+    <tr><td><code>FEISHU_APP_SECRET</code></td><td>✅</td><td>—</td><td>App Secret فیشو/لارک</td></tr>
+    <tr><td><code>FEISHU_DOMAIN</code></td><td>—</td><td><code>feishu</code></td><td>‏<code>feishu</code> ‏(چین) یا ‏<code>lark</code> ‏(بین‌المللی)</td></tr>
+    <tr><td><code>FEISHU_CONNECTION_MODE</code></td><td>—</td><td><code>websocket</code></td><td>‏<code>websocket</code> یا ‏<code>webhook</code></td></tr>
+    <tr><td><code>FEISHU_ALLOWED_USERS</code></td><td>—</td><td><em>(خالی)</em></td><td>فهرست open_id جداشده با ویرگول برای لیست مجاز کاربران</td></tr>
+    <tr><td><code>FEISHU_ALLOW_BOTS</code></td><td>—</td><td><code>none</code></td><td>پذیرش پیام سایر بات‌ها: ‏<code>none</code>، ‏<code>mentions</code> یا ‏<code>all</code></td></tr>
+    <tr><td><code>FEISHU_REQUIRE_MENTION</code></td><td>—</td><td><code>true</code></td><td>پیام‌های گروهی باید بات را @منشن کنند؟</td></tr>
+    <tr><td><code>FEISHU_HOME_CHANNEL</code></td><td>—</td><td>—</td><td>Chat ID برای خروجی کرون/اعلان</td></tr>
+    <tr><td><code>FEISHU_ENCRYPT_KEY</code></td><td>—</td><td><em>(خالی)</em></td><td>کلید رمزنگاری برای اعتبارسنجی امضای وب‌هوک</td></tr>
+    <tr><td><code>FEISHU_VERIFICATION_TOKEN</code></td><td>—</td><td><em>(خالی)</em></td><td>توکن تأیید برای احراز payload وب‌هوک</td></tr>
+    <tr><td><code>FEISHU_GROUP_POLICY</code></td><td>—</td><td><code>allowlist</code></td><td>سیاست پیام گروهی: ‏<code>open</code>، ‏<code>allowlist</code>، ‏<code>disabled</code></td></tr>
+    <tr><td><code>FEISHU_BOT_OPEN_ID</code></td><td>—</td><td><em>(خالی)</em></td><td>‏open_id بات ‏(برای تشخیص منشن)</td></tr>
+    <tr><td><code>FEISHU_BOT_USER_ID</code></td><td>—</td><td><em>(خالی)</em></td><td>‏user_id بات ‏(برای تشخیص منشن)</td></tr>
+    <tr><td><code>FEISHU_BOT_NAME</code></td><td>—</td><td><em>(خالی)</em></td><td>نام نمایشی بات ‏(برای تشخیص منشن)</td></tr>
+    <tr><td><code>FEISHU_WEBHOOK_HOST</code></td><td>—</td><td><code>127.0.0.1</code></td><td>آدرس bind سرور وب‌هوک</td></tr>
+    <tr><td><code>FEISHU_WEBHOOK_PORT</code></td><td>—</td><td><code>8765</code></td><td>پورت سرور وب‌هوک</td></tr>
+    <tr><td><code>FEISHU_WEBHOOK_PATH</code></td><td>—</td><td><code>/feishu/webhook</code></td><td>مسیر endpoint وب‌هوک</td></tr>
+    <tr><td><code>HERMES_FEISHU_DEDUP_CACHE_SIZE</code></td><td>—</td><td><code>2048</code></td><td>حداکثر شناسه‌های پیام dedupe‌شده قابل ردیابی</td></tr>
+    <tr><td><code>HERMES_FEISHU_TEXT_BATCH_DELAY_SECONDS</code></td><td>—</td><td><code>0.6</code></td><td>دورهٔ سکوت debounce رگبار متنی</td></tr>
+    <tr><td><code>HERMES_FEISHU_TEXT_BATCH_MAX_MESSAGES</code></td><td>—</td><td><code>8</code></td><td>حداکثر پیام ادغام‌شده به‌ازای هر batch متنی</td></tr>
+    <tr><td><code>HERMES_FEISHU_TEXT_BATCH_MAX_CHARS</code></td><td>—</td><td><code>4000</code></td><td>حداکثر کاراکتر ادغام‌شده به‌ازای هر batch متنی</td></tr>
+    <tr><td><code>HERMES_FEISHU_MEDIA_BATCH_DELAY_SECONDS</code></td><td>—</td><td><code>0.8</code></td><td>دورهٔ سکوت debounce رگبار رسانه‌ای</td></tr>
+  </tbody>
+</table>
+</div>
+<p>تنظیمات WebSocket و ACL به‌ازای-گروه از طریق config.yaml زیر ‏<code>platforms.feishu.extra</code> پیکربندی می‌شوند ‏(<a href="#websocket-tuning">تنظیم WebSocket</a> و <a href="#per-group-acl">کنترل دسترسی به‌ازای-گروه</a> بالا).</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="websocket-tuning"><span class="secnum">۲۱</span> عیب‌یابی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مشکل</th><th>راه‌حل</th></tr></thead>
+  <tbody>
+    <tr><td>‏<code>lark-oapi not installed</code></td><td>نصب SDK: ‏<code>pip install lark-oapi</code></td></tr>
+    <tr><td>‏<code>websockets not installed; websocket mode unavailable</code></td><td>نصب websockets: ‏<code>pip install websockets</code></td></tr>
+    <tr><td>‏<code>aiohttp not installed; webhook mode unavailable</code></td><td>نصب aiohttp: ‏<code>pip install aiohttp</code></td></tr>
+    <tr><td>‏<code>FEISHU_APP_ID or FEISHU_APP_SECRET not set</code></td><td>هر دو env را تنظیم یا با ‏<code>hermes gateway setup</code> پیکربندی کنید</td></tr>
+    <tr><td>‏<code>Another local Hermes gateway is already using this Feishu app_id</code></td><td>هر لحظه فقط یک نمونه هرمس می‌تواند همان app_id را داشته باشد. اول گیت‌وی دیگر را متوقف کنید.</td></tr>
+    <tr><td>بات در گروه‌ها جواب نمی‌دهد</td><td>مطمئن شوید بات @منشن شده، ‏<code>FEISHU_GROUP_POLICY</code> را چک و اگر سیاست ‏<code>allowlist</code> است تأیید کنید فرستنده در ‏<code>FEISHU_ALLOWED_USERS</code> باشد</td></tr>
+    <tr><td>‏<code>Webhook rejected: invalid verification token</code></td><td>مطمئن شوید ‏<code>FEISHU_VERIFICATION_TOKEN</code> با توکن پیکربندی Event Subscriptions اپ فیشو‌تان یکی است</td></tr>
+    <tr><td>‏<code>Webhook rejected: invalid signature</code></td><td>مطمئن شوید ‏<code>FEISHU_ENCRYPT_KEY</code> با encrypt key پیکربندی اپ فیشو یکی است</td></tr>
+    <tr><td>پیام‌های post به‌صورت متن خام نشان داده می‌شوند</td><td>API فیشو payload پست را رد کرده؛ این رفتار fallback عادی است. جزئیات را در لاگ‌ها چک کنید.</td></tr>
+    <tr><td>تصاویر/فایل‌ها به بات نمی‌رسند</td><td>scope های ‏<code>im:message</code> و ‏<code>im:resource</code> را به اپ فیشو‌تان بدهید</td></tr>
+    <tr><td>هویت بات خودکار تشخیص داده نمی‌شود</td><td>معمولاً مسئلهٔ شبکه‌ای گذرا برای رسیدن به endpoint اطلاعات بات فیشو. به‌عنوان workaround ‏<code>FEISHU_BOT_OPEN_ID</code> و ‏<code>FEISHU_BOT_NAME</code> را دستی بگذارید.</td></tr>
+    <tr><td>پیام‌های بات همتا بعد از فعال‌کردن ‏<code>FEISHU_ALLOW_BOTS</code> هنوز نادیده گرفته می‌شوند</td><td>هرمس هنوز نمی‌تواند خودش را شناسایی کند — ‏<code>FEISHU_BOT_OPEN_ID</code> ‏(و اگر اپ شما ‏<code>sender_id_type=user_id</code> دارد ‏<code>FEISHU_BOT_USER_ID</code>) را بگذارید.</td></tr>
+    <tr><td>بات‌های همتا به‌جای اسم به‌صورت ‏<code>ou_xxxxxx</code> دیده می‌شوند</td><td>scope ‏<code>application:bot.basic_info:read</code> را بدهید.</td></tr>
+    <tr><td>خطای ۲۰۰۳۴۰ هنگام کلیک دکمه‌های تأیید</td><td>قابلیت ‏<strong>Interactive Card</strong> را فعال و ‏<strong>Card Request URL</strong> را در کنسول توسعه‌دهندهٔ فیشو پیکربندی کنید. بخش «پیکربندی الزامی اپ فیشو» بالا را ببینید.</td></tr>
+    <tr><td>‏<code>Webhook rate limit exceeded</code></td><td>بیش از ۱۲۰ درخواست/دقیقه از یک IP. معمولاً بدپیکربندی یا حلقه است.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec" id="per-group-acl">
+<h2><span class="secnum">۲۲</span> تول‌ست</h2>
+<p>‏Feishu / Lark از preset پلتفرمی ‏<code>hermes-feishu</code> استفاده می‌کند که همان ابزارهای هستهٔ تلگرام و سایر پلتفرم‌های پیام‌رسانی مبتنی بر گیت‌وی را شامل می‌شود.</p>
+</section>
+
+<div class="pager">
+  <a href="yuanbao.html"><span class="dir">→ قبلی</span><span class="ttl">Yuanbao</span></a>
+  <a class="next" href="teams-meetings.html"><span class="dir">بعدی ←</span><span class="ttl">جلسات Microsoft Teams</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/feishu" target="_blank" rel="noopener">Feishu / Lark</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

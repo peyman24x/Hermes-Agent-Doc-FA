@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>گیت‌وی پیام‌رسانی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>نمای کلی گیت‌وی</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>گیت‌وی پیام‌رسانی</h1>
+<p>با هرمس از تلگرام، دیسکورد، اسلک، واتساپ، سیگنال، پیامک، ایمیل، هوم‌اسیسنت، مترمست، ماتریکس، دینگ‌تاک، فیشو/لارک، ‏WeCom، ‏ویکسین، ‏BlueBubbles ‏(‏iMessage)، ‏QQ، ‏یوان‌بائو، مایکروسافت تیمز، لاین، ‏ntfy یا مرورگر خود حرف بزنید. گیت‌وی یک پروسهٔ پس‌زمینهٔ واحد است که به همهٔ پلتفرم‌های پیکربندی‌شده‌تان وصل می‌شود، نشست‌ها را هندل می‌کند، کارهای کرونی را اجرا و پیام‌های صوتی را تحویل می‌دهد.</p>
+<p>برای مجموعهٔ کامل قابلیت‌های صوتی به «حالت صوتی» و «استفاده از حالت صوتی با هرمس» مراجعه کنید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>بات‌ها هم به ارائه‌دهندهٔ مدل و هم به ارائه‌دهندگان ابزار‏ (‏TTS، ‏وب) نیاز دارند. یک اشتراک «Nous Portal» همه را باندل می‌کند.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> مقایسهٔ پلتفرم‌ها</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>پلتفرم</th><th>صوت</th><th>تصویر</th><th>فایل</th><th>رشته</th><th>واکنش</th><th>تایپینگ</th><th>استریم</th></tr></thead>
+  <tbody>
+    <tr><td>تلگرام</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>—</td><td>✅</td><td>✅</td></tr>
+    <tr><td>دیسکورد</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+    <tr><td>اسلک</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+    <tr><td>گوگل‌چت</td><td>—</td><td>✅</td><td>✅</td><td>✅</td><td>—</td><td>✅</td><td>—</td></tr>
+    <tr><td>واتساپ</td><td>—</td><td>✅</td><td>✅</td><td>—</td><td>—</td><td>✅</td><td>✅</td></tr>
+    <tr><td>واتساپ Cloud API</td><td>✅</td><td>✅</td><td>✅</td><td>—</td><td>—</td><td>✅</td><td>—</td></tr>
+    <tr><td>سیگنال</td><td>—</td><td>✅</td><td>✅</td><td>—</td><td>—</td><td>✅</td><td>—</td></tr>
+    <tr><td>پیامک</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr><td>ایمیل</td><td>—</td><td>✅</td><td>✅</td><td>✅</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr><td>هوم‌اسیسنت</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr><td>مترمست</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>—</td><td>✅</td><td>✅</td></tr>
+    <tr><td>ماتریکس</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+    <tr><td>دینگ‌تاک</td><td>—</td><td>✅</td><td>✅</td><td>—</td><td>✅</td><td>—</td><td>✅</td></tr>
+    <tr><td>فیشو/لارک</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+    <tr><td>WeCom</td><td>✅</td><td>✅</td><td>✅</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr><td>WeCom Callback</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr><td>ویکسین</td><td>✅</td><td>✅</td><td>✅</td><td>—</td><td>—</td><td>✅</td><td>—</td></tr>
+    <tr><td>BlueBubbles</td><td>—</td><td>✅</td><td>✅</td><td>—</td><td>✅</td><td>✅</td><td>—</td></tr>
+    <tr><td>Photon ‏(‏iMessage)</td><td>✅</td><td>✅</td><td>✅</td><td>—</td><td>✅</td><td>✅</td><td>—</td></tr>
+    <tr><td>QQ</td><td>✅</td><td>✅</td><td>✅</td><td>—</td><td>—</td><td>✅</td><td>—</td></tr>
+    <tr><td>یوان‌بائو</td><td>✅</td><td>✅</td><td>✅</td><td>—</td><td>—</td><td>✅</td><td>✅</td></tr>
+    <tr><td>مایکروسافت تیمز</td><td>—</td><td>✅</td><td>—</td><td>✅</td><td>—</td><td>✅</td><td>—</td></tr>
+    <tr><td>لاین</td><td>—</td><td>✅</td><td>✅</td><td>—</td><td>—</td><td>✅</td><td>—</td></tr>
+    <tr><td>ntfy</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr><td>Raft</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr><td>IRC</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr><td>Buzz</td><td>—</td><td>✅</td><td>—</td><td>✅</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr><td>SimpleX</td><td>✅</td><td>✅</td><td>✅</td><td>—</td><td>—</td><td>✅</td><td>—</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>صوت</strong> = پاسخ‌های صوتی TTS و/یا رونویسی پیام صوتی. <strong>تصویر</strong> = ارسال/دریافت تصویر. <strong>فایل</strong> = ارسال/دریافت پیوست فایل. <strong>رشته</strong> = گفتگوهای رشته‌ای. <strong>واکنش</strong> = واکنش‌های ایموجی روی پیام‌ها. <strong>تایپینگ</strong> = نشانگر تایپ حین پردازش. <strong>استریم</strong> = به‌روزرسانی پیشروندهٔ پیام با ویرایش.</p>
+<div class="callout note">
+  <div class="callout-title">ℹ️ Hermes Relay</div>
+  <p>«Hermes Relay» (آزمایشی) خودش یک پلتفرم چت نیست — یک سیستم کانکتور است که پلتفرم‌هایی مثل دیسکورد، تلگرام، اسلک و واتساپ را از طریق کانکتور خارجیِ مالکِ اعتبارنامه‌های پلتفرم جلو می‌گیرد. قابلیت‌ها‏ (رسانه، اعلان‌های تأیید/شفاف‌سازی بومی، واکنش‌ها، رشته‌ها، تایپینگ، استریم) به‌ازای-کانکتور هنگام دست‌دادن مذاکره می‌شوند نه در جدول بالا ثابت باشند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> معماری</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text — جریان</span><button class="copy-btn">کپی</button></div>
+  <pre><code>پلتفرم‌ها (تلگرام، دیسکورد، واتساپ، اسلک، گوگل‌چت، سیگنال، پیامک، ایمیل،
+هوم‌اسیسنت، مترمست، ماتریکس، دینگ‌تاک، فیشو، WeCom، WeCom Callback، ویکسین،
+BlueBubbles، QQ، یوان‌بائو، تیمز، سرور API، وب‌هوک‌ها)
+        │
+        ▼
+مخزن نشست (به‌ازای-چت) ──▶ AIAgent ‏(run_agent.py)
+        ▲
+زمان‌بند کرون (تیک هر ۶۰ ثانیه)</code></pre>
+</div>
+<p>هر آداپتور پلتفرمی پیام‌ها را دریافت، از طریق مخزن نشستِ به‌ازای-چت مسیریابی و برای پردازش به AIAgent اعزام می‌کند. گیت‌وی همچنین زمان‌بند کرون را اجرا می‌کند که هر ۶۰ ثانیه تیک می‌زند تا کارهای سررسید را اجرا کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> توکن‌های سکوت عمدی</h2>
+<p>برای گفتگوهای گروهی، هوک‌ها و جریان‌های اتوماسیون، هرمس توکن‌های سکوت صریح را پشتیبانی می‌کند. اگر پاسخ نهایی ایجنت دقیقاً یکی از توکن‌های پشتیبانی‌شده باشد، گیت‌وی تحویل خروجی را سرکوب و هیچ‌چیز به چت نمی‌فرستد.</p>
+<p>توکن‌های پشتیبانی‌شده: ‏<code>[SILENT]</code>، ‏<code>SILENT</code>، ‏<code>NO_REPLY</code>، ‏<code>NO REPLY</code></p>
+<p>فضای سفید و بزرگی/کوچکی نرمال می‌شوند، ولی کل پاسخ نهایی باید همان توکن باشد. جمله‌ای مثل «Use [SILENT] when nothing changed» عادی تحویل می‌شود.</p>
+<p>سکوت فقط یک تصمیم تحویل است. هرمس نوبتِ سکوتِ دستیار را در رونوشت نشست نگه می‌دارد، پس گفتگو همچنان عادی یکی‌درمیان می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>user: side-channel chatter
+assistant: [SILENT]   # ذخیره می‌شود، تحویل نمی‌شود
+user: next message</code></pre>
+</div>
+<p>نوبت‌های شکست‌خورده همچنان به‌صورت خطا ظاهر می‌شوند؛ هرمس شکست‌ها را فقط چون متن شبیه توکن سکوت است پنهان نمی‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> راه‌اندازی سریع و فرمان‌های گیت‌وی</h2>
+<p>آسان‌ترین راه پیکربندی پلتفرم‌های پیام‌رسانی، ویزارد تعاملی است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway setup        # راه‌اندازی تعاملی همهٔ پلتفرم‌های پیام‌رسانی</code></pre>
+</div>
+<p>این شما را با انتخاب کلیدهای جهت از پیکربندی هر پلتفرم عبور می‌دهد، نشان می‌دهد کدام‌ها از قبل پیکربندی شده‌اند و پیشنهاد شروع/ری‌استارت گیت‌وی را می‌دهد.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway              # اجرا در پیش‌زمینه
+hermes gateway setup        # پیکربندی تعاملی پلتفرم‌های پیام‌رسانی
+hermes gateway install      # نصب به‌عنوان سرویس کاربر (لینوکس) / سرویس launchd (مک)
+sudo hermes gateway install --system   # فقط لینوکس: نصب سرویس سیستمیِ زمان-بوت
+hermes gateway start        # شروع سرویس پیش‌فرض
+hermes gateway stop         # توقف سرویس پیش‌فرض
+hermes gateway status       # بررسی وضعیت سرویس پیش‌فرض
+hermes gateway status --system         # فقط لینوکس: بازرسی صریح سرویس سیستمی</code></pre>
+</div>
+
+<h3>نگهبان حلقهٔ رویداد لینوکس (اختیاری)</h3>
+<p>یک گیت‌وی مدیریت‌شده-با-systemd می‌تواند بازیابی پروسه را وقتی حلقهٔ رویداد asyncio پایتون دیگر زمان‌بندی نمی‌گیرد اختیار کند. این توقف‌های کل-پروسه را پوشش می‌دهد که اجرای وظایف زنده‌ماندنِ مخصوص-پلتفرم را هم متوقف می‌کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  systemd_watchdog_seconds: 120</code></pre>
+</div>
+<p>پس از تغییر این تنظیم، یونیت سرویس را دوباره تولید کنید: <code>hermes gateway install --force</code></p>
+<p>مقدار مثبت makes یونیت تولیدشده از <code>Type=notify</code>، ‏<code>NotifyAccess=main</code> و <code>WatchdogSec</code> مطابق استفاده می‌کند. هرمس فقط تا وقتی حلقهٔ رویدادش پیشرفت به‌موقع دارد ضربان می‌فرستد؛ ‏systemd وقتی متوقف شدند پروسه را ری‌استارت می‌کند. پیش‌فرض <code>0</code> رفتار موجودِ <code>Type=simple</code> را نگه می‌دارد. این تنظیم فقط لینوکس/systemd است و قطع شبکهٔ عادیِ پلتفرم را شکست حلقهٔ رویداد تلقی نمی‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> فرمان‌های چت (درون پیام‌رسانی)</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرمان</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>/new</code> یا <code>/reset</code></td><td>شروع گفتگوی تازه</td></tr>
+    <tr><td><code>/model [provider:model]</code></td><td>نمایش یا تغییر مدل‏ (نگارش provider:model را پشتیبانی می‌کند)</td></tr>
+    <tr><td><code>/personality [name]</code></td><td>گذاشتن شخصیت‏ (<code>none</code> برای ریست)</td></tr>
+    <tr><td><code>/retry</code></td><td>retry آخرین پیام</td></tr>
+    <tr><td><code>/undo</code></td><td>حذف آخرین تبادل</td></tr>
+    <tr><td><code>/status</code></td><td>اطلاعات نشست</td></tr>
+    <tr><td><code>/whoami</code></td><td>نمایش دسترسی فرمان اسلش شما روی این دامنه (مدیر / کاربر / بدون‌محدودیت)</td></tr>
+    <tr><td><code>/stop</code></td><td>توقف ایجنت در حال اجرا</td></tr>
+    <tr><td><code>/approve</code></td><td>تأیید فرمان خطرناکِ در-انتظار</td></tr>
+    <tr><td><code>/deny</code></td><td>رد فرمان خطرناکِ در-انتظار</td></tr>
+    <tr><td><code>/sethome</code></td><td>تنظیم این چت به‌عنوان کانال خانگی</td></tr>
+    <tr><td><code>/compress</code></td><td>فشرده‌سازی دستی زمینهٔ گفتگو</td></tr>
+    <tr><td><code>/title [name]</code></td><td>تنظیم یا نمایش عنوان نشست</td></tr>
+    <tr><td><code>/resume [name]</code></td><td>ازسرگیری نشستِ قبلاً نام‌گذاری‌شده</td></tr>
+    <tr><td><code>/sessions [all] [search &lt;query&gt;]</code></td><td>فهرست نشست‌های قبلی؛ ‏<code>search</code> بر اساس عنوان یا شناسه فیلتر می‌کند</td></tr>
+    <tr><td><code>/usage</code></td><td>مصرف توکن این نشست‏ (<code>/usage reset [--force]</code> ریستِ ذخیره‌شدهٔ کدکس را نقد می‌کند)</td></tr>
+    <tr><td><code>/insights [days]</code></td><td>نمایش بینش‌ها و تحلیل مصرف</td></tr>
+    <tr><td><code>/reasoning [level|show|hide]</code></td><td>تغییر تلاش استدلال یا سوییچ نمایش استدلال</td></tr>
+    <tr><td><code>/voice [on|off|tts|join|leave|status]</code></td><td>کنترل پاسخ‌های صوتی و رفتار کانال صوتی دیسکورد</td></tr>
+    <tr><td><code>/rollback [number]</code></td><td>فهرست یا بازیابی چک‌پوینت‌های فایل‌سیستم</td></tr>
+    <tr><td><code>/background &lt;prompt&gt;</code></td><td>اجرای پرامپت در نشست پس‌زمینهٔ جداگانه</td></tr>
+    <tr><td><code>/reload-mcp</code></td><td>بارگذاری مجدد سرورهای MCP از پیکربندی</td></tr>
+    <tr><td><code>/update</code></td><td>به‌روزرسانی هرمس ایجنت به آخرین نسخه</td></tr>
+    <tr><td><code>/help</code></td><td>نمایش فرمان‌های موجود</td></tr>
+    <tr><td><code>/&lt;skill-name&gt;</code></td><td>فراخوانی هر مهارت نصب‌شده</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> مدیریت نشست</h2>
+<p><strong>ماندگاری:</strong> نشست‌ها بین پیام‌ها تا ریست‌شدن می‌مانند. ایجنت زمینهٔ گفتگوی شما را به خاطر می‌سپارد.</p>
+<p><strong>یافتن نشست‌های گذشته (<code>/sessions</code>):</strong> نشست‌های قبلی چت فعلی را فهرست و با <code>/sessions &lt;name&gt;</code> یکی را ازسر می‌گیرد. وقتی فهرست بلند شد، ‏<code>/sessions search &lt;query&gt;</code> بر اساس عنوان/شناسه فیلتر می‌کند. فهرست‌کردن بین‌مبدأ با <code>/sessions all</code> فقط-مدیر است — کاربران عادی فقط نشست‌های مبدأ چت خودشان را می‌بینند.</p>
+<p><strong>بازنویسی‌های پایدار <code>/model</code>:</strong> یک سوییچ <code>/model</code> در چت گیت‌وی به همان نشست اعمال و اکنون <strong>از ری‌استارت‌های گیت‌وی جان سالم به در می‌برد</strong>: انتخاب مدل/ارائه‌دهنده در مخزن نشست ماندگار و پس از ری‌استارت در اولین استفاده بازآباری می‌شود‏ (اعتبارنامه‌ها هنگام بارگذاری دوباره حل و هرگز روی دیسک نوشته نمی‌شوند). ‏<code>/new</code> بازنویسی را پاک، و <code>/model &lt;name&gt; --global</code> آن را به config.yaml می‌نویسد. ‏<code>--once</code> فقط برای یک نوبت اعمال می‌شود.</p>
+
+<h3>قابلیت اطمینان تحویل</h3>
+<p>پاسخ‌های نهایی ایجنت در یک <strong>دفتر تحویل</strong> پایدار‏ (<code>state.db</code>) دور هر ارسال پلتفرمی ثبت می‌شوند. اگر گیت‌وی بین تولید پاسخ و تأیید رسیدِ پلتفرم کرش یا ری‌استارت کند، بوت بعدی پاسخ ذخیره‌شده را دوباره تحویل می‌دهد به‌جای گم‌کردنش — یا اجرای کل نوبت.</p>
+<p>معناشناسی صادقانهٔ حداقل-یک‌بار است:</p>
+<ul>
+  <li>پاسخی که ارسالش <strong>هرگز شروع نشد</strong> عیناً دوباره تحویل می‌شود.</li>
+  <li>پاسخی که <strong>وسط-ارسال</strong> وقتی گیت‌وی مرد (پلتفرم شاید گرفته شاید نه) با پیشوند مرئی «♻️ Recovered reply — … may be a duplicate» دوباره تحویل می‌شود. ابهام برچسب می‌خورد، هرگز خاموش بازفرست نمی‌شود.</li>
+  <li>بازتحویل کراندار است: ۳ تلاش، تازگی ۲۴ ساعته، بعد از آن مدخل رها می‌شود. مدخل‌های تحویل‌شده پس از ۷ روز هرس می‌شوند.</li>
+</ul>
+<p>با <code>gateway.delivery_ledger: false</code> در config.yaml غیرفعالش کنید‏ (رفتار قدیمی: پاسخ‌های در-پرواز هنگام کرش گم می‌شوند).</p>
+
+<h3>سیاست‌های ریست</h3>
+<p><strong>به‌طور پیش‌فرض نشست‌ها هرگز خودکار ریست نمی‌شوند</strong> — زمینه تا <code>/reset</code> دستی یا فعال‌شدن فشرده‌سازی زمینه می‌ماند. برای ریست خودکار، با بخش <code>session_reset</code> اختیارش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml + json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>session_reset:
+  mode: idle        # "idle"، "daily"، "both" یا "none" (پیش‌فرض)
+  idle_minutes: 1440  # برای idle/both: دقیقه‌های بیکاری پیش از ریست
+  at_hour: 4          # برای daily/both: ساعت روز (۰-۲۳، زمان محلی)
+
+# بازنویسی به‌ازای-پلتفرم در ~/.hermes/gateway.json:
+{
+  "reset_by_platform": {
+    "telegram": { "mode": "idle", "idle_minutes": 240 },
+    "discord": { "mode": "idle", "idle_minutes": 60 }
+  }
+}</code></pre>
+</div>
+<p>یک پروسهٔ پس‌زمینهٔ زنده‏ (شروع‌شده با <code>terminal(background=true)</code>) معمولاً نشستش را از ریست محافظت می‌کند تا خروجی گم نشود. تا پروسهٔ فراموش‌شده‌ای — مثلاً سرور پیش‌نمایش — نشستی را برای همیشه باز نگه ندارد، پروسهٔ پس‌زمینهٔ قدیمی‌تر از <code>bg_process_max_age_hours</code> (پیش‌فرض <strong>۲۴</strong>) دیگر ریست را بلاک نمی‌کند. پروسه <strong>کشته نمی‌شود</strong>، فقط توسط گارد ریست نادیده گرفته می‌شود. <code>0</code> برای غیرفعال‌کردن برش‏ (هر پروسهٔ زنده ریست را بلاک می‌کند، رفتار قدیمی)، یا برای کارهای مشروعِ چندروزه که زنده‌بودنشان باید گفتگو را باز نگه دارد بالا ببرید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> بازنویسی مدل و پرامپت سیستمی به‌ازای-کانال</h2>
+<p>کانال‌های متفاوت می‌توانند از <strong>یک گیت‌وی واحد</strong> مدل‌ها و پرسوناهای متفاوت اجرا کنند — مثلاً مدل ارزان سریع در <code>#daily</code> و مدل مرزی با پرامپت متخصص در <code>#dev</code>. ‏<code>channel_overrides</code> را زیر پلتفرم در <code>~/.hermes/gateway-config.yaml</code> پیکربندی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  discord:
+    enabled: true
+    channel_overrides:
+      "123456789012345678":        # شناسهٔ کانال/رشته
+        model: anthropic/claude-sonnet-4.6
+        provider: anthropic
+        system_prompt: "You are the #dev channel code-review specialist."
+      "987654321098765432":
+        model: openai/gpt-5-mini</code></pre>
+</div>
+<p>جزئیات:</p>
+<ul>
+  <li>هر سه کلید اختیاری‌اند — فقط <code>model</code>، فقط <code>system_prompt</code> یا هر ترکیبی. فیلدهای تنظیم‌نشده به پیش‌فرض‌های سراسری برمی‌گردند.</li>
+  <li>ترتیب جستجو اول شناسهٔ دقیق کانال/رشته، بعد شناسهٔ کانال/فرومِ <strong>والد</strong> — پس رشته‌های دیسکورد بازنویسی کانال والدشان را خودکار به ارث می‌برند.</li>
+  <li>اولویت حل مدل: بازنویسی <code>/model</code> نشست ← ‏<code>channel_overrides</code> ← ‏پیکربندی سراسری. کاربری که <code>/model</code> بزند همچنان بر پیش‌فرض کانال می‌برد.</li>
+  <li>بازنویسی <code>system_prompt</code> پرامپت سراسری گیت‌وی را برای آن کانال جایگزین می‌کند‏ (زودگذر است — به‌ازای-نوبت تزریق، در تاریخچه ذخیره نمی‌شود).</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> امنیت</h2>
+<p><strong>به‌طور پیش‌فرض، گیت‌وی همهٔ کاربرانی که در فهرست مجاز نیستند یا با DM جفت نشده‌اند را رد می‌کند.</strong> این پیش‌فرضِ امنِ باتی با دسترسی ترمینال است.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash — در ~/.hermes/.env</span><button class="copy-btn">کپی</button></div>
+  <pre><code># محدودکردن به کاربران مشخص (توصیه‌شده):
+TELEGRAM_ALLOWED_USERS=123456789,987654321
+DISCORD_ALLOWED_USERS=123456789012345678
+SIGNAL_ALLOWED_USERS=+155****4567,+155****6543
+SMS_ALLOWED_USERS=+155****4567,+155****6543
+EMAIL_ALLOWED_USERS=trusted@example.com,colleague@work.com
+MATTERMOST_ALLOWED_USERS=3uo8dkh1p7g1mfk49ear5fzs5c
+MATRIX_ALLOWED_USERS=@alice:matrix.org
+DINGTALK_ALLOWED_USERS=user-id-1
+FEISHU_ALLOWED_USERS=ou_xxxxxxxx,ou_yyyyyyyy
+WECOM_ALLOWED_USERS=user-id-1,user-id-2
+WECOM_CALLBACK_ALLOWED_USERS=user-id-1,user-id-2
+TEAMS_ALLOWED_USERS=aad-object-id-1,aad-object-id-2
+
+# یا مجاز سراسری:
+GATEWAY_ALLOWED_USERS=123456789,987654321
+
+# یا صریحاً همه (برای بات‌های دارای ترمینال توصیه نمی‌شود):
+GATEWAY_ALLOW_ALL_USERS=true</code></pre>
+</div>
+
+<h3>جفت‌سازی DM (جایگزین فهرست‌های مجاز)</h3>
+<p>به‌جای پیکربندی دستی شناسه‌های کاربر، کاربران ناشناس هنگام DM به بات یک کد جفت‌سازی یک‌باره می‌گیرند. ایمیل استثناست: فرستندگان ناشناس ایمیل نادیده گرفته می‌شوند مگر جفت‌سازی ایمیل صریحاً فعال باشد.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># کاربر می‌بیند: "Pairing code: XKGH5N7P"
+# شما تأییدش می‌کنید با:
+hermes pairing approve telegram XKGH5N7P
+
+# سایر فرمان‌های جفت‌سازی:
+hermes pairing list          # دیدن کاربران در-انتظار + تأییدشده
+hermes pairing revoke telegram 123456789  # حذف دسترسی</code></pre>
+</div>
+<p>کدهای جفت‌سازی پس از ۱ ساعت منقضی، محدود-نرخ و با تصادفی‌بودن رمزنگارانه‌اند.</p>
+
+<h3>مدیران در برابر کاربران عادی</h3>
+<p>فهرست‌های مجاز به «آیا این اصلاً می‌تواند به بات برسد؟» پاسخ می‌دهند. <strong>تفکیک مدیر / کاربر</strong> به «حالا که وارد شده، چه کاری مجاز است؟» پاسخ می‌دهد.</p>
+<p>هر کاربر مجاز به‌ازای-دامنه‏ (‏DM در برابر گروه/کانال) در یکی از دو رده می‌افتد:</p>
+<ul>
+  <li><strong>مدیر</strong> — دسترسی کامل. می‌تواند هر فرمان اسلشِ ثبت‌شده‏ (داخلی + پلاگین) و هر قابلیت گیت‌شده را اجرا کند.</li>
+  <li><strong>کاربر عادی</strong> — دسترسی محدود. می‌تواند عادی با ایجنت چت کند، ولی فقط فرمان‌های اسلشی را اجرا کند که صریحاً فعال کرده‌اید. کفِ همیشه-مجاز <code>/help</code> و <code>/whoami</code> است.</li>
+</ul>
+<p>رده‌ها به‌ازای-پلتفرم و به‌ازای-دامنه پیکربندی می‌شوند. مدیرِ DM لزوماً مدیر گروه/کانال نیست — هر دامنه فهرست مدیر خودش را دارد.</p>
+<p><strong>امروز چه چیزی را گیت می‌کنند:</strong> فرمان‌های اسلش. تفکیک از رجیستری زندهٔ فرمان‌ها می‌گذرد، پس داخلی‌ها و فرمان‌های ثبت‌شده-پلاگین را بدون سیم‌کشی به‌ازای-قابلیت پوشش می‌دهد. چت ساده متأثر نیست — غیرمدیرها همچنان می‌توانند با ایجنت حرف بزنند.</p>
+<p><strong>در آینده چه ممکن است گیت شود:</strong> سطوح قابلیت بیشتر (دسترسی ابزار، تعویض مدل، عملیات گران) از همین تفکیک مدیر/کارگر آویزان خواهند شد. پیکربندی تفکیک الان یعنی آن محدودیت‌های آینده تمیز فرود می‌آیند بدون بازمدل‌سازیِ اینکه مدیر کیست.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  platforms:
+    discord:
+      extra:
+        allow_from: ["111", "222", "333"]
+        allow_admin_from: ["111"]                    # مدیرها ← همهٔ فرمان‌های اسلش
+        user_allowed_commands: [status, model]       # غیرمدیرها چه می‌توانند
+        # اختیاری: دامنهٔ جداگانهٔ گروه/کانال
+        group_allow_admin_from: ["111"]
+        group_user_allowed_commands: [status]</code></pre>
+</div>
+<p><strong>سازگاری-به-عقب:</strong> اگر <code>allow_admin_from</code> برای دامنه‌ای تنظیم نشده باشد، تفکیک رده برای آن دامنه خاموش و هر کاربر مجاز دسترسی کامل دارد. نصب‌های موجود بدون تغییر کار می‌کنند — وقتی تمایز را خواستید اختیارش کنید. برای بازبینی دسترسی‌تان از هر پلتفرمی <code>/whoami</code> بزنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> بازهدایت ایجنت</h2>
+<p>حین کار ایجنت پیام بفرستید تا نوبت فعال اصلاح شود:</p>
+<ul>
+  <li><strong>تولید مدل با زمینه دوباره شروع می‌شود</strong> — استدکارِ نمایش‌داده‌شده و متن جزئیِ مرئی به‌عنوان یک checkpoint عادی دستیار حفظ می‌شوند</li>
+  <li><strong>کارِ تکمیل‌شده در دسترس می‌ماند</strong> — فراخوانی‌ها و نتایج ابزار قبلی در نوبت می‌مانند</li>
+  <li><strong>ابزارهای در حال اجرا امن تمام می‌شوند</strong> — اصلاح در مرزِ نتیجهٔ ابزارِ بعدی اعمال می‌شود نه کشتن ابزار</li>
+  <li><strong><code>/stop</code> همچنان توقف سخت است</strong> — برای لغو نوبت فعال و کار پیش‌زمینه</li>
+</ul>
+
+<h3>صف در برابر وقفه در برابر هدایت (حالت ورودی-مشغول)</h3>
+<p>به‌طور پیش‌فرض، پیام‌دادن به ایجنتِ مشغول نوبتش را بازهدایت می‌کند. دو حالت دیگر هم هست:</p>
+<ul>
+  <li><code>queue</code> — پیام‌های پیگیری صبر و پس از اتمام کار فعلی به‌عنوان نوبت بعدی اجرا می‌شوند.</li>
+  <li><code>steer</code> — پیام‌های پیگیری از طریق <code>/steer</code> به اجرای فعلی تزریق و پس از فراخوانی ابزار بعدی به ایجنت می‌رسند. بدون وقفه، بدون نوبت جدید. اگر ایجنت هنوز شروع نشده به رفتار <code>queue</code> برمی‌گردد.</li>
+</ul>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  busy_input_mode: steer   # یا queue، یا interrupt (پیش‌فرض)
+  busy_ack_enabled: true   # false برای سرکوب کامل پاسخ ⚡/⏳/⏩ در چت</code></pre>
+</div>
+<p>اولین باری که روی هر پلتفرمی به ایجنتِ مشغول پیام می‌دهید، هرمس یک یادآور یک‌خطی به تأییدِ مشغولیتی اضافه می‌کند که پیچ را توضیح می‌دهد. یادآور یک بار به‌ازای-نصب صادر می‌شود — پرچمی زیر <code>onboarding.seen.busy_input_prompt</code> قفلش می‌کند. آن کلید را حذف کنید تا نکته دوباره بیاید. اگر تأییدِ مشغولیتی پر نویز است، <code>display.busy_ack_enabled: false</code> بگذارید. هندل ورودی بدون تغییر؛ فقط پیام تأیید مخفی می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> سؤالات شفاف‌سازی (چندانتخابی)</h2>
+<p>وقتی ایجنت با ابزار <code>clarify</code> از شما سؤال می‌پرسد، گیت‌وی گزینه‌ها را به‌صورت پرامپت شماره‌دار‏ (یا دکمه‌های بومی روی پلتفرم‌های پشتیبان‌کننده) رندر می‌کند. شفاف‌سازی سؤالات <strong>چندانتخابی</strong> را هم پشتیبانی می‌کند — ایجنت می‌تواند بگذارد چند گزینه را یک‌جا بردارید:</p>
+<ul>
+  <li><strong>پلتفرم‌های پیام‌رسانی</strong> — پرامپت می‌گوید «Multiple selections allowed»؛ با شماره‌های جداشده با ویرگول یا فاصله‏ (مثل <code>1, 3</code>)، متن گزینه یا پاسخ آزاد خودتان جواب دهید.</li>
+  <li><strong>‏CLI کلاسیک / ‏TUI</strong> — چندانتخابی به‌صورت چک‌باکس رندر می‌شود: <strong>Space</strong> یک گزینه را سوییچ، ‏<strong>Enter</strong> انتخاب را ثبت می‌کند.</li>
+</ul>
+<p>پرامپت‌های تک‌انتخابی مثل قبل: یک گزینه با شماره، دکمه یا متن بردارید، یا از مسیر «Other» پاسخ خودتان را بنویسید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> اعلان‌های پیشرفت ابزار</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  tool_progress: all    # off | new | all | verbose | log
+  tool_progress_command: false  # true برای فعال‌سازی /verbose در پیام‌رسانی
+  # گروهبندی پیشرفت روی پلتفرم‌های دارای ویرایش پیام:
+  #   accumulate (پیش‌فرض) — یک حباب را درجا حین اجرای ابزارها ویرایش کن
+  #   separate             — یک پیام به‌ازای-ابزار (سبک پیش-v0.9؛ پرنویزتر)
+  tool_progress_grouping: accumulate   # accumulate | separate</code></pre>
+</div>
+
+<h3>حالت <code>log</code> — فایل ممیزی به‌جای پیام چت</h3>
+<p><code>display.tool_progress: log</code> <strong>هیچ</strong> حباب پیشرفتی به چت نمی‌فرستد. به‌جایش هر فراخوانی ابزار به‌صورت خطی به <code>~/.hermes/logs/tool_calls.log</code> الصاق می‌شود — فایل ممیزی چرخشی‏ (۵MB × ۳ پشتیبان) که از همان پاک‌ساز رازِ لاگ‌های عادی عبور می‌کند، پس اعتبارنامه‌ها هرگز روی دیسک نمی‌نشینند. وقتی بخواهید ردِ کامل فراخوانی ابزار بدون نویز چت داشته باشید استفاده‌اش کنید.</p>
+
+<h3>عبارت‌های وضعیت قابل‌پیکربندی</h3>
+<p>خطوط وضعیتِ بلندمدت گیت‌وی‏ (ضربان‌های سبک «هنوز کار می‌کند…») از کاتالوگ عبارت می‌آیند. پیش‌فرض‌های داخلی در <code>gateway/assets/status_phrases.yaml</code> عرضه می‌شوند؛ می‌توانید با فایل‌های قابل‌حمل-با-پروفایل زیر HERMES_HOME خودتان را بیفزایید: ‏<code>~/.hermes/status_phrases.yaml</code> یا هر <code>*.yaml</code> در <code>~/.hermes/status_phrases/</code>‏ (مسیرهای قراردادی، بارگذاری خودکار)، یا پیکربندی را به مسیر نسبی اشاره کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  status_phrases:
+    path: status_phrases/whatsapp.yaml  # نسبی به HERMES_HOME
+    mode: append                        # append (پیش‌فرض) یا replace</code></pre>
+</div>
+<p>فایل‌های عبارت یک سطح‏ (<code>status</code>، ‏<code>generic</code>) را به فهرستی از رشته‌ها نگاشت می‌کنند‏ (حداکثر ۸۰ عبارت به‌ازای-سطح، ۱۶۰ کاراکتر هرکدام). مسیرهای مطلق و فرارهای <code>..</code> نادیده گرفته می‌شوند تا پیکربندی قابل‌حمل بماند. فقط رشته‌های عبارتِ پیکربندی‌شدهٔ شما استفاده می‌شوند — آرگومان‌های خام ابزار، فرمان‌ها و متن استدلال هرگز در عبارت وضعیت درج نمی‌شوند.</p>
+
+<h3>مهرهای زمانی پیام در زمینهٔ مدل</h3>
+<p>پیش‌فرض خاموش. وقتی فعال باشد، هرمس یک مهر زمانی انسانی‌خوان‏ (مثل <code>[Tue 2026-04-28 13:40:53 CEST]</code>) روی هر پیام <strong>کاربر</strong> در زمینهٔ مدل پیشوند می‌کند تا ایجنت بداند پیام‌ها کِی فرستاده شده‌اند — برای استدلال زمانی مفید است. به پیام‌های دستیار یا پرامپت سیستمی اضافه <strong>نمی‌شود</strong>. رونوشت‌های ماندگار همیشه تمیز می‌مانند — مهر به‌صورت فرادادهٔ پیام صرف‌نظر از این سوییچ ذخیره می‌شود، پس فعال‌کردن بعدی مهرهای پیام‌های گذشته را هم ظاهر می‌کند و بازپخش هرگز پیشوندهای تکراری انبار نمی‌کند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  message_timestamps:
+    enabled: false   # true برای نمایش زمان-ارسال به مدل</code></pre>
+</div>
+<p>وقتی پیشرفت فعال است، بات حین کار پیام‌های وضعیت می‌فرستد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">نمونه</span><button class="copy-btn">کپی</button></div>
+  <pre><code>💻 `ls -la`...
+🔍 web_search...
+📄 web_extract...
+🐍 execute_code...</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> نشست‌های پس‌زمینه</h2>
+<p>پرامپتی را در نشست پس‌زمینهٔ جداگانه اجرا کنید تا ایجنت مستقل رویش کار کند در حالی که چت اصلی‌تان پاسخگو می‌ماند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان در چت</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/background Check all servers in the cluster and report any that are down</code></pre>
+</div>
+<p>هرمس بلافاصله تأیید می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>🔄 Background task started: "Check all servers in the cluster..."
+   Task ID: bg_143022_a1b2c3</code></pre>
+</div>
+<p>هر پرامپت <code>/background</code> یک <strong>نمونهٔ ایجنت جداگانه</strong> تولید می‌کند که غیرهم‌زمان اجرا می‌شود: نشست ایزوله با تاریخچهٔ خودش‏ (هیچ دانشی از زمینهٔ چت فعلی ندارد)؛ همان پیکربندی‏ (مدل، ارائه‌دهنده، تول‌ست‌ها و مسیریابی ارث‌بری از گیت‌وی فعلی)؛ غیرمسدودکننده؛ و نتیجه وقتی کار تمام شد به <strong>همان چت/کانالی</strong> که فرمان را دادید با پیشوند «✅ Background task complete» فرستاده می‌شود‏ (یا «❌ Background task failed» با خطا).</p>
+
+<h3>اعلان‌های پروسهٔ پس‌زمینه</h3>
+<p>وقتی ایجنتِ نشستِ پس‌زمینه از <code>terminal(background=true)</code> برای شروع پروسه‌های بلندمدت‏ (سرورها، بیلدها و غیره) استفاده کند، گیت‌وی می‌تواند به‌روزرسانی وضعیت به چت‌تان پوش کند. با <code>display.background_process_notifications</code> کنترلش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  background_process_notifications: concise    # concise | all | result | error | off</code></pre>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>حالت</th><th>چه می‌گیرید</th></tr></thead>
+  <tbody>
+    <tr><td><code>concise</code></td><td>پیام وضعیت یک‌خطی هنگام تکمیل؛ شکست‌ها یک دنبالهٔ کوتاه خروجی می‌افزایند (پیش‌فرض)</td></tr>
+    <tr><td><code>all</code></td><td>به‌روزرسانی خروجی-در-اجرا <strong>و</strong> پیام نهایی خروجی-خام</td></tr>
+    <tr><td><code>result</code></td><td>فقط پیام نهایی خروجی-خام‏ (صرف‌نظر از کد خروج)</td></tr>
+    <tr><td><code>error</code></td><td>فقط پیام نهایی وقتی کد خروج غیرصفر است</td></tr>
+    <tr><td><code>off</code></td><td>هیچ پیام ناظر-پروسه‌ای</td></tr>
+  </tbody>
+</table>
+</div>
+<p>با متغیر محیطی هم می‌شود: ‏<code>HERMES_BACKGROUND_NOTIFICATIONS=result</code>. موارد استفاده: پایش سرور، بیلدهای طولانی، کارهای پژوهشی و عملیات فایل — همه شلیک-و-رها؛ نتایج خودکار در همان چت می‌رسند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> مدیریت سرویس</h2>
+<h3>لینوکس (systemd)</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway install               # نصب به‌عنوان سرویس کاربر
+hermes gateway start                 # شروع سرویس
+hermes gateway stop                  # توقف سرویس
+hermes gateway status                # بررسی وضعیت
+journalctl --user -u hermes-gateway -f  # دیدن لاگ‌ها
+
+# فعال‌سازی linger (ادامهٔ اجرا پس از خروج)
+sudo loginctl enable-linger $USER
+
+# یا نصب سرویس سیستمیِ زمان-بوت که همچنان به‌عنوان کاربر شما اجرا می‌شود
+sudo hermes gateway install --system
+sudo hermes gateway start --system
+sudo hermes gateway status --system
+journalctl -u hermes-gateway -f</code></pre>
+</div>
+<p>روی لپ‌تاپ و ماشین‌های dev سرویس کاربر را استفاده کنید. روی VPS یا هاست‌های headless که باید هنگام بوت برگردند بدون اتکا به linger، سرویس سیستمی.</p>
+<div class="callout caution">
+  <div class="callout-title">⛔ دراپ-اینِ کشتنِ ExecStopPost سفارشی اضافه نکنید</div>
+  <p>یونیتی که هرمس نصب می‌کند از قبل با <code>KillMode=mixed</code> + ‏<code>KillSignal=SIGTERM</code> تمیز خاموش می‌شود و از <code>Restart=always</code> با <code>RestartForceExitStatus</code> استفاده می‌کند تا به‌روزرسانی‌ها و <code>/restart</code> درست respawn شوند. یک دراپ-این systemd مثل <code>ExecStopPost=/bin/kill -9 $MAINPID</code> اضافه <strong>نکنید</strong> — ‏<code>ExecStopPost</code> روی <em>هر</em> توقف شامل ری‌استارت‌های تمیز شلیک می‌شود، پس نمونهٔ تازه-تولیدشده را پیش از پایداری SIGKILL می‌کند و <code>Restart=always</code> بلافاصله دوباره تولیدش می‌کند. نتیجه حلقهٔ بی‌نهایت ری‌استارت است (و روی تلگرام، سیل پیام‌های ری‌استارت). اگر چنین دراپ‌اینی گذاشته‌اید حذفش کنید: <code>systemctl --user edit hermes-gateway</code> و خط <code>ExecStopPost</code> را پاک، سپس <code>systemctl --user daemon-reload</code>.</p>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 VMهای headless: سرویس کاربر + linger از پرامپت‌های root اجتناب می‌کند</div>
+  <p>سرویس سیستمی برای هر ری‌استارت root می‌خواهد — از جمله ری‌استارت خودکار گیت‌وی در پایان <code>hermes update</code>. وقتی <code>hermes update</code> به‌عنوان کاربر غیر-root اجرا می‌شود، ‏sudo بدون-رمز <code>systemctl</code> را امتحان می‌کند؛ اگر نبود، ری‌استارت را رد و فرمان دستی را چاپ می‌کند‏ (هرگز روی پرامپت رمز تعاملی بلاک نمی‌شود). برای VMای که هرگز لاگین نمی‌کنید، <strong>سرویس کاربر</strong> با linger همان رفتار شروع-هنگام-بوت را بدون دخالت root می‌دهد. پس از آن <code>hermes update</code> می‌تواند بدون هیچ امتیازی گیت‌وی را ری‌استارت کند. اگر سرویس سیستمی را ترجیح می‌دهید، یا به‌روزرسانی‌ها را با <code>sudo hermes update</code> اجرا کنید یا sudo بدون-رمز برای systemctl بدهید.</p>
+</div>
+<p>از نصب هم‌زمان یونیت‌های کاربر و سیستم خودداری کنید مگر واقعاً منظورتان باشد — هرمس هشدار می‌دهد چون رفتار start/stop/status مبهم می‌شود. برای نصب‌های چندگانه، هر <code>HERMES_HOME</code> نام سرویس خودش را می‌گیرد‏ (<code>hermes-gateway</code> برای پیش‌فرض؛ <code>hermes-gateway-&lt;hash&gt;</code> برای بقیه) و فرمان‌های <code>hermes gateway</code> خودکار سرویس درست را هدف می‌گیرند.</p>
+
+<h3>مک (launchd)</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway install               # نصب به‌عنوان launchd agent
+hermes gateway start                 # شروع سرویس
+hermes gateway stop                  # توقف سرویس
+hermes gateway status                # بررسی وضعیت
+tail -f ~/.hermes/logs/gateway.log   # دیدن لاگ‌ها</code></pre>
+</div>
+<p>plist تولیدشده در <code>~/Library/LaunchAgents/ai.hermes.gateway.plist</code> می‌نشیند و شامل سه متغیر محیطی است: <strong>PATH</strong>‏ (کل شل‌PATH شما هنگام نصب، با <code>bin/</code> مربوط به venv و <code>node_modules/.bin</code> پیشوندشده تا ابزارهای کاربرنصب برای زیرپروسه‌های گیت‌وی مثل پل واتساپ موجود باشند)؛ <strong>VIRTUAL_ENV</strong>؛ و <strong>HERMES_HOME</strong>. ‏plistهای launchd ایستا‌اند — اگر بعد از راه‌اندازی گیت‌وی ابزار جدیدی نصب کردید‏ (نسخهٔ جدید Node با nvm یا ffmpeg با Homebrew) دوباره <code>hermes gateway install</code> اجرا کنید تا PATH به‌روز گرفته شود؛ گیت‌وی plist کهنه را تشخیص و خودکار بارگذاری مجدد می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> تول‌ست‌های مخصوص-پلتفرم</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>پلتفرم</th><th>تول‌ست</th><th>قابلیت‌ها</th></tr></thead>
+  <tbody>
+    <tr><td>CLI</td><td><code>hermes-cli</code></td><td>دسترسی کامل</td></tr>
+    <tr><td>تلگرام</td><td><code>hermes-telegram</code></td><td>ابزارهای کامل شامل ترمینال</td></tr>
+    <tr><td>دیسکورد</td><td><code>hermes-discord</code></td><td>ابزارهای کامل شامل ترمینال</td></tr>
+    <tr><td>واتساپ / ‏Cloud API</td><td><code>hermes-whatsapp</code></td><td>ابزارهای کامل شامل ترمینال (مشترک با پل Baileys)</td></tr>
+    <tr><td>اسلک / گوگل‌چت / سیگنال / پیامک / ایمیل</td><td><code>hermes-slack</code> و غیره</td><td>ابزارهای کامل شامل ترمینال</td></tr>
+    <tr><td>هوم‌اسیسنت</td><td><code>hermes-homeassistant</code></td><td>ابزارهای کامل + کنترل دستگاه HA ‏(‏ha_list_entities، ‏ha_get_state، ‏ha_call_service، ‏ha_list_services)</td></tr>
+    <tr><td>سایر پلتفرم‌ها</td><td><code>hermes-&lt;platform&gt;</code></td><td>ابزارهای کامل شامل ترمینال</td></tr>
+    <tr><td>سرور API</td><td><code>hermes-api-server</code></td><td>ابزارهای کامل‏ (بدون <code>clarify</code> و <code>text_to_speech</code> — دسترسی برنامه‌پذیر کاربر تعاملی ندارد)</td></tr>
+    <tr><td>Raft</td><td><code>hermes-raft</code></td><td>کانال فقط-بیدارباش؛ ایجنت از CLI مربوط به Raft برای I/O پیام استفاده می‌کند</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> بهره‌برداری از گیت‌وی چندپلتفرمی</h2>
+<h3>فرمان <code>/platform</code></h3>
+<p>وقتی گیت‌وی اجراست، از هر نشست CLI یا چتِ متصل با فرمان <code>/platform</code> آداپتورهای تکی را بدون ری‌استارت کل گیت‌وی بازبینی و هدایت کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">فرمان‌ها</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/platform list                  # نمایش همهٔ آداپتورها و وضعیتشان
+/platform pause &lt;name&gt;          # توقف اعزام پیام‌های جدید به یک آداپتور
+/platform resume &lt;name&gt;         # بازفعال‌سازی آداپتور متوقف‌شده</code></pre>
+</div>
+<p><code>/platform list</code> نشان می‌دهد هر آداپتور <code>running</code>، ‏<code>paused</code> (دستی) یا <code>paused-by-breaker</code> است. توقف، آداپتور را بارگذاری و حلقه‌های پس‌زمینه‌اش را زنده نگه می‌دارد — پیام‌های ورودی روی زمین انداخته می‌شوند، ولی خود اتصال باز می‌ماند تا resume آنی باشد.</p>
+
+<h3>قطع‌کنندهٔ مدار خودکار</h3>
+<p>هر آداپتور در یک قطع‌کنندهٔ مدار پیچیده شده. شکست‌های مکررِ قابل-retry‏ (لرزش شبکه، پاسخ‌های محدودیت-نرخ، ‏۵xx بالادستی، قطع websocket) قطع‌کننده را وامی‌اندازند — آداپتور خودکار متوقف، اعلان اپراتوری به کانال خانگی پلتفرم زندهٔ دیگری وقتی پیکربندی شده فرستاده و یک خط لاگ ساخت‌یافته صادر می‌شود.</p>
+<p>قطع‌کننده خودکار resume <strong>نمی‌شود</strong> — تا وقتی دستی <code>/platform resume &lt;name&gt;</code> نکنید باز می‌ماند. عمدی است: اگر پلتفرمی در قطعیِ پایدار است، نمی‌خواهید گیت‌وی اتصال‌مجدد بزند. وقتی آداپتوری متوقف است بررسی کنید: ‏(۱) لاگ گیت‌وی‏ (<code>~/.hermes/logs/gateway.log</code> یا لاگ یونیت) با جستجوی نام پلتفرم و <code>circuit breaker</code>؛ ‏(۲) خروجی <code>/platform list</code>؛ ‏(۳) صفحهٔ وضعیت ارائه‌دهنده. وقتی بالادستی سالم شد، <code>resume</code> قطع‌کننده را پاک و آداپتور را مسلح می‌کند.</p>
+
+<h3>اعلان‌های ری‌استارت</h3>
+<p>وقتی گیت‌وی ری‌استارت می‌شود‏ (یا با نشست‌های در-پرواز خاموش)، می‌تواند پیام یک‌بارهٔ «ایجنت برگشت» / «ایجنت قطع شد» به کانال خانگی هر پلتفرم بفرستد. با پرچم <code>gateway_restart_notification</code> در gateway-config.yaml به‌ازای-پلتفرم کنترل می‌شود‏ (پیش‌فرض <code>true</code>). روی پلتفرم‌های پونویز/کم‌اولویت غیرفعال و روی چت اصلی روشنش نگه دارید. اعلون یک‌باره به‌ازای-ری‌استارت است، صرف‌نظر از شمار نشست‌های در-پرواز.</p>
+
+<h3>نشانگرهای تایپینگ</h3>
+<p>حین پردازش پیام، گیت‌وی وضعیت تایپ زنده روی پلتفرم‌های پشتیبان‌کننده نشان می‌دهد — حباب «typing…» روی تلگرام/دیسکورد/سیگنال یا وضعیت دستیار «is thinking…» روی اسلک. با پرچم <code>typing_indicator</code> به‌ازای-پلتفرم کنترل می‌شود‏ (پیش‌فرض <code>true</code>). برخی اسلک‌ها وضعیت «is thinking…» را پونویز می‌دانند‏ (جعبهٔ نگارش را هم لحظه‌ای غیرفعال می‌کند چون از Assistant API اسلک استفاده می‌کند). غیرفعال‌کردن فقط نشانگر را سرکوب می‌کند — تحویل پیام و بقیه بدون تغییر. پرچم عمومی است و برای همهٔ پلتفرم‌ها کار می‌کند.</p>
+
+<h3>ازسرگیری نشست در سراسر ری‌استارت‌ها</h3>
+<p>وقتی گیت‌وی با فراخوانی ابزار یا تولیدِ در-پرواز خاموش می‌شود، نشست‌های متأثر <code>restart_interrupted</code> علامت می‌خورند. در استارتاپ بعدی، گیت‌وی برای هرکدام یک ازسرگیری خودکار زمان‌بندی می‌کند — کاربر یک خبر کوتاه در چت می‌گیرد‏ («بعد از ری‌استارت هر پیامی بفرست تا از همان‌جا که بودید ادامه بدهم») و نشست با پاسخ او از آخرین نوبتِ ثبت‌شده ادامه می‌یابد. این رفتار پیش‌فرض روشن است و نیازی به پیکربندی ندارد.</p>
+
+<h3>پیش‌فرض‌های پیشرفت موبایل‌دوست</h3>
+<p>تلگرام معمولاً اینباکس موبایل است، پس پیش‌فرض‌ها برای آن سطح تنظیم شده‌اند: <code>tool_progress</code> پیش‌فرض <strong>خاموش</strong> (بدون جریان ردپای به‌ازای-ابزار که چت را پر کند)؛ ‏<code>busy_ack_detail</code> پیش‌فرض <strong>خاموش</strong> (تأییدها و ضربان‌ها مختصر می‌مانند)؛ ‏<code>interim_assistant_messages</code> <strong>روشن</strong> می‌ماند (توضیح واقعی میان-نوبت سیگنال است نه نویز)؛ و <code>long_running_notifications</code> <strong>روشن</strong> می‌ماند (یک حباب «⏳ Working — N min» با ویرایش درجا هر چند دقیقه به‌روز می‌شود تا ضربان داشته باشید). برای بازگشت به پیشرفت پرگویانه به‌ازای-پلتفرم:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  platforms:
+    telegram:
+      tool_progress: new               # بازفعال‌سازی جریان پیشرفت ابزار
+      busy_ack_detail: true           # نمایش "iteration N/M, running: tool"
+      interim_assistant_messages: false   # یا کاملاً ساکت
+      long_running_notifications: false</code></pre>
+</div>
+
+<h3>پاکسازی حباب‌های پیشرفت (اختیاری)</h3>
+<p>پیام‌های پیشرفت ابزار، ضربانِ «هنوز کار می‌کند…» و حباب‌های callback وضعیت می‌توانند پس از فرود پاسخ نهایی خودکار حذف شوند. به‌ازای-پلتفرم با <code>display.platforms.&lt;platform&gt;.cleanup_progress</code> فعال کنید‏ (پیش‌فرض <code>false</code>؛ فقط پلتفرم‌هایی که <code>delete_message</code> پیاده کرده‌اند‏ — فعلاً تلگرام و دیسکورد — آن را رعایت می‌کنند). اجراهای شکست‌خورده پاکسازی را رد می‌کنند تا حباب‌ها به‌عنوان ردپا بمانند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> گام‌های بعدی</h2>
+<ul>
+  <li>راه‌اندازی تلگرام · دیسکورد · اسلک · گوگل‌چت · واتساپ · واتساپ Cloud API · سیگنال · پیامک (‏Twilio) · ایمیل · هوم‌اسیسنت · مترمست · ماتریکس · دینگ‌تاک · فیشو/لارک · WeCom · ‏WeCom Callback · ویکسین (وی‌چت) · ‏BlueBubbles ‏(‏iMessage) · ‏Photon · ‏QQBot · یوان‌بائو · مایکروسافت تیمز · خط لولهٔ جلسات تیمز · وب‌هوک Microsoft Graph · لاین · ‏ntfy · ‏SimpleX · ‏Open WebUI + سرور API · ‏Raft · ‏IRC · ‏Buzz · ‏A2A · وب‌هوک‌ها — همه در صف ترجمه</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="../features/curator.html"><span class="dir">→ قبلی</span><span class="ttl">نگهدارندهٔ مهارت‌ها</span></a>
+  <a class="next" href="telegram.html"><span class="dir">بعدی ←</span><span class="ttl">تلگرام</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/" target="_blank" rel="noopener">Messaging Gateway</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

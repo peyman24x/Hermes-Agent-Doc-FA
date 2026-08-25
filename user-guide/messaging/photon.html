@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photon iMessage — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/photon" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>Photon iMessage</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>‏Photon iMessage</h1>
+<p>هرمس را از طریق <a href="https://photon.codes/" target="_blank" rel="noopener">Photon</a> به ‏<strong>iMessage</strong> وصل کنید — سرویس مدیریتی که تخصیص خط اپل و لایهٔ پیشگیری از سوءاستفاده را هندل می‌کند تا مجبور نباشید رلهٔ مک خودتان را اجرا کنید.</p>
+<p>سطح رایگان از استخر خط اشتراکی iMessage فوتون استفاده می‌کند — گیرنده‌های مختلف ممکن است شماره‌های ارسال مختلفی ببینند، ولی هر گفتگو پایدار می‌ماند. سطح تجاریِ پرداختی به هر کاربر همان شمارهٔ اختصاصی را می‌دهد؛ افزونه هر دو را پشتیبانی می‌کند و سطح رایگان نقطهٔ شروع توصیه‌شده است.</p>
+<div class="callout note">
+  <div class="callout-title">📌 شروع رایگان</div>
+  <p>استخر خط اشتراکی فوتون رایگان است. برای فرستادن اولین iMessage از هرمس اشتراک لازم نیست — فقط شماره تلفنی که بتوانیم به حسابتان قفل کنیم.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> معماری</h2>
+<p>‏فوتون یک کانال <strong>اتصال-دائمی</strong> است مثل دیسکورد یا اسلک — <strong>بدون وب‌هوک، بدون URL عمومی، بدون رمز امضا برای مدیریت.</strong></p>
+<p>‏SDK ‏<code>spectrum-ts</code> یک جریان <strong>gRPC</strong> طولانی‌عمر به فوتون برای هر دو جهت نگه می‌دارد. چون SDK فقط TypeScript است، هرمس آن را در یک <strong>Node sidecar</strong> کوچکِ تحت-نظارت اجرا و از طریق loopback با حرف می‌زند:</p>
+<ul>
+  <li><strong>ورودی</strong> — sidecar جریان gRPC ‏<code>app.messages</code> SDK را مصرف و هر پیام را روی loopback ‏(<code>GET /inbound</code> با NDJSON) به آداپتور پایتونی فوروارد می‌کند. آداپتور حذف تکرار و dispatch به ایجنت می‌کند و در قطع جریان خودکار reconnect می‌شود.</li>
+  <li><strong>خروجی</strong> — ریپلای‌ها POST های loopback به sidecar هستند که روی SDK ‏<code>space.send(...)</code> صدا می‌زند.</li>
+</ul>
+<p>افزونهٔ پایتونی sidecar را خودکار شروع، نظارت و خاموش می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پیش‌نیازها</h2>
+<ul>
+  <li>حساب فوتون — ثبت‌نام در ‏<a href="https://app.photon.codes/" target="_blank" rel="noopener">app.photon.codes</a></li>
+  <li><strong>‏Node.js نسخهٔ ۱۸.۱۷ یا جدیدتر</strong> روی PATH ‏(<code>node --version</code>)</li>
+  <li>شماره تلفنی که بتواند iMessage دریافت کند ‏(برای قفل حسابتان استفاده می‌شود)</li>
+</ul>
+<p>همین — هیچ URL عمومی یا تونلی برای راه‌اندازی نیست.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> راه‌اندازی اولیه</h2>
+<p>یا ویزارد واحد گیت‌وی را اجرا و <strong>Photon iMessage</strong> را انتخاب کنید:</p>
+<div class="codebox"><pre><code>hermes gateway setup</code></pre></div>
+<p>…یا setup فوتون را مستقیم اجرا کنید ‏(ویزارد همین جریان را صدا می‌زند):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ورود device-code + پروژه + کاربر + وابستگی‌های sidecar، همه در یک
+hermes photon setup --phone +15551234567</code></pre>
+</div>
+<p>راه‌اندازی به ترتیب:</p>
+<ol>
+  <li><strong>ورود دستگاهی</strong> ‏(<code>client_id=photon-cli</code>) — ‏<code>https://app.photon.codes/</code> را برای تأیید باز و bearer token ذخیره می‌کند.</li>
+  <li>پروژهٔ ‏<code>Hermes Agent</code> را روی حسابتان <strong>پیدا یا می‌سازد</strong>.</li>
+  <li><strong>Spectrum را فعال</strong>، شناسهٔ Spectrum پروژه را می‌خواند و رمز پروژه را می‌چرخاند.</li>
+  <li>شماره تلفن شما را به‌عنوان کاربر Spectrum <strong>ثبت می‌کند</strong> — اگر کاربری با آن شماره موجود باشد رد می‌شود، پس اجرای مجدد امن است.</li>
+  <li><strong>خط iMessage تخصیصی‌تان را چاپ می‌کند</strong> — شماره‌ای که برای رسیدن به ایجنت بهش پیام می‌دهید.</li>
+  <li><strong>‏npm install را داخل دایرکتوری sidecar افزونه اجرا می‌کند.</strong> روی درخت‌های نصب فقط-خواندنی ‏(ایمیج‌های Docker میزبانی‌شده، ‏Podman، ‏Nix) sidecar خودکار به آینهٔ نوشتنی زیر ‏<code>~/.hermes/photon/sidecar</code> برمی‌گردد؛ ‏<code>PHOTON_SIDECAR_DIR</code> را بگذارید تا مکان صریح قفل شود.</li>
+</ol>
+<p>اعتبارنامه‌های runtime در ‏<code>~/.hermes/.env</code> نوشته می‌شوند ‏(<code>PHOTON_PROJECT_ID</code> = شناسهٔ پروژهٔ Spectrum، ‏<code>PHOTON_PROJECT_SECRET</code>) — همان جایی که همهٔ کانال‌های دیگر توکنشان را نگه می‌دارند. متادیتای مدیریتی ‏(توکن دستگاه، شناسهٔ پروژهٔ داشبورد) در ‏<code>~/.hermes/auth.json</code> زیر ‏<code>credential_pool.photon</code> / ‏<code>credential_pool.photon_project</code> زندگی می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مجوز کاربران</h2>
+<p>‏Photon همان مدل مجوز سایر کانال‌های هرمس را دارد. یکی از این‌ها:</p>
+<p><strong>جفت‌سازی DM ‏(پیش‌فرض).</strong> وقتی شمارهٔ ناشناسی به خط فوتون شما پیام دهد، هرمس کد جفت‌سازی جواب می‌دهد. تأیید کنید:</p>
+<div class="codebox"><pre><code>hermes pairing approve photon &lt;CODE&gt;</code></pre></div>
+<p>با ‏<code>hermes pairing list</code> کدهای در انتظار و کاربران تأییدشده را ببینید.</p>
+<p><strong>پیش-مجوز شماره‌های خاص</strong> ‏(در ‏<code>~/.hermes/.env</code>):</p>
+<div class="codebox"><pre><code>PHOTON_ALLOWED_USERS=+15551234567,+15559876543</code></pre></div>
+<p><strong>دسترسی باز</strong> ‏(فقط توسعه، در ‏<code>~/.hermes/.env</code>):</p>
+<div class="codebox"><pre><code>PHOTON_ALLOW_ALL_USERS=true</code></pre></div>
+<p>وقتی ‏<code>PHOTON_ALLOWED_USERS</code> تنظیم باشد، فرستندگان ناشناخته بی‌صدا نادیده گرفته می‌شوند نه اینکه کد جفت‌سازی بگیرند ‏(لیست مجاز علامت می‌دهد که عمداً دسترسی را محدود کرده‌اید).</p>
+
+<h3>منشن اجباری در چت‌های گروهی</h3>
+<p>به‌طور پیش‌فرض هرمس به همهٔ DM ها و پیام‌های گروهی مجاز پاسخ می‌دهد. برای انتخابی‌کردن چت گروهی گیت منشن را فعال کنید ‏(DM ها همچنان همیشه کار می‌کنند):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  platforms:
+    photon:
+      enabled: true
+      require_mention: true</code></pre>
+</div>
+<p>با ‏<code>require_mention: true</code> پیام‌های چت گروهی مگر الگوی واژه-بیداری بخوانند نادیده گرفته می‌شوند. پیش‌فرض‌ها واریانت‌های «Hermes» و «‎@Hermes agent» را می‌گیرند. برای نام سفارشی الگوهای regex بگذارید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  platforms:
+    photon:
+      require_mention: true
+      mention_patterns:
+        - '(?&lt;![\w@])@?amos\b[,:\-]?'</code></pre>
+</div>
+<p>هر دو کلید env هم می‌پذیرند ‏(<code>PHOTON_REQUIRE_MENTION</code>، ‏<code>PHOTON_MENTION_PATTERNS</code>). همین مدل gating منشن کانال BlueBubbles/iMessage است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> شروع گیت‌وی</h2>
+<div class="codebox"><pre><code>hermes gateway start</code></pre></div>
+<p>چیزی شبیه این می‌بینید:</p>
+<div class="codebox"><pre><code>[photon] connected — sidecar on 127.0.0.1:8789, streaming inbound over gRPC</code></pre></div>
+<p>به شمارهٔ تخصیص‌شده‌تان iMessage بدهید و هرمس جواب می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> وضعیت و عیب‌یابی</h2>
+<div class="codebox"><pre><code>hermes photon status</code></pre></div>
+<p>اعتبارنامه‌های ذخیره‌شده، سلامت sidecar، شمارهٔ ثبتی و خط iMessage تخصیصی‌ای که هرمس استفاده می‌کند را چاپ می‌کند. وقتی توکن فوتون و پروژهٔ داشبورد موجود باشند، ‏<code>status</code> ردیف‌های شمارهٔ گمشده را از داشبورد بدون provision خط جدید refresh می‌کند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Photon iMessage status
+──────────────────────
+  device token        : ✓ stored
+  dashboard project   : 3c90c3cc-0d44-4b50-...
+  spectrum project id : sp-...
+  project secret      : ✓ stored
+  my number           : +15551234567
+  assigned number     : +16282679185
+  node binary         : /usr/bin/node
+  sidecar deps        : ✓ installed</code></pre>
+</div>
+<p>مشکلات رایج:</p>
+<ul>
+  <li><strong>‏<code>sidecar deps : ✗ run hermes photon install-sidecar</code></strong> — Node نصب است ولی ‏<code>spectrum-ts</code> نیست. فرمان پیشنهادی را اجرا کنید.</li>
+  <li><strong>‏<code>device token : ✗ missing</code></strong> — ‏<code>hermes photon setup</code> را برای ورود اجرا کنید.</li>
+  <li><strong>‏<code>No iMessage line assigned yet</code></strong> — Spectrum فعال شده ولی هنوز خطی provision نشده؛ ‏<code>hermes photon setup</code> را دوباره اجرا یا <a href="https://app.photon.codes/" target="_blank" rel="noopener">داشبورد</a> را چک کنید.</li>
+  <li><strong>sidecar شروع نمی‌شود</strong> — تأیید کنید ‏<code>node --version</code> نسخهٔ ۱۸.۱۷+ است و ‏<code>hermes photon install-sidecar</code> بدون خطا تمام شده.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> محدودیت‌های فعلی</h2>
+<ul>
+  <li><strong>پیوست‌های ورودی فقط-متادیتا هستند.</strong> رویدادهای ورودی نام فایل + MIME حمل می‌کنند؛ ایجنت نشانگر می‌بیند ولی هنوز نمی‌تواند بایت‌ها را بخواند. ‏SDK بایت پیوست‌ها را با ‏<code>content.read()</code> expose می‌کند، پس این یک کار پیگیری sidecar است.</li>
+  <li><strong>پیوست‌های خروجی پشتیبانی می‌شوند.</strong> هرمس تصویر، یادداشت صوتی، ویدیو و سند را از طریق سازنده‌های محتوایی ‏<code>attachment()</code>/<code>voice()</code> در spectrum-ts از طریق endpoint ‏<code>/send-attachment</code> سایدکار می‌فرستد. کپشن‌ها بعد از رسانه به‌عنوان حباب جداگانهٔ iMessage می‌آیند.</li>
+  <li><strong>نظرسنجی‌های بومی پشتیبانی می‌شوند.</strong> هرمس محتوای نظرسنجی را از طریق سازندهٔ ‏<code>poll()</code> spectrum-ts از endpoint ‏<code>/send-poll</code> سایدکار می‌فرستد.</li>
+  <li><strong>جلوه‌های پیام پشتیبانی می‌شوند.</strong> هرمس متن با جلوه‌های بومی حباب/صفحهٔ iMessage را از طریق سازندهٔ ‏<code>effect()</code> از endpoint ‏<code>/send-effect</code> می‌فرستد.</li>
+  <li><strong>سهمیه‌های رایگان فوتون:</strong> ۵٬۰۰۰ پیام به‌ازای سرور در روز، ‏۵۰ شروع گفتگوی جدید به‌ازای هر خط اشتراکی در روز. افزایش قابل‌درخواست است — ایمیل به ‏<code>help@photon.codes</code>.</li>
+  <li><strong>کرون و ارسال‌های مستقل گیت‌وی روشن می‌خواهند.</strong> فرستنده‌های خارج-از-پروسه ‏(کارهای کرون، ‏<code>hermes send</code>، داشبورد) همان sidecar را که گیت‌وی spawn کرده بازمصرف می‌کنند — پورت/توکنش را از ‏<code>&lt;hermes-home&gt;/runtime/photon-sidecar.json</code> می‌خوانند که بعد از عبور health-check نوشته و هنگام توقف حذف می‌شود. اگر ارسال مستقلی گفت گیت‌وی ظاهراً خاموش است، اول گیت‌وی را شروع ‏(یا ری‌استارت) کنید.</li>
+  <li><strong>خط‌های اشتراکی/رایگان نمی‌توانند گفتگو با هدف جدید شروع کنند.</strong> سیاست سمت-فوتون: خط اشتراکی فقط بعد از اینکه عددی اول به خط پیام داده باشد می‌تواند بهش پیام بفرستد. ارسال کرون/مستقیم به گیرندهٔ کاملاً جدید حتی با setup درست هرمس توسط فوتون رد می‌شود — یا بگذارید گیرنده یک‌بار به خط پیام دهد، یا به خط اختصاصی مهاجرت کنید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> متغیرهای محیطی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>پیش‌فرض</th><th>یادداشت‌ها</th></tr></thead>
+  <tbody>
+    <tr><td><code>PHOTON_PROJECT_ID</code></td><td>از .env</td><td>شناسهٔ پروژهٔ Spectrum ‏(<code>projectId</code> مربوط به SDK)؛ توسط setup تنظیم می‌شود</td></tr>
+    <tr><td><code>PHOTON_PROJECT_SECRET</code></td><td>از .env</td><td>رمز پروژه؛ توسط setup تنظیم می‌شود</td></tr>
+    <tr><td><code>PHOTON_SIDECAR_PORT</code></td><td><code>8789</code></td><td>پورت loopback برای کنترل sidecar + کانال ورودی</td></tr>
+    <tr><td><code>PHOTON_SIDECAR_AUTOSTART</code></td><td><code>true</code></td><td>آیا آداپتور sidecar را spawn کند</td></tr>
+    <tr><td><code>PHOTON_NODE_BIN</code></td><td><code>which node</code></td><td>override مسیر باینری Node</td></tr>
+    <tr><td><code>PHOTON_HOME_CHANNEL</code></td><td>—</td><td>شناسهٔ فضای پیش‌فرض برای کرون / اعلان‌ها</td></tr>
+    <tr><td><code>PHOTON_HOME_CHANNEL_NAME</code></td><td>—</td><td>برچسب خوانا برای کانال خانگی</td></tr>
+    <tr><td><code>PHOTON_ALLOWED_USERS</code></td><td>—</td><td>لیست مجاز E.164 جداشده با ویرگول</td></tr>
+    <tr><td><code>PHOTON_ALLOW_ALL_USERS</code></td><td><code>false</code></td><td>فقط توسعه — پذیرش هر فرستنده‌ای</td></tr>
+    <tr><td><code>PHOTON_REQUIRE_MENTION</code></td><td><code>false</code></td><td>واژهٔ بیداری قبل از پاسخ در گروه‌ها لازم باشد</td></tr>
+    <tr><td><code>PHOTON_MENTION_PATTERNS</code></td><td>واژه‌های بیداری هرمس</td><td>فهرست JSON / ویرگول / خط‌جدید از الگوهای regex برای منشن گروهی</td></tr>
+    <tr><td><code>PHOTON_DASHBOARD_HOST</code></td><td><code>app.photon.codes</code></td><td>override میزبان داشبورد / ورود دستگاهی</td></tr>
+    <tr><td><code>PHOTON_SPECTRUM_HOST</code></td><td><code>spectrum.photon.codes</code></td><td>override میزبان API Spectrum</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<div class="pager">
+  <a href="line.html"><span class="dir">→ قبلی</span><span class="ttl">LINE</span></a>
+  <a class="next" href="teams.html"><span class="dir">بعدی ←</span><span class="ttl">Microsoft Teams</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/photon" target="_blank" rel="noopener">Photon iMessage</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

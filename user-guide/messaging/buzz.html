@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buzz — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/buzz" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>Buzz</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>Buzz</h1>
+<p>آداپتور Buzz هرمس را به یک جامعهٔ ‏<a href="https://github.com/block/buzz" target="_blank" rel="noopener">Buzz</a> وصل می‌کند — پلتفرم متن‌باز همکاری انسان+ایجنتِ Block ساخته‌شده روی پروتکل Nostr — و پیام‌ها را بین کانال‌های Buzz ‏(یا DM ها) و ایجنت رله می‌کند. ترافیک خروجی به باینری CLI ‏<code>buzz</code> سپرده می‌شود ‏(«JSON در، JSON out»)؛ ورودی از اشتراک WebSocket بومی Nostr استفاده می‌کند ‏(با بستهٔ همراه‌بستهٔ ‏<code>websockets</code>) با polling کلاینت به‌عنوان fallback. <strong>هیچ بستهٔ پایتونی اضافه لازم نیست</strong> — فقط باینری <code>buzz</code>.</p>
+<p>‏Buzz مارک‌داون رندر می‌کند، پس ریپلای‌های ایجنت قالب‌بندی‌شان حفظ می‌شود. تصاویر به‌صورت آپلود ‏(فایل محلی) یا لینک ‏(URL) تحویل می‌گیرند. ریپلای‌ها می‌توانند با event id روی پیام موجود ترد شوند.</p>
+<p>پیام‌های ورودی به‌طور پیش‌فرض روی اشتراک دائمی WebSocket Nostr با احراز NIP-42 می‌رسند ‏(تحویل تقریباً آنی)، با fallback خودکار به polling وقتی WebSocket برقرار نشود. پیام‌های خروجی همیشه از CLI ‏<code>buzz</code> می‌روند. با ‏<code>transport</code> / ‏<code>BUZZ_TRANSPORT</code> کنترلش کنید: ‏<code>auto</code> ‏(پیش‌فرض)، ‏<code>websocket</code> ‏(WS الزامی، وگرنه شکست) یا <code>poll</code>. اگر عضویت relay شما گواهی مالکیت NIP-OA دارد، ‏<code>BUZZ_AUTH_TAG</code> را به JSON تگ احراز چهاررشته‌ای تنظیم کنید.</p>
+<blockquote><p><code>hermes gateway setup</code> را اجرا و <strong>Buzz</strong> را انتخاب کنید تا راهنمای گام‌به‌گام ببینید.</p></blockquote>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li>باینری CLI ‏<code>buzz</code> روی ‏<code>PATH</code> ‏(یا ‏<code>BUZZ_CLI_PATH</code> را بهش اشاره دهید) — از مخزن Buzz با ‏<code>cargo build --release -p buzz-cli</code> بسازید</li>
+  <li>یک URL relay جامعهٔ Buzz ‏(مثل ‏<code>https://mycommunity.communities.buzz.xyz</code>)</li>
+  <li>یک کلید خصوصی Nostr ‏(nsec یا hex) که هویتش قبلاً <strong>عضو</strong> آن جامعه باشد</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پیکربندی هرمس</h2>
+<p>‏Buzz دو جور پیکربندی می‌شود — بلوک <code>gateway</code> در config.yaml ‏(مرجع) یا متغیرهای محیطی ‏(که بر آن مقدم‌اند). کلید خصوصی یک <strong>رمز</strong> است و همیشه جای‌اش در ‏<code>~/.hermes/.env</code> است.</p>
+
+<h3>گزینهٔ A — config.yaml</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  platforms:
+    buzz:
+      enabled: true
+      extra:
+        relay_url: https://mycommunity.communities.buzz.xyz
+        channels:                  # شناسه‌های UUID کانال برای پایش (خالی = همهٔ عضوشده)
+          - ccc2bc1a-7a82-5a8f-8c4e-57a070cbe7cd
+        home_channel: ccc2bc1a-7a82-5a8f-8c4e-57a070cbe7cd
+        poll_interval: 4           # ثانیه بین هر sweep پایش ورودی
+        cli_path: ""               # باینری buzz (پیش‌فرض: PATH، بعد ~/bin/buzz)
+        credentials_file: ""       # فایل JSON حاوی nsec (fallback برای BUZZ_PRIVATE_KEY)
+        allowed_users: []          # خالی = اجازه به همه؛ pubkeys هگز یا npub</code></pre>
+</div>
+<p>به‌اضافه، در <code>~/.hermes/.env</code>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>BUZZ_PRIVATE_KEY=nsec1...</code></pre>
+</div>
+
+<h3>گزینهٔ B — متغیرهای محیطی</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>لازم</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>BUZZ_RELAY_URL</code></td><td>✅</td><td>URL پایهٔ relay جامعه</td></tr>
+    <tr><td><code>BUZZ_PRIVATE_KEY</code></td><td>✅</td><td>کلید خصوصی Nostr ‏(nsec یا hex) — تنها رمز</td></tr>
+    <tr><td><code>BUZZ_CHANNELS</code></td><td>—</td><td>شناسه‌های UUID کانال برای پایش، جداشده با ویرگول ‏(پیش‌فرض: همهٔ کانال‌های عضو)</td></tr>
+    <tr><td><code>BUZZ_HOME_CHANNEL</code></td><td>—</td><td>شناسهٔ UUID کانال برای تحویل کرون / اعلان ‏(پیش‌فرض: اولین کانال پایش‌شده)</td></tr>
+    <tr><td><code>BUZZ_ALLOWED_USERS</code></td><td>—</td><td>‏npub ها یا pubkeys هگز مجازِ گفتگو با ایجنت، جداشده با ویرگول</td></tr>
+    <tr><td><code>BUZZ_ALLOW_ALL_USERS</code></td><td>—</td><td>اجازه گفتگو به هر عضو جامعه با ایجنت</td></tr>
+    <tr><td><code>BUZZ_POLL_INTERVAL</code></td><td>—</td><td>ثانیه بین sweep های پایش ورودی ‏(پیش‌فرض: 4)</td></tr>
+    <tr><td><code>BUZZ_CLI_PATH</code></td><td>—</td><td>مسیر باینری ‏<code>buzz</code> ‏(پیش‌فرض: ‏<code>buzz</code> روی PATH، بعد ‏<code>~/bin/buzz</code>)</td></tr>
+    <tr><td><code>BUZZ_CREDENTIALS_FILE</code></td><td>—</td><td>فایل اعتبارنامهٔ JSON نگهدارندهٔ nsec؛ وقتی ‏<code>BUZZ_PRIVATE_KEY</code> تنظیم نباشد استفاده می‌شود</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پیش‌فرض‌های توصیه‌شده</h2>
+<p>هنگام سیم‌کشی Buzz این پیش‌فرض‌ها را در config.yaml بگذارید تا کانال تمیز بماند و ایجنت روی نتایج نهایی متمرکز شود نه لاگ اجرای داخلی ابزارش. با رفتار تلگرام و ایمیل که خروجی ابزار میانی را سرکوب می‌کنند یکی است.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  platforms:
+    buzz:
+      interim_assistant_messages: false   # سرکوب نتایج ابزار میانی، کامنت‌های استدلال و به‌روزرسانی‌های پیشرفت — فقط پاسخ نهایی به کانال می‌رسد
+      tool_progress: off                  # سرکوب حباب‌های پیشرفت ابزار (مثل "Running terminal command...", "Reading file...")
+gateway:
+  platforms:
+    buzz:
+      enabled: true
+      extra:
+        relay_url: https://mycommunity.communities.buzz.xyz
+        channels:                         # شناسه‌های UUID کانال برای پایش (خالی = همهٔ عضوشده)
+          - ccc2bc1a-7a82-5a8f-8c4e-57a070cbe7cd
+        home_channel: ccc2bc1a-7a82-5a8f-8c4e-57a070cbe7cd
+        poll_interval: 4                  # ثانیه بین sweep های پایش (پیش‌فرض ۴ — تعادل تأخیر vs بار relay)
+        cli_path: ""                      # باینری buzz (پیش‌فرض: PATH، بعد ~/bin/buzz)
+        credentials_file: ""              # فایل JSON حاوی nsec
+        allowed_users: []                 # خالی = همه اگر allow_all_users روشن باشد؛ وگرنه محدود به npub/pubkey فهرست‌شده
+        require_mention: true             # در کانال‌ها: فقط وقتی خطاب شود (@name، npub یا pubkey هگز)؛ DM همیشه dispatch می‌شود
+        allow_all_users: false            # true = حالت جامعه (همه چت کنند، فقط مالک ادمین است)؛ false = حالت خصوصی (فقط allowed_users)</code></pre>
+</div>
+<p><strong>چرا این پیش‌فرض‌ها:</strong></p>
+<ul>
+  <li>‏<code>interim_assistant_messages: false</code> — مانع پست شدن نتایج ابزار میانی، کامنت‌های استدلال و به‌روزرسانی‌های پیشرفت به‌عنوان پیام جدا در کانال می‌شود. فقط پاسخ نهایی به کانال می‌رود.</li>
+  <li>‏<code>tool_progress: off</code> — حباب‌های پیشرفت ابزار را سرکوب می‌کند. کانال روی نتایج واقعی متمرکز می‌ماند نه فرایند.</li>
+  <li>‏<code>poll_interval: 4</code> — تعادل بین تأخیر ورودی ‏(تا ۴ ثانیه) و بار relay. مقادیر کمتر یعنی polling پرتکرارتر؛ بیشتر یعنی کمتر.</li>
+  <li>‏<code>allowed_users: []</code> + ‏<code>allow_all_users: false</code> — حالت خصوصی پیش‌فرض. فقط کاربران فهرست‌شده تعامل می‌کنند. برای حالت جامعه که همه چت کنند ‏(سطح ادمین همچنان مالکیست) ‏<code>allow_all_users: true</code>.</li>
+  <li>‏<code>require_mention: true</code> — در کانال‌ها ایجنت فقط وقتی خطاب شود پاسخ می‌دهد. DM مستقل از این تنظیم همیشه dispatch می‌شود.</li>
+</ul>
+<p><strong>منطق:</strong> کانال‌ها جای نتایج نهایی و گفتگو هستند نه لاگ اجرای داخلی ابزار ایجنت. کاربر جواب نهایی را می‌بیند نه مراحل رسیدن به آن. با رفتار تلگرام و ایمیل که همین پیش‌فرض‌ها را دارند یکی است.</p>
+<p><strong>استثنا:</strong> اگر می‌خواهید کاربران پیشرفت ابزار را ببینند ‏(مثلاً عملیات‌های طولانی)، ‏<code>tool_progress: all</code> کنید — ولی ‏<code>interim_assistant_messages</code> همچنان باید <code>false</code> بماند تا با هر نتیجهٔ ابزار اسپم نشود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> منشن، کانال‌ها و DM ها</h2>
+<ul>
+  <li>در کانال‌های مشترک ایجنت فقط وقتی <strong>خطاب</strong> شود پاسخ می‌دهد — با ‏<code>@name</code>، ‏npub یا pubkey هگزش. هر چیز دیگری نادیده گرفته می‌شود.</li>
+  <li>پیام‌های مستقیم همیشه به ایجنت می‌رسند، بدون منشن.</li>
+  <li>پیام‌های خود ایجنت هرگز به خودش dispatch نمی‌شوند ‏(سرکوب خود-پژواک با pubkey) و هر رویداد بر اساس شناسه رویداد نسبت به نشانگر سطح-بالای به‌ازای-کانال حذف تکرار می‌شود.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> کنترل دسترسی</h2>
+<p>پیش‌فرض لیست مجاز خالی است؛ یعنی هر عضو جامعه‌ای که ایجنت را منشن کند فقط وقتی ‏<code>BUZZ_ALLOW_ALL_USERS=true</code> باشد جواب می‌گیرد؛ وگرنه دسترسی را با فهرست‌کردن npub ها یا pubkeys هگز در ‏<code>BUZZ_ALLOWED_USERS</code> ‏(یا ‏<code>allowed_users</code> در config.yaml) محدود کنید. عضویت خودِ جامعه توسط relay اجرا می‌شود — فقط اعضا می‌توانند پست کنند.</p>
+<p>کارهای کرون و اعلان‌ها ‏(<code>deliver=buzz</code>) به <strong>کانال خانگی</strong> تحویل می‌شوند — ‏<code>BUZZ_HOME_CHANNEL</code> اگر تنظیم باشد وگرنه اولین کانال پایش‌شده — و حتی وقتی کرون خارج از پروسهٔ گیت‌وی اجرا می‌شود کار می‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> اجرای گیت‌وی</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway start</code></pre>
+</div>
+<p>وضعیت را با ‏<code>hermes gateway status</code> چک کنید — وضعیت اتصال Buzz آنجا گزارش می‌شود، حتی برای راه‌اندازی‌های فقط-env.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> یادداشت‌ها و محدودیت‌ها</h2>
+<ul>
+  <li><strong>ورودی polled است نه streamed.</strong> ‏CLI ‏<code>buzz</code> درخواست/پاسخی است، پس آداپتور ‏<code>buzz messages get</code> را برای هر کانال پایش‌شده هر ‏<code>poll_interval</code> ثانیه صدا می‌زند ‏(پیش‌فرض ۴). برای پیام‌های ورودی تا یک interval تأخیر انتظار داشته باشید. یک بهینه‌سازی آینده، ترنسپورت websocket است ‏(مخزن Buzz ‏<code>buzz-ws-client</code> را برای استریم واقعی دارد).</li>
+  <li>هنگام اتصال ‏(مجدد) آداپتور نشانگر سطح-بالایش را از جدیدترین رویدادها seed می‌کند، پس تاریخچهٔ کانال هرگز به ایجنت بازپخش نمی‌شود.</li>
+  <li>گفتگوهای DM جدید خودکار کشف می‌شوند ‏(هر چند sweep).</li>
+  <li>کلید خصوصی از طریق محیط زیرپروسه به CLI داده می‌شود — هرگز در argv یا لاگ‌ها ظاهر نمی‌شود.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="raft.html"><span class="dir">→ قبلی</span><span class="ttl">Raft</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">QQ Bot</span></span>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/buzz" target="_blank" rel="noopener">Buzz</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ntfy — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/ntfy" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>ntfy</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>ntfy</h1>
+<p><a href="https://ntfy.sh/" target="_blank" rel="noopener">ntfy</a> یک سرویس اعلان pub-sub ساده مبتنی بر HTTP است. با سرور عمومی رایگان <code>ntfy.sh</code> یا هر نمونهٔ خودمیزبان کار می‌کند و هر کلاینتی که بتواند درخواست HTTP بزند را پشتیبانی می‌کند — گوشی، مرورگر، اسکریپت، ساعت.</p>
+<p>‏ntfy یک کانال پوش سبک عالی برای هرمس است: از <a href="https://ntfy.sh/docs/subscribe/phone/" target="_blank" rel="noopener">اپ موبایل ntfy</a> روی یک تاپیک subscribe کنید، برای حرف زدن با ایجنت به تاپیک پیام بدهید و پاسخ را روی گوشی بگیرید.</p>
+<blockquote><p><code>hermes gateway setup</code> را اجرا و <strong>ntfy</strong> را انتخاب کنید تا راهنمای گام‌به‌گام ببینید.</p></blockquote>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li>یک نام تاپیک ‏(هر رشتهٔ یکتایی — مثل <code>hermes-myname-2026</code>)</li>
+  <li><a href="https://ntfy.sh/docs/subscribe/phone/" target="_blank" rel="noopener">اپ موبایل ntfy</a> نصب‌شده و مشترک آن تاپیک</li>
+  <li>اختیاری: سرور ntfy خودمیزبان، یا توکن حساب <code>ntfy.sh</code> برای تاپیک‌های خصوصی/رزرو</li>
+</ul>
+<p>همین. بدون SDK، بدون دیمن، بدون Node.js. آداپتور از <code>httpx</code> استفاده می‌کند که از قبل وابستگی هرمس است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پیکربندی هرمس</h2>
+
+<h3>با ویزارد راه‌اندازی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway setup</code></pre>
+</div>
+<p><strong>ntfy</strong> را انتخاب و طبق پرسش‌ها پیش بروید.</p>
+
+<h3>با متغیرهای محیطی</h3>
+<p>این‌ها را به <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>NTFY_TOPIC=hermes-myname-2026
+NTFY_ALLOWED_USERS=hermes-myname-2026
+NTFY_HOME_CHANNEL=hermes-myname-2026</code></pre>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>لازم</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>NTFY_TOPIC</code></td><td>بله</td><td>تاپیک اشتراک ‏(پیام‌های ورودی)</td></tr>
+    <tr><td><code>NTFY_SERVER_URL</code></td><td>اختیاری</td><td>URL سرور ‏(پیش‌فرض: <code>https://ntfy.sh</code>) — برای حریم خصوصی به ntfy خودمیزبان اشاره دهید</td></tr>
+    <tr><td><code>NTFY_TOKEN</code></td><td>اختیاری</td><td>توکن Bearer ‏(مثل <code>tk_xyz</code>) یا <code>user:pass</code> برای احراز Basic</td></tr>
+    <tr><td><code>NTFY_PUBLISH_TOPIC</code></td><td>اختیاری</td><td>تاپیک جدا برای ریپلای‌های خروجی ‏(پیش‌فرض همان <code>NTFY_TOPIC</code>)</td></tr>
+    <tr><td><code>NTFY_MARKDOWN</code></td><td>اختیاری</td><td>‏<code>true</code> برای ارسال ریپلای‌ها با هدر <code>X-Markdown: true</code></td></tr>
+    <tr><td><code>NTFY_ALLOWED_USERS</code></td><td>توصیه‌شده</td><td>نام‌های تاپیک مجاز جداشده با ویرگول ‏(به‌عنوان شناسهٔ کاربر پردازش می‌شوند؛ پایین را ببینید)</td></tr>
+    <tr><td><code>NTFY_ALLOW_ALL_USERS</code></td><td>اختیاری</td><td>‏<code>true</code> برای اجازه به هر ناشر — فقط برای تاپیک‌های خصوصیِ دارای توکن خواندن امن است</td></tr>
+    <tr><td><code>NTFY_HOME_CHANNEL</code></td><td>اختیاری</td><td>تاپیک پیش‌فرض تحویل کرون / اعلان‌ها</td></tr>
+    <tr><td><code>NTFY_HOME_CHANNEL_NAME</code></td><td>اختیاری</td><td>برچسب خوانا برای کانال خانگی</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> مدل هویت — قبل از استقرار بخوانید</h2>
+<p>‏ntfy هویت کاربر احرازشدهٔ بومی ندارد. فیلد <code>title</code> پیام منتشرشده <strong>در اختیار ناشر است</strong> و می‌تواند هر چیزی باشد که فرستنده بخواهد. آداپتور هرمس برای مجوزدهی از <code>title</code> استفاده نمی‌کند — این اجازه می‌داد هر ناشری که تاپیک را بداند خودش را به‌جای کاربر مجاز جا بزند.</p>
+<p>به‌جایش، <strong>خود نام تاپیک همان هویت است</strong>. هر پیام منتشرشده به تاپیک به‌عنوان پیام از طرف همان کاربر منطقی ‏(تاپیک) پردازش می‌شود. پس <code>NTFY_ALLOWED_USERS</code> معمولاً فقط خود نام تاپیک است — لیست‌مجاز تک‌عضوی که کل کانال را گیت می‌زند.</p>
+<p>یعنی <strong>هر کسی که تاپیک را بداند می‌تواند با ایجنت حرف بزند</strong>. برای تبدیل این به یک مرز اعتماد واقعی:</p>
+<ul>
+  <li><strong>‏ntfy را خودمیزبان کنید</strong> و تاپیک را با <a href="https://docs.ntfy.sh/config/#access-control" target="_blank" rel="noopener">کنترل دسترسی</a> قفل کنید. فقط کلاینت‌های مجاز دارای توکن خواندن/نوشتن می‌توانند منتشر کنند.</li>
+  <li>یا <strong>از یک تاپیک خصوصی روی ntfy.sh استفاده کنید</strong> ‏(<a href="https://docs.ntfy.sh/publish/#reserved-topics" target="_blank" rel="noopener">تاپیک‌های رزرو</a> حساب می‌خواهند) و با <code>NTFY_TOKEN</code> محافظتش کنید.</li>
+  <li>یا <strong>نامی بلند و غیرقابل‌حدس انتخاب کنید</strong> ‏(<code>hermes-7d4f9c8b-2026</code>) و آن را رمز مشترک فرض کنید. سبک‌ترین راه‌اندازی است ولی نام تاپیک از طریق لاگ‌ها یا اسکرین‌شات‌ها لو می‌رود.</li>
+</ul>
+<p>در همهٔ حالت‌ها، مگر تاپیک زیرین کنترل دسترسی داشته باشد دادهٔ حساس از ntfy عبور ندهید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> شروع سریع — گفتگو با ایجنت از گوشی</h2>
+<ol>
+  <li>نام تاپیک را انتخاب کنید: ‏<code>hermes-myname-2026</code></li>
+  <li>روی گوشی: <a href="https://ntfy.sh/docs/subscribe/phone/" target="_blank" rel="noopener">اپ ntfy</a> را نصب، دکمهٔ <strong>+</strong> را بزنید و <code>hermes-myname-2026</code> را وارد کنید</li>
+  <li>روی میزبان:</li>
+</ol>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>echo 'NTFY_TOPIC=hermes-myname-2026' >> ~/.hermes/.env
+echo 'NTFY_ALLOWED_USERS=hermes-myname-2026' >> ~/.hermes/.env
+hermes gateway restart</code></pre>
+</div>
+<ol start="4">
+  <li>از اپ ntfy به تاپیک پیام بدهید. ریپلای ایجنت به‌صورت اعلان پوش می‌رسد.</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> استفاده از ntfy با کارهای کرون</h2>
+<p>وقتی <code>NTFY_HOME_CHANNEL</code> تنظیم باشد، کارهای کرون می‌توانند به ntfy تحویل شوند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cronjob(
+    action="create",
+    schedule="every 1h",
+    deliver="ntfy",          # از NTFY_HOME_CHANNEL استفاده می‌کند
+    prompt="Check for alerts and summarise."
+)</code></pre>
+</div>
+<p>یا صریحاً یک تاپیک مشخص را از طریق فیلد <code>deliver:</code> کار کرون هدف بگیرید، یا از اسکریپت شل با <a href="https://hermes-agent.nousresearch.com/docs/guides/pipe-script-output" target="_blank" rel="noopener">CLI ‏<code>hermes send</code></a>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes send ntfy:alerts-channel "Done!"</code></pre>
+</div>
+<p>این حتی وقتی کرون خارج-از-پروسه از گیت‌وی اجرا می‌شود کار می‌کند — افزونه یک <code>standalone_sender_fn</code> ثبت می‌کند که اتصال HTTP خودش را باز می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> خودمیزبان‌کردن ntfy</h2>
+<p>اگر کنترل کامل می‌خواهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Docker
+docker run -p 80:80 -it binwiederhier/ntfy serve
+
+# Native
+go install heckel.io/ntfy/v2@latest
+ntfy serve</code></pre>
+</div>
+<p>سپس هرمس را به آن اشاره دهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>NTFY_SERVER_URL=https://ntfy.mydomain.com
+NTFY_TOPIC=hermes
+NTFY_TOKEN=tk_abc123  # اگر کنترل دسترسی گذاشته باشید</code></pre>
+</div>
+<p>خودمیزبانی کنترل دسترسی تاپیک، سیاست ماندگاری پیام، پیوست‌ها و تگ‌های ایموجی می‌دهد. <a href="https://docs.ntfy.sh/install/" target="_blank" rel="noopener">مستندات سرور ntfy</a> را ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> قالب‌بندی مارک‌داون</h2>
+<p>کلاینت‌های ntfy وقتی ناشر هدر <code>X-Markdown: true</code> بگذارد مارک‌داون رندر می‌کنند. برای فعال‌سازی روی ریپلای‌های خروجی هرمس:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>NTFY_MARKDOWN=true</code></pre>
+</div>
+<p>یا در config.yaml:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  ntfy:
+    extra:
+      markdown: true</code></pre>
+</div>
+<p>اپ موبایل زیرمجموعه‌ای از CommonMark را پشتیبانی می‌کند — ضخیم، ایتالیک، فهرست، لینک، بلوک کد محصور. مجموعهٔ دقیق را در <a href="https://docs.ntfy.sh/publish/#markdown-formatting" target="_blank" rel="noopener">مستندات مارک‌داون ntfy</a> ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> راه‌اندازی فقط-خروجی ‏(اعلان بدون ورودی)</h2>
+<p>اگر فقط می‌خواهید هرمس به ntfy اعلان <em>push</em> کند ‏(خلاصه‌های کرون، هشدارها) و هیچ‌وقت پیام قبول نکند، هم <code>NTFY_TOPIC</code> هم <code>NTFY_PUBLISH_TOPIC</code> را یک مقدار بگذارید و <code>NTFY_ALLOWED_USERS</code> را کلاً حذف کنید. بدون لیست مجاز، ایجنت هرگز به پیام‌های ورودی پاسخ نمی‌دهد — گوشی‌تان پوش می‌گیرد ولی گفتگو یک‌طرفه است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> محدودیت‌ها</h2>
+<ul>
+  <li><strong>حجم پیام</strong>: ntfy بدنهٔ پیام را روی ۴۰۹۶ کاراکتر سقف می‌زند. هرمس هنگام عبور با هشدار برش می‌زند.</li>
+  <li><strong>بدون نشانگر تایپ</strong>: پروتکل چنین چیزی expose نمی‌کند؛ ‏<code>send_typing</code> no-op است.</li>
+  <li><strong>بدون ترد یا پیوست</strong>: ntfy فقط اعلان پوش ساده است. ریپلای‌های بلند داخل بدنهٔ پیام می‌مانند، بدون fanout ترد.</li>
+  <li><strong>بدون هویت کاربر بومی</strong>: بخش مدل هویت بالاتر را ببینید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> عیب‌یابی</h2>
+<p><strong>شکست احراز / 401</strong> — ‏<code>NTFY_TOKEN</code> اشتباه است یا توکن حق publish/subscribe روی این تاپیک ندارد. آداپتور حلقهٔ reconnect را روی 401 متوقف می‌کند و وضعیت runtime گیت‌وی ‏<code>fatal: ntfy_unauthorized</code> نشان می‌دهد. توکن را درست کنید و گیت‌وی را ری‌استارت کنید.</p>
+<p><strong>تاپیک پیدا نشد / 404</strong> — ‏<code>NTFY_TOPIC</code> روی سرور پیکربندی‌شده وجود ندارد. در ntfy.sh تاپیک‌ها با اولین publish خودکار ساخته می‌شوند، پس 404 یعنی به سروری خودمیزبان اشاره دارید که تاپیکش provision نشده. آداپتور حلقهٔ reconnect را با ‏<code>fatal: ntfy_topic_not_found</code> متوقف می‌کند.</p>
+<p><strong>متصل است ولی پیامی نمی‌آید</strong> — چک کنید <code>NTFY_ALLOWED_USERS</code> خود نام تاپیک را داشته باشد. در مدل هویت ntfy، تاپیک همان کاربر است؛ خالی‌گذاشتن لیست مجاز همه‌چیز را رد می‌کند.</p>
+<p><strong>هر ۶۰ ثانیه reconnect می‌شود</strong> — پیش‌فرض keepalive استریم ۵۵ ثانیه است؛ ممکن است ntfy مشکلات شبکه‌ای متناوب داشته باشد. آداپتور backoff نمایی اعمال می‌کند ‏(۲ ← ۵ ← ۱۰ ← ۳۰ ← ۶۰ ثانیه) و وقتی استریم ≥۶۰ ثانیه زنده بماند به صفر برمی‌گردد.</p>
+</section>
+
+<div class="pager">
+  <a href="irc.html"><span class="dir">→ قبلی</span><span class="ttl">IRC</span></a>
+  <a class="next" href="relay.html"><span class="dir">بعدی ←</span><span class="ttl">هرمس رله</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/ntfy" target="_blank" rel="noopener">ntfy</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

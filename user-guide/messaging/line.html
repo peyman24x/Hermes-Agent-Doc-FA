@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LINE — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/line" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>LINE</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی LINE</h1>
+<p>هرمس ایجنت را به‌عنوان یک بات ‏<a href="https://line.me/" target="_blank" rel="noopener">LINE</a> از طریق LINE Messaging API رسمی اجرا کنید. آداپتور به‌عنوان یک افزونهٔ پلتفرم همراه‌بسته زیر مسیر ‏<code>plugins/platforms/line/</code> زندگی می‌کند — بدون ویرایش هسته، مثل هر پلتفرم دیگری فعالش کنید.</p>
+<p>‏LINE پیام‌رسان غالب ژاپن، تایوان و تایلند است. اگر کاربرانتان آنجا هستند، راه رسیدنشان به شما همین است.</p>
+<blockquote><p><code>hermes gateway setup</code> را اجرا و <strong>LINE</strong> را انتخاب کنید تا راهنمای گام‌به‌گام ببینید.</p></blockquote>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نحوهٔ پاسخ بات</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>زمینه</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><strong>چت ۱:۱</strong> ‏(شناسه‌های <code>U</code>)</td><td>به همهٔ پیام‌ها پاسخ می‌دهد</td></tr>
+    <tr><td><strong>چت گروهی</strong> ‏(شناسه‌های <code>C</code>)</td><td>وقتی گروه در لیست مجاز باشد پاسخ می‌دهد</td></tr>
+    <tr><td><strong>اتاق چندنفره</strong> ‏(شناسه‌های <code>R</code>)</td><td>وقتی اتاق در لیست مجاز باشد پاسخ می‌دهد</td></tr>
+  </tbody>
+</table>
+</div>
+<p>متن، تصویر، صوت، ویدیو، فایل، استیکر و موقعیت مکانی ورودی همه هندل می‌شوند. متن خروجی اول از <strong>توکن ریپلای رایگان</strong> استفاده می‌کند ‏(تک‌مصرف، پنجرهٔ ~۶۰ ثانیه) و وقتی توکن منقضی شد به Push API مترشح برمی‌گردد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: ساخت کانال LINE Messaging API</h2>
+<ol>
+  <li>به <a href="https://developers.line.biz/console/" target="_blank" rel="noopener">کنسول توسعه‌دهندگان LINE</a> بروید.</li>
+  <li>یک Provider بسازید و زیر آن یک کانال <strong>Messaging API</strong>.</li>
+  <li>از تب <strong>Basic settings</strong> کانال، <strong>Channel secret</strong> را کپی کنید.</li>
+  <li>از تب <strong>Messaging API</strong> به <strong>Channel access token (long-lived)</strong> اسکرول و <strong>Issue</strong> را کلیک کنید. توکن را کپی کنید.</li>
+  <li>در همان تب Messaging API، گزینه‌های <strong>Auto-reply messages</strong> و <strong>Greeting messages</strong> را هم خاموش کنید که با ریپلای‌های بات‌تان تداخل نکنند.</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: expose کردن پورت وب‌هوک</h2>
+<p>‏LINE وب‌هوک‌ها را روی HTTPS عمومی تحویل می‌دهد. پورت پیش‌فرض ‏<code>8646</code> است — در صورت نیاز با ‏<code>LINE_PORT</code> عوضش کنید.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Cloudflare Tunnel (برای تولید توصیه‌شده — hostname ثابت)
+cloudflared tunnel --url http://localhost:8646
+
+# ngrok (مناسب توسعه)
+ngrok http 8646
+
+# devtunnel
+devtunnel create hermes-line --allow-anonymous
+devtunnel port create hermes-line -p 8646 --protocol https
+devtunnel host hermes-line</code></pre>
+</div>
+<p>URL ‏<code>https://...</code> را کپی کنید — پایین به‌عنوان URL وب‌هوک تنظیمش می‌کنید. حین تست <strong>تونل را روشن نگه دارید</strong>. برای تولید یک تونل نام‌دار ثابت کلادفلر راه بیندازید تا URL وب‌هوک با ری‌استارت عوض نشود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۳: پیکربندی هرمس</h2>
+<p>به <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>LINE_CHANNEL_ACCESS_TOKEN=YOUR_LONG_LIVED_TOKEN
+LINE_CHANNEL_SECRET=YOUR_CHANNEL_SECRET
+
+# لیست مجاز — دست‌کم یکی از این‌ها (یا LINE_ALLOW_ALL_USERS=true برای توسعه)
+LINE_ALLOWED_USERS=U1234567890abcdef...           # شناسه‌های U-دار جداشده با ویرگول
+LINE_ALLOWED_GROUPS=C1234567890abcdef...          # شناسه‌های گروه اختیاری
+LINE_ALLOWED_ROOMS=R1234567890abcdef...           # شناسه‌های اتاق اختیاری
+
+# الزامی برای ارسال تصویر / صوت / ویدیو — base URL عمومی HTTPS
+# که تونل بهش حل می‌شود. بدون این، send_image/voice/video از ارسال امتناع می‌کند.
+LINE_PUBLIC_URL=https://my-tunnel.example.com</code></pre>
+</div>
+<p>سپس در config.yaml:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  platforms:
+    line:
+      enabled: true</code></pre>
+</div>
+<p>همین کافی است — اسکن افزونه‌های همراه‌بسته در ‏<code>gateway/config.py</code> خودکار ‏<code>plugins/platforms/line/</code> را برمی‌دارد. نه ویرایش enum ‏<code>Platform.LINE</code> لازم است نه ثبت ‏<code>_create_adapter</code>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۴: تنظیم URL وب‌هوک</h2>
+<p>به کنسول LINE برگردید:</p>
+<ol>
+  <li>کانال‌تان ← تب <strong>Messaging API</strong> را باز کنید.</li>
+  <li>تحت <strong>Webhook settings</strong> ← <strong>Webhook URL</strong> مقدار ‏<code>https://&lt;your-tunnel&gt;/line/webhook</code> را بچسبانید ‏(به مسیر ‏<code>/line/webhook</code> دقت کنید — آداپتور همانجا گوش می‌دهد).</li>
+  <li><strong>Verify</strong> را کلیک کنید. LINE به URL پینگ می‌زند؛ باید ۲۰۰ ببینید.</li>
+  <li>‏<strong>Use webhook</strong> را روی <strong>On</strong> بگذارید.</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۵: اجرای گیت‌وی</h2>
+<div class="codebox"><pre><code>hermes gateway</code></pre></div>
+<p>لاگ ایجنت نشان می‌دهد:</p>
+<div class="codebox"><pre><code>LINE: webhook listening on * (all interfaces, IPv4+IPv6):8646/line/webhook (public: https://my-tunnel.example.com)</code></pre></div>
+<p>از اپ LINE بات را به‌عنوان دوست اضافه کنید ‏(QR تب Messaging API کانال را اسکن کنید) و بهش پیام بدهید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> پاسخ‌های کند LLM</h2>
+<p>توکن ریپلای LINE تک‌مصرف است و تقریباً ۶۰ ثانیه بعد از رویداد ورودی منقضی می‌شود. LLM های کند نمی‌توانند به‌موقع جواب دهند، که معمولاً یعنی فراخوانی پرداخت‌دار Push API.</p>
+<p>وقتی LLM از ‏<code>LINE_SLOW_RESPONSE_THRESHOLD</code> ثانیه ‏(پیش‌فرض ‏<code>45</code>) هم گذشت و هنوز در حال اجراست، آداپتور توکن ریپلای اصلی را صرف ارسال حباب <strong>Template Buttons</strong> می‌کند:</p>
+<blockquote><p>🤔 Still thinking. Tap below to fetch the answer when it's ready.</p><p>[ Get answer ]</p></blockquote>
+<p>کاربر هر وقت خواست روی <strong>Get answer</strong> ضربه می‌زند — آن postback یک توکن ریپلای <em>تازه</em> تحویل می‌دهد که آداپتور برای فرستادن جواب کش‌شده استفاده می‌کند ‏(هنوز رایگان).</p>
+<p>ماشین حالت: ‏<code>PENDING → READY → DELIVERED</code> به‌اضافهٔ ‏<code>ERROR</code> برای اجراهای لغوشده ‏(PENDING بی‌صاحب بعد از ‏<code>/stop</code> به «Run was interrupted before completion.» حل می‌شود تا دکمهٔ ماندگار حلقه نزند).</p>
+<p>برای خاموش‌کردن دکمهٔ postback و همیشه fallback به Push:</p>
+<div class="codebox"><pre><code>LINE_SLOW_RESPONSE_THRESHOLD=0</code></pre></div>
+<p>برای شلیک مطمئن جریان postback، چرت‌وپرتی را که قبل از آستانه توکن ریپلای را مصرف کند سرکوب کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  interim_assistant_messages: false
+  platforms:
+    line:
+      tool_progress: off</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> تحویل کرون / اعلان</h2>
+<div class="codebox"><pre><code>LINE_HOME_CHANNEL=Uxxxxxxxxxxxxxxxxxxxx     # هدف تحویل پیش‌فرض</code></pre></div>
+<p>کارهای کرون با ‏<code>deliver: line</code> به ‏<code>LINE_HOME_CHANNEL</code> مسیریابی می‌شوند. آداپتور یک فرستندهٔ مستقلِ فقط-Push دارد تا کارهای کرون حتی وقتی کرون در پروسهٔ جدا از گیت‌وی اجرا می‌شود کار کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> مرجع متغیرهای محیطی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>لازم</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>LINE_CHANNEL_ACCESS_TOKEN</code></td><td>بله</td><td>—</td><td>توکن دسترسی طولانی‌عمر کانال</td></tr>
+    <tr><td><code>LINE_CHANNEL_SECRET</code></td><td>بله</td><td>—</td><td>Channel secret ‏(اعتبارسنجی HMAC-SHA256 وب‌هوک)</td></tr>
+    <tr><td><code>LINE_HOST</code></td><td>خیر</td><td>تنظیم‌نشده ‏(dual-stack: همهٔ interface ها، IPv4+IPv6)</td><td>میزبان bind وب‌هوک</td></tr>
+    <tr><td><code>LINE_PORT</code></td><td>خیر</td><td><code>8646</code></td><td>پورت bind وب‌هوک</td></tr>
+    <tr><td><code>LINE_PUBLIC_URL</code></td><td>برای رسانه</td><td>—</td><td>base URL عمومی HTTPS؛ برای ارسال تصویر/صوت/ویدیو الزامی</td></tr>
+    <tr><td><code>LINE_ALLOWED_USERS</code></td><td>یکی از این‌ها</td><td>—</td><td>شناسه‌های کاربر ‏(U-دار) جداشده با ویرگول</td></tr>
+    <tr><td><code>LINE_ALLOWED_GROUPS</code></td><td>یکی از این‌ها</td><td>—</td><td>شناسه‌های گروه ‏(C-دار) جداشده با ویرگول</td></tr>
+    <tr><td><code>LINE_ALLOWED_ROOMS</code></td><td>یکی از این‌ها</td><td>—</td><td>شناسه‌های اتاق ‏(R-دار) جداشده با ویرگول</td></tr>
+    <tr><td><code>LINE_ALLOW_ALL_USERS</code></td><td>فقط توسعه</td><td><code>false</code></td><td>رد شدن کامل از لیست مجاز</td></tr>
+    <tr><td><code>LINE_HOME_CHANNEL</code></td><td>خیر</td><td>—</td><td>هدف پیش‌فرض تحویل کرون / اعلان</td></tr>
+    <tr><td><code>LINE_SLOW_RESPONSE_THRESHOLD</code></td><td>خیر</td><td><code>45</code></td><td>ثانیه قبل از شلیک دکمهٔ postback ‏(<code>0</code> = غیرفعال)</td></tr>
+    <tr><td><code>LINE_PENDING_TEXT</code></td><td>خیر</td><td>«🤔 Still thinking…»</td><td>متن حباب کنار دکمهٔ postback</td></tr>
+    <tr><td><code>LINE_BUTTON_LABEL</code></td><td>خیر</td><td>«Get answer»</td><td>برچسب دکمه</td></tr>
+    <tr><td><code>LINE_DELIVERED_TEXT</code></td><td>خیر</td><td>«Already replied ✅»</td><td>ریپلای وقتی دکمهٔ قبلاً-تحویل‌شده دوباره لمس شود</td></tr>
+    <tr><td><code>LINE_INTERRUPTED_TEXT</code></td><td>خیر</td><td>«Run was interrupted before completion.»</td><td>ریپلای وقتی دکمهٔ یتیمِ پس از ‏<code>/stop</code> لمس شود</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> عیب‌یابی</h2>
+
+<p><strong>«invalid signature» هنگام تأیید وب‌هوک.</strong> یا ‏<code>Channel secret</code> اشتباه کپی شده یا تونلتان بدنهٔ درخواست را بازنویسی کرده. اول با ‏<code>curl -i https://&lt;tunnel&gt;/line/webhook/health</code> تست کنید — باید ‏<code>{"status":"ok","platform":"line"}</code> برگرداند.</p>
+
+<p><strong>بات در گروه‌ها هیچ چیزی نمی‌گیرد.</strong> چک کنید ‏<code>LINE_ALLOWED_GROUPS</code> شناسهٔ گروه ‏<code>C...</code> را داشته باشد. برای یافتن شناسهٔ گروه، پیام تستی بدهید و در ‏<code>~/.hermes/logs/gateway.log</code> دنبال ‏<code>LINE: rejecting unauthorized source</code> بگردید — dict مبدأ ردشده شناسه‌ها را دارد.</p>
+
+<p><strong>‏<code>send_image</code> با «LINE_PUBLIC_URL must be set» شکست می‌خورد.</strong> ‏Messaging API لاین آپلود باینری نمی‌پذیرد — تصاویر، صدا و ویدیو باید URL های HTTPS قابل‌رسید باشند. ‏<code>LINE_PUBLIC_URL</code> را روی hostname عمومی تونل بگذارید؛ آداپتور فایل‌ها را خودکار از ‏<code>/line/media/&lt;token&gt;/&lt;filename&gt;</code> سرو می‌کند.</p>
+
+<p><strong>دکمهٔ postback هرگز ظاهر نمی‌شود.</strong> یا LLM سریع‌تر از ‏<code>LINE_SLOW_RESPONSE_THRESHOLD</code> جواب داده، یا حباب دیگری ‏(پیشرفت ابزار، استریم) توکن ریپلای را زودتر مصرف کرده. بلوک سرکوب بخش «پاسخ‌های کند LLM» را ببینید.</p>
+
+<p><strong>«already in use by another profile».</strong> همان توکن دسترسی کانال به پروفایل هرمس دیگری که در حال اجراست قفل شده. گیت‌وی دیگر را متوقف کنید یا کانال جداگانه‌ای بسازید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> محدودیت‌ها</h2>
+<ul>
+  <li><strong>سقف حباب و طول.</strong> هر حباب متنی LINE سقف ۵۰۰۰ کاراکتر دارد. پاسخ‌های بلندتر هوشمندانه در ~۴۵۰۰ کاراکتر بین حداکثر ۵ حباب به‌ازای هر فراخوانی Reply/Push تکه می‌شوند، با شکستن روی مرزهای طبیعی هرجا ممکن باشد.</li>
+  <li><strong>بدون ویرایش بومی پیام.</strong> ‏LINE API ویرایش پیام ندارد — پاسخ‌های استریم همیشه حباب تازه می‌فرستند، هرگز حباب قبلی را ویرایش نمی‌کنند.</li>
+  <li><strong>بدون رندر مارک‌داون.</strong> ضخیم ‏(<code>**</code>)، ایتالیک ‏(<code>*</code>)، بلوک کد و تیترها به‌صورت کاراکتر تحت‌اللفظی رندر می‌شوند. آداپتور قبل از ارسال حذفشان می‌کند؛ URL ها حفظ می‌شوند ‏(<code>[label](url)</code> تبدیل به ‏<code>label (url)</code> می‌شود).</li>
+  <li><strong>نشانگر بارگذاری فقط DM است.</strong> ‏LINE API ‏chat/loading را برای گروه‌ها و اتاق‌ها رد می‌کند، پس نشانگر تایپ فقط در چت‌های ۱:۱ نمایش داده می‌شود.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="wecom-callback.html"><span class="dir">→ قبلی</span><span class="ttl">WeCom Callback</span></a>
+  <a class="next" href="photon.html"><span class="dir">بعدی ←</span><span class="ttl">Photon iMessage</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/line" target="_blank" rel="noopener">LINE</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

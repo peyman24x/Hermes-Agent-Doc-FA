@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCP ‏(Model Context Protocol) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>MCP ‏(Model Context Protocol)</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>‏MCP ‏(Model Context Protocol)</h1>
+<p>‏MCP اجازه می‌دهد هرمس ایجنت به سرورهای ابزار خارجی وصل شود تا ایجنت بتواند از ابزارهایی استفاده کند که بیرون از خود هرمس زندگی می‌کنند — ‏GitHub، ‏دیتابیس‌ها، فایل‌سیستم‌ها، پشته‌های مرورگر، APIهای داخلی و بیشتر.</p>
+<p>اگر همیشه دوست داشته‌اید هرمس از ابزاری که قبلاً جای دیگری وجود دارد استفاده کند، ‏MCP معمولاً تمیزترین راه انجامش است.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 از Claude Code می‌آیید؟</div>
+  <p>بلوک ‏<code>mcpServers</code> در ‏<code>~/.claude.json` شما به `mcp_servers</code> در config.yaml هرمس نگاشت می‌شود — و ‏<code>hermes import-agent claude-code</code> آن را ‏(همراه مهارت‌ها و دستورالعمل‌ها) خودکار مهاجرت می‌دهد. بخش «ورود از سایر ایجنت‌ها» را ببینید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> ‏MCP چه چیزی به شما می‌دهد</h2>
+<ul>
+  <li>دسترسی به اکوسیستم‌های ابزار خارجی بدون نوشتن اولیهٔ ابزار native هرمس</li>
+  <li>سرورهای stdio محلی و سرورهای HTTP راه‌دور MCP در یک پیکربندی واحد</li>
+  <li>کشف و ثبت خودکار ابزارها هنگام شروع</li>
+  <li>wrapper های کاربردی برای منابع و پرامپت‌های MCP وقتی سرور پشتیبانی کند</li>
+  <li>فیلترکردن به‌ازای-سرور تا فقط ابزارهای MCP واقعاً موردنظرتان را هرمس ببیند</li>
+</ul>
+
+<h3>شروع سریع</h3>
+<ol>
+  <li>پشتیبانی MCP با نصب استاندارد عرضه می‌شود — گام اضافه‌ای لازم نیست.</li>
+  <li>یک سرور MCP به config.yaml اضافه کنید:</li>
+</ol>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  filesystem:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/projects"]</code></pre>
+</div>
+<ol start="3">
+  <li>هرمس را شروع کنید:</li>
+</ol>
+<div class="codebox"><pre><code>hermes chat</code></pre></div>
+<ol start="4">
+  <li>از هرمس بخواهید قابلیت پشتیبان-MCP را استفاده کند. مثلاً:</li>
+</ol>
+<div class="codebox"><pre><code>List the files in /home/user/projects and summarize the repo structure.</code></pre></div>
+<p>هرمس ابزارهای سرور MCP را کشف و مثل هر ابزار دیگری استفاده می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> کاتالوگ: نصب یک‌کلیکی برای MCP های تأییدشده توسط Nous</h2>
+<p>هرمس یک کاتالوگ منتخب از سرورهای MCP عرضه می‌کند که توسط کارکنان Nous بازبینی و ادغام شده‌اند. پیش‌فرض خاموش‌اند — فقط چیزی که واقعاً می‌خواهید نصب کنید.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes mcp                # انتخاب‌گر تعاملی (پیش‌فرض)
+hermes mcp catalog        # فهرست متنی ساده، قابل‌اسکریپت
+hermes mcp install n8n    # نصب یک ورودی کاتالوگ با نام</code></pre>
+</div>
+<p>انتخاب‌گر هر ورودی با وضعیت فعلی‌اش نشان می‌دهد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>n8n          available              Manage and inspect n8n workflows from Hermes
+linear       enabled                Linear issue/project management (remote OAuth)
+github       installed (disabled)   GitHub repo + PR tools</code></pre>
+</div>
+<p>روی یک ردیف Enter بزنید تا نصب ‏(و طی کردن اعتبارنامه‌های لازم)، فعال‌سازی، غیرفعال‌سازی یا حذف نصب شود. ورودی‌های کاتالوگ زیر ‏<code>optional-mcps/</code> در مخزن hermes-agent ذخیره می‌شوند — حضور در آن پوشه یعنی تأیید Nous. هیچ سطح ارسال اجتماعی وجود ندارد؛ ورودی‌ها با ادغام یک PR اضافه می‌شوند.</p>
+<p>ورودی‌های کاتالوگ می‌توانند نیازمند باشند:</p>
+<ul>
+  <li><strong>کلید API</strong> — هرمس هنگام نصب می‌پرسد و مقدار را در ‏<code>~/.hermes/.env</code> می‌نویسد. مقادیر غیر-محرمانه ‏(URLهای پایه) به همان فایل می‌روند.</li>
+  <li><strong>OAuth</strong> ‏(MCP راه‌دور) — به‌صورت ‏<code>auth: oauth</code> در پیکربندی نوشته می‌شود؛ کلاینت MCP اولین اتصال مرورگر باز می‌کند.</li>
+  <li><strong>OAuth</strong> ‏(ارائه‌دهندهٔ شخص ثالث مثل Google/GitHub) — اگر هنوز احراز نکرده باشید هرمس شما را به ‏<code>hermes auth &lt;provider&gt;</code> اشاره می‌دهد.</li>
+</ul>
+
+<h3>انتخاب ابزار هنگام نصب</h3>
+<p>بعد از پیکربندی اعتبارنامه‌ها، هرمس سرور MCP را probe می‌کند تا همهٔ ابزارهای expose‌شده را فهرست و چک‌لیستی نشان دهد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Select tools for 'linear' (SPACE toggle, ENTER confirm)
+  [x] find_issues       Find issues matching a query
+  [x] get_issue         Get a single issue
+  [x] create_issue      Create a new issue
+  [ ] delete_workspace  Delete a Linear workspace
+  ...</code></pre>
+</div>
+<p>ردیف‌های پیش‌تیک‌خورده از این‌جا می‌آیند:</p>
+<ol>
+  <li><strong>انتخاب قبلی شما</strong> اگر قبلاً این ورودی را نصب کرده بودید ‏(نصب مجدد همان قبلی‌ها را حفظ می‌کند — پیش‌فرض‌های manifest آن را override نمی‌کنند)</li>
+  <li><strong>‏<code>tools.default_enabled</code> مربوط به manifest</strong> اگر ورودی یکی اعلام کرده باشد ‏(بعضی ورودی‌های کاتالوگ ابزارهای تغییردهنده یا کم‌کاربرد را از قبل هرس می‌کنند)</li>
+  <li><strong>همه‌چیز</strong> اگر هیچ‌کدام اعمال نشود</li>
+</ol>
+<p>چک‌لیست را با ENTER ثبت کنید. فقط ابزارهای تیک‌خورده به ‏<code>mcp_servers.&lt;name&gt;.tools.include</code> می‌روند. اگر همه را انتخاب کنید هیچ فیلتری نوشته نمی‌شود ‏(تمیزترین شکل پیکربندی، رفتار یکسان).</p>
+<p><strong>اگر probe شکست بخورد</strong> ‏(سرور غیرقابل‌دسترس، OAuth هنوز کامل نشده، سرویس پشتیبان روشن نیست)، نصب همچنان موفق می‌شود: ‏<code>tools.default_enabled</code> مربوط به manifest مستقیم اعمال می‌شود ‏(اگر اعلام شده) یا هیچ فیلتری نوشته نمی‌شود ‏(اگر نه). وقتی سرور در دسترس شد ‏<code>hermes mcp configure &lt;name&gt;</code> را دوباره اجرا کنید تا دقیق شود.</p>
+
+<h3>مدل اعتماد</h3>
+<p>نصب یک ورودی کاتالوگ هرچه manifest مشخص کند را اجرا می‌کند — ‏<code>git clone</code>، فرمان‌های ‏<code>bootstrap</code> ورودی ‏(<code>pip install</code>، ‏<code>npm install</code> و...) و در نهایت کد خودِ سرور MCP. ‏manifest ها با بازبینی PR داخل مخزن hermes-agent گیت می‌خورند، پس Nous هر ورودی را قبل از عرضه بازبینی کرده — <strong>ولی همچنان باید قبل از نصب خودتان manifest را بخوانید</strong>، مخصوصاً مخزنِ فیلد ‏<code>source:</code>، فرمان‌های ‏<code>install.bootstrap:</code> و هر فراخوانی ‏<code>transport.command:</code>.</p>
+<p>‏manifest ها در گیت‌هاب روی مسیر ‏<a href="https://github.com/NousResearch/hermes-agent/tree/main/optional-mcps" target="_blank" rel="noopener"><code>optional-mcps/&lt;name&gt;/manifest.yaml</code></a> زندگی می‌کنند. انتخاب‌گر هم URL ‏<code>source:</code> مربوط به manifest را هنگام نصب چاپ می‌کند تا سریع مخزن بالادستی را تأیید کنید. صفحهٔ MCP داشبورد وب همین جزئیات را به‌ازای هر ورودی کاتالوگ نشان می‌دهد — ترنسپورت، نوع احراز، URL نقطهٔ پایانی ‏(HTTP) یا فرمان+آرگومان‌ها ‏(stdio)، منبع/ref نصب گیت و فرمان‌های bootstrap و یادداشت‌های setup — با رندر شدن ‏<code>source:</code> به‌صورت لینک کلیک‌پذیر، تا قبل از زدن Install دقیقاً ببینید ورودی به چه چیزی وصل یا چه چیزی اجرا می‌کند.</p>
+
+<h3>سازگاری نسخهٔ manifest</h3>
+<p>‏manifest ها مقدار ‏<code>manifest_version</code> را pin می‌کنند. کاتالوگ رو-به-جلو سازگار است: اگر PR ای ورودی‌ای با ‏<code>manifest_version</code> جدیدتری از هرمس نصب‌شده شما اضافه کند، انتخاب‌گر برای آن ورودی هشدار سطح پیدا می‌کند ‏(<code>⚠ '&lt;name&gt;' requires a newer Hermes</code>) به‌جای مخفی‌کردن بی‌صدایش. وقتی دیدید ‏<code>hermes update</code> را اجرا کنید تا آخرین هرمس نصب شود.</p>
+
+<h3>جانشینی runtime ‏<code>${ENV_VAR}</code></h3>
+<p>داخل ‏<code>transport.command</code>، ‏<code>transport.args</code>، ‏<code>transport.url</code> و ‏<code>headers</code> مربوط به یک ورودی، placeholder های ‏<code>${VAR}</code> هنگام اتصال سرور از متغیرهای محیطی حل می‌شوند ‏(که شامل همهٔ ‏<code>~/.hermes/.env</code> است). وقتی مفید است که ورودی کاتالوگی بخواهد به مقداری که کاربر جای دیگر پیکربندی کرده اشاره کند — مثل ‏<code>${HOME}/foo</code> یا ‏<code>${MY_PROVIDER_TOKEN}</code>.</p>
+<p>متغیرهای زمینه سبک Cursor هم جانشین می‌شوند ‏(حساس-به-حروف): ‏<code>${userHome}</code> ‏(پوشهٔ خانه)، ‏<code>${workspaceFolder}</code> ‏(ریشهٔ ورک‌اسپیس نشست)، ‏<code>${workspaceFolderBasename}</code> و ‏<code>${pathSeparator}</code>/<code>${/}</code> ‏(جداکنندهٔ مسیر OS). جزئیات در <a href="https://hermes-agent.nousresearch.com/docs/reference/mcp-config-reference" target="_blank" rel="noopener">مرجع پیکربندی MCP</a>.</p>
+<p>توجه کنید این جدا از ‏<code>${INSTALL_DIR}</code> در manifest های کاتالوگ است که هنگام نصب با مسیری که کاتالوگ repo ورودی را clone کرده جانشین می‌شود.</p>
+
+<h3>به‌روزرسانی بعدیِ انتخاب ابزار</h3>
+<div class="codebox"><pre><code>hermes mcp configure linear</code></pre></div>
+<p>همان چک‌لیست را با انتخاب فعلی شما پیش‌تیک‌خورده دوباره باز می‌کند. وقتی ابزارهای بیشتری می‌خواهید فعال شوند یا سرور ابزارهای جدیدی اضافه کرده که می‌خواهید انتخابشان کنید استفاده کنید.</p>
+
+<h3>به‌روزرسانی manifest کاتالوگ</h3>
+<p>‏MCP ها هرگز خودکار به‌روز نمی‌شوند. بعد از به‌روزرسانی هرمس، اگر نسخهٔ manifest عوض شده ‏<code>hermes mcp install &lt;name&gt;</code> را دوباره اجرا کنید.</p>
+<p>برای افزودن MCP به کاتالوگ علیه ‏<a href="https://github.com/NousResearch/hermes-agent/tree/main/optional-mcps" target="_blank" rel="noopener"><code>optional-mcps/</code></a> ‏PR باز کنید.</p>
+
+<h3>متادیتای پیشنهاد ‏(<code>suggest:</code>)</h3>
+<p>یک manifest ممکن است بلوک اختیاری ‏<code>suggest:</code> با فهرست‌های ‏<code>keywords:</code> و/یا ‏<code>hosts:</code> اعلام کند. سطوح UI ‏(الان کامپوزر اپ Desktop) از آن برای پیشنهاد قرص یک‌کلیکی «Add &lt;server&gt;» استفاده می‌کنند وقتی پیش‌نویس شما یکی از کلیدواژه‌ها را به‌عنوان واژهٔ کامل ذکر کند یا لینک چسبانده‌شده‌ای داشته باشد که hostname اش به یکی از پسوندهای میزبان ختم شود. صرفاً مشورتی است — نصب‌ها همچنان از همان مسیرهای اعتبارسنجی‌شدهٔ کاتالوگ/config می‌گذرند — و بیشتر ورودی‌های راه‌دورِ میزبانی‌شده ‏(Atlassian، ‏Sentry، ‏Notion، ‏Stripe، ‏Vercel، ‏Supabase و رفقایش) آن را اعلام می‌کنند.</p>
+<p>‏GitHub عمداً <strong>در</strong> کاتالوگ <strong>نیست</strong>: ‏MCP میزبانی‌شده‌اش از هر کلاینت می‌خواهد اپ OAuth خودش را بیاورد ‏(ثبت داینامیک عمومی کلاینت رد می‌شود) و مهارت‌های همراه‌بستهٔ ‏<code>github/*</code> هرمس که CLI ‏gh را می‌رانند یکپارچه‌سازی توانمندتری هستند. روی Desktop، ذکر GitHub به‌جایش وقتی gh هنوز وارد نشده مهارت ‏<code>github-auth</code> را پیشنهاد می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> دو نوع سرور MCP</h2>
+
+<h3>سرورهای Stdio</h3>
+<p>سرورهای stdio به‌عنوان زیرپروسه‌های محلی اجرا و از طریق stdin/stdout حرف می‌زنند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  github:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "***"</code></pre>
+</div>
+<p>سرورهای stdio را وقتی استفاده کنید که:</p>
+<ul>
+  <li>سرور محلی نصب شده باشد</li>
+  <li>دسترسی کم‌تأخیر به منابع محلی بخواهید</li>
+  <li>مستندات سرور MCP‌ای را دنبال می‌کنید که ‏command و args و env نشان می‌دهد</li>
+</ul>
+
+<h3>سرورهای HTTP</h3>
+<p>سرورهای HTTP ‏MCP نقاط پایانی راه‌دوری هستند که هرمس مستقیم به آن‌ها وصل می‌شود.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  remote_api:
+    url: "https://mcp.example.com/mcp"
+    headers:
+      Authorization: "Bearer ***"</code></pre>
+</div>
+<p>سرورهای HTTP را وقتی استفاده کنید که:</p>
+<ul>
+  <li>سرور MCP جای دیگری میزبانی شده باشد</li>
+  <li>سازمان‌تان نقاط پایانی MCP داخلی expose کند</li>
+  <li>نخواهید هرمس برای آن یکپارچه‌سازی زیرپروسه محلی spawn کند</li>
+</ul>
+
+<h3>سرورهای HTTP با احراز OAuth</h3>
+<p>بیشتر سرورهای MCP میزبانی‌شده ‏(Linear، ‏Sentry، ‏Atlassian، ‏Asana، ‏Figma، ‏Stripe و...) به‌جای bearer token ثابت OAuth 2.1 می‌خواهند. مقدار ‏<code>auth: oauth</code> را بگذارید و هرمس کشف، شناسایی کلاینت، ‏PKCE، تبادل توکن، refresh و auth مرحله‌ای را از طریق SDK پایتونی MCP هندل می‌کند.</p>
+<p>هرمس خودش با یک ‏<a href="https://hermes-agent.nousresearch.com/docs/reference/mcp-config-reference" target="_blank" rel="noopener">سند متادیتای Client ID</a> روی سرورهایی که پشتیبانی‌اش می‌کنند معرفی می‌شود و روی بقیه به Dynamic Client Registration برمی‌گردد. هر دو خودکارند؛ چیزی برای پیکربندی نیست.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 ‏MCP راه‌دور فیتما</div>
+  <p>نقطهٔ پایانی میزبانی‌شده فیتما ‏(<code>https://mcp.figma.com/mcp</code>) ثبت داینامیک کلاینت را با تطبیق ‏<strong>دقیق ‏client_name</strong> لیست‌مجاز می‌کند — ‏<code>"Hermes Agent"</code> لخت مقدار 403 می‌گیرد در حالی که ‏<code>"Claude Code"</code> و ‏<code>"Codex"</code> موفق می‌شوند. هرمس برای ‏<code>mcp.figma.com</code> خودکار ‏<code>oauth.client_name: "Claude Code"</code> را ست می‌کند تا نصب/ورود بدون ترفند خاص کار کند:</p>
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+    <pre><code>mcp_servers:
+  figma:
+    url: "https://mcp.figma.com/mcp"
+    auth: oauth</code></pre>
+  </div>
+  <p>یا: ‏<code>hermes mcp install figma</code> سپس ‏<code>hermes mcp login figma</code>.</p>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  linear:
+    url: "https://mcp.linear.app/mcp"
+    auth: oauth</code></pre>
+</div>
+<p>در اولین اتصال هرمس URL مجوز چاپ، در صورت امکان مرورگرتان را باز و روی یک پورت loopback محلی منتظر callback می‌ماند. توکن‌ها با دسترسی ‏0o600 در ‏<code>~/.hermes/mcp-tokens/&lt;server&gt;.json</code> کش می‌شوند؛ اجراهای بعدی بی‌صدا ازشان بازمصرف می‌کنند تا refresh شکست بخورد.</p>
+<p><strong>میزبان‌های راه‌دور / headless.</strong> وقتی هرمس روی ماشینی غیر از ماشین مرورگرتان اجراست، callback loopback نمی‌تواند به لپ‌تاپ‌تان برسد. دو راه تکمیل جریان:</p>
+<ul>
+  <li><strong>چسباندن-برگردان ‏(بدون setup):</strong> روی ترمینال تعاملی هرمس کنار URL مجوز «Or paste the redirect URL here…» چاپ می‌کند. URL را در مرورگر باز، تأیید و URL کاملِ نهایی‌شده در مرورگر را کپی کنید ‏(redirect خطای اتصال نشان می‌دهد — طبیعی است) و در پرامپت بچسبانید. query string های لخت ‏<code>?code=…&amp;state=…</code> هم کار می‌کنند.</li>
+  <li><strong>Port forward از طریق SSH:</strong> در ترمینال جدا ‏<code>ssh -N -L &lt;port&gt;:127.0.0.1:&lt;port&gt; user@host</code> و بعد بگذارید redirect عادی جریان یابد.</li>
+  <li><strong>callback پروکسی‌شده ‏(redirect_uri):</strong> وقتی endpoint عمومی HTTPS به میزبان فوروارد می‌کند ‏(مثل Tailscale Funnel یا پروکسی معکوس اشاره‌شده به پورت callback)، مقدار ‏<code>oauth.redirect_uri</code> را بگذارید تا redirect مرورگر خودش به هرمس برسد — بدون تونل یا چسباندن:</li>
+</ul>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  myserver:
+    url: "https://mcp.example.com/mcp"
+    auth: oauth
+    oauth:
+      redirect_port: 8765                                # پورت ثابت برای هدف پروکسی
+      redirect_uri: "https://oauth.example.ts.net/callback"</code></pre>
+</div>
+<p>برای گیت‌وی‌های کاملاً headless ‏(بات پیام‌رسانی، اصلاً بدون ترمینال تعاملی)، مهارت اختیاری ‏<a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/optional/mcp/mcp-mcp-oauth-remote-gateway" target="_blank" rel="noopener">mcp-oauth-remote-gateway</a> ایجنت را قدم‌به‌قدم برای تکمیل دستی جریان و نوشتن توکن‌ها در محل موردانتظار هرمس راهنمایی می‌کند.</p>
+<p><strong>دام — ‏WAF مقدار redirect ‏127.0.0.1 را رد می‌کند.</strong> چند ارائه‌دهنده سرور مجوزشان را با WAFی جلو می‌گیرند که هر درخواست authorize دارای query string حاوی ‏<code>127.0.0.1</code> لخت را 403 می‌کند ‏(AWS API Gateway شرکت Reclaim.ai نمونهٔ شناخته‌شده است — هر تلاشی قبل از رسیدن به اپ OAuth مقدار ‏<code>{"message":"Forbidden"}</code> برمی‌گرداند). مقدار ‏<code>oauth.redirect_host: localhost</code> را بگذارید تا به‌جایش ‏<code>http://localhost:&lt;port&gt;/callback</code> استفاده شود؛ شنونده callback در هر صورت همچنان روی ‏<code>127.0.0.1</code> بایند می‌شود.</p>
+<p><a href="https://hermes-agent.nousresearch.com/docs/guides/oauth-over-ssh" target="_blank" rel="noopener">OAuth از طریق SSH / میزبان‌های راه‌دور</a> را برای راهنمای کامل ببینید، شامل سرورهای بدون ‏DCR ‏(مثل Slack)، ‏<code>client_id</code>/<code>client_secret</code> پیش-ثبت‌شده، سفارشی‌سازی scope و احراز مجدد با ‏<code>hermes mcp login &lt;server&gt;</code>.</p>
+<p><strong>دام — ارائه‌دهنده‌هایی که ثبت خودکار را پشتیبانی نمی‌کنند ‏(Google Drive، ‏Atlassian).</strong> بعضی سرورها مرحلهٔ ثبت داینامیک کلاینت ‏(RFC 7591) را که ‏<code>auth: oauth</code> لخت به آن اتکا دارد رد می‌کنند — سرور رسمی Drive گوگل ‏(<code>https://drivemcp.googleapis.com/mcp/v1</code>) مقدار ‏<code>400 Bad Request</code> برمی‌گرداند، پس هیچ کلاینت OAuth ساخته و هیچ توکنی گرفته نمی‌شود. علامتش ظریف است: این سرورها ‏<code>tools/list</code> را هم <em>بدون</em> احراز سرو می‌کنند، پس ‏<code>hermes mcp login</code> می‌تواند ابزارها را فهرست و موفق به نظر برسد ولی هر فراخوانی واقعی ابزار بعداً timeout می‌شود. ‏<code>hermes mcp login</code> الان این را تشخیص می‌دهد ‏(چک می‌کند توکن واقعاً روی دیسک بنشیند) و می‌گوید کلاینت OAuth خودتان را بدهید. یکی در کنسول ارائه‌دهنده بسازید و به پیکربندی اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  googledrive:
+    url: "https://drivemcp.googleapis.com/mcp/v1"
+    auth: oauth
+    oauth:
+      client_id: "&lt;your-oauth-client-id&gt;"
+      client_secret: "&lt;your-oauth-client-secret&gt;"</code></pre>
+</div>
+<p>سپس ‏<code>hermes mcp login googledrive</code> را اجرا کنید — با کلاینت پیش-ثبت‌شده هرمس از ثبت می‌گذرد و جریان عادی مجوز مرورگری را اجرا می‌کند.</p>
+<p><strong>دام — race بارگذاری مجدد خودکار پیکربندی.</strong> وقتی ‏<code>~/.hermes/config.yaml</code> را از داخل یک نشست در-حال-اجرا هرمس ویرایش کنید، ‏CLI اتصالات MCP را با timeout ۳۰ ثانیه‌ای خودکار reload می‌کند. برای جریان OAuth تعاملی کافی نیست. ورودی را اضافه کنید، بعد ‏<code>hermes mcp login &lt;server&gt;</code> را از ترمینال تازه اجرا کنید — تمام ۵ دقیقه برای تکمیل احراز شما صبر می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> ‏mTLS / گواهی کلاینت</h2>
+<p>سرورهای HTTP راه‌دور MCP که نیاز به mutual TLS دارند ‏(احراز گواهی-کلاینت) از طریق ‏<code>client_cert</code>/<code>client_key</code> پشتیبانی می‌شوند. هرمس گواهی حل‌شده را برای دست‌دادن TLS به کلاینت HTTP زیرین می‌دهد.</p>
+<p>‏<code>client_cert</code> سه شکل می‌پذیرد:</p>
+<ul>
+  <li><strong>یک مسیر PEM ترکیبی واحد</strong> — یک فایل هم گواهی هم کلید خصوصی:</li>
+</ul>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  internal_api:
+    url: "https://mcp.internal.example.com/mcp"
+    client_cert: "~/.certs/mcp-client.pem"</code></pre>
+</div>
+<ul>
+  <li><strong>یک ۲تایی ‏[cert, key]</strong> — گواهی و کلید در فایل‌های جدا ‏(معادل تنظیم ‏client_cert + ‏client_key):</li>
+</ul>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  internal_api:
+    url: "https://mcp.internal.example.com/mcp"
+    client_cert: ["~/.certs/mcp-client.crt", "~/.certs/mcp-client.key"]</code></pre>
+</div>
+<ul>
+  <li><strong>یک ۳تایی ‏[cert, key, password]</strong> — وقتی کلید خصوصی رمزگذاری شده، عنصر سوم passphrase کلید است:</li>
+</ul>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  internal_api:
+    url: "https://mcp.internal.example.com/mcp"
+    client_cert: ["~/.certs/mcp-client.crt", "~/.certs/mcp-client.key", "${MCP_KEY_PASSWORD}"]</code></pre>
+</div>
+<p>می‌توانید گواهی و کلید را کاملاً جدا هم نگه دارید: ‏<code>client_cert</code> ‏(PEM ترکیبی) به‌اضافهٔ ‏<code>client_key</code> صریح. مسیرها از ‏<code>~</code> پشتیبانی می‌کنند؛ فایل غایب به‌جای شکست دست‌دادن TLS مبهم، خطای واضح scoped-به-سرور می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> هدر هویت به‌ازای-کاربر</h2>
+<p>سرورهای HTTP/SSE راه‌دور MCP که رفتارشان بر هویت فراخواننده کلید می‌خورد ‏(سقف نرخ به‌ازای-کاربر، رد حسابرسی، مسیریابی چند-مستأجری) می‌توانند با ‏<code>identity_header</code> در هر درخواست هدر هویت دریافت کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  team_api:
+    url: "https://mcp.team.example.com/mcp"
+    identity_header:
+      name: "X-User-Id"
+      value_from: "static"   # "static" (پیش‌فرض) یا "profile"
+      value: "alice"         # برای static الزامی</code></pre>
+</div>
+<ul>
+  <li>‏<code>value_from: static</code> مقدار تحت‌اللفظی ‏value را از config.yaml می‌فرستد.</li>
+  <li>‏<code>value_from: profile</code> نام پروفایل فعال هرمس را می‌فرستد که یک‌بار هنگام اتصال حل می‌شود — مفید وقتی چند پروفایل روی یک ماشین با همان سرور حرف می‌زنند و سرور باید تفریقشان کند.</li>
+</ul>
+<p>ورودی صریح در mapping ‏headers سرور با همان نام ‏(هر حروف‌چینی) همیشه برنده است؛ هدر هویت هرگز پیکربندی هدر خودتان را override نمی‌کند. بلوک‌های ‏identity_header نامعتبر هشدار داده و نادیده گرفته می‌شوند — هرگز مانع اتصال سرور نمی‌شوند. روی سرورهای stdio این کلید با هشدار نادیده گرفته می‌شود ‏(ترنسپورت‌های stdio هدر ندارند).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> مرجع پیکربندی پایه</h2>
+<p>هرمس پیکربندی MCP را از ‏<code>~/.hermes/config.yaml</code> زیر ‏<code>mcp_servers</code> می‌خواند.</p>
+
+<h3>کلیدهای رایج</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید</th><th>نوع</th><th>معنی</th></tr></thead>
+  <tbody>
+    <tr><td><code>command</code></td><td>string</td><td>فایل اجرایی برای سرور MCP از نوع stdio</td></tr>
+    <tr><td><code>args</code></td><td>list</td><td>آرگومان‌های سرور stdio</td></tr>
+    <tr><td><code>env</code></td><td>mapping</td><td>متغیرهای محیطی پاس‌داده‌شده به سرور stdio</td></tr>
+    <tr><td><code>url</code></td><td>string</td><td>نقطهٔ پایانی HTTP مربوط به MCP</td></tr>
+    <tr><td><code>headers</code></td><td>mapping</td><td>هدرهای HTTP برای سرورهای راه‌دور</td></tr>
+    <tr><td><code>client_cert</code></td><td>string \| list</td><td>گواهی کلاینت برای mTLS — مسیر PEM ترکیبی، یا ‏[cert, key] / ‏[cert, key, password]</td></tr>
+    <tr><td><code>client_key</code></td><td>string</td><td>مسیر PEM کلید خصوصی کلاینت ‏(وقتی از ‏client_cert جداست)</td></tr>
+    <tr><td><code>identity_header</code></td><td>mapping</td><td>هدر هویت به‌ازای-کاربر اختیاری برای سرورهای HTTP/SSE — ‏{name, value_from: static|profile, value}</td></tr>
+    <tr><td><code>timeout</code></td><td>number</td><td>timeout فراخوانی ابزار</td></tr>
+    <tr><td><code>connect_timeout</code></td><td>number</td><td>timeout اتصال اولیه ‏(دست‌دادن initialize مربوط به MCP را هم محدود می‌کند)</td></tr>
+    <tr><td><code>idle_timeout_seconds</code></td><td>number</td><td>بازیافت سرور stdio بعد از این تعداد ثانیه بدون فراخوانی ابزار ‏(<code>0</code> = هرگز، پیش‌فرض). سرور در فراخوانی ابزار بعدی شفاف ری‌استارت می‌شود.</td></tr>
+    <tr><td><code>max_lifetime_seconds</code></td><td>number</td><td>بازیافت سرور stdio بعد از این عمر کل ‏(<code>0</code> = هرگز، پیش‌فرض). در استفاده بعدی شفاف ری‌استارت می‌شود.</td></tr>
+    <tr><td><code>enabled</code></td><td>bool</td><td>اگر ‏<code>false</code>، هرمس سرور را کلاً رد می‌کند</td></tr>
+    <tr><td><code>supports_parallel_tool_calls</code></td><td>bool</td><td>اگر ‏<code>true</code>، ابزارهای این سرور ممکن است هم‌زمان اجرا شوند</td></tr>
+    <tr><td><code>tools</code></td><td>mapping</td><td>فیلترکردن ابزار به‌ازای-سرور و سیاست کاربردی</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>مثال حداقلی stdio</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  filesystem:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]</code></pre>
+</div>
+
+<h3>بازیافت سرورهای stdio سنگین-حافظه</h3>
+<p>سرورهای MCP مبتنی بر مرورگر ‏(مثل ‏<code>@playwright/mcp</code>) بعد از اولین فراخوانی ابزار یک Chromium کامل مقیم نگه می‌دارند — صدها مگابایت که هرگز آزاد نمی‌شود. بازیافت خودکار را انتخاب کنید و سرور بعد از حد idle/lifetime جمع و دفعه بعد که یکی از ابزارش صدا زده شود شفاف ری‌استارت می‌شود ‏(ابزارش در طول این مدت ثبت‌شده می‌مانند):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  playwright:
+    command: "npx"
+    args: ["-y", "@playwright/mcp@latest", "--headless"]
+    idle_timeout_seconds: 900     # بازیافت بعد از ۱۵ دقیقه بدون فراخوانی ابزار
+    max_lifetime_seconds: 86400   # و مستقل از آن حداقل روزی یک‌بار</code></pre>
+</div>
+
+<h3>مثال حداقلی HTTP</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  company_api:
+    url: "https://mcp.internal.example.com"
+    headers:
+      Authorization: "Bearer ***"</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> preset های داخلی</h2>
+<p>برای سرورهای MCP معروف، ‏<code>hermes mcp add</code> فلگ ‏<code>--preset</code> را می‌پذیرد که جزئیات ترنسپورت را پر می‌کند تا لازم نباشد دنبال فرمان و آرگومان‌ها بگردید. preset فقط پیش‌فرض می‌دهد — هر چیز دیگری ‏(env، هدرها، فیلتر) که در همان خط فرمان بدهید همچنان برنده است.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Preset</th><th>چه چیزی را سیم‌کشی می‌کند</th></tr></thead>
+  <tbody>
+    <tr><td><code>codex</code></td><td>سرور MCP مربوط به CLI ‏Codex ‏(<code>codex mcp-server</code> روی stdio). نیازمند حضور CLI ‏codex روی PATH.</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="codebox"><pre><code># افزودن CLI Codex به‌عنوان سرور MCP در یک خط
+hermes mcp add codex --preset codex</code></pre></div>
+<p>معادل این را می‌نویسد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  codex:
+    command: "codex"
+    args: ["mcp-server"]</code></pre>
+</div>
+<p>می‌توانید هر نام محلی انتخاب کنید ‏(<code>hermes mcp add my-codex --preset codex</code> هم اوکی است)؛ preset فقط پیش‌فرض‌های ‏<code>command</code>/<code>args</code> را می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> نحوهٔ ثبت ابزارهای MCP توسط هرمس</h2>
+<p>هرمس به ابزارهای MCP پیشوند می‌زند تا با نام‌های داخلی تداخل نکنند:</p>
+<div class="codebox"><pre><code>mcp_&lt;server_name&gt;_&lt;tool_name&gt;</code></pre></div>
+<p>مثال‌ها:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>سرور</th><th>ابزار MCP</th><th>نام ثبت‌شده</th></tr></thead>
+  <tbody>
+    <tr><td><code>filesystem</code></td><td><code>read_file</code></td><td><code>mcp_filesystem_read_file</code></td></tr>
+    <tr><td><code>github</code></td><td><code>create-issue</code></td><td><code>mcp_github_create_issue</code></td></tr>
+    <tr><td><code>my-api</code></td><td><code>query.data</code></td><td><code>mcp_my_api_query_data</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>در عمل معمولاً لازم نیست نام پیشونددار را دستی صدا بزنید — هرمس ابزار را می‌بیند و حین استدلال عادی انتخابش می‌کند.</p>
+
+<h3>پاکسازی نتیجهٔ ابزار و ‏<code>_meta</code></h3>
+<p>دو رفتار روی هر نتیجهٔ ابزار MCP قبل از دید مدل اعمال می‌شود:</p>
+<ul>
+  <li><strong>کاراکترهای TAG یونیکد نامرئی حذف می‌شوند.</strong> کاراکترهای بازهٔ U+E0000–U+E007F در ترمینال‌ها و UIهای چت هیچ رندر نمی‌شوند ولی کاملاً برای مدل مرئی‌اند — یک کلاسیک کانال قاچاق prompt-injection برای سرور مخرب یا آلوده. هرمس آنها را از نتایج ابزار، محتوای منابع و توصیفات ابزار حذف می‌کند. دنباله‌های تگ ایموجی مشروع ‏(پرچم‌های منطقه‌ای مثل 🏴󠁧󠁢󠁳󠁣󠁴󠁿) حفظ می‌شوند.</li>
+  <li><strong>‏<code>_meta</code> فروشنده سطح پیدا می‌کند؛ کلیدهای رزروشدهٔ پروتکل نه.</strong> وقتی سروری mapping ‏<code>_meta</code>ای به نتیجهٔ ابزار الصاق کند ‏(namespace های فروشنده مثل ‏<code>com.example/handoff</code>)، هرمس آن را همراه محتوای نتیجه به مدل می‌دهد. کلیدهای زیر پیشوندهای رزروشدهٔ پروتکل — برچسب ‏<code>modelcontextprotocol</code> یا ‏<code>mcp</code> به‌دنبال‌شده با برچسب دیگر، مثل ‏<code>modelcontextprotocol.io/...</code> یا ‏<code>tools.mcp.com/...</code> — دور ریخته می‌شوند مطابق قواعد نام‌کلید مشخصات MCP. اگر چیزی رو-به-مدل باقی نماند، فیلد _meta کلاً حذف می‌شود.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> ابزارهای کاربردی MCP</h2>
+<p>وقتی پشتیبانی شود، هرمس حول منابع و پرامپت‌های MCP هم ابزارهای کاربردی ثبت می‌کند:</p>
+<ul>
+  <li>‏<code>list_resources</code></li>
+  <li>‏<code>read_resource</code></li>
+  <li>‏<code>list_prompts</code></li>
+  <li>‏<code>get_prompt</code></li>
+</ul>
+<p>این‌ها به‌ازای هر سرور با همان الگوی پیشوند ثبت می‌شوند، مثلاً:</p>
+<ul>
+  <li>‏<code>mcp_github_list_resources</code></li>
+  <li>‏<code>mcp_github_get_prompt</code></li>
+</ul>
+<h3>مهم</h3>
+<p>این ابزارهای کاربردی الان قابلیت-آگاه‌اند:</p>
+<ul>
+  <li>هرمس wrapper های منابع را فقط اگر نشست MCP واقعاً از عملیات منابع پشتیبانی کند ثبت می‌کند</li>
+  <li>هرمس wrapper های پرامپت را فقط اگر نشست MCP واقعاً از عملیات پرامپت پشتیبانی کند ثبت می‌کند</li>
+</ul>
+<p>پس سروری که ابزارهای قابل‌فراخوانی دارد ولی منبع/پرامپت ندارد آن wrapper های اضافه را نمی‌گیرد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> فیلتر به‌ازای-سرور</h2>
+<p>می‌توانید کنترل کنید هر سرور MCP چه ابزارهایی به هرمس بدهد و مدیریت دقیقی روی namespace ابزارتان داشته باشید.</p>
+
+<h3>غیرفعال‌سازی کامل یک سرور</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  legacy:
+    url: "https://mcp.legacy.internal"
+    enabled: false</code></pre>
+</div>
+<p>با ‏<code>enabled: false</code> هرمس سرور را کامل رد و حتی تلاش به اتصال هم نمی‌کند.</p>
+
+<h3>لیست‌سفید ابزارهای سرور</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  github:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "***"
+    tools:
+      include: [create_issue, list_issues]</code></pre>
+</div>
+<p>فقط همان ابزارهای سرور MCP ثبت می‌شوند.</p>
+
+<h3>لیست‌سیاه ابزارهای سرور</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  stripe:
+    url: "https://mcp.stripe.com"
+    tools:
+      exclude: [delete_customer]</code></pre>
+</div>
+<p>همهٔ ابزارهای سرور به‌جز موارد حذف‌شده ثبت می‌شوند.</p>
+
+<h3>الگوهای Glob</h3>
+<p>هر دو فهرست در کنار نام‌های دقیق الگوهای glob سبک fnmatch هم می‌پذیرند — برای سطوح تختِ عظیم مثل API ‏MCP کلادفلر ‏(<code>?codemode=false</code>، حدود ۳٬۳۰۰ ابزار) که حذف نواحی محصول یکی‌یکی غیرعملی است ضروری است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  cloudflare:
+    url: "https://mcp.cloudflare.com/mcp?codemode=false"
+    auth: oauth
+    tools:
+      exclude: ["*_radar_*", "*_accounts_dlp_*", "*_zones_web3_*"]</code></pre>
+</div>
+<p>ورودی‌های بدون متاکاراکتر glob ‏(<code>*</code>، ‏<code>?</code>، ‏<code>[</code>) دقیق تطبیق می‌یابند — ‏<code>docs</code> فقط ابزارِ نام‌دار docs را حذف می‌کند هرگز ‏docs_search را نه.</p>
+
+<h3>قاعدهٔ تقدم</h3>
+<p>اگر هر دو موجود باشند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>tools:
+  include: [create_issue]
+  exclude: [create_issue, delete_issue]</code></pre>
+</div>
+<p>‏<code>include</code> برنده است.</p>
+
+<h3>فیلتر ابزارهای کاربردی هم</h3>
+<p>می‌توانید wrapper های کاربردیِ افزوده‌شده توسط هرمس را جداگانه هم خاموش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  docs:
+    url: "https://mcp.docs.example.com"
+    tools:
+      prompts: false
+      resources: false</code></pre>
+</div>
+<p>یعنی:</p>
+<ul>
+  <li>‏<code>tools.resources: false</code> مقدار ‏<code>list_resources</code> و ‏<code>read_resource</code> را خاموش می‌کند</li>
+  <li>‏<code>tools.prompts: false</code> مقدار ‏<code>list_prompts</code> و ‏<code>get_prompt</code> را خاموش می‌کند</li>
+</ul>
+
+<h3>مثال کامل</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  github:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "***"
+    tools:
+      include: [create_issue, list_issues, search_code]
+      prompts: false
+
+  stripe:
+    url: "https://mcp.stripe.com"
+    headers:
+      Authorization: "Bearer ***"
+    tools:
+      exclude: [delete_customer]
+      resources: false
+
+  legacy:
+    url: "https://mcp.legacy.internal"
+    enabled: false</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> اگر همه‌چیز فیلتر شود چه می‌شود؟</h2>
+<p>اگر پیکربندی‌تان همهٔ ابزارهای قابل‌فراخوانی را فیلتر و همهٔ کاربردی‌های پشتیبانی‌شده را غیرفعال یا حذف کند، هرمس برای آن سرور تول‌ست runtime خالی نمی‌سازد.</p>
+<p>این فهرست ابزار را تمیز نگه می‌دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> رفتار runtime</h2>
+<h3>زمان کشف</h3>
+<p>هرمس سرورهای MCP را هنگام شروع کشف و ابزارشان را در رجیستری عادی ابزار ثبت می‌کند.</p>
+
+<h3>کشف داینامیک ابزار</h3>
+<p>سرورهای MCP می‌توانند با فرستادن اعلان ‏<code>notifications/tools/list_changed</code> به هرمس خبر دهند ابزارهای در دسترسشان در runtime عوض شده. هرمس با دریافت این اعلان خودکار فهرست ابزار سرور را دوباره می‌گیرد و رجیستری را به‌روز می‌کند — بدون ‏<code>/reload-mcp</code> دستی.</p>
+<p>برای سرورهای MCP‌ای که قابلیت‌هایشان داینامیک عوض می‌شود مفید است ‏(مثل سروری که با لود اسکیمای جدید دیتابیس ابزار اضافه یا وقتی سرویسی آفلاین می‌شود ابزار حذف می‌کند).</p>
+<p>refresh قفل-محافظت‌شده است تا اعلان‌های رگباری از یک سرور باعث refresh های هم‌پوشان نشوند. اعلان‌های تغییر پرامپت و منبع ‏(<code>prompts/list_changed</code>، ‏<code>resources/list_changed</code>) دریافت ولی هنوز عملیاتی نمی‌شوند.</p>
+
+<h3>بارگذاری مجدد</h3>
+<p>اگر پیکربندی MCP را عوض کردید از این استفاده کنید:</p>
+<div class="codebox"><pre><code>/reload-mcp</code></pre></div>
+<p>سرورهای MCP را از پیکربندی reload و فهرست ابزارهای موجود را refresh می‌کند. برای تغییرات ابزار runtime که خود سرور push می‌کند «کشف داینامیک ابزار» بالاتر را ببینید.</p>
+
+<h3>تول‌ست‌ها</h3>
+<p>هر سرور MCP پیکربندی‌شده وقتی دست‌کم یک ابزار ثبت‌شده بیاورد یک تول‌ست runtime هم می‌سازد:</p>
+<div class="codebox"><pre><code>mcp-&lt;server&gt;</code></pre></div>
+<p>این سرورهای MCP را در سطح تول‌ست راحت‌تر قابل-استدلال می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> مدل امنیت</h2>
+<h3>فیلتر env مربوط به stdio</h3>
+<p>برای سرورهای stdio هرمس کل محیط شل شما را کورکورانه عبور نمی‌دهد.</p>
+<p>فقط ‏<code>env</code> صریحاً پیکربندی‌شده به‌اضافهٔ یک baseline امن عبور می‌کند. این نشت تصادفی رمزها را کم می‌کند.</p>
+<h3>کنترل قرارگرفتن-در-معرض در سطح پیکربندی</h3>
+<p>پشتیبانی فیلتر جدید یک کنترل امنیتی هم هست:</p>
+<ul>
+  <li>غیرفعال‌کردن ابزارهای خطرناکی که نمی‌خواهید مدل ببیند</li>
+  <li>قرار دادن فقط یک لیست‌سفید حداقلی برای سرور حساس</li>
+  <li>خاموش‌کردن wrapper های منبع/پرامپت وقتی نمی‌خواهید آن سطح در معرض باشد</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> نمونه‌های کاربرد</h2>
+
+<h3>سرور گیت‌هاب با سطح حداقلی مدیریت issue</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  github:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "***"
+    tools:
+      include: [list_issues, create_issue, update_issue]
+      prompts: false
+      resources: false</code></pre>
+</div>
+<p>این‌طور استفاده کنید:</p>
+<div class="codebox"><pre><code>Show me open issues labeled bug, then draft a new issue for the flaky MCP reconnection behavior.</code></pre></div>
+
+<h3>سرور Stripe با حذف اکشن‌های خطرناک</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  stripe:
+    url: "https://mcp.stripe.com"
+    headers:
+      Authorization: "Bearer ***"
+    tools:
+      exclude: [delete_customer, refund_payment]</code></pre>
+</div>
+<p>این‌طور استفاده کنید:</p>
+<div class="codebox"><pre><code>Look up the last 10 failed payments and summarize common failure reasons.</code></pre></div>
+
+<h3>سرور filesystem برای یک ریشهٔ پروژه واحد</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  project_fs:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/my-project"]</code></pre>
+</div>
+<p>این‌طور استفاده کنید:</p>
+<div class="codebox"><pre><code>Inspect the project root and explain the directory layout.</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> عیب‌یابی</h2>
+
+<h3>سرور MCP وصل نمی‌شود</h3>
+<p>چک کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># تأیید نصب بودن وابستگی‌های MCP (در نصب استاندارد هست)
+cd ~/.hermes/hermes-agent && uv pip install -e ".[mcp]"
+
+node --version
+npx --version</code></pre>
+</div>
+<p>سپس پیکربندی‌تان را تأیید و هرمس را ری‌استارت کنید.</p>
+
+<h3>ابزارها ظاهر نمی‌شوند</h3>
+<p>علل ممکن:</p>
+<ul>
+  <li>سرور اتصالش شکست خورده</li>
+  <li>کشف شکست خورده</li>
+  <li>پیکربندی فیلترتان ابزارها را حذف کرده</li>
+  <li>قابلیت کاربردی روی آن سرور وجود ندارد</li>
+  <li>سرور با ‏<code>enabled: false</code> غیرفعال شده</li>
+</ul>
+<p>اگر عمداً فیلتر می‌کنید، این موردانتظار است.</p>
+
+<h3>چرا wrapper های منبع یا پرامپت ظاهر نشدند؟</h3>
+<p>چون هرمس الان آن wrapper ها را فقط وقتی هر دو درست است ثبت می‌کند:<br>
+۱. پیکربندی‌تان اجازه‌شان دهد<br>
+۲. نشست سرور واقعاً قابلیت را پشتیبانی کند</p>
+<p>این عمدی است و فهرست ابزار را صادق نگه می‌دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> فراخوانی‌های موازی ابزار</h2>
+<p>به‌طور پیش‌فرض ابزارهای MCP متوالی اجرا می‌شوند — یکی در لحظه. اگر سرور MCP شما ابزارهایی دارد که اجرای هم‌زمان‌شان امن است ‏(مثل پرس‌وجوهای فقط-خواندنی، فراخوانی‌های API مستقل)، می‌توانید اجرای موازی را انتخاب کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  docs:
+    command: "docs-server"
+    supports_parallel_tool_calls: true</code></pre>
+</div>
+<p>وقتی ‏<code>supports_parallel_tool_calls</code> برابر ‏<code>true</code> باشد، هرمس می‌تواند چند ابزار از آن سرور را هم‌زمان داخل یک batch فراخوانی-ابزار اجرا کند، درست مثل ابزارهای داخلی فقط-خواندنی ‏(web_search، ‏read_file و...).</p>
+<div class="callout caution">
+  <div class="callout-title">⚠️ توجه</div>
+  <p>فقط برای سرورهای MCP‌ای که ابزارشان اجرای هم‌زمان‌شان امن است فراخوانی موازی را فعال کنید. اگر ابزارها وضعیت، فایل، دیتابیس یا منابع خارجی مشترک را بخوانند و بنویسند، قبل از فعال‌کردن این تنظیم شرایط مسابقهٔ خواندن/نوشتن را بررسی کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۷</span> پشتیبانی Sampling مربوط به MCP</h2>
+<p>سرورهای MCP می‌توانند inference ‏LLM را از طریق پروتکل ‏<code>sampling/createMessage</code> از هرمس درخواست کنند. این اجازه می‌دهد سرور MCP از هرمس بخواهد به‌نیابت از او متن تولید کند — برای سرورهایی که قابلیت LLM می‌خواهند ولی دسترسی مدل خودشان ندارند مفید است.</p>
+<p>‏Sampling برای همهٔ سرورهای MCP <strong>پیش‌فرض فعال است</strong> ‏(وقتی SDK مربوط به MCP پشتیبانی کند). به‌ازای هر سرور زیر کلید <code>sampling</code> پیکربندی می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  my_server:
+    command: "my-mcp-server"
+    sampling:
+      enabled: true            # فعال‌سازی sampling (پیش‌فرض: true)
+      model: "openai/gpt-4o"  # override مدل برای درخواست‌های sampling (اختیاری)
+      max_tokens_cap: 4096     # حداکثر توکن به‌ازای هر پاسخ sampling (پیش‌فرض: 4096)
+      timeout: 30              # timeout به ثانیه به‌ازای هر درخواست (پیش‌فرض: 30)
+      max_rpm: 10              # سقف نرخ: حداکثر درخواست در دقیقه (پیش‌فرض: 10)
+      max_tool_rounds: 5       # حداکثر دورهای استفاده-از-ابزار در حلقه‌های sampling (پیش‌فرض: 5)
+      allowed_models: []       # لیست مجاز نام‌های مدلی که سرور حق درخواست دارد (خالی = هر)
+      log_level: "info"        # سطح لاگ حسابرسی: debug، info یا warning (پیش‌فرض: info)</code></pre>
+</div>
+<p>هندلر sampling شامل محدودکنندهٔ نرخ پنجره-لغزان، timeout های به‌ازای-درخواست و سقف عمق حلقه-ابزار برای پیشگیری از مصرف سرکش است. متریک‌ها ‏(تعداد درخواست، خطاها، توکن مصرفی) به‌ازای هر نمونه سرور ردیابی می‌شوند.</p>
+<p>برای خاموش‌کردن sampling برای یک سرور مشخص:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  untrusted_server:
+    url: "https://mcp.example.com"
+    sampling:
+      enabled: false</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۸</span> پشتیبانی Elicitation مربوط به MCP</h2>
+<p>سرورهای MCP می‌توانند وسط فراخوانی ابزار از طریق پروتکل ‏<code>elicitation/create</code> ‏(SDK پایتونی mcp ≥ 1.11.0) از کاربر ورودی ساختاریافته بخواهند. هرمس elicitation های <strong>حالت-فرم</strong> را از سطح تأیید موجودش مسیریابی می‌کند — پرامپت تعاملی در CLI/TUI یا دکمه‌های تأیید روی پلتفرم‌های گیت‌وی مثل تلگرام و اسلک — تا درخواست هرجا که نشست است به شما برسد. elicitation های <strong>حالت-URL</strong> ‏(جایی که سرور شما را به URL خارجی اشاره می‌دهد) به‌عنوان پشتیبانی‌نشده رد می‌شوند.</p>
+<p>‏Elicitation به‌ازای هر سرور <strong>پیش‌فرض فعال</strong> است. زیر کلید <code>elicitation</code> پیکربندی می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>mcp_servers:
+  my_server:
+    command: "my-mcp-server"
+    elicitation:
+      enabled: true    # پیش‌فرض: true
+      timeout: 300     # ثانیه انتظار برای جواب شما (پیش‌فرض: 300)</code></pre>
+</div>
+<p>timeout پیش‌فرض ۵ دقیقه‌ای آینهٔ پیش‌فرض تأیید گیت‌وی است تا کاربران سطوح ناهمگام قبل از تسلیم سرور وقت پاسخ داشته باشند. متریک‌های به‌ازای-سرور ‏(درخواست‌ها، پذیرفته‌شده، رد‌شده، خطاها) روی هندلر ردیابی می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۹</span> اجرای هرمس به‌عنوان سرور MCP</h2>
+<p>علاوه بر اتصال <strong>به</strong> سرورهای MCP، هرمس می‌تواند خودش هم <strong>باشد</strong> سرور MCP. این اجازه می‌دهد سایر ایجنت‌های توانمند-MCP ‏(Claude Code، ‏Cursor، ‏Codex یا هر کلاینت MCP) از قابلیت‌های پیام‌رسانی هرمس استفاده کنند — فهرست گفتگوها، خواندن تاریخچه پیام و ارسال پیام بین همهٔ پلتفرم‌های متصل شما.</p>
+
+<h3>کِی از این استفاده کنیم</h3>
+<ul>
+  <li>می‌خواهید Claude Code، ‏Cursor یا ایجنت کدنویس دیگری از طریق هرمس پیام‌های تلگرام/دیسکورد/اسلک را بفرستد و بخواند</li>
+  <li>یک سرور MCP واحد می‌خواهید که یک‌جا به همهٔ پلتفرم‌های پیام‌رسانی متصل هرمس پل بزند</li>
+  <li>قبلاً یک گیت‌وی هرمس در حال اجرا با پلتفرم‌های متصل دارید</li>
+</ul>
+
+<h3>شروع سریع</h3>
+<div class="codebox"><pre><code>hermes mcp serve</code></pre></div>
+<p>این یک سرور MCP از نوع stdio شروع می‌کند. مدیریت چرخهٔ حیات پروسه با کلاینت MCP است نه شما.</p>
+
+<h3>پیکربندی کلاینت MCP</h3>
+<p>هرمس را به پیکربندی کلاینت MCP اضافه کنید. مثلاً در ‏<code>~/.claude/claude_desktop_config.json</code> مربوط به Claude Code:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{
+  "mcpServers": {
+    "hermes": {
+      "command": "hermes",
+      "args": ["mcp", "serve"]
+    }
+  }
+}</code></pre>
+</div>
+<p>یا اگر هرمس را در مکان خاصی نصب کرده‌اید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{
+  "mcpServers": {
+    "hermes": {
+      "command": "/home/user/.hermes/hermes-agent/venv/bin/hermes",
+      "args": ["mcp", "serve"]
+    }
+  }
+}</code></pre>
+</div>
+
+<h3>ابزارهای موجود</h3>
+<p>سرور MCP ‏۱۰ ابزار expose می‌کند، مطابق سطح پل-کانال OpenClaw به‌اضافهٔ مرورگر کانال مخصوص هرمس:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ابزار</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>conversations_list</code></td><td>فهرست گفتگوهای فعال پیام‌رسانی. فیلتر بر اساس پلتفرم یا جست‌وجو با نام.</td></tr>
+    <tr><td><code>conversation_get</code></td><td>اطلاعات تفصیلی یک گفتگو با session key.</td></tr>
+    <tr><td><code>messages_read</code></td><td>خواندن تاریخچهٔ اخیر پیام‌های یک گفتگو.</td></tr>
+    <tr><td><code>attachments_fetch</code></td><td>استخراج پیوست‌های غیر-متنی ‏(تصاویر، رسانه) از یک پیام مشخص.</td></tr>
+    <tr><td><code>events_poll</code></td><td>Poll برای رویدادهای گفتگوی جدید از یک موقعیت cursor.</td></tr>
+    <tr><td><code>events_wait</code></td><td>Long-poll / انتظار تا رسیدن رویداد بعدی ‏(نزدیک-به-بلادرنگ).</td></tr>
+    <tr><td><code>messages_send</code></td><td>ارسال پیام از طریق یک پلتفرم ‏(مثل ‏<code>telegram:123456</code>، ‏<code>discord:#general</code>).</td></tr>
+    <tr><td><code>channels_list</code></td><td>فهرست اهداف پیام‌رسانی موجود بین همهٔ پلتفرم‌ها.</td></tr>
+    <tr><td><code>permissions_list_open</code></td><td>فهرست درخواست‌های تأیید در انتظار مشاهده‌شده در این نشست پل.</td></tr>
+    <tr><td><code>permissions_respond</code></td><td>اجازه یا رد یک درخواست تأیید در انتظار.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>سیستم رویداد</h3>
+<p>سرور MCP شامل پل رویداد زنده‌ای است که دیتابیس نشست هرمس را برای پیام‌های جدید poll می‌کند. این به کلاینت‌های MCP آگاهی تقریباً-بلادرنگ از گفتگوهای ورودی می‌دهد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Poll for new events (non-blocking)
+events_poll(after_cursor=0)
+
+# Wait for next event (blocks up to timeout)
+events_wait(after_cursor=42, timeout_ms=30000)</code></pre>
+</div>
+<p>انواع رویداد: ‏<code>message</code>، ‏<code>approval_requested</code>، ‏<code>approval_resolved</code></p>
+<p>صف رویداد درون-حافظه است و با اتصال پل شروع می‌شود. پیام‌های قدیمی‌تر از طریق ‏<code>messages_read</code> در دسترس‌اند.</p>
+
+<h3>گزینه‌ها</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes mcp serve              # حالت عادی
+hermes mcp serve --verbose    # لاگ دیباگ روی stderr</code></pre>
+</div>
+
+<h3>نحوهٔ کار</h3>
+<p>سرور MCP دادهٔ گفتگو را مستقیم از مخزن نشست هرمس می‌خواند — ‏<code>~/.hermes/state.db</code> منبع اصلی است و ‏<code>sessions.json</code> فقط fallback قدیمی. یک thread پس‌زمینه دیتابیس را برای پیام‌های جدید poll و یک صف رویداد درون-حافظه نگه می‌دارد. برای ارسال پیام از همان موتور ارسال داخلی ‏(<code>tools/send_message_tool.py</code>) استفاده می‌کند که تحویل کرون و CLI ‏<code>hermes send</code> را قدرت می‌دهد.</p>
+<p>گیت‌وی برای عملیات خواندن ‏(فهرست گفتگوها، خواندن تاریخچه، poll رویدادها) لازم نیست اجرا باشد. برای عملیات ارسال <strong>لازم است</strong> چون آداپتورهای پلتفرم به اتصالات فعال نیاز دارند.</p>
+
+<h3>محدودیت‌های فعلی</h3>
+<ul>
+  <li>‏<code>hermes mcp serve</code> داخلی امروز سرور MCP <strong>فقط-stdio</strong> expose می‌کند. اگر سرور MCP ‏HTTP لازم دارید یک آداپتور جدا اجرا کنید — یا خیلی رایج‌تر، سمت <strong>کلاینت</strong> MCP هرمس را استفاده کنید که هم استdio هم HTTP صحبت می‌کند ‏(<code>url</code> + ‏<code>headers</code> در ‏mcp_servers.yaml/config.yaml؛ سرورهای HTTP بالا را ببینید).</li>
+  <li>‏Poll رویداد با فواصل ~۲۰۰ میلی‌ثانیه از طریق polling دیتابیس بهینه‌شده با mtime ‏(وقتی فایل‌ها تغییری نکرده‌اند کار را رد می‌کند)</li>
+  <li>هنوز پروتکل اعلان push ‏<code>claude/channel</code> وجود ندارد</li>
+  <li>ارسال فقط-متنی ‏(بدون ارسال رسانه/پیوست از طریق messages_send)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲۰</span> مستندات مرتبط</h2>
+<ul>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/guides/use-mcp-with-hermes" target="_blank" rel="noopener">استفاده از MCP با هرمس</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/reference/cli-commands" target="_blank" rel="noopener">فرمان‌های CLI</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/reference/slash-commands" target="_blank" rel="noopener">فرمان‌های اسلش</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/reference/faq" target="_blank" rel="noopener">سؤالات متداول</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="plugins.html"><span class="dir">→ قبلی</span><span class="ttl">افزونه‌ها ‏(Plugins)</span></a>
+  <a class="next" href="cron.html"><span class="dir">بعدی ←</span><span class="ttl">کارهای زمان‌بندی‌شده ‏(کرون)</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp" target="_blank" rel="noopener">MCP (Model Context Protocol)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matrix — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/matrix" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>Matrix</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی Matrix</h1>
+<p>هرمس ایجنت با Matrix، پروتکل پیام‌رسانی باز و فدرال، یکپارچه می‌شود. Matrix اجازه می‌دهد هوم‌سرور خودتان را اجرا کنید یا از عمومی مثل matrix.org استفاده کنید — به هر حال کنترل ارتباطات با شماست. بات از طریق SDK پایتونی ‏<code>mautrix</code> وصل می‌شود، پیام‌ها را از خط‌لولهٔ هرمس ایجنت ‏(شامل استفاده از ابزار، حافظه و استدلال) عبور می‌دهد و در لحظه پاسخ می‌دهد. متن، پیوست فایل، تصویر، صوت، ویدیو و رمزنگاری سرتاسری اختیاری ‏(E2EE) را پشتیبانی می‌کند.</p>
+<p>هرمس با هر هوم‌سرور Matrixی کار می‌کند — Synapse، ‏Conduit، ‏Dendrite یا matrix.org.</p>
+<p>پیش از راه‌اندازی، بخشی که بیشتر افراد می‌خواهند بدانند: رفتار هرمس پس از اتصال چگونه است.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> رفتار هرمس</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>زمینه</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><strong>پیام‌های خصوصی ‏(DM)</strong></td><td>هرمس به همهٔ پیام‌ها پاسخ می‌دهد؛ نیازی به منشن نیست. هر DM نشست مستقل دارد. برای شروع ترد وقتی در DM منشن شود ‏<code>MATRIX_DM_MENTION_THREADS=true</code> را بگذارید.</td></tr>
+    <tr><td><strong>اتاق‌ها</strong></td><td>به‌طور پیش‌فرض هرمس برای پاسخ منشن لازم دارد. برای اتاق‌های پاسخ-آزاد ‏<code>MATRIX_REQUIRE_MENTION=false</code> کنید یا شناسهٔ اتاق‌ها را به ‏<code>MATRIX_FREE_RESPONSE_ROOMS</code> بیفزایید. دعوت‌های اتاق خودکار پذیرفته می‌شوند.</td></tr>
+    <tr><td><strong>تردها</strong></td><td>هرمس تردهای Matrix ‏(MSC3440) را پشتیبانی می‌کند. اگر داخل تردی ریپلای بدهید، هرمس زمینهٔ ترد را از خط‌زمان اصلی اتاق ایزوله نگه می‌دارد. تردهایی که بات قبلاً در آن‌ها بوده منشن نمی‌خواهند.</td></tr>
+    <tr><td><strong>ساخت خودکار ترد</strong></td><td>به‌طور پیش‌فرض هرمس برای هر پیامی که در یک اتاق به آن پاسخ می‌دهد ترد می‌سازد تا گفتگوها ایزوله بمانند. با ‏<code>MATRIX_AUTO_THREAD=false</code> خاموشش کنید. برای ساخت خودکار ترد برای DM ها هم ‏<code>MATRIX_DM_AUTO_THREAD=true</code> ‏(پیش‌فرض false)؛ این جدا از ‏<code>MATRIX_DM_MENTION_THREADS</code> است که فقط وقتی در DM منشن شود ترد می‌سازد.</td></tr>
+    <tr><td><strong>فرمان‌ها</strong></td><td>هرمس ‏<code>/commands</code> عادی را وقتی کلاینت Matrix شما ارسالشان کند می‌پذیرد. اگر کلاینت‌تان <code>/</code> را برای فرمان‌های محلی رزرو کرده، به‌جایش از ‏<code>!commands</code> استفاده کنید؛ هرمس نام‌های جایگزین شناخته‌شدهٔ ‏<code>!command</code> را به ‏<code>/command</code> نرمال می‌کند.</td></tr>
+    <tr><td><strong>کنترل‌های تعاملی</strong></td><td>تأیید فرمان خطرناک و انتخاب <code>/model</code> می‌توانند از واکنش‌های Matrix استفاده کنند. واکنش‌های تأیید را می‌توان فقط به کاربرِ درخواست‌کننده محدود کرد.</td></tr>
+    <tr><td><strong>تفکر و فعالیت ابزار</strong></td><td>‏Matrix وقتی پیشرفت گیت‌وی فعال باشد از پنل‌های تفکر/فعالیت-ابزار تردی و قابل‌ویرایش استفاده می‌کند تا به‌روزرسانی‌ها خط‌زمان اصلی اتاق را سیل‌بار نکنند.</td></tr>
+    <tr><td><strong>اتاق‌های مشترک چندکاربره</strong></td><td>به‌طور پیش‌فرض هرمس تاریخچهٔ نشست را داخل اتاق به‌ازای هر کاربر جدا می‌کند. دو نفر که در یک اتاق حرف می‌زنند مگر صریحاً غیرفعالش کنید رونویسی مشترک ندارند.</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>بات هنگام دعوت خودکار به اتاق‌ها می‌پیوندد. کافی است کاربر Matrix بات را به هر اتاقی دعوت کنید؛ می‌پیوندد و شروع به پاسخ می‌کند.</p>
+</div>
+
+<h3>ماتریس قابلیت‌ها</h3>
+<p>این جدول توسط اعلان قابلیت آداپتور Matrix و پوشش تست Matrix پشتیبانی می‌شود. E2EE حالت‌محور است چون استقرارها انتخاب می‌کنند اتاق‌های رمزنگاری‌شده خاموش، فرصت‌طلبانه یا الزامی باشند.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>قابلیت</th><th>Matrix</th></tr></thead>
+  <tbody>
+    <tr><td>متن</td><td>بله</td></tr>
+    <tr><td>تردها</td><td>بله</td></tr>
+    <tr><td>واکنش‌ها</td><td>بله</td></tr>
+    <tr><td>تأییدها</td><td>بله</td></tr>
+    <tr><td>انتخاب‌گر مدل</td><td>بله</td></tr>
+    <tr><td>پنل‌های تفکر</td><td>بله</td></tr>
+    <tr><td>تصاویر</td><td>بله</td></tr>
+    <tr><td>چند تصویر</td><td>بله</td></tr>
+    <tr><td>فایل‌ها</td><td>بله</td></tr>
+    <tr><td>صوت / پیام صوتی</td><td>بله</td></tr>
+    <tr><td>ویدیو</td><td>بله</td></tr>
+    <tr><td>E2EE</td><td>خاموش / اختیاری / الزامی</td></tr>
+    <tr><td>تشخیص‌ها</td><td>بله</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>مدل نشست در Matrix</h3>
+<p>به‌طور پیش‌فرض:</p>
+<ul>
+  <li>هر DM نشست مستقل خودش را دارد</li>
+  <li>هر ترد فضای‌نام نشست خودش را دارد</li>
+  <li>هر کاربر در یک اتاق مشترک، داخل همان اتاق نشست خودش را دارد</li>
+</ul>
+<p>این با config.yaml کنترل می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>group_sessions_per_user: true</code></pre>
+</div>
+<p>فقط اگر صریحاً یک گفتگوی مشترک برای کل اتاق می‌خواهید <code>false</code> کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>group_sessions_per_user: false</code></pre>
+</div>
+<p>نشست مشترک برای اتاق مشارکتی مفید است ولی یعنی:</p>
+<ul>
+  <li>کاربران در رشد زمینه و هزینهٔ توکن شریک‌اند</li>
+  <li>یک کار سنگین-ابزارِ طولانیِ یک نفر می‌تواند زمینهٔ بقیه را متورم کند</li>
+  <li>اجرای در-جریانِ یک نفر می‌تواند پیام بعدیِ فرد دیگری در همان اتاق را قطع کند</li>
+</ul>
+
+<h3>پیکربندی منشن و تردینگ</h3>
+<p>رفتار منشن و ترد خودکار را با env یا config.yaml تنظیم کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>matrix:
+  require_mention: true           # منشن در اتاق‌ها لازم باشد (پیش‌فرض: true)
+  allowed_users:                  # کاربران Matrix مجازِ فعال‌کردن نوبت ایجنت
+    - "@alice:matrix.org"
+  allowed_rooms:                  # اتاق‌های مجازِ فعال‌کردن نوبت ایجنت
+    - "!abc123:matrix.org"
+  free_response_rooms:            # اتاق‌های معاف از شرط منشن
+    - "!abc123:matrix.org"
+  ignore_user_patterns:           # کاربران شبح پل/appservice برای نادیده‌گرفتن
+    - "^@telegram_"
+    - "^@whatsapp_"
+  process_notices: false          # نادیده گرفتن m.notice به‌طور پیش‌فرض
+  session_scope: room             # auto|room|thread؛ room برای اتاق‌های پروژه توصیه می‌شود
+  auto_thread: true               # ساخت خودکار ترد برای پاسخ‌ها (پیش‌فرض: true)
+  dm_mention_threads: false       # ترد هنگام منشن در DM (پیش‌فرض: false)
+  max_message_length: 16000       # حجم chunk خروجی به کاراکتر (پیش‌فرض: 16000، بیشینه: 65535)</code></pre>
+</div>
+<p>یا با متغیرهای محیطی:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MATRIX_REQUIRE_MENTION=true
+MATRIX_ALLOWED_USERS=@alice:matrix.org
+MATRIX_ALLOWED_ROOMS=!abc123:matrix.org
+MATRIX_FREE_RESPONSE_ROOMS=!abc123:matrix.org,!def456:matrix.org
+MATRIX_IGNORE_USER_PATTERNS='^@telegram_,^@whatsapp_'
+MATRIX_PROCESS_NOTICES=false
+MATRIX_SESSION_SCOPE=room       # توصیه‌شده برای زمینهٔ پایدار اتاق پروژه
+MATRIX_AUTO_THREAD=true
+MATRIX_DM_MENTION_THREADS=false
+MATRIX_REACTIONS=true          # پیش‌فرض: true — واکنش ایموجی حین پردازش
+MATRIX_ALLOW_ROOM_MENTIONS=false</code></pre>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 خاموش‌کردن واکنش‌ها</div>
+  <p>‏<code>MATRIX_REACTIONS=false</code> واکنش‌های چرخه-حیات-پردازش ‏(👀/✅/❌) که بات روی پیام‌های ورودی می‌گذارد را خاموش می‌کند. برای اتاق‌هایی که رویدادهای واکنش پرسر و صدایند یا همهٔ کلاینت‌ها پشتیبانی نمی‌کنند مفید است.</p>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 منشن سراسر اتاق</div>
+  <p>هرمس برای شناسه‌های Matrix صریح مثل ‏<code>@alice:example.org</code> منشن ساختاریافتهٔ کاربر می‌فرستد. اعلان‌های سراسر-اتاقِ ‏<code>@room</code> پیش‌فرض غیرفعال‌اند؛ ‏<code>MATRIX_ALLOW_ROOM_MENTIONS=true</code> را فقط در اتاق‌هایی بگذارید که بات حق بیدارکردن همه را دارد.</p>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 یادداشت مهاجرت</div>
+  <p>اگر از نسخه‌ای بدون <code>MATRIX_REQUIRE_MENTION</code> ارتقا می‌دهید، بات قبلاً به همهٔ پیام‌های اتاق‌ها جواب می‌داد. برای حفظ آن رفتار ‏<code>MATRIX_REQUIRE_MENTION=false</code> بگذارید.</p>
+</div>
+
+<h3>ایزوله‌سازی اتاق پروژه</h3>
+<p>اگر همان بات Matrix را در چند اتاق پروژه استفاده می‌کنید، نشست‌های پایدارِ اتاق-محور را پیکربندی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MATRIX_SESSION_SCOPE=room
+MATRIX_AUTO_THREAD=false</code></pre>
+</div>
+<p>‏<code>MATRIX_SESSION_SCOPE</code> این‌ها را می‌پذیرد:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>دامنه</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>auto</code></td><td>پیش‌فرض سازگار رو به عقب. رفتار موجود ‏<code>MATRIX_AUTO_THREAD</code> تردهای مصنوعی را کنترل می‌کند.</td></tr>
+    <tr><td><code>room</code></td><td>پیام‌های بی‌ترد اتاق در یک نشست پایدار اتاق می‌مانند. تردهای واقعی Matrix همچنان از ریشهٔ ترد خودشان استفاده می‌کنند.</td></tr>
+    <tr><td><code>thread</code></td><td>پیام‌های بی‌ترد اتاق از شناسهٔ رویداد تریگر یک ترد/نشست مصنوعی می‌سازند.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>هرمس الان نام فعلی اتاق Matrix، شناسهٔ اتاق، موضوع، شناسهٔ پیام و یک یادداشت مرز-اتاق Matrix را داخل پرامپت ایجنت می‌گذارد. ‏<code>/status</code> هم دامنهٔ فعلی اتاق/نشست Matrix را نشان می‌دهد و ‏<code>/resume</code> مگر صریحاً ‏<code>/resume --cross-room &lt;session name&gt;</code> بزنید، نشست نام‌دار اتاق دیگری را بی‌صدا ازسر نمی‌گیرد.</p>
+<p>‏<code>MATRIX_SESSION_SCOPE=room</code> لاین اتاق/ترد را کنترل می‌کند. تنظیم موجود <code>group_sessions_per_user</code> همچنان تعیین می‌کند کاربران داخل آن اتاق لاین را شریک شوند یا نه. با ‏<code>true</code> ‏(پیش‌فرض) آلیس و باب نشست‌های جدا Project B می‌گیرند. با ‏<code>false</code> اتاق یک رونویسی مشترک Project B دارد.</p>
+<p>این راهنما کل فرایند راه‌اندازی را قدم‌به‌قدم توضیح می‌دهد — از ساخت حساب بات تا ارسال اولین پیام.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: ساخت حساب بات</h2>
+<p>برای بات به یک حساب کاربری Matrix نیاز دارید. چند راه دارید:</p>
+
+<h3>گزینهٔ A: ثبت‌نام روی هوم‌سرور خودتان ‏(توصیه‌شده)</h3>
+<p>اگر هوم‌سرور خودتان را اجرا می‌کنید ‏(Synapse، ‏Conduit، ‏Dendrite):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># مثال Synapse
+register_new_matrix_user -c /etc/synapse/homeserver.yaml http://localhost:8008</code></pre>
+</div>
+<p>یوزرنیمی مثل <code>hermes</code> انتخاب کنید — شناسهٔ کامل کاربر می‌شود ‏<code>@hermes:your-server.org</code>.</p>
+
+<h3>گزینهٔ B: استفاده از matrix.org یا هوم‌سرور عمومی دیگر</h3>
+<ol>
+  <li>به <a href="https://app.element.io" target="_blank" rel="noopener">Element Web</a> بروید و حساب جدید بسازید.</li>
+  <li>یوزرنیمی برای بات‌تان انتخاب کنید ‏(مثل <code>hermes-bot</code>).</li>
+</ol>
+
+<h3>گزینهٔ C: استفاده از حسابتان</h3>
+<p>می‌توانید هرمس را به‌عنوان کاربر خودتان اجرا کنید. یعنی بات به‌عنوان شما پست می‌کند — برای دستیارهای شخصی مفید است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: دریافت توکن دسترسی</h2>
+<p>هرمس برای احراز نزد هوم‌سرور به access token نیاز دارد. دو گزینه دارید:</p>
+
+<h3>گزینهٔ A: توکن دسترسی ‏(توصیه‌شده)</h3>
+<p>قابل‌اعتمادترین راه گرفتن توکن:</p>
+<p><strong>از طریق Element:</strong></p>
+<ol>
+  <li>با حساب بات وارد <a href="https://app.element.io" target="_blank" rel="noopener">Element</a> شوید.</li>
+  <li>به <strong>Settings ← Help &amp; About</strong> بروید.</li>
+  <li>به پایین اسکرول و بخش <strong>Advanced</strong> را باز کنید — توکن دسترسی آنجاست.</li>
+  <li><strong>فوراً کپیش کنید.</strong></li>
+</ol>
+<p><strong>از طریق API:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl -X POST https://your-server/_matrix/client/v3/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "m.login.password",
+    "user": "@hermes:your-server.org",
+    "password": "your-password"
+  }'</code></pre>
+</div>
+<p>پاسخ فیلد <code>access_token</code> را دارد — کپیش کنید.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ توکن دسترسی را امن نگه دارید</div>
+  <p>توکن دسترسی دسترسی کامل به حساب Matrix بات می‌دهد. هرگز عمومی به اشتراکش نگذارید یا به گیت کامیتش نکنید. اگر لو رفت، با خروج‌دادن همهٔ نشست‌های آن کاربر ابطالش کنید.</p>
+</div>
+
+<h3>گزینهٔ B: ورود با رمز عبور</h3>
+<p>به‌جای توکن دسترسی می‌توانید شناسهٔ کاربر و رمز بات را بدهید. هرمس هنگام شروع خودکار لاگین می‌کند. ساده‌تر است ولی یعنی رمز در فایل <code>.env</code> ذخیره می‌شود.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MATRIX_USER_ID=@hermes:your-server.org
+MATRIX_PASSWORD=your-password</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۳: یافتن شناسهٔ کاربری Matrix</h2>
+<p>هرمس ایجنت از شناسهٔ کاربری Matrix شما برای کنترل اینکه چه کسی با بات تعامل کند استفاده می‌کند. شناسه‌های کاربر Matrix قالب <code>@username:server</code> دارند.</p>
+<p>برای یافتن شناسه‌تان:</p>
+<ol>
+  <li><a href="https://app.element.io" target="_blank" rel="noopener">Element</a> ‏(یا کلاینت دلخواه Matrix‌تان) را باز کنید.</li>
+  <li>روی آواتار کلیک ← <strong>Settings</strong>.</li>
+  <li>شناسهٔ کاربری بالای پروفایل نمایش داده می‌شود ‏(مثل <code>@alice:matrix.org</code>).</li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>شناسه‌های کاربر Matrix همیشه با <code>@</code> شروع و <code>:</code> به‌اضافهٔ نام سرور دارند. مثلاً: ‏<code>@alice:matrix.org</code>، ‏<code>@bob:your-server.com</code>.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۴: پیکربندی هرمس ایجنت</h2>
+<h3>گزینهٔ A: راه‌اندازی تعاملی ‏(توصیه‌شده)</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway setup</code></pre>
+</div>
+<p>هنگام پرسش <strong>Matrix</strong> را انتخاب کنید و URL هوم‌سرور، توکن دسترسی ‏(یا شناسهٔ کاربر + رمز) و شناسه‌های کاربر مجاز را بدهید.</p>
+
+<h3>گزینهٔ B: پیکربندی دستی</h3>
+<p>این‌ها را به <code>~/.hermes/.env</code> اضافه کنید:</p>
+<p><strong>با توکن دسترسی:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># الزامی
+MATRIX_HOMESERVER=https://matrix.example.org
+MATRIX_ACCESS_TOKEN=***
+
+# اختیاری: شناسهٔ کاربر (اگر حذف شود از توکن کشف می‌شود)
+# MATRIX_USER_ID=@hermes:matrix.example.org
+
+# امنیت: محدودکردن تعامل با بات
+MATRIX_ALLOWED_USERS=@alice:matrix.example.org
+
+# اختیاری: محدودکردن اتاق‌های تریگرکنندهٔ بات
+MATRIX_ALLOWED_ROOMS=!abc123:matrix.example.org
+
+# چند کاربر مجاز (با ویرگول)
+# MATRIX_ALLOWED_USERS=@alice:matrix.example.org,@bob:matrix.example.org</code></pre>
+</div>
+<p><strong>با ورود رمزی:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># الزامی
+MATRIX_HOMESERVER=https://matrix.example.org
+MATRIX_USER_ID=@hermes:matrix.example.org
+MATRIX_PASSWORD=***
+
+# امنیت
+MATRIX_ALLOWED_USERS=@alice:matrix.example.org</code></pre>
+</div>
+
+<h3>مقاوم‌سازی استقرار خصوصی</h3>
+<p>برای استقرارهای خصوصی Matrix هم لیست مجاز کاربر هم اتاق را بگذارید. اگر ‏<code>MATRIX_ALLOWED_USERS</code> تنظیم نباشد هر فرستنده‌ای که در اتاق عضوشده به بات برسد می‌تواند نوبت ایجنت تریگر کند. اگر ‏<code>MATRIX_ALLOWED_ROOMS</code> تنظیم نباشد هر اتاقی که بات به آن می‌پیوندد می‌تواند تریگر کند. یک استقرار قفل‌شده هر دو را می‌گذارد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MATRIX_ALLOWED_USERS=@alice:matrix.example.org,@bob:matrix.example.org
+MATRIX_ALLOWED_ROOMS=!ops:matrix.example.org,!dmroom:matrix.example.org</code></pre>
+</div>
+<p>استقرارهای پل و appservice به محافظت اضافی حلقه نیاز دارند. هرمس همیشه رویدادهای خودش، کاربران appservice-گونه‌ای که localpart شان با <code>_</code> شروع می‌شود، شناسه‌های رویداد تکراری، رویدادهای قدیمیِ شروع، رویدادهای جایگزینی ویرایش و رویدادهای <code>m.notice</code> را به‌طور پیش‌فرض نادیده می‌گیرد. وقتی پل شما قرارداد نام‌گذاری متفاوتی دارد الگوهای شبح مخصوص همان استقرار را اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MATRIX_IGNORE_USER_PATTERNS='^@telegram_,^@slack_,^@whatsapp_'</code></pre>
+</div>
+<p>‏notice ها را فقط وقتی یک گردش‌کار انسانیِ مطمئن واقعاً <code>m.notice</code> می‌فرستد فعال کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MATRIX_PROCESS_NOTICES=true</code></pre>
+</div>
+<p>اعلان‌های سراسر-اتاق خروجی پیش‌فرض خاموش‌اند. ‏<code>MATRIX_ALLOW_ROOM_MENTIONS=false</code> را نگه دارید مگر اینکه بات صریحاً حق بیدارکردن کل اتاق با <code>@room</code> را داشته باشد.</p>
+<p>payload های تشخیص و دیباگ توکن‌های دسترسی Matrix، کلیدهای بازیابی، شناسه‌های دستگاه و بدنهٔ پیام‌ها را سانسور می‌کنند. دانلود رسانه به URIهای محتوای ‏<code>mxc://</code> محدود و در عبور از ‏<code>MATRIX_MAX_MEDIA_BYTES</code> رد می‌شود. اتاق‌های فدرال و هوم‌سرورهای غیرقابل‌اعتماد را ورودی غیرقابل‌اعتماد تلقی کنید: لیست‌مجاز اتاق‌ها را تنگ نگه دارید، برای کار سنگین-ابزار DM یا اتاق خصوصی را ترجیح دهید و از مجوز دادن به شبح‌های پل یا عروسک‌های appservice به‌عنوان کاربر مجاز بپرهیزید.</p>
+<p>تنظیم رفتاری اختیاری در config.yaml:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>group_sessions_per_user: true</code></pre>
+</div>
+<ul>
+  <li>‏<code>group_sessions_per_user: true</code> زمینهٔ هر شرکت‌کننده را داخل اتاق‌های مشترک ایزوله نگه می‌دارد</li>
+</ul>
+
+<h3>شروع گیت‌وی</h3>
+<p>بعد از پیکربندی، گیت‌وی Matrix را شروع کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway</code></pre>
+</div>
+<p>بات باید ظرف چند ثانیه به هوم‌سرور وصل و sync را شروع کند. برای تست بهش پیام بدهید — DM یا در اتاقی که پیوسته.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>می‌توانید <code>hermes gateway</code> را در پس‌زمینه یا به‌صورت سرویس systemd برای عملکرد مداوم اجرا کنید. جزئیات در مستندات استقرار.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> رمزنگاری سرتاسری ‏(E2EE)</h2>
+<p>هرمس از رمزنگاری سرتاسری Matrix پشتیبانی می‌کند، پس می‌توانید در اتاق‌های رمزنگاری‌شده با بات چت کنید.</p>
+
+<h3>پیش‌نیازها</h3>
+<p>E2EE کتابخانهٔ ‏<code>mautrix</code> با extras رمزنگاری و کتابخانهٔ C ‏<code>libolm</code> می‌خواهد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># نصب mautrix با پشتیبانی E2EE
+pip install 'mautrix[encryption]'
+
+# یا نصب با extras هرمس
+cd ~/.hermes/hermes-agent && uv pip install -e ".[matrix]"</code></pre>
+</div>
+<p>همچنین <code>libolm</code> باید روی سیستم نصب باشد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Debian/Ubuntu
+sudo apt install libolm-dev
+
+# macOS
+brew install libolm
+
+# Fedora
+sudo dnf install libolm-devel</code></pre>
+</div>
+
+<h3>فعال‌سازی E2EE</h3>
+<p>به <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MATRIX_E2EE_MODE=required</code></pre>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>حالت</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>off</code></td><td>E2EE مقداردهی اولیه نمی‌شود.</td></tr>
+    <tr><td><code>optional</code></td><td>وقتی وابستگی‌ها موجودند E2EE را امتحان می‌کند ولی اگر رمزنگاری مقداردهی نشود اتاق‌های بدون رمز همچنان کار می‌کنند.</td></tr>
+    <tr><td><code>required</code></td><td>اگر وابستگی‌ها یا setup رمزنگاری موجود نباشد fail-closed می‌شود.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>حالت optional ممکن است وقتی setup رمزنگاری در دسترس نیست به عملکرد غیر-E2EE برگردد. حالت required به‌جای تنزل بی‌صدا fail-closed می‌شود. برای سازگاری رو به عقب، ‏<code>MATRIX_ENCRYPTION=true</code> همچنان رفتار E2EE الزامی را فعال می‌کند.</p>
+<p>وقتی E2EE فعال است هرمس:</p>
+<ul>
+  <li>کلیدهای رمزنگاری را در <code>~/.hermes/platforms/matrix/store/</code> ذخیره می‌کند ‏(نصب‌های قدیمی: <code>~/.hermes/matrix/store/</code>)</li>
+  <li>کلیدهای دستگاه را در اولین اتصال آپلود می‌کند</li>
+  <li>پیام‌های ورودی را خودکار decrypt و خروجی‌ها را encrypt می‌کند</li>
+  <li>هنگام دعوت به اتاق‌های رمزنگاری‌شده خودکار می‌پیوندد</li>
+</ul>
+
+<h3>ابزارها و کنترل‌های Matrix</h3>
+<p>در گفتگوهای Matrix هرمس ابزارهای مخصوص Matrix را به ایجنت می‌دهد:</p>
+<ul>
+  <li>‏<code>matrix_send_reaction</code></li>
+  <li>‏<code>matrix_redact_message</code></li>
+  <li>‏<code>matrix_create_room</code></li>
+  <li>‏<code>matrix_invite_user</code></li>
+  <li>‏<code>matrix_fetch_history</code></li>
+  <li>‏<code>matrix_set_presence</code></li>
+</ul>
+<p>این ابزارها به زمینه‌های Matrix محدودند و در تول‌ست‌های غیر-Matrix در دسترس نیستند. ابزارهای ادمین‌گونه پیش‌فرض خاموش‌اند: ‏redaction نیازمند ‏<code>MATRIX_TOOLS_ALLOW_REDACTION=true</code>، دعوت نیازمند ‏<code>MATRIX_TOOLS_ALLOW_INVITES=true</code> و ساخت اتاق نیازمند ‏<code>MATRIX_TOOLS_ALLOW_ROOM_CREATE=true</code>. ساخت اتاق عمومی همچنین ‏<code>MATRIX_ALLOW_PUBLIC_ROOMS=true</code> می‌خواهد. اگر ‏<code>MATRIX_ALLOWED_ROOMS</code> تنظیم باشد ابزارهای Matrix فقط می‌توانند آن اتاق‌ها را هدف بگیرند.</p>
+<p>کنترل‌های واکنش:</p>
+<ul>
+  <li>✅ تأیید یک‌بار</li>
+  <li>♾️ تأیید همیشه</li>
+  <li>❌ رد</li>
+  <li>واکنش‌های عددی برای گزینه‌های <code>/model</code></li>
+</ul>
+<p>اگر عمداً می‌خواهید هر کاربر مجاز Matrix در اتاق بتواند پرامپت تأیید/انتخاب‌گر مدل را عملیاتی کند ‏<code>MATRIX_APPROVAL_REQUIRE_SENDER=false</code> بگذارید. پیش‌فرض، وقتی هرمس بداند چه کسی اکشن را خواسته، مقید-به-همان-درخواست‌کننده است.</p>
+
+<h3>سقف‌های رسانه</h3>
+<p>هرمس تصاویر، فایل‌ها، صدا و ویدیوی Matrix را از طریق APIهای رسانه Matrix آپلود/دانلود می‌کند. چند تصویر تولیدی به‌عنوان یک batch منطقی مرتب فرستاده می‌شوند و کپشن و زمینهٔ ترد در طول batch حفظ می‌شود.</p>
+<p>به‌طور پیش‌فرض رسانهٔ Matrix بالای ۱۰۰ مگابایت قبل از آپلود/دانلود رد می‌شود. override:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MATRIX_MAX_MEDIA_BYTES=104857600</code></pre>
+</div>
+<p>رسانهٔ ورودی باید URI محتوای ‏<code>mxc://</code> Matrix باشد. هرمس URLهای رسانه‌ای HTTP(S) دلخواه را در رویدادهای Matrix رد می‌کند تا یک اتاق فدرال به دانلودکنندهٔ بدون محدودیت تبدیل نشود.</p>
+
+<h3>تأیید امضای متقاطع ‏(توصیه‌شده)</h3>
+<p>اگر حسابتان امضای متقاطع ‏(cross-signing) دارد ‏(پیش‌فرض Element)، کلید بازیابی را بدهید تا بات هنگام شروع دستگاهش را self-sign کند. بدون این، سایر کلاینت‌های Matrix ممکن است بعد از چرخش کلید دستگاه از اشتراک نشست‌های رمزنگاری با بات خودداری کنند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MATRIX_RECOVERY_KEY=EsT... your recovery key here</code></pre>
+</div>
+<p><strong>کجا پیدا می‌شود:</strong> در Element به ‏<strong>Settings ← Security &amp; Privacy ← Encryption</strong> بروید ← کلید بازیابی‌تان ‏(با نام «Security Key» هم معروف). همان کلیدی است که موقع راه‌اندازی اولیه cross-signing ازتان خواسته شد ذخیره کنید.</p>
+<p>در هر شروع، اگر ‏<code>MATRIX_RECOVERY_KEY</code> تنظیم باشد هرمس کلیدهای cross-signing را از مخزن امن اسرار هوم‌سرور import و دستگاه فعلی را امضا می‌کند. idempotent است و امن است دائمی روشن بماند.</p>
+<p>اگر هرمس کلید بازیابی جدید بسازد هرگز کلید خام را لاگ نمی‌کند. قبل از شروع ‏<code>MATRIX_RECOVERY_KEY_OUTPUT_FILE=/secure/path/matrix-recovery-key.txt</code> را بگذارید تا کلید تولیدشده یک‌بار با دسترسی فایل <code>0600</code> نوشته شود؛ فایل موجود بازنویسی نمی‌شود.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ حذف مخزن رمزنگاری</div>
+  <p>اگر ‏<code>~/.hermes/platforms/matrix/store/crypto.db</code> را حذف کنید بات هویت رمزنگاری‌اش را از دست می‌دهد. ری‌استارت ساده با همان device ID <strong>کامل بازیابی نمی‌شود</strong> — هوم‌سرور هنوز one-time key هایی دارد که با کلید هویت قدیمی امضا شده‌اند و طرف مقابل نمی‌تواند نشست Olm جدید بسازد.</p>
+  <p>هرمس این وضعیت را هنگام شروع تشخیص و از فعال‌کردن E2EE امتناع می‌کند و لاگ می‌کند: ‏<code>device XXXX has stale one-time keys on the server signed with a previous identity key</code>.</p>
+  <p><strong>آسان‌ترین بازیابی: توکن دسترسی جدید بسازید</strong> ‏(که device ID تازه‌ای بدون تاریخچهٔ کلید کهنه می‌گیرد). بخش «ارتقا از نسخهٔ قبلی با E2EE» پایین را ببینید. مطمئن‌ترین مسیر است و دست‌زدن به دیتابیس هوم‌سرور ندارد.</p>
+  <p><strong>بازیابی دستی</strong> ‏(پیشرفته — همان device ID حفظ می‌شود):</p>
+  <ol>
+    <li>Synapse را متوقف و دستگاه قدیمی را از دیتابیسش حذف کنید:
+      <div class="codebox">
+        <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+        <pre><code>sudo systemctl stop matrix-synapse
+sudo sqlite3 /var/lib/matrix-synapse/homeserver.db "
+  DELETE FROM e2e_device_keys_json WHERE device_id = 'DEVICE_ID' AND user_id = '@hermes:your-server';
+  DELETE FROM e2e_one_time_keys_json WHERE device_id = 'DEVICE_ID' AND user_id = '@hermes:your-server';
+  DELETE FROM e2e_fallback_keys_json WHERE device_id = 'DEVICE_ID' AND user_id = '@hermes:your-server';
+  DELETE FROM devices WHERE device_id = 'DEVICE_ID' AND user_id = '@hermes:your-server';
+"
+sudo systemctl start matrix-synapse</code></pre>
+      </div>
+      یا از طریق admin API سیناپس ‏(توجه: شناسهٔ کاربر URL-encoded):
+      <div class="codebox">
+        <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+        <pre><code>curl -X DELETE -H "Authorization: Bearer ADMIN_TOKEN" \
+  'https://your-server/_synapse/admin/v2/users/%40hermes%3Ayour-server/devices/DEVICE_ID'</code></pre>
+      </div>
+      توجه: حذف دستگاه از طریق admin API ممکن است توکن دسترسی مرتبط را هم باطل کند. بعدش شاید لازم باشد توکن جدید بسازید.
+    </li>
+    <li>مخزن رمزنگاری محلی را حذف و هرمس را ری‌استارت کنید:
+      <div class="codebox">
+        <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+        <pre><code>rm -f ~/.hermes/platforms/matrix/store/crypto.db*
+# restart hermes</code></pre>
+      </div>
+    </li>
+  </ol>
+  <p>سایر کلاینت‌های Matrix ‏(Element، ‏matrix-commander) ممکن است کلیدهای دستگاه قدیمی را کش کرده باشند. بعد از بازیابی در Element ‏<code>/discardsession</code> بزنید تا نشست رمزنگاری جدیدی با بات ساخته شود.</p>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 نکته</div>
+  <p>اگر ‏<code>mautrix[encryption]</code> نصب نباشد یا <code>libolm</code> غایب باشد، بات خودکار به کلاینت ساده ‏(بدون رمز) سقوط می‌کند. هشدارش را در لاگ‌ها خواهید دید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> اتاق خانگی</h2>
+<p>می‌توانید یک «اتاق خانگی» تعیین کنید که بات پیام‌های پیش‌فعال را به آن بفرستد ‏(مثل خروجی job های کرون، یادآوری‌ها و اعلان‌ها). دو راه دارد:</p>
+<h3>با فرمان اسلش</h3>
+<p>‏<code>/sethome</code> را در هر اتاق Matrixی که بات حضور دارد تایپ کنید. همان اتاق اتاق خانگی می‌شود. اگر کلاینت Matrix‌تان فرمان‌های اسلش را intercept می‌کند به‌جایش ‏<code>!sethome</code> بنویسید.</p>
+<h3>پیکربندی دستی</h3>
+<p>این را به <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MATRIX_HOME_ROOM=!abc123def456:matrix.example.org</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> لیست‌مجاز اتاق (<code>allowed_rooms</code>)</h2>
+<p>بات را به مجموعهٔ ثابتی از اتاق‌های Matrix محدود کنید. با تنظیم، بات <strong>فقط</strong> در اتاق‌هایی که شناسه‌شان در فهرست است پاسخ می‌دهد — پیام‌های هر اتاق دیگری بی‌صدا نادیده گرفته می‌شوند حتی با منشن.</p>
+<p><strong>‏DM ها ‏(اتاق‌های گفتگوی مستقیم) از این فیلتر معاف‌اند</strong>، پس کاربران مجاز همیشه یک‌به‌یک به بات می‌رسند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>matrix:
+  allowed_rooms:
+    - "!abc123def456:matrix.example.org"
+    - "!opsroom789:matrix.example.org"</code></pre>
+</div>
+<p>یا با متغیر محیطی ‏(جداشده با ویرگول):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MATRIX_ALLOWED_ROOMS="!abc123def456:matrix.example.org,!opsroom789:matrix.example.org"</code></pre>
+</div>
+<p>رفتار:</p>
+<ul>
+  <li>خالی / تنظیم‌نشده ← بدون محدودیت ‏(پیش‌فرض).</li>
+  <li>غیرخالی ← شناسهٔ اتاق باید روی فهرست باشد. چک <strong>قبل از</strong> هر gating دیگری ‏(شرط منشن، لیست مجاز فرستنده و...) اجرا می‌شود.</li>
+  <li><strong>شناسهٔ داخلی</strong> اتاق را استفاده کنید ‏(<code>!abc...:server</code>) نه alias‌اش ‏(<code>#room:server</code>). شناسهٔ داخلی اتاق در Element از مسیر Room ← Settings ← Advanced پیدا می‌شود.</li>
+</ul>
+<p>همچنین ببینید: <a href="https://hermes-agent.nousresearch.com/docs/reference/slash-commands" target="_blank" rel="noopener">تفکیک فرمان ادمین/کاربر</a>.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>برای یافتن Room ID: در Element وارد اتاق شوید ← <strong>Settings</strong> ← <strong>Advanced</strong> ← ‏<strong>Internal room ID</strong> آنجاست ‏(با <code>!</code> شروع می‌شود).</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> فرمان‌ها در Matrix</h2>
+<p>هرمس همان فرمان‌های گیت‌وی دیگر پلتفرم‌ها را در Matrix پشتیبانی می‌کند شامل ‏<code>/commands</code>، ‏<code>/model</code>، ‏<code>/stop</code>، ‏<code>/queue</code>، ‏<code>/steer</code>، ‏<code>/goal</code>، ‏<code>/subgoal</code>، ‏<code>/background</code>، ‏<code>/bg</code>، ‏<code>/btw</code>، ‏<code>/tasks</code> و <code>/yolo</code>.</p>
+<p>بعضی کلاینت‌های Matrix <code>/</code> ابتدایی را برای فرمان‌های محلی کلاینت رزرو می‌کنند و ممکن است فرمان‌های اسلش ناشناخته را به اتاق نفرستند. در این صورت <code>!</code> را به‌عنوان alias سازگار-با-Matrix استفاده کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>!commands
+!model
+!model gpt-5.5 --provider openrouter
+!queue continue with the next task
+!stop</code></pre>
+</div>
+<p>هرمس ‏<code>!command</code> را فقط وقتی نرمال می‌کند که فرمان برای گیت‌وی شناخته شده باشد، فرمان افزونهٔ ثبت‌شده یا مهارت نصب‌شده باشد. تعجب‌های معمولی مثل ‏<code>!important</code> پیام چت عادی می‌مانند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> عیب‌یابی</h2>
+
+<h3>بات به پیام‌ها پاسخ نمی‌دهد</h3>
+<p><strong>علت:</strong> بات به اتاق نپیوسته، ‏<code>MATRIX_ALLOWED_USERS</code> شناسهٔ شما را ندارد، ‏<code>MATRIX_ALLOWED_ROOMS</code> اتاق را ندارد، یا پیام اتاق بات را منشن نکرده.</p>
+<p><strong>راه‌حل:</strong> بات را به اتاق دعوت کنید — با دعوت خودکار می‌پیوندد. تأیید کنید شناسه‌تان ‏(قالب کامل <code>@user:server</code>) در ‏<code>MATRIX_ALLOWED_USERS</code> و شناسهٔ اتاق در ‏<code>MATRIX_ALLOWED_ROOMS</code> است اگر آن لیست پیکربندی شده. در اتاق‌ها بات را منشن کنید یا اتاق را به ‏<code>MATRIX_FREE_RESPONSE_ROOMS</code> اضافه کنید. گیت‌وی را ری‌استارت کنید.</p>
+
+<h3>بات به اتاق‌ها می‌پیوندد ولی همهٔ پیام‌ها را بی‌صدا دور می‌ریزد ‏(اختلاف ساعت)</h3>
+<p><strong>علت:</strong> ساعت سیستمِ میزبان جلوتر از زمان واقعی است. آداپتور Matrix فیلتر grace شروع ۵ثانیه‌ای دارد ‏(<code>event_ts &lt; startup_ts - 5</code>) تا رویدادهای بازپخش‌شده از sync اولیه نادیده گرفته شوند. وقتی ساعت دیواری جلو باشد هر رویداد ورودی «قدیمی‌تر از شروع» به نظر می‌رسد و قبل از رسیدن به هندلر پیام دور ریخته می‌شود — بات متصل به نظر می‌رسد ولی هرگز جواب نمی‌دهد. <a href="https://github.com/NousResearch/hermes-agent/issues/12614" target="_blank" rel="noopener">issue شمارهٔ ۱۲۶۱۴</a> را ببینید.</p>
+<p><strong>علامت:</strong> لاگ گیت‌وی نشان می‌دهد ‏<code>Matrix: dropped N live events as 'too old' more than 30s after startup</code>.</p>
+<p><strong>راه‌حل:</strong> ساعت میزبان را با NTP سینک و بات را ری‌استارت کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Debian/Ubuntu
+sudo timedatectl set-ntp true
+timedatectl status   # تأیید "System clock synchronized: yes"
+
+# macOS
+sudo sntp -sS time.apple.com</code></pre>
+</div>
+
+<h3>«Failed to authenticate» / «whoami failed» هنگام شروع</h3>
+<p><strong>علت:</strong> توکن دسترسی یا URL هوم‌سرور اشتباه است.</p>
+<p><strong>راه‌حل:</strong> تأیید کنید ‏<code>MATRIX_HOMESERVER</code> به هوم‌سرورتان اشاره دارد ‏(با <code>https://</code>، بدون اسلش انتهایی). اعتبار ‏<code>MATRIX_ACCESS_TOKEN</code> را چک کنید — با curl امتحانش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl -H "Authorization: Bearer YOUR_TOKEN" \
+  https://your-server/_matrix/client/v3/account/whoami</code></pre>
+</div>
+<p>اگر اطلاعات کاربر برگرداند توکن معتبر است. اگر خطا برگرداند توکن جدید بسازید.</p>
+
+<h3>خطای «mautrix not installed»</h3>
+<p><strong>علت:</strong> بستهٔ پایتونی mautrix نصب نیست.</p>
+<p><strong>راه‌حل:</strong> نصبش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>pip install 'mautrix[encryption]'</code></pre>
+</div>
+<p>یا با extras هرمس:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cd ~/.hermes/hermes-agent && uv pip install -e ".[matrix]"</code></pre>
+</div>
+
+<h3>خطاهای رمزنگاری / «could not decrypt event»</h3>
+<p><strong>علت:</strong> کلیدهای رمزنگاری غایب، ‏libolm نصب نیست، یا دستگاه بات مطمئن‌سازی نشده.</p>
+<p><strong>راه‌حل:</strong></p>
+<ol>
+  <li>تأیید کنید <code>libolm</code> روی سیستم نصب است ‏(بخش E2EE بالا).</li>
+  <li>مطمئن شوید <code>MATRIX_ENCRYPTION=true</code> در <code>.env</code> است.</li>
+  <li>در کلاینت Matrix‌تان ‏(Element) به پروفایل بات ← Sessions بروید و دستگاه بات را verify/trust کنید.</li>
+  <li>اگر بات تازه به اتاق رمزنگاری‌شده‌ای پیوسته فقط پیام‌های <em>بعد از</em> پیوستنش را می‌تواند decrypt کند. پیام‌های قدیمی‌تر در دسترس نیستند.</li>
+</ol>
+
+<h3>ارتقا از نسخهٔ قبلی با E2EE</h3>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>اگر خودتان هم <code>crypto.db</code> را دستی حذف کرده‌اید، هشدار «حذف مخزن رمزنگاری» در بخش E2EE بالا را ببینید — گام‌های اضافی برای پاک‌کردن one-time key های کهنه از هوم‌سرور لازم است.</p>
+</div>
+<p>اگر قبلاً هرمس را با ‏<code>MATRIX_ENCRYPTION=true</code> استفاده می‌کردید و به نسخه‌ای با مخزن رمزنگاری SQLite جدید ارتقا می‌دهید، هویت رمزنگاری بات عوض شده است. کلاینت Matrix‌تان ‏(Element) ممکن است کلیدهای دستگاه قدیمی را کش کرده باشد و از اشتراک نشست رمزنگاری با بات خودداری کند.</p>
+<p><strong>علامت‌ها:</strong> بات وصل می‌شود و در لاگ‌ها «E2EE enabled» نشان می‌دهد ولی همهٔ پیام‌ها «could not decrypt event» هستند و بات هرگز جواب نمی‌دهد.</p>
+<p><strong>چه می‌شود:</strong> وضعیت رمزنگاری قدیمی ‏(از بک‌اند قبلی matrix-nio یا سریال‌سازی mautrix) با مخزن رمزنگاری SQLite جدید ناسازگار است. بات هویت رمزنگاری تازه می‌سازد ولی کلاینت شما هنوز کلیدهای قدیمی را کش کرده و با دستگاهی که کلیدهایش عوض شده نشست رمزنگاری اتاق را share نمی‌کند. این یک ویژگی امنیتی Matrix است — کلاینت‌ها تغییر کلیدهای هویت برای همان دستگاه را مشکوک تلقی می‌کنند.</p>
+<p><strong>راه‌حل</strong> ‏(مهاجرت یک‌باره):</p>
+<ol>
+  <li><strong>توکن دسترسی جدید بسازید</strong> تا device ID تازه بگیرید. ساده‌ترین راه:
+      <div class="codebox">
+        <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+        <pre><code>curl -X POST https://your-server/_matrix/client/v3/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "m.login.password",
+    "identifier": {"type": "m.id.user", "user": "@hermes:your-server.org"},
+    "password": "***",
+    "initial_device_display_name": "Hermes Agent"
+  }'</code></pre>
+      </div>
+      ‏<code>access_token</code> جدید را کپی و ‏<code>MATRIX_ACCESS_TOKEN</code> در ‏<code>~/.hermes/.env</code> را به‌روز کنید.
+    </li>
+    <li><strong>وضعیت رمزنگاری قدیمی را حذف کنید</strong>:
+      <div class="codebox">
+        <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+        <pre><code>rm -f ~/.hermes/platforms/matrix/store/crypto.db
+rm -f ~/.hermes/platforms/matrix/store/crypto_store.*</code></pre>
+      </div>
+    </li>
+    <li><strong>کلید بازیابی‌تان را بگذارید</strong> ‏(اگر cross-signing دارید — بیشتر کاربران Element دارند). به ‏<code>~/.hermes/.env</code> اضافه کنید:
+      <div class="codebox">
+        <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+        <pre><code>MATRIX_RECOVERY_KEY=EsT... your recovery key here</code></pre>
+      </div>
+      این باعث می‌شود بات هنگام شروع با کلیدهای cross-signing self-sign کند تا Element فوراً به دستگاه جدید اعتماد کند. بدون این، Element دستگاه جدید را unverified می‌بیند و از اشتراک نشست رمزنگاری خودداری می‌کند. کلید بازیابی در Element زیر ‏<strong>Settings ← Security &amp; Privacy ← Encryption</strong> است.
+    </li>
+    <li><strong>کلاینت Matrix‌تان را مجبور به چرخش نشست رمزنگاری کنید.</strong> در Element اتاق DM با بات را باز و ‏<code>/discardsession</code> تایپ کنید. این Element را مجبور می‌کند نشست رمزنگاری جدیدی بسازد و با دستگاه جدید بات share کند.
+    </li>
+    <li><strong>گیت‌وی را ری‌استارت کنید</strong>:
+      <div class="codebox">
+        <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+        <pre><code>hermes gateway run</code></pre>
+      </div>
+      اگر ‏<code>MATRIX_RECOVERY_KEY</code> تنظیم باشد باید ‏<code>Matrix: cross-signing verified via recovery key</code> را در لاگ‌ها ببینید.
+    </li>
+    <li><strong>پیام جدید بفرستید.</strong> بات باید decrypt و عادی پاسخ دهد.</li>
+</ol>
+<div class="callout note">
+  <div class="callout-title">📌 یادداشت</div>
+  <p>بعد از مهاجرت، پیام‌های فرستاده‌شده <em>قبل از</em> ارتقا قابل decrypt نیستند — کلیدهای رمزنگاری قدیمی رفته‌اند. این فقط انتقال را تحت تأثیر قرار می‌دهد؛ پیام‌های جدید عادی کار می‌کنند.</p>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p><strong>نصب‌های جدید تحت تأثیر نیستند.</strong> این مهاجرت فقط وقتی لازم است که setup E2EE کارکرده با نسخهٔ قبلی هرمس داشته‌اید و ارتقا می‌دهید.</p>
+  <p><strong>چرا توکن دسترسی جدید؟</strong> هر توکن دسترسی Matrix به یک device ID مشخص قفل است. استفادهٔ مجدد از همان device ID با کلیدهای رمزنگاری جدید باعث می‌شود سایر کلاینت‌ها به دستگاه بی‌اعتماد شوند ‏(تغییر کلیدهای هویت را نفوذ امنیتی بالقوه می‌بینند). توکن جدید device ID تازه‌ای بدون تاریخچهٔ کلید کهنه می‌گیرد، پس کلاینت‌های دیگر فوراً اعتماد می‌کنند.</p>
+</div>
+
+<h3>بات وصل و ارسال می‌کند ولی پیام‌های ورودی را نادیده می‌گیرد</h3>
+<p><strong>علت:</strong> هندلرهای رویداد Matrix فقط وقتی شلیک می‌کنند که payload های sync از ماشین ‏<code>handle_sync()</code> ماتریکس dispatch شوند. یک poll خام ‏<code>client.sync()</code> که هرگز <code>handle_sync()</code> را صدا نمی‌زند می‌تواند آداپتور را متصل نگه دارد ‏(ارسال کار می‌کند) در حالی که پیام‌های ورودی هرگز به <code>_on_room_message</code> نمی‌رسند.</p>
+<p><strong>راه‌حل:</strong> هرمس از حلقهٔ sync صریحی استفاده می‌کند که هم روی sync اولیه هم روی هر پاسخ sync افزایشی ‏<code>client.handle_sync()</code> را صدا می‌زند. این با تشخیص issue شمارهٔ ۷۹۱۴ بالادستی و PR بسته‌شدهٔ ۳۷۸۰۷ می‌خواند ولی وظایف نگهداشت پس‌زمینهٔ خود هرمس ‏(ردیابی اتاق‌های عضو، هندل دعوت، share کلید E2EE) را حفظ می‌کند به‌جای سپردن کل چرخهٔ حیات به ‏<code>client.start()</code>. اگر بعد از ری‌استارت گیت‌وی پیام‌های ورودی هنوز نمی‌آیند، تأیید کنید هندلرها قبل از اولین sync ثبت شده باشند و لاگ‌ها را برای ‏<code>sync event dispatch error</code> چک کنید.</p>
+
+<h3>مشکلات sync / بات عقب می‌افتد</h3>
+<p><strong>علت:</strong> اجراهای طولانی ابزار می‌توانند حلقهٔ sync را عقب بیندازند، یا هوم‌سرور کند است.</p>
+<p><strong>راه‌حل:</strong> حلقهٔ sync در خطا هر ۵ ثانیه خودکار retry می‌کند. هشدارهای مرتبط با sync را در لاگ‌های هرمس چک کنید. اگر بات مدام عقب می‌افتد مطمئن شوید هوم‌سرورتان منابع کافی دارد.</p>
+
+<h3>بات آفلاین است</h3>
+<p><strong>علت:</strong> گیت‌وی هرمس اجرا نیست یا اتصال شکست خورده.</p>
+<p><strong>راه‌حل:</strong> چک کنید <code>hermes gateway</code> در حال اجراست. خروجی ترمینال را برای پیام خطا ببینید. مسائل رایج: URL هوم‌سرور اشتباه، توکن دسترسی منقضی، هوم‌سرور در دسترس نیست.</p>
+
+<h3>«User not allowed» / بات شما را نادیده می‌گیرد</h3>
+<p><strong>علت:</strong> شناسهٔ کاربری شما در <code>MATRIX_ALLOWED_USERS</code> نیست.</p>
+<p><strong>راه‌حل:</strong> شناسه‌تان را به <code>MATRIX_ALLOWED_USERS</code> در <code>~/.hermes/.env</code> اضافه و گیت‌وی را ری‌استارت کنید. قالب کامل ‏<code>@user:server</code> را استفاده کنید.</p>
+
+<h3>بات کل یک اتاق را نادیده می‌گیرد</h3>
+<p><strong>علت:</strong> ‏<code>MATRIX_ALLOWED_ROOMS</code> تنظیم است و شناسهٔ اتاق فعلی فهرست نیست، یا اتاق منشن می‌خواهد و پیام بات را منشن نکرده.</p>
+<p><strong>راه‌حل:</strong> شناسهٔ اتاق را به ‏<code>MATRIX_ALLOWED_ROOMS</code> اضافه کنید، یا اگر استقرار شخصی است لیست‌مجاز اتاق را حذف کنید. برای یافتن Room ID در Element تنظیمات اتاق را باز و بخش <strong>Advanced</strong> را چک کنید.</p>
+
+<h3>پیام‌های پل حلقه می‌زنند یا echo می‌شوند</h3>
+<p><strong>علت:</strong> یک عروسک پل/appservice خروجی بات را به‌عنوان پیام کاربر جدید رله می‌کند، یا پل از شناسه‌های شبح غیریعادی استفاده می‌کند.</p>
+<p><strong>راه‌حل:</strong> شبح‌های پل را خارج از ‏<code>MATRIX_ALLOWED_USERS</code> نگه دارید، یک ورودی منطبق به ‏<code>MATRIX_IGNORE_USER_PATTERNS</code> اضافه کنید و مگر notice ها بخش گردش‌کار مطمئنی باشند ‏<code>MATRIX_PROCESS_NOTICES=false</code> بماند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> حالت پروکسی ‏(E2EE روی macOS)</h2>
+<p>‏E2EE ماتریکس به <code>libolm</code> نیاز دارد که روی macOS ARM64 ‏(Apple Silicon) کامپایل نمی‌شود. extra ‏<code>hermes-agent[matrix]</code> فقط برای لینوکس gate شده است. اگر روی macOS هستید، حالت پروکسی اجازه می‌دهد E2EE را در یک کانتینر Docker روی VM لینوکسی اجرا کنید در حالی که خود ایجنت به‌صورت native روی macOS با دسترسی کامل به فایل‌های محلی، حافظه و مهارت‌ها اجرا می‌شود.</p>
+
+<h3>نحوهٔ کار</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>macOS (Host):
+  └─ hermes gateway
+       ├─ api_server adapter ← listens on 0.0.0.0:8642
+       ├─ AIAgent ← single source of truth
+       ├─ Sessions, memory, skills
+       └─ Local file access (Obsidian, projects, etc.)
+
+Linux VM (Docker):
+  └─ hermes gateway (proxy mode)
+       ├─ Matrix adapter ← E2EE decryption/encryption
+       └─ HTTP forward → macOS:8642/v1/chat/completions
+           (no LLM API keys, no agent, no inference)</code></pre>
+</div>
+<p>کانتینر Docker فقط پروتکل Matrix + E2EE را هندل می‌کند. وقتی پیامی می‌رسد decrypt و متنش با یک درخواست HTTP استاندارد به میزبان فوروارد می‌شود. میزبان ایجنت را اجرا، ابزار را صدا، پاسخ را تولید و استریم برمی‌گرداند. کانتینر encrypt و به Matrix می‌فرستد. همهٔ نشست‌ها واحدند — CLI، ‏Matrix، ‏تلگرام و هر پلتفرم دیگری همان حافظه و تاریخچهٔ گفتگو را شریک‌اند.</p>
+
+<h3>گام ۱: پیکربندی میزبان ‏(macOS)</h3>
+<p>‏API server را فعال کنید تا میزبان درخواست‌های ورودی کانتینر را بپذیرد. به ‏<code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>API_SERVER_ENABLED=true
+API_SERVER_KEY=your-secret-key-here
+API_SERVER_HOST=0.0.0.0</code></pre>
+</div>
+<ul>
+  <li>‏<code>API_SERVER_HOST=0.0.0.0</code> به همهٔ interface ها بایند می‌شود تا کانتینر Docker بهش برسد.</li>
+  <li>‏<code>API_SERVER_KEY</code> برای bind غیر-loopback الزامی است. رشتهٔ تصادفی قوی انتخاب کنید.</li>
+  <li>‏API server پیش‌فرض روی پورت ۸۶۴۲ اجرا می‌شود ‏(در صورت نیاز با <code>API_SERVER_PORT</code> عوض کنید).</li>
+</ul>
+<p>گیت‌وی را شروع کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway</code></pre>
+</div>
+<p>‏API server را کنار پلتفرم‌های پیکربندی‌شده‌تان می‌بینید که شروع می‌شود. از VM قابل‌دسترسی بودنش را تأیید کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># از داخل Linux VM
+curl http://&lt;mac-ip&gt;:8642/health</code></pre>
+</div>
+
+<h3>گام ۲: پیکربندی کانتینر Docker ‏(Linux VM)</h3>
+<p>کانتینر اعتبارنامه‌های Matrix و URL پروکسی را می‌خواهد. کلیدهای API لالم <strong>لازم ندارد</strong>.</p>
+<p><strong>docker-compose.yml:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>services:
+  hermes-matrix:
+    build: .
+    environment:
+      # اعتبارنامه‌های Matrix
+      MATRIX_HOMESERVER: "https://matrix.example.org"
+      MATRIX_ACCESS_TOKEN: "syt_..."
+      MATRIX_ALLOWED_USERS: "@you:matrix.example.org"
+      MATRIX_ENCRYPTION: "true"
+      MATRIX_DEVICE_ID: "HERMES_BOT"
+
+      # حالت پروکسی — فوروارد به ایجنت میزبان
+      GATEWAY_PROXY_URL: "http://192.168.1.100:8642"
+      GATEWAY_PROXY_KEY: "your-secret-key-here"
+    volumes:
+      - ./matrix-store:/root/.hermes/platforms/matrix/store</code></pre>
+</div>
+<p><strong>Dockerfile:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">dockerfile</span><button class="copy-btn">کپی</button></div>
+  <pre><code>FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y libolm-dev && rm -rf /var/lib/apt/lists/*
+RUN cd ~/.hermes/hermes-agent && uv pip install -e ".[matrix]"
+
+CMD ["hermes", "gateway"]</code></pre>
+</div>
+<p>تمام کانتینر همین است. هیچ کلید API برای OpenRouter، ‏Anthropic یا هیچ ارائه‌دهندهٔ inference‌ای.</p>
+
+<h3>گام ۳: اجرای هر دو</h3>
+<ol>
+  <li>اول گیت‌وی میزبان را شروع کنید:
+    <div class="codebox">
+      <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+      <pre><code>hermes gateway</code></pre>
+    </div>
+  </li>
+  <li>کانتینر Docker را شروع کنید:
+    <div class="codebox">
+      <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+      <pre><code>docker compose up -d</code></pre>
+    </div>
+  </li>
+  <li>در یک اتاق رمزنگاری‌شدهٔ Matrix پیام بدهید. کانتینر decrypt، به میزبان فوروارد و پاسخ را استریم برمی‌گرداند.</li>
+</ol>
+
+<h3>مرجع پیکربندی</h3>
+<p>حالت پروکسی روی <strong>سمت کانتینر</strong> ‏(گیت‌وی لاغر) پیکربندی می‌شود:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>تنظیم</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>GATEWAY_PROXY_URL</code></td><td>URL سرور API هرمسِ راه‌دور ‏(مثل <code>http://192.168.1.100:8642</code>)</td></tr>
+    <tr><td><code>GATEWAY_PROXY_KEY</code></td><td>توکن Bearer برای احراز ‏(باید با ‏<code>API_SERVER_KEY</code> میزبان یکی باشد)</td></tr>
+    <tr><td><code>gateway.proxy_url</code></td><td>همان ‏<code>GATEWAY_PROXY_URL</code> ولی در config.yaml</td></tr>
+  </tbody>
+</table>
+</div>
+<p>سمت میزبان این‌ها را می‌خواهد:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>تنظیم</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>API_SERVER_ENABLED</code></td><td>روی <code>true</code></td></tr>
+    <tr><td><code>API_SERVER_KEY</code></td><td>توکن Bearer ‏(مشترک با کانتینر)</td></tr>
+    <tr><td><code>API_SERVER_HOST</code></td><td>‏<code>0.0.0.0</code> برای دسترسی شبکه‌ای</td></tr>
+    <tr><td><code>API_SERVER_PORT</code></td><td>شمارهٔ پورت ‏(پیش‌فرض: <code>8642</code>)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>برای هر پلتفرمی کار می‌کند</h3>
+<p>حالت پروکسی محدود به Matrix نیست. هر آداپتور پلتفرمی می‌تواند استفاده کند — روی هر نمونهٔ گیت‌وی ‏<code>GATEWAY_PROXY_URL</code> را بگذارید تا به‌جای اجرای ایجنت محلی به ایجنت راه‌دور فوروارد کند. برای هر استقراری که آداپتور پلتفرم باید در محیط متفاوتی از ایجنت اجرا شود مفید است ‏(ایزوله‌سازی شبکه، الزامات E2EE، محدودیت منابع).</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>تداوم نشست با هدر ‏<code>X-Hermes-Session-Id</code> حفظ می‌شود. ‏API server میزبان نشست‌ها را با این ID ردیابی می‌کند، پس گفتگوها بین پیام‌ها مثل ایجنت محلی ادامه می‌یابند.</p>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 محدودیت‌ها ‏(v1)</div>
+  <p>پیام‌های پیشرفت ابزار از ایجنت راه‌دور رله برنمی‌گردند — کاربر فقط پاسخ نهایی استریم‌شده را می‌بیند نه فراخوانی‌های تک‌تک ابزار. پرامپت‌های تأیید فرمان خطرناک سمت میزبان هندل می‌شوند نه رله به کاربر Matrix. این‌ها در به‌روزرسانی‌های آینده قابل رسیدگی‌اند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> امنیت</h2>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>همیشه ‏<code>MATRIX_ALLOWED_USERS</code> و برای استقرارهای مشترک/خصوصی ‏<code>MATRIX_ALLOWED_ROOMS</code> را تنظیم کنید. بدون آن‌ها هر کسی که بتواند در اتاقی عضوشده به بات پیام دهد می‌تواند ایجنت را تریگر کند. فقط افراد و اتاق‌های مورداطمینان را مجاز کنید — کاربران مجاز دسترسی کامل به قابلیت‌های ایجنت دارند شامل استفاده از ابزار و دسترسی سیستم.</p>
+</div>
+<p>برای اطلاعات بیشتر دربارهٔ امن‌سازی استقرار هرمس ایجنت، <a href="../security.html">راهنمای امنیت</a> را ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> یادداشت‌ها</h2>
+<ul>
+  <li><strong>هر هوم‌سروری</strong>: با Synapse، ‏Conduit، ‏Dendrite، ‏matrix.org یا هر هوم‌سرور سازگار-با-مشخصات کار می‌کند. نرم‌افزار خاصی لازم نیست.</li>
+  <li><strong>فدراسیون</strong>: اگر روی هوم‌سرور فدرال هستید بات می‌تواند با کاربران سرورهای دیگر حرف بزند — فقط شناسهٔ کامل ‏<code>@user:server</code> آن‌ها را به ‏<code>MATRIX_ALLOWED_USERS</code> اضافه کنید.</li>
+  <li><strong>پیوستن خودکار</strong>: بات دعوت‌های اتاق را خودکار می‌پذیرد و می‌پیوندد. بلافاصله بعد از پیوستن پاسخ می‌دهد.</li>
+  <li><strong>پشتیبانی رسانه</strong>: هرمس می‌تواند تصویر، صوت، ویدیو و پیوست فایل بفرستد و بگیرد. رسانه با API مخزن محتوای Matrix روی هوم‌سرور شما آپلود می‌شود.</li>
+  <li><strong>پیام‌های صوتی بومی ‏(MSC3245)</strong>: آداپتور Matrix پیام‌های صوتی خروجی را خودکار با فلگ ‏<code>org.matrix.msc3245.voice</code> تگ می‌کند. یعنی پاسخ‌های TTS و صدای صوتی به‌عنوان <strong>حباب صوتی بومی</strong> در Element و سایر کلاینت‌های پشتیبان MSC3245 رندر می‌شوند نه به‌عنوان پیوت فایل صوتی عمومی. پیام‌های صوتی ورودی دارای فلگ MSC3245 هم درست شناسایی و به رونویسی گفتار-به-متن مسیریابی می‌شوند. پیکربندی لازم نیست — خودکار کار می‌کند.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="mattermost.html"><span class="dir">→ قبلی</span><span class="ttl">Mattermost</span></a>
+  <a class="next" href="homeassistant.html"><span class="dir">بعدی ←</span><span class="ttl">Home Assistant</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/matrix" target="_blank" rel="noopener">Matrix</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

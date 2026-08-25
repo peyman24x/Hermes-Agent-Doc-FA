@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeCom ‏(وی‌چت سازمانی) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/wecom" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>WeCom ‏(وی‌چت سازمانی)</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>‏WeCom ‏(Enterprise WeChat)</h1>
+<p>هرمس را به ‏<a href="https://work.weixin.qq.com/" target="_blank" rel="noopener">WeCom</a> ‏(企业微信)، پلتفرم پیام‌رسانی سازمانی تنسنت، وصل کنید. آداپتور از دروازهٔ WebSocket ‏AI Bot ویکام برای ارتباط دوطرفهٔ لحظه‌ای استفاده می‌کند — بدون نیاز به endpoint عمومی یا وب‌هوک.</p>
+<p>همچنین ببینید: <a href="wecom-callback.html">‏WeCom Callback</a> برای راه‌اندازی وب‌هوک ورودی.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li>حساب سازمانی WeComp</li>
+  <li>یک AI Bot ساخته‌شده در کنسول مدیریت ویکام</li>
+  <li>Bot ID و Secret از صفحهٔ اعتبارنامه‌های بات</li>
+  <li>بسته‌های پایتونی: ‏<code>aiohttp</code> و ‏<code>httpx</code></li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> راه‌اندازی</h2>
+
+<h3>گام ۱: ساخت AI Bot</h3>
+<h4>توصیه‌شده: ساخت با اسکن QR ‏(یک فرمان)</h4>
+<div class="codebox"><pre><code>hermes gateway setup</code></pre></div>
+<p><strong>WeCom</strong> را انتخاب و کد QR را با اپ موبایل ویکام اسکن کنید. هرمس خودکار اپلیکیشن بات با دسترسی‌های درست می‌سازد و اعتبارنامه‌ها را ذخیره می‌کند.</p>
+<p>ویزارد setup این کارها را می‌کند:</p>
+<ol>
+  <li>کد QR را در ترمینال نمایش می‌دهد</li>
+  <li>منتظر اسکن شما با اپ موبایل ویکام می‌ماند</li>
+  <li>Bot ID و Secret را خودکار دریافت می‌کند</li>
+  <li>شما را برای پیکربندی کنترل دسترسی راهنمایی می‌کند</li>
+</ol>
+
+<h4>روش جایگزین: راه‌اندازی دستی</h4>
+<p>اگر ساخت با اسکان در دسترس نباشد، ویزارد به ورودی دستی برمی‌گردد:</p>
+<ol>
+  <li>وارد <a href="https://work.weixin.qq.com/wework_admin/frame" target="_blank" rel="noopener">کنسول مدیریت WeCom</a> شوید</li>
+  <li>به <strong>Applications ← Create Application ← AI Bot</strong> بروید</li>
+  <li>نام و توضیحات بات را پیکربندی کنید</li>
+  <li><strong>Bot ID</strong> و <strong>Secret</strong> را از صفحهٔ اعتبارنامه‌ها کپی کنید</li>
+  <li>‏<code>hermes gateway setup</code> را اجرا، <strong>WeCom</strong> را انتخاب و هنگام پرسش اعتبارنامه‌ها را وارد کنید</li>
+</ol>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>رمز بات را خصوصی نگه دارید. هر کسی با آن می‌تواند خودش را جای بات شما جا بزند.</p>
+</div>
+
+<h3>گام ۲: پیکربندی هرمس</h3>
+<h4>گزینهٔ A: راه‌اندازی تعاملی ‏(توصیه‌شده)</h4>
+<div class="codebox"><pre><code>hermes gateway setup</code></pre></div>
+<p><strong>WeCom</strong> را انتخاب و طبق پرسش‌ها پیش بروید. ویزارد شما را از این مسیر عبور می‌دهد:</p>
+<ul>
+  <li>اعتبارنامه‌های بات ‏(با اسکن QR یا ورود دستی)</li>
+  <li>تنظیمات کنترل دسترسی ‏(لیست مجاز، حالت جفت‌سازی یا دسترسی باز)</li>
+  <li>کانال خانگی برای اعلان‌ها</li>
+</ul>
+
+<h4>گزینهٔ B: پیکربندی دستی</h4>
+<p>این‌ها را به ‏<code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>WECOM_BOT_ID=your-bot-id
+WECOM_SECRET=your-secret
+
+# اختیاری: محدودکردن دسترسی
+WECOM_ALLOWED_USERS=user_id_1,user_id_2
+
+# اختیاری: کانال خانگی برای کرون/اعلان‌ها
+WECOM_HOME_CHANNEL=chat_id</code></pre>
+</div>
+
+<h3>گام ۳: شروع گیت‌وی</h3>
+<div class="codebox"><pre><code>hermes gateway</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> قابلیت‌ها</h2>
+<ul>
+  <li><strong>ترنسپورت WebSocket</strong> — اتصال دائمی، بدون endpoint عمومی</li>
+  <li><strong>پیام DM و گروهی</strong> — سیاست‌های دسترسی قابل‌پیکربندی</li>
+  <li><strong>لیست مجاز فرستنده به‌ازای-گروه</strong> — کنترل دقیق اینکه چه کسی در هر گروه تعامل کند</li>
+  <li><strong>پشتیبانی رسانه</strong> — آپلود/دانلود تصویر، فایل، صوت و ویدیو</li>
+  <li><strong>رسانهٔ رمزنگاری AES</strong> — decrypt خودکار پیوست‌های ورودی</li>
+  <li><strong>زمینهٔ نقل‌قول</strong> — threading ریپلای حفظ می‌شود</li>
+  <li><strong>رندر مارک‌داون</strong> — پاسخ‌های متن غنی</li>
+  <li><strong>همبستگی ریپلای</strong> — پاسخ‌ها به زمینهٔ پیام ورودی مرتبط می‌شوند</li>
+  <li><strong>اتصال‌مجدد خودکار</strong> — backoff نمایی در قطع اتصال</li>
+</ul>
+<div class="callout note">
+  <div class="callout-title">📌 استریم و نشانگر تایپ</div>
+  <p>آداپتور ویکام هر پاسخ را به‌صورت یک پیام کامل تحویل می‌دهد — پاسخ‌ها را توکن‌به‌توکن استریم <strong>نمی‌کند</strong> و نشانگر تایپ <strong>نشان نمی‌دهد</strong>. «همبستگی ریپلای» (پایین) فقط پاسخ را به درخواست ورودیش ترد می‌کند؛ استریم زنده نیست.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گزینه‌های پیکربندی</h2>
+<p>این‌ها را در config.yaml زیر ‏<code>platforms.wecom.extra</code> تنظیم کنید:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>bot_id</code></td><td>—</td><td>شناسهٔ AI Bot ویکام ‏(الزامی)</td></tr>
+    <tr><td><code>secret</code></td><td>—</td><td>رمز AI Bot ویکام ‏(الزامی)</td></tr>
+    <tr><td><code>websocket_url</code></td><td><code>wss://openws.work.weixin.qq.com</code></td><td>URL دروازهٔ WebSocket</td></tr>
+    <tr><td><code>dm_policy</code></td><td><code>open</code></td><td>دسترسی DM: ‏<code>open</code>، ‏<code>allowlist</code>، ‏<code>disabled</code>، ‏<code>pairing</code></td></tr>
+    <tr><td><code>group_policy</code></td><td><code>open</code></td><td>دسترسی گروهی: ‏<code>open</code>، ‏<code>allowlist</code>، ‏<code>disabled</code></td></tr>
+    <tr><td><code>allow_from</code></td><td><code>[]</code></td><td>شناسه‌های کاربر مجاز DM ‏(وقتی dm_policy=allowlist)</td></tr>
+    <tr><td><code>group_allow_from</code></td><td><code>[]</code></td><td>شناسه‌های گروه مجاز ‏(وقتی group_policy=allowlist)</td></tr>
+    <tr><td><code>groups</code></td><td><code>{}</code></td><td>پیکربندی به‌ازای-گروه ‏(پایین را ببینید)</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> سیاست‌های دسترسی</h2>
+
+<h3>سیاست DM</h3>
+<p>کنترل می‌کند چه کسی می‌تواند به بات DM بدهد:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مقدار</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>open</code></td><td>هر کسی می‌تواند به بات DM بدهد ‏(پیش‌فرض)</td></tr>
+    <tr><td><code>allowlist</code></td><td>فقط شناسه‌های داخل ‏<code>allow_from</code> حق DM دارند</td></tr>
+    <tr><td><code>disabled</code></td><td>همهٔ DM ها نادیده گرفته می‌شوند</td></tr>
+    <tr><td><code>pairing</code></td><td>حالت جفت‌سازی ‏(برای راه‌اندازی اولیه)</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="codebox"><pre><code>WECOM_DM_POLICY=allowlist</code></pre></div>
+
+<h3>سیاست گروهی</h3>
+<p>کنترل می‌کند بات در کدام گروه‌ها پاسخ دهد:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مقدار</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>open</code></td><td>بات در همهٔ گروه‌ها پاسخ می‌دهد ‏(پیش‌فرض)</td></tr>
+    <tr><td><code>allowlist</code></td><td>بات فقط در شناسه‌های گروهِ فهرست‌شده در ‏<code>group_allow_from</code> پاسخ می‌دهد</td></tr>
+    <tr><td><code>disabled</code></td><td>همهٔ پیام‌های گروه نادیده گرفته می‌شوند</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="codebox"><pre><code>WECOM_GROUP_POLICY=allowlist</code></pre></div>
+
+<h3>لیست‌مجاز فرستنده به‌ازای-گروه</h3>
+<p>برای کنترل دقیق می‌توانید محدود کنید چه کاربرانی در گروه‌های مشخص حق تعامل با بات دارند. پیکربندی در config.yaml:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  wecom:
+    enabled: true
+    extra:
+      bot_id: "your-bot-id"
+      secret: "your-secret"
+      group_policy: "allowlist"
+      group_allow_from:
+        - "group_id_1"
+        - "group_id_2"
+      groups:
+        group_id_1:
+          allow_from:
+            - "user_alice"
+            - "user_bob"
+        group_id_2:
+          allow_from:
+            - "user_charlie"
+        "*":
+          allow_from:
+            - "user_admin"</code></pre>
+</div>
+<p><strong>نحوهٔ کار:</strong></p>
+<ol>
+  <li>‏<code>group_policy</code> و ‏<code>group_allow_from</code> تعیین می‌کنند اصلاً یک گروه مجاز باشد یا نه.</li>
+  <li>اگر گروه چک سطح‌بالایی را رد کند، فهرست ‏<code>groups.&lt;group_id&gt;.allow_from</code> ‏(در صورت وجود) بیشتر محدود می‌کند کدام فرستندگان داخل آن گروه حق تعامل دارند.</li>
+  <li>ورودی گروه wildcard ‏«"*"» پیش‌فرض گروه‌هایی است که صریحاً فهرست نشده‌اند.</li>
+  <li>ورودی‌های لیست مجاز wildcard ‏<code>*</code> برای اجازه به همهٔ کاربران را پشتیبانی می‌کنند و تطبیق ورودی‌ها حساس-به-حروف نیست.</li>
+  <li>ورودی‌ها می‌توانند اختیاری قالب پیشوندی ‏<code>wecom:user:</code> یا ‏<code>wecom:group:</code> داشته باشند — پیشوند خودکار حذف می‌شود.</li>
+</ol>
+<p>اگر برای گروهی ‏<code>allow_from</code> پیکربندی نشده باشد همهٔ کاربران آن گروه مجازند ‏(فرض: خود گروه از چک سیاست سطح‌بالا رد شده).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> پشتیبانی رسانه</h2>
+
+<h3>ورودی ‏(دریافت)</h3>
+<p>آداپتور پیوست‌های رسانه‌ای کاربران را می‌گیرد و برای پردازش ایجنت محلی کش می‌کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نوع</th><th>نحوهٔ هندل</th></tr></thead>
+  <tbody>
+    <tr><td><strong>تصاویر</strong></td><td>دانلود و کش محلی. هم تصاویر URL-محور هم base64 پشتیبانی می‌شود.</td></tr>
+    <tr><td><strong>فایل‌ها</strong></td><td>دانلود و کش. نام فایل از پیام اصلی حفظ می‌شود.</td></tr>
+    <tr><td><strong>صوت</strong></td><td>در صورت موجود بودن، رونویسی متنی پیام صوتی استخراج می‌شود.</td></tr>
+    <tr><td><strong>پیام‌های ترکیبی</strong></td><td>پیام‌های نوع-ترکیبی ویکام ‏(متن + تصاویر) parse و همهٔ مؤلفه‌ها استخراج می‌شوند.</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>پیام‌های نقل‌قولی:</strong> رسانهٔ پیام‌های نقل‌قول‌شده ‏(ریپلای‌شده) هم استخراج می‌شود تا ایجنت زمینهٔ داشته باشد کاربر به چه چیزی جواب داده.</p>
+
+<h3>Decrypt رسانهٔ رمزنگاری‌شدهٔ AES</h3>
+<p>‏WeComp بعضی پیوست‌های رسانه‌ای ورودی را با AES-256-CBC رمزنگاری می‌کند. آداپتور خودکار هندل می‌کند:</p>
+<ul>
+  <li>وقتی آیتم رسانه‌ای ورودی فیلد ‏<code>aeskey</code> دارد، آداپتور بایت‌های رمزشده را دانلود و با AES-256-CBC با padding ‏PKCS#7 decrypt می‌کند.</li>
+  <li>کلید AES همان مقدار base64-decoded فیلد aeskey است ‏(باید دقیقاً ۳۲ بایت باشد).</li>
+  <li>‏IV از ۱۶ بایت اول کلید مشتق می‌شود.</li>
+  <li>این نیازمند بستهٔ پایتونی ‏<code>cryptography</code> است ‏(<code>pip install cryptography</code>).</li>
+</ul>
+<p>پیکربندی لازم نیست — decrypt شفاف هنگام رسیدن رسانهٔ رمزشده انجام می‌شود.</p>
+
+<h3>خروجی ‏(ارسال)</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متد</th><th>چه چیزی می‌فرستد</th><th>سقف حجم</th></tr></thead>
+  <tbody>
+    <tr><td><code>send</code></td><td>پیام‌های متنی مارک‌داونی</td><td>۴۰۰۰ کاراکتر</td></tr>
+    <tr><td><code>send_image</code> / ‏<code>send_image_file</code></td><td>پیام‌های تصویری بومی</td><td>۱۰ مگابایت</td></tr>
+    <tr><td><code>send_document</code></td><td>پیوست‌های فایل</td><td>۲۰ مگابایت</td></tr>
+    <tr><td><code>send_voice</code></td><td>پیام‌های صوتی ‏(فقط AMR برای voice بومی)</td><td>۲ مگابایت</td></tr>
+    <tr><td><code>send_video</code></td><td>پیام‌های ویدیویی</td><td>۱۰ مگابایت</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>آپلود تکه‌تکه:</strong> فایل‌ها در chunk های ۵۱۲ کیلوبایتی با پروتکل سه‌مرحله‌ای آپلود می‌شوند ‏(init ← chunks ← finish). آداپتور خودکار هندل می‌کند.</p>
+<p><strong>تنزل خودکار:</strong> وقتی رسانه از سقف حجم نوع بومی عبور کند ولی زیر سقف مطلق فایل ۲۰ مگابایتی باشد، خودکار به‌عنوان پیوست فایل عمومی فرستاده می‌شود:</p>
+<ul>
+  <li>تصاویر > ۱۰ مگابایت ← به‌صورت فایل فرستاده می‌شود</li>
+  <li>ویدیوها > ۱۰ مگابایت ← به‌صورت فایل</li>
+  <li>صوت > ۲ مگابایت ← به‌صورت فایل</li>
+  <li>صدای غیر-AMR ← به‌صورت فایل ‏(ویکام فقط AMR را برای voice بومی قبول دارد)</li>
+</ul>
+<p>فایل‌های بالای سقف مطلق ۲۰ مگابایت با یک پیام اطلاع‌رسانی به چت رد می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> پاسخ‌های حالت ریپلای</h2>
+<p>وقتی بات از طریق callback ویکام پیامی می‌گیرد، آداپتور شناسهٔ درخواست ورودی را یادش می‌ماند. اگر پاسخی وقتی زمینهٔ درخواست هنوز فعال است ارسال شود، آداپتور از reply-mode ویکام ‏(<code>aibot_respond_msg</code>) استفاده می‌کند تا پاسخ مستقیماً به پیام ورودی مرتبط شود. تجربهٔ گفتگویی طبیعی‌تری در کلاینت ویکام می‌دهد.</p>
+<p>کل پاسخ به‌عنوان یک پیام واحد تحویل می‌شود — آداپتور توکن‌ها را تدریجی استریم نمی‌کند. اگر زمینهٔ درخواست ورودی منقضی یا ناموجود باشد، آداپتور به ارسال پیش‌فعال از طریق ‏<code>aibot_send_msg</code> برمی‌گردد.</p>
+<p>reply-mode برای رسانه هم کار می‌کند: رسانهٔ آپلودشده می‌تواند به‌عنوان ریپلای پیام اصلی فرستاده شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> اتصال و اتصال‌مجدد</h2>
+<p>آداپتور اتصال WebSocket دائمی به دروازهٔ ویکام روی ‏<code>wss://openws.work.weixin.qq.com</code> نگه می‌دارد.</p>
+
+<h3>چرخهٔ حیات اتصال</h3>
+<ol>
+  <li><strong>Connect:</strong> اتصال WebSocket باز و قاب احراز ‏<code>aibot_subscribe</code> با bot_id و secret فرستاده می‌شود.</li>
+  <li><strong>Heartbeat:</strong> هر ۳۰ ثانیه قاب‌های ping سطح-اپلیکیشن فرستاده می‌شود تا اتصال زنده بماند.</li>
+  <li><strong>Listen:</strong> قاب‌های ورودی پیوسته خوانده و callback های پیام dispatch می‌شوند.</li>
+</ol>
+
+<h3>رفتار اتصال‌مجدد</h3>
+<p>در قطع اتصال، آداپتور با backoff نمایی reconnect می‌کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>تلاش</th><th>تأخیر</th></tr></thead>
+  <tbody>
+    <tr><td>تلاش اول</td><td>۲ ثانیه</td></tr>
+    <tr><td>تلاش دوم</td><td>۵ ثانیه</td></tr>
+    <tr><td>تلاش سوم</td><td>۱۰ ثانیه</td></tr>
+    <tr><td>تلاش چهارم</td><td>۳۰ ثانیه</td></tr>
+    <tr><td>تلاش پنجم+</td><td>۶۰ ثانیه</td></tr>
+  </tbody>
+</table>
+</div>
+<p>بعد از هر اتصال‌مجدد موفق شمارندهٔ backoff صفر می‌شود. همهٔ future های درخواست در انتظار هنگام قطع fail می‌شوند تا فراخواننده‌ها بی‌نهایت معلق نمانند.</p>
+
+<h3>حذف تکرار</h3>
+<p>پیام‌های ورودی با شناسهٔ پیام با پنجرهٔ ۵ دقیقه‌ای و کش حداکثر ۱۰۰۰ رکورد dedupe می‌شوند. مانع پردازش دوبارهٔ پیام‌ها حین reconnect یا لغزش شبکه می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> همهٔ متغیرهای محیطی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>لازم</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>WECOM_BOT_ID</code></td><td>✅</td><td>—</td><td>شناسهٔ AI Bot ویکام</td></tr>
+    <tr><td><code>WECOM_SECRET</code></td><td>✅</td><td>—</td><td>رمز AI Bot ویکام</td></tr>
+    <tr><td><code>WECOM_ALLOWED_USERS</code></td><td>—</td><td><em>(خالی)</em></td><td>شناسه‌های کاربر جداشده با ویرگول برای لیست مجاز سطح-گیت‌وی</td></tr>
+    <tr><td><code>WECOM_HOME_CHANNEL</code></td><td>—</td><td>—</td><td>Chat ID برای خروجی کرون/اعلان</td></tr>
+    <tr><td><code>WECOM_WEBSOCKET_URL</code></td><td>—</td><td><code>wss://openws.work.weixin.qq.com</code></td><td>URL دروازهٔ WebSocket</td></tr>
+    <tr><td><code>WECOM_DM_POLICY</code></td><td>—</td><td><code>open</code></td><td>سیاست دسترسی DM</td></tr>
+    <tr><td><code>WECOM_GROUP_POLICY</code></td><td>—</td><td><code>open</code></td><td>سیاست دسترسی گروهی</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> عیب‌یابی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مشکل</th><th>راه‌حل</th></tr></thead>
+  <tbody>
+    <tr><td>‏<code>WECOM_BOT_ID and WECOM_SECRET are required</code></td><td>هر دو env را تنظیم یا در ویزارد setup پیکربندی کنید</td></tr>
+    <tr><td>‏<code>WeCom startup failed: aiohttp not installed</code></td><td>نصب aiohttp: ‏<code>pip install aiohttp</code></td></tr>
+    <tr><td>‏<code>WeCom startup failed: httpx not installed</code></td><td>نصب httpx: ‏<code>pip install httpx</code></td></tr>
+    <tr><td>‏<code>invalid secret (errcode=40013)</code></td><td>تأیید کنید رمز با اعتبارنامه‌های بات بخواند</td></tr>
+    <tr><td>‏<code>Timed out waiting for subscribe acknowledgement</code></td><td>اتصال شبکه به ‏<code>openws.work.weixin.qq.com</code> را چک کنید</td></tr>
+    <tr><td>بات در گروه‌ها جواب نمی‌دهد</td><td>تنظیم ‏<code>group_policy</code> را چک و مطمئن شوید شناسهٔ گروه در ‏<code>group_allow_from</code> است</td></tr>
+    <tr><td>بات بعضی کاربران گروه را نادیده می‌گیرد</td><td>فهرست‌های ‏<code>allow_from</code> به‌ازای-گروه را در بخش ‏<code>groups</code> پیکربندی چک کنید</td></tr>
+    <tr><td>decrypt رسانه شکست می‌خورد</td><td>نصب ‏cryptography: ‏<code>pip install cryptography</code></td></tr>
+    <tr><td>‏<code>cryptography is required for WeCom media decryption</code></td><td>رسانهٔ ورودی AES-رمزنگاری‌شده است. نصب کنید: ‏<code>pip install cryptography</code></td></tr>
+    <tr><td>پیام‌های صوتی به‌عنوان فایل فرستاده می‌شوند</td><td>ویکام فقط AMR را برای voice بومی قبول دارد. سایر فرمت‌ها خودکار به فایل تنزل می‌یابند.</td></tr>
+    <tr><td>خطای ‏<code>File too large</code></td><td>ویکام سقف مطلق ۲۰ مگابایتی برای همهٔ آپلودها دارد. فایل را فشرده یا تقسیم کنید.</td></tr>
+    <tr><td>تصاویر به‌عنوان فایل فرستاده می‌شوند</td><td>تصاویر > ۱۰ مگابایت از سقف تصویر بومی می‌گذرند و خودکار به پیوست فایل تنزل می‌یابند.</td></tr>
+    <tr><td>‏<code>Timeout sending message to WeCom</code></td><td>احتمالاً WebSocket قطع شده. لاگ‌ها را برای پیام‌های اتصال‌مجدد چک کنید.</td></tr>
+    <tr><td>‏<code>WeCom websocket closed during authentication</code></td><td>مشکل شبکه یا اعتبارنامه اشتباه. bot_id و secret را تأیید کنید.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<div class="pager">
+  <a href="open-webui.html"><span class="dir">→ قبلی</span><span class="ttl">Open WebUI</span></a>
+  <a class="next" href="weixin.html"><span class="dir">بعدی ←</span><span class="ttl">Weixin ‏(WeChat)</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/wecom" target="_blank" rel="noopener">WeCom (Enterprise WeChat)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

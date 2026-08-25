@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weixin ‏(WeChat) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/weixin" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>Weixin ‏(WeChat)</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>‏Weixin ‏(WeChat)</h1>
+<p>هرمس را به ‏<a href="https://weixin.qq.com/" target="_blank" rel="noopener">WeChat</a> ‏(微信)، پلتفرم پیام‌رسانی شخصی تنسنت، وصل کنید. آداپتور از ‏<strong>‏iLink Bot API</strong> تنسنت برای حساب‌های شخصی WeChat استفاده می‌کند — این جدا از WeCom ‏(وی‌چت سازمانی) است. پیام‌ها با long-polling تحویل می‌شوند، پس endpoint عمومی یا وب‌هوک لازم نیست.</p>
+<div class="callout note">
+  <div class="callout-title">📌 نکته</div>
+  <p>این آداپتور برای <strong>حساب‌های شخصی WeChat</strong> است. اگر وی‌چت سازمانی می‌خواهید، به‌جایش <a href="wecom.html">آداپتور WeCom</a> را ببینید.</p>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هویت بات iLink — گروه‌های عادی ویکام ممکن است کار نکنند</div>
+  <p>ورود QR هرمس را به یک <strong>هویت بات iLink</strong> ‏(مثل ‏<code>a5ace6fd482e@im.bot</code>) وصل می‌کند، <strong>نه</strong> یک حساب شخصی عادیِ کاملاً قابل‌اسکریپت. پیامدها:</p>
+  <ul>
+    <li>هویت بات iLink معمولاً <strong>نمی‌تواند مثل یک مخاطب عادی به گروه‌های عادی ویکام دعوت شود</strong>.</li>
+    <li>‏iLink معمولاً <strong>رویدادهای گروه عادی ویکام را</strong> ‏(شامل @منشن‌های حساب شخصیِ اسکن‌کنندهٔ QR) برای بیشتر حساب‌های نوع-بات به گیت‌وی تحویل نمی‌دهد.</li>
+    <li>@منشن‌کردن حساب شخصی ویکامی که QR را اسکن کرده <strong>همان</strong> @منشن‌کردن بات iLink <strong>نیست</strong> — بات یک هویت جداگانه است.</li>
+    <li>تنظیمات ‏<code>WEIXIN_GROUP_POLICY</code>/<code>WEIXIN_GROUP_ALLOWED_USERS</code> پایین فقط وقتی اثر دارند که iLink واقعاً رویدادهای گروهی را برای نوع حسابتان برگرداند. اگر ندهد، مستقل از سیاست، پیام‌های گروهی هرگز به هرمس نمی‌رسند.</li>
+  </ul>
+  <p>در عمل بیشتر استقرارها فقط DM به بات iLink را مطمئن کار می‌کنند. اگر بعد از پیکربندی تحویل گروهی کار نکرد، محدودیت سمت iLink است نه هرمس. گیت‌وی هر وقت ‏<code>WEIXIN_GROUP_POLICY</code> چیزی غیر از ‏<code>disabled</code> باشد در شروع یک ‏WARNING لاگ می‌کند.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li>یک حساب شخصی WeChat</li>
+  <li>بسته‌های پایتونی: ‏<code>aiohttp</code> و ‏<code>cryptography</code></li>
+  <li>رندر QR ترمینال با نصب هرمس همراه extra ‏<code>messaging</code> موجود است</li>
+</ul>
+<p>وابستگی‌های لازم را نصب کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>pip install aiohttp cryptography
+# اختیاری: برای نمایش کد QR در ترمینال
+cd ~/.hermes/hermes-agent && uv pip install -e ".[messaging]"</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> راه‌اندازی</h2>
+
+<h3>۱. اجرای ویزارد راه‌اندازی</h3>
+<p>ساده‌ترین راه اتصال حسابتان، راه‌اندازی تعاملی است:</p>
+<div class="codebox"><pre><code>hermes gateway setup</code></pre></div>
+<p>هنگام پرسش <strong>Weixin</strong> را انتخاب کنید. ویزارد:</p>
+<ol>
+  <li>کد QR را از iLink Bot API درخواست می‌کند</li>
+  <li>کد QR را در ترمینال نمایش می‌دهد ‏(یا URL می‌دهد)</li>
+  <li>منتظر اسکن QR با اپ موبایل ویکام می‌ماند</li>
+  <li>تأیید ورود روی گوشی از شما می‌خواهد</li>
+  <li>اعتبارنامه‌های حساب را خودکار در ‏<code>~/.hermes/weixin/accounts/</code> ذخیره می‌کند</li>
+</ol>
+<p>بعد از تأیید چیزی شبیه این می‌بینید:</p>
+<div class="codebox"><pre><code>微信连接成功，account_id=your-account-id</code></pre></div>
+<p>ویزارد ‏<code>account_id</code>، ‏<code>token</code> و ‏<code>base_url</code> را ذخیره می‌کند تا لازم نباشد دستی پیکربندی کنید.</p>
+
+<h3>۲. پیکربندی متغیرهای محیطی</h3>
+<p>بعد از ورود اولیهٔ QR، دست‌کم شناسهٔ حساب را در ‏<code>~/.hermes/.env</code> تنظیم کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>WEIXIN_ACCOUNT_ID=your-account-id
+
+# اختیاری: override توکن (معمولاً خودکار از ورود QR ذخیره می‌شود)
+# WEIXIN_TOKEN=your-bot-token
+
+# اختیاری: محدودکردن دسترسی
+WEIXIN_DM_POLICY=open
+WEIXIN_ALLOWED_USERS=user_id_1,user_id_2
+
+# اختیاری: بازگرداندن رفتار قدیمی تقسیم چندخطی
+# WEIXIN_SPLIT_MULTILINE_MESSAGES=true
+
+# اختیاری: کانال خانگی برای کرون/اعلان‌ها
+WEIXIN_HOME_CHANNEL=chat_id
+WEIXIN_HOME_CHANNEL_NAME=Home</code></pre>
+</div>
+
+<h3>۳. شروع گیت‌وی</h3>
+<div class="codebox"><pre><code>hermes gateway</code></pre></div>
+<p>آداپتور اعتبارنامه‌های ذخیره‌شده را بازیابی، به API آیلینک وصل و long-polling پیام‌ها را شروع می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> قابلیت‌ها</h2>
+<ul>
+  <li><strong>ترنسپورت long-poll</strong> — بدون endpoint عمومی، وب‌هوک یا WebSocket</li>
+  <li><strong>ورود با کد QR</strong> — setup اسکن‌و-وصل با ‏<code>hermes gateway setup</code></li>
+  <li><strong>پیام‌رسانی DM</strong> — سیاست‌های دسترسی قابل‌پیکربندی؛ پیام گروهی به تحویل واقعی رویدادهای گروهی توسط iLink برای هویت متصل وابسته است ‏(اغلب برای حساب‌های بات iLink چنین نیست — هشدار بالای صفحه)</li>
+  <li><strong>پشتیبانی رسانه</strong> — تصویر، ویدیو، فایل و پیام صوتی</li>
+  <li><strong>‏CDN رمزنگاری AES-128-ECB</strong> — رمزنگاری/رمزگشایی خودکار همهٔ انتقالات رسانه</li>
+  <li><strong>ماندگاری توکن زمینه</strong> — تداوم ریپلای دیسک-محور بین ری‌استارت‌ها</li>
+  <li><strong>قالب‌بندی مارک‌داون</strong> — مارک‌داون حفظ می‌شود شامل تیترها، جدول‌ها و بلوک‌های کد تا کلاینت‌های ویکامِ پشتیبان مارک‌داون بومی رندر کنند</li>
+  <li><strong>تکه‌تکه‌کردن هوشمند پیام</strong> — پیام‌ها زیر سقف یک حباب واحد می‌مانند؛ فقط payload های بزرگ در مرزهای منطقی تقسیم می‌شوند</li>
+  <li><strong>نشانگر تایپ</strong> — حین پردازش ایجنت وضعیت «typing…» در کلاینت ویکام نشان داده می‌شود</li>
+  <li><strong>محافظ SSRF</strong> — URL های رسانهٔ خروجی قبل از دانلود اعتبارسنجی می‌شوند</li>
+  <li><strong>حذف تکرار پیام</strong> — پنجرهٔ لغزان ۵ دقیقه‌ای مانع پردازش دوباره می‌شود</li>
+  <li><strong>retry خودکار با backoff</strong> — بازیابی از خطاهای گذرای API</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گزینه‌های پیکربندی</h2>
+<p>این‌ها را در config.yaml زیر ‏<code>platforms.weixin.extra</code> تنظیم کنید:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>account_id</code></td><td>—</td><td>شناسهٔ حساب iLink Bot ‏(الزامی)</td></tr>
+    <tr><td><code>token</code></td><td>—</td><td>توکن iLink Bot ‏(الزامی، خودکار از ورود QR ذخیره می‌شود)</td></tr>
+    <tr><td><code>base_url</code></td><td><code>https://ilinkai.weixin.qq.com</code></td><td>URL پایهٔ API آیلینک</td></tr>
+    <tr><td><code>cdn_base_url</code></td><td><code>https://novac2c.cdn.weixin.qq.com/c2c</code></td><td>URL پایهٔ CDN برای انتقال رسانه</td></tr>
+    <tr><td><code>dm_policy</code></td><td><code>open</code></td><td>دسترسی DM: ‏<code>open</code>، ‏<code>allowlist</code>، ‏<code>disabled</code>، ‏<code>pairing</code></td></tr>
+    <tr><td><code>group_policy</code></td><td><code>disabled</code></td><td>دسترسی گروهی: ‏<code>open</code>، ‏<code>allowlist</code>، ‏<code>disabled</code></td></tr>
+    <tr><td><code>allow_from</code></td><td><code>[]</code></td><td>شناسه‌های کاربر مجاز DM ‏(وقتی dm_policy=allowlist)</td></tr>
+    <tr><td><code>group_allow_from</code></td><td><code>[]</code></td><td>شناسه‌های گروه مجاز ‏(وقتی group_policy=allowlist)</td></tr>
+    <tr><td><code>split_multiline_messages</code></td><td><code>false</code></td><td>با ‏<code>true</code> ریپلای‌های چندخطی به چند پیام چت تقسیم می‌شوند ‏(رفتار قدیمی). با ‏<code>false</code> ریپلای چندخطی تا عبور از سقف طول یک پیام می‌ماند.</td></tr>
+    <tr><td><code>text_batch_delay_seconds</code></td><td><code>3.0</code></td><td>دورهٔ سکوت ‏(ثانیه) پیش از flush رگبار سریع پیام‌های متنی به‌صورت یک درخواست ترکیبی. iLink هر پیام را جدا تحویل می‌دهد، پس این debounce مانع یک فراخوانی ایجنت به‌ازای هر قطعه می‌شود. برای ارسال فوری هر پیام ‏<code>0</code> کنید.</td></tr>
+    <tr><td><code>text_batch_split_delay_seconds</code></td><td><code>5.0</code></td><td>تأخیر flush طولانی‌شده وقتی آخرین قطعه نزدیک آستانهٔ تقسیم است ‏(پیام‌های بلندی که iLink ممکن است chunk کرده باشد).</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> سیاست‌های دسترسی</h2>
+
+<h3>سیاست DM</h3>
+<p>کنترل می‌کند چه کسی می‌تواند به بات DM بدهد:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مقدار</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>open</code></td><td>هر کسی می‌تواند DM بدهد ‏(پیش‌فرض)</td></tr>
+    <tr><td><code>allowlist</code></td><td>فقط شناسه‌های داخل ‏<code>allow_from</code> حق DM دارند</td></tr>
+    <tr><td><code>disabled</code></td><td>همهٔ DM ها نادیده گرفته می‌شوند</td></tr>
+    <tr><td><code>pairing</code></td><td>حالت جفت‌سازی ‏(راه‌اندازی اولیه)</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="codebox"><pre><code>WEIXIN_DM_POLICY=allowlist
+WEIXIN_ALLOWED_USERS=user_id_1,user_id_2</code></pre></div>
+<p>‏<code>WEIXIN_ALLOWED_USERS</code> یک <strong>فیلتر ورودی</strong> است نه سیستم دعوت. ورود QR یک هویت بات iLink را به هرمس وصل می‌کند. افراد دیگر QR هرمس را با حسابتان اسکن نمی‌کنند؛ باید از طریق ویکام به بات/مخاطبِ iLink متصل پیام بدهند و هرمس فقط وقتی فرستنده را پردازش می‌کند که شناسهٔ کاربری Weixin او در ‏<code>WEIXIN_ALLOWED_USERS</code> باشد.</p>
+<p>جریان عملی راه‌اندازی:</p>
+<ol>
+  <li>هرمس را یک‌بار با ‏<code>hermes gateway setup</code> جفت کنید و حساب بات iLink متصل را یادداشت کنید.</li>
+  <li>هر کاربر مجاز یک پیام خصوصی به آن بات/مخاطب بدهد.</li>
+  <li>شناسهٔ فرستنده/کاربر را از لاگ‌های گیت‌وی یا payload رویداد ورودی بخوانید.</li>
+  <li>آن شناسه‌ها را به ‏<code>WEIXIN_ALLOWED_USERS</code> بیفزایید و گیت‌وی را ری‌استارت کنید.</li>
+</ol>
+<p>اگر فقط حسابِ اسکن‌کنندهٔ QR می‌تواند با هرمس حرف بزند، تأیید کنید سایر کاربران به خود هویت بات iLink پیام می‌دهند نه به حساب شخصی ویکامی که ورود QR را انجام داده. بات iLink هویت جداگانه‌ای است و مسیریابی مخاطب/گروه عادی ویکام ممکن است توسط رفتار iLink تنسنت محدود شود.</p>
+
+<h3>سیاست گروهی</h3>
+<p>کنترل می‌کند بات در چه گروه‌هایی پاسخ دهد <strong>وقتی iLink برای هویت متصل رویدادهای گروهی تحویل دهد</strong>. برای هویت‌های بات iLink حاصل ورود QR ‏(مثل ‏<code>...@im.bot</code>) معمولاً اصلاً رویداد گروهی تحویل نمی‌شود، پس ممکن است این سیاست هیچ اثری نداشته باشد — هشدار محدودیت iLink بالای صفحه را ببینید.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مقدار</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>open</code></td><td>بات در همهٔ گروه‌ها پاسخ می‌دهد ‏(اگر رویدادها تحویل شوند)</td></tr>
+    <tr><td><code>allowlist</code></td><td>بات فقط در شناسه‌های گروهِ ‏<code>group_allow_from</code> پاسخ می‌دهد ‏(اگر رویدادها تحویل شوند)</td></tr>
+    <tr><td><code>disabled</code></td><td>همهٔ پیام‌های گروه نادیده گرفته می‌شوند ‏(پیش‌فرض)</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="codebox"><pre><code>WEIXIN_GROUP_POLICY=allowlist
+# توجه: این فهرست جداشده با ویرگول از «شناسه‌های چت گروهی» است، نه شناسه‌های کاربر عضو،
+# با اینکه نام متغیر USERS دارد. هنگام پیکربندی این را در نظر داشته باشید.
+WEIXIN_GROUP_ALLOWED_USERS=group_id_1,group_id_2</code></pre></div>
+<div class="callout note">
+  <div class="callout-title">📌 یادداشت</div>
+  <p>سیاست گروهی پیش‌فرض برای ویکسین ‏<code>disabled</code> است ‏(برخلاف ویکام که پیش‌فرضش ‏<code>open</code> است). عمدی است — حساب‌های شخصی WeChat ممکن است در گروه‌های زیادی باشند و هویت‌های بات iLink معمولاً اصلاً نمی‌توانند پیام‌های گروه عادی ویکام بگیرند. اگر ‏<code>WEIXIN_GROUP_POLICY</code> را غیر از ‏<code>disabled</code> بگذارید گیت‌وی هنگام شروع WARNING لاگ می‌کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> پشتیبانی رسانه</h2>
+
+<h3>ورودی ‏(دریافت)</h3>
+<p>آداپتور پیوست‌های رسانه‌ای کاربران را دریافت، از CDN ویکام دانلود، decrypt و برای پردازش ایجنت محلی کش می‌کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نوع</th><th>نحوهٔ هندل</th></tr></thead>
+  <tbody>
+    <tr><td><strong>تصاویر</strong></td><td>دانلود، decrypt با AES و کش به‌صورت JPEG.</td></tr>
+    <tr><td><strong>ویدیو</strong></td><td>دانلود، decrypt و کش به‌صورت MP4.</td></tr>
+    <tr><td><strong>فایل‌ها</strong></td><td>دانلود، decrypt و کش. نام فایل اصلی حفظ می‌شود.</td></tr>
+    <tr><td><strong>صوت</strong></td><td>اگر رونویسی متنی موجود باشد به‌عنوان متن استخراج می‌شود. وگرنه صدا ‏(فرمت SILK) دانلود و کش می‌شود.</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>پیام‌های نقل‌قولی:</strong> رسانهٔ پیام‌های نقل‌قول‌شده هم استخراج می‌شود تا ایجنت زمینهٔ داشته باشد کاربر به چه جواب داده.</p>
+
+<h3>‏CDN رمزنگاری‌شدهٔ AES-128-ECB</h3>
+<p>فایل‌های رسانه‌ای ویکام از طریق CDN رمزنگاری‌شده منتقل می‌شوند. آداپتور شفاف هندل می‌کند:</p>
+<ul>
+  <li><strong>ورودی:</strong> رسانهٔ رمزشده با URLهای ‏<code>encrypted_query_param</code> از CDN دانلود و با AES-128-ECB با کلید به‌ازای-فایل داخل payload پیام decrypt می‌شود.</li>
+  <li><strong>خروجی:</strong> فایل‌ها محلی با کلید تصادفی AES-128-ECB رمز، روی CDN آپلود و مرجع رمزشده در پیام خروجی گنجانده می‌شود.</li>
+  <li>کلید AES ۱۶ بایت ‏(۱۲۸ بیت) است. کلیدها ممکن است base64 خام یا hex برسند — آداپتور هر دو فرمت را هندل می‌کند.</li>
+  <li>نیازمند بستهٔ پایتونی ‏<code>cryptography</code> است.</li>
+</ul>
+<p>پیکربندی لازم نیست — رمزنگاری و رمزگشایی خودکار انجام می‌شود.</p>
+
+<h3>خروجی ‏(ارسال)</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متد</th><th>چه چیزی می‌فرستد</th></tr></thead>
+  <tbody>
+    <tr><td><code>send</code></td><td>پیام‌های متنی با قالب‌بندی مارک‌داون</td></tr>
+    <tr><td><code>send_image</code> / ‏<code>send_image_file</code></td><td>پیام‌های تصویری بومی ‏(با آپلود CDN)</td></tr>
+    <tr><td><code>send_document</code></td><td>پیوست‌های فایل ‏(با آپلود CDN)</td></tr>
+    <tr><td><code>send_video</code></td><td>پیام‌های ویدیویی ‏(با آپلود CDN)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>همهٔ رسانه‌های خروجی از جریان آپلود CDN رمزنگاری‌شده می‌روند:</p>
+<ol>
+  <li>تولید کلید تصادفی AES-128</li>
+  <li>رمزنگاری فایل با AES-128-ECB + ‏padding ‏PKCS#7</li>
+  <li>درخواست URL آپلود از API آیلینک ‏(<code>getuploadurl</code>)</li>
+  <li>آپلود ciphertext روی CDN</li>
+  <li>ارسال پیام با مرجع رسانهٔ رمزشده</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> ماندگاری توکن زمینه</h2>
+<p>‏API بات iLink نیازمند است یک ‏<code>context_token</code> با هر پیام خروجی برای هر همتا بازتاب داده شود. آداپتور یک مخزن توکن زمینهٔ دیسک-محور نگه می‌دارد:</p>
+<ul>
+  <li>توکن‌ها به‌ازای حساب+همتا در ‏<code>~/.hermes/weixin/accounts/&lt;account_id&gt;.context-tokens.json</code> ذخیره می‌شوند</li>
+  <li>هنگام شروع توکن‌های ذخیره‌شده قبلی بازیابی می‌شوند</li>
+  <li>هر پیام ورودی توکن ذخیره‌شدهٔ آن فرستنده را به‌روز می‌کند</li>
+  <li>پیام‌های خروجی خودکار آخرین توکن زمینه را شامل می‌شوند</li>
+</ul>
+<p>این تداوم ریپلای را حتی بعد از ری‌استارت گیت‌وی تضمین می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> قالب‌بندی مارک‌داون</h2>
+<p>کلاینت‌های ویکام متصل از طریق iLink Bot API مارک‌داون را مستقیم رندر می‌کنند، پس آداپتور مارک‌داون را حفظ می‌کند نه بازنویسی:</p>
+<ul>
+  <li><strong>تیترها</strong> به‌صورت heading مارک‌داون می‌مانند ‏(<code>#</code>، ‏<code>##</code> و...)</li>
+  <li><strong>جدول‌ها</strong> به‌صورت جدول مارک‌داون می‌مانند</li>
+  <li><strong>بلوک‌های کد</strong> به‌صورت code fence محصور می‌مانند</li>
+  <li><strong>خط‌های خالی مفرط</strong> بیرون بلوک‌های کد به دو خط‌جدید فشرده می‌شوند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> تکه‌تکه‌کردن پیام</h2>
+<p>پیام‌ها هرجا در سقف پلتفرم جا شوند به‌صورت یک پیام چت واحد تحویل می‌گیرند. فقط payload های بزرگ‌تر برای ارسال تقسیم می‌شوند:</p>
+<ul>
+  <li>حداکثر طول پیام: <strong>۴۰۰۰ کاراکتر</strong></li>
+  <li>پیام‌های زیر سقف حتی با چند پاراگراف یا خط‌جدید دست‌نخورده می‌مانند</li>
+  <li>پیام‌های بزرگ در مرزهای منطقی تقسیم می‌شوند ‏(پاراگراف‌ها، خطوط خالی، code fence ها)</li>
+  <li>بلوک‌های کد هرجا ممکن دست‌نخورده نگه داشته می‌شوند ‏(هرگز وسط بلوک تقسیم نمی‌شوند مگر خود fence از سقف بگذرد)</li>
+  <li>بلوک‌های فردِ بزرگ به منطق برشِ آداپتور پایه برمی‌گردند</li>
+  <li>تأخیر ۰٫۳ ثانیه‌ای بین تکه‌ها مانع drop شدن به‌خاطر rate-limit ویکام هنگام ارسال چندتکه می‌شود</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> نشانگر تایپ</h2>
+<p>آداپتور وضعیت تایپ را در کلاینت ویکام نشان می‌دهد:</p>
+<ol>
+  <li>وقتی پیامی می‌رسد آداپتور ‏<code>typing_ticket</code> را از طریق API ‏<code>getconfig</code> می‌گیرد</li>
+  <li>تیکت‌های تایپ ۱۰ دقیقه به‌ازای هر کاربر کش می‌شوند</li>
+  <li>‏<code>send_typing</code> سیگنال شروع تایپ و ‏<code>stop_typing</code> سیگنال توقف می‌فرستد</li>
+  <li>گیت‌وی حین پردازش پیام توسط ایجنت خودکار نشانگر تایپ را تریگر می‌کند</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> اتصال Long-Poll</h2>
+<p>آداپتور برای دریافت پیام از HTTP long-polling استفاده می‌کند ‏(نه WebSocket):</p>
+<h3>نحوهٔ کار</h3>
+<ol>
+  <li><strong>Connect:</strong> اعتبارنامه‌ها را تأیید و حلقهٔ poll را شروع می‌کند</li>
+  <li><strong>Poll:</strong> ‏<code>getupdates</code> را با timeout ۳۵ ثانیه صدا می‌زند؛ سرور درخواست را نگه می‌دارد تا پیام برسد یا timeout تمام شود</li>
+  <li><strong>Dispatch:</strong> پیام‌های ورودی هم‌زمان با ‏<code>asyncio.create_task</code> dispatch می‌شوند</li>
+  <li><strong>بافر sync:</strong> نشانگر sync دائمی ‏(<code>get_updates_buf</code>) روی دیسک ذخیره می‌شود تا آداپتور بعد از ری‌استارت از موقعیت درست ادامه دهد</li>
+</ol>
+<h3>رفتار retry</h3>
+<p>در خطاهای API آداپتور استراتژی retry ساده‌ای دارد:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>شرط</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td>خطای گذرا ‏(اول–دوم)</td><td>retry بعد از ۲ ثانیه</td></tr>
+    <tr><td>خطاهای مکرر ‏(سوم+)</td><td>۳۰ ثانیه backoff، بعد ریست شمارنده</td></tr>
+    <tr><td>نشست منقضی ‏(<code>errcode=-14</code>)</td><td>توقف ۱۰ دقیقه ‏(احتمالاً ورود مجدد لازم است)</td></tr>
+    <tr><td>Timeout</td><td>بلافاصله دوباره poll ‏(رفتار عادی long-poll)</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>حذف تکرار</h3>
+<p>پیام‌های ورودی با شناسهٔ پیام با پنجرهٔ ۵ دقیقه‌ای dedupe می‌شوند. مانع پردازش دوباره در لغزش شبکه یا هم‌پوشانی پاسخ‌های poll.</p>
+<h3>قفل توکن</h3>
+<p>در هر لحظه فقط یک نمونهٔ گیت‌وی ویکسین می‌تواند از یک توکن استفاده کند. آداپتور هنگام شروع قفل scoped می‌گیرد و هنگام خاموشی آزاد می‌کند. اگر گیت‌وی دیگری همان توکن را استفاده کند، شروع با پیام خطای گویا شکست می‌خورد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> همهٔ متغیرهای محیطی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>لازم</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>WEIXIN_ACCOUNT_ID</code></td><td>✅</td><td>—</td><td>شناسهٔ حساب iLink Bot ‏(از ورود QR)</td></tr>
+    <tr><td><code>WEIXIN_TOKEN</code></td><td>✅</td><td>—</td><td>توکن iLink Bot ‏(خودکار از ورود QR ذخیره می‌شود)</td></tr>
+    <tr><td><code>WEIXIN_BASE_URL</code></td><td>—</td><td><code>https://ilinkai.weixin.qq.com</code></td><td>URL پایهٔ API آیلینک</td></tr>
+    <tr><td><code>WEIXIN_CDN_BASE_URL</code></td><td>—</td><td><code>https://novac2c.cdn.weixin.qq.com/c2c</code></td><td>URL پایهٔ CDN برای انتقال رسانه</td></tr>
+    <tr><td><code>WEIXIN_DM_POLICY</code></td><td>—</td><td><code>open</code></td><td>سیاست دسترسی DM: ‏<code>open</code>، ‏<code>allowlist</code>، ‏<code>disabled</code>، ‏<code>pairing</code></td></tr>
+    <tr><td><code>WEIXIN_GROUP_POLICY</code></td><td>—</td><td><code>disabled</code></td><td>سیاست دسترسی گروهی: ‏<code>open</code>، ‏<code>allowlist</code>، ‏<code>disabled</code></td></tr>
+    <tr><td><code>WEIXIN_ALLOWED_USERS</code></td><td>—</td><td><em>(خالی)</em></td><td>شناسه‌های کاربر جداشده با ویرگول برای لیست مجاز DM</td></tr>
+    <tr><td><code>WEIXIN_GROUP_ALLOWED_USERS</code></td><td>—</td><td><em>(خالی)</em></td><td><strong>شناسه‌های چت گروهی</strong> جداشده با ویرگول ‏(نه شناسه‌های کاربر) برای لیست مجاز گروه. نام متغیر میراثی است — شناسهٔ گروه انتظار دارد نه شناسهٔ کاربر.</td></tr>
+    <tr><td><code>WEIXIN_HOME_CHANNEL</code></td><td>—</td><td>—</td><td>Chat ID برای خروجی کرون/اعلان</td></tr>
+    <tr><td><code>WEIXIN_HOME_CHANNEL_NAME</code></td><td>—</td><td><code>Home</code></td><td>نام نمایشی کانال خانگی</td></tr>
+    <tr><td><code>WEIXIN_ALLOW_ALL_USERS</code></td><td>—</td><td>—</td><td>فلگ سطح-گیت‌وی اجازه به همهٔ کاربران ‏(ویزارد setup استفاده می‌کند)</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> عیب‌یابی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مشکل</th><th>راه‌حل</th></tr></thead>
+  <tbody>
+    <tr><td>‏<code>Weixin startup failed: aiohttp and cryptography are required</code></td><td>هر دو را نصب کنید: ‏<code>pip install aiohttp cryptography</code></td></tr>
+    <tr><td>‏<code>Weixin startup failed: WEIXIN_TOKEN is required</code></td><td>‏<code>hermes gateway setup</code> را برای تکمیل ورود QR اجرا یا ‏<code>WEIXIN_TOKEN</code> را دستی تنظیم کنید</td></tr>
+    <tr><td>‏<code>Weixin startup failed: WEIXIN_ACCOUNT_ID is required</code></td><td>‏<code>WEIXIN_ACCOUNT_ID</code> را در .env بگذارید یا ‏<code>hermes gateway setup</code> را اجرا کنید</td></tr>
+    <tr><td>‏<code>Another local Hermes gateway is already using this Weixin token</code></td><td>اول نمونهٔ دیگر گیت‌وی را متوقف کنید — فقط یک poller به‌ازای هر توکن مجاز است</td></tr>
+    <tr><td>نشست منقضی ‏(<code>errcode=-14</code>)</td><td>نشست ورودتان منقضی شده. ‏<code>hermes gateway setup</code> را برای اسکن QR جدید دوباره اجرا کنید</td></tr>
+    <tr><td>کد QR حین setup منقضی شد</td><td>QR تا ۳ بار خودش refresh می‌شود. اگر مدام منقضی شد اتصال شبکه‌تان را چک کنید</td></tr>
+    <tr><td>بات به DM ها جواب نمی‌دهد</td><td>‏<code>WEIXIN_DM_POLICY</code> را چک کنید — اگر ‏<code>allowlist</code> است فرستنده باید در ‏<code>WEIXIN_ALLOWED_USERS</code> باشد</td></tr>
+    <tr><td>بات پیام‌های گروهی را نادیده می‌گیرد</td><td>سیاست گروه پیش‌فرض ‏<code>disabled</code> است. ‏<code>WEIXIN_GROUP_POLICY=open</code> یا ‏<code>allowlist</code> بگذارید — اما توجه: هویت‌های بات iLink حاصل ورود QR ‏(<code>...@im.bot</code>) معمولاً اصلاً نمی‌توانند پیام‌های گروه عادی ویکام بگیرند. اگر لاگ‌های گیت‌وی هیچ رویداد خام ورودی برای پیام‌های گروهی نشان ندهند، محدودیت سمت iLink است نه هرمس.</td></tr>
+    <tr><td>دانلود/آپلود رسانه شکست می‌خورد</td><td>مطمئن شوید ‏cryptography نصب است. دسترسی شبکه به ‏<code>novac2c.cdn.weixin.qq.com</code> را چک کنید</td></tr>
+    <tr><td>‏<code>Blocked unsafe URL (SSRF protection)</code></td><td>URL رسانهٔ خروجی به آدرس خصوصی/داخلی اشاره دارد. فقط URLهای عمومی مجازند</td></tr>
+    <tr><td>پیام‌های صوتی به‌صورت متن نشان داده می‌شوند</td><td>اگر ویکام رونویسی بدهد آداپتور از متن استفاده می‌کند. رفتار موردانتظار است</td></tr>
+    <tr><td>پیام‌ها تکراری دیده می‌شوند</td><td>آداپتور با شناسهٔ پیام dedupe می‌کند. اگر تکرار می‌بینید چک کنید چند نمونه گیت‌وی اجراست</td></tr>
+    <tr><td>‏<code>iLink POST ... HTTP 4xx/5xx</code></td><td>خطای API از سرویس iLink. اعتبار توکن و اتصال شبکه را چک کنید</td></tr>
+    <tr><td>کد QR ترمینال رندر نمی‌شود</td><td>با extra messaging دوباره نصب کنید: ‏<code>cd ~/.hermes/hermes-agent && uv pip install -e ".[messaging]"</code>. روش جایگزین: URL چاپ‌شده بالای QR را باز کنید</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<div class="pager">
+  <a href="wecom.html"><span class="dir">→ قبلی</span><span class="ttl">WeCom ‏(وی‌چت سازمانی)</span></a>
+  <a class="next" href="yuanbao.html"><span class="dir">بعدی ←</span><span class="ttl">Yuanbao</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/weixin" target="_blank" rel="noopener">Weixin (WeChat)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

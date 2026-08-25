@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Assistant — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/homeassistant" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>Home Assistant</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>یکپارچه‌سازی Home Assistant</h1>
+<p>هرمس ایجنت به دو شکل با <a href="https://www.home-assistant.io/" target="_blank" rel="noopener">Home Assistant</a> یکپارچه می‌شود:</p>
+<ol>
+  <li><strong>پلتفرم گیت‌وی</strong> — با WebSocket روی تغییرات وضعیت لحظه‌ای مشترک می‌شود و به رویدادها پاسخ می‌دهد</li>
+  <li><strong>ابزارهای خانهٔ هوشمند</strong> — چهار ابزار قابل-فراخوانی-توسط-LLM برای پرس‌وجو و کنترل دستگاه‌ها از طریق REST API</li>
+</ol>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> راه‌اندازی</h2>
+
+<h3>۱. ساخت توکن دسترسی طولانی‌عمر</h3>
+<ol>
+  <li>نمونهٔ Home Assistant خود را باز کنید</li>
+  <li>به <strong>Profile</strong> بروید ‏(روی نامتان در نوار کناری کلیک کنید)</li>
+  <li>به <strong>Long-Lived Access Tokens</strong> اسکرول کنید</li>
+  <li>‏<strong>Create Token</strong> را بزنید و نامی مثل «Hermes Agent» بدهید</li>
+  <li>توکن را کپی کنید</li>
+</ol>
+
+<h3>۲. پیکربندی متغیرهای محیطی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash — افزودن به ~/.hermes/.env</span><button class="copy-btn">کپی</button></div>
+  <pre><code># الزامی: توکن دسترسی طولانی‌عمر شما
+HASS_TOKEN=your-long-lived-access-token
+
+# اختیاری: URL هوم‌اسسیستنت (پیش‌فرض: http://homeassistant.local:8123)
+HASS_URL=http://192.168.1.100:8123</code></pre>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 نکته</div>
+  <p>تول‌ست <code>homeassistant</code> وقتی ‏<code>HASS_TOKEN</code> تنظیم شود خودکار فعال می‌گردد. هم پلتفرم گیت‌وی هم ابزارهای کنترل دستگاه از همین یک توکن فعال می‌شوند.</p>
+</div>
+
+<h3>۳. شروع گیت‌وی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway</code></pre>
+</div>
+<p>‏Home Assistant به‌عنوان یک پلتفرم متصل کنار سایر پیام‌رسان‌ها ‏(تلگرام، دیسکورد و...) ظاهر می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> ابزارهای موجود</h2>
+<p>هرمس ایجنت چهار ابزار برای کنترل خانهٔ هوشمند ثبت می‌کند:</p>
+
+<h3><code>ha_list_entities</code></h3>
+<p>فهرست موجودیت‌های Home Assistant، با فیلتر اختیاری بر اساس دامنه یا ناحیه.</p>
+<p><strong>پارامترها:</strong></p>
+<ul>
+  <li>‏<code>domain</code> <em>(اختیاری)</em> — فیلتر بر اساس دامنهٔ موجودیت: ‏<code>light</code>، ‏<code>switch</code>، ‏<code>climate</code>، ‏<code>sensor</code>، ‏<code>binary_sensor</code>، ‏<code>cover</code>، ‏<code>fan</code>، ‏<code>media_player</code> و غیره</li>
+  <li>‏<code>area</code> <em>(اختیاری)</em> — فیلتر بر اساس نام ناحیه/اتاق ‏(با نام‌های دوستانه تطبیق می‌یابد): ‏«living room»، ‏«kitchen»، ‏«bedroom» و غیره</li>
+</ul>
+<p><strong>مثال:</strong></p>
+<div class="codebox"><pre><code>List all lights in the living room</code></pre></div>
+<p>شناسه‌های موجودیت، وضعیت‌ها و نام‌های دوستانه را برمی‌گرداند.</p>
+
+<h3><code>ha_get_state</code></h3>
+<p>وضعیت تفصیلی یک موجودیت را می‌گیرد شامل همهٔ ویژگی‌ها ‏(روشنایی، رنگ، دمای هدف، قرائت سنسور و...).</p>
+<p><strong>پارامترها:</strong></p>
+<ul>
+  <li>‏<code>entity_id</code> <em>(الزامی)</em> — موجودیت مورد پرس‌وجو، مثل ‏<code>light.living_room</code>، ‏<code>climate.thermostat</code>، ‏<code>sensor.temperature</code></li>
+</ul>
+<p><strong>مثال:</strong></p>
+<div class="codebox"><pre><code>What's the current state of climate.thermostat?</code></pre></div>
+<p>برمی‌گرداند: وضعیت، همهٔ ویژگی‌ها، timestamp های آخرین تغییر/به‌روزرسانی.</p>
+
+<h3><code>ha_list_services</code></h3>
+<p>سرویس‌ها ‏(اکشن‌های) موجود برای کنترل دستگاه را فهرست می‌کند. نشان می‌دهد روی هر نوع دستگاه چه اکشن‌هایی ممکن است و چه پارامترهایی می‌پذیرند.</p>
+<p><strong>پارامترها:</strong></p>
+<ul>
+  <li>‏<code>domain</code> <em>(اختیاری)</em> — فیلتر بر اساس دامنه، مثل ‏<code>light</code>، ‏<code>climate</code>، ‏<code>switch</code></li>
+</ul>
+<p><strong>مثال:</strong></p>
+<div class="codebox"><pre><code>What services are available for climate devices?</code></pre></div>
+
+<h3><code>ha_call_service</code></h3>
+<p>یک سرویس Home Assistant را برای کنترل دستگاه صدا می‌زند.</p>
+<p><strong>پارامترها:</strong></p>
+<ul>
+  <li>‏<code>domain</code> <em>(الزامی)</em> — دامنهٔ سرویس: ‏<code>light</code>، ‏<code>switch</code>، ‏<code>climate</code>، ‏<code>cover</code>، ‏<code>media_player</code>، ‏<code>fan</code>، ‏<code>scene</code>، ‏<code>script</code></li>
+  <li>‏<code>service</code> <em>(الزامی)</em> — نام سرویس: ‏<code>turn_on</code>، ‏<code>turn_off</code>، ‏<code>toggle</code>، ‏<code>set_temperature</code>، ‏<code>set_hvac_mode</code>، ‏<code>open_cover</code>، ‏<code>close_cover</code>، ‏<code>set_volume_level</code></li>
+  <li>‏<code>entity_id</code> <em>(اختیاری)</em> — موجودیت هدف، مثل ‏<code>light.living_room</code></li>
+  <li>‏<code>data</code> <em>(اختیاری)</em> — پارامترهای اضافی به‌صورت آبجکت JSON</li>
+</ul>
+<p><strong>مثال‌ها:</strong></p>
+<div class="codebox"><pre><code>Turn on the living room lights
+→ ha_call_service(domain="light", service="turn_on", entity_id="light.living_room")</code></pre></div>
+<div class="codebox"><pre><code>Set the thermostat to 22 degrees in heat mode
+→ ha_call_service(domain="climate", service="set_temperature",
+    entity_id="climate.thermostat", data={"temperature": 22, "hvac_mode": "heat"})</code></pre></div>
+<div class="codebox"><pre><code>Set living room lights to blue at 50% brightness
+→ ha_call_service(domain="light", service="turn_on",
+    entity_id="light.living_room", data={"brightness": 128, "color_name": "blue"})</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پلتفرم گیت‌وی: رویدادهای لحظه‌ای</h2>
+<p>آداپتور گیت‌وی Home Assistant از طریق WebSocket وصل و به رویدادهای <code>state_changed</code> مشترک می‌شود. وقتی وضعیت دستگاهی عوض شود و با فیلترهای شما بخواند، به‌عنوان پیام به ایجنت فوروارد می‌شود.</p>
+
+<h3>فیلترکردن رویدادها</h3>
+<div class="callout warning">
+  <div class="callout-title">⚠️ پیکربندی الزامی</div>
+  <p>به‌طور پیش‌فرض <strong>هیچ رویدادی فوروارد نمی‌شود</strong>. برای دریافت رویدادها باید دست‌کم یکی از ‏<code>watch_domains</code>، ‏<code>watch_entities</code> یا ‏<code>watch_all</code> را پیکربندی کنید. بدون فیلتر، هنگام شروع هشدار لاگ می‌شود و همهٔ تغییرات وضعیت بی‌صدا دور ریخته می‌شوند.</p>
+</div>
+<p>رویدادهایی که ایجنت می‌بیند را در config.yaml زیر بخش <code>extra</code> پلتفرم Home Assistant پیکربندی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  homeassistant:
+    enabled: true
+    extra:
+      watch_domains:
+        - climate
+        - binary_sensor
+        - alarm_control_panel
+        - light
+      watch_entities:
+        - sensor.front_door_battery
+      ignore_entities:
+        - sensor.uptime
+        - sensor.cpu_usage
+        - sensor.memory_usage
+      cooldown_seconds: 30</code></pre>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>تنظیم</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>watch_domains</code></td><td>—</td><td>فقط این دامنه‌های موجودیت پایش شوند ‏(مثل <code>climate</code>، ‏<code>light</code>، ‏<code>binary_sensor</code>)</td></tr>
+    <tr><td><code>watch_entities</code></td><td>—</td><td>فقط این شناسه‌های موجودیت خاص پایش شوند</td></tr>
+    <tr><td><code>watch_all</code></td><td><code>false</code></td><td>برای دریافت <strong>همهٔ</strong> تغییرات وضعیت ‏<code>true</code> کنید ‏(برای بیشتر راه‌اندازی‌ها توصیه نمی‌شود)</td></tr>
+    <tr><td><code>ignore_entities</code></td><td>—</td><td>این موجودیت‌ها همیشه نادیده گرفته شوند ‏(قبل از فیلترهای دامنه/موجودیت اعمال می‌شود)</td></tr>
+    <tr><td><code>cooldown_seconds</code></td><td><code>30</code></td><td>حداقل ثانیه بین رویدادهای یک موجودیت واحد</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>با مجموعهٔ متمرکزی از دامنه‌ها شروع کنید — ‏<code>climate</code>، ‏<code>binary_sensor</code> و ‏<code>alarm_control_panel</code> مفیدترین اتوماسیون‌ها را پوشش می‌دهند. در صورت نیاز بیشترشان کنید. با <code>ignore_entities</code> سنسورهای پرسر‌وصدا مثل دمای CPU یا شمارندهٔ uptime را سرکوب کنید.</p>
+</div>
+
+<h3>قالب‌بندی رویداد</h3>
+<p>تغییرات وضعیت بر اساس دامنه به پیام‌های خوانا قالب می‌گیرند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>دامنه</th><th>قالب</th></tr></thead>
+  <tbody>
+    <tr><td><code>climate</code></td><td>«HVAC mode changed from 'off' to 'heat' (current: 21, target: 23)»</td></tr>
+    <tr><td><code>sensor</code></td><td>«changed from 21°C to 22°C»</td></tr>
+    <tr><td><code>binary_sensor</code></td><td>«triggered» / «cleared»</td></tr>
+    <tr><td><code>light</code>، ‏<code>switch</code>، ‏<code>fan</code></td><td>«turned on» / «turned off»</td></tr>
+    <tr><td><code>alarm_control_panel</code></td><td>«alarm state changed from 'armed_away' to 'triggered'»</td></tr>
+    <tr><td><em>(سایر)</em></td><td>«changed from 'old' to 'new'»</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>پاسخ‌های ایجنت</h3>
+<p>پیام‌های خروجی ایجنت به‌صورت <strong>اعلان ماندگار Home Assistant</strong> تحویل می‌شوند ‏(از طریق ‏<code>persistent_notification.create</code>). این‌ها در پنل اعلان HA با عنوان «Hermes Agent» ظاهر می‌شوند.</p>
+
+<h3>مدیریت اتصال</h3>
+<ul>
+  <li><strong>WebSocket</strong> با ضربان ۳۰ثانیه‌ای برای رویدادهای لحظه‌ای</li>
+  <li><strong>اتصال‌مجدد خودکار</strong> با backoff: ‏۵ ← ۱۰ ← ۳۰ ← ۶۰ ثانیه</li>
+  <li><strong>REST API</strong> برای اعلان‌های خروجی ‏(نشست جداگانه برای جلوگیری از تعارض WebSocket)</li>
+  <li><strong>مجوزدهی</strong> — رویدادهای HA همیشه مجازند ‏(لیست کاربر لازم ندارد چون ‏<code>HASS_TOKEN</code> اتصال را احراز می‌کند)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> امنیت</h2>
+<p>ابزارهای Home Assistant محدودیت‌های امنیتی اجرا می‌کنند:</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ دامنه‌های مسدود</div>
+  <p>دامنه‌های سرویس زیر برای جلوگیری از اجرای کد دلخواه روی میزبان HA <strong>مسدودند</strong>:</p>
+  <ul>
+    <li>‏<code>shell_command</code> — فرمان‌های شل دلخواه</li>
+    <li>‏<code>command_line</code> — سنسورها/کلیدهایی که فرمان اجرا می‌کنند</li>
+    <li>‏<code>python_script</code> — اجرای اسکریپتی پایتون</li>
+    <li>‏<code>pyscript</code> — یکپارچه‌سازی اسکریپت‌نویسی گسترده‌تر</li>
+    <li>‏<code>hassio</code> — کنترل افزونه، خاموش/راه‌اندازی مجدد میزبان</li>
+    <li>‏<code>rest_command</code> — درخواست‌های HTTP از سرور HA ‏(بردار SSRF)</li>
+  </ul>
+  <p>تلاش برای فراخوانی سرویس در این دامنه‌ها خطا برمی‌گرداند.</p>
+</div>
+<p>شناسه‌های موجودیت با الگوی ‏<code>^[a-z_][a-z0-9_]*\.[a-z0-9_]+$</code> اعتبارسنجی می‌شوند تا حملات تزریق پیشگیری شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> نمونه‌های اتوماسیون</h2>
+
+<h3>روتین صبحگاهی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>User: Start my morning routine
+
+Agent:
+1. ha_call_service(domain="light", service="turn_on",
+     entity_id="light.bedroom", data={"brightness": 128})
+2. ha_call_service(domain="climate", service="set_temperature",
+     entity_id="climate.thermostat", data={"temperature": 22})
+3. ha_call_service(domain="media_player", service="turn_on",
+     entity_id="media_player.kitchen_speaker")</code></pre>
+</div>
+
+<h3>بررسی امنیت خانه</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>User: Is the house secure?
+
+Agent:
+1. ha_list_entities(domain="binary_sensor")
+     → checks door/window sensors
+2. ha_get_state(entity_id="alarm_control_panel.home")
+     → checks alarm status
+3. ha_list_entities(domain="lock")
+     → checks lock states
+4. Reports: "All doors closed, alarm is armed_away, all locks engaged."</code></pre>
+</div>
+
+<h3>اتوماسیون واکنشی ‏(از طریق رویدادهای گیت‌وی)</h3>
+<p>وقتی به‌عنوان پلتفرم گیت‌وی متصل باشد، ایجنت می‌تواند به رویدادها واکنش نشان دهد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>[Home Assistant] Front Door: triggered (was cleared)
+
+Agent automatically:
+1. ha_get_state(entity_id="binary_sensor.front_door")
+2. ha_call_service(domain="light", service="turn_on",
+     entity_id="light.hallway")
+3. Sends notification: "Front door opened. Hallway lights turned on."</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> عیب‌یابی</h2>
+
+<p><strong>متغیرهای محیطی برداشته نمی‌شوند.</strong><br>
+آداپتور اعتبارنامه‌ها را از ‏<code>~/.hermes/.env</code> ‏(هنگام شروع auto-merge) یا از config.yaml می‌خواند. چک کنید فایل زیر خانهٔ پروفایل فعال هرمس باشد و دور URL/توکن کوتیشن اضافی نباشد. بعد از ویرایش گیت‌وی را ری‌استارت کنید — تغییرات env فقط هنگام شروع پروسه اعمال می‌شوند.</p>
+
+<p><strong>احراز REST شکست می‌خورد ‏(<code>401 Unauthorized</code>).</strong><br>
+توکن باید یک ‌<em>Long-Lived Access Token</em> ساخته‌شده از صفحهٔ پروفایل کاربری HA‌تان باشد ‏(<strong>Profile ← Security ← Long-lived access tokens</strong>). توکن‌های نشست کوتاه‌عمرِ UI کار نمی‌کنند. همچنین تأیید کنید URL پایه scheme و پورت دارد ‏(مثل ‏<code>http://homeassistant.local:8123</code>) و از میزبانی که هرمس را اجرا می‌کند قابل‌رسید است — دستور زیر باید ‏<code>{"message": "API running."}</code> برگرداند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl -H "Authorization: Bearer &lt;token&gt;" &lt;url&gt;/api/</code></pre>
+</div>
+</section>
+
+<div class="pager">
+  <a href="matrix.html"><span class="dir">→ قبلی</span><span class="ttl">Matrix</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">Raft</span></span>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/homeassistant" target="_blank" rel="noopener">Home Assistant</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

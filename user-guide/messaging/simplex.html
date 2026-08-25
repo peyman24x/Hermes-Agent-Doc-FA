@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SimpleX Chat — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/simplex" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>SimpleX Chat</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>SimpleX Chat</h1>
+<p><a href="https://simplex.chat/" target="_blank" rel="noopener">SimpleX Chat</a> پلتفرم پیام‌رسانی خصوصی و غیرمتمرکزی است که کاربران مالک مخاطبان و گروه‌های خودشان هستند. برخلاف سایر پلتفرم‌ها SimpleX هیچ شناسهٔ کاربری پایداری تخصیص نمی‌دهد — هر مخاطب با شناسهٔ داخلی مبهمی که هنگام اتصال تولید می‌شود شناخته می‌شود؛ همین آن را به یکی از خصوصی‌ترین پیام‌رسان‌های موجود تبدیل کرده است.</p>
+<blockquote><p><code>hermes gateway setup</code> را اجرا و <strong>SimpleX</strong> را انتخاب کنید تا راهنمای گام‌به‌گام ببینید.</p></blockquote>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li>‏CLI ‏<strong>simplex-chat</strong> نصب‌شده و در حال اجرا به‌عنوان دیمن</li>
+  <li>بستهٔ پایتونی ‏<strong>websockets</strong> ‏(<code>pip install websockets</code>)</li>
+</ul>
+
+<h3>نصب simplex-chat</h3>
+<p>آخرین ریلیز را از صفحهٔ <a href="https://github.com/simplex-chat/simplex-chat/releases" target="_blank" rel="noopener">ریلیزهای گیت‌هاب simplex-chat</a> دانلود کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># باینری Linux / macOS
+curl -L https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-chat-ubuntu-22_04-x86_64 -o simplex-chat
+chmod +x simplex-chat</code></pre>
+</div>
+<p>پروژهٔ SimpleX Chat ایمیج Docker آماده برای کلاینت چت منتشر نمی‌کند؛ برای اجرا زیر Docker از <a href="https://github.com/simplex-chat/simplex-chat" target="_blank" rel="noopener">مخزن simplex-chat</a> از سورس بسازید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> شروع دیمن</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>simplex-chat -p 5225</code></pre>
+</div>
+<p>دیمن پیش‌فرض روی WebSocket آدرس ‏<code>ws://127.0.0.1:5225</code> گوش می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پیکربندی هرمس</h2>
+<h3>با ویزارد راه‌اندازی</h3>
+<div class="codebox"><pre><code>hermes gateway setup</code></pre></div>
+<p><strong>SimpleX Chat</strong> را انتخاب و طبق پرسش‌ها پیش بروید.</p>
+
+<h3>با متغیرهای محیطی</h3>
+<p>به ‏<code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox"><pre><code>SIMPLEX_WS_URL=ws://127.0.0.1:5225
+SIMPLEX_ALLOWED_USERS=&lt;contact-id-1&gt;,&lt;contact-id-2&gt;
+SIMPLEX_HOME_CHANNEL=&lt;contact-id&gt;</code></pre></div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>لازم</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>SIMPLEX_WS_URL</code></td><td>بله</td><td>WebSocket URL دیمن simplex-chat</td></tr>
+    <tr><td><code>SIMPLEX_ALLOWED_USERS</code></td><td>توصیه‌شده</td><td>لیست مجاز جداشده با ویرگول. هر ورودی هم می‌تواند ‏<code>contactId</code> عددی باشد هم نام نمایشی — هر دو فرم کار می‌کند.</td></tr>
+    <tr><td><code>SIMPLEX_ALLOW_ALL_USERS</code></td><td>اختیاری</td><td>‏<code>true</code> برای اجازه به هر مخاطبی ‏(با احتیاط)</td></tr>
+    <tr><td><code>SIMPLEX_AUTO_ACCEPT</code></td><td>اختیاری</td><td>پذیرش خودکار درخواست‌های مخاطب ورودی ‏(پیش‌فرض: <code>true</code>)</td></tr>
+    <tr><td><code>SIMPLEX_GROUP_ALLOWED</code></td><td>اختیاری</td><td>شناسه‌های گروهی که بات درشان شرکت می‌کند جداشده با ویرگول، یا ‏<code>*</code> برای هر گروهی. حذف = نادیده گرفتن کامل پیام‌های گروهی</td></tr>
+    <tr><td><code>SIMPLEX_HOME_CHANNEL</code></td><td>اختیاری</td><td>شناسهٔ پیش‌فرض مخاطب/گروه برای تحویل کارهای کرون</td></tr>
+    <tr><td><code>SIMPLEX_HOME_CHANNEL_NAME</code></td><td>اختیاری</td><td>برچسب خوانا برای کانال خانگی</td></tr>
+    <tr><td><code>HERMES_SIMPLEX_TEXT_BATCH_DELAY</code></td><td>اختیاری</td><td>ثانیه دورهٔ سکوت ‏(پیش‌فرض: <code>0.8</code>) برای ادغام پیام‌های متنی ورودیِ پشت‌سرهم در یک رویداد واحد</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> یافتن contact ID یا نام نمایشی</h2>
+<p>بعد از شروع دیمن، با مخاطب ایجنت گفتگو باز کنید. ‏<code>contactId</code> عددی در لاگ‌های نشست ظاهر می‌شود. اگر ترجیح می‌دهید از نام نمایشی نشان‌داده‌شده در UI سیمپلکس استفاده کنید آن هم کار می‌کند — ‏<code>SIMPLEX_ALLOWED_USERS</code> هر دو فرم را می‌پذیرد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> مجوزدهی</h2>
+<p>به‌طور پیش‌فرض <strong>همهٔ مخاطبان رد می‌شوند</strong>. باید یکی از این دو:</p>
+<ol>
+  <li>‏<code>SIMPLEX_ALLOWED_USERS</code> را فهرست جداشده با ویرگول از ‏<code>contactId</code> ها و/یا نام‌های نمایشی کنید ‏(مثل ‏<code>SIMPLEX_ALLOWED_USERS=4,alice</code> که هم contactId ۴ را می‌گیرد هم مخاطبی با نام نمایشی «alice» را)، یا</li>
+  <li>از <strong>جفت‌سازی DM</strong> استفاده کنید — هر پیامی به بات بدهید تا کد جفت‌سازی جواب بدهد؛ کد را با ‏<code>hermes pairing approve simplex &lt;CODE&gt;</code> تأیید کنید.</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> چت‌های گروهی</h2>
+<p>به‌طور پیش‌فرض آداپتور پیام‌های گروه را نادیده می‌گیرد — باتی که در گروه است وگرنه ترافیک همهٔ اعضا را پردازش می‌کند. صریحاً انتخاب کنید:</p>
+<div class="codebox"><pre><code>SIMPLEX_GROUP_ALLOWED=12,34          # شناسه‌های گروه خاص
+# یا
+SIMPLEX_GROUP_ALLOWED=*              # هر گروهی که بات در آن است</code></pre></div>
+<p>خطاب گروه‌ها با پیشوند ‏<code>group:</code> روی شناسهٔ چت، مثل ‏<code>simplex:group:12</code> به‌عنوان هدف ‏<code>deliver=</code> کرون یا داخل فراخوانی ‏<code>hermes send</code>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> ارسال با <code>hermes send</code></h2>
+<p>‏SimpleX به‌عنوان هدف ارسال مستقل کار می‌کند — دیمن باید روشن باشد ولی برای متن ساده گیت‌وی زنده لازم نیست:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes send --to simplex:alice "hello"          # DM با نام نمایشی مخاطب
+hermes send --to simplex:group:12 "hello"       # گروه با شناسهٔ عددی
+hermes send --to simplex "hello"                # SIMPLEX_HOME_CHANNEL</code></pre>
+</div>
+<p>حین اجرای گیت‌وی، آداپتور مخاطبان و گروه‌های مجازتان را در directory کانال‌ها فهرست می‌کند ‏(هر ۵ دقیقه refresh)، پس ‏<code>hermes send --list</code> آنها را با نام نشان می‌دهد. قبل از اولین اجرای گیت‌وی پلتفرم همچنان در ‏<code>--list</code> با سرنخ «هنوز کانالی کشف نشده» می‌آید — هدف‌های مستقیم مثل بالا مستقلاً کار می‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> پیوست‌ها</h2>
+<p>آداپتور پیوست‌های بومی SimpleX را در هر دو جهت پشتیبانی می‌کند:</p>
+<ul>
+  <li><strong>ورودی</strong> — تصاویر، یادداشت‌های صوتی و فایل‌های ورودی از طریق جریان XFTP دیمن پذیرفته می‌شوند ‏(<code>rcvFileDescrReady</code> ← ‏<code>/freceive</code> ← انتظار برای ‏<code>rcvFileComplete</code>) و به‌صورت ‏<code>MessageEvent.media_urls</code> با ‏<code>MessageType</code> مناسب ‏(<code>PHOTO</code>، ‏<code>VOICE</code>، ‏<code>TEXT</code>+document) داده می‌شوند.</li>
+  <li><strong>خروجی</strong> — ‏<code>send_image_file</code>، ‏<code>send_voice</code>، ‏<code>send_document</code> و ‏<code>send_video</code> همه فرم ساختاریافتهٔ ‏<code>/_send</code> با ‏<code>filePath</code> را استفاده می‌کنند تا کلاینت SimpleX گیرنده تصاویر را درجا رندر و یادداشت‌های صوتی را درجا پخش کند نه به‌عنوان دانلود.</li>
+</ul>
+<p>ریپلای‌های ایجنت می‌توانند تگ‌های ‏<code>MEDIA:/path/to/file</code> را هم در متن ساده داشته باشند — آداپتور تگ را از بدنه برمی‌دارد و فایل را یا به‌عنوان یادداشت صوتی ‏(پسوندهای صوتی) یا document می‌فرستد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> استفاده از SimpleX با کارهای کرون</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cronjob(
+    action="create",
+    schedule="every 1h",
+    deliver="simplex",          # از SIMPLEX_HOME_CHANNEL استفاده می‌کند
+    prompt="Check for alerts and summarise."
+)</code></pre>
+</div>
+<p>یا یک مخاطب مشخص را از طریق فیلد ‏<code>deliver:</code> کار کرون هدف بگیرید، یا از اسکریپت شل با <a href="https://hermes-agent.nousresearch.com/docs/guides/pipe-script-output" target="_blank" rel="noopener">CLI ‏<code>hermes send</code></a>:</p>
+<div class="codebox"><pre><code>hermes send simplex:&lt;contact-id&gt; "Done!"</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> نکات حریم خصوصی</h2>
+<ul>
+  <li>‏SimpleX هرگز شماره تلفن یا ایمیل لو نمی‌دهد — مخاطبان از شناسه‌های مبهم استفاده می‌کنند</li>
+  <li>ارتباط هرمس و دیمن WebSocket محلی است ‏(<code>ws://127.0.0.1:5225</code>) — هیچ داده‌ای از ماشین شما خارج نمی‌شود</li>
+  <li>پیام‌ها قبل از رسیدن به دیمن توسط پروتکل SimpleX رمزنگاری سرتاسری می‌شوند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> عیب‌یابی</h2>
+<p><strong>«Cannot reach daemon»</strong> — مطمئن شوید ‏<code>simplex-chat -p 5225</code> اجراست و پورت با ‏<code>SIMPLEX_WS_URL</code> بخواند.</p>
+<p><strong>«websockets not installed»</strong> — ‏<code>pip install websockets</code> را اجرا کنید.</p>
+<p><strong>پیام‌ها دریافت نمی‌شوند</strong> — چک کنید شناسهٔ مخاطب در ‏<code>SIMPLEX_ALLOWED_USERS</code> باشد یا از طریق جفت‌سازی DM تأییدش کنید.</p>
+</section>
+
+<div class="pager">
+  <a href="msgraph-webhook.html"><span class="dir">→ قبلی</span><span class="ttl">Microsoft Graph Webhook</span></a>
+  <a class="next" href="bluebubbles.html"><span class="dir">بعدی ←</span><span class="ttl">BlueBubbles ‏(iMessage)</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/simplex" target="_blank" rel="noopener">SimpleX Chat</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

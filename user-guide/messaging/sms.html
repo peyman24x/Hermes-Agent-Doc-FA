@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پیامک ‏(Twilio) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/sms" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>پیامک ‏(Twilio)</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی پیامک ‏(Twilio)</h1>
+<p>هرمس از طریق API ‏<a href="https://www.twilio.com/" target="_blank" rel="noopener">Twilio</a> به پیامک وصل می‌شود. مردم به شمارهٔ Twilio شما SMS می‌زنند و پاسخ هوش مصنوعی می‌گیرند — همان تجربهٔ گفتگویی تلگرام یا دیسکورد، ولی روی پیامک استاندارد.</p>
+<div class="callout note">
+  <div class="callout-title">📌 اعتبارنامهٔ مشترک</div>
+  <p>گیت‌وی SMS اعتبارنامه‌اش را با <a href="https://hermes-agent.nousresearch.com/docs/reference/skills-catalog" target="_blank" rel="noopener">مهارت تلفنی</a> اختیاری به اشتراک می‌گذارد. اگر از قبل Twilio را برای تماس صوتی یا SMS تک‌موردی راه انداخته‌اید، گیت‌وی با همان <code>TWILIO_ACCOUNT_SID</code>، ‏<code>TWILIO_AUTH_TOKEN</code> و <code>TWILIO_PHONE_NUMBER</code> کار می‌کند.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li><strong>حساب Twilio</strong> — ‏<a href="https://www.twilio.com/try-twilio" target="_blank" rel="noopener">ثبت‌نام در twilio.com</a> ‏(نسخهٔ آزمایشی رایگان موجود است)</li>
+  <li><strong>یک شماره تلفن Twilio</strong> با قابلیت SMS</li>
+  <li><strong>یک سرور قابل‌دسترس عمومی</strong> — Twilio وقتی SMS می‌رسد وب‌هوک به سرور شما می‌فرستد</li>
+  <li><strong>aiohttp</strong> — ‏<code>cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[sms]"</code></li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: دریافت اعتبارنامه‌های Twilio</h2>
+<ol>
+  <li>به <a href="https://console.twilio.com/" target="_blank" rel="noopener">کنسول Twilio</a> بروید</li>
+  <li>‏<strong>Account SID</strong> و <strong>Auth Token</strong> را از داشبورد کپی کنید</li>
+  <li>به <strong>Phone Numbers ← Manage ← Active Numbers</strong> بروید — شماره تلفن‌تان را در قالب E.164 یادداشت کنید ‏(مثل <code>+15551234567</code>)</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: پیکربندی هرمس</h2>
+<h3>راه‌اندازی تعاملی ‏(توصیه‌شده)</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway setup</code></pre>
+</div>
+<p><strong>SMS (Twilio)</strong> را از فهرست پلتفرم‌ها انتخاب کنید. ویزارد اعتبارنامه‌ها را می‌پرسد.</p>
+
+<h3>راه‌اندازی دستی</h3>
+<p>به <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=your_auth_token_here
+TWILIO_PHONE_NUMBER=+15551234567
+
+# امنیت: محدودکردن به شماره‌های خاص (توصیه‌شده)
+SMS_ALLOWED_USERS=+15559876543,+15551112222
+
+# اختیاری: کانال خانگی برای تحویل کارهای کرون
+SMS_HOME_CHANNEL=+15559876543</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۳: پیکربندی وب‌هوک Twilio</h2>
+<p>Twilio باید بداند پیام‌های ورودی را کجا بفرستد. در <a href="https://console.twilio.com/" target="_blank" rel="noopener">کنسول Twilio</a>:</p>
+<ol>
+  <li>به <strong>Phone Numbers ← Manage ← Active Numbers</strong> بروید</li>
+  <li>روی شماره تلفن‌تان کلیک کنید</li>
+  <li>تحت <strong>Messaging ← A MESSAGE COMES IN</strong> تنظیم کنید:
+    <ul>
+      <li><strong>Webhook</strong>: ‏<code>https://your-server:8080/webhooks/twilio</code></li>
+      <li><strong>HTTP Method</strong>: ‏<code>POST</code></li>
+    </ul>
+  </li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡 در معرض گذاشتن وب‌هوک</div>
+  <p>اگر هرمس را محلی اجرا می‌کنید، برای expose کردن وب‌هوک از یک تونل استفاده کنید:</p>
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+    <pre><code># با cloudflared
+cloudflared tunnel --url http://localhost:8080
+
+# با ngrok
+ngrok http 8080</code></pre>
+  </div>
+  <p>URL عمومی حاصل را به‌عنوان وب‌هوک Twilio تنظیم کنید.</p>
+</div>
+<p><strong>‏<code>SMS_WEBHOOK_URL</code> را روی همان URLی که در Twilio پیکربندی کردید بگذارید.</strong> برای اعتبارسنجی امضای Twilio الزامی است — آداپتور بدون آن از شروع امتناع می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># باید با URL وب‌هوک کنسول Twilio مطابق باشد
+SMS_WEBHOOK_URL=https://your-server:8080/webhooks/twilio</code></pre>
+</div>
+<p>پورت وب‌هوک پیش‌فرض <code>8080</code> است. با این override کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>SMS_WEBHOOK_PORT=3000</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۴: شروع گیت‌وی</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway</code></pre>
+</div>
+<p>باید این را ببینید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>[sms] Twilio webhook server listening on 127.0.0.1:8080, from: +1555***4567</code></pre>
+</div>
+<p>اگر <code>Refusing to start: SMS_WEBHOOK_URL is required</code> دیدید، ‏<code>SMS_WEBHOOK_URL</code> را روی URL عمومیِ پیکربندی‌شده در کنسول Twilio بگذارید ‏(گام ۳).</p>
+<p>به شمارهٔ Twilio‌تان پیامک بزنید — هرمس از طریق SMS پاسخ می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> متغیرهای محیطی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>لازم</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>TWILIO_ACCOUNT_SID</code></td><td>بله</td><td>‏Account SID تویلیو ‏(با <code>AC</code> شروع می‌شود)</td></tr>
+    <tr><td><code>TWILIO_AUTH_TOKEN</code></td><td>بله</td><td>‏Auth Token تویلیو ‏(برای اعتبارسنجی امضای وب‌هوک هم استفاده می‌شود)</td></tr>
+    <tr><td><code>TWILIO_PHONE_NUMBER</code></td><td>بله</td><td>شماره تلفن Twilio شما ‏(قالب E.164)</td></tr>
+    <tr><td><code>SMS_WEBHOOK_URL</code></td><td>بله</td><td>URL عمومی برای اعتبارسنجی امضای Twilio — باید با URL وب‌هوک کنسول Twilio مطابق باشد</td></tr>
+    <tr><td><code>SMS_WEBHOOK_PORT</code></td><td>خیر</td><td>پورت گوش‌دهندهٔ وب‌هوک ‏(پیش‌فرض: <code>8080</code>)</td></tr>
+    <tr><td><code>SMS_WEBHOOK_HOST</code></td><td>خیر</td><td>آدرس bind وب‌هوک ‏(پیش‌فرض: <code>127.0.0.1</code>)</td></tr>
+    <tr><td><code>SMS_INSECURE_NO_SIGNATURE</code></td><td>خیر</td><td>‏<code>true</code> برای غیرفعال‌کردن اعتبارسنجی امضا ‏(فقط توسعه محلی — <strong>برای تولید نه</strong>)</td></tr>
+    <tr><td><code>SMS_ALLOWED_USERS</code></td><td>خیر</td><td>شماره‌های E.164 جداشده با ویرگول که حق چت دارند</td></tr>
+    <tr><td><code>SMS_ALLOW_ALL_USERS</code></td><td>خیر</td><td>‏<code>true</code> برای اجازه به همه ‏(توصیه نمی‌شود)</td></tr>
+    <tr><td><code>SMS_HOME_CHANNEL</code></td><td>خیر</td><td>شماره تلفن مقصد تحویل کارهای کرون / اعلان‌ها</td></tr>
+    <tr><td><code>SMS_HOME_CHANNEL_NAME</code></td><td>خیر</td><td>نام نمایشی کانال خانگی ‏(پیش‌فرض: <code>Home</code>)</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> رفتار مخصوص SMS</h2>
+<ul>
+  <li><strong>فقط متن ساده</strong> — مارک‌داون خودکار حذف می‌شود چون SMS آن را به‌صورت کاراکترهای تحت‌اللفظی رندر می‌کند</li>
+  <li><strong>سقف ۱۶۰۰ کاراکتر</strong> — پاسخ‌های بلندتر در مرزهای طبیعی ‏(اول خط جدید، بعد فاصله) بین چند پیام تقسیم می‌شوند</li>
+  <li><strong>پیشگیری از پژواک</strong> — پیام‌های شمارهٔ Twilio خودتان نادیده گرفته می‌شوند تا حلقه ساخته نشود</li>
+  <li><strong>سانسور شماره تلفن</strong> — شماره‌ها برای حریم خصوصی در لاگ‌ها سانسور می‌شوند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> امنیت</h2>
+
+<h3>اعتبارسنجی امضای وب‌هوک</h3>
+<p>هرمس با تأیید هدر <code>X-Twilio-Signature</code> ‏(HMAC-SHA1) اعتبارسنجی می‌کند که وب‌هوک‌های ورودی واقعاً از Twilio آمده‌اند. این مانع تزریق پیام جعلی توسط مهاجمان می‌شود.</p>
+<p><strong>‏<code>SMS_WEBHOOK_URL</code> الزامی است.</strong> آن را روی URL عمومی پیکربندی‌شده در کنسول Twilio بگذارید. آداپتور بدون آن از شروع امتناع می‌کند.</p>
+<p>برای توسعه محلی بدون URL عمومی می‌توانید اعتبارسنجی را خاموش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># فقط توسعه محلی — برای تولید نیست
+SMS_INSECURE_NO_SIGNATURE=true</code></pre>
+</div>
+
+<h3>لیست مجاز کاربران</h3>
+<p><strong>گیت‌وی به‌طور پیش‌فرض همهٔ کاربران را رد می‌کند.</strong> لیست مجاز پیکربندی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># توصیه‌شده: محدودکردن به شماره‌های مشخص
+SMS_ALLOWED_USERS=+15559876543,+15551112222
+
+# یا اجازه به همه (برای بات‌های دارای دسترسی ترمینال توصیه نمی‌شود)
+SMS_ALLOW_ALL_USERS=true</code></pre>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>‏SMS رمزنگاری داخلی ندارد. مگر پیامدهای امنیتی‌اش را بدانید، از SMS برای عملیات حساس استفاده نکنید. برای موارد حساس، سیگنال یا تلگرام را ترجیح دهید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> عیب‌یابی</h2>
+
+<h3>پیام‌ها نمی‌رسند</h3>
+<ol>
+  <li>چک کنید URL وب‌هوک Twilio درست و عمومی‌دسترس است</li>
+  <li>تأیید کنید <code>TWILIO_ACCOUNT_SID</code> و <code>TWILIO_AUTH_TOKEN</code> درست‌اند</li>
+  <li>در کنسول Twilio ← <strong>Monitor ← Logs ← Messaging</strong> خطاهای تحویل را چک کنید</li>
+  <li>مطمئن شوید شماره‌تان در <code>SMS_ALLOWED_USERS</code> است ‏(یا <code>SMS_ALLOW_ALL_USERS=true</code>)</li>
+</ol>
+
+<h3>پاسخ‌ها ارسال نمی‌شوند</h3>
+<ol>
+  <li>چک کنید <code>TWILIO_PHONE_NUMBER</code> درست تنظیم شده ‏(قالب E.164 با <code>+</code>)</li>
+  <li>تأیید کنید حساب Twilio‌تان شماره‌های دارای قابلیت SMS دارد</li>
+  <li>خطاهای API تویلیو را در لاگ‌های گیت‌وی هرمس چک کنید</li>
+</ol>
+
+<h3>تداخل پورت وب‌هوک</h3>
+<p>اگر پورت 8080 اشغال است عوضش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>SMS_WEBHOOK_PORT=3001</code></pre>
+</div>
+<p>URL وب‌هوک را در کنسول Twilio هم مطابق به‌روز کنید.</p>
+</section>
+
+<div class="pager">
+  <a href="signal.html"><span class="dir">→ قبلی</span><span class="ttl">سیگنال</span></a>
+  <a class="next" href="email.html"><span class="dir">بعدی ←</span><span class="ttl">ایمیل</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/sms" target="_blank" rel="noopener">SMS (Twilio)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

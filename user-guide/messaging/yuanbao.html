@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yuanbao — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/yuanbao" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>Yuanbao</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>Yuanbao</h1>
+<p>هرمس را به ‏<a href="https://yuanbao.tencent.com/" target="_blank" rel="noopener">Yuanbao</a>، پلتفرم پیام‌رسانی سازمانی تنسنت، وصل کنید. آداپتور از دروازهٔ WebSocket برای تحویل لحظه‌ای پیام استفاده و هم گفتگوهای مستقیم ‏(C2C) هم گروهی را پشتیبانی می‌کند.</p>
+<div class="callout note">
+  <div class="callout-title">📌 نکته</div>
+  <p>‏Yuanbao پلتفرم پیام‌رسانی سازمانی است که عمدتاً داخل تنسنت و محیط‌های سازمانی استفاده می‌شود. از WebSocket برای ارتباط لحظه‌ای، احراز مبتنی بر HMAC استفاده می‌کند و رسانهٔ غنی شامل تصویر، فایل و پیام صوتی را پشتیبانی می‌کند.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li>حساب Yuanbao با مجوز ساخت بات</li>
+  <li>‏APP_ID و APP_SECRET یوان‌بائو ‏(از ادمین پلتفرم)</li>
+  <li>بسته‌های پایتونی: ‏<code>websockets</code> و ‏<code>httpx</code></li>
+  <li>برای پشتیبانی رسانه: ‏<code>aiofiles</code></li>
+</ul>
+<p>وابستگی‌های لازم را نصب کنید:</p>
+<div class="codebox"><pre><code>pip install websockets httpx aiofiles</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> راه‌اندازی</h2>
+
+<h3>۱. ساخت بات در Yuanbao</h3>
+<ol>
+  <li>اپ یوان‌بائو را از ‏<a href="https://yuanbao.tencent.com/" target="_blank" rel="noopener">https://yuanbao.tencent.com/</a> دانلود کنید</li>
+  <li>در اپ به ‏<strong>PAI ← My Bot</strong> بروید و بات جدیدی بسازید</li>
+  <li>بعد از ساخت بات، ‏<strong>APP_ID</strong> و ‏<strong>APP_SECRET</strong> را کپی کنید</li>
+</ol>
+
+<h3>۲. اجرای ویزارد راه‌اندازی</h3>
+<p>ساده‌ترین راه پیکربندی یوان‌بائو راه‌اندازی تعاملی است:</p>
+<div class="codebox"><pre><code>hermes gateway setup</code></pre></div>
+<p>هنگام پرسش <strong>Yuanbao</strong> را انتخاب کنید. ویزارد:</p>
+<ol>
+  <li>‏APP_ID را می‌پرسد</li>
+  <li>‏APP_SECRET را می‌پرسد</li>
+  <li>پیکربندی را خودکار ذخیره می‌کند</li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>‏WebSocket URL و دامنهٔ API پیش‌فرض‌های منطقی داخلی دارند. فقط APP_ID و APP_SECRET لازم است تا شروع کنید.</p>
+</div>
+
+<h3>۳. پیکربندی متغیرهای محیطی</h3>
+<p>بعد از setup اولیه این متغیرها را در ‏<code>~/.hermes/.env</code> تأیید کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># الزامی
+YUANBAO_APP_ID=your-app-id
+YUANBAO_APP_SECRET=your-app-secret
+YUANBAO_WS_URL=wss://api.yuanbao.example.com/ws
+YUANBAO_API_DOMAIN=https://api.yuanbao.example.com
+
+# اختیاری: شناسهٔ حساب بات (معمولاً خودکار از sign-token گرفته می‌شود)
+# YUANBAO_BOT_ID=your-bot-id
+
+# اختیاری: محیط مسیریابی داخلی (مثلاً test/staging/production)
+# YUANBAO_ROUTE_ENV=production
+
+# اختیاری: کانال خانگی کرون/اعلان‌ها (قالب: direct:&lt;account&gt; یا group:&lt;group_code&gt;)
+YUANBAO_HOME_CHANNEL=direct:bot_account_id
+YUANBAO_HOME_CHANNEL_NAME="Bot Notifications"
+
+# اختیاری: محدودکردن دسترسی (قدیمی — سیاست‌های دقیق را در کنترل دسترسی پایین ببینید)
+YUANBAO_ALLOWED_USERS=user_account_1,user_account_2</code></pre>
+</div>
+
+<h3>۴. شروع گیت‌وی</h3>
+<div class="codebox"><pre><code>hermes gateway</code></pre></div>
+<p>آداپتور به دروازهٔ WebSocket یوان‌بائو وصل، با امضاهای HMAC احراز و پردازش پیام‌ها را شروع می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> قابلیت‌ها</h2>
+<ul>
+  <li><strong>دروازهٔ WebSocket</strong> — ارتباط دوطرفهٔ لحظه‌ای</li>
+  <li><strong>احراز HMAC</strong> — امضای امن درخواست با APP_ID/APP_SECRET</li>
+  <li><strong>پیام‌رسانی C2C</strong> — گفتگوهای مستقیم کاربر-به-بات</li>
+  <li><strong>پیام‌رسانی گروهی</strong> — گفتگوها در چت گروهی</li>
+  <li><strong>پشتیبانی رسانه</strong> — تصویر، فایل و پیام صوتی از طریق COS ‏(Cloud Object Storage)</li>
+  <li><strong>قالب‌بندی مارک‌داون</strong> — پیام‌ها خودکار مطابق سقف حجم یوان‌بائو تکه می‌شوند</li>
+  <li><strong>حذف تکرار پیام</strong> — مانع پردازش دوبارهٔ همان پیام می‌شود</li>
+  <li><strong>ضربان/keep-alive</strong> — حفظ پایداری اتصال WebSocket</li>
+  <li><strong>نشانگر تایپ</strong> — حین پردازش ایجنت وضعیت «typing…» نشان داده می‌شود</li>
+  <li><strong>اتصال‌مجدد خودکار</strong> — هندل قطعی WebSocket با backoff نمایی</li>
+  <li><strong>پرس‌وجوی اطلاعات گروه</strong> — گرفتن جزئیات گروه و فهرست اعضا</li>
+  <li><strong>استیکر/ایموجی</strong> — ارسال استیکرها و ایموجی TIMFaceElem در گفتگوها</li>
+  <li><strong>پشتیبانی تاریخچهٔ چت فورواردشدهٔ WeChat</strong> — وقتی کاربر بستهٔ تاریخچهٔ چت ویکام را به یوان‌بائو فوروارد کند، آداپتور رکوردهای فورواردشده ‏(لقب فرستنده‌ها، متن و ورودی‌های چندرسانه‌ای شامل فورواردهای تودرتو) را decode و داخل گفتگو تزریق می‌کند تا ایجنت کل رشتهٔ فورواردشده را بخواند</li>
+  <li><strong>Auto-sethome</strong> — اولین کاربری که به بات پیام دهد خودکار مالک کانال خانگی می‌شود</li>
+  <li><strong>اعلان پاسخ-کند</strong> — وقتی ایجنت بیشتر از انتظار طول بکشد پیام «منتظر بمانید» می‌فرستد</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گزینه‌های پیکربندی</h2>
+
+<h3>قالب‌های Chat ID</h3>
+<p>‏Yuanbao بسته به نوع گفتگو شناسه‌های پیشونددار استفاده می‌کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نوع چت</th><th>قالب</th><th>مثال</th></tr></thead>
+  <tbody>
+    <tr><td>پیام مستقیم ‏(C2C)</td><td><code>direct:&lt;account&gt;</code></td><td><code>direct:user123</code></td></tr>
+    <tr><td>پیام گروهی</td><td><code>group:&lt;group_code&gt;</code></td><td><code>group:grp456</code></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>آپلودهای رسانه‌ای</h3>
+<p>آداپتور یوان‌بائو آپلود رسانه را خودکار از طریق COS ‏(Tencent Cloud Object Storage) هندل می‌کند:</p>
+<ul>
+  <li><strong>تصاویر</strong>: JPEG، ‏PNG، ‏GIF، ‏WebP</li>
+  <li><strong>فایل‌ها</strong>: همهٔ انواع سند رایج</li>
+  <li><strong>صوت</strong>: WAV، ‏MP3، ‏OGG</li>
+</ul>
+<p>URL های رسانه قبل از آپلود برای جلوگیری از حملهٔ SSRF اعتبارسنجی و دانلود می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> کانال خانگی</h2>
+<p>فرمان ‏<code>/sethome</code> را در هر گفتگوی یوان‌بائو ‏(DM یا گروه) بزنید تا همانجا <strong>کانال خانگی</strong> شود. کارهای زمان‌بندی‌شده ‏(کرون) نتایجشان را به همین کانال تحویل می‌دهند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 Auto-sethome</div>
+  <p>اگر کانال خانگی پیکربندی نشده باشد اولین کاربری که به بات پیام دهد خودکار مالک کانال خانگی می‌شود. اگر کانال خانگی فعلی یک چت گروهی باشد، اولین DM آن را به کانال مستقیم ارتقا می‌دهد.</p>
+</div>
+<p>دستی هم در ‏<code>~/.hermes/.env</code> می‌شود گذاشت:</p>
+<div class="codebox"><pre><code>YUANBAO_HOME_CHANNEL=direct:user_account_id
+# یا برای گروه:
+# YUANBAO_HOME_CHANNEL=group:group_code
+YUANBAO_HOME_CHANNEL_NAME="My Bot Updates"</code></pre></div>
+
+<h3>مثال: تنظیم کانال خانگی</h3>
+<ol>
+  <li>با بات در یوان‌بائو گفتگو شروع کنید</li>
+  <li>فرمان را بفرستید: ‏<code>/sethome</code></li>
+  <li>بات جواب می‌دهد: «Home channel set to [chat_name] with ID [chat_id]. Cron jobs will deliver to this location.»</li>
+  <li>کارهای کرون و اعلان‌های بعدی به همین کانال فرستاده می‌شوند</li>
+</ol>
+
+<h3>مثال: تحویل کار کرون</h3>
+<p>یک کار کرون بسازید:</p>
+<div class="codebox"><pre><code>/cron "0 9 * * *" Check server status</code></pre></div>
+<p>خروجی زمان‌بندی‌شده هر روز ساعت ۹ صبح به کانال خانگی یوان‌بائوی شما تحویل داده می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> نکات استفاده</h2>
+
+<h3>شروع گفتگو</h3>
+<p>هر پیامی به بات در یوان‌بائو بدهید:</p>
+<div class="codebox"><pre><code>hello</code></pre></div>
+<p>بات در همان رشتهٔ گفتگو جواب می‌دهد.</p>
+
+<h3>فرمان‌های موجود</h3>
+<p>همهٔ فرمان‌های استاندارد هرمس روی یوان‌بائو کار می‌کنند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرمان</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>/new</code></td><td>شروع گفتگوی تازه</td></tr>
+    <tr><td><code>/model [provider:model]</code></td><td>نمایش یا تغییر مدل</td></tr>
+    <tr><td><code>/sethome</code></td><td>تعیین این چت به‌عنوان کانال خانگی</td></tr>
+    <tr><td><code>/status</code></td><td>نمایش اطلاعات نشست</td></tr>
+    <tr><td><code>/help</code></td><td>نمایش فرمان‌های موجود</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>ارسال فایل</h3>
+<p>برای فرستادن فایل به بات کافی است مستقیم داخل چت یوان‌بائو پیوستش کنید. بات خودکار پیوست فایل را دانلود و پردازش می‌کند.</p>
+<p>می‌توانید همراه پیوست پیام هم داشته باشید:</p>
+<div class="codebox"><pre><code>Please analyze this document</code></pre></div>
+
+<h3>دریافت فایل</h3>
+<p>وقتی از بات بخواهید فایلی بسازد یا export کند، فایل را مستقیم به چت یوان‌بائوی شما می‌فرستد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> عیب‌یابی</h2>
+
+<h3>بات آنلاین است ولی به پیام‌ها جواب نمی‌دهد</h3>
+<p><strong>علت:</strong> احراز حین دست‌دادن WebSocket شکست خورده.</p>
+<p><strong>راه‌حل:</strong></p>
+<ol>
+  <li>درستی APP_ID و APP_SECRET را تأیید کنید</li>
+  <li>قابل‌دسترس بودن WebSocket URL را چک کنید</li>
+  <li>مطمئن شوید حساب بات مجوزهای مناسب را دارد</li>
+  <li>لاگ‌های گیت‌وی را بازبینی کنید: ‏<code>tail -f ~/.hermes/logs/gateway.log</code></li>
+</ol>
+
+<h3>خطای «Connection refused»</h3>
+<p><strong>علت:</strong> WebSocket URL غیرقابل‌دسترس یا اشتباه است.</p>
+<p><strong>راه‌حل:</strong></p>
+<ol>
+  <li>قالب WebSocket URL را تأیید کنید ‏(باید با wss:// شروع شود)</li>
+  <li>اتصال شبکه به دامنهٔ API یوان‌بائو را چک کنید</li>
+  <li>تأیید کنید فایروال اتصالات WebSocket را اجازه می‌دهد</li>
+  <li>URL را تست کنید: ‏<code>curl -I https://[YUANBAO_API_DOMAIN]</code></li>
+</ol>
+
+<h3>آپلودهای رسانه شکست می‌خورند</h3>
+<p><strong>علت:</strong> اعتبارنامه‌های COS نامعتبرند یا سرور رسانه در دسترس نیست.</p>
+<p><strong>راه‌حل:</strong></p>
+<ol>
+  <li>درستی API_DOMAIN را تأیید کنید</li>
+  <li>چک کنید مجوز آپلود رسانه برای بات‌تان فعال باشد</li>
+  <li>مطمئن شوید فایل رسانه قابل‌دسترس و سالم است</li>
+  <li>پیکربندی bucket ‏COS را با ادمین پلتفرم چک کنید</li>
+</ol>
+
+<h3>پیام‌ها به کانال خانگی تحویل نمی‌شوند</h3>
+<p><strong>علت:</strong> قالب شناسهٔ کانال خانگی اشتباه است یا کار کرون هنوز تریگر نشده.</p>
+<p><strong>راه‌حل:</strong></p>
+<ol>
+  <li>تأیید کنید ‏YUANBAO_HOME_CHANNEL قالب درست دارد</li>
+  <li>با فرمان ‏<code>/sethome</code> تست کنید تا قالب درست خودکار تشخیص داده شود</li>
+  <li>زمان‌بندی کار کرون را با ‏<code>/status</code> چک کنید</li>
+  <li>تأیید کنید بات در چت هدف مجوز ارسال دارد</li>
+</ol>
+
+<h3>قطعی‌های مکرر</h3>
+<p><strong>علت:</strong> اتصال WebSocket ناپایدار یا شبکه نامطمئن است.</p>
+<p><strong>راه‌حل:</strong></p>
+<ol>
+  <li>لاگ‌های گیت‌وی را برای الگوهای خطا چک کنید</li>
+  <li>timeout ضربان را در تنظیمات اتصال بالا ببرید</li>
+  <li>اتصال شبکهٔ پایدار به API یوان‌بائو را تأمین کنید</li>
+  <li>لاگ پرجزئیات را فعال کنید: ‏<code>hermes gateway run -vv</code></li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> کنترل دسترسی</h2>
+<p>‏Yuanbao کنترل دسترسی دقیق برای گفتگوهای DM و گروهی دارد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># سیاست DM: open (پیش‌فرض) | allowlist | disabled
+YUANBAO_DM_POLICY=open
+# شناسه‌های کاربر جداشده با ویرگول مجازِ DM (فقط وقتی DM_POLICY=allowlist)
+YUANBAO_DM_ALLOW_FROM=user_id_1,user_id_2
+
+# سیاست گروه: open (پیش‌فرض) | allowlist | disabled
+YUANBAO_GROUP_POLICY=open
+# کدهای گروه جداشده با ویرگول مجاز (فقط وقتی GROUP_POLICY=allowlist)
+YUANBAO_GROUP_ALLOW_FROM=group_code_1,group_code_2</code></pre>
+</div>
+<p>در config.yaml هم می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  yuanbao:
+    extra:
+      dm_policy: allowlist
+      dm_allow_from: "user1,user2"
+      group_policy: open
+      group_allow_from: ""</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> پیکربندی پیشرفته</h2>
+
+<h3>تکه‌تکه‌کردن پیام</h3>
+<p>‏Yuanbao سقف حجم پیام دارد. هرمس پاسخ‌های بزرگ را خودکار با تقسیم آگاه-از-مارک‌داون تکه می‌کند ‏(code fence ها، جدول‌ها و مرزهای پاراگراف را رعایت می‌کند).</p>
+
+<h3>پارامترهای اتصال</h3>
+<p>پارامترهای اتصال زیر با پیش‌فرض‌های منطقی داخل آداپتور ساخته شده‌اند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>پارامتر</th><th>مقدار پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td>timeout اتصال WebSocket</td><td>۱۵ ثانیه</td><td>زمان انتظار برای دست‌دادن WS</td></tr>
+    <tr><td>فاصلهٔ ضربان</td><td>۳۰ ثانیه</td><td>فراوانی ping برای زنده نگه‌داشتن اتصال</td></tr>
+    <tr><td>حداکثر تلاش reconnect</td><td>۱۰۰</td><td>حداکثر تعداد تلاش اتصال‌مجدد</td></tr>
+    <tr><td>backoff اتصال‌مجدد</td><td>۱ ← ۶۰ ثانیه ‏(نمایی)</td><td>زمان انتظار بین تلاش‌های اتصال‌مجدد</td></tr>
+    <tr><td>فاصلهٔ ضربان ریپلای</td><td>۲ ثانیه</td><td>فراوانی ارسال وضعیت RUNNING</td></tr>
+    <tr><td>timeout ارسال</td><td>۳۰ ثانیه</td><td>timeout برای پیام‌های WS خروجی</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 یادداشت</div>
+  <p>این مقادیر الان از طریق متغیرهای محیطی قابل‌پیکربندی نیستند. برای استقرارهای معمول یوان‌بائو بهینه شده‌اند.</p>
+</div>
+
+<h3>لاگ پرجزئیات</h3>
+<p>برای عیب‌یابی مشکلات اتصال لاگ دیباگ را فعال کنید:</p>
+<div class="codebox"><pre><code>hermes gateway run -vv</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> یکپارچگی با سایر قابلیت‌ها</h2>
+
+<h3>کارهای کرون</h3>
+<p>کارهایی روی یوان‌بائو زمان‌بندی کنید:</p>
+<div class="codebox"><pre><code>/cron "0 */4 * * *" Report system health</code></pre></div>
+<p>نتایج به کانال خانگی شما تحویل می‌شوند.</p>
+
+<h3>کارهای پس‌زمینه</h3>
+<p>عملیات طولانی را بدون مسدودکردن گفتگو اجرا کنید:</p>
+<div class="codebox"><pre><code>/background Analyze all files in the archive</code></pre></div>
+
+<h3>پیام‌های بین-پلتفرمی</h3>
+<p>از CLI به یوان‌بائو پیام بفرستید:</p>
+<div class="codebox"><pre><code>hermes chat -q "Send 'Hello from CLI' to yuanbao:group:group_code"</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> مستندات مرتبط</h2>
+<ul>
+  <li><a href="index.html">نمای کلی گیت‌وی پیام‌رسانی</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/reference/slash-commands" target="_blank" rel="noopener">مرجع فرمان‌های اسلش</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/cron" target="_blank" rel="noopener">کارهای کرون</a></li>
+  <li><a href="../cli.html">نشست‌های پس‌زمینه</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="weixin.html"><span class="dir">→ قبلی</span><span class="ttl">Weixin ‏(WeChat)</span></a>
+  <a class="next" href="feishu.html"><span class="dir">بعدی ←</span><span class="ttl">Feishu / Lark</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/yuanbao" target="_blank" rel="noopener">Yuanbao</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

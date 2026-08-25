@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRC — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/irc" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>IRC</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>IRC</h1>
+<p>آداپتور IRC هرمس را به هر سرور IRCی وصل می‌کند و پیام‌ها را بین یک کانال IRC ‏(یا پیام خصوصی) و ایجنت رله می‌کند. با پروتکل IRC روی <code>asyncio</code> استاندارد پایتون حرف می‌زند — <strong>بدون هیچ وابستگی خارجی، بدون SDK، بدون دیمن</strong>. با شبکه‌های عمومی مثل <a href="https://libera.chat/" target="_blank" rel="noopener">Libera.Chat</a> و هر ircd خودمیزبان کار می‌کند.</p>
+<p>‏IRC متن ساده است: پشتیبانی صدا، تصویر، فایل، ترد، واکنش، تایپ یا استریم ندارد — ریپلای‌ها به‌صورت خطوط <code>PRIVMSG</code> فرستاده می‌شوند و پیام‌های بلند برای جا شدن در سقف خط IRC تقسیم می‌شوند.</p>
+<blockquote><p><code>hermes gateway setup</code> را اجرا و <strong>IRC</strong> را انتخاب کنید تا راهنمای گام‌به‌گام ببینید.</p></blockquote>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li>یک سرور IRC برای اتصال ‏(مثل <code>irc.libera.chat</code>)</li>
+  <li>یک کانال برای پیوستن ‏(مثل <code>#hermes</code>) — برای چند کانال با ویرگول جدا کنید</li>
+  <li>یک لقب ‏(nick) برای بات ‏(پیش‌فرض: <code>hermes-bot</code>)</li>
+  <li>اختیاری: nick ثبت‌شده + رمز NickServ اگر شبکه‌تان احراز بخواهد</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پیکربندی هرمس</h2>
+<p>IRC را دو جور می‌شود پیکربندی کرد — متغیرهای محیطی ‏(برای راه‌اندازی سریع فقط-env) یا بلوک <code>gateway</code> در <code>~/.hermes/gateway-config.yaml</code>.</p>
+
+<h3>گزینهٔ A — gateway-config.yaml</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  platforms:
+    irc:
+      enabled: true
+      extra:
+        server: irc.libera.chat
+        port: 6697
+        nickname: hermes-bot
+        channel: "#hermes"
+        use_tls: true
+        server_password: ""       # رمز سرور (اختیاری)
+        nickserv_password: ""     # احراز NickServ (اختیاری)
+        allowed_users: []         # خالی = اجازه به همه، یا فهرست nick ها
+        max_message_length: 450   # سقف خط IRC (پیش‌فرض امن)</code></pre>
+</div>
+
+<h3>گزینهٔ B — متغیرهای محیطی</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>لازم</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>IRC_SERVER</code></td><td>✅</td><td>هاستنیم سرور IRC ‏(مثل <code>irc.libera.chat</code>)</td></tr>
+    <tr><td><code>IRC_CHANNEL</code></td><td>✅</td><td>کانال‌هایی که باید بپیوندد — برای چندتا با ویرگول</td></tr>
+    <tr><td><code>IRC_NICKNAME</code></td><td>✅</td><td>لقب بات ‏(پیش‌فرض: <code>hermes-bot</code>)</td></tr>
+    <tr><td><code>IRC_PORT</code></td><td>—</td><td>پورت سرور ‏(پیش‌فرض: <code>6697</code> با TLS، ‏<code>6667</code> بدون)</td></tr>
+    <tr><td><code>IRC_USE_TLS</code></td><td>—</td><td>استفاده از TLS ‏(<code>true</code>/<code>false</code>؛ پیش‌فرض <code>true</code> روی پورت 6697)</td></tr>
+    <tr><td><code>IRC_SERVER_PASSWORD</code></td><td>—</td><td>رمز سرور برای فرمان <code>PASS</code></td></tr>
+    <tr><td><code>IRC_NICKSERV_PASSWORD</code></td><td>—</td><td>رمز NickServ برای IDENTIFY خودکار هنگام اتصال</td></tr>
+    <tr><td><code>IRC_ALLOWED_USERS</code></td><td>—</td><td>‏nick های مجازِ گفتگو با بات، جداشده با ویرگول</td></tr>
+    <tr><td><code>IRC_ALLOW_ALL_USERS</code></td><td>—</td><td>اجازه به همهٔ افراد کانال برای گفتگو با بات ‏(فقط توسعه)</td></tr>
+    <tr><td><code>IRC_HOME_CHANNEL</code></td><td>—</td><td>کانال تحویل کرون / اعلان‌ها ‏(پیش‌فرض همان <code>IRC_CHANNEL</code>)</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> کنترل دسترسی</h2>
+<p>به‌طور پیش‌فرض فقط nick هایی که در <code>allowed_users</code> ‏(یا <code>IRC_ALLOWED_USERS</code>) هستند حق حرف زدن با بات را دارند. فهرست را خالی بگذارید <strong>و</strong> ‏<code>IRC_ALLOW_ALL_USERS=true</code> بگذارید تا هر کسی در کانال بتواند با هرمس چت کند — برای تست مفید است ولی روی شبکه‌های عمومی توصیه نمی‌شود چون nick های IRC مگر شبکه NickServ را اجبار کند احراز نمی‌شوند.</p>
+<p>اگر شبکه‌تان nick ثبت می‌کند، ‏<code>IRC_NICKSERV_PASSWORD</code> ‏(یا <code>nickserv_password</code>) را بگذارید تا بات هنگام اتصال به NickServ معرفی شود و nick ثبت‌شده‌اش را نگه دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> کانال‌ها در برابر DM ها</h2>
+<ul>
+  <li>پیام‌های یک کانالِ عضو‌شده به‌عنوان گفتگوی <strong>گروهی</strong> پردازش می‌شوند.</li>
+  <li>پیام‌های خصوصی به بات به‌عنوان <strong>پیام مستقیم</strong> پردازش می‌شوند.</li>
+</ul>
+<p>کارهای کرون و اعلان‌ها به <strong>کانال خانگی</strong> تحویل می‌شوند — اگر <code>IRC_HOME_CHANNEL</code> تنظیم باشد همان، وگرنه اولین <code>IRC_CHANNEL</code>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> اجرای گیت‌وی</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway start</code></pre>
+</div>
+<p>وضعیت را با <code>hermes gateway status</code> چک کنید — وضعیت اتصال IRC آنجا گزارش می‌شود، حتی برای راه‌اندازی‌های فقط-env.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> یادداشت‌ها</h2>
+<ul>
+  <li>ریپلای‌های بلند ایجنت خودکار به چند خط <code>PRIVMSG</code> تقسیم می‌شوند تا در سقف خط IRC بمانند ‏(<code>max_message_length</code>، پیش‌فرض ۴۵۰ بایت پس از overhead پروتکل).</li>
+  <li>آداپتور به‌ازای هر ترکیب سرور+nick یک قفل اعتبارنامهٔ scoped می‌گیرد، پس دو پروفایل هرمس سر هویت IRC واحد دعوا نمی‌کنند.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="email.html"><span class="dir">→ قبلی</span><span class="ttl">ایمیل</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">ntfy (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/irc" target="_blank" rel="noopener">IRC</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

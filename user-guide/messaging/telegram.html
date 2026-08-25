@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تلگرام — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>تلگرام</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی تلگرام</h1>
+<p>هرمس ایجنت با تلگرام به‌صورت یک بات گفتگوی کامل‌عیار یکپارچه می‌شود. پس از اتصال، می‌توانید از هر دستگاهی با ایجنت‌تان چت کنید، یادداشت‌های صوتی بفرستید که خودکار رونویسی می‌شوند، نتایج کارهای زمان‌بندی‌شده دریافت کنید و از ایجنت در گفتگوهای گروهی استفاده کنید. یکپارچه‌سازی بر پایهٔ <a href="https://python-telegram-bot.org/" target="_blank" rel="noopener">python-telegram-bot</a> است و متن، صوت، تصویر و پیوست فایل را پشتیبانی می‌کند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> گام ۱: ساخت بات با BotFather</h2>
+<p>هر بات تلگرامی به یک توکن API از <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a> نیاز دارد.</p>
+<ol>
+  <li>تلگرام را باز و <strong>@BotFather</strong> را جست‌وجو کنید</li>
+  <li><code>/newbot</code> بفرستید</li>
+  <li>یک <strong>نام نمایشی</strong> انتخاب کنید (مثلاً «Hermes Agent») — هر چیزی می‌تواند باشد</li>
+  <li>یک <strong>یوزرنیم</strong> انتخاب کنید — باید یکتا و به <code>bot</code> ختم شود (مثلاً <code>my_hermes_bot</code>)</li>
+  <li>BotFather با <strong>توکن API</strong> شما پاسخ می‌دهد:</li>
+</ol>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">token</span><button class="copy-btn">کپی</button></div>
+  <pre><code>123456789:ABCdefGHIjklMNOpqrSTUvwxYZ</code></pre>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>توکن بات را محرمانه نگه دارید. هر کسی با این توکن می‌تواند بات‌تان را کنترل کند. اگر لو رفت، بلافاصله با <code>/revoke</code> در BotFather لغوش کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۲: سفارشی‌سازی بات (اختیاری)</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرمان</th><th>هدف</th></tr></thead>
+  <tbody>
+    <tr><td><code>/setdescription</code></td><td>متن «این بات چه کاری می‌تواند بکند؟» که قبل از شروع چت نمایش می‌یابد</td></tr>
+    <tr><td><code>/setabouttext</code></td><td>متن کوتاه در صفحهٔ پروفایل بات</td></tr>
+    <tr><td><code>/setuserpic</code></td><td>آپلود آواتار برای بات</td></tr>
+    <tr><td><code>/setcommands</code></td><td>تعریف منوی فرمان (دکمهٔ <code>/</code> در چت)</td></tr>
+    <tr><td><code>/setprivacy</code></td><td>کنترل اینکه بات همهٔ پیام‌های گروه را ببیند (گام ۳)</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>برای <code>/setcommands</code> یک مجموعهٔ شروع مفید:</p>
+  <div class="codebox">
+    <div class="code-head"><span class="code-lang">commands</span><button class="copy-btn">کپی</button></div>
+    <pre><code>help - Show help information
+new - Start a new conversation
+sethome - Set this chat as the home channel</code></pre>
+  </div>
+</div>
+
+<h3>نشانگر وضعیت آنلاین/آفلاین (اختیاری)</h3>
+<p>بات‌های تلگرام نقطهٔ حضور واقعی آنلاین/آفلاین ندارند — آن نقطهٔ سبز قابلیتِ حساب-کاربری است، نه چیزی که Bot API عرضه کند. نزدیک‌ترین سطح، <strong>توضیح کوتاه</strong> بات است. <code>status_indicator</code> را فعال کنید و هرمس آن توضیح را هنگام اتصال گیت‌وی روی <strong>Online</strong> و هنگام خاموشی تمیز روی <strong>Offline</strong> می‌گذارد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  platforms:
+    telegram:
+      extra:
+        status_indicator: true
+        status_online: "🟢 Online"     # اختیاری (پیش‌فرض: "Online")
+        status_offline: "🔴 Offline"   # اختیاری (پیش‌فرض: "Offline")</code></pre>
+</div>
+<p>توضیح کوتاه <strong>سراسری</strong> بات است (همهٔ کاربران می‌بینند). فقط خاموشیِ تمیز «Offline» می‌نویسد؛ کرش سخت وضعیت آخر را می‌گذارد. پیش‌فرض خاموش.</p>
+
+<h3>اولویت و سقف منوی فرمان (اختیاری)</h3>
+<p>هرمس منوی فرمان را هنگام شروع گیت‌وی خودکار ثبت می‌کند. سقف پیش‌فرض ۶۰ فرمان است. اگر فرمان‌های محلی/پلاگینی دارید که باید در انتخابگر <code>/</code> تلگرام بمانند، اولویت‌شان کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  telegram:
+    extra:
+      command_menu:
+        max_commands: 60
+        priority_mode: prepend  # prepend | append | replace
+        priority:
+          - my_plugin_command</code></pre>
+</div>
+<p><code>priority_mode</code>: ‏<code>prepend</code> فرمان‌های شما اول، بعد پیش‌فرض‌های هرمس؛ ‏<code>append</code> پیش‌فرض‌ها اول؛ ‏<code>replace</code> فقط فهرست شما. تلگرام تا ۱۰۰ فرمان می‌پذیرد ولی هرمس برای اطمینان روی ۶۰ سقف می‌زند و مقادیر را به ۱..۱۰۰ محدود می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۳: حالت حریم خصوصی (بحرانی برای گروه‌ها)</h2>
+<p>بات‌های تلگرام <strong>حالت حریم خصوصی</strong> دارند که <strong>پیش‌فرض روشن</strong> است. رایج‌ترین منبع سردرگمی در استفاده از بات در گروه‌ها همین است.</p>
+<p><strong>با حریم خصوصی روشن</strong>، بات فقط می‌بیند: پیام‌های شروع‌شونده با <code>/</code>؛ ‏ریپلای‌های مستقیم به پیام‌های خود بات؛ پیام‌های سرویس (عضویت/خروج، پین و غیره)؛ و پیام‌های کانال‌هایی که بات ادمین آن‌هاست.</p>
+<p><strong>با حریم خصوصی خاموش</strong>، بات هر پیام گروه را دریافت می‌کند.</p>
+<h3>غیرفعال‌کردن حریم خصوصی</h3>
+<ol>
+  <li>به <strong>@BotFather</strong> پیام دهید</li>
+  <li><code>/mybots</code> بفرستید</li>
+  <li>بات‌تان را انتخاب کنید</li>
+  <li><strong>Bot Settings ← Group Privacy ← Turn off</strong></li>
+</ol>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p><strong>باید بات را از گروه حذف و دوباره اضافه کنید</strong> پس از تغییر تنظیم حریم خصوصی. تلگرام وضعیت حریم را هنگام پیوستن بات کش می‌کند و تا حذف/افزودن مجدد به‌روز نمی‌شود.</p>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>جایگزین: بات را به <strong>ادمین گروه</strong> ارتقا دهید. بات‌های ادمین همیشه همهٔ پیام‌ها را صرف‌نظر از تنظیم حریم دریافت می‌کنند.</p>
+</div>
+
+<h3>مشاهدهٔ گفتگوی گروه بدون پاسخ خودکار</h3>
+<p>برای رفتار گروهی سبک OpenClaw/Yuanbao، بات را طوری تنظیم کنید که گفتگوی عادی گروه را <strong>ببیند</strong> ولی فقط هنگام تریگر مستقیم <strong>پاسخ دهد</strong>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml + bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>telegram:
+  allowed_chats:
+    - "-1001234567890"
+  group_allowed_chats:
+    - "-1001234567890"
+  require_mention: true
+  observe_unmentioned_group_messages: true
+
+# معادل متغیر محیطی:
+TELEGRAM_ALLOWED_CHATS=-1001234567890
+TELEGRAM_GROUP_ALLOWED_CHATS=-1001234567890
+TELEGRAM_OBSERVE_UNMENTIONED_GROUP_MESSAGES=true</code></pre>
+</div>
+<p>پیام‌های گروهیِ بدون-منشن از چت‌های صریحاً مجاز به رونوشت نشست مشترک چت/تاپیک به‌صورت زمینهٔ مشاهده‌شده الصاق می‌شوند، ولی ایجنت را اعزام نمی‌کنند. یک <code>@botname</code> بعدی، ‏ریپلای یا الگوی منشنِ پیکربندی‌شده می‌تواند از آن زمینهٔ مشاهده‌شده استفاده کند. پیامِ تریگرشده با <code>[nickname|user_id]</code> تگ و یک پرامپت ایمنی به‌ازایی-نوبت می‌گیرد تا مدل خطوط مشاهده‌شدهٔ قبلی را زمینه تلقی کند نه دستورالعمل خطاب‌شده به بات.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۴: یافتن شناسهٔ کاربر</h2>
+<p>هرمس از شناسه‌های عددی کاربر تلگرام برای کنترل دسترسی استفاده می‌کند. شناسهٔ کاربر شما یوزرنیم‌تان <strong>نیست</strong> — عددی مثل <code>123456789</code> است.</p>
+<p><strong>روش ۱ (توصیه‌شده):</strong> به <a href="https://t.me/userinfobot" target="_blank" rel="noopener">@userinfobot</a> پیام دهید — بلافاصله شناسه‌تان را پاسخ می‌دهد.</p>
+<p><strong>روش ۲:</strong> به <a href="https://t.me/get_id_bot" target="_blank" rel="noopener">@get_id_bot</a> پیام دهید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۵: پیکربندی هرمس و شروع</h2>
+<p><strong>گزینهٔ A (توصیه‌شده):</strong> <code>hermes gateway setup</code> — تلگرام را انتخاب کنید؛ ویزارد توکن بات و شناسه‌های مجاز را می‌پرسد و پیکربندی را می‌نویسد.</p>
+<p><strong>گزینهٔ B:</strong> دستی به <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrSTUvwxYZ
+TELEGRAM_ALLOWED_USERS=123456789    # جدا با ویرگول برای چند کاربر
+
+# شروع:
+hermes gateway</code></pre>
+</div>
+<p>بات باید ظرف چند ثانیه آنلاین شود. در تلگرام به آن پیام بدهید تا تأیید کنید.</p>
+
+<h3>ارسال فایل‌های تولیدی از ترمینال‌های داکری</h3>
+<p>اگر بک‌اند ترمینال <code>docker</code> است، پیوست‌های تلگرام توسط <strong>پروسهٔ گیت‌وی</strong> ارسال می‌شوند نه از داخل کانتینر. مسیر <code>MEDIA:/...</code> باید روی میزبانی که گیت‌وی اجرا می‌شود خوانا باشد. الگوی توصیه‌شده:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>terminal:
+  backend: docker
+  docker_volumes:
+    - "/home/user/.hermes/cache/documents:/output"</code></pre>
+</div>
+<p>داخل داکر به <code>/output/...</code> بنویسید و <strong>مسیر مرئی-برای-میزبان</strong> را در <code>MEDIA:</code> بدهید. اگر از قبل <code>docker_volumes:</code> دارید، مانت جدید را به همان فهرست بیفزایید — کلیدهای تکراری YAML خاموش بر هم‌دست‌های قبلی را بازنویسی می‌کنند.</p>
+
+<h3>پسوندهای پشتیبانی‌شدهٔ <code>MEDIA:</code></h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>دسته</th><th>پسوندها</th></tr></thead>
+  <tbody>
+    <tr><td>تصاویر</td><td><code>png jpg jpeg gif webp bmp tiff svg</code></td></tr>
+    <tr><td>صوت</td><td><code>mp3 wav ogg m4a opus flac aac</code></td></tr>
+    <tr><td>ویدیو</td><td><code>mp4 mov webm mkv avi</code></td></tr>
+    <tr><td><strong>اسناد</strong></td><td><code>pdf txt md csv json xml html yaml yml log</code></td></tr>
+    <tr><td><strong>آفیس</strong></td><td><code>docx xlsx pptx odt ods odp</code></td></tr>
+    <tr><td><strong>آرشیو</strong></td><td><code>zip rar 7z tar gz bz2</code></td></tr>
+    <tr><td><strong>کتاب / پکیج</strong></td><td><code>epub apk ipa</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>همهٔ این فهرست روی پلتفرم‌های دارای پشتیبانی بومی‏ (تلگرام، دیسکورد، سیگنال، اسلک، واتساپ، فیشو، ماتریکس و غیره) به‌صورت پیوست بومی تحویل می‌شوند؛ روی بقیه به لینک یا نشانگر متنی برمی‌گردند. دسته‌های <strong>پررنگ</strong> در آخرین ریلیزها اضافه شدند — اگر روی مدلِ گفتنِ «here is the file: /path/to/report.docx» تکیه داشتید، به <code>MEDIA:/path/to/report.docx</code> بروید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> حالت Webhook</h2>
+<p>پیش‌فرض هرمس با <strong>long polling</strong> وصل می‌شود. برای <strong>استقرارهای ابری</strong>‏ (‏Fly.io، ‏Railway، ‏Render و غیره) <strong>وب‌هوک</strong> به‌صرفه‌تر است — تلگرام به‌روزرسانی‌ها را به URL ‏HTTPS بات‌تان پوش می‌کند و ماشین می‌تواند بین پیام‌ها بخوابد.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th></th><th>Polling ‏(پیش‌فرض)</th><th>Webhook</th></tr></thead>
+  <tbody>
+    <tr><td>جهت</td><td>گیت‌وی ← تلگرام (خروجی)</td><td>تلگرام ← گیت‌وی (ورودی)</td></tr>
+    <tr><td>بهترین برای</td><td>سرورهای محلی، همیشه-روشن</td><td>پلتفرم‌های ابری با بیدارباش خودکار</td></tr>
+    <tr><td>راه‌اندازی</td><td>بدون پیکربندی اضافه</td><td><code>TELEGRAM_WEBHOOK_URL</code></td></tr>
+    <tr><td>هزینهٔ بیکاری</td><td>ماشین باید روشن بماند</td><td>ماشین می‌تواند بین پیام‌ها بخوابد</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash — در ~/.hermes/.env</span><button class="copy-btn">کپی</button></div>
+  <pre><code>TELEGRAM_WEBHOOK_URL=https://my-app.fly.dev/telegram
+TELEGRAM_WEBHOOK_SECRET="$(openssl rand -hex 32)"  # الزامی
+# TELEGRAM_WEBHOOK_PORT=8443        # اختیاری، پیش‌فرض 8443</code></pre>
+</div>
+<p><code>TELEGRAM_WEBHOOK_SECRET</code> <strong>الزامی</strong> است — گیت‌وی بدون آن شروع نمی‌شود. مثال استقرار Fly.io:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash + toml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>fly secrets set TELEGRAM_WEBHOOK_URL=https://my-app.fly.dev/telegram
+fly secrets set TELEGRAM_WEBHOOK_SECRET=$(openssl rand -hex 32)
+
+# fly.toml:
+[[services]]
+  internal_port = 8443
+  protocol = "tcp"
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+fly deploy</code></pre>
+</div>
+<p>لاگ گیت‌وی باید نشان دهد: <code>[telegram] Connected to Telegram (webhook mode)</code>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> پشتیبانی پراکسی</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml + bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># config.yaml (توصیه‌شده):
+telegram:
+  proxy_url: "socks5://127.0.0.1:1080"
+
+# یا متغیر محیطی:
+TELEGRAM_PROXY=socks5://127.0.0.1:1080</code></pre>
+</div>
+<p>طرح‌های پشتیبانی‌شده: <code>http://</code>، ‏<code>https://</code>، ‏<code>socks5://</code>. پراکسی روی اتصال اصلی و ترنسپورت IP جایگزین اعمال می‌شود. اگر پراکسی مخصوص تلگرام تنظیم نباشد، به <code>HTTPS_PROXY</code> / ‏<code>HTTP_PROXY</code> / ‏<code>ALL_PROXY</code> برمی‌گردد. اگر مسیر کشف IP جایگزین ناسالم است: ‏<code>HERMES_TELEGRAM_DISABLE_FALLBACK_IPS=true</code> و ‏<code>HERMES_TELEGRAM_FALLBACK_DISCOVERY_TIMEOUT</code> ‏(پیش‌فرض ۵ ثانیه).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> کانال خانگی و پیام‌های صوتی</h2>
+<h3>کانال خانگی</h3>
+<p>با <code>/sethome</code> در هر چتی‏ (‏DM یا گروه) آن را به‌عنوان <strong>کانال خانگی</strong> تعیین کنید — نتایج کرون به این کانال تحویل می‌شود. دستی هم می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>TELEGRAM_HOME_CHANNEL=-1001234567890
+TELEGRAM_HOME_CHANNEL_NAME="My Notes"
+# در حالت تاپیک برای تحویل کرون:
+TELEGRAM_CRON_THREAD_ID=&lt;topic_thread_id&gt;</code></pre>
+</div>
+<p>شناسهٔ چت گروه عدد منفی است. شناسهٔ DM شخصی شما همان شناسهٔ کاربرتان است.</p>
+
+<h3>پیام‌های صوتی ورودی (گفتار-به-متن)</h3>
+<p>یادداشت‌های صوتی شما خودکار توسط ارائه‌دهندهٔ STT رونویسی و به‌صورت متن در گفتگو تزریق می‌شوند: <code>local</code> از <code>faster-whisper</code> روی ماشین هرمس؛ ‏<code>groq</code> نیازمند <code>GROQ_API_KEY</code>؛ ‏<code>openai</code> نیازمند <code>VOICE_TOOLS_OPENAI_KEY</code>.</p>
+<p><strong>ردکردن STT:</strong> اگر می‌خواهید <strong>خود ایجنت</strong> صوت را هندل کند، ‏<code>stt.enabled: false</code> بگذارید — پیام صوتی دانلود ولی رونویسی نمی‌شود و ایجنت نشانی فایل را می‌گیرد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">نشانگر</span><button class="copy-btn">کپی</button></div>
+  <pre><code>[The user sent a voice message: /home/&lt;user&gt;/.hermes/cache/audio/&lt;hash&gt;.ogg]</code></pre>
+</div>
+
+<h3>پیام‌های صوتی خروجی (متن-به-گفتار)</h3>
+<p>صوت تولیدی TTS به‌صورت <strong>حباب صوتی بومی</strong> تلگرام تحویل می‌شود: OpenAI و ElevenLabs بومی Opus می‌سازند؛ ‏Edge TTS ‏(ارائه‌دهندهٔ رایگان پیش‌فرض) MP3 می‌دهد و برای تبدیل به Opus به <strong>ffmpeg</strong> نیاز دارد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Ubuntu/Debian
+sudo apt install ffmpeg
+# macOS
+brew install ffmpeg</code></pre>
+</div>
+<p>بدون ffmpeg، صوت Edge به‌صورت فایل صوتی معمولی فرستاده می‌شود (هنوز پخش‌شدنی، ولی پخش‌کنندهٔ مستطیلی).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> فایل‌های بزرگ (بالای ۲۰MB) با سرور Bot API محلی</h2>
+<p>‏Bot API <strong>عمومی</strong> تلگرام دانلود <code>getFile</code> را روی <strong>۲۰ مگابایت</strong> سقف می‌زند. راه مستند، اجرای یک دیمن <strong>محلی</strong> <a href="https://github.com/tdlib/telegram-bot-api" target="_blank" rel="noopener">telegram-bot-api</a> است که سقف را به <strong>۲ گیگابایت</strong> می‌رساند و هرمس با دیدن <code>base_url</code> سفارشی، سقف داخلی خود را خودکار بالا می‌برد. این قابلیت‌ها را باز می‌کند: یادداشت‌های صوتی طولانی (جلسهٔ ۴۵ دقیقه‌ای)، ویدیوهای بزرگ برای پردازش بینایی و آرشیو صوت خام.</p>
+
+<h3>گام ۱: دریافت اعتبارنامهٔ MTProto</h3>
+<p>سرور محلی با لایهٔ MTProto تلگرام حرف می‌زند و به <code>api_id</code> و <code>api_hash</code> نیاز دارد — از <a href="https://my.telegram.org/apps" target="_blank" rel="noopener">my.telegram.org/apps</a>.</p>
+
+<h3>گام ۲: اجرای سرور با داکر</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — docker-compose</span><button class="copy-btn">کپی</button></div>
+  <pre><code>services:
+  tg-bot-api:
+    image: aiogram/telegram-bot-api:latest
+    container_name: tg-bot-api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8081:8081"   # فقط loopback؛ نکتهٔ امنیتی را ببینید
+    environment:
+      TELEGRAM_API_ID: "12345"           # api_id شما
+      TELEGRAM_API_HASH: "abcdef..."     # api_hash شما
+      TELEGRAM_LOCAL: "1"                # حالت --local (‏۲۰MB ← ۲GB)
+    volumes:
+      - ./tg-bot-api-data:/var/lib/telegram-bot-api</code></pre>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ امنیت</div>
+  <p>سرور Bot API محلی توکن بات را در مسیر URL می‌گیرد <strong>بدون احراز اضافه</strong>. هر کسی که به پورت برسد می‌تواند کاملاً بات را کنترل کند. کانتینر را به <code>127.0.0.1</code> بایند کنید و/یا جلویش پروکسی معکوس روی شبکهٔ خصوصی. <strong>هرگز پورت 8081 را در اینترنت باز نکنید.</strong></p>
+</div>
+
+<h3>گام ۳: خروج بات از API عمومی (یک‌بار)</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl "https://api.telegram.org/bot&lt;YOUR_BOT_TOKEN&gt;/logOut"
+# پاسخ موردانتظار: {"ok":true,"result":true}
+
+# تأیید: سرور محلی می‌تواند صحبت کند:
+curl "http://127.0.0.1:8081/bot&lt;YOUR_BOT_TOKEN&gt;/getMe"</code></pre>
+</div>
+
+<h3>گام ۴: اشارهٔ هرمس به سرور محلی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — در ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  telegram:
+    extra:
+      base_url: "http://127.0.0.1:8081/bot"
+      base_file_url: "http://127.0.0.1:8081/file/bot"
+      local_mode: true        # فقط اگر دایرکتوری داده بات برای هرمس خواناست</code></pre>
+</div>
+<div class="callout caution">
+  <div class="callout-title">⚠️ از <code>platforms.telegram.extra</code> استفاده کنید نه <code>telegram.extra</code></div>
+  <p>فعلاً فقط فرم <code>platforms.&lt;name&gt;.extra</code> در پیکربندی عمیق-مرج می‌شود. کلیدهای زیر بلوک سطح‌بالای <code>telegram.extra</code> خاموش دور ریخته می‌شوند.</p>
+</div>
+
+<h3>گام ۵: <code>local_mode</code> — دسترسی فایل روی دیسک</h3>
+<p>سرور محلی دو راه دارد: بدون <code>--local</code> فایل روی HTTP سرو می‌شود (سقف ۲۰MB می‌ماند)؛ با <code>--local</code> فایل روی فایل‌سیستم نوشته و <code>getFile</code> <strong>مسیر مطلق</strong> برمی‌گرداند. هرمس باید بایت‌ها را <strong>از دیسک</strong> بخواند — <code>local_mode: true</code> بگذارید و مطمئن شوید پروسهٔ هرمس مسیر را می‌تواند بخواند. دو سناریو: <strong>همان ماشین</strong>‏ (والوم داده را به دایرکتوری خوانا برای هرمس بایند کنید و <code>user:</code> در compose تطبیق دهید)؛ <strong>ماشین‌های متفاوت</strong>‏ (دایرکتوری داده سرور باید در همان مسیر مطلق با ماشین هرمس به اشتراک باشد — NFS خوب کار می‌کند). اگر <code>local_mode: true</code> ولی <code>stat</code> شکست بخورد، پایتون-تلگرام-بات خاموش به HTTP برمی‌گردد که در حالت --local با 404 پاسخ می‌دهد — علامتش در gateway.log: <code>[Telegram] Failed to cache voice: Not Found</code>.</p>
+
+<h3>گام ۶: تست</h3>
+<p>یادداشت صوتی بالای ۲۰MB بفرستید و <code>tail -f ~/.hermes/logs/gateway.log | grep -iE "telegram|cache"</code> — باید <code>[Telegram] Cached user voice at ...</code> ببینید بدون ردِ «too large».</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> استفاده در گروه</h2>
+<ul>
+  <li><strong>حریم خصوصی</strong> تعیین می‌کند بات چه پیام‌هایی می‌بیند.</li>
+  <li><code>TELEGRAM_ALLOWED_USERS</code> همچنان اعمال می‌شود — فقط کاربران مجاز می‌توانند بات را تریگر کنند، حتی در گروه.</li>
+  <li>با <code>telegram.require_mention: true</code> بات از گفتگوی عادی گروه پاسخ نمی‌دهد. پیام‌ها پذیرفته می‌شوند وقتی: ریپلای به بات؛ منشن <code>@botusername</code>؛ ‏<code>/command@botusername</code>؛ یا تطبیق <code>mention_patterns</code>.</li>
+  <li>با چند بات هرمس در یک گروه، <code>exclusive_bot_mentions</code> ‏(پیش‌فرض روشن) مسیریابی قطعی می‌کند — فقط بات‌های منشن‌شده پردازش می‌کنند.</li>
+  <li>تغییر یوزرنیم بات در BotFather خودکار برداشت می‌شود.</li>
+  <li><code>telegram.ignored_threads</code> هرمس را در تاپیک‌های مشخص ساکت نگه می‌دارد.</li>
+  <li><strong>مشاهده بدون پاسخ:</strong> <code>observe_unmentioned_group_messages: true</code> همان‌طور که بالا گفته شد.</li>
+</ul>
+
+<h3>چند بات هرمس در یک گروه</h3>
+<p>برای هر پروفایل یک توکن بات جدا بسازید و به‌ازای-پروفایل گیت‌وی اجرا کنید — توکن یکسان در چند گیت‌ویِ هم‌زمان پذیرفته نمی‌شود. پیکربندی توصیه‌شده: <code>require_mention: true</code> + <code>exclusive_bot_mentions: true</code> + <code>mention_patterns: []</code>.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway start &amp;&amp; hermes -p research gateway start</code></pre>
+</div>
+<p>با <code>exclusive_bot_mentions</code>، پیامی مثل <code>@research_bot @ops_bot summarize this</code> فقط توسط آن دو پردازش می‌شود — بقیه حتی با ریپلای هم ساکت می‌مانند.</p>
+
+<h3>عیب‌یابی: در DM کار می‌کند ولی گروه نه</h3>
+<ol>
+  <li><strong>تحویل تلگرام:</strong> حریم خصوصی BotFather را خاموش، بات را ادمین یا مستقیم منشن کنید.</li>
+  <li><strong>بازپیوستن:</strong> پس از تغییر حریم، بات را از گروه حذف و دوباره اضافه کنید.</li>
+  <li><strong>مجوز هرمس:</strong> فرستنده در <code>TELEGRAM_ALLOWED_USERS</code> یا <code>TELEGRAM_GROUP_ALLOWED_USERS</code> است یا گروه در <code>TELEGRAM_GROUP_ALLOWED_CHATS</code>.</li>
+  <li><strong>فیلتر منشن:</strong> با <code>require_mention: true</code> گفتگوی عادی نادیده گرفته می‌شود.</li>
+  <li><strong>چند-بات:</strong> هر پروفایل توکن یکتا و <code>exclusive_bot_mentions</code> روشن.</li>
+</ol>
+<p>شناسهٔ گروه عدد منفی است — در <code>TELEGRAM_GROUP_ALLOWED_CHATS</code> بگذارید، نه فهرست کاربر.</p>
+
+<h3>مثال پیکربندی تریگر گروهی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>telegram:
+  require_mention: true
+  exclusive_bot_mentions: true
+  mention_patterns:
+    - "^\\s*chompy\\b"     # پیام‌هایی که با chompy شروع می‌شوند هم تریگر می‌کنند
+  ignored_threads:
+    - 31
+    - "42"                 # تاپیک‌هایی که هرمس همیشه ساکت می‌ماند</code></pre>
+</div>
+<p><strong>یادداشت‌های <code>mention_patterns</code>:</strong> regex پایتون؛ تطبیق بدون حساسیت به بزرگی/کوچکی؛ روی متن پیام و کپشن رسانه؛ الگوهای نامعتبر با هشدار نادیده؛ برای شروع-پیام با <code>^</code> لنگر کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> تاپیک‌های DM خصوصی (Bot API 9.4)</h2>
+<p>Bot API 9.4 ‏(فوریه ۲۰۲۶) <strong>تاپیک‌های خصوصی</strong> را معرفی کرد — بات‌ها می‌توانند رشته‌های تاپیک را مستقیم در چت یک‌به‌یک بسازند. هر تاپیک نشست، تاریخچه و زمینهٔ کاملاً ایزولهٔ خودش را می‌گیرد.</p>
+
+<h3>پیکربندی</h3>
+<p><strong>پیش‌نیاز:</strong> کاربر باید حالت Topics را در DM فعال کند‏ (اطلاعات چت ← Topics). بدون آن هرمس <code>The chat is not a forum</code> لاگ و رد می‌شود.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  telegram:
+    extra:
+      dm_topics:
+      - chat_id: 123456789
+        topics:
+        - name: General
+          icon_color: 7322096
+        - name: Website
+          icon_color: 9367192
+        - name: Research
+          icon_color: 16766590
+          skill: arxiv              # بارگذاری خودکار مهارت در این تاپیک</code></pre>
+</div>
+<p>هرمس در شروع گیت‌وی <code>createForumTopic</code> می‌زند، ‏<code>thread_id</code> را در config پس می‌نویسد و هر تاپیک به نشست ایزوله نگاشت می‌شود. با <code>ignore_root_dm: true</code> ریشهٔ DM به لابی تبدیل می‌شود.</p>
+
+<h3>حالت چندنشستی DM با <code>/topic</code></h3>
+<p>یک DM چندنشستیِ سبک ChatGPT — یک بات، گفتگوهای موازی بی‌شمار. <strong>کاربر-محور</strong> است: بدون config، بدون نام تاپیک از-پیش-اعلام‌شده.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرم</th><th>اثر</th></tr></thead>
+  <tbody>
+    <tr><td><code>/topic</code></td><td>در ریشهٔ DM: فعال‌سازی + ساخت تاپیک System پین‌شده</td></tr>
+    <tr><td><code>/topic &lt;id&gt;</code></td><td>در تاپیک: بازیابی نشست قبلی به تاپیک فعلی</td></tr>
+    <tr><td><code>/topic off</code></td><td>در ریشهٔ DM: غیرفعال‌سازی و پاک‌کردن پیوندها</td></tr>
+    <tr><td><code>/topic</code></td><td>در تاپیک: نمایش پیوند نشست فعلی</td></tr>
+  </tbody>
+</table>
+</div>
+<p>پس از فعال‌سازی ریشهٔ DM به لابی تبدیل می‌شود و کاربران با دکمهٔ + تلگرام تاپیک دلخواه می‌سازند — هرکدام نشست مستقل هرمس. نام تاپیک خودکار با عنوان نشست هم‌نام می‌شود. با <code>disable_topic_auto_rename: true</code> این را خاموش کنید. <code>/new</code> داخل تاپیک فقط همان تاپیک را ریست می‌کند. حذف با <code>/topic off</code> یا <code>sqlite3</code> مستقیم.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> پیوند مهارت به تاپیک گروهی</h2>
+<p>سوپرگروه‌های دارای حالت Topics از قبل به‌ازای-تاپیک ایزوله‌اند؛ با <code>group_topics</code> می‌توانید <strong>بارگذاری خودکار مهارت</strong> هم بدهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  telegram:
+    extra:
+      group_topics:
+      - chat_id: -1001234567890       # شناسهٔ سوپرگروه
+        topics:
+        - name: Engineering
+          thread_id: 5
+          skill: software-development
+        - name: Research
+          thread_id: 12
+          skill: arxiv</code></pre>
+</div>
+<p><code>thread_id</code> را از URL تاپیک در تلگرام وب/دسکتاپ بردارید: <code>t.me/c/1234567890/5</code> — آخرین عدد. <code>chat_id</code> سوپرگروه با پیشوند <code>-100</code>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> استریم، پیام‌های ریچ و پیش‌نمایش لینک</h2>
+<h3>ترنسپورت استریم</h3>
+<p>‏Bot API 9.5 استریم بومی با <code>sendMessageDraft</code> آورد. هرمس یکی از ۴ ترنسپورت را برمی‌گزیند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مقدار</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>auto</code> ‏(پیش‌فرض)</td><td>پیش‌نویس بومی روی چت‌های پشتیبان‌شده (فعلاً DM تلگرام)؛ ویرایشی برای بقیه</td></tr>
+    <tr><td><code>draft</code></td><td>اجبار پیش‌نویس بومی؛ با پشتیبان‌نشدن با هشدار به ویرایشی سقوط می‌کند</td></tr>
+    <tr><td><code>edit</code></td><td>مسیر ویرایشیِ پیشین برای همه</td></tr>
+    <tr><td><code>off</code></td><td>بدون استریم</td></tr>
+  </tbody>
+</table>
+</div>
+<p>در DM: <code>edit</code> یک پیام می‌فرستد و پیشرونده ویرایشش می‌کند؛ ‏<code>auto/draft</code> پیش‌نمایش پیش‌نویس متحرک نشان می‌دهد و پاسخ نهایی به‌صورت پیام معمولی می‌رسد. گروه‌ها همیشه ویرایشی‌اند (محدودیت تلگرام). خرابی فریم پیش‌نویس به ویرایشی برمی‌گردد.</p>
+
+<h3>پیام‌های ریچ (Bot API 10.1)</h3>
+<p>پاسخ‌های نهایی حاوی جدول/چک‌لیست/details/ریاضی با <code>sendRichMessage</code> تلگرام از **مارک‌داون خام** ارسال می‌شوند. پیش‌فرض خاموش — کلیدها: <code>rich_messages: true</code> و <code>rich_drafts: false</code>. با فعال‌بودن، هر رد تلگرام شفاف به MarkdownV2 برمی‌گردد و پیام گم نمی‌شود. جدول‌ها در MarkdownV2 نرمال می‌شوند: جدول‌های کوچک به فهرست‌های گلوله‌ای گروه‌ردیفی؛ بزرگ‌ترها به بلوک کد هم‌تراز.</p>
+
+<h3>پیش‌نمایش لینک</h3>
+<p>برای سرکوب خودکار پیش‌نمایش لینک تلگرام: <code>disable_link_previews: true</code>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> فهرست مجاز گروه</h2>
+<p>دو گیت مستقل:</p>
+<ul>
+  <li><strong>شناسه‌های کاربر فرستنده</strong>‏ (<code>group_allow_from</code> / <code>TELEGRAM_GROUP_ALLOWED_USERS</code>) — فقط برای گروه؛ به DM دسترسی نمی‌دهد.</li>
+  <li><strong>شناسه‌های چت</strong>‏ (<code>group_allowed_chats</code> / <code>TELEGRAM_GROUP_ALLOWED_CHATS</code>) — هر عضو این گروه‌ها مجاز است.</li>
+</ul>
+<p>با <code>*</code> هر فرستنده/چتی مجاز می‌شود. قبل از PR شمارهٔ ۱۷۶۸۶ کاربران شناسهٔ چت را در <code>GROUP_ALLOWED_USERS</code> می‌گذاشتند — شناسه‌های منفی هنوز محترم‌اند ولی هشدار منسوخ لاگ می‌شود.</p>
+
+<h3>حالت مهمان (guest_mode)</h3>
+<p>برای گروه‌های دوستانه که بات را <strong>عمدتاً ساکت</strong> ولی <strong>با پینگ صریح در دسترس</strong> می‌خواهید: <code>guest_mode: true</code> — پیام از گروهِ خارج از فهرست فقط با @منشن صریح پردازش می‌شود. هر نوبت منشن لازم است؛ چسبندگی نشست برای مهمان نیست.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> کنترل دسترسی فرمان‌های اسلش</h2>
+<p>پیش‌فرض همهٔ کاربران مجاز همهٔ فرمان‌ها را اجرا می‌کنند. برای تفکیک مدیر/کاربر: <code>allow_admin_from</code> و <code>user_allowed_commands</code> را اضافه کنید. غیرمدیرها فقط فرمان‌های فهرست‌شده + <code>/help</code> و <code>/whoami</code> را می‌توانند. بدون <code>allow_admin_from</code> تفکیک خاموش است. <code>/whoami</code> سطح شما را نشان می‌دهد.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  platforms:
+    telegram:
+      extra:
+        allow_from: ["123456789", "555555555"]  # همهٔ کاربران مجاز
+        allow_admin_from: ["123456789"]          # مدیرها
+        user_allowed_commands: [status, model, history]  # غیرمدیرها</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> امکانات تکمیلی</h2>
+
+<h3>انتخاب‌گر تعاملی مدل</h3>
+<p><code>/model</code> بدون آرگومان: دکمه‌های ارائه‌دهنده ← فهرست مدل صفحه‌بندی‌شده با Prev/Next/Back/Cancel. همه در همان پیام ویرایش می‌شود. اگر نام مدل را می‌دانید مستقیم <code>/model &lt;name&gt;</code> بزنید.</p>
+
+<h3>IPهای جایگزین DNS-over-HTTPS</h3>
+<p>در شبکه‌های محدود، آداپتور تلگرام با کشف IPهای جایگزین از Google/Cloudflare DNS روی DoH تلاش می‌کند؛ IPv4های شناخته قبل از نام میزبان امتحان می‌شوند؛ اگر DoH هم بسته باشد از لیست IPv4 هاردکد استفاده می‌شود. <code>TELEGRAM_FALLBACK_IPS</code> برای تعیین صریح.</p>
+
+<h3>واکنش‌ها</h3>
+<p>بات می‌تواند 👀 (شروع پردازش)، ✅ (موفق) و ❌ (خطا) روی پیام بگذارد: <code>reactions: true</code>. برخلاف دیسکورد، تلگرام همهٔ واکنش‌های بات را در یک فراخوانی جایگزین می‌کند.</p>
+
+<h3>پرامپت به‌ازای-کانال</h3>
+<p>پرامپت سیستمی زودگذر به گروه/تاپیک اختصاصی: <code>channel_prompts</code> با کلید شناسهٔ چت یا تاپیک؛ تاپیک بر گروه مقدم است.</p>
+
+<h3>تأیید فرمان و شفاف‌سازی</h3>
+<p>فرمان خطرناک در چت تأیید می‌خواهد؛ <code>clarify</code> با دکمه‌های بومی رندر می‌شود؛ <code>agent.clarify_timeout</code> ‏(پیش‌فرض ۶۰۰ ثانیه).</p>
+
+<h3>اعلان پوش</h3>
+<p>حالت <code>important</code> ‏(پیش‌فرض) فقط پاسخ نهایی/تأیید/فرمان اسلش را زنگ می‌زند؛ ‏<code>all</code> همه را. با <code>display.platforms.telegram.notifications</code> یا <code>HERMES_TELEGRAM_NOTIFICATIONS</code>.</p>
+
+<h3>پیام وضعیت ویرایش-درجا و پین پیام کاربر</h3>
+<p>فراخوانی‌های وضعیت در همان حباب ویرایش می‌شوند؛ پیام کاربر حین نوبت پین و پس از پاسخ آنپین می‌شود — بدون پیکربندی.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۷</span> عیب‌یابی و امنیت</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مشکل</th><th>راه‌حل</th></tr></thead>
+  <tbody>
+    <tr><td>بات اصلاً پاسخ نمی‌دهد</td><td><code>TELEGRAM_BOT_TOKEN</code> را تأیید و لاگ <code>hermes gateway</code> را ببینید.</td></tr>
+    <tr><td>«unauthorized»</td><td>شناسه‌تان در <code>TELEGRAM_ALLOWED_USERS</code> نیست — با @userinfobot چک کنید.</td></tr>
+    <tr><td>گروه را نادیده می‌گیرد</td><td>حریم خصوصی روشن است — خاموش کنید یا ادمین کنید. <strong>حذف/افزودن مجدد یادتان نرود.</strong></td></tr>
+    <tr><td>رونویسی نمی‌شود</td><td><code>faster-whisper</code> یا <code>GROQ_API_KEY</code> / <code>VOICE_TOOLS_OPENAI_KEY</code> لازم است.</td></tr>
+    <tr><td>جواب صوتی فایل است نه حباب</td><td><code>ffmpeg</code> نصب کنید.</td></tr>
+    <tr><td>توکن لغو/نامعتبر</td><td>با <code>/revoke</code> و <code>/newbot</code> توکن تازه بگیرید.</td></tr>
+    <tr><td>وب‌هوک نمی‌گیرد</td><td>URL عمومی است؟ ‏HTTPS فعال است؟ پورت صحیح مسیریابی شده؟ فایروال؟</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ امنیت</div>
+  <p>همیشه <code>TELEGRAM_ALLOWED_USERS</code> را تنظیم کنید — بدون آن گیت‌وی همه را رد می‌کند. توکن بات را هرگز عمومی نکنید؛ اگر لو رفت با <code>/revoke</code> بلافاصله لغو کنید.</p>
+</div>
+</section>
+
+<div class="pager">
+  <a href="index.html"><span class="dir">→ قبلی</span><span class="ttl">نمای کلی گیت‌وی</span></a>
+  <a class="next" href="discord.html"><span class="dir">بعدی ←</span><span class="ttl">دیسکورد</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram" target="_blank" rel="noopener">Telegram</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

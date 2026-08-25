@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>واتساپ — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/whatsapp" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>واتساپ</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی واتساپ</h1>
+<p>هرمس از طریق یک پل داخلی مبتنی بر <strong>Baileys</strong> به واتساپ وصل می‌شود. این پل با شبیه‌سازی یک نشست WhatsApp Web کار می‌کند — <strong>نه</strong> از طریق API رسمی WhatsApp Business. نه حساب توسعه‌دهندهٔ Meta لازم است نه احراز Business.</p>
+<blockquote><p><code>hermes gateway setup</code> را اجرا کنید و <strong>WhatsApp</strong> را انتخاب کنید تا راهنمای گام‌به‌گام را ببینید.</p></blockquote>
+<div class="callout tip">
+  <div class="callout-title">💡 دو یکپارچه‌سازی واتساپ</div>
+  <p>این صفحه برای <strong>پل Baileys</strong> است — راه‌اندازی سریع، حساب‌های شخصی، بدون نیاز به URL عمومی، با ریسک مسدودی.</p>
+  <p>اگر یک بات تجاری واقعی دارید و ثبات می‌خواهید، به‌جایش <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/whatsapp-cloud" target="_blank" rel="noopener">راهنمای WhatsApp Business Cloud API</a> را ببینید. مسیر رسمیِ پشتیبانی‌شده توسط Meta است: بدون ریسک مسدودی حساب، ولی حساب Meta Business و URL وب‌هوک عمومی می‌خواهد.</p>
+  <p>دو آداپتور در صورت نیاز می‌توانند روی شماره‌های تلفن مختلف موازی هم اجرا شوند.</p>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ API غیررسمی — ریسک مسدودی</div>
+  <p>واتساپ بات‌های شخص ثالث را خارج از Business API <strong>به‌طور رسمی پشتیبانی نمی‌کند</strong>. استفاده از پل شخص ثالث ریسک کوچکی از محدودشدن حساب دارد. برای کمینه‌کردن ریسک:</p>
+  <ul>
+    <li>برای بات <strong>یک شماره تلفن اختصاصی</strong> استفاده کنید ‏(نه شماره شخصی‌تان)</li>
+    <li><strong>پیام انبوه/اسپم نفرستید</strong> — مصرف را گفتگویی نگه دارید</li>
+    <li>ارسال خودکار پیام به افرادی که قبلاً پیام نداده‌اند <strong>راه نیندازید</strong></li>
+  </ul>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ به‌روزرسانی‌های پروتکل WhatsApp Web</div>
+  <p>واتساپ هر از گاهی پروتکل Web خود را به‌روز می‌کند که می‌تواند موقتاً سازگاری پل‌های شخص ثالث را بشکند. در این موارد هرمس وابستگی پل را به‌روز می‌کند. اگر بات بعد از یک به‌روزرسانی واتساپ از کار افتاد، آخرین نسخهٔ هرمس را بگیرید و دوباره جفت‌سازی (pair) کنید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> دو حالت</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>حالت</th><th>نحوهٔ کار</th><th>بهترین برای</th></tr></thead>
+  <tbody>
+    <tr><td><strong>شمارهٔ بات جداگانه</strong> ‏(توصیه‌شده)</td><td>یک شماره تلفن را به بات اختصاص دهید. مردم مستقیم به آن شماره پیام می‌دهند.</td><td>UX تمیز، چند کاربر، ریسک مسدودی کمتر</td></tr>
+    <tr><td><strong>خود-گفتگوی شخصی</strong></td><td>از واتساپ خودتان استفاده کنید. به خودتان پیام می‌دهید تا با ایجنت حرف بزنید.</td><td>راه‌اندازی سریع، تک‌کاربره، تست</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پیش‌نیازها</h2>
+<ul>
+  <li><strong>‏Node.js نسخهٔ ۱۸+</strong> و <strong>npm</strong> — پل واتساپ به‌صورت پروسهٔ Node.js اجرا می‌شود</li>
+  <li><strong>یک گوشی با واتساپ نصب‌شده</strong> ‏(برای اسکن کد QR)</li>
+</ul>
+<p>برخلاف پل‌های قدیمی مبتنی بر مرورگر، پل فعلی مبتنی بر Baileys به پشتهٔ وابستگی Chromium یا Puppeteer محلی <strong>نیاز ندارد</strong>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۱: اجرای ویزارد راه‌اندازی</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes whatsapp</code></pre>
+</div>
+<p>ویزارد این کارها را می‌کند:</p>
+<ol>
+  <li>حالت موردنظر را می‌پرسد ‏(<strong>bot</strong> یا <strong>self-chat</strong>)</li>
+  <li>در صورت نیاز وابستگی‌های پل را نصب می‌کند</li>
+  <li>یک <strong>کد QR</strong> در ترمینال نمایش می‌دهد</li>
+  <li>منتظر اسکن شما می‌ماند</li>
+</ol>
+<p><strong>برای اسکن کد QR:</strong></p>
+<ol>
+  <li>واتساپ را روی گوشی باز کنید</li>
+  <li>به <strong>Settings ← Linked Devices</strong> بروید</li>
+  <li><strong>Link a Device</strong> را بزنید</li>
+  <li>دوربین را به سمت کد QR ترمینال بگیرید</li>
+</ol>
+<p>پس از جفت‌شدن، ویزارد اتصال را تأیید و خارج می‌شود. نشست شما خودکار ذخیره می‌شود.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>اگر کد QR به‌هم‌ریخته به نظر رسید، مطمئن شوید ترمینال دست‌کم ۶۰ ستون عرض دارد و یونیکد را پشتیبانی می‌کند. همچنین می‌توانید یک شبیه‌ساز ترمینال دیگر امتحان کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۲: گرفتن شماره تلفن دوم ‏(حالت بات)</h2>
+<p>برای حالت بات به شماره‌ای نیاز دارید که قبلاً با واتساپ ثبت نشده باشد. سه گزینه:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>گزینه</th><th>هزینه</th><th>یادداشت‌ها</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Google Voice</strong></td><td>رایگان</td><td>فقط آمریکا. در <a href="https://voice.google.com" target="_blank" rel="noopener">voice.google.com</a> شماره بگیرید. واتساپ را از طریق SMS داخل اپ Google Voice تأیید کنید.</td></tr>
+    <tr><td><strong>سیم‌کارت اعتباری</strong></td><td>۵–۱۵ دلار یک‌بار</td><td>هر اپراتوری. فعال کنید، واتساپ را تأیید کنید، بعد سیم می‌تواند در کشو بماند. شماره باید فعال بماند ‏(هر ۹۰ روز یک تماس).</td></tr>
+    <tr><td><strong>سرویس‌های VoIP</strong></td><td>رایگان–۵ دلار/ماه</td><td>‏TextNow، ‏TextFree یا مشابه. بعضی شماره‌های VoIP توسط واتساپ مسدود شده‌اند — اگر اولی جواب نداد چندتا امتحان کنید.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>بعد از گرفتن شماره:</p>
+<ol>
+  <li>واتساپ را روی یک گوشی نصب کنید ‏(یا اپ WhatsApp Business با دو سیم‌کارت)</li>
+  <li>شماره جدید را با واتساپ ثبت کنید</li>
+  <li>‏<code>hermes whatsapp</code> را اجرا و کد QR آن حساب واتساپ را اسکن کنید</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۳: پیکربندی هرمس</h2>
+<p>این‌ها را به فایل <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># الزامی
+WHATSAPP_ENABLED=true
+WHATSAPP_MODE=bot                          # "bot" یا "self-chat"
+
+# کنترل دسترسی — یکی از این گزینه‌ها:
+WHATSAPP_ALLOWED_USERS=15551234567         # شماره‌ها جدا با ویرگول (با کد کشور، بدون +)
+# WHATSAPP_ALLOWED_USERS=*                 # یا با * همه مجاز شوند
+# WHATSAPP_ALLOW_ALL_USERS=true            # یا این فلگ را بگذارید (همان اثر *)</code></pre>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 میان‌بر allow-all</div>
+  <p>گذاشتن <code>WHATSAPP_ALLOWED_USERS=*</code> <strong>همهٔ</strong> فرستندگان را مجاز می‌کند ‏(معادل <code>WHATSAPP_ALLOW_ALL_USERS=true</code>). با <a href="https://hermes-agent.nousresearch.com/docs/reference/environment-variables" target="_blank" rel="noopener">لیست‌مجاز گروه سیگنال</a> هم‌خوان است. برای استفاده از جریان جفت‌سازی به‌جایش، هر دو متغیر را حذف و به <a href="../security.html">سیستم جفت‌سازی DM</a> اتکا کنید.</p>
+</div>
+<p>تنظیمات رفتاری اختیاری در <code>~/.hermes/config.yaml</code>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>unauthorized_dm_behavior: pair
+
+whatsapp:
+  unauthorized_dm_behavior: ignore</code></pre>
+</div>
+<ul>
+  <li>‏<code>unauthorized_dm_behavior: pair</code> پیش‌فرض سراسری است. فرستندگان ناشناس DM کد جفت‌سازی می‌گیرند.</li>
+  <li>‏<code>whatsapp.unauthorized_dm_behavior: ignore</code> باعث می‌شود واتساپ برای DM های غیرمجاز ساکت بماند — معمولاً انتخاب بهتر برای شمارهٔ خصوصی.</li>
+</ul>
+<p>سپس گیت‌وی را شروع کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway              # پیش‌زمینه
+hermes gateway install      # نصب به‌عنوان سرویس کاربر
+sudo hermes gateway install --system   # فقط لینوکس: سرویس سیستمی زمان‌بوت</code></pre>
+</div>
+<p>گیت‌وی پل واتساپ را با نشست ذخیره‌شده خودکار شروع می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> ماندگاری نشست</h2>
+<p>پل Baileys نشستش را زیر <code>~/.hermes/platforms/whatsapp/session</code> ذخیره می‌کند. یعنی:</p>
+<ul>
+  <li><strong>نشست‌ها از ری‌استارت جان سالم می‌برند</strong> — لازم نیست هر بار کد QR را دوباره اسکن کنید</li>
+  <li>دادهٔ نشست شامل کلیدهای رمزنگاری و اعتبارنامه‌های دستگاه است</li>
+  <li><strong>این پوشهٔ نشست را به اشتراک نگذارید یا کامیت نکنید</strong> — دسترسی کامل به حساب واتساپ می‌دهد</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> جفت‌سازی مجدد</h2>
+<p>اگر نشست بشکند ‏(ریست گوشی، به‌روزرسانی واتساپ، unlink دستی)، خطاهای اتصال در لاگ‌های گیت‌وی می‌بینید. برای رفع:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes whatsapp</code></pre>
+</div>
+<p>این فرمان کد QR تازه تولید می‌کند. دوباره اسکن کنید تا نشست برقرار شود. گیت‌وی قطعی‌های <strong>موقتی</strong> ‏(لغزش شبکه، آفلاین‌شدن لحظه‌ای گوشی) را خودکار با منطق اتصال‌مجدد هندل می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> پیام‌های صوتی</h2>
+<p>هرمس صدا را روی واتساپ پشتیبانی می‌کند:</p>
+<ul>
+  <li><strong>ورودی:</strong> پیام‌های صوتی ‏(<code>.ogg</code> opus) خودکار با ارائه‌دهندهٔ STT پیکربندی‌شده رونویسی می‌شوند: ‏<code>faster-whisper</code> محلی، ‏Groq Whisper ‏(<code>GROQ_API_KEY</code>) یا OpenAI Whisper ‏(<code>VOICE_TOOLS_OPENAI_KEY</code>)</li>
+  <li><strong>خروجی:</strong> پاسخ‌های TTS به‌صورت پیوست فایل صوتی MP3 فرستاده می‌شوند</li>
+  <li>پاسخ‌های ایجنت به‌طور پیش‌فرض با پیشوند «⚕ **Hermes Agent**» می‌آیند. می‌توانید در <code>config.yaml</code> سفارشی یا خاموشش کنید:</li>
+</ul>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>whatsapp:
+  reply_prefix: ""                          # رشتهٔ خالی هدر را خاموش می‌کند
+  # reply_prefix: "🤖 *My Bot*\n──────\n"  # پیشوند سفارشی (\n برای خط جدید)
+  send_read_receipts: false                 # علامت‌گذاری پیام‌های ورودی پذیرفته‌شده به‌عنوان خوانده‌شده (تیک آبی)</code></pre>
+</div>
+<p>وقتی <code>send_read_receipts</code> برابر <code>true</code> باشد، آداپتور پیام‌های ورودیِ پذیرفته‌شده توسط سیاست را پس از عبور از فیلترهای DM/گروه/منشن خوانده‌شده علامت می‌زند. پیام‌های ردشده ‏(مثلاً از فرستندگان خارج از لیست مجاز) خوانده‌شده علامت نمی‌خورند. برای حریم خصوصی به‌طور پیش‌فرض خاموش است. تغییر این تنظیم، زیرپروسهٔ پل را در اتصال بعدی خودکار ری‌استارت می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> قالب‌بندی و تحویل پیام</h2>
+<p>واتساپ از <strong>پاسخ‌های استریم ‏(تدریجی)</strong> پشتیبانی می‌کند — بات پیامش را هم‌زمان با تولید متن AI در لحظه ویرایش می‌کند، مثل دیسکورد و تلگرام. در درون، واتساپ از نظر قابلیت‌های تحویل پلتفرمی از نوع TIER_MEDIUM طبقه‌بندی می‌شود.</p>
+
+<h3>تکه‌تکه‌کردن (Chunking)</h3>
+<p>پاسخ‌های بلند خودکار در <strong>۴٬۰۹۶ کاراکتر</strong> به‌ازای هر تکه به چند پیام تقسیم می‌شوند ‏(حد عملی نمایش واتساپ). نیازی به پیکربندی نیست — گیت‌وی تقسیم را هندل و تکه‌ها را متوالی می‌فرستد.</p>
+
+<h3>مارک‌داون سازگار با واتساپ</h3>
+<p>مارک‌داون استاندارد در پاسخ‌های AI خودکار به قالب‌بندی بومی واتساپ تبدیل می‌شود:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مارک‌داون</th><th>واتساپ</th><th>رندر</th></tr></thead>
+  <tbody>
+    <tr><td><code>**bold**</code></td><td><code>*bold*</code></td><td><strong>ضخیم</strong></td></tr>
+    <tr><td><code>~~strikethrough~~</code></td><td><code>~strikethrough~</code></td><td><del>خط‌خورده</del></td></tr>
+    <tr><td><code># Heading</code></td><td><code>*Heading*</code></td><td>متن ضخیم ‏(تیتر بومی ندارد)</td></tr>
+    <tr><td><code>[link text](url)</code></td><td><code>link text (url)</code></td><td>URL درون‌خطی</td></tr>
+  </tbody>
+</table>
+</div>
+<p>بلوک‌های کد و کد درون‌خطی عیناً حفظ می‌شوند چون واتساپ قالب‌بندی triple-backtick را به‌صورت بومی پشتیبانی می‌کند.</p>
+
+<h3>پیشرفت ابزار</h3>
+<p>وقتی ایجنت ابزار صدا می‌زند ‏(جست‌وجوی وب، عملیات فایل و...)، واتساپ نشانگرهای پیشرفت زنده نشان می‌دهد که کدام ابزار در حال اجراست. پیش‌فرض فعال است — پیکربندی نمی‌خواهد.</p>
+
+<h3>نظرسنجی بومی، clarify به‌صورت نظرسنجی و موقعیت مکانی</h3>
+<p>آداپتور پل Baileys ‏(حالت بات) چند نوع پیام بومی واتساپ را پشتیبانی می‌کند:</p>
+<ul>
+  <li><strong>نظرسنجی‌ها</strong> — ایجنت می‌تواند از طریق نقطهٔ پایانی <code>/send-poll</code> پل، یک نظرسنجی بومی واتساپ بفرستد ‏(پرسش + گزینه‌ها). رأی‌های نظرسنجی به گفتگو برمی‌گردند.</li>
+  <li><strong>پرسش‌های clarify به‌صورت نظرسنجی</strong> — وقتی ایجنت پرسش clarify چندگزینه‌ای می‌پرسد، به‌صورت نظرسنجی بومی تک‌انتخابی رندر می‌شود؛ لمس یک گزینه پاسخ پرسش است. اگر ارسال نظرسنجی شکست بخورد، آداپتور به پرسش متنی ساده سقوط می‌کند. پرامپت‌های تأیید <strong>هرگز</strong> به نظرسنجی نگاشت نمی‌شوند — نظرسنجی فقط برای clarify های واقعاً چندگزینه‌ای است.</li>
+  <li><strong>پین موقعیت مکانی</strong> — ایجنت می‌تواند از طریق <code>/send-location</code> پین بومی موقعیت بفرستد ‏(عرض/طول جغرافیایی، نام/نشانی اختیاری)، و موقعیت‌های اشتراک‌گذاری‌شدهٔ ورودی ‏(شامل موقعیت زنده) به‌عنوان پیام موقعیت به ایجنت می‌رسند.</li>
+</ul>
+<p>همهٔ این‌ها در حالت بات ‏(Baileys) از جعبه کار می‌کنند؛ پیکربندی لازم نیست.</p>
+
+<h3>دسته‌بندی پیام (Debounce)</h3>
+<p>واتساپ هر پیام را جدا تحویل می‌دهد، پس رگبار سریع ‏(بچ‌های فورواردشده، چسباندن‌های چندتکه، متن چندخطی) بدون آن به‌ازای هر قطعه یک فراخوانی جداگانهٔ ایجنت راه می‌انداخت — هدر دادن توکن و تولید چند پاسخ ناهم‌پیوسته. آداپتور پیام‌های متنی متوالی از یک چت را بافر و بعد از یک دورهٔ کوتاه سکوت ‏(پیش‌فرض <strong>۵ ثانیه</strong>، برای قطعات خیلی بلند <strong>۱۰ ثانیه</strong>) به‌عنوان یک درخواست ترکیبی dispatch می‌کند. تنظیم از طریق config.yaml:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  platforms:
+    whatsapp:
+      extra:
+        text_batch_delay_seconds: 5.0         # دورهٔ سکوت قبل از flush دسته
+        text_batch_split_delay_seconds: 10.0  # تأخیر طولانی‌شده نزدیک آستانهٔ تقسیم</code></pre>
+</div>
+<p>برای ارسال فوری هر پیام ‏(غیرفعال‌کردن دسته‌بندی) ‏<code>text_batch_delay_seconds: 0</code> بگذارید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> عیب‌یابی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مشکل</th><th>راه‌حل</th></tr></thead>
+  <tbody>
+    <tr><td><strong>کد QR اسکن نمی‌شود</strong></td><td>ترمینال به اندازهٔ کافی پهن باشد ‏(۶۰+ ستون). ترمینال دیگری امتحان کنید. مطمئن شوید از حساب واتساپ درست اسکن می‌کنید ‏(شمارهٔ بات، نه شخصی).</td></tr>
+    <tr><td><strong>کد QR منقضی می‌شود</strong></td><td>کدهای QR هر ~۲۰ ثانیه refresh می‌شوند. اگر timeout شد، <code>hermes whatsapp</code> را دوباره اجرا کنید.</td></tr>
+    <tr><td><strong>نشست ماندگار نمی‌شود</strong></td><td>چک کنید <code>~/.hermes/platforms/whatsapp/session</code> وجود دارد و نوشتنی است. اگر کانتینری است، به‌عنوان والوم ماندگار مانت کنید.</td></tr>
+    <tr><td><strong>خروج غیرمنتظره از حساب</strong></td><td>واتساپ دستگاه‌ها را پس از بی‌فعالیتی طولانی unlink می‌کند. گوشی روشن و متصل بماند؛ در صورت نیاز با <code>hermes whatsapp</code> دوباره جفت کنید.</td></tr>
+    <tr><td><strong>کرش پل یا حلقهٔ اتصال‌مجدد</strong></td><td>گیت‌وی را ری‌استارت کنید، هرمس را به‌روز کنید، و اگر نشست توسط تغییر پروتکل واتساپ بی‌اعتبار شد دوباره جفت کنید.</td></tr>
+    <tr><td><strong>بات بعد از به‌روزرسانی واتساپ از کار افتاد</strong></td><td>هرمس را برای آخرین نسخهٔ پل به‌روز کنید، سپس دوباره جفت کنید.</td></tr>
+    <tr><td><strong>‏macOS: «Node.js نصب نیست» ولی node در ترمینال کار می‌کند</strong></td><td>سرویس‌های launchd مسیر PATH شل شما را ارث نمی‌برند. ‏<code>hermes gateway install</code> را اجرا کنید تا PATH فعلی دوباره در plist snapshot شود، سپس <code>hermes gateway start</code>. جزئیات در <a href="index.html">مستندات سرویس گیت‌وی</a>.</td></tr>
+    <tr><td><strong>پیام‌ها دریافت نمی‌شوند</strong></td><td>تأیید کنید <code>WHATSAPP_ALLOWED_USERS</code> شمارهٔ فرستنده را دارد ‏(با کد کشور، بدون <code>+</code> و فاصله) یا آن را <code>*</code> کنید. ‏<code>WHATSAPP_DEBUG=true</code> را در <code>.env</code> بگذارید و گیت‌وی را ری‌استارت کنید تا رویدادهای خام پیام در <code>bridge.log</code> دیده شوند.</td></tr>
+    <tr><td><strong>بات به غریبه‌ها با کد جفت‌سازی جواب می‌دهد</strong></td><td>اگر می‌خواهید DM های غیرمجاز بی‌صدا نادیده گرفته شوند، ‏<code>whatsapp.unauthorized_dm_behavior: ignore</code> را در <code>~/.hermes/config.yaml</code> بگذارید.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> امنیت</h2>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>قبل از رفتن روی خط، <strong>کنترل دسترسی را پیکربندی کنید</strong>. ‏<code>WHATSAPP_ALLOWED_USERS</code> را با شماره‌های مشخص ‏(با کد کشور، بدون <code>+</code>) تنظیم کنید، با <code>*</code> همه را مجاز کنید، یا ‏<code>WHATSAPP_ALLOW_ALL_USERS=true</code> بگذارید. بدون هیچ‌کدام، گیت‌وی به‌عنوان اقدام ایمنی <strong>همهٔ پیام‌های ورودی را رد می‌کند</strong>.</p>
+</div>
+<p>به‌طور پیش‌فرض DM های غیرمجاز همچنان کد جفت‌سازی می‌گیرند. اگر می‌خواهید شمارهٔ خصوصی واتساپ نسبت به غریبه‌ها کاملاً ساکت بماند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>whatsapp:
+  unauthorized_dm_behavior: ignore</code></pre>
+</div>
+<ul>
+  <li>پوشهٔ <code>~/.hermes/platforms/whatsapp/session</code> اعتبارنامهٔ کامل نشست را دارد — مثل رمز عبور ازش محافظت کنید</li>
+  <li>دسترسی فایل: ‏<code>chmod 700 ~/.hermes/platforms/whatsapp/session</code></li>
+  <li>برای ایزوله‌کردن ریسک از حساب شخصی‌تان، برای بات <strong>شمارهٔ اختصاصی</strong> استفاده کنید</li>
+  <li>اگر به نفوذ شک دارید، دستگاه را از واتساپ حذف کنید ← Settings ← Linked Devices</li>
+  <li>شماره‌های تلفن در لاگ‌ها جزئی سانسور می‌شوند، ولی سیاست نگهداشت لاگ خودتان را بازبینی کنید</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="slack.html"><span class="dir">→ قبلی</span><span class="ttl">اسلک</span></a>
+  <a class="next" href="signal.html"><span class="dir">بعدی ←</span><span class="ttl">سیگنال</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/whatsapp" target="_blank" rel="noopener">WhatsApp</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

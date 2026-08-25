@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>کارهای زمان‌بندی‌شده ‏(کرون) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/cron" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>کارهای زمان‌بندی‌شده ‏(کرون)</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>کارهای زمان‌بندی‌شده ‏(Cron)</h1>
+<p>کارها را با زبان طبیعی یا عبارات cron برای اجرای خودکار زمان‌بندی کنید. هرمس مدیریت کرون را از طریق یک ابزار واحدِ ‏<code>cronjob</code> با عملیات سبک-اقدامی expose می‌کند به‌جای ابزارهای جدای schedule/list/remove.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> کرون الان چه کارهایی می‌تواند بکند</h2>
+<p>کارهای کرون می‌توانند:</p>
+<ul>
+  <li>کارهای یک‌باره یا تکرارشونده را زمان‌بندی کنند</li>
+  <li>job ها را مکث، ازسرگیری، ویرایش، اجرا و حذف کنند</li>
+  <li>صفر، یک یا چند مهارت را به یک job الصاق کنند</li>
+  <li>نتایج را به چت مبدأ، فایل‌های محلی یا هدف‌های پلتفرمی پیکربندی‌شده تحویل دهند</li>
+  <li>در نشست‌های تازهٔ ایجنت با فهرست ایستای عادی ابزارها اجرا شوند</li>
+  <li>در <strong>حالت بدون-ایجنت</strong> اجرا شوند — یک اسکریپت طبق زمان‌بندی که خروجی stdout آن تحت‌اللفظی تحویل می‌شود، بدون هیچ دخالت LLM ‏(بخش «حالت بدون-ایجنت» پایین را ببینید)</li>
+</ul>
+<p>همهٔ این‌ها برای خود هرمس هم از طریق ابزار ‏<code>cronjob</code> در دسترس است، پس می‌توانید با پرسیدن به زبان ساده job بسازید، مکث، ویرایش و حذف کنید — بدون CLI.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 کدام مدل روی یک کار کرون اجرا می‌شود؟</div>
+  <p>ترتیب حل هنگام شلیک: pin به‌ازای-job ← ‏<code>cron.model</code> در config.yaml ← پیش‌فرض سراسری از ‏<code>hermes model</code>.</p>
+  <ul>
+    <li><strong>Pin به‌ازای-job</strong> — توسط *خودتان* از داشبورد، ‏<code>hermes cron create/edit --model … --provider …</code> یا ویرایش ‏<code>~/.hermes/cron/jobs.json</code> تنظیم می‌شود. بعد از تنظیم تا تغییر شما می‌ماند. ابزار ‏<code>cronjob</code> ایجنت نمی‌تواند مدل به‌ازای-job را ست یا عوض کند — pin های inference متعلق به کاربرند.</li>
+    <li><strong>‏<code>cron.model</code>/<code>cron.model_provider</code></strong> — پیش‌فرض ناوگان-کرون: هر job بدون-pin روی این مدل اجرا می‌شود مستقل از مدل چت شما. یک‌بار ست کنید ‏(<code>hermes config set cron.model &lt;name&gt;</code>) و تغییر مدل چت با ‏<code>hermes model</code> یا ‏<code>/model</code> هرگز به ناوگان کرونتان دست نمی‌زند.</li>
+    <li><strong>پیش‌فرض سراسری</strong> — فقط وقتی هیچ‌کدام از بالا تنظیم نباشد job دنبال ‏<code>hermes model</code> می‌رود. در این حالت هرمس ارائه‌دهنده و مدل را هنگام ساخت <strong>snapshot</strong> می‌کند و اگر پیش‌فرض سراسری بعداً عوض شود job <strong>fail-closed می‌شود</strong>: اجرا را رد، فراخوانی inference نمی‌زند و <strong>یک‌بار</strong> هشدارتان می‌دهد — job روی تیک‌های بعدی رد‌شده ‏(و بی‌صدا) می‌ماند تا اقدام کنید یا پیکربندی برگردد ‏(#44585). برای job های تکرارشونده صریحاً provider/model را pin کنید ‏(<code>hermes cron edit &lt;job_id&gt; --provider &lt;provider&gt; --model &lt;model&gt;</code>). یک one-shot مصرف‌شدهٔ متناهی قابل به‌روزرسانی نیست؛ به‌جایش یک one-shot آیندهٔ جدید با provider و model صریح بسازید. این مانع می‌شود job بی‌نگهبان بی‌صدا به تعویض به یک ارائه‌دهنده/مدل پرداخت‌دار ارث برساند. گذاشتن ‏<code>cron.model</code> ‏(یا pin به‌ازای-job) راه آگاهانه مسیریابی هزینهٔ کرون است و نگهبان-رانش برای محورِ تحت‌پوشش فعال نمی‌شود. اپراتورهایی که می‌خواهند job های بدون-pin دنبال پیش‌فرض سراسریِ متغیر بروند می‌توانند <a href="#track-global">نگهبان رانش را خاموش کنند</a>.</li>
+  </ul>
+  <p>‏<code>hermes setup --portal</code> کمترین اصطکاک را برای اجراهای بی‌نگهبان دارد چون refresh ‏OAuth خودکار است. بخش Nous Portal را ببینید.</p>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 سطح استدلال به‌ازای-job</div>
+  <p>یک job می‌تواند سطح تفکر خودش را مستقل از pin مدل قفل کند: یکی از ‏<code>none</code>، ‏<code>minimal</code>، ‏<code>low</code>، ‏<code>medium</code>، ‏<code>high</code>، ‏<code>xhigh</code>، ‏<code>max</code>، ‏<code>ultra</code>. با تنظیم شدن، هم ‏<code>agent.reasoning_effort</code> سراسری و هم ‏<code>agent.reasoning_overrides</code> به‌ازای-مدل را برای اجراهای همان job override می‌کند ‏(<code>none</code> تفکر را خاموش می‌کند). با ‏<code>hermes cron create/edit --reasoning-effort high</code> ست کنید؛ هنگام ویرایش رشتهٔ خالی بدهید تا pin پاک و دوباره از config پیروی شود. ‏(عمداً روی ابزار ‏<code>cronjob</code> ایجنت expose نشده — پیکربندی مدل تصمیم کاربر می‌ماند.) سطح‌هایی که مدل پشتیبانی نمی‌کند توسط ارائه‌دهنده هنگام درخواست clamp یا حذف می‌شوند — pin کردن ‏xhigh روی مدلی که سقفش high است با high اجرا می‌شود. این pin روی job های ‏no_agent اثری ندارد ‏(فراخوانی LLM‌ای برای تنظیم نیست). از آن استفاده کنید تا تحلیل‌های سنگین زمان‌بندی‌شده روی ‏high و کارهای تکراری ارزان روی ‏minimal اجرا شوند بدون دست زدن به پیش‌فرض سراسری‌تان.</p>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>نشست‌های اجراشده-با-کرون نمی‌توانند بازگشتی کار کرون بیشتری بسازند. هرمس ابزارهای مدیریت کرون را داخل اجراهای کرونی خاموش می‌کند تا جلوگیری از حلقه‌های زمان‌بندی سرکش.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> ساخت کارهای زمان‌بندی‌شده</h2>
+<h3>در چت با ‏<code>/cron</code></h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/cron add 30m "Remind me to check the build"
+/cron add "every 2h" "Check server status"
+/cron add "every 1h" "Summarize new feed items" --skill blogwatcher
+/cron add "every 1h" "Use both skills and combine the result" --skill blogwatcher --skill maps</code></pre>
+</div>
+<h3>از CLI مستقل</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes cron create "every 2h" "Check server status"
+hermes cron create "every 1h" "Summarize new feed items" --skill blogwatcher
+hermes cron create "every 1h" "Use both skills and combine the result" \
+  --skill blogwatcher \
+  --skill maps \
+  --name "Skill combo"</code></pre>
+</div>
+<h3>از طریق گفتگوی طبیعی</h3>
+<p>عادی از هرمس بخواهید:</p>
+<div class="codebox"><pre><code>Every morning at 9am, check Hacker News for AI news and send me a summary on Telegram.</code></pre></div>
+<p>هرمس داخلش از ابزار یکپارچهٔ ‏<code>cronjob</code> استفاده خواهد کرد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> اعتبارسنجی پیش-از-dispatch پیکربندی</h2>
+<p>قبل از ساخت هر ماشین ایجنتی برای یک اجرای زمان‌بندی‌شده، زمان‌بند اعتبارسنجی می‌کند پیکربندی job واقعاً بتواند اجرای موفق تولید کند:</p>
+<ul>
+  <li>کلید API ارائه‌دهنده حل شود ‏(وقتی زنجیرهٔ ‏<code>fallback_providers</code> پیکربندی شده رد می‌شود چون مسیر fallback ممکن است کلید اصلی غایب را نجات دهد)،</li>
+  <li>مهارت‌های الصاقی آماده باشند ‏(بدون متغیر محیطی، فرمان یا فایل اعتبارنامهٔ الزامیِ غایب)،</li>
+  <li>هدف‌های پلتفرم تحویل شناخته و دارای اعتبارنامهٔ گیت‌وی باشند ‏(هدف‌های ‏local/origin هرگز چک نمی‌شوند).</li>
+</ul>
+<p>وقتی اعتبارسنجی شکست بخورد، ‏<code>last_status</code> مربوط به job مقدار ‏<code>blocked_config</code> می‌گیرد، <strong>یک</strong> هشدار تحویل می‌شود ‏(هر تیک تکرار نمی‌شود) و <strong>هیچ فراخوانی LLM زده نمی‌شود</strong> — یک job بدپیکربندی هرگز توکن خرج نمی‌کند. اولین اجرای سالم وضعیت بلوک را پاک می‌کند تا شکست پیکربندی بعدی دوباره هشدار بدهد.</p>
+<p>برای غیرفعال‌کردن اعتبارسنجی و بازگرداندن رفتار قدیمی ‏(اجرا ادامه یابد و حین اجرا بشکند):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cron:
+  preflight: false</code></pre>
+</div>
+<p>یا: ‏<code>hermes config set cron.preflight false</code></p>
+</section>
+
+<section class="doc-sec" id="track-global">
+<h2><span class="secnum">۴</span> اجازه به job های بدون-pin برای دنبال‌کردن پیش‌فرض‌های سراسری</h2>
+<p>نگهبان رانش مدل/ارائه‌دهنده پیش‌فرض روشن است. اگر job های بدون-pin کرونتان باید عمداً هر تغییر سراسری مدل یا ارائه‌دهنده را دنبال کنند، در config.yaml خاموشش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cron:
+  model_drift_guard: false</code></pre>
+</div>
+<p>یا با فرمان پیکربندی:</p>
+<div class="codebox"><pre><code>hermes config set cron.model_drift_guard false</code></pre></div>
+<p>این هم بلوک runtime هم هشدارِ نمایش‌داده‌شده هنگام تغییر تنظیمات سراسری inference را خاموش می‌کند. snapshot های موجود همچنان ذخیره می‌مانند، پس برگرداندن گزینه به ‏<code>true</code> حفاظت را بدون بازسازی job ها دوباره فعال می‌کند.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>با خاموش بودن نگهبان، job های بدون-pinِ بی‌نگهبان فوراً پیش‌فرض‌های سراسریِ عوض‌شده را ارث می‌برند. پس تعویض به ارائه‌دهنده یا مدل پرداخت‌دار می‌تواند روی هر اجرای زمان‌بندی‌شده پول خرج کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> کارهای کرون پشتیبان-مهارت</h2>
+<p>یک کار کرون می‌تواند قبل از اجرای پرامپت یک یا چند مهارت بارگذاری کند.</p>
+<h3>تک مهارت</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cronjob(
+    action="create",
+    skill="blogwatcher",
+    prompt="Check the configured feeds and summarize anything new.",
+    schedule="0 9 * * *",
+    name="Morning feeds",
+)</code></pre>
+</div>
+<h3>چند مهارت</h3>
+<p>مهارت‌ها به ترتیب لود می‌شوند. پرامپت تبدیل به دستورالعمل کارِ لایه‌گذاری‌شده روی آن مهارت‌ها می‌شود.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cronjob(
+    action="create",
+    skills=["blogwatcher", "maps"],
+    prompt="Look for new local events and interesting nearby places, then combine them into one short brief.",
+    schedule="every 6h",
+    name="Local brief",
+)</code></pre>
+</div>
+<p>وقتی مفید است که بخواهید یک ایجنت زمان‌بندی‌شده گردش‌کارهای قابل‌استفاده-مجدد ارث ببرد بدون اینکه متن کامل مهارت را داخل خود پرامپت کرون بچپانید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> اجرای job داخل یک پوشهٔ پروژه</h2>
+<p>کارهای کرون پیش‌فرض جدا از هر repo ای اجرا می‌شوند — هیچ ‏AGENTS.md، ‏CLAUDE.md یا ‎.cursorrules لود نمی‌شود و ابزارهای ترمینال/فایل/اجرای-کد از هر پوشهٔ کاری که گیت‌وی در آن شروع شده اجرا می‌شوند. ‏<code>--workdir</code> ‏(CLI) یا ‏<code>workdir=</code> ‏(فراخوانی ابزار) را بدهید تا عوض شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Standalone CLI (schedule و prompt موقعیتی‌اند)
+hermes cron create "every 1d at 09:00" \
+  "Audit open PRs, summarize CI health, and post to #eng" \
+  --workdir /home/me/projects/acme</code></pre>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code># From a chat, via the cronjob tool
+cronjob(
+    action="create",
+    schedule="every 1d at 09:00",
+    workdir="/home/me/projects/acme",
+    prompt="Audit open PRs, summarize CI health, and post to #eng",
+)</code></pre>
+</div>
+<p>وقتی ‏<code>workdir</code> تنظیم باشد:</p>
+<ul>
+  <li>‏AGENTS.md، ‏CLAUDE.md و ‎.cursorrules آن پوشه داخل پرامپت سیستمی تزریق می‌شوند ‏(همان ترتیب کشف CLI تعاملی)</li>
+  <li>‏terminal، ‏read_file، ‏write_file، ‏patch، ‏search_files و ‏execute_code همه آن پوشه را پوشهٔ کاری خودشان می‌گیرند</li>
+  <li>مسیر باید پوشهٔ مطلق موجود باشد — مسیرهای نسبی و پوشه‌های غایب هنگام create/update رد می‌شوند</li>
+  <li>هنگام ویرایش ‏<code>--workdir ""</code> ‏(یا ‏<code>workdir=""</code> از طریق ابزار) بدهید تا پاک و رفتار قبلی برگردد</li>
+</ul>
+<div class="callout note">
+  <div class="callout-title">📌 سریال‌سازی</div>
+  <p>job های دارای ‏workdir روی تیک زمان‌بند به‌طور متوالی اجرا می‌شوند نه در pool موازی. عمدی است: worker کرون workdir مربوط به job را از طریق وضعیت terminal سطح-پروسه اعمال می‌کند، پس دو job دارای-workdir که هم‌زمان اجرا شوند cwd همدیگر را خراب می‌کنند. job های بدون-workdir مثل قبل موازی اجرا می‌شوند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> ویرایش job ها</h2>
+<p>لازم نیست صرفاً برای تغییر دادن، job را حذف و دوباره بسازید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 ارجاع به job</div>
+  <p>placeholder ‏<code>&lt;job_id&gt;</code> در پایین ‏(و در «اقدامات چرخهٔ حیات») نام job را هم می‌پذیرد ‏(بی‌حساس-به-حروف) — وقتی ‏morning-digest را یادتان هست ولی شناسهٔ hex را نه کاربردی است. تطبیق دقیق ID بر تطبیق نام مقدم است؛ اگر مرجع ID نباشد و نامی با بیش از یک job بخواند فرمان امتناع و شناسه‌های کاندیدا را چاپ می‌کند تا مشخص کنید.</p>
+</div>
+<h3>چت</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/cron edit &lt;job_id&gt; --schedule "every 4h"
+/cron edit &lt;job_id&gt; --prompt "Use the revised task"
+/cron edit &lt;job_id&gt; --skill blogwatcher --skill maps
+/cron edit &lt;job_id&gt; --remove-skill blogwatcher
+/cron edit &lt;job_id&gt; --clear-skills</code></pre>
+</div>
+<h3>CLI مستقل</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes cron edit &lt;job_id&gt; --schedule "every 4h"
+hermes cron edit &lt;job_id&gt; --prompt "Use the revised task"
+hermes cron edit &lt;job_id&gt; --skill blogwatcher --skill maps
+hermes cron edit &lt;job_id&gt; --add-skill maps
+hermes cron edit &lt;job_id&gt; --remove-skill blogwatcher
+hermes cron edit &lt;job_id&gt; --clear-skills</code></pre>
+</div>
+<p>یادداشت‌ها:</p>
+<ul>
+  <li>تکرار ‏<code>--skill</code> فهرست مهارت‌های الصاقی job را جایگزین می‌کند</li>
+  <li>‏<code>--add-skill</code> به فهرست موجود می‌افزاید بدون جایگزینی</li>
+  <li>‏<code>--remove-skill</code> مهارت‌های مشخص الصاقی را حذف می‌کند</li>
+  <li>‏<code>--clear-skills</code> همهٔ مهارت‌های الصاقی را حذف می‌کند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> اقدامات چرخهٔ حیات</h2>
+<p>کارهای کرون الان چرخهٔ حیات کامل‌تری از فقط ساختن/حذف دارند.</p>
+<h3>چت</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/cron list
+/cron pause &lt;job_id&gt;
+/cron resume &lt;job_id&gt;
+/cron run &lt;job_id&gt;
+/cron remove &lt;job_id&gt;</code></pre>
+</div>
+<h3>CLI مستقل</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes cron list
+hermes cron pause &lt;job_id_or_name&gt;
+hermes cron resume &lt;job_id_or_name&gt;
+hermes cron run &lt;job_id_or_name&gt;
+hermes cron remove &lt;job_id_or_name&gt;
+hermes cron edit &lt;job_id_or_name&gt; [...flags]
+hermes cron status
+hermes cron tick</code></pre>
+</div>
+<p>چه می‌کنند:</p>
+<ul>
+  <li>‏<code>pause</code> — job را نگه می‌دارد ولی زمان‌بندی‌اش را متوقف می‌کند</li>
+  <li>‏<code>resume</code> — job را دوباره فعال و اجرای آیندهٔ بعدی را حساب می‌کند</li>
+  <li>‏<code>run</code> — job را در تیک بعدی زمان‌بند تریگر می‌کند</li>
+  <li>‏<code>remove</code> — کاملاً حذفش می‌کند</li>
+  <li>‏<code>edit</code> — زمان‌بندی، پرامپت، تحویل و... را تغییر می‌دهد</li>
+</ul>
+<p><strong>جست‌وجوی مبتنی بر نام.</strong> هر چهار فعل تغییردهنده ‏(<code>pause</code>، ‏<code>resume</code>، ‏<code>run</code>، ‏<code>remove</code>، ‏<code>edit</code>) به‌اضافهٔ ابزار ‏<code>cronjob</code> ایجنت الان <strong>نام</strong> job ‏(بی‌حساس-به-حروف) را به‌جای ID هگز می‌پذیرند. ایجنت و CLI هر دو اگر تطبیق دقیق ID موجود باشد همان را ترجیح می‌دهند؛ تطبیق‌های مبهم نام ‏(چند job هم‌نام) با فهرست کامل شناسه‌های کاندیدا رد می‌شود تا صریحاً انتخاب کنید. نام‌ها یکتا نیستند، پس این محافظ بار-بر است — مانع تغییر بی‌صدای job اشتباه وقتی دو تا هم‌نام‌اند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> زمان‌بندی اداره‌شده-با-ایجنت ‏(کارهای کرونی که کار کرون مدیریت می‌کنند)</h2>
+<p>به‌طور پیش‌فرض ایجنت‌هایی که <em>توسط</em> زمان‌بند launch می‌شوند نمی‌توانند از ابزار ‏<code>cronjob</code> استفاده کنند — یک کار زمان‌بندی‌شده نمی‌تواند job های دیگر بسازد، ویرایش یا حذف کند. از طریق config.yaml انتخاب کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cron:
+  allow_agent_scheduling: true   # پیش‌فرض: false</code></pre>
+</div>
+<p>با فعال شدن، یک ایجنت زمان‌بندی‌شده می‌تواند جدول کرون را مثل هر نشست چتی مدیریت کند: از داخل کارِ زمان‌بندی‌شده one-shot های پیگیری زمان‌بندی کند، ضرباهجه خودش را تنظیم کند، یا یک job «کتابدار کرون» اجرا کند که کل جدول را آشتی می‌دهد ‏(اول list، بعد update/remove/create طبق نیاز). دو ویژگی این را منطقی نگه می‌دارد:</p>
+<ul>
+  <li><strong>یک جدول تختِ متعلق-به-کاربر.</strong> job های ساخته‌شده از یک اجرای کرونی داخل همان ‏jobs.json بقیه می‌روند بدون مالکیت خاص — دقیقاً انگار خودتان ساخته‌اید می‌توانید list/edit/remove‌شان کنید.</li>
+  <li><strong>بدون تحویل معلق.</strong> یک اجرای کرونی گذراست، پس ‏<code>deliver: origin</code> از داخلش <strong>هنگام ساخت</strong> به هدف عینیِ خودِ job سازنده حل می‌شود ‏(<code>platform:chat_id[:thread_id]</code>، یا ‏<code>local</code> اگر job سازنده جایی تحویل ندهد). job ساخته‌شده توسط ایجنت زمان‌بندی‌شده هرگز نمی‌تواند خروجیش را به نشستی که دیگر وجود ندارد اشاره دهد. هدف‌های صریح ‏(<code>local</code>، ‏<code>all</code>، ‏<code>telegram:&lt;chat_id&gt;</code>) عیناً محترم شمرده می‌شوند.</li>
+</ul>
+<p>پرامپت‌هایی را ترجیح دهید که job های موجود را به‌روز می‌کنند ‏(اول list، بعد update با ID) بر پرامپت‌هایی که هر بار job جدید می‌سازند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> نحوهٔ کار</h2>
+<p><strong>اجرای کرون توسط دیمن گیت‌وی هندل می‌شود.</strong> گیت‌وی هر ۶۰ ثانیه زمان‌بند را تیک می‌زند و job های سررسید را در نشست‌های ایجنتی ایزوله اجرا می‌کند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway install     # نصب به‌عنوان سرویس کاربر
+sudo hermes gateway install --system   # لینوکس: سرویس سیستمی زمان-بوت برای سرورها
+hermes gateway             # یا اجرا در پیش‌زمینه
+
+hermes cron list
+hermes cron status</code></pre>
+</div>
+<h3>رفتار زمان‌بند گیت‌وی</h3>
+<p>در هر تیک هرمس:</p>
+<ol>
+  <li>job ها را از ‏<code>~/.hermes/cron/jobs.json</code> لود می‌کند</li>
+  <li>‏<code>next_run_at</code> را با زمان فعلی مقایسه می‌کند</li>
+  <li>برای هر job سررسید یک نشست تازهٔ ‏AIAgent شروع می‌کند</li>
+  <li>به‌صورت اختیاری یک یا چند مهارت الصاقی داخل آن نشست تازه تزریق می‌کند</li>
+  <li>پرامپت را تا تکمیل اجرا می‌کند</li>
+  <li>پاسخ نهایی را تحویل می‌دهد</li>
+  <li>متادیتای اجرا و زمان‌بندی بعدی را به‌روز می‌کند</li>
+</ol>
+<p>یک قفل فایل در ‏<code>~/.hermes/cron/.tick.lock</code> مانع می‌شود تیک‌های هم‌پوشان زمان‌بند همان batch از job ها را دوبار اجرا کنند.</p>
+
+<h3>تاریخچهٔ اجرا</h3>
+<p>هرمس هر تلاش کرونیِ گرفته‌شده را قبل از dispatch مجری یا ارائه‌دهنده در ‏<code>~/.hermes/cron/executions.db</code> محلی-پروفایل ثبت می‌کند. تلاش‌ها از ‏<code>claimed</code>، ‏<code>running</code> و یک وضعیت پایانی تغییرناپذیر عبور می‌کنند: ‏<code>completed</code>، ‏<code>failed</code> یا ‏<code>unknown</code>. بعد از ری‌استارت هرمس یک تلاش رهاشده را فقط وقتی ‏<code>unknown</code> علامت می‌زند که PID اصلی و fingerprint شروع-پروسه ثابت کنند مالکش رفته. تلاش‌های unknown رکورد حسابرسی‌اند و هرگز خودکار rerun نمی‌شوند.</p>
+<p>تلاش‌های اخیر را با ‏<code>hermes cron runs [job-id] --limit 20</code> بازرسی کنید ‏(alias: ‏history). تاریخچهٔ پایانی bounded است؛ تلاش‌های فعال هرگز هرس نمی‌شوند. دفتر در بکاپ‌های سریع گنجانده می‌شود.</p>
+
+<h3>سرکش بازبینی شکست‌های مکرر</h3>
+<p>هر job یک ‏<code>failure_streak</code> ردیابی می‌کند — اجراهای متوالی شکست‌خورده ‏(شکست‌های تحویل حساب نمی‌شوند). اجرایی که قبل از رسیدن به ایجنت اصلاً شکست بخورد — ایمپورت بد بعد از به‌روزرسانی نصفه-اعمال‌شده، کلاینت ارائه‌دهنده‌ای که نتوان ساخت — حساب و مثل اجرایی که خود ایجنت شکستش داده هشدار می‌دهد. وقتی streak یک job <em>تکرارشونده</em> به آستانه برسد، پیام شکستِ تحویل‌شده به چت یک سرکش بازبینی می‌گیرد که می‌گوید job پشت‌سرهم N بار شکست خورده و پیشنهاد می‌کند رفع، مکث ‏(<code>hermes cron pause &lt;job&gt;</code>) یا حذفش کنید. هر اجرای موفق streak را ریست می‌کند و ‏<code>hermes cron list</code> کنار آخرین اجرای job در حال شکست، streak را نشان می‌دهد. job های one-shot هرگز سرکش نمی‌زنند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cron:
+  failure_nudge_threshold: 3   # پیش‌فرض؛ 0 سرکش را خاموش می‌کند</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> گزینه‌های تحویل</h2>
+<p>هنگام زمان‌بندی job ها مشخص می‌کنید خروجی کجا برود:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>گزینه</th><th>توضیح</th><th>مثال</th></tr></thead>
+  <tbody>
+    <tr><td><code>"origin"</code></td><td>به همان جایی که job ساخته شده</td><td>پیش‌فرض روی پلتفرم‌های پیام‌رسانی</td></tr>
+    <tr><td><code>"local"</code></td><td>فقط ذخیره در فایل‌های محلی ‏(<code>~/.hermes/cron/output/</code>)</td><td>پیش‌فرض روی CLI</td></tr>
+    <tr><td><code>"telegram"</code></td><td>کانال خانگی تلگرام</td><td>از ‏TELEGRAM_HOME_CHANNEL استفاده می‌کند</td></tr>
+    <tr><td><code>"telegram:123456"</code></td><td>چت خاص تلگرام با شناسه</td><td>تحویل مستقیم</td></tr>
+    <tr><td><code>"telegram:-100123:17585"</code></td><td>تاپیک مشخص تلگرام</td><td>قالب ‏chat_id:thread_id</td></tr>
+    <tr><td><code>"discord"</code></td><td>کانال خانگی دیسکورد</td><td>از ‏DISCORD_HOME_CHANNEL استفاده می‌کند</td></tr>
+    <tr><td><code>"discord:#engineering"</code></td><td>کانال مشخص دیسکورد</td><td>با نام کانال</td></tr>
+    <tr><td><code>"slack"</code></td><td>کانال خانگی اسلک</td><td></td></tr>
+    <tr><td><code>"whatsapp"</code></td><td>خانهٔ واتساپ</td><td></td></tr>
+    <tr><td><code>"signal"</code></td><td>سیگنال</td><td></td></tr>
+    <tr><td><code>"matrix"</code></td><td>اتاق خانگی ماتریکس</td><td></td></tr>
+    <tr><td><code>"mattermost"</code></td><td>کانال خانگی Mattermost</td><td></td></tr>
+    <tr><td><code>"email"</code></td><td>ایمیل</td><td></td></tr>
+    <tr><td><code>"sms"</code></td><td>SMS از طریق Twilio</td><td></td></tr>
+    <tr><td><code>"homeassistant"</code></td><td>Home Assistant</td><td></td></tr>
+    <tr><td><code>"dingtalk"</code></td><td>DingTalk</td><td></td></tr>
+    <tr><td><code>"feishu"</code></td><td>Feishu/Lark</td><td></td></tr>
+    <tr><td><code>"wecom"</code></td><td>WeCom</td><td></td></tr>
+    <tr><td><code>"weixin"</code></td><td>Weixin ‏(WeChat)</td><td></td></tr>
+    <tr><td><code>"bluebubbles"</code></td><td>BlueBubbles ‏(iMessage)</td><td></td></tr>
+    <tr><td><code>"qqbot"</code></td><td>QQ Bot ‏(Tencent QQ)</td><td></td></tr>
+    <tr><td><code>"bot-chat"</code></td><td>Bot Chat مرجع همین پروفایل — بات خروجی را می‌خواند و پاسخ می‌دهد</td><td>محلی-ماشین</td></tr>
+    <tr><td><code>"bot-chat:research"</code></td><td>Bot Chat پروفایل دیگری روی همان ماشین</td><td>هنگام ساخت اعتبارسنجی می‌شود</td></tr>
+    <tr><td><code>"all"</code></td><td>fan-out به همهٔ کانال‌های خانگی متصل</td><td>هنگام شلیک حل می‌شود</td></tr>
+    <tr><td><code>"telegram,discord"</code></td><td>fan-out به مجموعه‌ای مشخص از کانال‌ها</td><td>فهرست جداشده با ویرگول</td></tr>
+    <tr><td><code>"origin,all"</code></td><td>تحویل به مبدأ <strong>+ </strong>همهٔ کانال‌های متصل دیگر</td><td>ترکیب هر توکنی</td></tr>
+  </tbody>
+</table>
+</div>
+<p>پاسخ نهایی ایجنت خودکار به هدف ‏<code>deliver:</code> پیکربندی‌شده تحویل داده می‌شود — ایجنت خودش پیام نمی‌فرستد، پس چیزی برای صدازدن داخل پرامپت کرون نیست.</p>
+
+<h3>تحویل Bot Chat ‏(<code>bot-chat</code>)</h3>
+<p>‏<code>bot-chat</code> خروجی را <strong>به‌عنوان یک پیام واقعی داخل نشست مرجع «Bot Chat» یک پروفایل</strong> تحویل می‌دهد. برخلاف همهٔ هدف‌های دیگر — که گیرنده‌شان انسانی است که یک کانال را می‌خواند — گیرنده اینجا خود بات است: خروجی را به‌عنوان پیام ورودی می‌گیرد، هر چه نیازمند اقدام است انجام و در چتش پاسخ می‌دهد. وقتی استفاده کنید که خروجی زمان‌بندی‌شده باید <em>پردازش</em> شود نه فقط پست.</p>
+<ul>
+  <li>‏<code>bot-chat</code> ‏(لخت) پروفایل خود job را هدف می‌گیرد.</li>
+  <li>‏<code>bot-chat:&lt;profile&gt;</code> پروفایل دیگری را <strong>روی همان ماشین</strong> هدف می‌گیرد. نام‌ها هنگام ساخت job نسبت به ‏<code>hermes profile list</code> اعتبارسنجی می‌شوند؛ پروفایل‌های روی گیت‌وی‌ها یا ماشین‌های دیگر هرگز قابل هدف‌گیری نیستند، پس پروفایل‌های هم‌نام بین ماشین‌ها مبهم نیستند.</li>
+  <li>هر تحویل یک نوبت کامل ایجنت از بات هدف می‌گیرد — به فراوانی زمان‌بندی توجه کنید.</li>
+  <li>با هدف‌های دیگر ترکیب می‌شود ‏(<code>bot-chat,telegram</code>) ولی هرگز داخل ‏<code>all</code> گنجانده نمی‌شود.</li>
+</ul>
+
+<h3>نیت مسیریابی ‏(<code>all</code>)</h3>
+<p>‏<code>all</code> اجازه می‌دهد یک کار کرون را به همهٔ کانال‌های پیام‌رسانی پیکربندی‌شده‌تان بفرستید بدون شمارش دستی‌شان. <strong>هنگام شلیک حل می‌شود</strong>، پس job ای که قبل از سیم‌کشی تلگرام ساخته شده، در تیک بعدیِ گذاشتن ‏<code>TELEGRAM_HOME_CHANNEL</code> تلگرام را برمی‌دارد.</p>
+<p>معناشناسی: ‏<code>all</code> به هر پلتفرمی با کانال خانگی پیکربندی‌شده باز می‌شود. صفر هم اوکی است؛ job صرفاً هیچ هدف تحویلی تولید نمی‌کند و بالادستی به‌عنوان شکست تحویل ثبت می‌شود.</p>
+<p>‏<code>all</code> با هدف‌های صریح ترکیب می‌شود. ‏<code>origin,all</code> به چت مبدأ <em>+ </em>همهٔ کانال‌های خانگی متصل دیگر تحویل می‌دهد، با حذف تکرار بر اساس ‏<code>(platform, chat_id, thread_id)</code>.</p>
+
+<h3>تاپیک کرون تلگرام ‏(<code>TELEGRAM_CRON_THREAD_ID</code>)</h3>
+<p>وقتی حالت تاپیک تلگرام فعال است، DM ریشه به‌عنوان لابی سیستم رزرو می‌شود — ریپلای‌های فرستاده‌شده به آن با یادآوری لابی رد و ‏<code>reply_to_message_id</code> دور انداخته می‌شود، پس نمی‌توانید به پیام کرونی که در چت اصلی نشسته ریپلای بدهید.</p>
+<p>کرون را به یک تاپیک فروم اختصاصی اشاره دهید:</p>
+<ol>
+  <li>در تلگرام DM بات را باز و تاپیکی مثلاً به نام ‏<code>Cron</code> بسازید. سربرگ تاپیک را لمس طولانی ← <strong>Copy link</strong>؛ عدد انتهایی همان ‏<code>message_thread_id</code> تاپیک است.</li>
+  <li>‏<code>TELEGRAM_CRON_THREAD_ID=&lt;that id&gt;</code> را در .env بگذارید.</li>
+</ol>
+<p>این فقط روی تحویل‌های کرون اعمال می‌شود. ‏<code>TELEGRAM_HOME_CHANNEL_THREAD_ID</code> ‏(که جای دیگر استفاده می‌شود مثل اعلان‌های ری‌استارت) تغییری نمی‌کند. هدف‌های صریح ‏<code>deliver="telegram:chat_id:thread_id"</code> همچنان بر env مقدم‌اند. ریپلای‌های پیام‌های کرون حالا در نشست تاپیک موجود می‌آیند تا مستقیم رویشان عمل کنید.</p>
+
+<h3>پیچیدن پاسخ</h3>
+<p>به‌طور پیش‌فرض خروجی کرونیِ تحویل‌شده با سربرگ و فوتر پیچیده می‌شود تا گیرنده بداند از یک کار زمان‌بندی‌شده آمده:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Cronjob Response: Morning feeds
+-------------
+
+&lt;agent output here&gt;
+
+Note: The agent cannot see this message, and therefore cannot respond to it.</code></pre>
+</div>
+<p>برای تحویل خروجی خام ایجنت بدون پیچیدگی، ‏<code>cron.wrap_response</code> را ‏<code>false</code> کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cron:
+  wrap_response: false</code></pre>
+</div>
+
+<h3>کارهای قابل-ادامه ‏(ریپلای به یک تحویل کرونی)</h3>
+<p>به‌طور پیش‌فرض تحویل کرونی fire-and-forget است: پیام فرستاده می‌شود ولی در تاریخچهٔ گفتگوی چت زندگی نمی‌کند، پس اگر ریپلای بدهید ایجنت هیچ رکوردی از گفته‌اش ندارد. یک job را <strong>قابل-ادامه</strong> کنید و خلاصهٔ تحویل‌شده به گفتگویی تبدیل می‌شود که می‌توانید واردش ریپلای بدهید — ایجنت خلاصه را داخل زمینه دارد به‌جای پرسیدن «Task #2 چیست؟».</p>
+<p>انتخابی، <strong>پیش‌فرض خاموش</strong>. سراسری در config یا به‌ازای job از طریق ‏<code>attach_to_session</code> ابزار ‏<code>cronjob</code> فعال کنید ‏(که برای همان یک job تنظیم سراسری را override می‌کند):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cron:
+  mirror_delivery: false   # true کنید تا تحویل‌های کرون قابل-ادامه شوند</code></pre>
+</div>
+<p>رفتار <strong>ترد-محور</strong> است و به چت مبدأِ job محدود:</p>
+<ul>
+  <li><strong>پلتفرم‌های توانمند-ترد</strong> ‏(تاپیک‌های تلگرام، تردهای دیسکورد/اسلک): هر تحویل ترد اختصاصی خودش را باز و خلاصه در نشست همان ترد seed می‌شود، پس ریپلای داخل ترد با زمینهٔ کامل ادامه می‌یابد. یک job تکرارشونده ‏(مثل خلاصهٔ روزانه) به‌ازای هر اجرا ترد تازه‌ای باز می‌کند و بحث پیگیری هر تحویل ایزوله می‌ماند.</li>
+  <li><strong>پلتفرم‌های فقط-DM</strong> ‏(واتساپ، سیگنال، SMS): تردی وجود ندارد، پس خلاصه به‌جایش در نشست DM مبدأ mirror می‌شود — خود DM سطح ادامه است.</li>
+</ul>
+<p>فقط چت مبدأ دست‌خوش می‌شود: هدف‌های fan-out/broadcast ‏(<code>all</code>، تحویل‌های صریح چت دیگر) هرگز قابل-ادامه نمی‌شوند. mirror به‌عنوان یک نوبت کاربر برچسب‌دار نوشته می‌شود ‏(<code>[Cron delivery: &lt;task name&gt;]</code>) که تاریخچهٔ گفتگو را در همهٔ ارائه‌دهندگان مدل alternation-safe نگه می‌دارد.</p>
+
+<h4>ادامهٔ تخت درون-کانالی ‏(Slack)</h4>
+<p>رفتار ترد-محور بالا در هر تحویل یک ترد اختصاصی ضرب می‌کند. اگر ترجیح می‌دهید job قابل-ادامه <strong>تخت در خط‌زمان کانال</strong> بنشیند — بدون ترد — سطح <strong>قابل-ادامهٔ</strong> اسلک را روی ‏<code>in_channel</code> بگذارید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>slack:
+  cron_continuable_surface: in_channel   # پیش‌فرض: thread
+  reply_in_thread: false                 # جفت‌سازی لازم (پایین را ببینید)
+  require_mention: false                 # تا یک ریپلای ساده کار را ادامه دهد</code></pre>
+</div>
+<p>در حالت ‏<code>in_channel</code> خلاصه به‌عنوان یک پیام معمولی سطح‌بالای کانال تحویل می‌شود ‏(تردی باز نمی‌شود) و ریپلای شما کار را از طریق نشست مشترک کانال ادامه می‌دهد. سه تنظیم با هم کار می‌کنند:</p>
+<ul>
+  <li><strong>‏<code>cron_continuable_surface: in_channel</code></strong> — ساخت ترد هنگام تحویل را رد می‌کند.</li>
+  <li><strong>‏<code>reply_in_thread: false</code></strong> ‏(لازم) — بات را وامی‌کند ریپلایتان را <em>تخت</em> در کانال جواب دهد و به همان نشست تمام-کانالی که خلاصه درش seed شده کلید بخورد. بدون آن ادامه هنوز کار می‌کند ولی داخل ترد می‌رسد ‏(امن به ادامهٔ سبک-ترد fallback می‌شود، هرگز ریپلای دورریخته نیست — گیت‌وی در شروع هشدار لاگ می‌کند تا عدم‌تطبیق را ببینید).</li>
+  <li><strong>‏<code>require_mention: false</code></strong> ‏(یا افزودن کانال به free_response_channels) — تا با پیام ساده ریپلای بدهید؛ وگرنه بات فقط وقتی بیدار می‌شود که در هر ریپلای @منشنش کنید.</li>
+</ul>
+<p>چون ادامه، نشست <strong>تمام-کانال</strong> است، مشترک است: چت‌وچورت دیگر کانال — و job دومِ قابل-ادامهٔ درون-کانالی — به همان گفتگوی چرخشی می‌پیوندند. این ذات «تخت در یک کانال» است و همان موازنه‌ای که کاربران ‏<code>reply_in_thread: false</code> قبلاً می‌پذیرند؛ وقتی پیگیریِ هر تحویل را ایزوله می‌خواهید سطح پیش‌فرض ‏<code>thread</code> را استفاده کنید.</p>
+<p>این امروز قابلیت Slack است. سایر پلتفرم‌ها کلید را می‌پذیرند ولی به سطح ‏<code>thread</code> برمی‌گردند ‏(primitives ادامه‌شان متفاوت است)؛ انتخاب به‌ازای-پلتفرم و زیر پیکربندی هر پلتفرم است. فلگ پیکربندی سمت-گیت‌وی است — ‏<code>/restart</code> آن را برمی‌دارد؛ reinstall اپ اسلک لازم نیست.</p>
+<div class="callout note">
+  <div class="callout-title">📌 ‏DM های ۱:۱</div>
+  <p>‏<code>cron_continuable_surface</code> یک تنظیم <strong>کانال</strong> است — ‏DM یک‌به‌یک تقسیم ترد-vs-خط‌زمان ندارد که بین‌شان انتخاب کنید ‏(خود DM از قبل تخته)، پس کلید آنجا اثر ندارد. اینکه آیا تحویل کرونیِ DM قابل-ادامه باشد را کلید جداگانه و از-قبل-موجود ‏<code>slack.dm_top_level_threads_as_sessions</code> تعیین می‌کند:</p>
+  <ul>
+    <li><strong>‏<code>false</code></strong> — همهٔ DM های سطح‌بالا یک نشست DM چرخشی مشترک دارند، پس خلاصهٔ کرونی قابل-ادامه و ریپلایتان در <strong>همان</strong> نشست می‌نشینند و کار با زمینه ادامه می‌یابد. این چیزی است که برای کرون قابل-ادامه در DM می‌خواهید.</li>
+    <li><strong>‏<code>true</code></strong> ‏(پیش‌فرض) — هر پیام DM سطح‌بالا نشست خودش است، پس ریپلای به خلاصهٔ تحویل‌شده نشست <em>تازه‌ای</em> شروع می‌کند که هیچ رکوردی از خلاصه ندارد. ادامه در این حالت کار نمی‌کند ‏(برای کرون یا هر تحویل تخت دیگری).</li>
+  </ul>
+  <p>پس برای کار کرون قابل-ادامه‌ای که به DM یک‌به‌یک تحویل می‌شود ‏<code>slack.dm_top_level_threads_as_sessions: false</code> را بگذارید. ‏<code>cron_continuable_surface</code> برای DM ها لازم نیست ‏(و نادیده گرفته می‌شود).</p>
+</div>
+
+<h3>سرکوب بی‌صدا</h3>
+<p>اگر پاسخ نهایی ایجنت شامل ‏<code>[SILENT]</code> باشد، تحویل کلاً سرکوب می‌شود. خروجی همچنان برای حسابرسی محلی ذخیره می‌شود ‏(در ‏<code>~/.hermes/cron/output/</code>) ولی هیچ پیامی به هدف تحویل نمی‌رود.</p>
+<p>برای job های مانیتورینگ که باید فقط وقتی مشکلی هست گزارش بدهند مفید است:</p>
+<div class="codebox"><pre><code>Check if nginx is running. If everything is healthy, respond with only [SILENT].
+Otherwise, report the issue.</code></pre></div>
+<p>job های شکست‌خورده فارغ از نشانگر ‏[SILENT] همیشه تحویل می‌دهند — فقط اجراهای موفق می‌توانند ساکت شوند. برای job های مانیتورینگِ بی‌سر‌وصدا به ایجنت بگویید وقتی چیزی برای گزارش نیست فقط [SILENT] جواب بدهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> timeout اسکریپت</h2>
+<p>اسکریپت‌های پیش-از-اجرا ‏(الصاقی با پارامتر ‏<code>script</code>) پیش‌فرض timeout ‏۳۶۰۰ ثانیه دارند ‏(۱ ساعت). این فقط <strong>اسکریپت را</strong> محدود می‌کند — job های مبتنی-بر-مهارت / محرک-LLM روی بودجه جدایی از بی‌فعالیتی اجرا می‌شوند و با این مقدار سقف نمی‌خورند. اگر اسکریپت‌هایتان حد متفاوت می‌خواهند عوضش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cron:
+  script_timeout_seconds: 1800   # ۳۰ دقیقه</code></pre>
+</div>
+<p>یا متغیر محیطی ‏<code>HERMES_CRON_SCRIPT_TIMEOUT</code> را بگذارید. ترتیب حل: env ← config.yaml ← پیش‌فرض ۳۶۰۰ ثانیه.</p>
+<p>کرون پاکسازی منابع نشست و ایجنتِ پس-از-اجرا را هم محدود می‌کند. این بعد از برگشتن نوبت LLM اتفاق می‌افتد، پس از timeout بی‌فعالیتی جداست. پیش‌فرض ۱۰ ثانیه به‌ازای هر عملیات پاکسازی است. اگر یک finalizer ذخیره‌سازی یا کلاینت از پاسخ‌دادن بایستد، زمان‌بند خطا لاگ، نگهبان در-جراحی job را آزاد و اجازه می‌دهد اجراهای بعدی dispatch شوند به‌جای رد شدن همیشگی آن job.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cron:
+  cleanup_timeout_seconds: 10</code></pre>
+</div>
+<p>‏<code>cleanup_timeout_seconds: 0</code> را فقط برای بازگرداندن رفتار قدیمیِ پاکسازی بی‌کران بگذارید.</p>
+
+<h3>timeout ارسال رسانه</h3>
+<p>وقتی تحویل کرونی شامل پیوست‌های رسانه‌ای باشد ‏(PDF تولیدی، صدای TTS، گزارش export‌شده) که از طریق آداپتور گیت‌وی زنده فرستاده می‌شوند، آپلود هر پیوست با timeout محدود می‌شود — پیش‌فرض ۳۰۰ ثانیه. فایل‌های بزرگ روی uplink های کند ممکن است بیشتر بخواهند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cron:
+  media_send_timeout_seconds: 600   # ۱۰ دقیقه به‌ازای هر پیوست</code></pre>
+</div>
+<p>یا متغیر محیطی ‏<code>HERMES_CRON_MEDIA_SEND_TIMEOUT</code>. ترتیب حل: env ← config.yaml ← پیش‌فرض ۳۰۰ ثانیه. پیوستِ timeout‌شده در وضعیت اجرای job به‌عنوان شکست تحویل جزئی ثبت می‌شود ‏(متن همچنان تحویل می‌گیرد).</p>
+
+<h3>timeout تحویل Bot Chat</h3>
+<p>تحویل ‏<code>bot-chat</code> یک نوبت کامل ایجنت در چت بات هدف اجرا می‌کند، پس حدش دقیقه است نه ثانیه — پیش‌فرض ‏۶۰۰ ثانیه:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cron:
+  bot_chat_delivery_timeout_seconds: 900</code></pre>
+</div>
+<p>تحویل timeout‌شده در ‏<code>last_delivery_error</code> ثبت می‌شود؛ نوبت بات ممکن است همچنان خودش تمام شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> حالت بدون-ایجنت ‏(job های فقط-اسکریپت)</h2>
+<p>برای کارهای تکرارشونده‌ای که به استدلال LLM نیاز ندارند — watchdog های کلاسیک، alert های دیسک/حافظه، ضربان‌ها، پینگ‌های CI — هنگام ساخت ‏<code>no_agent=True</code> بدهید. زمان‌بند اسکریپت شما را طبق برنامه اجرا و stdout‌اش را مستقیم تحویل می‌دهد، ایجنت کلاً رد می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes cron create "every 5m" \
+  --no-agent \
+  --script memory-watchdog.sh \
+  --deliver telegram \
+  --name "memory-watchdog"</code></pre>
+</div>
+<p>معناشناسی:</p>
+<ul>
+  <li>stdout اسکریپت ‏(trim‌شده) → تحت‌اللفظی به‌عنوان پیام تحویل می‌شود.</li>
+  <li><strong>stdout خالی → تیک بی‌صدا</strong>، بدون تحویل. الگوی watchdog همین است: «فقط وقتی مشکلی هست حرفی بزن».</li>
+  <li>خروج غیرصفر یا timeout → alert خطا تحویل می‌شود تا watchdog خراب نتواند بی‌صدا شکست بخورد.</li>
+  <li>‏<code>{"wakeAgent": false}</code> در آخرین خط → تیک بی‌صدا ‏(همان گیتی که job های LLM استفاده می‌کنند).</li>
+  <li>بدون توکن، بدون مدل، بدون fallback ارائه‌دهنده — job هرگز به لایه inference دست نمی‌زند.</li>
+</ul>
+<p>فایل‌های ‏<code>.sh</code>/<code>.bash</code> وقتی موجود باشد زیر ‏<code>bash</code> از PATH اجرا می‌شوند وگرنه ‏<code>/bin/bash</code> ‏(روی Windows Git Bash مهم است). بقیه زیر مفسر Python فعلی ‏(<code>sys.executable</code>) اجرا می‌شوند. اسکریپت‌ها باید داخل ‏<code>$HERMES_HOME/scripts/</code> حل شوند — نام‌های نسبی، مسیرهای مطلق و مسیرهای با پیشوند ~ وقتی هدف حل‌شده در همان پوشه بماند پذیرفته می‌شوند؛ مسیرهایی که ازش خارج شوند رد می‌شوند. env زیرپروسه پاکسازی می‌شود ‏(<code>_sanitize_subprocess_env</code>): اعتبارنامه‌های API ارائه‌دهنده و سایر رمزهای مدیریت‌شده توسط هرمس به اسکریپت‌های کرون <strong>ارث نمی‌رسند</strong>.</p>
+
+<h3>ایجنت این‌ها را برایتان راه می‌اندازد</h3>
+<p>schema ابزار ‏<code>cronjob</code> مقدار ‏<code>no_agent</code> را مستقیماً به هرمس می‌دهد، پس می‌توانید یک watchdog را در چت توصیف و سیم‌کشی را به ایجنت بسپارید:</p>
+<div class="codebox"><pre><code>Ping me on Telegram if RAM is over 85%, every 5 minutes.</code></pre></div>
+<p>هرمس اسکریپت چک را با ‏<code>write_file</code> در ‏<code>~/.hermes/scripts/</code> می‌نویسد، سپس صدا می‌زند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cronjob(action="create", schedule="every 5m",
+        script="memory-watchdog.sh", no_agent=True,
+        deliver="telegram", name="memory-watchdog")</code></pre>
+</div>
+<p>وقتی محتوای پیام کاملاً توسط اسکریپت تعیین می‌شود ‏(watchdog ها، alert های آستانه، ضربان‌ها) خودش ‏<code>no_agent=True</code> را انتخاب می‌کند. همان ابزار اجازه می‌دهد ایجنت job ها را pause، resume، edit و remove کند — پس کل چرخهٔ حیات چت‌محور است بدون دست‌زدن کسی به CLI.</p>
+<p><a href="https://hermes-agent.nousresearch.com/docs/guides/cron-script-only" target="_blank" rel="noopener">راهنمای کارهای کرون فقط-اسکریپت</a> را برای مثال‌های کاربردی ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> زنجیره‌کردن job ها با ‏<code>context_from</code></h2>
+<p>کارهای کرون در نشست‌های ایزوله بدون حافظه از اجراهای قبلی اجرا می‌شوند. ولی بعضی وقت‌ها خروجی یک job دقیقاً همان چیزی است که job بعدی لازم دارد. پارامتر ‏<code>context_from</code> این اتصال را خودکار سیم می‌کشد — پرامپتِ Job B آخرین خروجی Job A را هنگام runtime به‌عنوان زمینه پیشوند می‌گیرد.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Job 1: Collect raw data
+cronjob(
+    action="create",
+    prompt="Fetch the top 10 AI/ML stories from Hacker News. Save them to ~/.hermes/data/briefs/raw.md in markdown format with title, URL, and score.",
+    schedule="0 7 * * *",
+    name="AI News Collector",
+)
+
+# Job 2: Triage — receives Job 1's output as context
+# Get Job 1's ID from: cronjob(action="list")
+cronjob(
+    action="create",
+    prompt="Read ~/.hermes/data/briefs/raw.md. Score each story 1–10 for engagement potential and novelty. Output the top 5 to ~/.hermes/data/briefs/ranked.md.",
+    schedule="30 7 * * *",
+    context_from="&lt;job1_id&gt;",
+    name="AI News Triage",
+)
+
+# Job 3: Ship — receives Job 2's output as context
+cronjob(
+    action="create",
+    prompt="Read ~/.hermes/data/briefs/ranked.md. Write 3 tweet drafts (hook + body + hashtags). Deliver to telegram:7976161601.",
+    schedule="0 8 * * *",
+    context_from="&lt;job2_id&gt;",
+    name="AI News Brief",
+)</code></pre>
+</div>
+<p><strong>نحوهٔ کار:</strong></p>
+<ul>
+  <li>وقتی Job 2 شلیک می‌کند هرمس آخرین خروجی Job 1 را از ‏<code>~/.hermes/cron/output/{job1_id}/*.md</code> می‌خواند</li>
+  <li>آن خروجی خودکار به ابتدای پرامپت Job 2 الصاق می‌شود</li>
+  <li>Job 2 لازم نیست «این فایل را بخوان» را هاردکد کند — محتوا را به‌عنوان زمینه می‌گیرد</li>
+  <li>زنجیره می‌تواند هر طولی باشد: Job 1 ← Job 2 ← Job 3 ← ...</li>
+</ul>
+<p><strong>‏<code>context_from</code> چه می‌پذیرد:</strong></p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>قالب</th><th>مثال</th></tr></thead>
+  <tbody>
+    <tr><td>شناسهٔ job واحد ‏(رشته)</td><td><code>context_from="a1b2c3d4"</code></td></tr>
+    <tr><td>چند شناسهٔ job ‏(فهرست)</td><td><code>context_from=["job_a", "job_b"]</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>خروجی‌ها به ترتیب فهرست الحاق می‌شوند.</p>
+<p><strong>تداوم: حمل خروجی اجرای قبلی</strong></p>
+<p>‏<code>continuity=true</code> را بگذارید و job آخرین خروجی <em>خودش</em> را در هر اجرا تزریق می‌کند. job های تکرارشونده معمولاً هر اجرا با فراموشی شروع می‌کنند — خبرنگاری که همان اخبار را دوباره گزارش می‌کند، مانیتوری که روی همان شرط دوباره هشدار می‌دهد. با روشن بودن continuity، job بیدار می‌شود و می‌بیند بار قبل چه گزارش کرده و می‌تواند حذف تکرار و ادامه از همان‌جا:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cronjob(
+    action="create",
+    prompt="Scan HN and arXiv for new agent-tooling papers. Report only items NOT already covered in your previous run's output.",
+    schedule="every 6h",
+    continuity=True,
+    name="Agent Tooling Scout",
+)</code></pre>
+</div>
+<p>اجرای اول خروجی قبلی ندارد، پس پرامپت عیناً اجرا می‌شود. در اجراهای بعدی خروجی قبلی با قاب continuity («آنچه قبلاً گزارش شده را تکرار نکن») الصاق می‌شود. با job های بالادستی آزادانه ترکیب می‌شود ‏(<code>context_from=["&lt;other_job_id&gt;"]</code> به‌اضافهٔ ‏<code>continuity=true</code>) و ‏<code>continuity=false</code> هنگام update آن را خاموش می‌کند در حالی که ورودی‌های دیگر ‏context_from حفظ می‌شوند. داخلی فلگ به‌عنوان ورودی رزروشدهٔ ‏<code>self</code> در ‏context_from ذخیره می‌شود.</p>
+<p>از CLI: ‏<code>hermes cron create "every 6h" "Scan for news" --continuity</code> و برای تغییر روی job موجود ‏<code>hermes cron edit &lt;job_id&gt; --continuity</code> / ‏<code>--no-continuity</code>. همان کلید در ویرایشگر کرون داشبورد و دیالوگ روتین Bot Mode دسکتاپ هم هست.</p>
+<p><strong>کِی استفاده کنیم:</strong></p>
+<ul>
+  <li>خط‌لوله‌های چندمرحله‌ای ‏(جمع‌آوری ← فیلتر ← قالب ← تحویل)</li>
+  <li>کارهای وابسته که کار مرحله N به خروجی مرحله N−1 وابسته است</li>
+  <li>الگوهای fan-out/fan-in که یک job نتایج چند job دیگر را تجمیع می‌کند</li>
+  <li>خبرنگاران/مانیتورهای تکرارشونده که باید علیه گزارش قبلی‌شان dedupe کنند ‏(<code>continuity=true</code>)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> بازیابی ارائه‌دهنده</h2>
+<p>کارهای کرون ارائه‌دهنده‌های fallback پیکربندی‌شده و چرخش pool اعتبارنامه را ارث می‌برند. اگر کلید API اصلی rate-limit شود یا ارائه‌دهنده خطا برگرداند، ایجنت کرونی می‌تواند:</p>
+<ul>
+  <li><strong>به ارائه‌دهندهٔ جایگزین برگردد</strong> اگر ‏<code>fallback_providers</code> ‏(یا ‏<code>fallback_model</code> قدیمی) را در config.yaml دارید</li>
+  <li><strong>به اعتبارنامهٔ بعدی</strong> در <a href="../configuration.html">pool اعتبارنامه</a>‌تان برای همان ارائه‌دهنده بچرخد</li>
+</ul>
+<p>یعنی کارهای کرونی با فراوانی بالا یا در ساعت‌های اوج مقاوم‌ترند — یک کلید rate-limit‌شده کل اجرا را شکست نمی‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> شلیک‌های از‌دست‌رفتهٔ زمان‌بندی ‏(<code>last_fire_error</code>)</h2>
+<p>در استقرارهای میزبانی‌شده ‏(کرون-مدیریتی)، یک شلیک زمان‌بندی‌شده از زمان‌بند پلتفرم از طریق داشبورد به سرور API داخلی گیت‌وی سفر می‌کند. اگر آن تحویل نهایی شکست بخورد — پروسهٔ گیت‌وی خاموش است یا شنونده سرور-API‌اش هرگز شروع نشده — اجرا اصلاً شروع نمی‌شود، پس رکورد اجرایی و last_status‌ای برای بررسی وجود ندارد. شکل گویا: job هر بار که دستی تریگرش می‌کنید کار می‌کند ولی هرگز خودکار شلیک نمی‌شود.</p>
+<p>این ردشده‌ها روی رکورد job به‌صورت ‏<code>last_fire_error</code> مهر می‌خورند ‏(timestamp + دلیل) و اینجا سطح پیدا می‌کنند:</p>
+<ul>
+  <li>ابزار ‏<code>cronjob</code> ← ‏<code>action: "list"</code> — فیلد ‏<code>last_fire_error</code></li>
+  <li>‏<code>hermes cron list</code> — خط قرمز ‏<code>⚠ Missed scheduled fire:</code> زیر job</li>
+  <li>نمای job در داشبورد</li>
+</ul>
+<p>مهر همیشه سلامت <strong>فعلیِ</strong> شلیک-خودکار را بازتاب می‌دهد: با ردشده‌های جدیدتر بازنویسی و توسط اولین اجرای موفق بعدی خودکار پاک می‌شود. اگر دیدیدش job و زمان‌بندی‌اش سالم‌اند — سمت گیت‌وی مسیر شلیک توجه می‌خواهد ‏(رایج‌ترین: گیت‌وی را از طریق supervisor ری‌استارت کنید تا محیط کامل پروفایل لود شود: ‏<code>hermes gateway restart</code>).</p>
+
+<h3>جبران misfire</h3>
+<p>وقتی ارائه‌دهندهٔ زمان‌بند خارجی فعال است ‏(کرون مدیریتی روی استقرارهای میزبانی‌شده)، گیت‌وی یک sweep جبران هم اجرا می‌کند: job‌ای که زمانش گذشته و شلیکی تحویل نشده — و پنجرهٔ grace‌اش سپری شده — گرفته و محلی اجرا می‌شود، تا قطعی در تحویل شلیک به‌جای کل روز فقط چند دقیقه هزینه داشته باشد. sweep نسبت به retry های دیرهنگامِ زمان‌بند با همان claim مخزنِ شلیک‌های عادی dedupe می‌شود.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cron:
+  misfire_grace_minutes: 10   # این‌قدر منتظر retry های خودِ زمان‌بند می‌ماند
+                              # قبل از جبران محلی؛ 0 جبران را خاموش می‌کند</code></pre>
+</div>
+<p>استقرارهای محلی ‏(ticker داخلی) به این نیاز ندارند — ticker خودش job های عقب‌افتاده را در تیک بعدی برمی‌دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۷</span> قالب‌های زمان‌بندی</h2>
+<p>پاسخ نهایی ایجنت خودکار به هدف ‏<code>deliver:</code> مربوط به job تحویل می‌شود — ایجنت دیگر خودش پیام شلیک نمی‌کند، پس محتوای رو-به-کاربر به‌سادگی در پاسخ نهایی می‌رود. برای تحویل به هدف‌های <strong>اضافی یا متفاوت</strong> چند هدف ‏<code>deliver:</code> را روی کار کرون فهرست کنید ‏(جداشده با ویرگول، مثل ‏<code>deliver: "telegram,discord"</code>) به‌جای اینکه ایجنت بفرستد.</p>
+<h3>تأخیرهای نسبی ‏(one-shot)</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>30m     → Run once in 30 minutes
+2h      → Run once in 2 hours
+1d      → Run once in 1 day</code></pre>
+</div>
+<h3>فاصله‌ها ‏(تکرارشونده)</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>every 30m    → Every 30 minutes
+every 2h     → Every 2 hours
+every 1d     → Every day</code></pre>
+</div>
+<h3>عبارات cron</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>0 9 * * *       → Daily at 9:00 AM
+0 9 * * 1-5     → Weekdays at 9:00 AM
+0 */6 * * *     → Every 6 hours
+30 8 1 * *      → First of every month at 8:30 AM
+0 0 * * 0       → Every Sunday at midnight</code></pre>
+</div>
+<h3>timestamp های ISO</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>2026-03-15T09:00:00    → One-time at March 15, 2026 9:00 AM</code></pre>
+</div>
+<h3>رفتار تکرار</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نوع زمان‌بندی</th><th>تکرار پیش‌فرض</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td>One-shot ‏(<code>30m</code>، timestamp)</td><td>۱</td><td>یک‌بار اجرا می‌شود</td></tr>
+    <tr><td>Interval ‏(<code>every 2h</code>)</td><td>بی‌نهایت</td><td>تا حذف اجرا می‌شود</td></tr>
+    <tr><td>عبارت cron</td><td>بی‌نهایت</td><td>تا حذف اجرا می‌شود</td></tr>
+  </tbody>
+</table>
+</div>
+<p>می‌توانید override کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cronjob(
+    action="create",
+    prompt="...",
+    schedule="every 2h",
+    repeat=5,
+)</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۸</span> مدیریت programmatik job ها</h2>
+<p>API رو-به-ایجنت یک ابزار است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cronjob(action="create", ...)
+cronjob(action="list")
+cronjob(action="update", job_id="...")
+cronjob(action="pause", job_id="...")
+cronjob(action="resume", job_id="...")
+cronjob(action="run", job_id="...")
+cronjob(action="remove", job_id="...")</code></pre>
+</div>
+<p>برای ‏<code>update</code> مقدار ‏<code>skills=[]</code> بدهید تا همهٔ مهارت‌های الصاقی حذف شوند.</p>
+<h3>اجراهای دستی ناهمگام‌اند</h3>
+<p>‏<code>cronjob(action="run")</code> job را فوراً <strong>در پس‌زمینه</strong> شلیک می‌کند ‏(مثل ‏delegate_task): فراخوانی ابزار بلافاصله با یک handle برمی‌گردد و پیامد job — موفقیت/شکست، هدف تحویل، اجرای زمان‌بندی‌شده بعدی و گزیدهٔ خروجی — وقتی اجرا تمام شد به‌عنوان پیام جدید به گفتگو برمی‌گردد. ایجنت ‏(و شما) می‌توانید در این فاصله به کار ادامه دهید و job‌ای که از قبل میان-اجراست با «already running» رد می‌شود نه شلیک دوباره.</p>
+<p>می‌توانید همراه ‏<code>action="run"</code> مقدار ‏<code>prompt</code> هم بدهید تا زمینهٔ گذرا به‌ازای-اجرا تزریق کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cronjob(action="run", job_id="...", prompt="CONTEXT: focus on the EU region today")</code></pre>
+</div>
+<p>زمینه برای همان یک شلیک زیر سربرگ ‏<code>## Run Context</code> به پرامپت ذخیره‌شده job الصاق می‌شود — هرگز در تعریف job ماندگار نمی‌شود و از همان اسکن prompt-injection پرامپت‌های ذخیره‌شده عبور می‌کند.</p>
+<p>runtime هایی که نمی‌توانند نتیجهٔ جدا‌شده بگیرند ‏(<code>hermes -z</code> یک‌باره، ‏<code>hermes cron run</code> از CLI، نشست‌های فرزند کرون، worker های کانبان) خودکار به اجرای همگام برمی‌گردند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۹</span> تول‌ست‌های در دسترس job های کرون</h2>
+<p>کرون هر job را در نشست تازهٔ ایجنتی بدون هیچ پلتفرم چت الصاقی اجرا می‌کند. پیش‌فرض ایجنت کرونی <strong>تول‌ست پیکربندی‌شده برای پلتفرم cron در ‏hermes tools</strong> را می‌گیرد — نه پیش‌فرض CLI، نه همه‌چیزِ زیر آفتاب.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes tools
+# → در UI curses پلتفرم "cron" را انتخاب کنید
+# → تول‌ست‌ها را مثل Telegram/Discord و... روشن/خاموش کنید</code></pre>
+</div>
+<p>کنترل دقیق‌تر به‌ازای-job از طریق فیلد ‏<code>enabled_toolsets</code> روی ‏<code>cronjob.create</code> ‏(یا روی job موجود با ‏<code>cronjob.update</code>) در دسترس است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cronjob(action="create", name="weekly-news-summary",
+        schedule="every sunday 9am",
+        enabled_toolsets=["web", "file"],      # فقط web + file، بدون terminal/browser/etc.
+        prompt="Summarize this week's AI news: ...")</code></pre>
+</div>
+<p>وقتی ‏<code>enabled_toolsets</code> روی job تنظیم باشد آن برنده است؛ وگرنه پیکربندی پلتفرم-cron مربوط به ‏<code>hermes tools</code> برنده است؛ وگرنه هرمس به پیش‌فرض‌های داخلی برمی‌گردد. برای کنترل هزینه مهم است: حمل ‏browser و ‏delegation داخل هر job کوچک «گرفتن خبر» پرامپت schema-ابزار را در هر فراخوانی LLM متورم می‌کند.</p>
+
+<h3>رد شدن کلاً از ایجنت: ‏<code>wakeAgent</code></h3>
+<p>اگر کار کرون‌تان اسکریپت پیش-چک الصاق کند ‏(با ‏<code>script=</code>)، اسکریپت می‌تواند در runtime تصمیم بگیرد اصلاً هرمس ایجنت را invoke کند یا نه. خط نهایی stdout به این شکل چاپ کنید:</p>
+<div class="codebox"><pre><code>{"wakeAgent": false}</code></pre></div>
+<p>…و کرون اجرای ایجنت را برای این تیک کلاً رد می‌کند. برای poll های پرتکرار ‏(هر ۱–۵ دقیقه) که فقط وقتی وضعیت واقعاً عوض شده باید LLM بیدار شود مفید است — وگرنه بارها برای نوبت‌های ایجنتیِ بدون-محتوا هزینه می‌دهید.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code># pre-check script
+import json, sys
+latest = fetch_latest_issue_count()
+prev = read_state("issue_count")
+if latest == prev:
+    print(json.dumps({"wakeAgent": False}))   # skip this tick
+    sys.exit(0)
+write_state("issue_count", latest)
+print(json.dumps({"wakeAgent": True, "context": {"new_issues": latest - prev}}))</code></pre>
+</div>
+<p>وقتی ‏<code>wakeAgent</code> حذف شود پیش‌فرض ‏<code>true</code> است ‏(بیدارکردن عادی ایجنت).</p>
+
+<h4>دستورالعمل‌ها: گیت‌های ارزان پیش-از-اجرا</h4>
+<p>گیتی ‏<code>wakeAgent</code> راه $0‌ای می‌دهد برای تصمیم اینکه کار زمان‌بندی‌شده اصلاً توکن LLM خرج کند یا نه. سه الگو بیشتر موارد استفاده را پوشش می‌دهد.</p>
+<p><strong>گیتی تغییر-فایل</strong> — فقط وقتی اجرا شود که فایل تحت‌نظارت از آخرین تیک موفق محتوای جدید داشته باشد. زمان‌بند ‏<code>last_run_at</code> هر job را ثبت می‌کند؛ آن را با mtime فایل مقایسه کنید.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash — ~/.hermes/scripts/feed-changed.sh</span><button class="copy-btn">کپی</button></div>
+  <pre><code>#!/bin/bash
+FEED="$HOME/data/feed.json"
+STATE="$HOME/.hermes/scripts/.feed-changed.last"
+test -f "$FEED" || { echo '{"wakeAgent": false}'; exit 0; }
+mtime=$(stat -c %Y "$FEED")
+last=$(cat "$STATE" 2>/dev/null || echo 0)
+if [ "$mtime" -le "$last" ]; then
+  echo '{"wakeAgent": false}'
+else
+  echo "$mtime" > "$STATE"
+  echo '{"wakeAgent": true}'
+fi</code></pre>
+</div>
+<div class="codebox"><pre><code>cronjob(action="create", name="process-feed",
+        schedule="every 30m",
+        script="feed-changed.sh",
+        prompt="A new ~/data/feed.json has landed. Summarize what changed.")</code></pre></div>
+<p><strong>گیتی فلگ-خارجی</strong> — فقط وقتی اجرا شود که پروسهٔ دیگری آمادگی را علامت داده باشد ‏(مثل deploy hook که فایلی می‌اندازد یا job ‏CI که مقداری در state store شما ست می‌کند).</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash — ~/.hermes/scripts/flag-ready.sh</span><button class="copy-btn">کپی</button></div>
+  <pre><code>#!/bin/bash
+if test -f /tmp/new-data-ready; then
+  rm -f /tmp/new-data-ready
+  echo '{"wakeAgent": true}'
+else
+  echo '{"wakeAgent": false}'
+fi</code></pre>
+</div>
+<div class="codebox"><pre><code>cronjob(action="create", name="nightly-analysis",
+        schedule="0 9 * * *",
+        script="flag-ready.sh",
+        prompt="Run the nightly analysis over today's batch.")</code></pre></div>
+<p><strong>گیتی شمارش-SQL</strong> — فقط وقتی ردیف‌های جدیدی برای پردازش در دیتابیس خودتان هست اجرا شود. اسکریپت می‌تواند تعداد را هم از طریق ‏<code>context</code> به ایجنت بدهد تا بدون re-query بداند با چه حجمی طرف است.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python — ~/.hermes/scripts/new-rows.py</span><button class="copy-btn">کپی</button></div>
+  <pre><code>#!/usr/bin/env python
+import json, sqlite3
+conn = sqlite3.connect("/home/me/data/app.db")
+n = conn.execute(
+    "SELECT COUNT(*) FROM messages WHERE ts > strftime('%s','now','-2 hours')"
+).fetchone()[0]
+if n &lt; 1:
+    print(json.dumps({"wakeAgent": False}))
+else:
+    print(json.dumps({"wakeAgent": True, "context": {"new_rows": n}}))</code></pre>
+</div>
+<div class="codebox"><pre><code>cronjob(action="create", name="summarize-new-msgs",
+        schedule="every 2h",
+        script="new-rows.py",
+        prompt="Summarize the new messages from the last 2 hours.")</code></pre></div>
+<p>همان الگو برای هر منبع داده‌ای که از اسکریپت قابل پرس‌وجوست کار می‌کند — Postgres، یک HTTP API، state store خودتان — بدون bake کردن یک evaluator SQL داخل زیرسیستم کرون.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>‏<code>~/.hermes/state.db</code> خودِ هرمس یک schema داخلی است که بین ریلیزها عوض می‌شود. از داخل گیت پیش-اجرا رویش query نزنید — به‌جایش به دیتابیس یا feed خودتان اشاره دهید.</p>
+</div>
+<p>اعتبار: این مجموعه دستورالعمل با کاوش ‏@iankar8 در ‏<a href="https://github.com/NousResearch/hermes-agent/pull/2654" target="_blank" rel="noopener">#2654</a> الهام گرفت که افزودن تریگرهای sql/file/command را به‌عنوان مکانیزم موازی پیشنهاد کرده بود. گیتی ‏<code>script</code> + ‏<code>wakeAgent</code> هر سه مورد را با $0 پوشش می‌داد، پس کار به‌جای کد به‌صورت مستندات فرود آمد.</p>
+
+<h3>زنجیره‌کردن job ها: ‏<code>context_from</code></h3>
+<p>یک کار کرون می‌تواند با ذکر نام‌ها ‏(یا شناسه‌ها) در ‏<code>context_from</code> آخرین خروجی موفق یک یا چند job دیگر را مصرف کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>cronjob(action="create", name="daily-digest",
+        schedule="every day 7am",
+        context_from=["ai-news-fetch", "github-prs-fetch"],
+        prompt="Write the daily digest using the outputs above.")</code></pre>
+</div>
+<p>آخرین خروجی‌های کامل‌شدهٔ job های ارجاع‌شده به‌عنوان زمینه بالای پرامپت این اجرا تزریق می‌شوند. هر ورودی بالادستی باید شناسه یا نام معتبر job باشد ‏(‏<code>cronjob action="list"</code> را ببینید). توجه: زنجیره <em>آخرین خروجی کامل‌شده</em> را می‌خواند — منتظر job های بالادستی که در همان تیک در حال اجرایند نمی‌ماند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲۰</span> ذخیرهٔ job ها</h2>
+<p>‏job ها در ‏<code>~/.hermes/cron/jobs.json</code> ذخیره می‌شوند. خروجی اجرای job ها در ‏<code>~/.hermes/cron/output/{job_id}/{timestamp}.md</code> ذخیره می‌شود.</p>
+<p>تعاریف job JSON ساده روی دیسک‌اند: از ‏<code>hermes update</code>، ری‌استارت‌های گیت‌وی و ری‌بوت ماشین جان سالم می‌برند. job‌ای که حین ری‌استارت وسط اجرا بوده در دفتر اجرا ‏<code>unknown</code> علامت می‌خورد — خودکار retry نمی‌شود ولی تیک زمان‌بندی‌شده بعدی job عادی شلیک می‌کند. جزئیات در «تاریخچهٔ اجرا».</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>از ایجنت بخواهید job ها را از طریق ابزار ‏<code>cronjob</code>، ‏<code>hermes cron edit</code> یا ‏<code>/cron</code> مدیریت کند — نه با patch مستقیم ‏jobs.json. ویرایش مستقیم وقتی <a href="../security.html">امنیت نوشتن فایل</a> مسیر را بلاک می‌کند ‏(مثلاً وقتی ‏<code>HERMES_WRITE_SAFE_ROOT</code> تنظیم است) می‌تواند بی‌صدا شکست بخورد و فوتر <a href="../configuration.html">تأییدگر جهش-فایل</a> سیگنال مرجع این است که چیزی ذخیره نشده.</p>
+</div>
+<p>‏job ها ممکن است ‏<code>model</code> و ‏<code>provider</code> را به‌صورت ‏<code>null</code> ذخیره کنند. وقتی آن فیلدها حذف شده باشند هرمس هنگام اجرا از پیکربندی سراسری حل‌شان می‌کند. فقط وقتی override به‌ازای-job تنظیم شده در رکورد job ظاهر می‌شوند.</p>
+<p>ذخیره‌سازی از نوشته‌های atomic استفاده می‌کند تا نوشته‌های قطع‌شده فایل job نیمه‌نوشته جا نگذارند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲۱</span> پرامپت‌های خودبسنده همچنان مهم‌اند</h2>
+<div class="callout warning">
+  <div class="callout-title">⚠️ مهم</div>
+  <p>کارهای کرون در نشست ایجنتیِ کاملاً تازه اجرا می‌شوند. پرامپت باید هر چیزی را که ایجنت لازم دارد و توسط مهارت‌های الصاقی فراهم نمی‌شود در بر داشته باشد.</p>
+</div>
+<p><strong>بد:</strong> ‏<code>"Check on that server issue"</code></p>
+<p><strong>خوب:</strong> ‏<code>"SSH into server 192.168.1.100 as user 'deploy', check if nginx is running with 'systemctl status nginx', and verify https://example.com returns HTTP 200."</code></p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲۲</span> امنیت</h2>
+<p>پرامپت‌های کارهای زمان‌بندی‌شده هنگام ساخت و به‌روزرسانی برای الگوهای prompt-injection و خروج برداشتگاه-اعتبارنامه اسکن می‌شوند. پرامپت‌های حاوی ترفندهای یونیکد نامرئی، تلاش‌های درب-پشتی SSH یا payload های واضح خروج-رمز بلوک می‌شوند.</p>
+</section>
+
+<div class="pager">
+  <a href="mcp.html"><span class="dir">→ قبلی</span><span class="ttl">MCP ‏(Model Context Protocol)</span></a>
+  <a class="next" href="web-dashboard.html"><span class="dir">بعدی ←</span><span class="ttl">داشبورد وب</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/cron" target="_blank" rel="noopener">Scheduled Tasks (Cron)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

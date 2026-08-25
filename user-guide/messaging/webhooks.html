@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>وب‌هوک‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>وب‌هوک‌ها</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>وب‌هوک‌ها</h1>
+<p>رویدادهای سرویس‌های خارجی ‏(GitHub، ‏GitLab، ‏JIRA، ‏Stripe و...) را دریافت کنید و اجرای ایجنت هرمس را خودکار تریگر کنید. آداپتور webhook یک سرور HTTP اجرا می‌کند که درخواست‌های POST را می‌پذیرد، امضاهای HMAC را اعتبارسنجی، payload ها را به پرامپت‌های ایجنت تبدیل و پاسخ‌ها را به منبع یا پلتفرم پیکربندی‌شدهٔ دیگر مسیریابی می‌کند.</p>
+<p>ایجنت رویداد را پردازش و می‌تواند با پست کامنت روی PR ها، ارسال پیام به تلگرام/دیسکورد یا لاگ نتیجه پاسخ دهد.</p>
+<div class="callout note">
+  <div class="callout-title">🎬 آموزش تصویری</div>
+  <p>ویدیوی آموزشی رسمی: <a href="https://www.youtube.com/watch?v=WNYe5mD4fY8" target="_blank" rel="noopener">Hermes Agent — Webhooks Tutorial ‏(یوتیوب)</a></p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> شروع سریع</h2>
+<ol>
+  <li>با <code>hermes gateway setup</code> یا متغیرهای محیطی فعال کنید</li>
+  <li>مسیرها ‏(routes) را در config.yaml تعریف کنید <strong>یا</strong> با <code>hermes webhook subscribe</code> به‌صورت داینامیک بسازید</li>
+  <li>سرویس‌تان را به <code>http://your-server:8644/webhooks/&lt;route-name&gt;</code> اشاره دهید</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> راه‌اندازی</h2>
+<p>آداپتور webhook دو جور فعال می‌شود.</p>
+
+<h3>با ویزارد راه‌اندازی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway setup</code></pre>
+</div>
+<p>طبق پرسش‌ها webhooks را فعال، پورت را تعیین و رمز HMAC سراسری بگذارید.</p>
+
+<h3>با متغیرهای محیطی</h3>
+<p>به <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>WEBHOOK_ENABLED=true
+WEBHOOK_PORT=8644        # پیش‌فرض
+WEBHOOK_SECRET=your-global-secret</code></pre>
+</div>
+
+<h3>تأیید سرور</h3>
+<p>وقتی گیت‌وی اجراست:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl http://localhost:8644/health</code></pre>
+</div>
+<p>پاسخ موردانتظار:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{"status": "ok", "platform": "webhook"}</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پیکربندی مسیرها ‏(Routes)</h2>
+<p>مسیرها تعیین می‌کنند منابع مختلف webhook چطور هندل شوند. هر مسیر یک ورودی نام‌دار زیر <code>platforms.webhook.extra.routes</code> در config.yaml شماست.</p>
+
+<h3>ویژگی‌های مسیر</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ویژگی</th><th>لازم</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>events</code></td><td>خیر</td><td>فهرست انواع رویداد قابل قبول ‏(مثل <code>["pull_request"]</code>). اگر خالی باشد همهٔ رویدادها پذیرفته می‌شوند. نوع رویداد از <code>X-GitHub-Event</code>، ‏<code>X-GitLab-Event</code> یا <code>event_type</code> داخل payload خوانده می‌شود.</td></tr>
+    <tr><td><code>secret</code></td><td><strong>بله</strong></td><td>رمز HMAC برای اعتبارسنجی امضا. اگر روی مسیر تنظیم نشده باشد به رمز سراسری <code>secret</code> برمی‌گردد. فقط برای تست ‏(رد اعتبارسنجی) روی <code>"INSECURE_NO_AUTH"</code>.</td></tr>
+    <tr><td><code>profile</code></td><td>خیر</td><td>پروفایل مجازِ اجرای این مسیر وقتی <code>gateway.multiplex_profiles</code> فعال است. برای مسیر فقط-پروفایل-پیش‌فرض حذفش کنید؛ نام پروفایل ‏(مثل <code>coder</code>) بگذارید تا مسیر و رمزش به ‏<code>/p/coder/webhooks/&lt;route&gt;</code> قفل شوند.</td></tr>
+    <tr><td><code>prompt</code></td><td>خیر</td><td>رشتهٔ قالب با دسترسی dot-notation به payload ‏(مثل <code>{pull_request.title}</code>). اگر حذف شود کل JSON payload داخل پرامپت dump می‌شود. فیلدهای payload غیرقابل‌اعتمادند — «احراز‌شده به معنی مطمئن نیست» را ببینید.</td></tr>
+    <tr><td><code>filters</code></td><td>خیر</td><td>فیلترهای اعلانیِ payload که بعد از فیلتر auth/body/event و قبل از کار ایجنت یا تحویل مستقیم ارزیابی می‌شوند. عدم‌تطبیق با HTTP 200 برمی‌گردد: ‏<code>{"status":"ignored","reason":"filter"}</code>.</td></tr>
+    <tr><td><code>script</code></td><td>خیر</td><td>اسکریپت فیلتر/تبدیل زیر <code>~/.hermes/scripts/</code>. payload وب‌هوک به‌صورت JSON روی stdin داده می‌شود. خروجی stdout آبجکت JSON جایگزین payload پیش از قالب‌سازی می‌شود؛ متن stdout به‌صورت <code>script_output</code> expose می‌شود؛ stdout خالی، ‏<code>[SILENT]</code> یا کد خروج ناصفر webhook را نادیده می‌گیرد.</td></tr>
+    <tr><td><code>skills</code></td><td>خیر</td><td>فهرست نام مهارت‌ها برای بارگذاری در اجرای ایجنت.</td></tr>
+    <tr><td><code>toolsets</code></td><td>خیر</td><td>فهرست کلیدهای تول‌ست ‏(مثل <code>["terminal", "file", "web"]</code>) که تول‌ست سطح-پلتفرم webhook را فقط برای اجراهای این مسیر <strong>جایگزین</strong> می‌کند. فقط با ویرایش دستی config — از طریق <code>hermes webhook subscribe</code> قابل تنظیم نیست تا اشتراک‌های ساختهٔ ایجنت نتوانند ابزار ممتاز خودشان را grant کنند. نام‌ها مثل ورودی‌های <code>platform_toolsets</code> اعتبارسنجی می‌شوند ‏(نام‌های ناشناخته یا محدود-به-پلتفرم رد می‌شوند).</td></tr>
+    <tr><td><code>deliver</code></td><td>خیر</td><td>مقصد پاسخ: ‏<code>github_comment</code>، ‏<code>telegram</code>، ‏<code>discord</code>، ‏<code>slack</code>، ‏<code>signal</code>، ‏<code>sms</code>، ‏<code>whatsapp</code>، ‏<code>matrix</code>، ‏<code>mattermost</code>، ‏<code>homeassistant</code>، ‏<code>email</code>، ‏<code>dingtalk</code>، ‏<code>feishu</code>، ‏<code>wecom</code>، ‏<code>weixin</code>، ‏<code>bluebubbles</code>، ‏<code>qqbot</code> یا <code>log</code> ‏(پیش‌فرض).</td></tr>
+    <tr><td><code>deliver_extra</code></td><td>خیر</td><td>پیکربندی تحویل اضافی — کلیدها بسته به نوع <code>deliver</code> ‏(مثل <code>repo</code>، ‏<code>pr_number</code>، ‏<code>chat_id</code>). مقادیر همان قالب‌های <code>{dot.notation}</code> را مثل prompt پشتیبانی می‌کنند.</td></tr>
+    <tr><td><code>deliver_only</code></td><td>خیر</td><td>اگر <code>true</code>، ایجنت کلاً رد می‌شود — قالب <code>prompt</code> رندرشده همان پیام تحت‌اللفظی است که تحویل می‌گیرد. بدون هزینهٔ LLM، تحویل زیرثانیه‌ای. Requires ‏<code>deliver</code> هدف واقعی باشد ‏(نه <code>log</code>).</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>مثال کامل</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  webhook:
+    enabled: true
+    extra:
+      port: 8644
+      secret: "global-fallback-secret"
+      routes:
+        github-pr:
+          events: ["pull_request"]
+          secret: "github-webhook-secret"
+          prompt: |
+            Review this pull request:
+            Repository: {repository.full_name}
+            PR #{number}: {pull_request.title}
+            Author: {pull_request.user.login}
+            URL: {pull_request.html_url}
+            Diff URL: {pull_request.diff_url}
+            Action: {action}
+          skills: ["github-code-review"]
+          deliver: "github_comment"
+          deliver_extra:
+            repo: "{repository.full_name}"
+            pr_number: "{number}"
+        deploy-notify:
+          events: ["push"]
+          secret: "deploy-secret"
+          prompt: "New push to {repository.full_name} branch {ref}: {head_commit.message}"
+          filters:
+            - field: "ref"
+              equals: "refs/heads/main"
+          deliver: "telegram"</code></pre>
+</div>
+
+<h3>فیلترهای Payload</h3>
+<p>وقتی یک ارائه‌دهنده جریان رویداد پهنی می‌فرستد ولی فقط بعضی payload ها باید ایجنت را بیدار یا تحویل <code>deliver_only</code> تریگر کنند از <code>filters</code> استفاده کنید. فیلترها بعد از اعتبارسنجی امضا، parse بدنه و <code>events</code> اجرا می‌شوند ولی قبل از رندر پرامپت، idempotency، dispatch ایجنت یا تحویل مستقیم.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  webhook:
+    extra:
+      routes:
+        todoist:
+          events: ["item:updated"]
+          secret: "todoist-secret"
+          filters:
+            - field: "payload.labels"
+              contains: "hermes"
+            - any:
+                - field: "payload.priority"
+                  equals: 4
+                - field: "payload.project_id"
+                  in_file: "~/.hermes/data/todoist/watchlist.json"
+          prompt: "Todoist task changed: {payload.content}"</code></pre>
+</div>
+<p>عملگرهای پشتیبانی‌شده:</p>
+<ul>
+  <li>‏<code>exists: true|false</code></li>
+  <li>‏<code>missing: true</code></li>
+  <li>‏<code>equals</code> / ‏<code>not_equals</code></li>
+  <li>‏<code>contains</code> برای رشته‌ها، فهرست‌ها و کلیدهای dict</li>
+  <li>‏<code>in</code> برای فهرست‌های درجا</li>
+  <li>‏<code>in_file</code> برای آرایه‌های JSON، آبجکت‌های JSON ‏(کلیدها استفاده می‌شوند) یا فایل‌های متنی جداشده با خط جدید</li>
+  <li>‏<code>regex</code></li>
+  <li>گروه‌های <code>all</code>، ‏<code>any</code> و <code>not</code></li>
+</ul>
+<p>مسیر فیلدها dot-notation است. ‏<code>payload.foo</code> وقتی آبجکت سطح‌بالای <code>payload</code> وجود دارد از آن می‌خواند وگرنه از بدنهٔ ریشهٔ webhook برای payload های تخت. ‏<code>event</code> / ‏<code>event_type</code> نوع رویداد حل‌شده را تطبیق می‌دهد و <code>headers.&lt;Name&gt;</code> هدرهای درخواست را می‌خواند.</p>
+
+<h3>فیلترها و تبدیل‌های اسکریپتی</h3>
+<p>وقتی فیلترهای اعلانی کافی نیستند از <code>script</code> استفاده کنید. اسکریپت‌ها باید زیر <code>~/.hermes/scripts/</code> پروفایل فعال باشند؛ مسیرهای نسبی آنجا حل می‌شوند و path traversal بیرون آن دایرکتوری مسدود است. اسکریپت‌های <code>.sh</code> و <code>.bash</code> با bash اجرا می‌شوند و بقیهٔ پسوندها با مفسر Python فعلی.</p>
+<p>payload مسیر به‌صورت JSON به stdin فرستاده می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python — ~/.hermes/scripts/todoist-hermes-label.py</span><button class="copy-btn">کپی</button></div>
+  <pre><code>import json
+import sys
+
+payload = json.load(sys.stdin)
+labels = payload.get("payload", {}).get("labels", [])
+if "hermes" not in labels:
+    print("[SILENT]")
+    raise SystemExit(0)
+
+payload["body"] = payload["payload"]["content"]
+print(json.dumps(payload))</code></pre>
+</div>
+<p>پیامدهای اسکریپت:</p>
+<ul>
+  <li>stdout آبجکت JSON جایگزین payload استفاده‌شده توسط <code>prompt</code> و <code>deliver_extra</code> می‌شود.</li>
+  <li>stdout متنیِ غیر-JSON به payload به‌صورت <code>script_output</code> اضافه می‌شود.</li>
+  <li>stdout خالی، عیناً ‏<code>[SILENT]</code>، ‏<code>{"__hermes_ignore__": true}</code>، timeout، نبودن اسکریپت یا کد خروج ناصفر HTTP 200 با ‏<code>{"status":"ignored","reason":"script"}</code> برمی‌گرداند.</li>
+</ul>
+
+<h3>قالب‌های پرامپت</h3>
+<p>پرامپت‌ها برای دسترسی به فیلدهای تودرتوی payload از dot-notation استفاده می‌کنند:</p>
+<ul>
+  <li>‏<code>{pull_request.title}</code> به ‏<code>payload["pull_request"]["title"]</code> حل می‌شود</li>
+  <li>‏<code>{repository.full_name}</code> به ‏<code>payload["repository"]["full_name"]</code> حل می‌شود</li>
+  <li>‏<code>{__raw__}</code> — توکن ویژه که <strong>کل payload</strong> را به‌صورت JSON تورفتگی‌دار dump می‌کند ‏(بریده در ۴۰۰۰ کاراکتر). برای هشدارهای مانیتورینگ یا webhook های عمومی که ایجنت زمینهٔ کامل لازم دارد مفید است.</li>
+  <li>کلیدهای گمشده به‌عنوان رشتهٔ تحت‌اللفظی <code>{key}</code> می‌مانند ‏(بدون خطا)</li>
+  <li>dict و list های تودرتو JSON-serialize و در ۲۰۰۰ کاراکتر بریده می‌شوند</li>
+</ul>
+<p>می‌توانید <code>{__raw__}</code> را با متغیرهای قالب معمولی مخلوط کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>prompt: "PR #{pull_request.number} by {pull_request.user.login}: {__raw__}"</code></pre>
+</div>
+<p>اگر برای مسیری قالب <code>prompt</code> پیکربندی نشده باشد، کل payload به‌صورت JSON تورفتگی‌دار dump می‌شود ‏(بریده در ۴۰۰۰ کاراکتر).</p>
+<p>همان قالب‌های dot-notation در مقادیر <code>deliver_extra</code> هم کار می‌کنند.</p>
+
+<h3>تحویل تاپیک فروم</h3>
+<p>برای تحویل پاسخ‌های webhook به تلگرام می‌توانید با گنجاندن <code>message_thread_id</code> ‏(یا <code>thread_id</code>) در <code>deliver_extra</code> یک تاپیک فروم مشخص را هدف بگیرید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>webhooks:
+  routes:
+    alerts:
+      events: ["alert"]
+      prompt: "Alert: {__raw__}"
+      deliver: "telegram"
+      deliver_extra:
+        chat_id: "-1001234567890"
+        message_thread_id: "42"</code></pre>
+</div>
+<p>اگر <code>chat_id</code> در <code>deliver_extra</code> نباشد، تحویل به کانال خانگیِ پیکربندی‌شدهٔ پلتفرم هدف برمی‌گردد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> بازبینی PR گیت‌هاب ‏(گام‌به‌گام)</h2>
+<p>این راهنما بازبینی خودکار کد را برای هر pull request راه می‌اندازد.</p>
+
+<h3>۱. ساخت وب‌هوک در گیت‌هاب</h3>
+<ol>
+  <li>به مخزن ← <strong>Settings</strong> ← <strong>Webhooks</strong> ← <strong>Add webhook</strong> بروید</li>
+  <li>‏<strong>Payload URL</strong> را روی ‏<code>http://your-server:8644/webhooks/github-pr</code> بگذارید</li>
+  <li>‏<strong>Content type</strong> را روی ‏<code>application/json</code> بگذارید</li>
+  <li>‏<strong>Secret</strong> را مطابق پیکربندی مسیر بگذارید ‏(مثل <code>github-webhook-secret</code>)</li>
+  <li>تحت <strong>Which events?</strong> گزینهٔ <strong>Let me select individual events</strong> را انتخاب و <strong>Pull requests</strong> را تیک بزنید</li>
+  <li><strong>Add webhook</strong> را کلیک کنید</li>
+</ol>
+
+<h3>۲. افزودن پیکربندی مسیر</h3>
+<p>مسیر <code>github-pr</code> را طبق مثال بالا به <code>~/.hermes/config.yaml</code> اضافه کنید.</p>
+
+<h3>۳. احراز CLI ‏gh</h3>
+<p>نوع تحویل <code>github_comment</code> برای پست کامنت از GitHub CLI استفاده می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gh auth login</code></pre>
+</div>
+
+<h3>۴. تست</h3>
+<p>یک pull request روی مخزن باز کنید. وب‌هوک شلیک می‌شود، هرمس رویداد را پردازش و کامنت بازبینی روی PR می‌گذارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> راه‌اندازی وب‌هوک گیت‌لب</h2>
+<p>وب‌هوک‌های گیت‌لب مشابه کار می‌کنند ولی مکانیزم احراز متفاوت دارند. گیت‌لب رمز را به‌عنوان هدر سادهٔ <code>X-Gitlab-Token</code> می‌فرستد ‏(تطبیق دقیق رشته، نه HMAC).</p>
+
+<h3>۱. ساخت وب‌هوک در گیت‌لب</h3>
+<ol>
+  <li>به پروژه ← <strong>Settings</strong> ← <strong>Webhooks</strong> بروید</li>
+  <li>‏<strong>URL</strong> را روی ‏<code>http://your-server:8644/webhooks/gitlab-mr</code> بگذارید</li>
+  <li><strong>Secret token</strong> را وارد کنید</li>
+  <li><strong>Merge request events</strong> را انتخاب کنید ‏(+ هر رویداد دیگری که می‌خواهید)</li>
+  <li><strong>Add webhook</strong> را کلیک کنید</li>
+</ol>
+
+<h3>۲. افزودن پیکربندی مسیر</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  webhook:
+    enabled: true
+    extra:
+      routes:
+        gitlab-mr:
+          events: ["merge_request"]
+          secret: "your-gitlab-secret-token"
+          prompt: |
+            Review this merge request:
+            Project: {project.path_with_namespace}
+            MR !{object_attributes.iid}: {object_attributes.title}
+            Author: {object_attributes.last_commit.author.name}
+            URL: {object_attributes.url}
+            Action: {object_attributes.action}
+          deliver: "log"</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گزینه‌های تحویل</h2>
+<p>فیلد <code>deliver</code> کنترل می‌کند پاسخ ایجنت پس از پردازش رویداد webhook کجا برود.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نوع تحویل</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>log</code></td><td>پاسخ را در خروجی لاگ گیت‌وی ثبت می‌کند. پیش‌فرض است و برای تست مناسب.</td></tr>
+    <tr><td><code>github_comment</code></td><td>پاسخ را با CLI ‏gh به‌عنوان کامنت PR/issue پست می‌کند. نیازمند <code>deliver_extra.repo</code> و ‏<code>deliver_extra.pr_number</code>. ‏CLI ‏gh باید روی میزبان گیت‌وی نصب و احراز شده باشد ‏(<code>gh auth login</code>).</td></tr>
+    <tr><td><code>telegram</code></td><td>مسیریابی پاسخ به تلگرام. کانال خانگی، یا ‏<code>chat_id</code> در deliver_extra.</td></tr>
+    <tr><td><code>discord</code></td><td>مسیریابی پاسخ به دیسکورد. کانال خانگی، یا ‏<code>chat_id</code> در deliver_extra.</td></tr>
+    <tr><td><code>slack</code></td><td>مسیریابی پاسخ به اسلک. کانال خانگی، یا ‏<code>chat_id</code> در deliver_extra.</td></tr>
+    <tr><td><code>signal</code></td><td>مسیریابی پاسخ به سیگنال. کانال خانگی، یا ‏<code>chat_id</code> در deliver_extra.</td></tr>
+    <tr><td><code>sms</code></td><td>مسیریابی پاسخ به SMS از طریق Twilio. کانال خانگی، یا ‏<code>chat_id</code> در deliver_extra.</td></tr>
+    <tr><td><code>whatsapp</code></td><td>مسیریابی پاسخ به واتساپ. کانال خانگی، یا ‏<code>chat_id</code> در deliver_extra.</td></tr>
+    <tr><td><code>matrix</code></td><td>مسیریابی پاسخ به Matrix. کانال خانگی، یا ‏<code>chat_id</code> در deliver_extra.</td></tr>
+    <tr><td><code>mattermost</code></td><td>مسیریابی پاسخ به Mattermost. کانال خانگی، یا ‏<code>chat_id</code> در deliver_extra.</td></tr>
+    <tr><td><code>homeassistant</code></td><td>مسیریابی پاسخ به Home Assistant. کانال خانگی، یا ‏<code>chat_id</code> در deliver_extra.</td></tr>
+    <tr><td><code>email</code></td><td>مسیریابی پاسخ به ایمیل. کانال خانگی، یا ‏<code>chat_id</code> در deliver_extra.</td></tr>
+    <tr><td><code>dingtalk</code></td><td>مسیریابی پاسخ به DingTalk. کانال خانگی، یا ‏<code>chat_id</code> در deliver_extra.</td></tr>
+    <tr><td><code>feishu</code></td><td>مسیریابی پاسخ به Feishu/Lark. کانال خانگی، یا ‏<code>chat_id</code> در deliver_extra.</td></tr>
+    <tr><td><code>wecom</code></td><td>مسیریابی پاسخ به WeCom. کانال خانگی، یا ‏<code>chat_id</code> در deliver_extra.</td></tr>
+    <tr><td><code>weixin</code></td><td>مسیریابی پاسخ به Weixin ‏(WeChat). کانال خانگی، یا ‏<code>chat_id</code> در deliver_extra.</td></tr>
+    <tr><td><code>bluebubbles</code></td><td>مسیریابی پاسخ به BlueBubbles ‏(iMessage). کانال خانگی، یا ‏<code>chat_id</code> در deliver_extra.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>برای تحویل چند-پلتفرمه، پلتفرم هدف هم باید در گیت‌وی فعال و متصل باشد. اگر <code>chat_id</code> در deliver_extra داده نشود، پاسخ به کانال خانگیِ پیکربندی‌شدهٔ آن پلتفرم می‌رود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> حالت تحویل مستقیم</h2>
+<p>به‌طور پیش‌فرض هر POST وب‌هوک یک اجرای ایجنت تریگر می‌کند — payload تبدیل به پرامپت می‌شود، ایجنت پردازش می‌کند و پاسخش تحویل می‌گیرد. این روی هر رویداد توکن LLM هزینه دارد.</p>
+<p>برای مواردی که فقط می‌خواهید <strong>یک اعلان ساده push کنید</strong> — نه استدلال، نه حلقهٔ ایجنت، فقط تحویل پیام — ‏<code>deliver_only: true</code> را روی مسیر بگذارید. قالب <code>prompt</code> رندرشده همان بدنهٔ تحت‌اللفظی پیام می‌شود و آداپتور مستقیم به هدف تحویل پیکربندی‌شده dispatch‌اش می‌کند.</p>
+
+<h3>کِی از تحویل مستقیم استفاده کنیم</h3>
+<ul>
+  <li><strong>push سرویس خارجی</strong> — وب‌هوک Supabase/Firebase روی تغییر دیتابیس شلیک می‌شود ← اعلان فوری به کاربر در تلگرام</li>
+  <li><strong>هشدارهای مانیتورینگ</strong> — وب‌هوک alert دیتاداگ/گرافانا ← push به کانال دیسکورد</li>
+  <li><strong>پینگ بین-ایجنتی</strong> — ایجنت A به کاربر ایجنت B خبر می‌دهد کار طولانی تمام شد</li>
+  <li><strong>اتمام job پس‌زمینه</strong> — کار کرون تمام شد ← پست نتیجه در اسلک</li>
+</ul>
+<p>مزایا:</p>
+<ul>
+  <li><strong>صفر توکن LLM</strong> — ایجنت هیچ‌وقت فراخوانی نمی‌شود</li>
+  <li><strong>تحویل زیرثانیه‌ای</strong> — یک فراخوانی آداپتور، بدون حلقهٔ استدلال</li>
+  <li><strong>همان امنیت حالت ایجنت</strong> — احراز HMAC، سقف نرخ، idempotency و سقف حجم بدنه همه همچنان اعمال می‌شوند</li>
+  <li><strong>پاسخ همگام</strong> — POST بعد از موفقیت تحویل ‏<code>200 OK</code> برمی‌گرداند یا در صورت رد شدن توسط هدف ‏<code>502</code>، تا سرویس بالادستی بتواند هوشمندانه retry کند</li>
+</ul>
+
+<h3>مثال: push تلگرام از Supabase</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  webhook:
+    enabled: true
+    extra:
+      port: 8644
+      secret: "global-secret"
+      routes:
+        antenna-matches:
+          secret: "antenna-webhook-secret"
+          deliver: "telegram"
+          deliver_only: true
+          prompt: "🎉 New match: {match.user_name} matched with you!"
+          deliver_extra:
+            chat_id: "{match.telegram_chat_id}"</code></pre>
+</div>
+<p>‏edge function ساپابیزتان payload را با HMAC-SHA256 امضا و به ‏<code>https://your-server:8644/webhooks/antenna-matches</code> پست می‌کند. آداپتور امضا را تأیید، قالب را از payload رندر، به تلگرام تحویل و ‏<code>200 OK</code> برمی‌گرداند.</p>
+
+<h3>مثال: اشتراک داینامیک با CLI</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes webhook subscribe antenna-matches \
+  --deliver telegram \
+  --deliver-chat-id "123456789" \
+  --deliver-only \
+  --prompt "🎉 New match: {match.user_name} matched with you!" \
+  --description "Antenna match notifications"</code></pre>
+</div>
+
+<h3>کدهای پاسخ</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>وضعیت</th><th>معنی</th></tr></thead>
+  <tbody>
+    <tr><td><code>200 OK</code></td><td>تحویل موفق. بدنه: ‏<code>{"status": "delivered", "route": "...", "target": "...", "delivery_id": "..."}</code></td></tr>
+    <tr><td><code>200 OK</code> ‏(status=duplicate)</td><td>شناسهٔ تکراری ‏<code>X-GitHub-Delivery</code> در TTL idempotency ‏(۱ ساعت). دوباره تحویل نمی‌شود.</td></tr>
+    <tr><td><code>401 Unauthorized</code></td><td>امضای HMAC نامعتبر یا غایب.</td></tr>
+    <tr><td><code>400 Bad Request</code></td><td>بدنهٔ JSON خراب.</td></tr>
+    <tr><td><code>404 Not Found</code></td><td>نام مسیر ناشناخته.</td></tr>
+    <tr><td><code>413 Payload Too Large</code></td><td>بدنه از <code>max_body_bytes</code> گذشت.</td></tr>
+    <tr><td><code>429 Too Many Requests</code></td><td>سقف نرخ مسیر پر شد.</td></tr>
+    <tr><td><code>502 Bad Gateway</code></td><td>آداپتور هدف پیام را رد کرد یا exception زد. خطا سمت سرور لاگ می‌شود؛ بدنهٔ پاسخ یک <code>Delivery failed</code> عمومی است تا جزئیات داخلی آداپتور لو نرود.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>نکته‌های پیکربندی</h3>
+<ul>
+  <li>‏<code>deliver_only: true</code> نیازمند هدف واقعی در <code>deliver</code> است. ‏<code>deliver: log</code> ‏(یا حذف deliver) هنگام شروع رد می‌شود — آداپتور اگر مسیر بدپیکربندی ببیند از شروع امتناع می‌کند.</li>
+  <li>فیلد <code>skills</code> در حالت تحویل مستقیم نادیده گرفته می‌شود ‏(اجرای ایجنت نیست، پس مهارتی برای تزریق وجود ندارد).</li>
+  <li>رندر قالب همان syntax ‏<code>{dot.notation}</code> حالت ایجنت را دارد شامل توکن <code>{__raw__}</code>.</li>
+  <li>Idempotency از همان هدر ‏<code>X-GitHub-Delivery</code> / ‏<code>X-Request-ID</code> استفاده می‌کند — retry با شناسهٔ یکسان ‏<code>status=duplicate</code> برمی‌گرداند و دوباره تحویل نمی‌دهد.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> اشتراک‌های داینامیک ‏(CLI)</h2>
+<p>علاوه بر مسیرهای ثابت config.yaml، می‌توانید اشتراک‌های webhook را با فرمان CLI ‏<code>hermes webhook</code> داینامیک بسازید. مخصوصاً وقتی خود ایجنت نیاز دارد تریگرهای رویدادمحور راه بیندازد مفید است.</p>
+
+<h3>ساخت اشتراک</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes webhook subscribe github-issues \
+  --events "issues" \
+  --prompt "New issue #{issue.number}: {issue.title}\nBy: {issue.user.login}\n\n{issue.body}" \
+  --deliver telegram \
+  --deliver-chat-id "-100123456789" \
+  --description "Triage new GitHub issues"</code></pre>
+</div>
+<p>این فرمان URL وب‌هوک و یک رمز HMAC خودکار تولیدشده برمی‌گرداند. سرویس‌تان را طوری پیکربندی کنید که به آن URL پست کند.</p>
+
+<h3>فهرست اشتراک‌ها</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes webhook list</code></pre>
+</div>
+
+<h3>حذف اشتراک</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes webhook remove github-issues</code></pre>
+</div>
+
+<h3>تست اشتراک</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes webhook test github-issues
+hermes webhook test github-issues --payload '{"issue": {"number": 42, "title": "Test"}}'</code></pre>
+</div>
+
+<h3>نحوهٔ کار اشتراک‌های داینامیک</h3>
+<ul>
+  <li>اشتراک‌ها در <code>~/.hermes/webhook_subscriptions.json</code> ذخیره می‌شوند</li>
+  <li>آداپتور webhook این فایل را روی هر درخواست ورودی hot-reload می‌کند ‏(گیت‌خورده با mtime، overhead ناچیز)</li>
+  <li>مسیرهای ثابت config.yaml همیشه بر داینامیک‌های هم‌نام مقدم‌اند</li>
+  <li>اشتراک‌های داینامیک همان فرمت و قابلیت‌های مسیر ثابت را دارند ‏(events، قالب‌های پرامپت، مهارت‌ها، تحویل)</li>
+  <li>ری‌استارت گیت‌وی لازم نیست — subscribe کنید و بلافاصله لایو است</li>
+</ul>
+
+<h3>اشتراک‌های ایجنت‌محور</h3>
+<p>ایجنت می‌تواند با ابزار ترمینال و هدایت مهارت <code>webhook-subscriptions</code> اشتراک بسازد. از ایجنت بخواهید «برای issue های گیت‌هاب یک وب‌هوک راه بینداز» و خودش فرمان مناسب ‏<code>hermes webhook subscribe</code> را اجرا می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> تول‌ست به‌ازای-مسیر</h2>
+<p>اجراهای ایجنتِ webhook به‌طور پیش‌فرض تول‌ست عمداً محدودی دارند ‏(<code>web_search</code>، ‏<code>web_extract</code>، ‏<code>vision_analyze</code>، ‏<code>clarify</code>) چون payload های وب‌هوک ممکن است محتوای شخص ثالثِ غیرقابل‌اعتماد حمل کنند — تیتر PR عمومی یا کامنت issue هرگز نباید بتواند با prompt-injection راهش را به ترمینال شما باز کند.</p>
+<p>برای مسیرهای <strong>مطمئن</strong> — دیمن مانیتورینگ localhost که هشدار سیستم push می‌کند، سیستم CI داخلی — می‌توانید فقط به همان مسیر تول‌ست پهن‌تری بدهید بدون پهن‌کردن بقیهٔ مسیرها:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  webhook:
+    enabled: true
+    extra:
+      routes:
+        oom-emergency:
+          secret: "monitor-secret"
+          prompt: "Memory emergency: {detail}. Diagnose with ps/free/py-spy and report."
+          toolsets: ["terminal", "file", "code_execution", "web"]
+          deliver: "telegram"</code></pre>
+</div>
+<p>برای اشتراک‌های داینامیک، کلید <code>toolsets</code> را با ویرایش مستقیم <code>~/.hermes/webhook_subscriptions.json</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{
+  "oom-emergency": {
+    "secret": "...",
+    "prompt": "...",
+    "toolsets": ["terminal", "file", "web"],
+    "deliver": "telegram"
+  }
+}</code></pre>
+</div>
+<p>رفتار و ویژگی‌های امنیتی:</p>
+<ul>
+  <li>فهرست مسیر، حل تول‌ست سطح-پلتفرم webhook را برای اجراهای آن مسیر <strong>جایگزین</strong> می‌کند ‏(merge نمی‌شود).</li>
+  <li>نام‌ها از همان مسیر پیکربندی <code>platform_toolsets</code> اعتبارسنجی می‌شوند — نام‌های ناشناخته و تول‌ست‌های محدود-به-پلتفرم رد می‌شوند.</li>
+  <li>‏<code>hermes webhook subscribe</code> عمداً فلگ toolsets <strong>نمی‌پذیرد</strong>. دادن ابزار ممتاز فقط ویرایش دستی فایل پیکربندی است، تا ایجنتی که در runtime اشتراکش را می‌سازد نتواند خودش <code>terminal</code> را grant کند.</li>
+  <li>فقط به مسیرهایی تول‌ست ممتاز بدهید که فرستنده‌شان را کاملاً کنترل می‌کنید و رمز HMAC واقعی دارند. هر کسی بتواند payload دارای امضای معتبر به آن مسیر پست کند عملاً ایجنتی با آن ابزارها اجرا می‌کند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> امنیت</h2>
+<p>آداپتور webhook چند لایهٔ امنیتی دارد:</p>
+
+<h3>اعتبارسنجی امضای HMAC</h3>
+<p>آداپتور امضاهای ورودی را با روش مناسب هر منبع اعتبارسنجی می‌کند:</p>
+<ul>
+  <li><strong>‏GitHub</strong>: هدر ‏<code>X-Hub-Signature-256</code> — digest hex ‏HMAC-SHA256 با پیشوند <code>sha256=</code></li>
+  <li><strong>‏GitLab</strong>: هدر ‏<code>X-Gitlab-Token</code> — تطبیق رشتهٔ سادهٔ رمز</li>
+  <li><strong>عمومی ‏(V2، توصیه‌شده)</strong>: هدرهای ‏<code>X-Webhook-Signature-V2</code> + ‏<code>X-Webhook-Timestamp</code> — digest hex ‏HMAC-SHA256 از ‏<code>&lt;timestamp&gt;.&lt;body&gt;</code>. timestamp ‏(ثانیه یونیکس) باید در بازهٔ ±۳۰۰ ثانیه ساعت سرور باشد تا درخواست‌های ضبط‌شده نتوانند بعداً replay شوند.</li>
+  <li><strong>عمومی ‏(V1، legacy)</strong>: هدر ‏<code>X-Webhook-Signature</code> — digest hex خام ‏HMAC-SHA256 فقط بدنه. برای سازگاری هنوز پذیرفته می‌شود ولی محافظت replay ندارد ‏(درخواست ضبط‌شده بی‌نهایت بار تکرارپذیر است)؛ گیت‌وی یک هشدار deprecation به‌ازای هر مسیر لاگ می‌کند. فرستنده‌ها را به V2 منتقل کنید.</li>
+</ul>
+<p>اگر رمزی پیکربندی شده باشد ولی هیچ هدر امضای شناخته‌شده‌ای نباشد، درخواست رد می‌شود.</p>
+
+<h3>رمز الزامی است</h3>
+<p>هر مسیر باید رمز داشته باشد — چه مستقیم روی مسیر چه ارثی از <code>secret</code> سراسری. مسیر بدون رمز باعث می‌شود آداپتور هنگام شروع با خطا fail شود. فقط برای توسعه/تست می‌توانید رمز را <code>"INSECURE_NO_AUTH"</code> بگذارید تا اعتبارسنجی کلاً رد شود.</p>
+<p>وقتی مسیریابی چند-پروفایلی فعال است، فیلد <code>profile</code> مسیر آن رمز را به یک هدف اجرا قفل می‌کند. مسیرِ بدون profile فقط پروفایل‌پیش‌فرض است. درخواستی که امضای مسیرِ معتبر داشته باشد همچنان رد می‌شود اگر پیشوند ‏<code>/p/&lt;profile&gt;/</code>اش با قید مسیر نخواند.</p>
+<p>‏<code>INSECURE_NO_AUTH</code> فقط وقتی پذیرفته می‌شود که گیت‌وی به میزبان loopback ‏(<code>127.0.0.1</code>، ‏<code>localhost</code>، ‏<code>::1</code>) بایند شده باشد. ترکیبش با bind غیر-loopback مثل <code>0.0.0.0</code> یا IP شبکهٔ محلی باعث می‌شود آداپتور از شروع امتناع کند — تا endpoint بدون احراز تصادفی روی interface عمومی در معرض قرار نگیرد.</p>
+
+<h3>سقف نرخ</h3>
+<p>هر مسیر به‌طور پیش‌فرض به ‍<strong>۳۰ درخواست در دقیقه</strong> سقف دارد ‏(fixed-window). سراسری تنظیمش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  webhook:
+    extra:
+      rate_limit: 60  # درخواست در دقیقه</code></pre>
+</div>
+<p>درخواست‌های فراتر از سقف پاسخ ‏<code>429 Too Many Requests</code> می‌گیرند.</p>
+
+<h3>Idempotency</h3>
+<p>شناسه‌های تحویل ‏(از ‏<code>X-GitHub-Delivery</code>، ‏<code>X-Request-ID</code> یا fallback timestamp) به مدت <strong>۱ ساعت</strong> کش می‌شوند. تحویل‌های تکراری ‏(مثل retry های webhook) بی‌صدا با پاسخ <code>200</code> رد می‌شوند تا اجرای ایجنت تکراری نشود.</p>
+
+<h3>سقف حجم بدنه</h3>
+<p>‏Payload های بالای <strong>۱ مگابایت</strong> قبل از خواندن بدنه رد می‌شوند. تنظیم:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  webhook:
+    extra:
+      max_body_bytes: 2097152  # ۲ مگابایت</code></pre>
+</div>
+
+<h3>احراز‌شده به معنی مطمئن نیست</h3>
+<div class="callout warning">
+  <div class="callout-title">⚠️ مدل اعتماد</div>
+  <p><strong>اعتبارسنجی HMAC <em>فرستنده</em> را احراز می‌کند نه <em>محتوا</em> را.</strong> امضای معتبر فقط ثابت می‌کند درخواست از طرفی آمده که رمز مسیر را دارد ‏(مثل گیت‌هاب). هیچ‌چیز دربارهٔ نویسندهٔ <em>فیلدهای کسب‌وکاری</em> داخل payload نمی‌گوید — تیترهای PR، پیام‌های کامیت، توضیحات issue و هر متن بالادستی دیگر را افراد دلخواه ثالث نوشته‌اند و باید غیرقابل‌اعتماد تلقی شوند.</p>
+  <p>همان مدل اعتمادی که روی هر چیزی که ایجنت می‌خواند اعمال می‌شود: صفحات وب، فایل‌ها و خروجی ابزار همه ورودی غیرقابل‌اعتمادند. هرمس متن غیرقابل‌اعتماد را با blocklist پاکسازی نمی‌کند ‏— و نمی‌تواند مطمئن کند؛ صیغه‌بازی، انکودینگ و ترجمه دورزدنش را بدیهی می‌کنند. <strong>مرز اعتماد، سطح قابلیت ایجنت است نه کانال ورودی.</strong> همان‌جا مقاوم‌سازی کنید:</p>
+  <ul>
+    <li><strong>‏runtime را سندباکس کنید.</strong> وقتی به اینترنت در معرض است، گیت‌وی را با بک‌اند ترمینال Docker یا SSH ‏(یا داخل VM) اجرا کنید تا نوبت ربوده‌شده نتواند به میزبان دست بزند.</li>
+    <li><strong>تول‌ست را scope کنید.</strong> ‏terminal، file و ابزارهای اکشن-خروجی را روی نشست‌های تریگرشدهٔ webhook خاموش کنید اگر مسیر فقط باید بخواند و خلاصه کند. قابلیت کمتر یعنی شعاع انفجار کوچکتر وقتی فیلدی از payload دستورالعمل تزریق‌شده حمل کند.</li>
+    <li><strong>تأییدها روشن بمانند</strong> برای هر عمل مخرب یا خروجی، تا دستورالعمل تزریق‌شده نتواند بدون نظارت عمل کند.</li>
+    <li><strong>قالب را باریک بگیرید.</strong> ‏prompt مشخص با فیلدهای نام‌دار ‏(<code>{pull_request.title}</code>) را بر ‏{__raw__} یا قالب خالیِ dumpکنندهٔ کل payload ترجیح دهید تا فقط فیلدهای موردنظرتان به پرامپت برسند.</li>
+  </ul>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> عیب‌یابی</h2>
+
+<h3>وب‌هوک نمی‌رسد</h3>
+<ul>
+  <li>تأیید کنید پورت expose و از منبع وب‌هوک قابل‌دسترس است</li>
+  <li>قواعد فایروال را چک کنید — پورت <code>8644</code> ‏(یا پورت پیکربندی‌شده) باید باز باشد</li>
+  <li>تأیید کنید مسیر URL مطابق است: ‏<code>http://your-server:8644/webhooks/&lt;route-name&gt;</code></li>
+  <li>با endpoint ‏<code>/health</code> تأیید کنید سرور اجراست</li>
+</ul>
+
+<h3>اعتبارسنجی امضا شکست می‌خورد</h3>
+<ul>
+  <li>مطمئن شوید رمز در پیکربندی مسیر دقیقاً با رمز پیکربندی‌شده در منبع وب‌هوک یکی است</li>
+  <li>برای گیت‌هاب رمز مبتنی بر HMAC است — ‏<code>X-Hub-Signature-256</code> را چک کنید</li>
+  <li>برای گیت‌لب رمز تطبیق توکن ساده است — ‏<code>X-Gitlab-Token</code> را چک کنید</li>
+  <li>هشدارهای <code>Invalid signature</code> را در لاگ‌های گیت‌وی چک کنید</li>
+</ul>
+
+<h3>رویداد نادیده گرفته می‌شود</h3>
+<ul>
+  <li>چک کنید نوع رویداد در فهرست <code>events</code> مسیرتان باشد</li>
+  <li>رویدادهای گیت‌هاب مقادیری مثل <code>pull_request</code>، ‏<code>push</code>، ‏<code>issues</code> دارند ‏(مقدار هدر X-GitHub-Event)</li>
+  <li>رویدادهای گیت‌لب مقادیری مثل <code>merge_request</code>، ‏<code>push</code> ‏(مقدار هدر X-GitLab-Event)</li>
+  <li>اگر <code>events</code> خالی یا تنظیم‌نشده باشد همهٔ رویدادها پذیرفته می‌شوند</li>
+</ul>
+
+<h3>ایجنت پاسخ نمی‌دهد</h3>
+<ul>
+  <li>گیت‌وی را در پیش‌زمینه اجرا کنید تا لاگ‌ها را ببینید: ‏<code>hermes gateway run</code></li>
+  <li>چک کنید قالب پرامپت درست رندر می‌شود</li>
+  <li>تأیید کنید هدف تحویل پیکربندی و متصل است</li>
+</ul>
+
+<h3>پاسخ‌های تکراری</h3>
+<ul>
+  <li>کش idempotency باید جلویش را بگیرد — چک کنید منبع وب‌هوک هدر شناسهٔ تحویل می‌فرستد ‏(<code>X-GitHub-Delivery</code> یا <code>X-Request-ID</code>)</li>
+  <li>شناسه‌های تحویل ۱ ساعت کش می‌شوند</li>
+</ul>
+
+<h3>خطاهای CLI ‏gh ‏(تحویل کامنت گیت‌هاب)</h3>
+<ul>
+  <li>‏<code>gh auth login</code> را روی میزبان گیت‌وی اجرا کنید</li>
+  <li>مطمئن شوید کاربر گیت‌هابِ احرازشده دسترسی write به مخزن دارد</li>
+  <li>چک کنید gh نصب و روی PATH باشد</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> متغیرهای محیطی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>توضیح</th><th>پیش‌فرض</th></tr></thead>
+  <tbody>
+    <tr><td><code>WEBHOOK_ENABLED</code></td><td>فعال‌سازی آداپتور پلتفرم webhook</td><td><code>false</code></td></tr>
+    <tr><td><code>WEBHOOK_PORT</code></td><td>پورت سرور HTTP برای دریافت وب‌هوک‌ها</td><td><code>8644</code></td></tr>
+    <tr><td><code>WEBHOOK_SECRET</code></td><td>رمز HMAC سراسری ‏(fallback وقتی مسیرها رمز خودشان را ندارند)</td><td>—</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<div class="pager">
+  <a href="relay.html"><span class="dir">→ قبلی</span><span class="ttl">هرمس رله</span></a>
+  <a class="next" href="mattermost.html"><span class="dir">بعدی ←</span><span class="ttl">Mattermost</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks" target="_blank" rel="noopener">Webhooks</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

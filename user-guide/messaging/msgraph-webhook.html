@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شنوندهٔ وب‌هوک Microsoft Graph — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/msgraph-webhook" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>Microsoft Graph Webhook</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>شنوندهٔ وب‌هوک Microsoft Graph</h1>
+<p>پلتفرم گیت‌وی ‏<code>msgraph_webhook</code> یک شنوندهٔ رویداد ورودی است. نحوهٔ دریافت <strong>اعلان‌های تغییر</strong> از Microsoft Graph توسط هرمس است — «یک جلسهٔ Teams تمام شد»، «پیام جدیدی در این چت نشست»، «این رویداد تقویم به‌روز شد». متفاوت از پلتفرم <code>teams</code> ‏(که بات چتی است که کاربران تایپ می‌کنند) — این یکی M365 است که به هرمس خبر می‌دهد اتفاقی افتاده، نه یک انسان.</p>
+<p>الان مصرف‌کنندهٔ اصلی خط‌لولهٔ خلاصهٔ جلسات Teams است: Graph اطلاع می‌دهد وقتی جلسه‌ای رونویسی تولید کرده، خط‌لوله آن را می‌گیرد و هرمس خلاصه را به Teams برمی‌گرداند. سایر منابع Graph ‏(<code>/chats/.../messages</code>، ‏<code>/users/.../events</code>) از همین شنونده استفاده می‌کنند — مصرف‌کننده‌های خط‌لوله با PR های خودشان می‌آیند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li>اعتبارنامهٔ اپلیکیشن Microsoft Graph — <a href="https://hermes-agent.nousresearch.com/docs/guides/microsoft-graph-app-registration" target="_blank" rel="noopener">ثبت اپلیکیشن Microsoft Graph</a></li>
+  <li>یک <strong>URL عمومی HTTPS</strong> قابل‌دسترس برای Microsoft Graph ‏(Graph نقاط پایانی خصوصی را صدا نمی‌زند). تونل توسعه برای تست کافی است؛ تولید دامنهٔ واقعی با گواهی معتبر می‌خواهد.</li>
+  <li>رمز مشترک قوی به‌عنوان مقدار ‏<code>clientState</code>. با ‏<code>openssl rand -hex 32</code> تولید و در ‏<code>~/.hermes/.env</code> به‌صورت ‏<code>MSGRAPH_WEBHOOK_CLIENT_STATE</code> بگذارید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> شروع سریع</h2>
+<p>حداقل config.yaml:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  msgraph_webhook:
+    enabled: true
+    extra:
+      host: 127.0.0.1
+      port: 8646
+      client_state: "replace-with-a-strong-secret"
+      accepted_resources:
+        - "communications/onlineMeetings"</code></pre>
+</div>
+<p>یا با env در ‏<code>~/.hermes/.env</code> ‏(هنگام شروع auto-merge):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MSGRAPH_WEBHOOK_ENABLED=true
+MSGRAPH_WEBHOOK_PORT=8646
+MSGRAPH_WEBHOOK_CLIENT_STATE=&lt;تولید-با-openssl-rand-hex-32&gt;
+MSGRAPH_WEBHOOK_ACCEPTED_RESOURCES=communications/onlineMeetings</code></pre>
+</div>
+<p>یادداشت: میزبان bind از ‏<code>extra.host</code> در config.yaml خوانده می‌شود ‏(مثال بالا)؛ override محیطیِ ‏<code>MSGRAPH_WEBHOOK_HOST</code> وجود ندارد.</p>
+<p>گیت‌وی را شروع کنید: ‏<code>hermes gateway run</code>. شنونده این‌ها را expose می‌کند:</p>
+<ul>
+  <li>‏<code>POST /msgraph/webhook</code> — اعلان‌های تغییر از Graph</li>
+  <li>‏<code>GET /msgraph/webhook?validationToken=...</code> — دست‌دادن اعتبارسنجی اشتراک Graph</li>
+  <li>‏<code>GET /health</code> — probe آماده‌باشی با شمارنده‌های پذیرفته/تکراری</li>
+</ul>
+<p>شنونده را عمومی expose کنید ‏(پروکسی معکوس، تونل توسعه، ingress). URL اعلان شما برای اشتراک‌های Graph، مبدأ HTTPS عمومی‌تان + مسیر ‏<code>/msgraph/webhook</code> است:</p>
+<div class="codebox"><pre><code>https://ops.example.com/msgraph/webhook</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پیکربندی</h2>
+<p>همهٔ تنظیمات زیر ‏<code>platforms.msgraph_webhook.extra</code> می‌روند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>تنظیم</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>host</code></td><td>تنظیم‌نشده ‏(dual-stack: همهٔ interface ها، IPv4+IPv6)</td><td>آدرس bind شنوندهٔ HTTP. bind غیر-loopback نیازمند ‏<code>allowed_source_cidrs</code>؛ ‏loopback ‏(<code>127.0.0.1</code>/<code>::1</code>) ساده‌ترین setup برای تونل توسعه/پروکسی معکوس است.</td></tr>
+    <tr><td><code>port</code></td><td><code>8646</code></td><td>پورت bind.</td></tr>
+    <tr><td><code>webhook_path</code></td><td><code>/msgraph/webhook</code></td><td>مسیر URL که Graph بهش POST می‌کند.</td></tr>
+    <tr><td><code>health_path</code></td><td><code>/health</code></td><td>نقطهٔ پایانی آماده‌باشی.</td></tr>
+    <tr><td><code>client_state</code></td><td>—</td><td>رمز مشترکی که Graph در هر اعلان بازتاب می‌دهد. با ‏<code>hmac.compare_digest</code> مقایسه می‌شود — با ‏<code>openssl rand -hex 32</code> بسازید.</td></tr>
+    <tr><td><code>accepted_resources</code></td><td><code>[]</code> ‏(همه پذیرفته)</td><td>لیست مجاز مسیرها/الگوهای منبع Graph. ستارهٔ انتهایی تطبیق پیشوندی است. اسلش ابتدایی هم تحمل می‌شود. مثال: ‏<code>["communications/onlineMeetings", "chats/*/messages"]</code>.</td></tr>
+    <tr><td><code>max_seen_receipts</code></td><td><code>5000</code></td><td>حجم کش حذف‌تکرار برای شناسه‌های اعلان. قدیمی‌ترین‌ها با رسیدن به سقف تخلیه می‌شوند.</td></tr>
+    <tr><td><code>allowed_source_cidrs</code></td><td><code>[]</code></td><td>برای bind غیر-loopback الزامی. فقط وقتی شنونده روی loopback است و جلویش تونل/پروکسی معکوس محلی دارید خالی بگذارید.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>بیشتر تنظیمات معادل env ‏(<code>MSGRAPH_WEBHOOK_*</code>) دارند که هنگام شروع گیت‌وی به config ادغام می‌شود ‏(استثنا host که فقط-config است — یادداشت بالا) — مرجع متغیرهای محیطی را ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مقاوم‌سازی امنیتی</h2>
+
+<h3>‏clientState چک اصلی احراز است</h3>
+<p>هر اعلان Graph رشتهٔ ‏<code>clientState</code>ای را شامل می‌شود که اشتراکتان ثبت کرده بود. شنونده هر اعلانی که ‏<code>clientState</code>اش نخواند با مقایسهٔ timing-safe رد می‌کند. این مکانیزم مستند خود مایکروسافت است — مقدار را رمز مشترک قوی تلقی کنید.</p>
+<p>اگر ‏<code>client_state</code> تنظیم نباشد شنونده از شروع امتناع می‌کند.</p>
+
+<h3>لیست مجاز IP مبدأ ‏(استقرارهای تولید)</h3>
+<p>برای تولید، شنونده را به بازه‌های IP مبدأ منتشرشدهٔ وب‌هوک Graph مایکروسافت محدود کنید. مایکروسافت بازه‌های egress را در <a href="https://learn.microsoft.com/en-us/microsoft-365/enterprise/urls-and-ip-address-ranges" target="_blank" rel="noopener">سرویس وب IP و URL آفیس ۳۶۵</a> مستند کرده. پیکربندی:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  msgraph_webhook:
+    enabled: true
+    extra:
+      host: 0.0.0.0
+      client_state: "..."
+      allowed_source_cidrs:
+        - "52.96.0.0/14"
+        - "52.104.0.0/14"
+        # ...بازه‌های egress فعلی دستهٔ "Common" + "Teams" مایکروسافت ۳۶۵ را اضافه کنید</code></pre>
+</div>
+<p>یا به‌عنوان env:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>MSGRAPH_WEBHOOK_ALLOWED_SOURCE_CIDRS="52.96.0.0/14,52.104.0.0/14"</code></pre>
+</div>
+<p>bind کردن میزبانی غیر-loopback مثل ‏<code>0.0.0.0</code>، ‏<code>::</code> یا IP شبکهٔ محلی بدون ‏<code>allowed_source_cidrs</code> هنگام شروع رد می‌شود. اگر تونل توسعه یا پروکسی معکوس روی همان ماشین دارید، هرمس را روی ‏<code>127.0.0.1</code> یا ‏<code>::1</code> بایند و لیست را همانجا خالی بگذارید. رشته‌های CIDR نامعتبر هشدار لاگ می‌خورند و نادیده گرفته می‌شوند. <strong>فهرست IP مایکروسافت را هر سه‌ماهه بازبینی کنید</strong> — عوض می‌شود.</p>
+
+<h3>خاتمهٔ TLS</h3>
+<p>شنونده HTTP خام صحبت می‌کند. TLS را در پروکسی معکوس‌تان ‏(Caddy، ‏Nginx، ‏Cloudflare Tunnel، ‏AWS ALB) خاتمه دهید و روی شبکهٔ محلی به شنونده پروکسی کنید. Graph تحویل به endpoint های غیر-HTTPS را رد می‌کند، پس هیچ مسیری برای رسیدن ترافیک رمزنشده از طرف خود Graph وجود ندارد.</p>
+
+<h3>بهداشت پاسخ</h3>
+<p>در موفقیت شنونده ‏<code>202 Accepted</code> با بدنهٔ خالی برمی‌گرداند — شمارنده‌های داخلی خارج از پاسخ سیمی می‌مانند. اپراتورها شمارنده‌ها را از ‏<code>/health</code> مشاهده می‌کنند که با همان قواعد IP مبدأِ مسیر webhook محافظت می‌شود.</p>
+<p>جدول کدهای وضعیت:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>پیامد</th><th>وضعیت</th></tr></thead>
+  <tbody>
+    <tr><td>اعلان(ها) پذیرفته یا حذف‌تکرار شدند</td><td>202</td></tr>
+    <tr><td>دست‌دادن اعتبارسنجی ‏(GET با validationToken)</td><td>200 ‏(توکن بازتاب می‌شود)</td></tr>
+    <tr><td>همهٔ اقلام batch در clientState شکست خوردند</td><td>403</td></tr>
+    <tr><td>JSON خراب / آرایهٔ value غایب / منبع ناشناخته</td><td>400</td></tr>
+    <tr><td>IP مبدأ در لیست مجاز نیست</td><td>403</td></tr>
+    <tr><td>GET لخت بدون validationToken</td><td>400</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> عیب‌یابی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مشکل</th><th>چه چیزی را چک کنیم</th></tr></thead>
+  <tbody>
+    <tr><td>اعتبارسنجی اشتراک Graph شکست می‌خورد</td><td>URL عمومی قابل‌دسترس است؟ مسیر ‏<code>/msgraph/webhook</code> مطابق است؟ GET با ‏<code>validationToken</code> تا ۱۰ ثانیه توکن را عیناً به‌صورت ‏<code>text/plain</code> بازتاب می‌دهد؟</td></tr>
+    <tr><td>POST انجام می‌شود ولی چیزی ingest نمی‌شود</td><td>‏<code>client_state</code> با مقدار ثبت‌شدهٔ اشتراک بخواند. اگر مقدار جابه‌جا شده ‏<code>openssl rand -hex 32</code> را دوباره اجرا و اشتراک جدید بسازید. چک کنید ‏<code>accepted_resources</code> شامل مسیر منبعی باشد که Graph می‌فرستد.</td></tr>
+    <tr><td>همهٔ اعلان‌ها 403 می‌گیرند</td><td>عدم‌تطبیق clientState ‏(جعلی، یا اشتراک با مقدار دیگری ثبت شده). اشتراک را با ‏<code>hermes teams-pipeline subscribe --client-state "$MSGRAPH_WEBHOOK_CLIENT_STATE" ...</code> دوباره بسازید.</td></tr>
+    <tr><td>شنونده روی ‏<code>0.0.0.0</code> از شروع امتناع می‌کند</td><td>‏<code>allowed_source_cidrs</code> را روی بازه‌های egress فعلی وب‌هوک مایکروسافت بگذارید، یا هرمس را روی ‏<code>127.0.0.1</code>/<code>::1</code> پشت تونل/پروکسی بایند کنید.</td></tr>
+    <tr><td>شنونده شروع می‌شود ولی ‏<code>curl http://localhost:8646/health</code> معلق می‌ماند</td><td>تعارض bind پورت. ‏<code>ss -tlnp | grep 8646</code> را چک و در صورت نیاز ‏<code>port:</code> را عوض کنید.</td></tr>
+    <tr><td>درخواست‌های واقعی Graph مایکروسافت 403 می‌گیرند</td><td>لیست مجاز IP مبدأ خیلی تنگ است. فهرست را به بازه‌های egress فعلی مایکروسافت پهن کنید. اگر هنوز مسیر تونل را اعتبارسنجی می‌کنید، هرمس را روی loopback بایند و expose شدن را به تونل بسپارید.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> مستندات مرتبط</h2>
+<ul>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/guides/microsoft-graph-app-registration" target="_blank" rel="noopener">ثبت اپلیکیشن Microsoft Graph</a> — پیش‌نیاز ثبت اپ Azure</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/reference/environment-variables" target="_blank" rel="noopener">متغیرهای محیطی ← Microsoft Graph</a> — فهرست کامل env</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/teams" target="_blank" rel="noopener">راه‌اندازی بات Microsoft Teams</a> — پلتفرم متفاوتی که اجازه می‌دهد کاربران داخل Teams با هرمس چت کنند</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="a2a.html"><span class="dir">→ قبلی</span><span class="ttl">A2A</span></a>
+  <a class="next" href="simplex.html"><span class="dir">بعدی ←</span><span class="ttl">SimpleX Chat</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/msgraph-webhook" target="_blank" rel="noopener">Microsoft Graph Webhook Listener</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

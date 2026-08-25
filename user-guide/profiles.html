@@ -54,7 +54,7 @@
 <h2><span class="secnum">۲</span> شروع سریع</h2>
 <div class="codebox">
   <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
-  <pre><code>hermes profile create coder       # ساخت پروفایل + نام‌مستفر فرمان "coder"
+  <pre><code>hermes profile create coder       # ساخت پروفایل + نام مستعار فرمان "coder"
 coder setup                       # پیکربندی کلیدهای API و مدل
 coder chat                        # شروع گفتگو</code></pre>
 </div>
@@ -117,7 +117,7 @@ coder chat                        # شروع گفتگو</code></pre>
 <h2><span class="secnum">۴</span> استفاده از پروفایل‌ها</h2>
 
 <h3>نام‌های مستقل فرمان</h3>
-<p>هر پروفایل به‌طور خودکار یک نام‌مستفر فرمان در <code>~/.local/bin/&lt;name&gt;</code> می‌گیرد:</p>
+<p>هر پروفایل به‌طور خودکار یک نام مستعار فرمان در <code>~/.local/bin/&lt;name&gt;</code> می‌گیرد:</p>
 <div class="codebox">
   <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
   <pre><code>coder chat                    # گفتگو با ایجنت coder
@@ -127,7 +127,7 @@ coder doctor                  # بررسی سلامت coder
 coder skills list             # فهرست مهارت‌های coder
 coder config set model.default anthropic/claude-sonnet-4</code></pre>
 </div>
-<p>این نام‌مستفر با هر زیرفرمان هرمس کار می‌کند — در پس‌زمینه فقط <code>hermes -p &lt;name&gt;</code> است.</p>
+<p>این نام مستعار با هر زیرفرمان هرمس کار می‌کند — در پس‌زمینه فقط <code>hermes -p &lt;name&gt;</code> است.</p>
 
 <h3>پرچم <code>-p</code></h3>
 <p>همچنین می‌توانید پروفایل را با هر فرمانی صریح هدف بگیرید:</p>
@@ -261,7 +261,7 @@ echo "You are a focused coding assistant." &gt; ~/.hermes/profiles/coder/SOUL.md
   <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
   <pre><code>hermes profile list           # نمایش همهٔ پروفایل‌ها با وضعیت
 hermes profile show coder     # اطلاعات دقیق یک پروفایل
-hermes profile rename coder dev-bot   # تغییر نام (نام‌مستفر + سرویس به‌روز می‌شود)
+hermes profile rename coder dev-bot   # تغییر نام (نام مستعار + سرویس به‌روز می‌شود)
 hermes profile export coder   # بسته‌بندی در coder.tar.gz (قابل اشتراک؛ کلیدها حذف می‌شوند)
 hermes profile import coder.tar.gz   # نصب یک آرشیو به‌عنوان پروفایل جدید</code></pre>
 </div>
@@ -282,7 +282,7 @@ hermes profile import coder.tar.gz   # نصب یک آرشیو به‌عنوان 
   <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
   <pre><code>hermes profile delete coder</code></pre>
 </div>
-<p>گیت‌وی را متوقف می‌کند، سرویس systemd/launchd را حذف می‌کند، نام‌مستفر فرمان را برمی‌دارد و تمام داده‌های پروفایل را پاک می‌کند. برای تأیید از شما خواسته می‌شود نام پروفایل را تایپ کنید.</p>
+<p>گیت‌وی را متوقف می‌کند، سرویس systemd/launchd را حذف می‌کند، نام مستعار فرمان را برمی‌دارد و تمام داده‌های پروفایل را پاک می‌کند. برای تأیید از شما خواسته می‌شود نام پروفایل را تایپ کنید.</p>
 <p>برای رد کردن تأیید از <code>--yes</code> استفاده کنید: <code>hermes profile delete coder --yes</code></p>
 <div class="callout note">
   <div class="callout-title">ℹ️ توجه</div>

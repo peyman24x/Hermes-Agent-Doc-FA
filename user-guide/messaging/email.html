@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ایمیل — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/email" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>ایمیل</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی ایمیل</h1>
+<p>هرمس می‌تواند با پروتکل‌های استاندارد IMAP و SMTP ایمیل دریافت و پاسخ دهد. به نشانی ایجنت ایمیل بزنید و در همان ترد جواب می‌گیرد — نه کلاینت خاصی لازم است نه API بات. با Gmail، ‏Outlook، ‏Yahoo، ‏Fastmail یا هر ارائه‌دهندهٔ پشتیبان IMAP/SMTP کار می‌کند.</p>
+<div class="callout note">
+  <div class="callout-title">📌 فقط آداپتور گیت‌وی: بدون وابستگی خارجی</div>
+  <p>این صفحه آداپتور گیت‌وی ایمیل را پوشش می‌دهد که از ماژول‌های داخلی پایتون ‏<code>imaplib</code>، ‏<code>smtplib</code> و <code>email</code> استفاده می‌کند. برای این مسیر هیچ بسته یا سرویس خارجی اضافه‌ای لازم نیست.</p>
+</div>
+<p>این جدا از <a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/email/email-himalaya" target="_blank" rel="noopener">مهارت ایمیل Himalaya</a> همراه‌بسته است که به ایجنت اجازه مدیریت ایمیل از طریق فرمان‌های ترمینال را می‌دهد و CLI خارجی <code>himalaya</code> و فایل پیکربندی Himalaya لازم دارد.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کاربرد</th><th>چه چیزی را پیکربندی کنیم</th><th>وابستگی خارجی</th></tr></thead>
+  <tbody>
+    <tr><td>اجازه دهیم مردم به ایجنت هرمس ایمیل بزنند و پاسخ بگیرند</td><td>آداپتور گیت‌وی ایمیل در همین صفحه</td><td>هیچ — فراتر از یک حساب ایمیل IMAP/SMTP</td></tr>
+    <tr><td>اجازه دهیم ایجنت از ابزارهای ترمینال پیام‌های صندوق را بازرسی، نوشته، جابه‌جا و مدیریت کند</td><td>مهارت ایمیل Himalaya</td><td>‏CLI ‏<code>himalaya</code> و ‏<code>~/.config/himalaya/config.toml</code></td></tr>
+  </tbody>
+</table>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li><strong>یک حساب ایمیل اختصاصی</strong> برای ایجنت هرمس ‏(ایمیل شخصی‌تان را استفاده نکنید)</li>
+  <li><strong>‏IMAP فعال</strong> روی حساب ایمیل</li>
+  <li><strong>یک رمز اپ (App Password)</strong> اگر Gmail یا ارائه‌دهندهٔ دارای 2FA استفاده می‌کنید</li>
+</ul>
+
+<h3>راه‌اندازی Gmail</h3>
+<ol>
+  <li>احراز هویت دومرحله‌ای را روی حساب Google خود فعال کنید</li>
+  <li>به <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">App Passwords</a> بروید</li>
+  <li>رمز اپ جدید بسازید ‏(«Mail» یا «Other» را انتخاب کنید)</li>
+  <li>رمز ۱۶کاراکتری را کپی کنید — به‌جای رمز معمولی از این استفاده می‌کنید</li>
+</ol>
+
+<h3>‏Outlook / Microsoft 365</h3>
+<ol>
+  <li>به <a href="https://account.microsoft.com/security" target="_blank" rel="noopener">تنظیمات امنیتی</a> بروید</li>
+  <li>اگر 2FA فعال نیست فعالش کنید</li>
+  <li>تحت «Additional security options» رمز اپ بسازید</li>
+  <li>میزبان IMAP: ‏<code>outlook.office365.com</code>، میزبان SMTP: ‏<code>smtp.office365.com</code></li>
+</ol>
+
+<h3>سایر ارائه‌دهندگان</h3>
+<p>بیشتر ارائه‌دهندگان ایمیل IMAP/SMTP دارند. مستندات ارائه‌دهنده‌تان را برای این‌ها چک کنید:</p>
+<ul>
+  <li>میزبان و پورت IMAP ‏(معمولاً پورت ۹۹۳ با SSL)</li>
+  <li>میزبان و پورت SMTP ‏(معمولاً پورت ۵۸۷ با STARTTLS)</li>
+  <li>آیا رمز اپ لازم است یا نه</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: پیکربندی هرمس</h2>
+<p>ساده‌ترین راه:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway setup</code></pre>
+</div>
+<p><strong>Email</strong> را از منوی پلتفرم انتخاب کنید. ویزارد نشانی ایمیل، رمز، میزبان‌های IMAP/SMTP و فرستندگان مجاز را می‌پرسد.</p>
+
+<h3>پیکربندی دستی</h3>
+<p>به <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># الزامی
+EMAIL_ADDRESS=hermes@gmail.com
+EMAIL_PASSWORD=abcd efgh ijkl mnop    # رمز اپ (نه رمز معمولی)
+EMAIL_IMAP_HOST=imap.gmail.com
+EMAIL_SMTP_HOST=smtp.gmail.com
+
+# امنیت (توصیه‌شده)
+EMAIL_ALLOWED_USERS=your@email.com,colleague@work.com
+
+# اختیاری
+EMAIL_IMAP_PORT=993                    # پیش‌فرض: 993 (IMAP SSL)
+EMAIL_SMTP_PORT=587                    # پیش‌فرض: 587 (SMTP STARTTLS)
+EMAIL_POLL_INTERVAL=15                 # فاصلهٔ ثانیه‌ای چک صندوق (پیش‌فرض: 15)
+EMAIL_HOME_ADDRESS=your@email.com      # هدف تحویل پیش‌فرض کارهای کرون</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: شروع گیت‌وی</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway              # اجرا در پیش‌زمینه
+hermes gateway install      # نصب به‌عنوان سرویس کاربر
+sudo hermes gateway install --system   # فقط لینوکس: سرویس سیستمی زمان‌بوت</code></pre>
+</div>
+<p>آداپتور هنگام شروع:</p>
+<ol>
+  <li>اتصالات IMAP و SMTP را تست می‌کند</li>
+  <li>همهٔ پیام‌های موجود صندوق را «خوانده‌شده» علامت می‌زند ‏(فقط ایمیل‌های جدید پردازش می‌شوند)</li>
+  <li>پایش پیام‌های جدید را شروع می‌کند</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> نحوهٔ کار</h2>
+
+<h3>دریافت پیام‌ها</h3>
+<p>آداپتور با فاصلهٔ قابل‌پیکربندی ‏(پیش‌فرض: ۱۵ ثانیه) صندوق IMAP را برای پیام‌های UNSEEN پایش می‌کند. برای هر ایمیل جدید:</p>
+<ul>
+  <li><strong>خط موضوع</strong> به‌عنوان زمینه لحاظ می‌شود ‏(مثل <code>[Subject: Deploy to production]</code>)</li>
+  <li><strong>ایمیل‌های ریپلای</strong> ‏(موضوع با <code>Re:</code>) پیشوند موضوع را رد می‌کنند — زمینهٔ ترد از قبل برقرار است</li>
+  <li><strong>پیوست‌ها</strong> محلی کش می‌شوند:
+    <ul>
+      <li>تصاویر ‏(JPEG، ‏PNG، ‏GIF، ‏WebP) ← در دسترس ابزار بینایی</li>
+      <li>اسناد ‏(PDF، ‏ZIP و غیره) ← در دسترس دسترسی فایل</li>
+    </ul>
+  </li>
+  <li><strong>ایمیل‌های فقط-HTML</strong> برای استخراج متن ساده از تگ خالی می‌شوند</li>
+  <li><strong>پیام‌های خودِ سیستم</strong> برای پیشگیری از حلقهٔ ریپلای فیلتر می‌شوند</li>
+  <li><strong>فرستندگان خودکار/noreply</strong> بی‌صدا نادیده گرفته می‌شوند — ‏<code>noreply@</code>، ‏<code>mailer-daemon@</code>، ‏<code>bounce@</code>، ‏<code>no-reply@</code> و ایمیل‌هایی با هدرهای <code>Auto-Submitted</code>، ‏<code>Precedence: bulk</code> یا <code>List-Unsubscribe</code></li>
+</ul>
+
+<h3>ارسال ریپلای</h3>
+<p>ریپلای‌ها از طریق SMTP با threading صحیح ایمیل ارسال می‌شوند:</p>
+<ul>
+  <li>هدرهای <strong>In-Reply-To</strong> و <strong>References</strong> ترد را حفظ می‌کنند</li>
+  <li><strong>خط موضوع</strong> با پیشوند <code>Re:</code> حفظ می‌شود ‏(بدون <code>Re: Re:</code> دوتایی)</li>
+  <li><strong>Message-ID</strong> با دومین ایجنت تولید می‌شود</li>
+  <li>پاسخ‌ها به‌صورت متن ساده ‏(UTF-8) فرستاده می‌شوند</li>
+</ul>
+
+<h3>پیوست فایل</h3>
+<p>ایجنت می‌تواند در ریپلای‌ها پیوست فایل بفرستد. ‏<code>MEDIA:/path/to/file</code> را در پاسخ بگنجانید تا فایل به ایمیل خروجی پیوست شود.</p>
+
+<h3>ردکردن پیوست‌ها</h3>
+<p>برای نادیده‌گرفتن همهٔ پیوست‌های ورودی ‏(محافظت بدافزار یا صرفه‌جویی پهنای‌باند) به config.yaml اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  email:
+    skip_attachments: true</code></pre>
+</div>
+<p>با فعال‌بودن، بخش‌های پیوست و inline قبل از decode شدن payload رد می‌شوند. متن بدنهٔ ایمیل همچنان عادی پردازش می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> کنترل دسترسی</h2>
+<p>دسترسی ایمیل به‌طور پیش‌فرض سخت‌گیرانه‌تر از پلتفرم‌های چت‌گونه است:</p>
+<ol>
+  <li><strong>‏<code>EMAIL_ALLOWED_USERS</code> تنظیم شده</strong> ← فقط ایمیل‌های آن نشانی‌ها پردازش می‌شوند</li>
+  <li><strong>لیست مجاز تنظیم نشده</strong> ← فرستندگان ناشناس بی‌صدا نادیده گرفته می‌شوند</li>
+  <li><strong>‏<code>EMAIL_ALLOW_ALL_USERS=true</code></strong> ← هر فرستنده‌ای پذیرفته می‌شود ‏(با احتیاط)</li>
+  <li><strong>‏<code>platforms.email.unauthorized_dm_behavior: pair</code></strong> ← فرستندگان ناشناس کد جفت‌سازی می‌گیرند</li>
+</ol>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p><strong>برای عملیات عادی از صندوق اختصاصی استفاده و <code>EMAIL_ALLOWED_USERS</code> را پیکربندی کنید.</strong> جفت‌سازی ایمیل اختیاری است چون صندوق‌های مشترک اغلب پیام‌های نخواندهٔ نامرتبط دارند و هرمس نباید به‌طور پیش‌فرض به آن مخاطبان جواب بدهد.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> عیب‌یابی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مشکل</th><th>راه‌حل</th></tr></thead>
+  <tbody>
+    <tr><td><strong>«IMAP connection failed»</strong> هنگام شروع</td><td>‏<code>EMAIL_IMAP_HOST</code> و <code>EMAIL_IMAP_PORT</code> را تأیید کنید. مطمئن شوید IMAP روی حساب فعال است. برای Gmail: ‏Settings ← Forwarding and POP/IMAP.</td></tr>
+    <tr><td><strong>«SMTP connection failed»</strong> هنگام شروع</td><td>‏<code>EMAIL_SMTP_HOST</code> و <code>EMAIL_SMTP_PORT</code> را تأیید کنید. درستی رمز را چک کنید ‏(برای Gmail از App Password استفاده کنید).</td></tr>
+    <tr><td><strong>پیام‌ها دریافت نمی‌شوند</strong></td><td>چک کنید <code>EMAIL_ALLOWED_USERS</code> شامل ایمیل فرستنده باشد. پوشهٔ اسپم را چک کنید — بعضی ارائه‌دهندگان ریپلای‌های خودکار را فلگ می‌زنند.</td></tr>
+    <tr><td><strong>«Authentication failed»</strong></td><td>برای Gmail باید App Password استفاده کنید نه رمز معمولی. اول 2FA را فعال کنید.</td></tr>
+    <tr><td><strong>ریپلای‌های تکراری</strong></td><td>مطمئن شوید فقط یک نمونه گیت‌وی اجراست. ‏<code>hermes gateway status</code> را چک کنید.</td></tr>
+    <tr><td><strong>پاسخ کند</strong></td><td>فاصلهٔ پیش‌فرض پایش ۱۵ ثانیه است. با <code>EMAIL_POLL_INTERVAL=5</code> سریع‌ترش کنید ‏(ولی اتصالات IMAP بیشتر).</td></tr>
+    <tr><td><strong>ریپلای‌ها ترد نمی‌شوند</strong></td><td>آداپتور از هدرهای In-Reply-To استفاده می‌کند. بعضی کلاینت‌های ایمیل ‏(به‌خصوص وبی) ممکن است با پیام‌های خودکار درست ترد نکنند.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> امنیت</h2>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p><strong>از حساب ایمیل اختصاصی استفاده کنید.</strong> ایمیل شخصی‌تان را استفاده نکنید — ایجنت رمز را در <code>.env</code> ذخیره و دسترسی کامل صندوق از طریق IMAP دارد.</p>
+</div>
+<ul>
+  <li>به‌جای رمز اصلی از <strong>App Password</strong> استفاده کنید ‏(برای Gmail با 2FA الزامی)</li>
+  <li>‏<code>EMAIL_ALLOWED_USERS</code> را بگذارید تا مشخص شود چه کسی با ایجنت تعامل کند</li>
+  <li>رمز در <code>~/.hermes/.env</code> ذخیره می‌شود — از این فایل محافظت کنید ‏(<code>chmod 600</code>)</li>
+  <li>‏IMAP از SSL ‏(پورت ۹۹۳) و SMTP از STARTTLS ‏(پورت ۵۸۷) به‌طور پیش‌فرض استفاده می‌کنند — اتصالات رمزنگاری می‌شوند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> مرجع متغیرهای محیطی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>لازم</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>EMAIL_ADDRESS</code></td><td>بله</td><td>—</td><td>نشانی ایمیل ایجنت</td></tr>
+    <tr><td><code>EMAIL_PASSWORD</code></td><td>بله</td><td>—</td><td>رمز ایمیل یا رمز اپ</td></tr>
+    <tr><td><code>EMAIL_IMAP_HOST</code></td><td>بله</td><td>—</td><td>میزبان سرور IMAP ‏(مثل <code>imap.gmail.com</code>)</td></tr>
+    <tr><td><code>EMAIL_SMTP_HOST</code></td><td>بله</td><td>—</td><td>میزبان سرور SMTP ‏(مثل <code>smtp.gmail.com</code>)</td></tr>
+    <tr><td><code>EMAIL_IMAP_PORT</code></td><td>خیر</td><td><code>993</code></td><td>پورت سرور IMAP</td></tr>
+    <tr><td><code>EMAIL_SMTP_PORT</code></td><td>خیر</td><td><code>587</code></td><td>پورت سرور SMTP</td></tr>
+    <tr><td><code>EMAIL_POLL_INTERVAL</code></td><td>خیر</td><td><code>15</code></td><td>فاصلهٔ ثانیه‌ای بین چک صندوق</td></tr>
+    <tr><td><code>EMAIL_ALLOWED_USERS</code></td><td>خیر</td><td>—</td><td>نشانی‌های فرستندهٔ مجاز جدا با ویرگول</td></tr>
+    <tr><td><code>EMAIL_HOME_ADDRESS</code></td><td>خیر</td><td>—</td><td>هدف تحویل پیش‌فرض کارهای کرون</td></tr>
+    <tr><td><code>EMAIL_ALLOW_ALL_USERS</code></td><td>خیر</td><td><code>false</code></td><td>اجازه به همهٔ فرستندگان ‏(توصیه نمی‌شود)</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<div class="pager">
+  <a href="sms.html"><span class="dir">→ قبلی</span><span class="ttl">پیامک ‏(Twilio)</span></a>
+  <a class="next" href="irc.html"><span class="dir">بعدی ←</span><span class="ttl">IRC</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/email" target="_blank" rel="noopener">Email</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

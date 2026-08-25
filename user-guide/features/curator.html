@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نگهدارندهٔ مهارت‌ها (Curator) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/curator" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌های اصلی<span class="sep">/</span><strong>نگهدارندهٔ مهارت‌ها (Curator)</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>نگهدارندهٔ مهارت‌ها (Curator)</h1>
+<p>نگهدارنده (کرتور) یک گذرِ نگهداریِ پس‌زمینه برای **مهارت‌های ساخته‌شده توسط ایجنت** است. دفعات دیده‌شدن، استفاده و patch شدنِ هر مهارت را پیگیری می‌کند، مهارت‌های مدت‌ها-استفاده‌نشده را از حالت‌های <code>active → stale → archived</code> عبور می‌دهد، و دوره‌ای یک بازبینی کوتاهِ مدل-کمکی تولید می‌کند که ادغام‌ها یا patchهای انحراف را پیشنهاد می‌دهد.</p>
+<p>وجودش برای این است که مهارت‌هایی که از طریق <a href="skills.html">حلقهٔ خودبهبودی</a> ساخته می‌شوند برای همیشه انبار نشوند. هر بار ایجنت مسئلهٔ تازه‌ای را حل و مهارتی ذخیره می‌کند، آن مهارت در <code>~/.hermes/skills/</code> فرود می‌آید. بدون نگهداری، با ده‌ها نزدیک-تکرارِ باریک مواجه می‌شوید که کاتالوگ را آلوده و توکن را هدر می‌دهند.</p>
+<p>به‌طور پیش‌فرض‏ (<code>prune_builtins: true</code>) کرتور می‌تواند **مهارت‌های داخلیِ همراهِ استفاده‌نشده** را (که با مخزن عرضه شده‌اند) پس از <code>archive_after_days</code> روز عدم استفاده آرشیو کند، در کنار مهارت‌های ایجنت‌ساخته‌ای که عمدتاً مدیریت می‌کند. مهارت‌های نصب‌شده از هاب‏ (از <a href="https://agentskills.io" target="_blank" rel="noopener">agentskills.io</a>) همیشه مصون‌اند. <code>curator.prune_builtins: false</code> را برای برگرداندن رفتار قدیمیِ فقط-ایجنت‌ساخته بگذارید، جایی که مهارت‌های همراه هرگز لمس نمی‌شوند. کرتور همچنین <strong>هرگز خودکار حذف نمی‌کند</strong> — بدترین نتیجه، آرشیو در <code>~/.hermes/skills/.archive/</code> است که قابل‌بازیابی است.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چگونه اجرا می‌شود</h2>
+<p>کرتور با بررسی بیکاری تریگر می‌شود، نه با دیمن کرون. در شروع نشست CLI، و در تیکِ ادواری داخل نخِ کرون‌تیکرِ گیت‌وی، هرمس بررسی می‌کند آیا:</p>
+<ol>
+  <li>زمان کافی از آخرین اجرای کرتور گذشته‏ (<code>interval_hours</code>، پیش‌فرض <strong>۷ روز</strong>)، و</li>
+  <li>ایجنت به‌اندازهٔ کافی بیکار مانده‏ (<code>min_idle_hours</code>، پیش‌فرض <strong>۲ ساعت</strong>).</li>
+</ol>
+<p>اگر هر دو درست باشند، یک انشعاب پس‌زمینه از <code>AIAgent</code> تولید می‌کند — همان الگویی که یادآورهای خودبهبودیِ حافظه/مهارت استفاده می‌کنند. انشعاب در کش پرامپت خودش اجرا و هرگز گفتگوی فعال را لمس نمی‌کند.</p>
+<div class="callout note">
+  <div class="callout-title">ℹ️ رفتار اولین اجرا</div>
+  <p>در نصب کاملاً-تازه (یا اولین تیکِ نصبِ پیش-کرتوری بعد از <code>hermes update</code>)، کرتور <strong>بلافاصله اجرا نمی‌شود</strong>. اولین مشاهده <code>last_run_at</code> را روی «الان» می‌کارد و اولین گذرِ واقعی را یک <code>interval_hours</code> کامل عقب می‌اندازد. این به شما یک بازهٔ کامل می‌دهد تا کتابخانهٔ مهارت‌تان را بازبینی، چیز مهمی را پین یا کلاً خارج شوید، پیش از آنکه کرتور به آن دست بزند.</p>
+  <p>اگر می‌خواهید ببینید کرتور <em>چه می‌کرد</em> پیش از اجرای واقعی، <code>hermes curator run --dry-run</code> را بزنید — همان گزارش بازبینی را بدون جهش در کتابخانه تولید می‌کند.</p>
+</div>
+<p>یک اجرا دو فاز دارد:</p>
+<ol>
+  <li><strong>گذرهای خودکار</strong> (قطعی، بدون LLM). مهارت‌های استفاده‌نشده برای <code>stale_after_days</code> ‏(۳۰) <code>stale</code> می‌شوند؛ مهارت‌های استفاده‌نشده برای <code>archive_after_days</code> ‏(۹۰) به <code>~/.hermes/skills/.archive/</code> منتقل می‌شوند. این رفتار همیشه-روشنِ هرس است — هر وقت کرتور فعال باشد اجرا می‌شود، بدون هزینهٔ مدل-کمکی.
+    <ul>
+      <li><strong>مهارت‌های پین‌شده</strong> و <strong>مهارت‌های ارجاع‌شده توسط هر کار کرونی</strong> (شامل کارهای متوقف/غیرفعال) کلاً رد می‌شوند — برای گذرهای خودکار مثل پین رفتار می‌کنند تا زمان‌بندیِ کند یا متوقف نتواند مهارتی را زیر پای یک کار آرشیو کند. ادغام هم ارجاعات کرونیِ مهارت را هنگام ادغام چترها بازنویسی می‌کند.</li>
+      <li><strong>مهارت‌های هرگز-استفاده‌نشده</strong>‏ (<code>use_count == 0</code>) یک کف مهلت می‌گیرند: تا حداقل <code>stale_after_days</code> روزه نشوند آرشیو نمی‌شوند. صفر استفاده یعنی نبودِ شاهد، نه اثباتِ دورانداختنی‌بودن.</li>
+    </ul>
+  </li>
+  <li><strong>ادغام LLM</strong> (یک گذر تکی مدل-کمکی با سقف تکرار بالا — یک جاروی کامل کیوریشن معمولاً ۵۰-۱۰۰ فراخوانی API) — <strong>پیش‌فرض خاموش</strong>. وقتی <code>curator.consolidate: true</code> باشد، ایجنتِ انشعاب‌یافته مهارت‌های ایجنت‌ساخته را بررسی، هر کدام را با <code>skill_view</code> می‌خواند و به‌ازای-هر-مهارت تصمیم می‌گیرد نگه دارد، ‏patch کند‏ (با <code>skill_manage</code>)، مهارت‌های هم‌پوشان را در چترهای سطح-کلاس ادغام کند، یا با ابزار ترمینال آرشیو کند. ادغام مهارت را بستهٔ کامل تلقی می‌کند: اگر مهارتی <code>references/</code>، ‏<code>templates/</code>، ‏<code>scripts/</code>، ‏<code>assets/</code> یا لینک‌های نسبی به آن مسیرها دارد، کرتور باید یا آن را مستقل نگه دارد، فایل‌های پشتیبان لازم را خانه‌دادن و مسیرها را بازنویسی کند، یا کل بسته را بدون تغییر آرشیو کند — نه اینکه فقط <code>SKILL.md</code> را در فایل <code>references/</code> مهارتی دیگر تخت کند.</li>
+</ol>
+<div class="callout note">
+  <div class="callout-title">ℹ️ ادغام اختیاری است</div>
+  <p>به‌طور پیش‌فرض کرتور فقط <strong>هرس می‌کند</strong> — گذرِ قطعیِ بیکاری مهارت‌ها را stale علامت و بلندمدت-استفاده‌نشده‌ها را آرشیو می‌کند. گذرِ نظرمحور <strong>ادغامِ</strong> LLM ‏(ساخت چتر، ادغام هم‌پوشان‌ها) پیش‌فرض خاموش است چون هر اجرا توکن مدل-کمکی خرج و تغییرات ساختاری گسترده‌ای به کتابخانه‌تان می‌دهد. با <code>curator.consolidate: true</code> روشنش کنید، یا یک‌باره با <code>hermes curator run --consolidate</code> به‌درخواست اجرایش کنید.</p>
+</div>
+<p>مهارت‌های پین‌شده هم برای گذرهای خودکار کرتور و هم برای خودِ ابزار <code>skill_manage</code> ایجنت مصون‌اند. به «پین‌کردن یک مهارت» پایین مراجعه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پیکربندی</h2>
+<p>همهٔ تنظیمات در config.yaml زیر <code>curator:</code> زندگی می‌کنند (نه .env — این یک راز نیست). پیش‌فرض‌ها:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curator:
+  enabled: true
+  interval_hours: 168          # ۷ روز
+  min_idle_hours: 2
+  stale_after_days: 30
+  archive_after_days: 90
+  consolidate: false           # گذر ساخت-چترِ LLM — اختیاری (پیش‌فرض فقط-هرس)
+  prune_builtins: true         # آرشیو داخلی‌های همراهِ استفاده‌نشده هم (هاب‌ها همیشه مصون)</code></pre>
+</div>
+<p>برای کلاً غیرفعال‌کردن، <code>curator.enabled: false</code>. برای نگه‌داشتن هرسِ همیشه-روشن و اختیارگرفتنِ ادغام LLM، ‏<code>curator.consolidate: true</code>.</p>
+
+<h3>اجرای بازبینی روی مدل کمکیِ ارزان‌تر</h3>
+<p>گذر بازبینی LLM مربوط به کرتور یک جایگاه کار کمکیِ عادی است — <code>auxiliary.curator</code> — کنار بینایی، فشرده‌سازی، جستجوی نشست و غیره. «auto» یعنی «مدل چت اصلی‌ام را استفاده کن»؛ جایگاه را بازنویسی کنید تا ارائه‌دهنده + مدل مشخصی برای گذر بازبینی پین شود.</p>
+<p><strong>آسان‌ترین — ‏<code>hermes model</code>:</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes model                   # ← "Auxiliary models — side-task routing"
+                               # ← "Curator" را بردارید ← ارائه‌دهنده ← مدل</code></pre>
+</div>
+<p>همان انتخاب‌گر در داشبورد وب زیر تب **Models** هم موجود است.</p>
+<p><strong>config.yaml مستقیم (هم‌ارز):</strong></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>auxiliary:
+  curator:
+    provider: openrouter
+    model: google/gemini-3-flash-preview
+    timeout: 600               # سخاوتمندانه — بازبینی‌ها می‌توانند چند دقیقه طول بکشند</code></pre>
+</div>
+<p>رهاکردن <code>provider: auto</code> (پیش‌فرض) گذر بازبینی را از همان مدلی که چت اصلی‌تان است عبور می‌دهد، منطبق با رفتار هر کار کمکی دیگر.</p>
+<div class="callout note">
+  <div class="callout-title">ℹ️ پیکربندی قدیمی</div>
+  <p>ریلیزهای قبلی از بلوک یک‌بارهٔ <code>curator.auxiliary.{provider,model}</code> استفاده می‌کردند. آن مسیر هنوز کار می‌کند ولی یک خط لاگ منسوخ‌شدن صادر می‌کند — لطفاً به <code>auxiliary.curator</code> بالا مهاجرت کنید تا کرتور همان لوله‌کشی‏ (<code>hermes model</code>، ‏تب Models داشبورد، ‏<code>base_url</code>، ‏<code>api_key</code>، ‏<code>timeout</code>، ‏<code>extra_body</code>) را با هر کار کمکی دیگر شریک شود.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> CLI</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes curator status         # آخرین اجرا، شمارش‌ها، فهرست پین‌شده‌ها، ۵ تای LRU
+hermes curator run            # تریگر اجرا همین حالا (تا اتمام بلاک). فقط-هرس مگر consolidate: true
+hermes curator run --consolidate # روشن‌کردن اجباریِ گذر ادغام LLM برای همین اجرا
+hermes curator run --background  # شلیک-و-رها: شروع اجرا در نخ پس‌زمینه
+hermes curator run --dry-run  # فقط پیش‌نمایش — گزارش بدون هیچ جهشی
+hermes curator backup         # اسنپ‌شات دستی از ~/.hermes/skills/
+hermes curator rollback       # بازیابی از جدیدترین اسنپ‌شات
+hermes curator rollback --list     # فهرست اسنپ‌شات‌های موجود
+hermes curator rollback --id &lt;ts&gt;  # بازیابی اسنپ‌شات مشخص
+hermes curator rollback -y         # ردکردن اعلان تأیید
+hermes curator pause          # توقف اجراها تا resume
+hermes curator resume
+hermes curator pin &lt;skill&gt;    # هرگز گذر خودکار برای این مهارت
+hermes curator unpin &lt;skill&gt;
+hermes curator adopt &lt;skill&gt;    # سپردن مهارتِ مدیریت‌نشده به کرتور
+hermes curator adopt --all-unmanaged   # سپردن همهٔ مدیریت‌نشده‌ها
+hermes curator list-unmanaged   # فهرست مشروط مهارت‌های بدون نشان منشأ
+hermes curator restore &lt;skill&gt;  # برگرداندن مهارت آرشیوشده به active
+hermes curator list-archived    # فهرست مهارت‌های فعلاً در ~/.hermes/skills/.archive/
+hermes curator archive &lt;skill&gt;  # آرشیو دستی یک مهارت تکی همین حالا
+hermes curator prune [--days N] # آرشیو گروهی مهارت‌های ایجنت‌ساختهٔ بیکارِ ≥ N روز (پیش‌فرض ۹۰)
+hermes curator ledger           # فهرست دفتر ممیزیِ به‌ازایی-جهش (همهٔ بازیگران)
+hermes curator ledger --skill &lt;name&gt; --limit 50  # فیلتر/صفحه‌بندی مدخل‌های دفتر
+hermes curator rollback &lt;entry-id&gt;  # خنثی‌کردن یک جهش تکی از دفتر
+hermes curator purge [--days N] [--dry-run]  # حذف آرشیوهای قدیمی‌تر از TTL (فقط صریح)</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پشتیبان‌ها و بازگشت</h2>
+<p>پیش از هر گذرِ واقعی کرتور، هرمس اسنپ‌شات tar.gz از <code>~/.hermes/skills/</code> در <code>~/.hermes/skills/.curator_backups/&lt;utc-iso&gt;/skills.tar.gz</code> می‌گیرد. اگر گذری چیزی را آرشیو یا ادغام کرد که نمی‌خواستید لمس شود، کل اجرا را با یک فرمان خنثی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes curator rollback        # بازیابی جدیدترین اسنپ‌شات (با تأیید)
+hermes curator rollback -y     # ردکردن پرامپت
+hermes curator rollback --list # دیدن همهٔ اسنپ‌شات‌ها با دلیل + حجم</code></pre>
+</div>
+<p>خود بازگشت هم برگشت‌پذیر است: پیش از جایگزینی درخت مهارت‌ها، هرمس اسنپ‌شات دیگری با برچسب <code>pre-rollback to &lt;target-id&gt;</code> می‌گیرد، پس یک بازگشت اشتباه با بازگشتِ رو-به-جلو به همان یکی با <code>--id</code> خنثی‌شدنی است.</p>
+<p>هر زمان اسنپ‌شات دستی هم می‌توانید بگیرید: <code>hermes curator backup --reason "before-refactor"</code>. رشتهٔ <code>--reason</code> در <code>manifest.json</code> اسنپ‌شات می‌نشیند و در <code>--list</code> نشان داده می‌شود.</p>
+<p>اسنپ‌شات‌ها برای کرانداشتن مصرف دیسک به <code>curator.backup.keep</code> (پیش‌فرض ۵) هرس می‌شوند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curator:
+  backup:
+    enabled: true
+    keep: 5</code></pre>
+</div>
+<p><code>curator.backup.enabled: false</code> اسنپ‌شات‌گیری خودکار را خاموش می‌کند. فرمان دستی <code>hermes curator backup</code> وقتی پشتیبان‌ها خاموش‌اند فقط کار می‌کند که اول <code>enabled: true</code> گذاشته باشید — پرچم هر دو مسیر را متقارن گیت می‌کند تا راهی برای پرشِ تصادفی از اسنپ‌شاتِ پیش-اجرا روی اجراهای جهش‌دهنده نباشد.</p>
+<p><code>hermes curator status</code> همچنین پنج مهارتِ کمترین-استفادهٔ-اخیر را فهرست می‌کند — راه سریعی برای دیدن چیزی که احتمالاً بعدی stale می‌شود. همان زیرفرمان‌ها به‌صورت فرمان اسلش <code>/curator</code> داخل نشستِ در حال اجرا‏ (‏CLI یا پلتفرم‌های گیت‌وی) هم موجودند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> دفتر ممیزی و بازگشتِ تکی‌ویرایش</h2>
+<p>اسنپ‌شات‌های کل-اجرا به «همهٔ کاری که آخرین گذر کرتور کرد را خنثی کن» پاسخ می‌دهند — ولی گاهی می‌خواهید بدانید <em>چه کسی چه چیزی را تغییر داد</em> و دقیقاً یک جهش را خنثی کنید. هر جهش مهارت — گذرهای خودکار کرتور، فراخوانی‌های <code>skill_manage</code> ایجنت، و archive/restore/purge خودتان از CLI — یک مدخل به دفتر JSONL فقط-الحاقیِ <code>~/.hermes/skills/.curator_ledger.jsonl</code> می‌افزاید:</p>
+<ul>
+  <li><strong>بازیگر</strong> — ‏<code>curator</code> ‏(انشعاب بازبینی پس‌زمینه / گذرهای خودکار)، ‏<code>agent</code> ‏(فراخوانی‌های ابزار ایجنتِ پیش‌زمینه)، یا <code>user</code> ‏(فرمان‌های CLI)</li>
+  <li><strong>اقدام</strong> — ‏<code>create</code>، ‏<code>edit</code>، ‏<code>patch</code>، ‏<code>delete</code>، ‏<code>write_file</code>، ‏<code>remove_file</code>، ‏<code>archive</code>، ‏<code>restore</code>، ‏<code>purge</code>، ‏<code>rollback</code></li>
+  <li><strong>شاهد</strong> — نیت حذف‏ (<code>absorbed_into</code> برای ادغام‌ها، خالی برای هرس‌ها، و اینکه مسیر آرشیوِ-قابل-بازیابی هندلش کرده)، شناسهٔ نشستِ تریگرکننده وقتی موجود است</li>
+  <li><strong>قبل/بعد</strong> — مانیفستهای به‌ازای-فایلِ <code>{path, sha256}</code>. محتویات فایل به‌صورت محتوا-نشانی‏ (بی‌تکرار با هش) زیر <code>~/.hermes/.curator_backups/blobs/</code> ذخیره می‌شوند، پس صد مدخلِ لمس‌کنندهٔ همان فایلِ تغییرنکرده یک blob هزینه می‌دهد.</li>
+</ul>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes curator ledger                  # ۲۰ مدخل جدیدترین
+hermes curator ledger --skill my-skill --limit 50
+hermes curator rollback &lt;entry-id&gt;     # بازیابی وضعیت-قبلِ همان یک جهش</code></pre>
+</div>
+<p>بازگشت تکی‌مدخلی دقیقاً فایل‌هایی را که آن جهش لمس کرد بازیابی‏ (و فایل‌هایی که ساخته را حذف می‌کند) از مخزن blob — هیچ‌چیز دیگری در درخت مهارت‌ها حرکت نمی‌کند. مثل بازگشت کل-درخت، اول یک مدخلِ ایمنیِ وضعیت فعلی به دفتر می‌گیرد و <strong>ایمن می‌شکند</strong>: اگر ثبتِ ایمنی نوشتنی نباشد، هیچ‌چیز تغییر نمی‌کند. چون حذف‌های پیش‌زمینه هم در دفتر ثبت می‌شوند، <code>hermes curator rollback &lt;entry-id&gt;</code> می‌تواند مهارتِ سخت‌حذف‌شده را زنده کند.</p>
+<p>دفتر تلمتری است، هرگز دروازه نه — اگر نوشتن مدخلی شکست بخورد، جهش همچنان انجام می‌شود. غیرفعالش کنید با:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>skills:
+  ledger: false</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> پاک‌سازی TTL آرشیو</h2>
+<p>مهارت‌های آرشیوشده به‌طور پیش‌فرض برای همیشه نگه داشته می‌شوند. اگر می‌خواهید <code>~/.hermes/skills/.archive/</code> کراندار باشد، یک TTL بگذارید و صریح purge کنید — purging هرگز خودکار اجرا نمی‌شود، و هر مهارتِ purge‌شده اول در دفتر‏ (با blobها) ثبت می‌شود، پس حتی یک purge هم ردِ ممتحن-شونده و قابل‌بازیابی می‌گذارد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml + bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curator:
+  archive_ttl_days: 180   # ۰ (پیش‌فرض) = هرگز purge نکن
+
+hermes curator purge --dry-run   # پیش‌نمایش آنچه حذف می‌شد
+hermes curator purge             # حذف آرشیوهای قدیمی‌تر از TTL (با تأیید)
+hermes curator purge --days 90   # بازنویسی یک‌بارهٔ TTL</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> معنای «ایجنت‌ساخته»</h2>
+<p>کرتور فقط مهارت‌هایی را مدیریت می‌کند که صریحاً در <code>~/.hermes/skills/.usage.json</code> به‌عنوان <strong>ایجنت‌ساخته</strong> علامت خورده‌اند. مهارتی واجدشرط است وقتی <strong>همهٔ</strong> موارد زیر درست باشند:</p>
+<ol>
+  <li>نامش در <code>~/.hermes/skills/.bundled_manifest</code> نیست (مهارت‌های همراهِ عرضه‌شده با مخزن).</li>
+  <li>نامش در <code>~/.hermes/skills/.hub/lock.json</code> نیست (مهارت‌های نصب‌شده از هاب).</li>
+  <li>مدخل <code>.usage.json</code>‌اش <code>"created_by": "agent"</code> یا <code>"agent_created": true</code> دارد.</li>
+</ol>
+<p>فعلاً فقط <strong>انشعاب بازبینیِ خودبهبودیِ پس‌زمینه</strong> این نشان را می‌گذارد — وقتی در گذر بازبینی دوره‌ای‌اش‏ (‏~هر ۱۰ نوبت ایجنت) مهارت چتری تازه می‌سازد. انشعاب پس‌زمینه با خاستگاهِ نوشتنِ <code>"background_review"</code> اجرا می‌شود‏ (از <code>tools/skill_provenance.py</code>)، که تنها مسیرِ تریگرکردنِ فراخوانی <code>mark_agent_created()</code> در <code>skill_manage</code> است.</p>
+<p>مهارت‌هایی که ایجنتِ پیش‌زمینه در طول گفتگو با <code>skill_manage(action="create")</code> می‌سازد ایجنت‌ساخته علامت <strong>نمی‌خورند</strong> — کاربر-هدایت‌شده تلقی و کرتور آگاهانه رهایشان می‌کند.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ مهارت‌های دست‌نوشتهٔ شما کیور نمی‌شوند</div>
+  <p>اگر دستی SKILL.md ساخته‌اید یا هرمس را به پوشهٔ مهارت بیرونی اشاره داده‌اید، آن مهارت مدخل <code>.usage.json</code> با <code>created_by: null</code> دارد (یا فیلد غایب). کرتور به آن دست نمی‌زند. همین برای مهارت‌هایی که ایجنت پیش‌زمینه به درخواست شما ساخته صادق است.</p>
+  <p><strong>برای دیدن اینکه کرتور واقعاً چه مهارت‌هایی را مدیریت می‌کند</strong>، <code>hermes curator status</code> را اجرا کنید. اگر شمار ایجنت‌ساخته‌ها ۰ بود، هیچ مهارتی فعلاً در صلاحیت کرتور نیست — گذر بازبینی LLM رد می‌شود و گزارش <code>Model: (not resolved) via (not resolved)</code> با <code>Duration: 0s</code> نشان می‌دهد.</p>
+</div>
+
+<h3>به‌فرزندخواندن مهارت‌های مدیریت‌نشده</h3>
+<p><code>hermes curator status</code> شمار <strong>مدیریت‌نشده</strong> را کنار شمار مدیریت‌شده گزارش می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">خروجی</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curator-managed skills: 43 total  (agent-created=43  bundled=0)
+  active     41
+  stale       2
+  archived    0
+
+unmanaged (no provenance marker): 112 total
+  pre-dates marker    34
+  foreground-created  78
+  never auto-staled or archived — `hermes curator adopt &lt;name&gt;` hands one over</code></pre>
+</div>
+<p>آن ۱۱۲ تا کیور-<em>واجدشرط</em> ولی برای چرخهٔ حیات برای همیشه نامرئی‌اند، به یکی از این دو دلیل:</p>
+<ul>
+  <li><strong>قدیمی‌تر از نشان</strong> — رکورد قبل از وجود <code>created_by</code> نوشته شده، پس اصلاً سیگنال منشأیی حمل نمی‌کند. مؤلفّیت از روی رکورد واقعاً دانستنی نیست.</li>
+  <li><strong>پیش‌زمینه‌ساخته</strong> — یک <code>skill_manage(create)</code> پیش‌زمینه‌ای نشان را عمداً تنظیم‌نشده گذاشته، چون مهارت‌هایی که شما می‌خواهید مال شما هستند.</li>
+</ul>
+<p>پس کتابخانهٔ بزرگی می‌تواند کاملاً کیورشده به‌نظر برسد در حالی که بیشترش دست‌نخوردنی است. <code>adopt</code> این شکاف را با <strong>اعلام</strong> می‌بندد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes curator list-unmanaged                    # فهرست مشروط با دلایل
+hermes curator adopt &lt;name&gt; [&lt;name&gt; ...]         # سپردن مهارت‌های مشخص
+hermes curator adopt --all-unmanaged --dry-run   # پیش‌نمایش فهرست کامل
+hermes curator adopt --all-unmanaged             # سپردن همه (با پرامپت)
+hermes curator adopt --all-unmanaged --yes       # ردکردن پرامپت</code></pre>
+</div>
+<p>به‌فرزندخواندن همان نشان <code>created_by: agent</code>ی را می‌نویسد که انشعاب بازبینی پس‌زمینه می‌نویسد. ساعت بیکاری را ریست <strong>نمی‌کند</strong> — مهارت فرزندخوانده <code>last_activity_at</code> موجودش را نگه می‌دارد، پس سپردن کتابخانه‌ای که از قبل دست‌کشیده‌اید پنجرهٔ تازهٔ ۹۰ روزه‌ای به آن نمی‌خرد. انتظار داشته باشید مهارت‌های فرزندخواندهٔ بلندبیکار در گذر بعدی <code>stale</code> ‏(یا <code>archived</code>) شوند؛ نکته همین است.</p>
+<p>به‌فرزندخواندن همان چیزی است که بهبودِ خودمختار را باز می‌کند. انشعاب بازبینی پس‌زمینه از patch‌کردن مهارتی که مدیریت-کرتوری نیست سر باز می‌زند، پس اگر متوجه شود یکی از مهارت‌هایتان قدیمی شده، می‌گوید و به‌فرزندخواندن را توصیه می‌کند به‌جای ویرایشش. ویرایش‌های پیش‌زمینه‏ (کاربر-هدایت) هرگز متأثر نمی‌شوند — شما و ایجنت همیشه می‌توانید مهارت‌های خودتان را به درخواست ویرایش کنید.</p>
+<div class="callout note">
+  <div class="callout-title">ℹ️ <code>created_by</code> یک پرچم سیاست است، نه ادعای منشأ</div>
+  <p>فیلد ذخیره‌شده <code>created_by</code> نام دارد، ولی به‌عنوانِ «آیا کیوریشنِ خودمختار می‌تواند به این دست بزند؟» مصرف می‌شود — نه «چه کسی این فایل را نوشت». این‌ها سؤال‌های متفاوتی‌اند و برای رکوردهای قدیمی‌تر از نشان، پاسخ مؤلفّیت صرفاً بازیابی‌ناپذیر است. نام نگه داشته شده چون از قبل در هر <code>.usage.json</code> روی دیسک است؛ آن را به‌عنوان سیاست بخوانید. <code>hermes curator adopt</code> سیاست را عوض می‌کند و چیزی دربارهٔ مؤلف فایل نمی‌گوید.</p>
+</div>
+<div class="callout note">
+  <div class="callout-title">ℹ️ منشأ اعلام می‌شود، هرگز استنتاج نمی‌شود</div>
+  <p>به‌فرزندخواندن عمداً دستی است. تلمتری نمی‌تواند مؤلفّیت را اثبات کند: مهارتی با هزاران patch ثابت می‌کند ایجنت آن را <strong>نگهداری</strong> می‌کند، نه اینکه ایجنت آن را <strong>نوشته</strong> — هرمس دائماً از طرف شما مهارت‌های کاربر-نوشته را ویرایش می‌کند. یک ابتکار خودکارِ «ایجنت‌ساخته-به‌نظر-می‌رسد، به‌فرزندش بگیر» بالاخره چیزی را که خودتان نوشته بودید آرشیو می‌کرد. <code>adopt</code> از مهارت‌های همراه، هاب‌نصب، بیرونی و داخلیِ محافظت‌شده — که مالکی جز شما دارند — سر باز می‌زند.</p>
+</div>
+<p>مهارت‌هایی که ایجنت‌ساخته‌اند چرخهٔ کامل را طی می‌کنند:</p>
+<ul>
+  <li><code>active</code> ← ‏(۳۰ روز بیکار) <code>stale</code> ← ‏(۹۰ روز بیکار) <code>archived</code></li>
+  <li>مهارت‌های پین‌شده از همهٔ گذرهای خودکار عبور می‌کنند</li>
+  <li>آرشیوها با <code>hermes curator restore &lt;name&gt;</code> قابل‌بازیابی‌اند</li>
+</ul>
+<p>اگر می‌خواهید مهارت مشخصی را برای همیشه مصون کنید — مثلاً مهارت دست‌نوشته‌ای که به آن تکیه دارید — از <code>hermes curator pin &lt;name&gt;</code> استفاده کنید. بخش بعدی را ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> پین‌کردن یک مهارت</h2>
+<p>پین‌کردن مهارت را از حذف محافظت می‌کند — هم گذرهای آرشیوِ خودکارِ کرتور و هم فراخوانی ابزار <code>skill_manage(action="delete")</code> ایجنت. وقتی مهارتی پین شد:</p>
+<ul>
+  <li><strong>کرتور</strong> آن را در گذرهای خودکار‏ (<code>active → stale → archived</code>) رد می‌کند، و به گذر بازبینی LLMش دستور داده شده کاری با آن نکند.</li>
+  <li><strong>ابزار <code>skill_manage</code> ایجنت</strong> <code>delete</code> روی آن را رد کرده و کاربر را به <code>hermes curator unpin &lt;name&gt;</code> اشاره می‌کند. ‏Patchها و ویرایش‌ها همچنان عبور می‌کنند، پس ایجنت می‌تواند محتوای مهارت پین‌شده را وقتی دام‌ها پیدا شدند بهبود دهد، بدون رقصِ پین/آنپین/بازپین.</li>
+</ul>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes curator pin &lt;skill&gt;
+hermes curator unpin &lt;skill&gt;</code></pre>
+</div>
+<p>پرچم به‌صورت <code>"pinned": true</code> روی مدخل مهارت در <code>~/.hermes/skills/.usage.json</code> ذخیره می‌شود، پس بین نشست‌ها می‌ماند.</p>
+<p>مهارت‌های نام‌برده در فهرست <code>skills:</code> هر کار کرونی برای <strong>گذرهای خودکار</strong> به همین شکل محافظت می‌شوند‏ (کرتور تا وقتی ارجاع هست هرگز آن‌ها را stale/آرشیو نمی‌کند)، حتی وقتی کار متوقف یا غیرفعال است. وقتی می‌خواهید <code>skill_manage delete</code> هم بلاک شود پین صریح را ترجیح دهید.</p>
+<p>فقط مهارت‌های <strong>ایجنت‌ساخته</strong> پین‌پذیرند — <code>hermes curator pin</code> روی مهارت‌های همراه و هاب‌نصب با پیام توضیحی رد می‌شود. مهارت‌های هاب‌نصب هرگز تابع جهش کرتور نیستند. داخلی‌های همراه فقط وقتی <code>curator.prune_builtins: true</code> (پیش‌فرض) لمس می‌شوند، و حتی آن‌وقت فقط پس از <code>archive_after_days</code> روز عدم استفاده آرشیو — هرگز patch، ادغام یا حذف نمی‌شوند. برای مصون‌کردن کامل داخلی‌ها <code>curator.prune_builtins: false</code> بگذارید.</p>
+<p>مجموعهٔ کوچکی از <strong>داخلی‌های محافظت‌شده</strong> به‌صورت هاردکد هرگز-آرشیو-پذیر و هرگز-ادغام-پذیرند، صرف‌نظر از <code>curator.prune_builtins</code>، وضعیت پین یا قضاوت LLM. این‌ها UX حمل‌بار را پشتیبانی می‌کنند — مثلاً <code>plan</code> جریان فرمان اسلش <code>/plan</code> را قدرت می‌دهد — پس آرشیو خاموشِ یکی فرمان اسلشش را به خطای «Unknown command» تبدیل می‌کرد بدون سیگنالی به شما. داخلی‌های محافظت‌شده کلاً از فهرست کاندیدهای کرتور فیلتر می‌شوند، پس گذر ادغام هرگز نمی‌بیندشان.</p>
+<p>اگر تضمینی قوی‌تر از «بدون حذف» می‌خواهید — مثلاً فریز کامل محتوای مهارت در حالی که ایجنت همچنان می‌خواندش — <code>~/.hermes/skills/&lt;name&gt;/SKILL.md</code> را مستقیم با ادیتور خودتان ویرایش کنید. پین، حذفِ ابزار-محور را گیت می‌کند، نه دسترسیِ خودتان به فایل‌سیستم را.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> تلمتری استفاده</h2>
+<p>کرتور یک سایدکار در <code>~/.hermes/skills/.usage.json</code> با یک مدخل به‌ازای-هر-مهارت نگه می‌دارد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{
+  "my-skill": {
+    "use_count": 12,
+    "view_count": 34,
+    "last_used_at": "2026-04-24T18:12:03Z",
+    "last_viewed_at": "2026-04-23T09:44:17Z",
+    "patch_count": 3,
+    "last_patched_at": "2026-04-20T22:01:55Z",
+    "created_at": "2026-03-01T14:20:00Z",
+    "state": "active",
+    "pinned": false,
+    "archived_at": null
+  }
+}</code></pre>
+</div>
+<p>شمارنده‌ها وقتی بالا می‌روند:</p>
+<ul>
+  <li><code>view_count</code>: ایجنت <code>skill_view</code> را روی مهارت صدا می‌زند.</li>
+  <li><code>use_count</code>: مهارت در پرامپت گفتگویی بارگذاری می‌شود.</li>
+  <li><code>patch_count</code>: <code>skill_manage patch/edit/write_file/remove_file</code> روی مهارت اجرا می‌شود.</li>
+</ul>
+<p>مهارت‌های همراه و هاب‌نصب صریحاً از نوشتنِ تلمتری مستثنا‌اند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> گزارش‌های به‌ازایی-اجرا</h2>
+<p>هر اجرای کرتور یک پوشهٔ مُهردار-با-زمان زیر <code>~/.hermes/logs/curator/</code> می‌نویسد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>~/.hermes/logs/curator/
+└── 20260429-111512/
+    ├── run.json      # ماشین‌خوان: وفاداری کامل، آمار، خروجی LLM
+    └── REPORT.md     # خلاصهٔ انسانی‌خوان</code></pre>
+</div>
+<p><code>REPORT.md</code> راه سریعی است برای دیدن اجرای معین چه کرد — کدام مهارت‌ها گذر کردند، بازبین LLM چه گفت، کدام‌ها را patch کرد. برای ممیزی بدون grep ‏<code>agent.log</code> خوب است.</p>
+<div class="callout note">
+  <div class="callout-title">ℹ️ بدون کاندید؟ گزارش <code>(not resolved)</code> نشان می‌دهد</div>
+  <p>وقتی کرتور <strong>مهارت ایجنت‌ساخته‌ای</strong> برای بازبینی ندارد، گذر بازبینی LLM کلاً رد می‌شود. سرصفحهٔ گزارش <code>Model: (not resolved) via (not resolved)</code> با <code>Duration: 0s</code> نشان می‌دهد — این <strong>خطای پیکربندی یا شکست حل مدل نیست</strong>. صرفاً یعنی کاندیدی نبود، پس مدلی هرگز فراخوانی نشد. فاز گذر خودکار همچنان اجرا و شمارش‌هایش را عادی گزارش می‌کند.</p>
+</div>
+
+<h3>نقشهٔ تغییرنام در خلاصه</h3>
+<p>اگر اجرایی چند مهارت را زیر چتری ادغام کرد‏ (یا نزدیک-تکرارها را مرج)، خلاصهٔ رو-به-کاربری که در پایان اجرا چاپ می‌شود نقشهٔ تغییرنام صریحی شامل هر جفتِ <code>old-name → new-name</code>ی که کرتور اعمال کرد را می‌گیرد. این به‌علاوهٔ خطوط گذرِ به‌ازای-مهارت است، پس وقتی موجی از تغییرنام‌ها می‌آید بدون diff ‏گزارش JSON در یک نگاه می‌بینیدشان. راهنما زیر <code>hermes curator pin</code> هم ظاهر می‌شود تا اگر می‌خواهید برچسب جدید را قفل کنید، بلافاصله نام چتر را پین کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> بازیابی مهارت آرشیوشده</h2>
+<p>اگر کرتور چیزی را آرشیو کرد که هنوز می‌خواهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes curator restore &lt;skill-name&gt;</code></pre>
+</div>
+<p>این مهارت را از <code>~/.hermes/skills/.archive/</code> به درخت فعال برمی‌گرداند و وضعیتش را به <code>active</code> ریست می‌کند. اگر مهارت همراه یا هاب‌نصبی از آن زمان با همان نام نصب شده باشد بازیابی رد می‌شود (بالاترین را سایه می‌انداشت).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> غیرفعال‌سازی به‌ازای-محیط</h2>
+<p>کرتور پیش‌فرض روشن است. برای خاموش‌کردن:</p>
+<ul>
+  <li><strong>فقط یک پروفایل:</strong> <code>~/.hermes/config.yaml</code> (یا config پروفایل فعال) را ویرایش و <code>curator.enabled: false</code> کنید.</li>
+  <li><strong>فقط یک مدت:</strong> <code>hermes curator pause</code> — توقف بین نشست‌ها می‌ماند؛ با <code>resume</code> دوباره فعال کنید.</li>
+</ul>
+<p>کرتور اگر <code>min_idle_hours</code> نگذشته هم اجرا نمی‌شود، پس روی ماشین dev فعال به‌طور طبیعی فقط در سکوت‌ها اجرا می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> همچنین ببینید</h2>
+<ul>
+  <li><a href="skills.html">سیستم مهارت‌ها</a> — کارکرد عمومی مهارت‌ها و حلقهٔ خودبهبودی که می‌سازدشان</li>
+  <li><a href="memory.html">حافظه</a> — بازبینی پس‌زمینه‌ای موازی که حافظهٔ بلندمدت را نگه می‌دارد</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/reference/skills-catalog" target="_blank" rel="noopener">کاتالوگ مهارت‌های داخلی</a></li>
+  <li><a href="https://github.com/NousResearch/hermes-agent/issues/7816" target="_blank" rel="noopener">Issue #7816</a> — پیشنهاد اصلی و بحث طراحی</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="skills.html"><span class="dir">→ قبلی</span><span class="ttl">سیستم مهارت‌ها</span></a>
+  <a class="next" href="plugins.html"><span class="dir">بعدی ←</span><span class="ttl">افزونه‌ها ‏(Plugins)</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/curator" target="_blank" rel="noopener">Curator</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

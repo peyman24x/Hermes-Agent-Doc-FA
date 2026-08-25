@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اسلک — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/slack" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>اسلک</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی اسلک</h1>
+<p>هرمس ایجنت را با حالت Socket ‏(Socket Mode) به اسلک به‌عنوان بات وصل کنید. Socket Mode به‌جای نقاط پایانی عمومی HTTP از WebSocket استفاده می‌کند، پس نمونهٔ هرمس شما نیازی به قابل‌دسترس‌بودن عمومی ندارد — پشت فایروال، روی لپ‌تاپ یا سرور خصوصی کار می‌کند.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ اپ‌های کلاسیک اسلک منسوخ شده‌اند</div>
+  <p>اپ‌های کلاسیک اسلک ‏(با RTM API) در <strong>مارس ۲۰۲۵ کاملاً منسوخ</strong> شدند. هرمس از SDK مدرن Bolt با Socket Mode استفاده می‌کند. اگر اپ کلاسیک قدیمی دارید باید طبق گام‌های زیر یک اپ جدید بسازید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نمای کلی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مؤلفه</th><th>مقدار</th></tr></thead>
+  <tbody>
+    <tr><td><strong>کتابخانه</strong></td><td>‏<code>slack-bolt</code> / ‏<code>slack_sdk</code> برای پایتون ‏(Socket Mode)</td></tr>
+    <tr><td><strong>اتصال</strong></td><td>WebSocket — بدون نیاز به URL عمومی</td></tr>
+    <tr><td><strong>توکن‌های احراز لازم</strong></td><td>توکن بات ‏(<code>xoxb-</code>) + توکن سطح‌اپ ‏(<code>xapp-</code>)</td></tr>
+    <tr><td><strong>شناسایی کاربر</strong></td><td>شناسه‌های عضو اسلک ‏(مثل <code>U01ABC2DEF3</code>)</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: ساخت اپ اسلک</h2>
+<p>سریع‌ترین مسیر این است که مانیفستی که هرمس برایتان تولید می‌کند را بچسبانید. این مانیفست همهٔ فرمان‌های اسلش داخلی ‏(<code>/btw</code>، ‏<code>/stop</code>، ‏<code>/model</code> و...)، همهٔ scope های OAuth لازم، همهٔ اشتراک‌های رویداد را اعلام و Socket Mode را فعال می‌کند — همه‌با هم.</p>
+
+<h3>گزینهٔ A: از مانیفست تولیدشده توسط هرمس ‏(توصیه‌شده)</h3>
+<ol>
+  <li>مانیفست را تولید کنید. اپ‌های جدید اسلک باید از Agent view استفاده کنند:</li>
+</ol>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes slack manifest --agent-view --write</code></pre>
+</div>
+<p>این فرمان <code>~/.hermes/slack-manifest.json</code> را می‌نویسد و دستورالعمل چسباندن را چاپ می‌کند. اپ‌های موجودی که هنوز از Assistant view قدیمی اسلک استفاده می‌کنند تا آمادهٔ مهاجرت نشوند می‌توانند <code>--agent-view</code> را حذف کنند.</p>
+<p>برای پرکردن توضیح بلند اپ اسلک از یک فایل متنی UTF-8 یا Markdown موجود، ‏<code>--long-description-file</code> را اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes slack manifest --agent-view \
+  --long-description-file AGENTS.md --write</code></pre>
+</div>
+<p>محتوای فایل دقیقاً در بازهٔ ۱۷۵ تا ۴٬۰۰۰ کاراکتری اسلک حفظ می‌شود. برای متن درجا به‌جایش <code>--long-description "..."</code>؛ گزینهٔ درجا و فایل با هم جمع‌ناپذیرند و با <code>--slashes-only</code> هم قابل ترکیب نیستند.</p>
+<ol start="2">
+  <li>به <a href="https://api.slack.com/apps" target="_blank" rel="noopener">https://api.slack.com/apps</a> بروید ← <strong>Create New App</strong> ← <strong>From an app manifest</strong></li>
+  <li>ورک‌اسپیس‌تان را انتخاب، محتوای JSON را بچسبانید، بازبینی کنید و <strong>Next</strong> ← <strong>Create</strong> را بزنید</li>
+  <li>مستقیم به <strong>گام ۶: نصب اپ در ورک‌اسپیس</strong> بروید. مانیفست scope ها، رویدادها و فرمان‌های اسلش را برایتان انجام داده است.</li>
+</ol>
+
+<h3>گزینهٔ B: از صفر ‏(دستی)</h3>
+<ol>
+  <li>به <a href="https://api.slack.com/apps" target="_blank" rel="noopener">https://api.slack.com/apps</a> بروید</li>
+  <li>روی <strong>Create New App</strong> کلیک کنید</li>
+  <li><strong>From scratch</strong> را انتخاب کنید</li>
+  <li>نام اپ ‏(مثلاً «Hermes Agent») را وارد و ورک‌اسپیس‌تان را انتخاب کنید</li>
+  <li>روی <strong>Create App</strong> کلیک کنید</li>
+</ol>
+<p>به صفحهٔ <strong>Basic Information</strong> اپ می‌روید. با گام‌های ۲ تا ۶ پایین ادامه دهید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: پیکربندی scope های توکن بات</h2>
+<p>به <strong>Features ← OAuth &amp; Permissions</strong> در نوار کناری بروید. به <strong>Scopes ← Bot Token Scopes</strong> اسکرول کنید و این‌ها را اضافه کنید:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Scope</th><th>هدف</th></tr></thead>
+  <tbody>
+    <tr><td><code>chat:write</code></td><td>ارسال پیام به‌عنوان بات</td></tr>
+    <tr><td><code>app_mentions:read</code></td><td>تشخیص @منشن شدن در کانال‌ها</td></tr>
+    <tr><td><code>channels:history</code></td><td>خواندن پیام‌ها در کانال‌های عمومیِ عضو بات</td></tr>
+    <tr><td><code>channels:read</code></td><td>فهرست و اطلاعات کانال‌های عمومی</td></tr>
+    <tr><td><code>groups:history</code></td><td>خواندن پیام‌ها در کانال‌های خصوصیِ دعوت‌شدهٔ بات</td></tr>
+    <tr><td><code>im:history</code></td><td>خواندن تاریخچهٔ پیام خصوصی</td></tr>
+    <tr><td><code>im:read</code></td><td>دیدن اطلاعات پایهٔ DM</td></tr>
+    <tr><td><code>im:write</code></td><td>بازکردن و مدیریت DM‌ها</td></tr>
+    <tr><td><code>mpim:history</code></td><td>خواندن تاریخچهٔ DM گروهی ‏(DM چندنفره)</td></tr>
+    <tr><td><code>mpim:read</code></td><td>دیدن اطلاعات پایهٔ DM گروهی</td></tr>
+    <tr><td><code>users:read</code></td><td>جست‌وجوی اطلاعات کاربر</td></tr>
+    <tr><td><code>files:read</code></td><td>خواندن و دانلود فایل‌های پیوست شامل یادداشت صوتی/صدا</td></tr>
+    <tr><td><code>files:write</code></td><td>آپلود فایل ‏(تصویر، صدا، سند)</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout caution">
+  <div class="callout-title">⚠️ scope ناموجود = قابلیت ناموجود</div>
+  <p>بدون <code>channels:history</code> و <code>groups:history</code> بات <strong>پیام‌های کانال را دریافت نمی‌کند</strong> — فقط در DM کار می‌کند. بدون <code>files:read</code> هرمس می‌تواند چت کند ولی <strong>نمی‌تواند پیوست‌های آپلودی کاربران را مطمئن بخواند</strong>. این‌ها رایج‌ترین scope های جاافتاده‌اند.</p>
+</div>
+<p><strong>scope های اختیاری:</strong></p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Scope</th><th>هدف</th></tr></thead>
+  <tbody>
+    <tr><td><code>groups:read</code></td><td>فهرست و اطلاعات کانال‌های خصوصی</td></tr>
+    <tr><td><code>assistant:write</code></td><td>رندر خط وضعیت حالت-کار ‏(«در حال فکر کردن است…») کنار نام بات حین پردازش پیام. بدون این scope فراخوانی <code>assistant.threads.setStatus</code> بی‌صدا شکست می‌خورد و اسلک به‌جایش placeholder های عمومی چرخان خودش را نشان می‌دهد ‏(«Finding answers…»، «Reviewing findings…» و...) — هرمس هیچ‌وقت متن را کنترل نمی‌کند. برای اثر مرئیِ <code>typing_status_text</code> الزامی است.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۳: فعال‌سازی Socket Mode</h2>
+<p>Socket Mode اجازه می‌دهد بات از طریق WebSocket وصل شود نه اینکه URL عمومی لازم داشته باشد.</p>
+<ol>
+  <li>در نوار کناری به <strong>Settings ← Socket Mode</strong> بروید</li>
+  <li>‏<strong>Enable Socket Mode</strong> را روشن کنید</li>
+  <li>برای ساخت <strong>App-Level Token</strong> از شما پرسیده می‌شود:
+    <ul>
+      <li>نامی مثل <code>hermes-socket</code> بگذارید ‏(نام مهم نیست)</li>
+      <li>scope ‏<strong><code>connections:write</code></strong> را اضافه کنید</li>
+      <li>روی <strong>Generate</strong> کلیک کنید</li>
+    </ul>
+  </li>
+  <li><strong>توکن را کپی کنید</strong> — با <code>xapp-</code> شروع می‌شود. این همان <code>SLACK_APP_TOKEN</code> شماست</li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>توکن‌های سطح‌اپ را همیشه می‌توانید زیر <strong>Settings ← Basic Information ← App-Level Tokens</strong> پیدا یا بازتولید کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۴: اشتراک رویدادها</h2>
+<p>این گام بحرانی است — کنترل می‌کند بات چه پیام‌هایی را ببیند.</p>
+<ol>
+  <li>در نوار کناری به <strong>Features ← Event Subscriptions</strong> بروید</li>
+  <li>‏<strong>Enable Events</strong> را روشن کنید</li>
+  <li>بخش <strong>Subscribe to bot events</strong> را باز و این‌ها را اضافه کنید:</li>
+</ol>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>رویداد</th><th>لازم؟</th><th>هدف</th></tr></thead>
+  <tbody>
+    <tr><td><code>message.im</code></td><td><strong>بله</strong></td><td>بات پیام‌های خصوصی را دریافت می‌کند</td></tr>
+    <tr><td><code>message.mpim</code></td><td><strong>بله</strong></td><td>بات پیام‌های <strong>DM های گروهی</strong> ‏(چندنفره) که به آن‌ها افزوده شده را دریافت می‌کند</td></tr>
+    <tr><td><code>message.channels</code></td><td><strong>بله</strong></td><td>بات پیام‌های کانال‌های <strong>عمومی</strong> عضوشده را دریافت می‌کند</td></tr>
+    <tr><td><code>message.groups</code></td><td><strong>توصیه‌شده</strong></td><td>بات پیام‌های کانال‌های <strong>خصوصی</strong> دعوت‌شده را دریافت می‌کند</td></tr>
+    <tr><td><code>app_mention</code></td><td><strong>بله</strong></td><td>خطاهای Bolt SDK هنگام @منشن شدن بات را پیشگیری می‌کند</td></tr>
+  </tbody>
+</table>
+</div>
+<ol start="4">
+  <li>در پایین صفحه <strong>Save Changes</strong> را کلیک کنید</li>
+</ol>
+<div class="callout warning">
+  <div class="callout-title">🚨 جاافتادن اشتراک رویدادها = مشکل شمارهٔ ۱ راه‌اندازی</div>
+  <p>اگر بات در DM کار می‌کند ولی <strong>در کانال‌ها نه</strong>، تقریباً قطعاً فراموش کرده‌اید <code>message.channels</code> ‏(برای کانال‌های عمومی) و/یا <code>message.groups</code> ‏(برای خصوصی) را اضافه کنید. بدون این رویدادها اسلک اصلاً پیام‌های کانال را به بات تحویل نمی‌دهد.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۵: فعال‌سازی تب Messages</h2>
+<p>این گام پیام خصوصی به بات را ممکن می‌کند. بدون آن کاربران هنگام DM به بات پیام <strong>«Sending messages to this app has been turned off»</strong> می‌بینند.</p>
+<ol>
+  <li>در نوار کناری به <strong>Features ← App Home</strong> بروید</li>
+  <li>به <strong>Show Tabs</strong> اسکرول کنید</li>
+  <li>‏<strong>Messages Tab</strong> را روشن کنید</li>
+  <li>گزینهٔ <strong>«Allow users to send Slash commands and messages from the messages tab»</strong> را تیک بزنید</li>
+</ol>
+<div class="callout warning">
+  <div class="callout-title">🚨 بدون این گام، DM کلاً مسدود است</div>
+  <p>حتی با همهٔ scope ها و اشتراک‌های رویداد درست، اسلک اجازه نمی‌دهد کاربران به بات پیام خصوصی بدهند مگر تب Messages فعال باشد. این الزام پلتفرم اسلک است نه مسئلهٔ پیکربندی هرمس.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> گام ۶: نصب اپ در ورک‌اسپیس</h2>
+<ol>
+  <li>در نوار کناری به <strong>Settings ← Install App</strong> بروید</li>
+  <li>روی <strong>Install to Workspace</strong> کلیک کنید</li>
+  <li>دسترسی‌ها را بازبینی و <strong>Allow</strong> را بزنید</li>
+  <li>پس از تأیید، یک <strong>Bot User OAuth Token</strong> با شروع <code>xoxb-</code> می‌بینید</li>
+  <li><strong>این توکن را کپی کنید</strong> — این همان <code>SLACK_BOT_TOKEN</code> شماست</li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>اگر بعداً scope ها یا اشتراک‌های رویداد را تغییر دادید، برای اعمال تغییرات <strong>باید اپ را دوباره نصب کنید</strong>. صفحهٔ Install App بنری برای همین نشان می‌دهد.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> گام ۷: یافتن شناسه‌های کاربری برای فهرست مجاز</h2>
+<p>هرمس برای فهرست مجاز از <strong>Member ID</strong> های اسلک استفاده می‌کند ‏(نه یوزرنیم یا نام نمایشی).</p>
+<p>برای یافتن Member ID:</p>
+<ol>
+  <li>در اسلک روی نام یا آواتار کاربر کلیک کنید</li>
+  <li>روی <strong>View full profile</strong> کلیک کنید</li>
+  <li>دکمهٔ <strong>⋮</strong> ‏(بیشتر) را بزنید</li>
+  <li><strong>Copy member ID</strong> را انتخاب کنید</li>
+</ol>
+<p>‏Member ID ها شبیه <code>U01ABC2DEF3</code> هستند. دست‌کم Member ID خودتان را لازم دارید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> گام ۸: پیکربندی هرمس</h2>
+<p>این‌ها را به فایل <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># الزامی
+SLACK_BOT_TOKEN=xoxb-your-bot-token-here
+SLACK_APP_TOKEN=xapp-your-app-token-here
+SLACK_ALLOWED_USERS=U01ABC2DEF3              # شناسه‌های عضو جدا با ویرگول
+
+# اختیاری
+SLACK_HOME_CHANNEL=C01234567890              # کانال پیش‌فرض پیام‌های کرون/زمان‌بندی‌شده
+SLACK_HOME_CHANNEL_NAME=general              # نام خوانا برای کانال خانگی (اختیاری)</code></pre>
+</div>
+<p>یا راه‌اندازی تعاملی:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway setup    # هنگام پرسش Slack را انتخاب کنید</code></pre>
+</div>
+<p>سپس گیت‌وی را شروع کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway              # پیش‌زمینه
+hermes gateway install      # نصب به‌عنوان سرویس کاربر
+sudo hermes gateway install --system   # فقط لینوکس: سرویس سیستمی زمان‌بوت</code></pre>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 ایمنی reasoning-effort برای Codex</div>
+  <p>برای کانال‌های همتای اسلکِ پشتیبان Codex، ‏<code>agent.reasoning_effort: high</code> یا کمتر را ترجیح دهید. ‏<code>xhigh</code> می‌تواند کل نوبت را در استدلال پنهان بگذراند و هرگز متن مرئی دستیار تولید نکند؛ هرمس الان آن هشدارهای نوبت-ناقص را از ترد حذف و تشخیص‌ها را در لاگ‌های گیت‌وی نگه می‌دارد.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> گام ۹: دعوت بات به کانال‌ها</h2>
+<p>پس از شروع گیت‌وی باید بات را به هر کانالی که می‌خواهید پاسخ دهد <strong>دعوت کنید</strong>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/invite @Hermes Agent</code></pre>
+</div>
+<p>بات <strong>به‌طور خودکار</strong> به کانال‌ها نمی‌پیوندد. باید تک‌تک کانال‌ها را دعوتش کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> فرمان‌های اسلش</h2>
+<p>هر فرمان هرمس ‏(<code>/btw</code>، ‏<code>/stop</code>، ‏<code>/new</code>، ‏<code>/model</code>، ‏<code>/help</code> و...) یک فرمان اسلش بومی اسلک است — دقیقاً مثل رفتارشان در تلگرام و دیسکورد. در اسلک <code>/</code> تایپ کنید و انتخاب‌گر تکمیل‌خودکار همهٔ فرمان‌های هرمس را با توضیحشان فهرست می‌کند.</p>
+<p>در پس‌زمینه: هرمس با یک مانیفست اپ اسلکِ تولیدشده عرضه می‌شود ‏(گام ۱، گزینهٔ A) که هر فرمان <a href="https://github.com/NousResearch/hermes-agent/blob/main/hermes_cli/commands.py" target="_blank" rel="noopener"><code>COMMAND_REGISTRY</code></a> را به‌عنوان فرمان اسلش اعلام می‌کند. در Socket Mode اسلک رویداد فرمان را مستقل از فیلد <code>url</code> مانیفست از طریق WebSocket مسیریابی می‌کند.</p>
+
+<h3>تجربهٔ پیام‌رسانی ایجنت</h3>
+<p>اپ‌های جدید اسلک از تجربهٔ پیام‌رسانی <strong>Agent</strong> اسلک استفاده می‌کنند. اپ‌های Assistant موجود هرمس می‌توانند با بازتولید مانیفست با <code>--agent-view</code> مهاجرت کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes slack manifest --agent-view --write</code></pre>
+</div>
+<p>مانیفست را در <strong>Features ← App Manifest</strong> به‌روز کنید و اگر اسلک خواست اپ را دوباره نصب کنید. Agent view به Assistant view برگشت‌پذیر نیست و کاربران ممکن است بعد از تغییر نیاز به hard-refresh اسلک داشته باشند. مانیفست Agent تولیدشده به <code>message.im</code>، ‏<code>app_home_opened</code> و <code>app_context_changed</code> اشتراک دارد تا هرمس بتواند DM تب Messages را شناسایی و زمینهٔ فعال اسلک کاربر را همراه نوبت دریافت کند. هرمس آن زمینه را فقط به‌عنوان برچسب می‌دهد؛ تاریخچهٔ کانال مشاهده‌شده را نمی‌خواند.</p>
+
+<h3>بازخوانی فرمان‌های اسلش پس از به‌روزرسانی</h3>
+<p>وقتی هرمس فرمان جدیدی اضافه می‌کند ‏(مثلاً بعد از <code>hermes update</code>)، مانیفست را بازتولید و اپ اسلک‌تان را به‌روز کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes slack manifest --write</code></pre>
+</div>
+<p>سپس در اسلک:</p>
+<ol>
+  <li><a href="https://api.slack.com/apps" target="_blank" rel="noopener">https://api.slack.com/apps</a> را باز کنید ← اپ هرمس‌تان</li>
+  <li><strong>Features ← App Manifest ← Edit</strong></li>
+  <li>محتوای جدید <code>~/.hermes/slack-manifest.json</code> را بچسبانید</li>
+  <li><strong>Save</strong> را بزنید. اگر scope یا فرمان‌های اسلش عوض شده باشند اسلک reinstall را پیشنهاد می‌دهد.</li>
+</ol>
+
+<h3>‏<code>/hermes &lt;زیرفرمان&gt;</code> قدیمی همچنان کار می‌کند</h3>
+<p>برای سازگاری رو به عقب با مانیفست‌های قدیمی‌تر هنوز می‌توانید <code>/hermes btw run the tests</code> تایپ کنید — هرمس همان‌طور مثل <code>/btw run the tests</code> مسیریابی‌اش می‌کند. پرسش‌های آزاد هم کار می‌کنند: ‏<code>/hermes what's the weather?</code> به‌عنوان پیام معمولی پردازش می‌شود.</p>
+
+<h3>استفاده از فرمان‌ها داخل تردها (پیشوند <code>!cmd</code>)</h3>
+<p>خود اسلک فرمان‌های اسلش بومی را داخل ریپلای‌های ترد مسدود می‌کند — ‏<code>/queue</code> را در ترد امتحان کنید و اسلک پاسخ می‌دهد: *«‎/queue is not supported in threads. Sorry!»* هیچ تنظیم سمت-اپی وجود ندارد که آنها را دوباره فعال کند؛ اسلک هرگزشان را به هرمس تحویل نمی‌دهد.</p>
+<p>به‌عنوان راه‌حل جایگزین، هرمس یک <code>!</code> ابتدایی را به‌عنوان پیشوند فرمان جایگزین می‌شناسد که در تردها ‏(و هر جای دیگر) کار می‌کند. ‏<code>!queue</code>، ‏<code>!stop</code>، ‏<code>!model gpt-5.4</code> و غیره را به‌عنوان ریپلای عادی ترد بنویسید — هرمس عیناً مثل فرم اسلش رفتار و در همان ترد پاسخ می‌دهد.</p>
+<p>فقط توکن اول با فهرست فرمان‌های شناخته‌شده چک می‌شود، پس پیام‌های معمولی مثل <code>!nice work</code> بدون تغییر به ایجنت می‌رسند. فرم تعجبی پشت منشن هم ‏(<code>@Hermes !stop</code>) و با فضای سفید ابتدایی هم کار می‌کند — هر دو در تردها به‌عنوان فرمان dispatch می‌شوند.</p>
+<p>پرامپت‌های تأیید ‏(تأیید فرمان خطرناک / ‏<code>execute_code</code>) معمولاً به‌صورت دکمه‌های تعاملی رندر می‌شوند. وقتی دکمه‌ها قابل‌تحویل نباشند و هرمس به پرامپت متنی سقوط کند، پرامپت به شما می‌گوید با <code>!approve</code> / ‏<code>!deny</code> پاسخ دهید — فرمی که داخل تردها کار می‌کند.</p>
+
+<h3>پاسخ‌های اسلش زودگذر (ephemeral) هستند</h3>
+<p>پاسخ به فرمان اسلش بومی ‏(مثل <code>/status</code>، ‏<code>/help</code>) به‌صورت <strong>زودگذر</strong> تحویل می‌شود — «Only visible to you» — پس خروجی فرمان هرگز کانال را اسپم نمی‌کند. placeholder «Running /cmd…» با پاسخ واقعی جایگزین می‌شود؛ پاسخ‌های بلند به پیام‌های زودگذر پیاپی تقسیم می‌شوند. اسلک جریان پاسخ را به ۵ پست سقف می‌زند، پس خروجی خیلی بلند با یک اعلان برشِ صریح بسته می‌شود نه حذف بی‌صدا. اگر مسیر اصلی زودگذر شکست بخورد، هرمس از یک مسیر API زودگذر دوم تلاش مجدد می‌کند — پاسخ اسلش هرگز به‌عنوان fallback عمومی در کانال پست نمی‌شود. ‏(فرمان‌هایی که به‌صورت پیام عادی تایپ شده‌اند — ‏<code>!cmd</code> در تردها، ‏<code>@Hermes /cmd</code> — به‌جایش مثل پیام‌های مرئی عادی پاسخ می‌گیرند.)</p>
+
+<h3>پرامپت‌های شفاف‌سازی (دکمه‌های یک‌ضربه‌ای)</h3>
+<p>وقتی ایجنت لازم باشد یک پرسش چندگزینه‌ای بپرسد ‏(ابزار <code>clarify</code>)، اسلک آن را به‌صورت <strong>دکمه‌های Block Kit</strong> رندر می‌کند — یک ضربه به‌ازای هر گزینه، به‌اضافهٔ دکمهٔ «✏️ Other…» که به حالت متن آزاد می‌رود ‏(پیام تایپی بعدی‌تان تبدیل به پاسخ می‌شود). پس از ضربه، پیام درجا به‌روز می‌شود تا نشان دهد چه کسی پاسخ داد و چه چیزی انتخاب شد؛ کلیک‌های بعدی روی همان پرامپت نادیده گرفته می‌شوند. کلیک دکمه‌ها همان مجوزدهی کاربر پیام‌ها را رعایت می‌کنند و پرامپت‌های منقضی ‏(ری‌استارت گیت‌وی، timeout) به‌جای بلع بی‌صدای کلیک، می‌گویند دوباره بپرسید. پرسش‌های بازِ clarify به‌صورت پرسش ساده رندر و ریپلای تایپی بعدی‌تان را می‌پذیرند. هیچ پیکربندی‌ای لازم نیست — مستقل از تنظیم <code>rich_blocks</code> کار می‌کند.</p>
+
+<h3>پیشرفته: فقط آرایهٔ فرمان‌های اسلش</h3>
+<p>اگر مانیفست اسلک‌تان را دستی نگه می‌دارید و فقط فهرست فرمان‌های اسلش را می‌خواهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes slack manifest --slashes-only > /tmp/slashes.json</code></pre>
+</div>
+<p>آن آرایه را در کلید <code>features.slash_commands</code> مانیفست موجودتان بچسبانید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> نحوهٔ پاسخ‌دادن بات</h2>
+<p>درک رفتار هرمس در زمینه‌های مختلف:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>زمینه</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><strong>DM‌ها</strong></td><td>بات به هر پیامی پاسخ می‌دهد — بدون نیاز به @منشن</td></tr>
+    <tr><td><strong>کانال‌ها</strong></td><td>بات <strong>فقط با @منشن پاسخ می‌دهد</strong> ‏(مثل «@Hermes Agent ساعت چنده؟»). در کانال‌ها هرمس در تردی چسبیده به همان پیام پاسخ می‌دهد.</td></tr>
+    <tr><td><strong>تردها</strong></td><td>اگر داخل تردي موجود هرمس را @منشن کنید در همان ترد پاسخ می‌دهد. وقتی بات نشست فعالی در ترد داشته باشد، <strong>ریپلای‌های بعدی همان ترد نیازی به @منشن ندارند</strong> — بات گفتگو را طبیعی دنبال می‌کند.</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>در کانال‌ها همیشه برای شروع گفتگو بات را @منشن کنید. وقتی بات در تردی فعال شد می‌توانید بدون منشن در همان ترد ریپلای بدهید. خارج از تردها، پیام‌های بدون @منشن برای جلوگیری از نویز در کانال‌های شلوغ نادیده گرفته می‌شوند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> گزینه‌های پیکربندی</h2>
+<p>فراتر از متغیرهای محیطی الزامی گام ۸، می‌توانید رفتار بات اسلک را از طریق <code>~/.hermes/config.yaml</code> سفارشی کنید.</p>
+
+<h3>رفتار ترد و ریپلای</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  slack:
+    # نحوهٔ تردشدن پاسخ‌های چندبخشی
+    # "off"   — هرگز ریپلای به پیام اصلی ترد نشود
+    # "first" — اولین بخش به پیام کاربر ترد شود (پیش‌فرض)
+    # "all"   — همهٔ بخش‌ها به پیام کاربر ترد شوند
+    reply_to_mode: "first"
+
+    extra:
+      # پاسخ در ترد باشد یا نه (پیش‌فرض: true).
+      # با false، پیام‌های کانال به‌جای ترد مستقیم در کانال پاسخ می‌گیرند.
+      # پیام‌های داخل تردهای موجود همچنان داخل ترد ریپلای می‌شوند.
+      reply_in_thread: true
+
+      # ارسال ریپلای‌های ترد به کانال اصلی هم
+      # (قابلیت "Also send to channel" اسلک).
+      # فقط اولین بخش اولین ریپلای broadcast می‌شود.
+      reply_broadcast: false
+
+      # رندر پیام‌های ایجنت به‌صورت بلوک‌های Block Kit اسلک (پیش‌فرض: false).
+      # با true، پیام نهایی ایجنت با بلوک‌های ساختاریافته فرستاده می‌شود —
+      # تیترهای بخش، جداکننده، فهرست‌های تودرتوی واقعی (با rich_text)،
+      # و جدول‌های بومی Block Kit — به‌جای متن mrkdwn تخت. یک fallback
+      # متنی ساده همیشه همراهش فرستاده می‌شود برای اعلان/دسترس‌پذیری.
+      # جدول‌های فراتر از سقف‌های اسلک (100 ردیف / 20 ستون / 10k کاراکتر)
+      # با ملایمت به مونواسپیس هم‌تراز برمی‌گردند.
+      rich_blocks: false
+
+      # افزودن کنترل‌های بازخورد بومی اسلک به ریپلای‌های نهایی Block Kit.
+      # نیازمند rich_blocks: true. پیش‌فرض: false.
+      feedback_buttons: false
+
+      # رندر فراخوانی‌های زندهٔ ابزار به‌صورت کارت‌های plan/task بومی اسلک.
+      # این انتخاب صریح، پیشرفت بومی را حتی با خاموشی text tool_progress فعال می‌کند.
+      # اگر اسلک استریم بومی را رد کند، هرمس برای بقیه نوبت یک fallback
+      # متنی قابل‌ویرایش را به‌روز نگه می‌دارد.
+      native_task_cards: false
+
+      # پرامپت‌های پیشنهادی پین‌شده بالای تب Messages نمای Agent.
+      # یا فهرستی از ردیف‌های {title, message}، یا آبجکت عنوان‌دار:
+      # {title: "Start here", prompts: [{title: "Plan", message: "..."}]}
+      suggested_prompts: []
+
+      # عنوان‌گذاری تردهای DM ایجنت/دستیار از اولین پیام کاربر.
+      # پیش‌فرض: true. با false عناوین پیش‌فرض اسلک می‌مانند.
+      assistant_thread_titles: true
+
+      # پذیرش پیام‌های بات‌های دیگر اسلک (پیش‌فرض: "none").
+      # "none" بات‌ها را نادیده می‌گیرد، "mentions" فقط وقتی پیام بات
+      # خودش هرمس را @منشن کرده قبول می‌کند، "all" همهٔ بات‌های دیگر را.
+      # هرمس همیشه کاربر باتِ خودش را برای پیشگیری از خود-پژواک نادیده می‌گیرد.
+      allow_bots: "none"
+
+      # سطح تحویل کرون قابل-ادامه (پیش‌فرض: "thread").
+      # "in_channel" کار کرونِ قابل‌ادامه را FLAT داخل کانال تحویل می‌دهد
+      # (بدون ترد اختصاصی)؛ با reply_in_thread: false (و require_mention: false)
+      # جفتش کنید تا یک ریپلای ساده کار را ادامه دهد.
+      # راهنمای کرون ← "Flat, in-channel continuation".
+      cron_continuable_surface: thread</code></pre>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>platforms.slack.reply_to_mode</code></td><td><code>"first"</code></td><td>حالت تردشدن پیام‌های چندبخشی: ‏<code>"off"</code>، ‏<code>"first"</code> یا <code>"all"</code></td></tr>
+    <tr><td><code>platforms.slack.extra.reply_in_thread</code></td><td><code>true</code></td><td>با <code>false</code> پیام‌های کانال به‌جای ترد مستقیم پاسخ می‌گیرند. پیام‌های داخل تردهای موجود همچنان داخل ترد ریپلای می‌شوند.</td></tr>
+    <tr><td><code>platforms.slack.extra.reply_broadcast</code></td><td><code>false</code></td><td>با <code>true</code> ریپلای‌های ترد به کانال اصلی هم پست می‌شوند. فقط اولین بخش broadcast می‌شود.</td></tr>
+    <tr><td><code>platforms.slack.extra.rich_blocks</code></td><td><code>false</code></td><td>با <code>true</code> پیام‌های ایجنت به‌صورت بلوک‌های <a href="https://docs.slack.dev/block-kit/" target="_blank" rel="noopener">Block Kit</a> رندر می‌شوند ‏(تیتر، جداکننده، فهرست تودرتوی واقعی و جدول بومی). fallback متنی ساده همیشه فرستاده می‌شود. جدول‌های فراتر از سقف اسلک به مونواسپیس هم‌تراز برمی‌گردند. reinstall لازم ندارد — فقط تغییر سمت ارسال است.</td></tr>
+    <tr><td><code>platforms.slack.extra.feedback_buttons</code></td><td><code>false</code></td><td>با <code>true</code> همراه <code>rich_blocks</code>، کنترل‌های بازخورد بومی اسلک به ریپلای‌های نهایی اضافه می‌شود.</td></tr>
+    <tr><td><code>platforms.slack.extra.native_task_cards</code></td><td><code>false</code></td><td>با <code>true</code> فراخوانی‌های زندهٔ ابزار به‌صورت کارت‌های plan/task بومی اسلک رندر می‌شوند. انتخاب صریح پیشرفت مستقل از پیش‌فرض <code>tool_progress: off</code> اسلک؛ شکست API بومی به یک به‌روزرسانی متنی پیوسته-ویرایش‌شونده سقوط می‌کند.</td></tr>
+    <tr><td><code>platforms.slack.extra.suggested_prompts</code></td><td><code>[]</code></td><td>تا چهار پرامپت <code>{title, message}</code> برای نقطهٔ ورود DM ایجنت/دستیار؛ هم فهرست می‌پذیرد هم <code>{title, prompts}</code>.</td></tr>
+    <tr><td><code>platforms.slack.extra.assistant_thread_titles</code></td><td><code>true</code></td><td>با <code>true</code> تردهای DM ایجنت/دستیار از اولین پیام کاربر نام‌گذاری می‌شوند.</td></tr>
+    <tr><td><code>platforms.slack.extra.allow_bots</code></td><td><code>"none"</code></td><td>کنترل پیام‌های بات‌های دیگر اسلک: ‏<code>"none"</code> نادیده می‌گیرد، ‏<code>"mentions"</code> فقط وقتی <strong>خودِ پیام</strong> هرمس را @منشن کرده می‌پذیرد، ‏<code>"all"</code> همه را می‌پذیرد. امن‌ترین حالت همکاری بات-به-بات <code>"mentions"</code> است.</td></tr>
+    <tr><td><code>platforms.slack.extra.cron_continuable_surface</code></td><td><code>"thread"</code></td><td>سطح تحویل کارهای کرون قابل‌ادامه. ‏<code>"thread"</code> به‌ازای هر تحویل ترد اختصاصی باز می‌کند ‏(پیش‌فرض)؛ ‏<code>"in_channel"</code> flat در خط‌زمان کانال تحویل می‌دهد. ‏<code>in_channel</code> را با <code>reply_in_thread: false</code> ‏(و <code>require_mention: false</code>) جفت کنید تا ریپلای سادهٔ کانال کار را ادامه دهد.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>متغیر محیطی معادل <code>SLACK_ALLOW_BOTS=none|mentions|all</code> است. وقتی هر دو تنظیم باشند <code>platforms.slack.extra.allow_bots</code> مقدم است. وقتی بات‌های همتا می‌توانند بدون منشن صریح به هم جواب دهند از <code>all</code> بپرهیزید، چون سیاست‌های ریپلای خودشان هنوز می‌توانند حلقه بسازند.</p>
+
+<h3>خط وضعیت حالت-کار</h3>
+<p>حین پردازش پیام توسط ایجنت، اسلک خط وضعیتی کنار نام بات در ترد نشان می‌دهد. پیش‌فرض هرمس <code>is thinking...</code> است؛ با <code>typing_status_text</code> سفارشی‌اش کنید — مثلاً دستیار بچه‌گربه‌ای به نام Ada:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  slack:
+    # خط وضعیت حالت-کار سفارشی (پیش‌فرض: "is thinking...").
+    typing_status_text: "is pouncing… 🐾"</code></pre>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>platforms.slack.typing_status_text</code></td><td><code>"is thinking..."</code></td><td>متن خط وضعیت حالت-کار حین پردازش پیام. scope ‏<code>assistant:write</code> لازم دارد — بدون آن فراخوانی وضعیت بی‌صدا شکست می‌خورد و اسلک placeholder عمومی خودش را نشان می‌دهد فارغ از مقدار این کلید. برای غیرفعال‌سازی کامل خط وضعیت <code>typing_indicator: false</code> را بگذارید.</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 وضعیت کجا رندر می‌شود</div>
+  <p>وضعیت سفارشی در <strong>فوترِ زیر جعبهٔ نوشتن پاسخ</strong> ظاهر می‌شود ‏(«*BotName* is thinking…»)، نه درجا در فهرست پیام‌ها. خطوط «Generating response…» / «Finding answers…» درون‌خطی که اسلک در ناحیهٔ پیام حین کار یک اپ AI نشان می‌دهد <strong>نشانگرهای چرخانِ خودِ اسلک‌اند</strong> — ‏<code>assistant.threads.setStatus</code> آن‌ها را کنترل نمی‌کند و هر دو می‌توانند هم‌زمان دیده شوند.</p>
+</div>
+<p>همین کلید پیام نشانگر حالت-کارِ مرئی Google Chat را هم سفارشی می‌کند ‏(<code>platform.google_chat.typing_status_text</code>، پیش‌فرض <code>"Hermes is thinking…"</code>) — توجه: در Google Chat این یک پیام واقعی پست‌شده است که به ریپلای وصله می‌شود، نه وضعیت زودگذر.</p>
+
+<h3>وضعیت زنده (به‌ازای هر ابزار)</h3>
+<p>به‌طور پیش‌فرض خط وضعیت <strong>همراه کار ایجنت زنده به‌روز می‌شود</strong>: به‌جای <code>is thinking...</code> ثابت نشان می‌دهد ایجنت همین الان چه می‌کند — ‏<code>is running pytest tests/…</code>، ‏<code>is reading docs/api.md…</code>، ‏<code>is searching the web for slack api limits…</code>. بین فراخوانی‌های ابزار به متن ثابت برمی‌گردد. این روی همان ضرباهجهٔ refresh وضعیت موجود سوار است، پس فراخوانی API اضافه‌ای به اسلک نمی‌زند و حتی با <code>tool_progress: off</code> ‏(پیش‌فرض اسلک) کار می‌کند — برخلاف حباب‌های پیشرفت، خط وضعیت زودگذر است و چیزی در کانال جا نمی‌گذارد.</p>
+<p>با <code>display.live_status</code> ‏(سراسری یا به‌ازای پلتفرم) کنترلش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  platforms:
+    slack:
+      # full = فعل + آرگومان ("is running pytest…")   [پیش‌فرض]
+      # verb = فقط فعل ("is running…") — دستورها/مسیرها را مخفی می‌کند،
+      #        مناسب کانال‌های مشترک یا رو‌به‌مشتری
+      # off  = متن ثابت (typing_status_text یا "is thinking...")
+      live_status: full</code></pre>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>display.live_status</code></td><td><code>"full"</code></td><td>خط وضعیت زندهٔ به‌ازای-ابزار. ‏<code>full</code> فعل + پیش‌نمایش آرگومان؛ ‏<code>verb</code> فقط فعل ‏(مسیر فایل و فرمان وارد کانال‌های مشترک نمی‌شود)؛ ‏<code>off</code> متن ثابت. مثل خط وضعیت ثابت، scope ‏<code>assistant:write</code> می‌خواهد.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>استریم بومی (پاسخ‌های تایپ-زنده)</h3>
+<p>قابلیت <a href="https://docs.slack.dev/ai/" target="_blank" rel="noopener">Agents &amp; AI Apps</a> اسلک یک سطح استریم بومی دارد ‏(<code>chat.startStream</code> / ‏<code>chat.appendStream</code> / ‏<code>chat.stopStream</code>) که پاسخ را به‌صورت پیام تایپ-زنده رندر می‌کند — بسیار روان‌تر از به‌روزرسانی‌های تدریجی مبتنی بر ویرایش. وقتی <code>streaming.enabled</code> روشن باشد ‏(ترنسپورت <code>auto</code> یا <code>draft</code>)، هرمس هر جا در دسترس باشد خودکار از استریم بومی استفاده می‌کند:</p>
+<ul>
+  <li>استریم با اولین فریم شروع و فقط دلتاها الصاق می‌شوند ‏(API فقط-الصاقی است). پیام استریم‌شده <strong>همان</strong> پیام نهایی است — هرمس با <code>chat.stopStream</code> مهرش می‌زند به‌جای پست یک ریپلای نهایی تکراری.</li>
+  <li>اگر اپ اسلک‌تان قابلیت AI نداشته باشد ‏(یا scope ‏<code>assistant:write</code> را ندارد)، اولین شکست کش می‌شود و هرمس با یک هشدار لاگِ واحد که راه‌حل را نام می‌برد به استریم مبتنی بر ویرایش سقوط می‌کند.</li>
+  <li>‏Block Kit انتخابی ‏(<code>rich_blocks: true</code>) روی پیام مهروشده اعمال می‌شود، مثل مسیر finalize مبتنی بر ویرایش.</li>
+</ul>
+<p>فراتر از فعال‌کردن streaming پیکربندی اضافه لازم نیست:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>streaming:
+  enabled: true       # ترنسپورت auto/draft استریم بومی اسلک را روشن می‌کند</code></pre>
+</div>
+
+<h3>کارت‌های Task بومی (پیشرفت زندهٔ ابزار)</h3>
+<p>با <code>platforms.slack.extra.native_task_cards: true</code> فراخوانی‌های زندهٔ ابزار به‌صورت <strong>کارت‌های plan/task</strong> بومی اسلک رندر می‌شوند ‏(همان UI قابلیت‌های AI خود اسلک) به‌جای حباب‌های متنی پیشرفت: یک کارت به‌ازای هر نوبت، یک ردیف به‌ازای هر فراخوانی ابزار، با وضعیت‌های running/complete/error به‌ازای هر task که درجا به‌روز می‌شوند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  slack:
+    extra:
+      native_task_cards: true</code></pre>
+</div>
+<ul>
+  <li>این یک انتخاب صریح پیشرفت است — حتی با پیش‌فرض <code>tool_progress: off</code> اسلک کار می‌کند ‏(حباب‌های متنی کانال را اسپم می‌کنند؛ کارت‌های بومی نمی‌کنند).</li>
+  <li>فراخوانی‌های هم‌زمان یک ابزار با شناسهٔ واقعی فراخوانی correlate می‌شوند، پس فراخوانی‌های موازی <code>web_search</code> هرکدام ردیف خودشان را با وضعیت درست دارند.</li>
+  <li>اگر استریم بومی شروع یا به‌روز نشود، هرمس به یک پیام متنی واحدِ پیوسته-ویرایش‌شونده سقوط می‌کند تا پیشرفت برای همان نوبت زنده بماند.</li>
+  <li>استریم کارت دقیقاً یک‌بار هنگام نهایی‌شدن نوبت متوقف می‌شود، شامل وقفه/قطعی، پس هیچ نشانگر زندهٔ معلق جا نمی‌ماند.</li>
+</ul>
+
+<h3>ایزوله‌سازی نشست</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># تنظیم سراسری — روی اسلک و همهٔ پلتفرم‌های دیگر اعمال می‌شود
+group_sessions_per_user: true</code></pre>
+</div>
+<p>وقتی <code>true</code> ‏(پیش‌فرض)، هر کاربر در کانال مشترک نشست گفتگوی ایزولهٔ خودش را دارد. دو نفری که در <code>#general</code> با هرمس حرف می‌زنند تاریخچه و زمینهٔ جدا دارند.</p>
+<p>اگر حالت مشارکتی می‌خواهید که کل کانال یک نشست مشترک داشته باشد <code>false</code> کنید. بدانید این یعنی کاربران در رشد زمینه و هزینهٔ توکن شریک‌اند و <code>/reset</code> یک نفر نشست همه را پاک می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> رفتار منشن و تریگر</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>slack:
+  # منشن اجباری در کانال‌ها (این رفتار پیش‌فرض است؛
+  # آداپتور اسلک در کانال‌ها به هر حال گیت منشن را اعمال می‌کند،
+  # ولی برای یکدستی با پلتفرم‌های دیگر می‌توانید صریحش کنید)
+  require_mention: true
+
+  # جلوگیری از درگیری خودکار ترد: فقط به پیام‌های کانالی که
+  # @منشن صریح دارند پاسخ بده. با خاموشی این گزینه (پیش‌فرض)،
+  # اسلک می‌تواند «خودکار درگیر شود» — منشن‌های گذشتهٔ ترد را
+  # به یاد دارد، ریپلای به پیام‌های بات را دنبال می‌کند و نشست‌های
+  # فعال را بدون منشن تازه ادامه می‌دهد. با strict_mention روشن،
+  # هر پیام جدید کانال باید قبل از پاسخ هرمس بات را @منشن کند.
+  strict_mention: false
+
+  # نادیده گرفتن پیام‌های خطاب‌شده به کاربر دیگر: وقتی پیام کانال/ترد
+  # با @منشن شخصی غیر از بات «شروع» می‌شود (مثلاً "@rasha می‌گیری این را؟")،
+  # ساکت بمان مگر بات هم منشن شده باشد. فقط منشن «ابتدایی» حساب
+  # «خطاب‌شده» می‌شود — پیامی که وسط جمله کسی را ذکر کند
+  # ("loop in @rasha") همچنان به بات می‌رسد. بر free_response_channels
+  # و درگیری خودکار ترد مقدم است. انتخابی؛ پیش‌فرض خاموش. Env: SLACK_IGNORE_OTHER_USER_MENTIONS.
+  ignore_other_user_mentions: false
+
+  # منشن صریح برای ریپلای‌های ترد لازم باشد، در حالی که پیام‌های
+  # سطح‌بالای کانال تابع require_mention / free_response_channels می‌مانند.
+  # محدودتر از strict_mention: وقتی بات پاسخ-آزاد نباید وارد هر
+  # پیام بعدیِ تردهای شلوغ شود. انتخابی؛ پیش‌فرض خاموش. Env: SLACK_THREAD_REQUIRE_MENTION.
+  thread_require_mention: false
+
+  # بازنویسی اجبار-منشن به‌ازای کانال — در جهت مقابل free_response_channels.
+  # کانال‌های این فهرست ALWAYS منشن صریح می‌خواهند، حتی وقتی
+  # require_mention سراسری false است. گفتگوهای در جریان همچنان
+  # خودکار دنبال می‌شوند (تردهای منشن‌شده، نشست‌های فعال، تردهای ساختهٔ بات).
+  # شناسه‌ها با ویرگول یا فهرست. Env: SLACK_REQUIRE_MENTION_CHANNELS.
+  require_mention_channels: ""
+
+  # الگوهای منشن سفارشی که بات را فعال می‌کنند
+  # (علاوه بر تشخیص پیش‌فرض @منشن)
+  mention_patterns:
+    - "hey hermes"
+    - "hermes,"
+
+  # متنی که به ابتدای هر پیام خروجی الصاق می‌شود
+  reply_prefix: ""</code></pre>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 کِی <code>strict_mention</code>؟</div>
+  <p>در ورک‌اسپیس‌های شلوغی که رفتار پیش‌فرض «بات این ترد را به یاد دارد» اسلک کاربران را غافلگیر می‌کند <code>true</code> کنید — مثلاً ترد طولانی پشتیبانی فنی که بات اولش کمک کرد و ترجیح می‌دهید مگر دوباره صریحاً پینگ شود ساکت بماند. DM‌ها و نشست‌های تعاملی فعال بی‌تأثیرند.</p>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 کِی <code>ignore_other_user_mentions</code>؟</div>
+  <p>وقتی بات تردهای شلوغ را دنبال می‌کند ‏(با درگیری خودکار ترد یا <code>free_response_channels</code>) و وسط پیام‌هایی که انسان‌ها به همدیگر داده‌اند پا می‌گذارد <code>true</code> کنید. ابزار محدودتری از <code>strict_mention</code>: پیام‌های ادامه‌دهندهٔ عادی تردِ درگیر همچنان جواب می‌گیرند؛ فقط پیام‌هایی که با منشن شخص دیگری باز می‌شوند رد می‌شوند. ‏<strong>DM های ۱:۱ بی‌تأثیرند</strong>؛ ‏DM گروهی ‏(MPIM) و کانال هر دو شامل‌اند، مطابق سیاست سطح-مشترک پایین. توکن‌های broadcast ‏(<code>@here</code>، ‏<code>@channel</code>) و ارجاعات کانال خطاب به اتاق‌اند نه شخص، پس هرگز رد نمی‌شوند.</p>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 نکته</div>
+  <p>اسلک هر دو الگو را پشتیبانی می‌کند: پیش‌فرض <code>@منشن</code> برای شروع گفتگو لازم است، ولی می‌توانید کانال‌های خاص را با <code>SLACK_FREE_RESPONSE_CHANNELS</code> ‏(شناسه‌های کانال جدا با ویرگول) یا <code>slack.free_response_channels</code> در <code>config.yaml</code> مستثنا کنید. وقتی بات نشست فعالی در ترد داشته باشد ریپلای‌های بعدی ترد منشن نمی‌خواهند. در <strong>DM های ۱:۱</strong> بات همیشه بدون منشن پاسخ می‌دهد.</p>
+</div>
+<div class="callout caution">
+  <div class="callout-title">⚠️ DM های گروهی ‏(MPIM) سطح مشترک‌اند نه DM یک‌به‌یک</div>
+  <p>‏<strong>پیام خصوصی ۱:۱</strong> گفتگوی خصوصی با یک نفر است، پس از منشن معاف است. <strong>‏DM گروهی ‏(MPIM / چندنفره)</strong> یک <em>سطح مشترک</em> است — چند نفر می‌توانند ببینند و بات را فعال کنند — پس همان کنترل‌های اپراتوریِ کانال را دارد: ‏<code>require_mention</code>، ‏<code>strict_mention</code>، ‏<code>free_response_channels</code> و <code>allowed_channels</code> همه اعمال می‌شوند و بات فقط وقتی واقعاً <code>@منشن</code> شود واکنش ‏<code>:eyes:</code>/<code>:white_check_mark:</code> می‌گذارد. برای پاسخ آزاد بات در یک MPIM مشخص، شناسهٔ کانالش ‏(شروع با <code>G</code>) را به <code>free_response_channels</code> اضافه کنید.</p>
+</div>
+
+<h4>کدام گزینهٔ منشن را می‌خواهم؟</h4>
+<p>گزینه‌های gating ترکیب‌شدنی‌اند — هر کدام به پرسشی مختلف جواب می‌دهد:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>گزینه</th><th>پرسشی که جواب می‌دهد</th><th>پیش‌فرض</th><th>دامنه</th></tr></thead>
+  <tbody>
+    <tr><td><code>require_mention</code></td><td>آیا <strong>پیام‌های سطح‌بالای کانال</strong> به @منشن نیاز دارند؟</td><td><code>true</code></td><td>همهٔ کانال‌ها</td></tr>
+    <tr><td><code>free_response_channels</code></td><td>کدام کانال‌ها از <code>require_mention</code> معافند؟</td><td>هیچ</td><td>کانال‌های فهرست‌شده</td></tr>
+    <tr><td><code>require_mention_channels</code></td><td>کدام کانال‌ها ALWAYS @منشن می‌خواهند، حتی وقتی <code>require_mention</code> برابر <code>false</code> یا کانال پاسخ-آزاد است؟ بر هر دو مقدم است.</td><td>هیچ</td><td>کانال‌های فهرست‌شده</td></tr>
+    <tr><td><code>thread_require_mention</code></td><td>آیا <strong>ریپلای‌های ترد</strong> به @منشن نیاز دارند حتی وقتی پیام‌های سطح‌بالا ندارند؟ تردهای منشن‌شده به یاد سپرده نمی‌شوند.</td><td><code>false</code></td><td>فقط تردها</td></tr>
+    <tr><td><code>strict_mention</code></td><td>آیا <strong>هر</strong> پیام کانال ‏(سطح‌بالا و ترد) منشن تازه می‌خواهد؟ همهٔ دنبال‌کردن‌های خودکار را غیرفعال می‌کند: حافظهٔ ترد منشن‌شده، دنبال‌کردن ریپلای بات، ازسرگیری نشست فعال.</td><td><code>false</code></td><td>همهٔ کانال‌ها + تردها</td></tr>
+    <tr><td><code>ignore_other_user_mentions</code></td><td>پیامی که <strong>با منشن شخص دیگری باز می‌شود</strong> ‏(«@rasha می‌گیری این را؟») رد شود؟ بر پاسخ-آزاد و دنبال‌کردن خودکار ترد مقدم است؛ ارجاع وسط‌جمله همچنان به بات می‌رسد.</td><td><code>false</code></td><td>کانال‌ها + DM گروهی</td></tr>
+  </tbody>
+</table>
+</div>
+<p>قاعدهٔ سرانگشتی: ‏<code>strict_mention</code> پهن‌ترین چکش است؛ ‏<code>thread_require_mention</code> تردهای شلوغ را بدون دست‌زدن به gating سطح‌بالا آرام می‌کند؛ ‏<code>require_mention_channels</code> کانال‌های تکی را روی باتی که کلاً پاسخ-آزاد است دوباره سفت می‌کند؛ ‏<code>ignore_other_user_mentions</code> فقط پیام‌های خطاب‌شدهٔ صریح به شخص دیگر را رد می‌کند. DM های ۱:۱ همیشه پاسخ می‌دهند و از همهٔ این‌ها بی‌تأثیرند.</p>
+
+<h3>پذیرش پیام از بات‌های دیگر (<code>allow_bots</code>)</h3>
+<p>به‌طور پیش‌فرض هرمس هر پیامِ نوشته‌شده توسط بات یا اپ دیگر اسلک را نادیده می‌گیرد ‏(شامل پست‌های Workflow Builder). برای ورک‌اسپیس‌های چندایجنتی — چند نمونهٔ هرمس یا بات‌های همتا که در یک کانال همکاری می‌کنند — با <code>allow_bots</code> انتخاب کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  slack:
+    extra:
+      # "none" (پیش‌فرض) — نادیده گرفتن همهٔ پیام‌های بات/اپ
+      # "mentions"       — پذیرش پیام بات فقط وقتی همان پیام
+      #                    این بات را @منشن کرده باشد
+      # "all"            — پذیرش همهٔ پیام‌های بات (غیر از خودِ بات)
+      allow_bots: mentions</code></pre>
+</div>
+<p>معادل env: ‏<code>SLACK_ALLOW_BOTS=none|mentions|all</code> ‏(با تنظیم هر دو، کلید config برنده است). مقادیر ناشناخته <code>none</code> فرض می‌شوند.</p>
+<p>نحوهٔ gating حالت <code>mentions</code>:</p>
+<ul>
+  <li>پیام بات همتا <strong>فقط وقتی پذیرفته می‌شود که خود پیام یک <code>@منشن</code> جاری از این بات داشته باشد</strong> — در متنش یا بلوک‌های Block Kitش. تاریخچهٔ ترد حساب نمی‌شود: منشن‌شدن قبلی بات در ترد، ریپلای به پیام‌های خود بات، و نشست‌های فعال ترد، پیام‌های بعدیِ بی-منشنِ بات همتا را <strong>نمی‌پذیرند</strong>. این عمدی است — همان چیزی که حلقه‌های ack/status ایجنت-به-ایجنت را می‌شکند.</li>
+  <li>پیام‌های انسان بی‌تأثیرند؛ gating منشن عادی رویشان اعمال می‌شود.</li>
+  <li>هرمس در همهٔ حالت‌ها پیام‌های خودش را نادیده می‌گیرد تا حلقهٔ خود-پژواک نسازد.</li>
+</ul>
+<p>‏<code>mentions</code> حالت توصیه‌شده برای همکاری بات-به-بات است: هر ایجنت باید به‌ازای هر نوبت صریحاً دیگری را احضار کند. جز وقتی سیاست ریپلای همهٔ بات‌های همتا loop-safe باشد از <code>all</code> بپرهیزید — دو باتی که به همه‌چیز جواب می‌دهند تا ابد به همدیگر جواب خواهند داد. تشخیص، پیام‌های برچسب‌دار بات ‏(<code>bot_id</code>، ‏<code>subtype: bot_message</code>)، رویدادهای برخاسته از اپ و کاربران باتِ بی‌برچسب ‏(با probe ‏<code>users.info</code>) را پوشش می‌دهد، پس ایجنت‌های هرمس همتا در همهٔ ورک‌اسپیس‌ها یکدست فیلتر می‌شوند.</p>
+<p>برای استقرارهای سخت‌گیرانهٔ چند-بات با <code>require_mention: true</code> و <code>strict_mention: true</code> جفتش کنید — پروفایل smoke-check پایین را ببینید.</p>
+
+<h3>تریگرهای واکنش (<code>reaction_triggers</code>)</h3>
+<p>به‌طور پیش‌فرض واکنش‌های ایموجی فقط تأیید و رها می‌شوند — 👍 روی پیام بات کاری نمی‌کند. ‏<code>slack.reaction_triggers</code> را بگذارید تا واکنش‌ها وارد حلقهٔ ایجنت شوند ‏(scope ‏<code>reactions:read</code> به‌اضافهٔ اشتراک رویدادهای بات ‏<code>reaction_added</code>/<code>reaction_removed</code> در مانیفست اپ اسلک لازم است — با <code>hermes slack manifest</code> بازتولید کنید):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>slack:
+  # انتخابی. false/غایب (پیش‌فرض) = واکنش‌ها تأیید و رها می‌شوند.
+  # true = هر واکنشی روی پیام‌های خودِ بات به ایجنت مسیریابی می‌شود.
+  reaction_triggers: true
+  # یا لیست‌مجاز صریح ایموجی — فقط این نام‌ها مسیریابی می‌شوند و
+  # می‌توانند هر پیامی را هدف بگیرند (گردش‌کار emoji-handoff، مثل :task: برای ثبت):
+  # reaction_triggers: [white_check_mark, thumbsup, task]
+  # هدف handoff اختیاری: در این کانال (سطح‌بالا) یا ترد (C123:&lt;thread_ts&gt;)
+  # پاسخ بده به‌جای ترد پیامِ واکنش‌خورده.
+  # reaction_trigger_target: C0123456789</code></pre>
+</div>
+<p>معادل‌های محیطی: ‏<code>SLACK_REACTION_TRIGGERS</code> ‏(<code>true</code>/<code>all</code> یا فهرست جداشده با ویرگول) و <code>SLACK_REACTION_TRIGGER_TARGET</code>.</p>
+<p>رفتار:</p>
+<ul>
+  <li>واکنش به‌عنوان یک نوبت عادی ایجنت با متن ‏<code>reaction:added:👍</code> / ‏<code>reaction:removed:👍</code> می‌رسد ‏(نام‌های رایج اسلک به یونیکد ترجمه می‌شوند؛ نام‌های ناشناخته عیناً عبور می‌کنند مثل <code>reaction:added:custom-emoji</code>)، زیر پیامِ واکنش‌خورده ترد می‌شود تا ایجنت ببیند به چه چیزی واکنش داده شده و نوبت در همان نشستِ یک ریپلای می‌نشیند.</li>
+  <li>واکنش‌دهنده کاربرِ پیام می‌شود، پس <strong>مجوزدهی کاربر و گیت <code>allowed_channels</code> دقیقاً مثل پیام‌های تایپی اعمال می‌شود</strong> — واکنش کاربر غریبه نمی‌تواند ایجنت را جایی تریگر کند که پیامش نمی‌توانست.</li>
+  <li>با <code>reaction_triggers: true</code> فقط واکنش‌های روی پیام‌های <strong>خودی</strong> بات مسیریابی می‌شوند ‏(گردش‌کارهای تأیید). با لیست‌مجاز صریح ایموجی، ایموجی‌های فهرست‌شده از هر پیامی مسیریابی می‌شوند.</li>
+  <li>واکنش‌های چرخه‌حیاتِ خود بات ‏(<code>:eyes:</code> و مانند آن) هرگز برنمی‌گردند.</li>
+  <li>مستقل از این انتخاب، هر واکنش انسان هوک‌های گیت‌وی ‏<code>reaction:added</code>/<code>reaction:removed</code> را برای ناظرانی که نوبت ایجنت لازم ندارند شلیک می‌کند.</li>
+</ul>
+
+<h3>Smoke-check ایجنت همتا</h3>
+<p>برای استقرارهای چند-بات اسلکی که به منشن سخت‌گیرانهٔ به‌ازای-نوبت تکیه دارند این پروفایل را حفظ کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>slack:
+  require_mention: true
+  strict_mention: true
+  allow_bots: mentions
+  allowed_channels: ""</code></pre>
+</div>
+<p>بعد از تغییرات config گیت‌وی، deploy یا ری‌استارت، این هدف smoke مصنوعی را اجرا کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>uv run --frozen pytest -q tests/gateway/test_slack_peer_agent_smoke.py -o addopts=''</code></pre>
+</div>
+<p>این هدف فقط از رویدادهای مصنوعی درون-پروسه‌ای استفاده می‌کند. پیام زندهٔ اسلک نمی‌فرستد و به‌طور پیش‌فرض توکن بات واقعی نمی‌خواهد.</p>
+<p>سبدهای شکست:</p>
+<ul>
+  <li><code>config:</code> ‏<code>test_peer_agent_smoke_preflight_contract</code> عدم‌تطبیق پروفایل را گرفت ‏(<code>require_mention</code>، ‏<code>strict_mention</code>، ‏<code>allow_bots</code> یا <code>allowed_channels</code>).</li>
+  <li><code>platform_connectivity:</code> آداپتور/کلاینت مقداردهی نشده بود، پس smoke مسیریابی هنوز سیگنال قابل‌اعتمادی نیست.</li>
+  <li><code>bot_identity:</code> آداپتور هرگز شناسهٔ کاربر باتش را حل نکرد، پس چک منشنِ پیام-جاری نمی‌تواند کار کند.</li>
+  <li><code>routing_logic:</code> آداپتور اسلک روی یکی از ناورداها‌های ایجنت-همتا پسروی کرد ‏(مسیریابی منشن انسان، نادیده‌گرفتن بات همتا، پذیرش منشن صریح همتا، یا سرکوب منفعل ack/status/error).</li>
+</ul>
+<p>اگر این هدف پاس شد ولی ورک‌اسپیس زنده هنوز پیام‌ها را بد مسیریابی می‌کند، اتصال توکن/ورک‌اسپیس اسلک و وضعیت استقرار runtime را خارج از منطق مسیریابی بررسی کنید.</p>
+
+<h3>لیست‌مجاز کانال (<code>allowed_channels</code>)</h3>
+<p>بات را به مجموعهٔ ثابتی از کانال‌های اسلک محدود کنید — وقتی بات به کانال‌های زیادی دعوت شده ولی باید فقط در چندتا پاسخ دهد مفید است. با تنظیم، پیام‌های کانال‌های خارج از این فهرست <strong>بی‌صدا نادیده گرفته می‌شوند</strong> حتی با @منشن.</p>
+<p><strong>‏DM های ۱:۱ از این فیلتر معاف‌اند</strong>، پس کاربران مجاز همیشه در پیام خصوصی به بات می‌رسند. <strong>‏DM های گروهی ‏(MPIM) معاف نیستند</strong> — مثل کانال‌ها، MPIM باید روی لیست‌مجاز باشد ‏(شناسه‌اش با <code>G</code> شروع می‌شود) وگرنه پیام‌هایش رد می‌شوند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>slack:
+  allowed_channels:
+    - "C0123456789"   # ‎#ops
+    - "C0987654321"   # ‎#incident-response</code></pre>
+</div>
+<p>یا با متغیر محیطی ‏(جداشده با ویرگول):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>SLACK_ALLOWED_CHANNELS="C0123456789,C0987654321"</code></pre>
+</div>
+<p>رفتار:</p>
+<ul>
+  <li>خالی / تنظیم‌نشده ← بدون محدودیت ‏(کاملاً سازگار رو به عقب).</li>
+  <li>غیرخالی ← شناسهٔ کانال باید روی فهرست باشد وگرنه پیام قبل از هر gating دیگری ‏(شرط منشن، ‏<code>free_response_channels</code> و...) رد می‌شود.</li>
+  <li>شناسه‌های کانال اسلک با <code>C</code> ‏(عمومی)، ‏<code>G</code> ‏(خصوصی) یا <code>D</code> ‏(DM) شروع می‌شوند. از UI اسلک «Open channel details» ← پنل «About» یا از API پیدا کنید.</li>
+</ul>
+<p>همچنین ببینید: <a href="https://hermes-agent.nousresearch.com/docs/reference/slash-commands" target="_blank" rel="noopener">تفکیک فرمان ادمین/کاربر</a>.</p>
+
+<h3>مدیریت کاربر غیرمجاز</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>slack:
+  # وقتی کاربر غیرمجاز (خارج از SLACK_ALLOWED_USERS) به بات DM بدهد چه شود
+  # "pair"   — کد جفت‌سازی از او بپرس (پیش‌فرض)
+  # "ignore" — پیام را بی‌صدا دور بینداز
+  unauthorized_dm_behavior: "pair"</code></pre>
+</div>
+<p>سراسری هم برای همهٔ پلتفرم‌ها می‌شود گذاشت:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>unauthorized_dm_behavior: "pair"</code></pre>
+</div>
+<p>تنظیم مخصوص پلتفرم زیر <code>slack:</code> بر تنظیم سراسری مقدم است.</p>
+
+<h3>رونویسی صوت</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># تنظیم سراسری — فعال/غیرفعال‌کردن رونویسی خودکار پیام‌های صوتی ورودی
+stt_enabled: true</code></pre>
+</div>
+<p>وقتی <code>true</code> ‏(پیش‌فرض)، پیام‌های صوتی ورودی قبل از پردازش توسط ایجنت خودکار با ارائه‌دهندهٔ STT پیکربندی‌شده رونویسی می‌شوند.</p>
+
+<h3>مثال کامل</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># تنظیمات سراسری گیت‌وی
+group_sessions_per_user: true
+unauthorized_dm_behavior: "pair"
+stt_enabled: true
+
+# تنظیمات مخصوص اسلک
+slack:
+  require_mention: true
+  unauthorized_dm_behavior: "pair"
+
+# پیکربندی پلتفرم
+platforms:
+  slack:
+    reply_to_mode: "first"
+    extra:
+      reply_in_thread: true
+      reply_broadcast: false</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> کانال خانگی</h2>
+<p>‏<code>SLACK_HOME_CHANNEL</code> را روی شناسهٔ کانالی بگذارید که هرمس پیام‌های زمان‌بندی‌شده، نتایج job های کرون و سایر اعلان‌های پیش‌فعال را به آن تحویل دهد. برای یافتن شناسهٔ کانال:</p>
+<ol>
+  <li>روی نام کانال در اسلک راست‌کلیک کنید</li>
+  <li><strong>View channel details</strong> را بزنید</li>
+  <li>به پایین اسکرول کنید — Channel ID آنجاست</li>
+</ol>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>SLACK_HOME_CHANNEL=C01234567890</code></pre>
+</div>
+<p>حتماً بات به کانال <strong>دعوت شده باشد</strong> ‏(<code>/invite @Hermes Agent</code>).</p>
+
+<h3>هدف‌گذاری تحویل کرون</h3>
+<p>کارهای کرون ‏(<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/cron" target="_blank" rel="noopener">راهنمای کرون</a> را ببینید) سه راه به اسلک هدف می‌گیرند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مقدار <code>deliver:</code></th><th>کجا می‌نشیند</th></tr></thead>
+  <tbody>
+    <tr><td><code>slack</code></td><td>کانال خانگی ‏(<code>SLACK_HOME_CHANNEL</code>)</td></tr>
+    <tr><td><code>slack:C0123456789</code></td><td>یک کانال مشخص با شناسه</td></tr>
+    <tr><td><code>slack:U0123456789</code></td><td><strong>DM</strong> آن کاربر — شناسهٔ لخت کاربر خودکار به گفتگوی DM حل می‌شود ‏(scope ‏<code>im:write</code> لازم دارد)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>تحویل حتی وقتی پروسهٔ کرون هم‌مکان با گیت‌وی نیست کار می‌کند — هرمس به یک فرستندهٔ مستقل Web API با <code>SLACK_BOT_TOKEN</code> سقوط می‌کند. پیوست‌های <code>MEDIA:</code> در خروجی کرون به‌عنوان file share بومی اسلک به همان هدف آپلود می‌شوند.</p>
+
+<h3>ارسال پیام و رسانه (<code>send_message</code>)</h3>
+<p>ابزار <code>send_message</code> ایجنت همان شکل‌های هدف را می‌پذیرد: شناسهٔ کانال ‏(<code>C…</code>/<code>G…</code>)، گفتگوی DM ‏(<code>D…</code>) یا شناسهٔ لخت کاربر ‏(<code>U…</code>/<code>W…</code>) که در همهٔ مسیرهای ارسال — متن، رسانه و پرامپت‌های تعاملی — به DM کاربر حل می‌شود. پیوست‌های <code>MEDIA:&lt;path&gt;</code> ‏(تصویر، PDF، سند) به‌صورت file share بومی آپلود می‌شوند؛ وقتی پیام کوتاهی همراه یک پیوست واحد باشد به‌جای پیام جداگانه به‌عنوان کپشن فایل سوار می‌شود. فایل‌های گمشده به‌ازای هر فایل به‌عنوان هشدار گزارش می‌شوند نه شکست کل ارسال.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> پشتیبانی چند-ورک‌اسپیس</h2>
+<p>هرمس می‌تواند با یک نمونهٔ گیت‌وی به‌طور هم‌زمان به <strong>چند ورک‌اسپیس اسلک</strong> وصل شود. هر ورک‌اسپیس مستقلاً با شناسهٔ کاربر بات خودش احراز می‌شود.</p>
+
+<h3>پیکربندی</h3>
+<p>چند توکن بات را به‌صورت <strong>فهرست جداشده با ویرگول</strong> در <code>SLACK_BOT_TOKEN</code> بدهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># چند توکن بات — یکی به‌ازای هر ورک‌اسپیس
+SLACK_BOT_TOKEN=xoxb-workspace1-token,xoxb-workspace2-token,xoxb-workspace3-token
+
+# یک توکن سطح‌اپ واحد همچنان برای Socket Mode استفاده می‌شود
+SLACK_APP_TOKEN=xapp-your-app-token</code></pre>
+</div>
+<p>یا در <code>~/.hermes/config.yaml</code>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  slack:
+    token: "xoxb-workspace1-token,xoxb-workspace2-token"</code></pre>
+</div>
+
+<h3>فایل توکن OAuth</h3>
+<p>علاوه بر توکن‌های محیط/config، هرمس توکن‌ها را از یک <strong>فایل توکن OAuth</strong> هم بار می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>~/.hermes/slack_tokens.json</code></pre>
+</div>
+<p>این فایل آبجکت JSON نگاشت team ID به رکورد توکن است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{
+  "T01ABC2DEF3": {
+    "token": "xoxb-workspace-token-here",
+    "team_name": "My Workspace"
+  }
+}</code></pre>
+</div>
+<p>توکن‌های این فایل با توکن‌های <code>SLACK_BOT_TOKEN</code> ادغام می‌شوند. توکن‌های تکراری خودکار dedupe می‌شوند.</p>
+
+<h3>نحوهٔ کار</h3>
+<ul>
+  <li><strong>اولین توکن</strong> فهرست، توکن اصلی است و برای اتصال Socket Mode ‏(AsyncApp) استفاده می‌شود.</li>
+  <li>هر توکن هنگام شروع با <code>auth.test</code> احراز می‌شود. گیت‌وی هر <code>team_id</code> را به <code>WebClient</code> و <code>bot_user_id</code> خودش نگاشت می‌کند.</li>
+  <li>وقتی پیامی می‌رسد هرمس از کلاینت مخصوص همان ورک‌اسپیس برای پاسخ استفاده می‌کند.</li>
+  <li>‏<code>bot_user_id</code> اصلی ‏(از اولین توکن) برای سازگاری رو به عقب با قابلیت‌هایی که هویت بات واحد انتظار دارند استفاده می‌شود.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۷</span> پیام‌های صوتی</h2>
+<p>هرمس صدا را روی اسلک پشتیبانی می‌کند:</p>
+<ul>
+  <li><strong>ورودی:</strong> پیام‌های صوتی خودکار با ارائه‌دهندهٔ STT پیکربندی‌شده رونویسی می‌شوند: ‏<code>faster-whisper</code> محلی، ‏Groq Whisper ‏(<code>GROQ_API_KEY</code>) یا OpenAI Whisper ‏(<code>VOICE_TOOLS_OPENAI_KEY</code>)</li>
+  <li><strong>خروجی:</strong> پاسخ‌های TTS به‌صورت پیوست فایل صوتی فرستاده می‌شوند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۸</span> پرامپت به‌ازای-کانال</h2>
+<p>پرامپت‌های سیستمی زودگذر را به کانال‌های مشخص اسلک اختصاص دهید. پرامپت در زمان اجرا در هر نوبت تزریق می‌شود — هرگز در تاریخچهٔ رونویسی ذخیره نمی‌شود — پس تغییرات فوراً اثر می‌کنند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>slack:
+  channel_prompts:
+    "C01RESEARCH": |
+      You are a research assistant. Focus on academic sources,
+      citations, and concise synthesis.
+    "C02ENGINEERING": |
+      Code review mode. Be precise about edge cases and
+      performance implications.</code></pre>
+</div>
+<p>کلیدها شناسه‌های کانال اسلک‌اند ‏(از channel details ← «About» ← اسکرول تا پایین). همهٔ پیام‌های کانال منطبق پرامپت را به‌عنوان دستور سیستمی زودگذر دریافت می‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۹</span> اتصال مهارت به‌ازای-کانال</h2>
+<p>هر وقت نشست جدیدی در کانال یا DM مشخصی شروع شود یک مهارت خودکار بارگذاری کنید. برخلاف پرامپت‌های به‌ازای-کانال ‏(که در هر نوبت تزریق می‌شوند)، اتصال مهارت محتوای مهارت را در <strong>شروع نشست</strong> به‌عنوان پیام کاربر تزریق می‌کند — بخشی از تاریخچهٔ گفتگو می‌شود و نیازی به بارگذاری مجدد در نوبت‌های بعدی نیست.</p>
+<p>برای DM ها یا کانال‌های با هدف مشخص ‏(فلش‌کارت، بات پرسش‌وپاسخ حوزه‌محور، کانال triage پشتیبانی و...) ایده‌آل است که نمی‌خواهید انتخابگر مهارتِ مدل تصمیم بگیرد در هر ریپلای کوتاه بار بگیرد یا نه.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>slack:
+  channel_skill_bindings:
+    # کانال DM — همیشه در حالت "german-flashcards" اجرا می‌شود
+    - id: "D0ATH9TQ0G6"
+      skills:
+        - german-flashcards
+    # کانال تحقیقاتی — پیش‌بارگذاری چند مهارت به ترتیب
+    - id: "C01RESEARCH"
+      skills:
+        - arxiv
+        - writing-plans
+    # فرم کوتاه: یک مهارت به‌صورت رشته
+    - id: "C02SUPPORT"
+      skill: hubspot-on-demand</code></pre>
+</div>
+<p>یادداشت‌ها:</p>
+<ul>
+  <li>اتصال با شناسهٔ کانال تطبیق می‌کند. برای پیام‌های تردی در کانال متصل، ترد از اتصال کانال والد ارث می‌برد.</li>
+  <li>مهارت فقط در شروع نشست ‏(نشست جدید یا بعد از auto-reset) بارگذاری می‌شود. اگر اتصال را عوض کردید <code>/new</code> بزنید یا منتظر auto-reset نشست بمانید تا اثر کند.</li>
+  <li>با <code>channel_prompts</code> ترکیبش کنید تا لحن/محدودیت به‌ازای-کانال روی دستورالعمل‌های مهارت بیاید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲۰</span> عیب‌یابی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مشکل</th><th>راه‌حل</th></tr></thead>
+  <tbody>
+    <tr><td>بات به DM پاسخ نمی‌دهد</td><td>تأیید کنید <code>message.im</code> در اشتراک‌های رویداد است و اپ دوباره نصب شده</td></tr>
+    <tr><td>بات در DM کار می‌کند ولی در کانال‌ها نه</td><td><strong>رایج‌ترین مشکل.</strong> ‏<code>message.channels</code> و <code>message.groups</code> را به اشتراک‌های رویداد اضافه، اپ را دوباره نصب و بات را با <code>/invite @Hermes Agent</code> به کانال دعوت کنید</td></tr>
+    <tr><td>بات به @منشن در کانال‌ها پاسخ نمی‌دهد</td><td>۱) رویداد <code>message.channels</code> مشترک شده؟ ۲) بات باید به کانال دعوت شده باشد. ۳) scope ‏<code>channels:history</code> اضافه شده؟ ۴) بعد از تغییر scope/رویداد اپ را دوباره نصب کنید</td></tr>
+    <tr><td>بات پیام‌های کانال‌های خصوصی را نادیده می‌گیرد</td><td>هم اشتراک رویداد <code>message.groups</code> هم scope ‏<code>groups:history</code> را اضافه، بعد اپ را reinstall و بات را <code>/invite</code> کنید</td></tr>
+    <tr><td>بات در DM های گروهی پاسخ نمی‌دهد</td><td>اشتراک رویداد <code>message.mpim</code> و scope ‏<code>mpim:history</code> ‏(+ ‏<code>mpim:read</code>) را اضافه و اپ را <strong>reinstall</strong> کنید. بدون <code>message.mpim</code> اسلک هرگز پیام‌های DM گروهی را به بات نمی‌دهد — حتی اگر DM یک‌به‌یک کار کند.</td></tr>
+    <tr><td>پیام «Sending messages to this app has been turned off» در DM</td><td>تب <strong>Messages Tab</strong> را در تنظیمات App Home فعال کنید ‏(گام ۵)</td></tr>
+    <tr><td>خطاهای <code>not_authed</code> یا <code>invalid_auth</code></td><td>توکن بات و توکن اپ را بازتولید و <code>.env</code> را به‌روز کنید</td></tr>
+    <tr><td>بات پاسخ می‌دهد ولی نمی‌تواند در کانال پست کند</td><td>بات را با <code>/invite @Hermes Agent</code> به کانال دعوت کنید</td></tr>
+    <tr><td>بات چت می‌کند ولی تصاویر/فایل‌های آپلودی را نمی‌خواند</td><td>‏<code>files:read</code> را اضافه و اپ را <strong>reinstall</strong> کنید. هرمس الان تشخیص‌های دسترسی پیوست را هنگام شکست scope/auth/permission اسلک درون‌چت نشان می‌دهد.</td></tr>
+    <tr><td>خطای <code>missing_scope</code></td><td>scope لازم را در OAuth &amp; Permissions اضافه و اپ را <strong>reinstall</strong> کنید</td></tr>
+    <tr><td>اتصال Socket مدام قطع می‌شود</td><td>شبکه‌تان را چک کنید؛ Bolt خودش reconnect می‌شود ولی اتصال ناپایدار تأخیر می‌سازد</td></tr>
+    <tr><td>scope/رویداد را عوض کردم ولی چیزی عوض نشد</td><td>بعد از هر تغییر scope یا اشتراک رویداد <strong>باید</strong> اپ را دوباره در ورک‌اسپیس نصب کنید</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>چک‌لیست سریع</h3>
+<p>اگر بات در کانال‌ها کار نمی‌کند <strong>همهٔ</strong> موارد زیر را تأیید کنید:</p>
+<ol>
+  <li>✅ رویداد <code>message.channels</code> مشترک شده ‏(کانال‌های عمومی)</li>
+  <li>✅ رویداد <code>message.groups</code> مشترک شده ‏(کانال‌های خصوصی)</li>
+  <li>✅ رویداد <code>app_mention</code> مشترک شده</li>
+  <li>✅ scope ‏<code>channels:history</code> اضافه شده ‏(کانال‌های عمومی)</li>
+  <li>✅ scope ‏<code>groups:history</code> اضافه شده ‏(کانال‌های خصوصی)</li>
+  <li>✅ اپ بعد از افزودن scope/رویداد <strong>دوباره نصب</strong> شده</li>
+  <li>✅ بات به کانال <strong>دعوت</strong> شده ‏(<code>/invite @Hermes Agent</code>)</li>
+  <li>✅ در پیام‌تان بات را <strong>@منشن</strong> می‌کنید</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲۱</span> امنیت</h2>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p><strong>همیشه <code>SLACK_ALLOWED_USERS</code> را با Member ID های کاربران مجاز تنظیم کنید.</strong> بدون این تنظیم، گیت‌وی به‌عنوان اقدام ایمنی به‌طور پیش‌فرض <strong>همهٔ پیام‌ها را رد می‌کند</strong>. هرگز توکن‌های بات را به اشتراک نگذارید — مثل رمز عبور با آن‌ها رفتار کنید.</p>
+</div>
+<ul>
+  <li>توکن‌ها باید در <code>~/.hermes/.env</code> ذخیره شوند ‏(دسترسی فایل <code>600</code>)</li>
+  <li>توکن‌ها را به‌طور دوره‌ای از تنظیمات اپ اسلک بچرخانید</li>
+  <li>بازبینی کنید چه کسانی به دایرکتوری پیکربندی هرمس دسترسی دارند</li>
+  <li>Socket Mode یعنی هیچ نقطهٔ پایانی عمومی‌ای در معرض نیست — یک سطح حمله کمتر</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="discord.html"><span class="dir">→ قبلی</span><span class="ttl">دیسکورد</span></a>
+  <a class="next" href="whatsapp.html"><span class="dir">بعدی ←</span><span class="ttl">واتساپ</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/slack" target="_blank" rel="noopener">Slack</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

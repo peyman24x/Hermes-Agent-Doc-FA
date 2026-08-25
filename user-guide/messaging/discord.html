@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دیسکورد — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>دیسکورد</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی دیسکورد</h1>
+<p>هرمس ایجنت با دیسکورد به‌صورت یک بات یکپارچه می‌شود و اجازه می‌دهد از طریق پیام خصوصی یا کانال‌های سرور با دستیار هوش مصنوعی‌تان گفتگو کنید. بات پیام‌های شما را دریافت، از خط‌لولهٔ هرمس ایجنت (شامل استفاده از ابزار، حافظه و استدلال) عبور داده و در لحظه پاسخ می‌دهد. از متن، پیام صوتی، پیوست فایل و فرمان‌های اسلش پشتیبانی می‌کند.</p>
+<p>پیش از راه‌اندازی، بخشی که بیشتر افراد می‌خواهند بدانند: رفتار هرمس پس از ورود به سرور شما چگونه است.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> رفتار هرمس</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>زمینه</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><strong>پیام‌های خصوصی (DM)</strong></td><td>هرمس به همهٔ پیام‌ها پاسخ می‌دهد؛ نیازی به <code>@منشن</code> نیست. هر DM نشست مستقل خودش را دارد.</td></tr>
+    <tr><td><strong>کانال‌های سرور</strong></td><td>به‌طور پیش‌فرض هرمس فقط وقتی <code>@منشن</code> شود پاسخ می‌دهد. اگر بدون منشن در کانالی بنویسید، هرمس پیام را نادیده می‌گیرد.</td></tr>
+    <tr><td><strong>کانال‌های پاسخ-آزاد</strong></td><td>می‌توانید کانال‌های مشخص را با <code>DISCORD_FREE_RESPONSE_CHANNELS</code> بی‌نیاز از منشن کنید یا با <code>DISCORD_REQUIRE_MENTION=false</code> منشن را سراسری خاموش کنید. پیام‌ها در این کانال‌ها درجا پاسخ می‌گیرند — ساخت خودکار ترد رد می‌شود تا کانال یک چت سبک بماند.</td></tr>
+    <tr><td><strong>تردها (Threads)</strong></td><td>هرمس داخل همان ترد پاسخ می‌دهد. قواعد منشن همچنان اعمال می‌شود مگر آن ترد یا کانال والدش پاسخ-آزاد پیکربندی شده باشد. تردها برای تاریخچهٔ نشست از کانال والد ایزوله‌اند.</td></tr>
+    <tr><td><strong>کانال‌های مشترک چند کاربره</strong></td><td>به‌طور پیش‌فرض هرمس برای ایمنی و شفافیت تاریخچهٔ نشست را داخل کانال به‌ازای هر کاربر جدا می‌کند. دو نفر که در یک کانال صحبت می‌کنند مگر صراحتاً غیرفعالش کنید یک رونویسی مشترک ندارند.</td></tr>
+    <tr><td><strong>پیام‌هایی که کاربر دیگری را منشن می‌کنند</strong></td><td>وقتی <code>DISCORD_IGNORE_NO_MENTION</code> برابر <code>true</code> باشد (پیش‌فرض)، اگر پیامی کاربران دیگر را @منشن کند ولی بات را نه، هرمس ساکت می‌ماند. این مانع ورود بات به گفتگوهایی می‌شود که خطاب به افراد دیگر است. برای پاسخ به همهٔ پیام‌ها صرف‌نظر از اینکه چه کسی منشن شده، آن را <code>false</code> کنید. فقط در کانال‌های سرور اعمال می‌شود، نه DM.</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>اگر یک کانال معمولی «راهنمای بات» می‌خواهید که مردم بدون تگ‌کردن هر بار با هرمس حرف بزنند، همان کانال را به <code>DISCORD_FREE_RESPONSE_CHANNELS</code> اضافه کنید.</p>
+</div>
+
+<h3>مدل گیت‌وی دیسکورد</h3>
+<p>هرمس روی دیسکورد یک وب‌هوکِ بی‌حافظه نیست. از گیت‌وی کامل پیام‌رسانی می‌گذرد؛ یعنی هر پیام ورودی این مسیر را طی می‌کند:</p>
+<ol>
+  <li>مجوزدهی (<code>DISCORD_ALLOWED_USERS</code>)</li>
+  <li>بررسی منشن / پاسخ-آزاد</li>
+  <li>یافتن نشست</li>
+  <li>بارگذاری رونویسی نشست</li>
+  <li>اجرای عادی ایجنت هرمس شامل ابزارها، حافظه و فرمان‌های اسلش</li>
+  <li>تحویل پاسخ به دیسکورد</li>
+</ol>
+<p>این مهم است چون رفتار در یک سرور شلوغ هم به مسیریابی دیسکورد و هم به سیاست نشستِ هرمس بستگی دارد.</p>
+
+<h3>مدل نشست در دیسکورد</h3>
+<p>به‌طور پیش‌فرض:</p>
+<ul>
+  <li>هر DM نشست مستقل خودش را دارد</li>
+  <li>هر ترد سرور فضای‌نام نشست خودش را دارد</li>
+  <li>هر کاربر در یک کانال مشترک، داخل همان کانال نشست خودش را دارد</li>
+</ul>
+<p>پس اگر آلیس و باب هر دو در <code>#research</code> با هرمس حرف بزنند، هرمس این‌ها را به‌طور پیش‌فرض دو گفتگوی جدا می‌بیند حتی‌با اینکه کانال دیسکوردشان یکی است.</p>
+<p>این با <code>config.yaml</code> کنترل می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>group_sessions_per_user: true</code></pre>
+</div>
+<p>فقط اگر صریحاً یک گفتگوی مشترک برای کل اتاق می‌خواهید <code>false</code> کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>group_sessions_per_user: false</code></pre>
+</div>
+<p>نشست مشترک برای یک اتاق مشارکتی مفید است ولی یعنی:</p>
+<ul>
+  <li>کاربران در رشد زمینه و هزینهٔ توکن شریک‌اند</li>
+  <li>یک کار سنگین-ابزارِ طولانیِ یک نفر می‌تواند زمینهٔ بقیه را متورم کند</li>
+  <li>اجرای در-جریانِ یک نفر می‌تواند پیام بعدیِ فرد دیگری در همان اتاق را قطع کند</li>
+</ul>
+
+<h3>وقفه‌ها و هم‌زمانی</h3>
+<p>هرمس ایجنت‌های در حال اجرا را با کلید نشست ردیابی می‌کند.</p>
+<p>با پیش‌فرض <code>group_sessions_per_user: true</code>:</p>
+<ul>
+  <li>وقفهٔ آلیس روی درخواست در-جریان خودش فقط نشست آلیس را در آن کانال تحت تأثیر قرار می‌دهد</li>
+  <li>باب می‌تواند در همان کانال به گفتگو ادامه دهد بدون به‌ارث‌بردن تاریخچهٔ آلیس یا قطع اجرای او</li>
+</ul>
+<p>با <code>group_sessions_per_user: false</code>:</p>
+<ul>
+  <li>کل اتاق یک اسلات ایجنت-در-حال-اجرا برای آن کانال/ترد دارد</li>
+  <li>پیام‌های بعدیِ افراد مختلف می‌توانند یکدیگر را قطع یا پشت هم صف کنند</li>
+</ul>
+<p>این راهنما کل فرایند راه‌اندازی را قدم‌به‌قدم توضیح می‌دهد — از ساخت بات در پرتال توسعه‌دهندگان دیسکورد تا ارسال اولین پیام.</p>
+
+<h3>سلامت WebSocket گیت‌وی</h3>
+<p>‏REST دیسکورد و WebSocket گیت‌وی دو مسیر انتقال جدایند. یک پاسخ REST موفق ‏(از جمله <code>fetch_user()</code> با HTTP 200) ثابت نمی‌کند بات هنوز می‌تواند رویدادهای گیت‌وی را بگیرد. بنابراین هرمس آماده‌بودن (ready state)، وضعیت بسته‌شدن کلاینت/سوکت، بازبودن سوکت، عمر ACK ضربان و تأخیر محدود ضربان را با هم ترکیب می‌کند.</p>
+<p>پس از تعداد پیکربندی‌شده نمونهٔ ناسالم متوالی، آداپتور یک رویداد fatal قابل-تلاش-مجدد صادر می‌کند. ناظر اتصال‌مجدد موجودِ گیت‌وی آداپتور تازه می‌سازد؛ آداپتور دیسکورد حلقهٔ اتصال‌مجدد دومیِ بی‌کران نمی‌سازد.</p>
+<p>آستانه‌های غیرمحرمانه را در <code>config.yaml</code> تنظیم کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>discord:
+  websocket_liveness_interval_seconds: 15
+  websocket_liveness_failure_threshold: 2
+  websocket_heartbeat_ack_max_age_seconds: 60
+  websocket_max_latency_seconds: 30</code></pre>
+</div>
+<p>نام‌های قدیمی <code>liveness_interval_seconds</code> و <code>liveness_failure_threshold</code> فقط نام‌های جایگزین سازگاری‌اند و دیگر معنای پایش REST ندارند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: ساخت اپلیکیشن دیسکورد</h2>
+<ol>
+  <li>به <a href="https://discord.com/developers/applications" target="_blank" rel="noopener">پرتال توسعه‌دهندگان دیسکورد</a> بروید و با حساب دیسکوردتان وارد شوید.</li>
+  <li>در بالا-سمت-راست روی <strong>New Application</strong> کلیک کنید.</li>
+  <li>نامی برای اپلیکیشن وارد کنید ‏(مثلاً «Hermes Agent») و شرایط توسعه‌دهنده را بپذیرید.</li>
+  <li>روی <strong>Create</strong> کلیک کنید.</li>
+</ol>
+<p>به صفحهٔ <strong>General Information</strong> می‌روید. <strong>Application ID</strong> را یادداشت کنید — بعداً برای ساخت URL دعوت لازمش دارید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: ساخت بات</h2>
+<ol>
+  <li>در نوار کناری چپ روی <strong>Bot</strong> کلیک کنید.</li>
+  <li>دیسکورد خودکار یک کاربر بات برای اپلیکیشن می‌سازد. یوزرنیم بات را می‌بینید که می‌توانید سفارشی کنید.</li>
+  <li>تحت <strong>Authorization Flow</strong>:
+    <ul>
+      <li><strong>Public Bot</strong> را <strong>روشن</strong> کنید — برای استفاده از لینک دعوت ارائه‌شده توسط دیسکورد لازم است ‏(توصیه‌شده). این امکان می‌دهد تب Installation یک URL مجوز پیش‌فرض بسازد.</li>
+      <li><strong>Require OAuth2 Code Grant</strong> را <strong>خاموش</strong> بگذارید.</li>
+    </ul>
+  </li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>می‌توانید در همین صفحه آواتار و بنر سفارشی برای بات بگذارید. همین چیزی است که کاربران در دیسکورد می‌بینند.</p>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 جایگزین: بات خصوصی</div>
+  <p>اگر بات را خصوصی نگه دارید ‏(Public Bot = OFF)، باید در گام ۵ به‌جای تب Installation از روش <strong>Manual URL</strong> استفاده کنید. لینک ارائه‌شدهٔ دیسکورد فعال‌بودن Public Bot را الزام می‌کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۳: فعال‌سازی Intents ممتاز</h2>
+<p>این بحرانی‌ترین گام کل راه‌اندازی است. بدون Intents درست، بات به دیسکورد وصل می‌شود ولی <strong>نمی‌تواند متن پیام‌ها را بخواند</strong>.</p>
+<p>در صفحهٔ <strong>Bot</strong> به پایین اسکرول کنید تا <strong>Privileged Gateway Intents</strong>. سه کلید می‌بینید:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Intent</th><th>هدف</th><th>لازم؟</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Presence Intent</strong></td><td>دیدن وضعیت آنلاین/آفلاین کاربران</td><td>اختیاری</td></tr>
+    <tr><td><strong>Server Members Intent</strong></td><td>دسترسی به فهرست اعضا، حل یوزرنیم‌ها</td><td><strong>الزامی</strong></td></tr>
+    <tr><td><strong>Message Content Intent</strong></td><td>خواندن متن پیام‌ها</td><td><strong>الزامی</strong></td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>هم Server Members Intent و هم Message Content Intent را روشن کنید.</strong></p>
+<ul>
+  <li>بدون <strong>Message Content Intent</strong> رویداد پیام می‌گیرید ولی متن پیام خالی است — بات واقعاً نمی‌بیند چه تایپ کرده‌اید.</li>
+  <li>بدون <strong>Server Members Intent</strong> بات نمی‌تواند یوزرنیم‌ها را برای فهرست کاربران مجاز حل کند و ممکن است تشخیص ندهد چه کسی پیام می‌دهد.</li>
+</ul>
+<div class="callout warning">
+  <div class="callout-title">⚠️ دلیل شمارهٔ ۱ خرابی بات‌های دیسکورد</div>
+  <p>اگر بات آنلاین است ولی هرگز به پیام‌ها جواب نمی‌دهد، تقریباً قطعاً <strong>Message Content Intent</strong> خاموش است. به <a href="https://discord.com/developers/applications" target="_blank" rel="noopener">پرتال توسعه‌دهندگان</a> برگردید، اپلیکیشن‌تان ← Bot ← Privileged Gateway Intents و مطمئن شوید <strong>Message Content Intent</strong> روشن است. سپس <strong>Save Changes</strong>.</p>
+</div>
+<p><strong>دربارهٔ تعداد سرور:</strong></p>
+<ul>
+  <li>اگر بات در <strong>کمتر از ۱۰۰ سرور</strong> است، آزادانه می‌توانید intents را روشن/خاموش کنید.</li>
+  <li>اگر بات در <strong>۱۰۰ سرور یا بیشتر</strong> است، دیسکورد برای استفاده از intents ممتاز درخواست احراز (verification) می‌خواهد. برای استفاده شخصی موضوعیت ندارد.</li>
+</ul>
+<p>در پایین صفحه <strong>Save Changes</strong> را بزنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۴: دریافت توکن بات</h2>
+<p>توکن بات اعتباری است که هرمس ایجنت با آن به‌عنوان بات‌تان وارد می‌شود. همچنان در صفحهٔ <strong>Bot</strong>:</p>
+<ol>
+  <li>تحت بخش <strong>Token</strong> روی <strong>Reset Token</strong> کلیک کنید.</li>
+  <li>اگر احراز دومرحله‌ای دارید، کد 2FA را وارد کنید.</li>
+  <li>دیسکورد توکن جدید را نشان می‌دهد. <strong>فوراً کپیش کنید.</strong></li>
+</ol>
+<div class="callout warning">
+  <div class="callout-title">⚠️ توکن فقط یک‌بار نمایش داده می‌شود</div>
+  <p>توکن فقط یک‌بار نشان داده می‌شود. اگر گمش کردید باید ریست و توکن جدید بسازید. هرگز توکن را عمومی به اشتراک نگذارید یا به گیت کامیت نکنید — هر کسی با این توکن کنترل کامل بات را دارد.</p>
+</div>
+<p>توکن را جایی امن نگه دارید (مثلاً مدیر رمز). در گام ۸ لازمش دارید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۵: ساخت URL دعوت</h2>
+<p>برای دعوت بات به سرور به یک URL OAuth2 نیاز دارید. دو راه دارید:</p>
+
+<h3>گزینهٔ A: تب Installation ‏(توصیه‌شده)</h3>
+<div class="callout note">
+  <div class="callout-title">📌 نیازمند Public Bot</div>
+  <p>این روش نیازمند <strong>Public Bot = ON</strong> در گام ۲ است. اگر Public Bot را خاموش کردید، از روش Manual URL پایین استفاده کنید.</p>
+</div>
+<ol>
+  <li>در نوار کناری چپ روی <strong>Installation</strong> کلیک کنید.</li>
+  <li>تحت <strong>Installation Contexts</strong> گزینهٔ <strong>Guild Install</strong> را فعال کنید.</li>
+  <li>برای <strong>Install Link</strong> مقدار <strong>Discord Provided Link</strong> را انتخاب کنید.</li>
+  <li>تحت <strong>Default Install Settings</strong> برای Guild Install:
+    <ul>
+      <li><strong>Scopes</strong>: مقادیر <code>bot</code> و <code>applications.commands</code> را انتخاب کنید</li>
+      <li><strong>Permissions</strong>: دسترسی‌های فهرست پایین را انتخاب کنید</li>
+    </ul>
+  </li>
+</ol>
+
+<h3>گزینهٔ B: URL دستی</h3>
+<p>می‌توانید URL دعوت را مستقیم با این قالب بسازید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>https://discord.com/oauth2/authorize?client_id=YOUR_APP_ID&amp;scope=bot+applications.commands&amp;permissions=274878286912</code></pre>
+</div>
+<p><code>YOUR_APP_ID</code> را با Application ID گام ۱ جایگزین کنید.</p>
+
+<h3>دسترسی‌های الزامی</h3>
+<p>حداقل دسترسی‌هایی که بات نیاز دارد:</p>
+<ul>
+  <li><strong>View Channels</strong> — دیدن کانال‌هایی که به آن‌ها دسترسی دارد</li>
+  <li><strong>Send Messages</strong> — پاسخ به پیام‌های شما</li>
+  <li><strong>Embed Links</strong> — قالب‌بندی پاسخ‌های غنی</li>
+  <li><strong>Attach Files</strong> — ارسال تصویر، صوت و خروجی‌های فایل</li>
+  <li><strong>Read Message History</strong> — حفظ زمینهٔ گفتگو</li>
+</ul>
+
+<h3>دسترسی‌های اضافی توصیه‌شده</h3>
+<ul>
+  <li><strong>Send Messages in Threads</strong> — پاسخ در گفتگوهای ترد</li>
+  <li><strong>Add Reactions</strong> — واکنش‌گذاری برای اعلام دریافت</li>
+</ul>
+
+<h3>اعداد صحیح دسترسی‌ها</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>سطح</th><th>عدد دسترسی‌ها</th><th>شامل</th></tr></thead>
+  <tbody>
+    <tr><td>حداقلی</td><td><code>117760</code></td><td>View Channels، Send Messages، Read Message History، Attach Files</td></tr>
+    <tr><td>توصیه‌شده</td><td><code>274878286912</code></td><td>همهٔ موارد بالا + Embed Links، Send Messages in Threads، Add Reactions</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> گام ۶: دعوت به سرور</h2>
+<ol>
+  <li>URL دعوت را در مرورگر باز کنید ‏(از تب Installation یا URL دستی).</li>
+  <li>در کشویی <strong>Add to Server</strong> سرورتان را انتخاب کنید.</li>
+  <li>روی <strong>Continue</strong> و سپس <strong>Authorize</strong> کلیک کنید.</li>
+  <li>در صورت درخواست، CAPTCHA را کامل کنید.</li>
+</ol>
+<div class="callout note">
+  <div class="callout-title">📌 نکته</div>
+  <p>برای دعوت بات به سرور دیسکورد باید دسترسی <strong>Manage Server</strong> را داشته باشید. اگر سرورتان را در کشو نمی‌بینید، از یک ادمین سرور بخواهید لینک دعوت را استفاده کند.</p>
+</div>
+<p>پس از تأیید، بات در فهرست اعضای سرور ظاهر می‌شود ‏(تا شروع گیت‌وی هرمس آفلاین نمایش داده می‌شود).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> گام ۷: یافتن شناسهٔ کاربری دیسکورد</h2>
+<p>هرمس ایجنت از شناسهٔ کاربری دیسکورد شما برای کنترل اینکه چه کسی با بات تعامل کند استفاده می‌کند. برای یافتنش:</p>
+<ol>
+  <li>دیسکورد را باز کنید ‏(اپ دسکتاپ یا وب).</li>
+  <li>به <strong>Settings</strong> ← <strong>Advanced</strong> بروید و <strong>Developer Mode</strong> را <strong>روشن</strong> کنید.</li>
+  <li>تنظیمات را ببندید.</li>
+  <li>روی یوزرنیم خودتان راست‌کلیک کنید ‏(در یک پیام، فهرست اعضا یا پروفایل‌تان) ← <strong>Copy User ID</strong>.</li>
+</ol>
+<p>شناسهٔ کاربری شما عددی بلند مثل <code>284102345871466496</code> است.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>حالت توسعه‌دهنده همچنین امکان کپی <strong>Channel ID</strong> و <strong>Server ID</strong> را به همان روش می‌دهد — راست‌کلیک روی نام کانال یا سرور و انتخاب Copy ID. اگر بخواهید کانال خانگی را دستی تنظیم کنید به Channel ID نیاز دارید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> گام ۸: پیکربندی هرمس ایجنت</h2>
+<h3>گزینهٔ A: راه‌اندازی تعاملی ‏(توصیه‌شده)</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway setup</code></pre>
+</div>
+<p>هنگام پرسش <strong>Discord</strong> را انتخاب کنید و توکن بات و شناسهٔ کاربری‌تان را بچسبانید.</p>
+
+<h3>گزینهٔ B: پیکربندی دستی</h3>
+<p>این‌ها را به فایل <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># الزامی
+DISCORD_BOT_TOKEN=your-bot-token
+DISCORD_ALLOWED_USERS=284102345871466496
+
+# چند کاربر مجاز (با ویرگول)
+# DISCORD_ALLOWED_USERS=284102345871466496,198765432109876543</code></pre>
+</div>
+<p>سپس گیت‌وی را شروع کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway</code></pre>
+</div>
+<p>بات باید ظرف چند ثانیه در دیسکورد آنلاین شود. برای تست به آن پیام بدهید — DM یا در کانالی که می‌بیند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>می‌توانید <code>hermes gateway</code> را در پس‌زمینه یا به‌صورت سرویس systemd برای عملکرد مداوم اجرا کنید. جزئیات را در مستندات استقرار ببینید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> مرجع پیکربندی</h2>
+<p>رفتار دیسکورد با دو فایل کنترل می‌شود: <strong><code>~/.hermes/.env</code></strong> برای اعتبارنامه‌ها و کلیدهای سطح env، و <strong><code>~/.hermes/config.yaml</code></strong> برای تنظیمات ساختاریافته. وقتی هر دو تنظیم شده باشند متغیرهای محیطی همیشه بر مقادیر config.yaml مقدم‌اند.</p>
+
+<h3>متغیرهای محیطی (<code>.env</code>)</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>لازم</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>DISCORD_BOT_TOKEN</code></td><td><strong>بله</strong></td><td>—</td><td>توکن بات از <a href="https://discord.com/developers/applications" target="_blank" rel="noopener">پرتال توسعه‌دهندگان دیسکورد</a>.</td></tr>
+    <tr><td><code>DISCORD_ALLOWED_USERS</code></td><td>شرطی</td><td>—</td><td>شناسه‌های کاربری دیسکوردِ مجازِ تعامل با بات، جدا با ویرگول. بدون این <strong>یا</strong> <code>DISCORD_ALLOWED_ROLES</code>، گیت‌وی همهٔ کاربران را رد می‌کند مگر <code>DISCORD_ALLOW_ALL_USERS=true</code> یا <code>GATEWAY_ALLOW_ALL_USERS=true</code> یا اینکه <code>DISCORD_ALLOWED_CHANNELS</code> صریحاً دسترسی سرور را محدود کرده باشد.</td></tr>
+    <tr><td><code>DISCORD_ALLOWED_ROLES</code></td><td>خیر</td><td>—</td><td>شناسه‌های نقش دیسکورد، جدا با ویرگول. هر عضوی با یکی از این نقش‌ها مجاز است — با منطق OR نسبت به <code>DISCORD_ALLOWED_USERS</code>. هنگام اتصال <strong>Server Members Intent</strong> را خودکار فعال می‌کند. برای تیم‌های نظارتیِ متغیر مفید است: مادِر جدید به‌محض گرفتن نقش دسترسی می‌گیرد، بدون ویرایش پیکربندی.</td></tr>
+    <tr><td><code>DISCORD_ALLOW_ALL_USERS</code></td><td>خیر</td><td><code>false</code></td><td>انتخاب صریح برای اجازه به هر کاربر دیسکوردی که به بات برسد. رفتار بازِ قبل از 0.18 را فقط برای دیسکورد برمی‌گرداند؛ فقط برای سرورهای خصوصی/مطمئن یا توسعه استفاده کنید.</td></tr>
+    <tr><td><code>GATEWAY_ALLOW_ALL_USERS</code></td><td>خیر</td><td><code>false</code></td><td>انتخاب سراسری allow-all برای همهٔ پلتفرم‌های گیت‌وی. مگر عمداً همهٔ پلتفرم‌های متصل را باز نخواهید، همان <code>DISCORD_ALLOW_ALL_USERS</code> مخصوص پلتفرم را ترجیح دهید.</td></tr>
+    <tr><td><code>DISCORD_HOME_CHANNEL</code></td><td>خیر</td><td>—</td><td>شناسهٔ کانالی که بات پیام‌های پیش‌فعال را به آن می‌فرستد ‏(خروجی کرون، یادآوری‌ها، اعلان‌ها).</td></tr>
+    <tr><td><code>DISCORD_HOME_CHANNEL_NAME</code></td><td>خیر</td><td><code>"Home"</code></td><td>نام نمایشی کانال خانگی در لاگ‌ها و خروجی وضعیت.</td></tr>
+    <tr><td><code>DISCORD_COMMAND_SYNC_POLICY</code></td><td>خیر</td><td><code>"safe"</code></td><td>کنترل همگام‌سازی فرمان‌های اسلش بومی هنگام شروع. ‏<code>"safe"</code> اختلاف فرمان‌های سراسری موجود را می‌گیرد و فقط تغییرات را به‌روز می‌کند و در صورت عدم امکان patch، بازسازی می‌کند. ‏<code>"bulk"</code> رفتار قدیمی <code>tree.sync()</code> را حفظ می‌کند. ‏<code>"off"</code> همگام‌سازی شروع را کلاً رد می‌کند.</td></tr>
+    <tr><td><code>DISCORD_REQUIRE_MENTION</code></td><td>خیر</td><td><code>true</code></td><td>وقتی <code>true</code>، بات در کانال‌های سرور فقط با <code>@منشن</code> پاسخ می‌دهد. برای پاسخ به همهٔ پیام‌ها در همهٔ کانال‌ها <code>false</code> کنید.</td></tr>
+    <tr><td><code>DISCORD_THREAD_REQUIRE_MENTION</code></td><td>خیر</td><td><code>false</code></td><td>وقتی <code>true</code>، میان‌بر منشن-داخل-ترد غیرفعال می‌شود — تردها مثل کانال‌ها گیت می‌خورند و حتی پس از مشارکت قبلی بات <code>@منشن</code> لازم است. برای تردهایی که چند بات در آن‌ها هستند و می‌خواهید هرکدام فقط با منشن صریح فعال شود.</td></tr>
+    <tr><td><code>DISCORD_FREE_RESPONSE_CHANNELS</code></td><td>خیر</td><td>—</td><td>شناسه‌های کانال جدا با ویرگول که بات در آن‌ها بدون <code>@منشن</code> پاسخ می‌دهد، حتی وقتی <code>DISCORD_REQUIRE_MENTION</code> روشن است.</td></tr>
+    <tr><td><code>DISCORD_IGNORE_NO_MENTION</code></td><td>خیر</td><td><code>true</code></td><td>وقتی <code>true</code>، اگر پیام کاربران دیگر را منشن کند ولی بات را نه، بات ساکت می‌ماند؛ مانع ورود بات به گفتگوهای خطاب‌شده به دیگران. فقط در کانال‌های سرور، نه DM.</td></tr>
+    <tr><td><code>DISCORD_AUTO_THREAD</code></td><td>خیر</td><td><code>true</code></td><td>وقتی <code>true</code>، به‌ازای هر <code>@منشن</code> در یک کانال متنی خودکار ترد جدید می‌سازد تا هر گفتگو ایزوله بماند ‏(شبیه رفتار Slack). پیام‌های داخل تردهای موجود یا DM بی‌تأثیرند.</td></tr>
+    <tr><td><code>DISCORD_ALLOW_BOTS</code></td><td>خیر</td><td><code>"none"</code></td><td>نحوهٔ مدیریت پیام‌های سایر بات‌ها. ‏<code>"none"</code> — نادیده گرفتن همهٔ بات‌های دیگر. ‏<code>"mentions"</code> — فقط پیام بات‌هایی که هرمس را @منشن کنند. ‏<code>"all"</code> — پذیرش همهٔ پیام‌های بات.</td></tr>
+    <tr><td><code>DISCORD_REACTIONS</code></td><td>خیر</td><td><code>true</code></td><td>وقتی <code>true</code>، بات حین پردازش واکنش ایموجی می‌گذارد ‏(👀 هنگام شروع، ✅ موفقیت، ❌ خطا). برای غیرفعال‌سازی کامل <code>false</code>.</td></tr>
+    <tr><td><code>DISCORD_IGNORED_CHANNELS</code></td><td>خیر</td><td>—</td><td>شناسه‌های کانالی که بات <strong>هرگز</strong> در آن‌ها پاسخ نمی‌دهد، حتی با منشن. بر همهٔ تنظیمات کانالی دیگر مقدم است.</td></tr>
+    <tr><td><code>DISCORD_ALLOWED_CHANNELS</code></td><td>خیر</td><td>—</td><td>شناسه‌های کانال جدا با ویرگول. با تنظیم، بات <strong>فقط</strong> در این کانال‌ها پاسخ می‌دهد ‏(+DM اگر مجاز). بر <code>discord.allowed_channels</code> در config.yaml مقدم است. با <code>DISCORD_IGNORED_CHANNELS</code> ترکیبش کنید تا قواعد allow/deny بسازید.</td></tr>
+    <tr><td><code>DISCORD_NO_THREAD_CHANNELS</code></td><td>خیر</td><td>—</td><td>شناسه‌های کانالی که بات درجا در کانال پاسخ می‌دهد نه با ساخت ترد. فقط وقتی <code>DISCORD_AUTO_THREAD</code> روشن است مهم.</td></tr>
+    <tr><td><code>DISCORD_HISTORY_BACKFILL</code></td><td>خیر</td><td><code>true</code></td><td>وقتی <code>true</code>، هنگام منشن‌شدن، پیام‌های اخیر کانال ‏(از آخرین پاسخ بات) به ابتدای پیام کاربر الصاق می‌شود. زمینه‌ای را بازیابی می‌کند که با <code>require_mention</code> از دست می‌رفت. در DM و کانال‌های پاسخ-آزاد رد می‌شود. برای غیرفعال‌کردن <code>false</code>.</td></tr>
+    <tr><td><code>DISCORD_HISTORY_BACKFILL_LIMIT</code></td><td>خیر</td><td><code>50</code></td><td>حداکثر تعداد پیام برای اسکن رو به عقب هنگام ساخت بلوک backfill. در عمل اسکن معمولاً زودتر — در آخرین پیام خود بات در کانال — متوقف می‌شود.</td></tr>
+    <tr><td><code>DISCORD_REPLY_TO_MODE</code></td><td>خیر</td><td><code>"first"</code></td><td>کنترل رفتار ریپلای: ‏<code>"off"</code> — هرگز به پیام اصلی ریپلای نکن؛ ‏<code>"first"</code> — ریفرنس ریپلای فقط روی اولین تکهٔ پیام ‏(پیش‌فرض)؛ ‏<code>"all"</code> — روی همهٔ تکه‌ها.</td></tr>
+    <tr><td><code>DISCORD_ALLOW_MENTION_EVERYONE</code></td><td>خیر</td><td><code>false</code></td><td>وقتی <code>false</code> ‏(پیش‌فرض)، بات حتی اگر پاسخش این توکن‌ها را داشته باشد نمی‌تواند <code>@everyone</code> یا <code>@here</code> پینگ کند. برای بازگرداندن <code>true</code>. بخش «کنترل منشن» پایین را ببینید.</td></tr>
+    <tr><td><code>DISCORD_ALLOW_MENTION_ROLES</code></td><td>خیر</td><td><code>false</code></td><td>وقتی <code>false</code> ‏(پیش‌فرض)، بات نمی‌تواند <code>@نقش</code> پینگ کند. برای اجازه <code>true</code>.</td></tr>
+    <tr><td><code>DISCORD_ALLOW_MENTION_USERS</code></td><td>خیر</td><td><code>true</code></td><td>وقتی <code>true</code> ‏(پیش‌فرض)، بات می‌تواند کاربران مشخص را با شناسه پینگ کند.</td></tr>
+    <tr><td><code>DISCORD_ALLOW_MENTION_REPLIED_USER</code></td><td>خیر</td><td><code>true</code></td><td>وقتی <code>true</code> ‏(پیش‌فرض)، ریپلای به یک پیام نویسندهٔ اصلی را پینگ می‌کند.</td></tr>
+    <tr><td><code>DISCORD_PROXY</code></td><td>خیر</td><td>—</td><td>URL پراکسی برای اتصالات دیسکورد ‏(HTTP، WebSocket، REST). بر <code>HTTPS_PROXY</code>/<code>ALL_PROXY</code> مقدم است. طرح‌های <code>http://</code>، ‏<code>https://</code> و <code>socks5://</code> را پشتیبانی می‌کند.</td></tr>
+    <tr><td><code>DISCORD_ALLOW_ANY_ATTACHMENT</code></td><td>خیر</td><td><code>false</code></td><td>وقتی <code>true</code>، بات پیوست‌های هر نوع فایلی را می‌پذیرد ‏(نه فقط لیست‌مجاز داخلی PDF/متن/zip/آفیس). انواع ناشناخته روی دیسک کش می‌شوند و با MIME ‏<code>application/octet-stream</code> به‌صورت مسیر محلی به ایجنت داده می‌شوند تا با <code>terminal</code> / ‏<code>read_file</code> / ‏<code>ffprobe</code> و غیره بررسی‌شان کند.</td></tr>
+    <tr><td><code>DISCORD_MAX_ATTACHMENT_BYTES</code></td><td>خیر</td><td><code>33554432</code></td><td>حداکثر بایت به‌ازای پیوست که گیت‌وی دانلود و کش می‌کند. پیش‌فرض ۳۲ MiB. برای بی‌سقف <code>0</code> ‏(پیوست‌ها حین نوشتن در حافظه نگه داشته می‌شوند، پس بی‌سقفی هزینهٔ حافظهٔ واقعی دارد).</td></tr>
+    <tr><td><code>HERMES_DISCORD_TEXT_BATCH_DELAY_SECONDS</code></td><td>خیر</td><td><code>0.6</code></td><td>پنجرهٔ مهلت که آداپتور پیش از flush تکهٔ متنی صف‌شده صبر می‌کند. برای هموارکردن خروجی استریم مفید.</td></tr>
+    <tr><td><code>HERMES_DISCORD_TEXT_BATCH_SPLIT_DELAY_SECONDS</code></td><td>خیر</td><td><code>2.0</code></td><td>تأخیر بین تکه‌های تقسیم‌شده وقتی یک پیام از سقف طول دیسکورد می‌گذرد.</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ گفتگوی بات-به-بات پشتیبانی نمی‌شود</div>
+  <p><code>DISCORD_ALLOW_BOTS</code> برای پذیرش ورودی از یک بات مطمئن مشخص ‏(مثل رله یا بات وب‌هوک) هست، نه برای گفتگوی دو پروفایل هرمس با هم. پیش‌فرض <code>"none"</code> همهٔ بات‌های دیگر را نادیده می‌گیرد و تنظیم امن است.</p>
+  <p>سیم‌کشی چند پروفایل هرمس برای پاسخ به هم در یک کانال مشترک — با گذاشتن <code>"mentions"</code> یا <code>"all"</code> روی چند پروفایل — توپولوژی پشتیبانی‌نشده‌ای است. دیسکورد در هر ریپلای خودکار نویسندهٔ ریپلای‌شده را @منشن می‌کند، پس با <code>"mentions"</code> دو بات بی‌نهایت گیت منشن همدیگر را ارضا و ack-loop می‌زنند. هیچ مدارشکنی برای این وجود ندارد چون پیکربندی پشتیبانی‌شده همان رهاکردن <code>DISCORD_ALLOW_BOTS</code> روی <code>"none"</code> است. اگر ناچارید بات خاصی را بپذیرید، پذیرش را خیلی محدود scope کنید و هرگز به یک ایجنت خودپاسخ‌دهٔ دیگر بازش نکنید.</p>
+</div>
+
+<h3>فایل پیکربندی (<code>config.yaml</code>)</h3>
+<p>بخش <code>discord</code> در <code>~/.hermes/config.yaml</code> آینهٔ متغیرهای env بالاست. تنظیمات config.yaml به‌عنوان پیش‌فرض اعمال می‌شوند — اگر متغیر env معادل از قبل تنظیم شده باشد، env برنده است.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># تنظیمات مخصوص دیسکورد
+discord:
+  require_mention: true           # منشن اجباری در کانال‌های سرور
+  thread_require_mention: false   # اگر true، در تردها هم منشن لازم (چند-بات)
+  free_response_channels: ""      # شناسه‌های کانال با ویرگول (یا فهرست YAML)
+  auto_thread: true               # ساخت خودکار ترد روی @منشن
+  reactions: true                 # واکنش ایموجی حین پردازش
+  ignored_channels: []            # کانال‌هایی که بات هرگز پاسخ نمی‌دهد
+  no_thread_channels: []          # کانال‌هایی که بات بدون ترد پاسخ می‌دهد
+  history_backfill: true          # الصاق پیام‌های اخیر کانال هنگام منشن (پیش‌فرض: true)
+  history_backfill_limit: 50      # حداکثر اسکن رو به عقب (پیش‌فرض: 50)
+  missed_message_backfill:        # بازپخش پیام‌های از‌دست‌رفته هنگام قطعی (اختیاری)
+    enabled: false
+    channels: []                  # خالی = free_response_channels
+    window_seconds: 21600         # حداکثر ۶ ساعت به عقب
+    limit: 100                    # سقف سراسری اسکن به‌ازای هر اتصال‌مجدد
+    max_dispatches: 10            # سقف dispatch بازیابی به‌ازای هر اتصال‌مجدد
+  channel_prompts: {}             # پرامپت‌های سیستمی زودگذر به‌ازای کانال
+  voice_channel_inactivity_timeout_seconds: 300  # صفر = بمان تا /voice leave صریح
+  voice_playback_timeout_seconds: 120             # حداقلِ نگهبان پخش؛ کلیپ‌های بلند duration+padding می‌گیرند
+  allow_mentions:                 # چه چیزی بات حق پینگ دارد (پیش‌فرض‌های امن)
+    everyone: false               # پینگ @everyone / @here (پیش‌فرض: false)
+    roles: false                  # پینگ @نقش (پیش‌فرض: false)
+    users: true                   # پینگ @کاربر (پیش‌فرض: true)
+    replied_user: true            # ریپلای، نویسنده را پینگ می‌کند (پیش‌فرض: true)
+
+# ایزوله‌سازی نشست (سراسری برای همهٔ پلتفرم‌های گیت‌وی، نه فقط دیسکورد)
+group_sessions_per_user: true     # نشست جدا به‌ازای هر کاربر در کانال‌های مشترک</code></pre>
+</div>
+
+<h3><code>discord.require_mention</code></h3>
+<p><strong>نوع:</strong> boolean — <strong>پیش‌فرض:</strong> <code>true</code></p>
+<p>با فعال‌بودن، بات در کانال‌های سرور فقط با <code>@منشن</code> مستقیم پاسخ می‌دهد. DM‌ها مستقل از این تنظیم همیشه پاسخ می‌گیرند.</p>
+
+<h3><code>discord.thread_require_mention</code></h3>
+<p><strong>نوع:</strong> boolean — <strong>پیش‌فرض:</strong> <code>false</code></p>
+<p>به‌طور پیش‌فرض، وقتی بات یک‌بار در تردی شرکت کند ‏(ترد خودکارِ ساخته‌شده با منشن یا یک ریپلای)، به هر پیام بعدی همان ترد بدون منشن دوباره پاسخ می‌دهد. برای گفتگوهای دونفره پیش‌فرض درستی است.</p>
+<p>در <strong>تردهای چند-بات</strong> که کاربران هر نوبت یک بات را خطاب قرار می‌دهند، این پیش‌فرض تله است — هر بات دیگر ترد هم روی هر پیام فعال می‌شود، اعتبار می‌سوزاند و کانال را اسپم می‌کند. با <code>thread_require_mention: true</code> میان‌بر داخل-ترد را خاموش و تردها را مثل کانال‌ها گیت کنید. منشن‌های صریح مثل قبل کار می‌کنند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>discord:
+  require_mention: true
+  thread_require_mention: true    # راه‌اندازی چند-بات</code></pre>
+</div>
+
+<h3><code>discord.free_response_channels</code></h3>
+<p><strong>نوع:</strong> رشته یا فهرست — <strong>پیش‌فرض:</strong> <code>""</code></p>
+<p>شناسه‌های کانالی که بات به همهٔ پیام‌ها بدون <code>@منشن</code> پاسخ می‌دهد. هم رشتهٔ جداشده با ویرگول می‌پذیرد هم فهرست YAML:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># فرمت رشته‌ای
+discord:
+  free_response_channels: "1234567890,9876543210"
+
+# فرمت فهرستی
+discord:
+  free_response_channels:
+    - 1234567890
+    - 9876543210</code></pre>
+</div>
+<p>اگر کانال والد یک ترد در این فهرست باشد، آن ترد هم بی‌نیاز از منشن می‌شود.</p>
+<p>کانال‌های پاسخ-آزاد همچنین <strong>ساخت خودکار ترد را رد می‌کنند</strong> — بات درجا پاسخ می‌دهد نه با ساخت ترد جدید به‌ازای هر پیام. این کانال را به‌صورت یک سطح چت سبک نگه می‌دارد. اگر رفتار تردی می‌خواهید، کانال را پاسخ-آزاد نکنید ‏(از مسیر عادی <code>@منشن</code> استفاده کنید).</p>
+
+<h3><code>discord.auto_thread</code></h3>
+<p><strong>نوع:</strong> boolean — <strong>پیش‌فرض:</strong> <code>true</code></p>
+<p>با فعال‌بودن، هر <code>@منشن</code> در یک کانال متنی عادی خودکار ترد جدیدی برای گفتگو می‌سازد. کانال اصلی تمیز می‌ماند و هر گفتگو تاریخچهٔ نشست ایزولهٔ خودش را دارد. پس از ساخت ترد، پیام‌های بعدی داخل آن نیازی به منشن ندارند — بات می‌داند در گفتگوست. برای غیرفعال‌کردن این میان‌بر در راه‌اندازی‌های چند-بات، ‏<code>thread_require_mention</code> را <code>true</code> کنید.</p>
+<p>پیام‌های داخل تردهای موجود یا DM از این تنظیم بی‌تأثیرند. کانال‌های فهرست‌شده در <code>free_response_channels</code> یا <code>no_thread_channels</code> هم از ساخت خودکار ترد می‌گذرند و پاسخ درجا می‌گیرند.</p>
+
+<h3><code>discord.reactions</code></h3>
+<p><strong>نوع:</strong> boolean — <strong>پیش‌فرض:</strong> <code>true</code></p>
+<p>کنترل اینکه بات به‌عنوان بازخورد بصری واکنش ایموجی بگذارد:</p>
+<ul>
+  <li>👀 هنگام شروع پردازش پیام شما اضافه می‌شود</li>
+  <li>✅ وقتی پاسخ با موفقیت تحویل شد</li>
+  <li>❌ اگر خطایی حین پردازش رخ داد</li>
+</ul>
+<p>اگر واکنش‌ها حواس‌پرت‌اند یا نقش بات دسترسی <strong>Add Reactions</strong> ندارد، خاموشش کنید.</p>
+
+<h3><code>discord.ignored_channels</code></h3>
+<p><strong>نوع:</strong> رشته یا فهرست — <strong>پیش‌فرض:</strong> <code>[]</code></p>
+<p>شناسه‌های کانالی که بات <strong>هرگز</strong> پاسخ نمی‌دهد، حتی با منشن مستقیم. بالاترین اولویت را دارد — اگر کانالی در این فهرست باشد، بات بی‌صدا همهٔ پیام‌هایش را نادیده می‌گیرد؛ فارغ از <code>require_mention</code>، ‏<code>free_response_channels</code> یا هر تنظیم دیگر.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># فرمت رشته‌ای
+discord:
+  ignored_channels: "1234567890,9876543210"
+
+# فرمت فهرستی
+discord:
+  ignored_channels:
+    - 1234567890
+    - 9876543210</code></pre>
+</div>
+<p>اگر کانال والد تردی در این فهرست باشد، پیام‌های آن ترد هم نادیده گرفته می‌شوند.</p>
+
+<h3><code>discord.no_thread_channels</code></h3>
+<p><strong>نوع:</strong> رشته یا فهرست — <strong>پیش‌فرض:</strong> <code>[]</code></p>
+<p>شناسه‌های کانالی که بات به‌جای ساخت خودکار ترد، درجا در کانال پاسخ می‌دهد. فقط وقتی مؤثر است که <code>auto_thread</code> روشن باشد ‏(پیش‌فرض). در این کانال‌ها بات مثل پیام عادی درجا جواب می‌دهد نه با ساخت ترد.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>discord:
+  no_thread_channels:
+    - 1234567890  # بات اینجا درجا پاسخ می‌دهد</code></pre>
+</div>
+<p>برای کانال‌های مخصوص تعامل با بات که تردها نویز اضافه می‌کنند مفید است.</p>
+
+<h3><code>discord.channel_prompts</code></h3>
+<p><strong>نوع:</strong> mapping — <strong>پیش‌فرض:</strong> <code>{}</code></p>
+<p>پرامپت‌های سیستمی زودگذر به‌ازای کانال که در هر نوبت در کانال/ترد منطبق تزریق می‌شوند بدون ذخیره در تاریخچهٔ رونویسی.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>discord:
+  channel_prompts:
+    "1234567890": |
+      This channel is for research tasks. Prefer deep comparisons,
+      citations, and concise synthesis.
+    "9876543210": |
+      This forum is for therapy-style support. Be warm, grounded,
+      and non-judgmental.</code></pre>
+</div>
+<p>رفتار:</p>
+<ul>
+  <li>تطبیق دقیق شناسهٔ ترد/کانال برنده است.</li>
+  <li>اگر پیامی داخل ترد یا پست فروم برسد و آن ترد ورودی صریح نداشته باشد، هرمس به شناسهٔ کانال/فروم والد برمی‌گردد.</li>
+  <li>پرامپت‌ها زودگذر و در زمان اجرا اعمال می‌شوند، پس تغییرشان بلافاصله نوبت‌های بعدی را تحت تأثیر می‌گذارد بدون بازنویسی تاریخچهٔ گذشته.</li>
+</ul>
+
+<h3><code>discord.history_backfill</code></h3>
+<p><strong>نوع:</strong> boolean — <strong>پیش‌فرض:</strong> <code>true</code></p>
+<p>با فعال‌بودن، بات در هر <code>@منشن</code> پیام‌های از‌دست‌رفتهٔ کانال را بازیابی می‌کند. با <code>require_mention: true</code> بات فقط پیام‌هایی را پردازش می‌کند که مستقیم تگش کنند — بقیهٔ کانال برای رونویسی نشست نامرئی‌اند. backfill هنگام تریگر در تاریخچهٔ اخیر کانال رو به عقب اسکن می‌کند، پیام‌های بین آخرین پاسخ بات و منشن فعلی را جمع می‌کند و به‌عنوان زمینه اضافه‌شان می‌کند.</p>
+<p>رفتار بر اساس سطح:</p>
+<ul>
+  <li><strong>کانال‌های سرور</strong> ‏(با <code>require_mention: true</code>): اسکن کانال از آخرین پاسخ بات. مفید وقتی دیگران حینی که بات خطاب نشده بود پیام گذاشته‌اند.</li>
+  <li><strong>تردها</strong>: فقط خود ترد اسکن می‌شود — ‏<code>channel.history()</code> دیسکورد روی ترد فقط پیام‌های همان ترد را برمی‌گرداند نه کانال والد. این scope درست است چون تردها معمولاً گفتگوهای خودبسنده‌اند.</li>
+  <li><strong>DM‌ها</strong>: رد می‌شود. هر پیام DM بات را فعال می‌کند پس رونویسی نشست کامل است — شکاف منشن‌ای برای پرکردن نیست.</li>
+  <li><strong>کانال‌های پاسخ-آزاد</strong> و <strong>تردهای خودساختهٔ بات</strong>: به همان دلیل رد می‌شوند — بدون گیت منشن، شکافی وجود ندارد.</li>
+</ul>
+<p>نشست‌های به‌ازای-کاربر ‏(<code>group_sessions_per_user: true</code>، پیش‌فرض) هم سود می‌برند: نشست کاربر زمینه‌ای را که دیگران در کانال گذاشته‌اند و پیام‌های قبلی خود کاربر پیش از تگ بات را ندارد. Backfill هر دو شکاف را پر می‌کند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>discord:
+  history_backfill: true   # پیش‌فرض</code></pre>
+</div>
+<p>برای خاموشی:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>discord:
+  history_backfill: false</code></pre>
+</div>
+<blockquote><p><strong>یادداشت:</strong> پیام‌هایی که <em>حین</em> پردازش بات می‌رسند ‏(بین تریگر و پاسخش) ثبت نمی‌شوند. این ساده‌سازی پذیرفته‌شده‌ای است — کاربر می‌تواند دوباره بفرستد یا دوباره تگ کند.</p></blockquote>
+
+<h3><code>discord.history_backfill_limit</code></h3>
+<p><strong>نوع:</strong> integer — <strong>پیش‌فرض:</strong> <code>50</code></p>
+<p>حداکثر تعداد پیام برای اسکن رو به عقب هنگام بازیابی زمینهٔ کانال. در عمل اسکن معمولاً خیلی زودتر متوقف می‌شود — در آخرین پیام خود بات در کانال که مرز طبیعی بین نوبت‌هاست. این سقف برای شروع‌های سرد و شکاف‌های بلندِ بدون پیام بات در تاریخچهٔ اخیر است.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>discord:
+  history_backfill: true
+  history_backfill_limit: 50</code></pre>
+</div>
+
+<h3><code>discord.missed_message_backfill</code></h3>
+<p><strong>نوع:</strong> object — <strong>پیش‌فرض:</strong> غیرفعال</p>
+<p>پنجرهٔ resume وب‌سوکت دیسکورد طی ری‌استارت یا قطعی شبکه می‌تواند منقضی شود. پیام‌های فرستاده‌شده در آن بازه به‌صورت رویداد زندهٔ گیت‌وی تحویل نمی‌شوند. با فعال‌کردن این گزینه، هرمس پس از اتصال‌مجدد دیسکورد مجموعه‌ای محدود از تاریخچهٔ کانال‌ها و تردهای پیکربندی‌شده را اسکن و پیام‌های هنوز-پاسخ‌نگرفته را از همان مسیر مجوزدهی، منشن، کانال، حذف‌تکرار و dispatch رویدادهای زنده عبور می‌دهد.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>discord:
+  missed_message_backfill:
+    enabled: true
+    channels: ["123456789012345678"]
+    window_seconds: 3600
+    limit: 100
+    max_dispatches: 10</code></pre>
+</div>
+<p>اگر <code>channels</code> خالی باشد هرمس از <code>discord.free_response_channels</code> استفاده می‌کند. فقط وقتی بات باید همهٔ کانال‌های متنی قابل‌دسترس سرورها را بررسی کند آن را <code>"*"</code> بگذارید. دفتر بازیابی به‌ازای هر پروفایل در <code>gateway/discord_message_recovery.db</code> ذخیره می‌شود تا پیامِ پاسخ‌گرفته پس از ری‌استارت بعدی دوباره پخش نشود.</p>
+
+<h3><code>group_sessions_per_user</code></h3>
+<p><strong>نوع:</strong> boolean — <strong>پیش‌فرض:</strong> <code>true</code></p>
+<p>تنظیم سراسری گیت‌وی است ‏(مخصوص دیسکورد نیست) و کنترل می‌کند کاربران یک کانال تاریخچه‌های نشست ایزوله داشته باشند یا نه.</p>
+<p><code>true</code>: آلیس و باب در <code>#research</code> هرکدام گفتگوی جداگانه با هرمس دارند. <code>false</code>: کل کانال یک رونویسی مشترک و یک اسلات ایجنت-در-حال-اجرا دارد.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>group_sessions_per_user: true</code></pre>
+</div>
+<p>برای پیامدهای کامل هر حالت بخش «مدل نشست در دیسکورد» بالاتر را ببینید.</p>
+
+<h3><code>display.tool_progress</code></h3>
+<p><strong>نوع:</strong> string — <strong>پیش‌فرض:</strong> <code>"all"</code> — <strong>مقادیر:</strong> ‏<code>off</code>، ‏<code>new</code>، ‏<code>all</code>، ‏<code>verbose</code></p>
+<p>کنترل اینکه بات حین پردازش پیام پیشرفت در چت بفرستد ‏(مثل «دارم فایل را می‌خوانم...», «اجرای فرمان ترمینال...»). تنظیمی سراسری برای همهٔ پلتفرم‌هاست.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  tool_progress: "all"    # off | new | all | verbose</code></pre>
+</div>
+<ul>
+  <li><code>off</code> — بدون پیام پیشرفت</li>
+  <li><code>new</code> — فقط اولین فراخوانی ابزار هر نوبت</li>
+  <li><code>all</code> — همهٔ فراخوانی‌های ابزار ‏(در پیام‌های گیت‌وی به ۴۰ کاراکتر بریده می‌شوند)</li>
+  <li><code>verbose</code> — جزئیات کامل فراخوانی ابزار ‏(پیام‌های بلند می‌سازد)</li>
+</ul>
+
+<h3><code>display.tool_progress_command</code></h3>
+<p><strong>نوع:</strong> boolean — <strong>پیش‌فرض:</strong> <code>false</code></p>
+<p>با فعال‌بودن، فرمان اسلش <code>/verbose</code> در گیت‌وی در دسترس می‌شود تا بین حالت‌های پیشرفت ابزار ‏(<code>off → new → all → verbose → off</code>) بدون ویرایش config.yaml بچرخید.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  tool_progress_command: true</code></pre>
+</div>
+
+<h3><code>display.reasoning_style</code></h3>
+<p><strong>نوع:</strong> string — <strong>پیش‌فرض (دیسکورد):</strong> <code>"subtext"</code> — <strong>مقادیر:</strong> ‏<code>code</code>، ‏<code>blockquote</code>، ‏<code>subtext</code></p>
+<p>کنترل نحوهٔ رندر بلوک استدلال مدل وقتی نمایش reasoning فعال است. دیسکورد پیش‌فرض <code>subtext</code> دارد که از متن کوچک خاکستری بومی دیسکورد ‏(<code>-# </code>) استفاده می‌کند تا استدلال بصری ثانویه به پاسخ بماند. ‏<code>blockquote</code> آن را نقل‌قول <code>&gt;</code> رندر می‌کند و <code>code</code> ‏(پیش‌فرض پلتفرم‌های دیگر) بلوک کد محصور. استدلال بلند به ۱۵ خط اول بریده می‌شود.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  platforms:
+    discord:
+      reasoning_style: subtext   # code | blockquote | subtext</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> کنترل دسترسی فرمان‌های اسلش</h2>
+<p>به‌طور پیش‌فرض هر کاربر مجاز می‌تواند هر فرمان اسلش را اجرا کند. برای تفکیک فهرست مجاز به <strong>مدیران</strong> ‏(دسترسی کامل اسلش) و <strong>کاربران عادی</strong> ‏(فقط فرمان‌هایی که صریحاً فعال می‌کنید)، <code>allow_admin_from</code> و <code>user_allowed_commands</code> را به بلوک <code>extra</code> پلتفرم دیسکورد اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  platforms:
+    discord:
+      extra:
+        # فهرست کاربران مجاز موجود (بدون تغییر)
+        allow_from:
+          - "123456789012345678"  # شناسهٔ کاربر مدیر
+          - "999888777666555444"  # شناسهٔ کاربر عادی
+
+        # جدید — مدیران همهٔ فرمان‌های اسلش را دارند (داخلی + افزونه)
+        allow_admin_from:
+          - "123456789012345678"
+
+        # جدید — کاربران غیرمدیر فقط این فرمان‌ها را می‌توانند اجرا کنند.
+        # ‎/help و ‎/whoami همیشه مجازند تا کاربران سطح دسترسی‌شان را ببینند.
+        user_allowed_commands:
+          - status
+          - model
+          - history
+
+        # اختیاری: فهرست جداگانهٔ مدیر/فرمان برای کانال‌های سرور
+        group_allow_admin_from:
+          - "123456789012345678"
+        group_user_allowed_commands:
+          - status</code></pre>
+</div>
+<p><strong>رفتار:</strong></p>
+<ul>
+  <li>کاربری که در <code>allow_admin_from</code> یک حوزه ‏(DM یا کانال سرور) باشد می‌تواند <strong>همهٔ</strong> فرمان‌های اسلش ثبت‌شده — داخلی و افزونه‌ای — را از طریق رجیستری زندهٔ فرمان‌ها اجرا کند.</li>
+  <li>کاربری که در <code>allow_admin_from</code> نیست فقط فرمان‌های فهرست‌شده در <code>user_allowed_commands</code> به‌اضافهٔ کف همیشه-مجاز: ‏<code>/help</code> و <code>/whoami</code> را می‌تواند.</li>
+  <li>چت عادی ‏(پیام غیر-اسلش) بی‌تأثیر است. کاربران غیرمدیر همچنان عادی با ایجنت حرف می‌زنند؛ فقط نمی‌توانند فرمان دلخواه تریگر کنند.</li>
+  <li><strong>سازگاری رو به عقب:</strong> اگر <code>allow_admin_from</code> برای حوزه‌ای تنظیم نشده باشد، گیت اسلش برای همان حوزه غیرفعال است. نصب‌های موجود بدون تغییر کار می‌کنند.</li>
+  <li>مدیر بودن در DM به معنی مدیر بودن در کانال سرور نیست. هر حوزه فهرست مدیر خودش را دارد.</li>
+</ul>
+<p>با <code>/whoami</code> ببینید حوزهٔ فعال، سطح‌تان ‏(مدیر / کاربر / نامحدود) و کدام فرمان‌های اسلش را می‌توانید اجرا کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> انتخاب‌گر تعاملی مدل</h2>
+<p><code>/model</code> را بدون آرگومان در کانال دیسکورد بفرستید تا انتخاب‌گر مدل مبتنی بر dropdown باز شود:</p>
+<ol>
+  <li><strong>انتخاب ارائه‌دهنده</strong> — یک Select dropdown با ارائه‌دهنده‌های موجود ‏(تا ۲۵).</li>
+  <li><strong>انتخاب مدل</strong> — dropdown دوم با مدل‌های ارائه‌دهندهٔ انتخابی ‏(تا ۲۵).</li>
+</ol>
+<p>انتخاب‌گر بعد از ۱۲۰ ثانیه timeout می‌شود. فقط کاربران مجاز ‏(اعضای <code>DISCORD_ALLOWED_USERS</code>) می‌توانند با آن تعامل کنند. اگر نام مدل را می‌دانید مستقیم <code>/model &lt;name&gt;</code> تایپ کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> فرمان‌های اسلش بومی برای مهارت‌ها</h2>
+<p>هرمس مهارت‌های نصب‌شده را خودکار به‌عنوان <strong>Application Command بومی دیسکورد</strong> ثبت می‌کند. یعنی مهارت‌ها در منوی تکمیل خودکار <code>/</code> دیسکورد کنار فرمان‌های داخلی ظاهر می‌شوند.</p>
+<ul>
+  <li>هر مهارت یک فرمان اسلش دیسکورد می‌شود ‏(مثل <code>/code-review</code>، ‏<code>/ascii-art</code>)</li>
+  <li>مهارت‌ها پارامتر رشته‌ای اختیاری <code>args</code> می‌پذیرند</li>
+  <li>دیسکورد سقف ۱۰۰ فرمان اپلیکیشن به‌ازای بات دارد — اگر مهارت‌های بیشتری از اسلات‌های موجود دارید، مازاد با هشدار در لاگ رد می‌شوند</li>
+  <li>مهارت‌ها هنگام شروع بات کنار فرمان‌های داخلی مثل <code>/model</code>، ‏<code>/reset</code> و <code>/background</code> ثبت می‌شوند</li>
+</ul>
+<p>پیکربندی اضافه لازم نیست — هر مهارت نصب‌شده با <code>hermes skills install</code> در ری‌استارت بعدی گیت‌وی خودکار به فرمان اسلش دیسکورد تبدیل می‌شود.</p>
+
+<h3>غیرفعال‌کردن ثبت فرمان‌های اسلش</h3>
+<p>اگر چند گیت‌وی هرمس روی یک اپلیکیشن دیسکورد دارید ‏(مثل staging + production)، فقط یکی باید مالک ثبت سراسری فرمان‌های اسلش باشد — وگرنه آخرین شروع برنده می‌شود و ثبت‌ها بالا-پایین می‌پرند. روی گیت‌وی «دنباله‌رو» ثبت اسلش را خاموش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  platforms:
+    discord:
+      extra:
+        slash_commands: false   # پیش‌فرض: true</code></pre>
+</div>
+<p>روی گیت‌وی «اصلی» همان <code>true</code> بماند تا رفتار عادی — فرمان‌های منوی <code>/</code> سراسری برای داخلی‌ها و مهارت‌های نصب‌شده — حفظ شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> ارسال رسانه (تگ‌های درجا <code>MEDIA:</code>)</h2>
+<p>آداپتور دیسکورد برای هر نوع رسانهٔ رایج آپلود بومی فایل را از طریق تگ‌های درجا <code>MEDIA:/path/to/file</code> در پاسخ ایجنت پشتیبانی می‌کند — آداپتور تگ را برمی‌دارد و فایل را خودکار آپلود می‌کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نوع</th><th>روش تحویل</th></tr></thead>
+  <tbody>
+    <tr><td>تصاویر ‏(PNG/JPG/WebP)</td><td>پیوست تصویر بومی دیسکورد با پیش‌نمایش درجا</td></tr>
+    <tr><td>GIF متحرک</td><td>‏<code>send_animation</code> با نام <code>animation.gif</code> آپلود می‌کند تا دیسکورد درجا پخشش کند ‏(نه به‌صورت thumbnail ثابت)</td></tr>
+    <tr><td>ویدیو ‏(MP4/MOV)</td><td>‏<code>send_video</code> — پخش‌کنندهٔ ویدیوی بومی</td></tr>
+    <tr><td>صوت / پیام صوتی</td><td>‏<code>send_voice</code> — در صورت امکان پیام صوتی بومی، وگرنه پیوست فایل</td></tr>
+    <tr><td>اسناد ‏(PDF/ZIP/docx و غیره)</td><td>‏<code>send_document</code> — پیوست بومی با دکمهٔ دانلود</td></tr>
+  </tbody>
+</table>
+</div>
+<p>سقف حجم هر آپلود دیسکورد به سطح boost سرور بستگی دارد ‏(۲۵ مگابایت رایگان، تا ۵۰۰ مگابایت). اگر هرمس HTTP 413 بگیرد، آداپتور به‌جای شکست خاموش به لینکی به مسیر کش محلی برمی‌گردد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> دریافت انواع فایل دلخواه</h2>
+<p>هر نوع فایلی که کاربر آپلود کند پذیرفته می‌شود. گیتِ مجوزِ پیام‌دادن به ایجنت است — نه پسوند فایل. هر آپلود دانلود، زیر <code>~/.hermes/cache/documents/</code> کش، و به‌صورت رویداد پیام از نوع <code>DOCUMENT</code> به ایجنت داده می‌شود تا بتواند با <code>terminal</code> ‏(<code>ffprobe</code>، ‏<code>unzip</code>، ‏<code>file</code>، ‏<code>strings</code> و غیره) یا <code>read_file</code> فایل را بررسی کند.</p>
+<ul>
+  <li>انواع شناخته ‏(PDF، ‏docx/xlsx/pptx، ‏zip، تصویر/صوت/ویدیو و غیره) MIME دقیق‌شان را نگه می‌دارند.</li>
+  <li>انواع ناشناخته به content-type گزارش‌شدهٔ آپلود و در نبودش به <code>application/octet-stream</code> برمی‌گردند.</li>
+  <li>فایل‌های کوچک قابل-رمزگشایی UTF-8 ‏(متن، کد، پیکربندی، HTML، CSS، JSON، YAML و...) تا سقف ۱۰۰ KiB محتوایشان خودکار در پرامپت تزریق می‌شود. فایل‌های باینریِ رمزگشایی‌ناشدنی فقط به‌صورت یادداشت زمینه‌ایِ اشاره‌گر-مسیر داده می‌شوند ‏(برای ترمینال‌های سندباکس Docker/Modal با <code>to_agent_visible_cache_path</code> خودکار ترجمه می‌شود) تا پنجرهٔ زمینه را منفجر نکنند.</li>
+</ul>
+<p>تنها محدودیت ورودی، سقف حجم به‌ازای فایل است ‏(پیش‌فرض ۳۲ MiB):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>discord:
+  # اختیاری — بالا بردن/غیرفعال‌کردن سقف حجم به‌ازای فایل. پیش‌فرض ۳۲ MiB.
+  # کل فایل حین کش‌شدن در حافظه نگه داشته می‌شود، پس آپلود نامحدود
+  # هزینهٔ حافظهٔ واقعی دارد.
+  max_attachment_bytes: 33554432   # بایت؛ 0 = نامحدود</code></pre>
+</div>
+<p>متغیر env معادل: ‏<code>DISCORD_MAX_ATTACHMENT_BYTES=33554432</code> ‏(یا <code>0</code> برای بی‌سقفی).</p>
+<p>فلگ قدیمی <code>discord.allow_any_attachment</code> الان no-op است — هر نوع فایلی همیشه پذیرفته می‌شود — و فقط نگه داشته شده تا پیکربندی‌های موجود خطا ندهند.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هزینهٔ حافظهٔ حالت نامحدود</div>
+  <p>غیرفعال‌کردن سقف حجم ‏(<code>max_attachment_bytes: 0</code>) یعنی کاربر می‌تواند فایلی چند گیگابایتی روی بات بگذارد و گیت‌وی حین کش روی دیسک، آن را از حافظه عبور می‌دهد. فقط در نصب‌های تک‌کاربرهٔ مطمئن این را بگذارید. برای بات‌های اشتراکی پیش‌فرض ۳۲ MiB را نگه دارید یا محتاطانه بالا ببرید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> پرامپت‌های تعاملی (clarify)</h2>
+<p>وقتی ایجنت ابزار <code>clarify</code> را صدا می‌زند — برای پرسیدن رویکرد موردعلاقه‌تان، گرفتن بازخورد پس از کار، یا چک پیش از تصمیم غیربدیهی — دیسکورد پرسش را <strong>با یک دکمه به‌ازای هر گزینه</strong> رندر می‌کند:</p>
+<blockquote><p>برای داشبورد از کدام فریم‌ورک استفاده کنم؟</p><p>[1. Next.js] [2. Remix] [3. Astro] [Other (type answer)]</p></blockquote>
+<p>روی دکمهٔ شماره‌دار کلیک کنید تا پاسخ دهید، یا روی <strong>Other</strong> بزنید و پاسخ آزاد تایپ کنید ‏(پیام بعدی‌تان در آن کانال تبدیل به پاسخ می‌شود). فراخوانی‌های بازِ <code>clarify</code> ‏(بدون گزینهٔ از-پیش-تعیین‌شده) از دکمه‌ها می‌گذرند و پیام بعدی‌تان را ثبت می‌کنند.</p>
+<p>دکمه‌ها پس از انتخاب، خودشان غیرفعال می‌شوند تا کلیک تکراری پرامپت را دو-مرتبه حل نکند. timeout پاسخ را با <code>agent.clarify_timeout</code> در <code>~/.hermes/config.yaml</code> تنظیم کنید ‏(پیش‌فرض <code>600</code> ثانیه). اگر تا انقضا پاسخ ندهید، ایجنت با پیام جانشین رفع‌انسداد می‌شود و تطبیق می‌یابد نه اینکه معلق بماند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۷</span> کانال خانگی</h2>
+<p>می‌توانید یک «کانال خانگی» تعیین کنید که بات پیام‌های پیش‌فعال را به آن بفرستد ‏(مثل خروجی job های کرون، یادآوری‌ها و اعلان‌ها). دو راه دارد:</p>
+<h3>با فرمان اسلش</h3>
+<p><code>/sethome</code> را در هر کانال دیسکوردی که بات حضور دارد تایپ کنید. همان کانال کانال خانگی می‌شود.</p>
+<h3>پیکربندی دستی</h3>
+<p>این‌ها را به <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>DISCORD_HOME_CHANNEL=123456789012345678
+DISCORD_HOME_CHANNEL_NAME="#bot-updates"</code></pre>
+</div>
+<p>شناسه را با Channel ID واقعی جایگزین کنید ‏(با Developer Mode روشن: راست‌کلیک ← Copy Channel ID).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۸</span> پیام‌های صوتی</h2>
+<p>هرمس ایجنت از پیام‌های صوتی دیسکورد پشتیبانی می‌کند:</p>
+<ul>
+  <li><strong>پیام‌های صوتی ورودی</strong> خودکار با ارائه‌دهندهٔ STT پیکربندی‌شده رونویسی می‌شوند: ‏<code>faster-whisper</code> محلی ‏(بدون کلید)، ‏Groq Whisper ‏(<code>GROQ_API_KEY</code>) یا OpenAI Whisper ‏(<code>VOICE_TOOLS_OPENAI_KEY</code>).</li>
+  <li><strong>متن-به-گفتار</strong>: از <code>/voice tts</code> استفاده کنید تا بات همراه پاسخ متنی، پاسخ صوتی هم بفرستد.</li>
+  <li><strong>کانال‌های صوتی دیسکورد</strong>: هرمس می‌تواند به کانال صوتی بپیوندد، به سخن کاربران گوش دهد و در همان کانال حرف بزند.</li>
+</ul>
+<p>راهنمای کامل راه‌اندازی و عملیات:</p>
+<ul>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/voice-mode" target="_blank" rel="noopener">حالت صوتی ‏(Voice Mode)</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/guides/use-voice-mode-with-hermes" target="_blank" rel="noopener">استفاده از حالت صوتی با هرمس</a></li>
+</ul>
+
+<h3>جلوه‌های صوتی کانال صوتی (ambient + تأیید شفاهی)</h3>
+<p>وقتی بات در کانال صوتی است می‌توانید حس گفتگومحورتری بهش بدهید: یک تأیید شفاهی کوتاه («بگذار بررسی کنم») پیش از شروع کار، و یک بستر ambient ظریفِ «در حال فکر» که زیر کارِ ابزارها پخش می‌شود — صدای گفتگو ambient را duck می‌کند و پس از پایان برمی‌گرداند؛ شبیه حالت صدای Grok.</p>
+<p>‏discord.py فقط یک استریم صوتی به‌ازای هر اتصال پخش می‌کند، پس هرمس یک میکسر نرم‌افزاری روی استریم خروجی می‌نشیند که لوپ ambient، تأییدها و پاسخ‌های TTS را در همان استریم واحد جمع می‌کند — هم‌پوشانی دارند به‌جای قطع همدیگر.</p>
+<p>این <strong>به‌طور پیش‌فرض خاموش</strong> است. در <code>config.yaml</code> فعال کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>discord:
+  voice_fx:
+    enabled: true          # کلید اصلی
+    ambient_enabled: true  # بستر idle «در حال فکر» حین اجرای ابزارها
+    ambient_path: ""       # فایل لوپ سفارشی (هر فرمت صوتی)؛ "" = پد سنتزشدهٔ داخلی
+    ambient_gain: 0.18     # بلندی بستر idle (0.0–1.0)
+    duck_gain: 0.06        # بلندی ambient حین صحبت بات
+    speech_gain: 1.0       # بلندی TTS / تأیید
+    ack_enabled: true      # گفتن جملهٔ کوتاه پیش از اولین فراخوانی ابزار نوبت
+    ack_phrases:           # تصادفی انتخاب می‌شود؛ [] بگذارید تا تأیید گفتاری خاموش شود
+      - "Let me look into that."
+      - "One moment."
+      - "Checking on that now."</code></pre>
+</div>
+<p>یادداشت‌ها:</p>
+<ul>
+  <li>اگر می‌خواهید بات تا <code>/voice leave</code> صریح یا قطع دستی در کانال صوتی بماند، ‏<code>voice_channel_inactivity_timeout_seconds: 0</code> بگذارید. پیش‌فرض، ترک خودکار ۳۰۰ ثانیه‌ایِ idle تاریخی را حفظ می‌کند.</li>
+  <li>‏<code>voice_playback_timeout_seconds</code> کف است نه سقف سخت برای TTS بلند. هرمس مدت صدای تولیدی را probe می‌کند و وقتی <code>duration + 30s</code> بلندتر از کف پیکربندی است همان را منتظر می‌ماند.</li>
+  <li>تأیید حداکثر یک‌بار در هر نوبت، فقط وقتی بات در کانال صوتی است و میکسر فعال است، شلیک می‌شود. از ارائه‌دهندهٔ TTS پیکربندی‌شده استفاده می‌کند.</li>
+  <li>‏<code>ambient_path</code> هر فایلی که <code>ffmpeg</code> بتواند decode کند را می‌پذیرد؛ بی‌درز لوپ می‌شود. خالی بگذارید تا از پد سنتزشدهٔ داخلی استفاده شود ‏(asset لازم ندارد).</li>
+  <li>همهٔ تنظیمات در <code>config.yaml</code> هستند نه <code>.env</code> — رفتاری‌اند نه محرمانه.</li>
+  <li>وقتی <code>voice_fx.enabled</code> برابر <code>false</code> است، پخش صوتی از مسیر one-shot اصلی می‌رود و چیزی تغییر نمی‌کند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۹</span> کانال‌های فروم</h2>
+<p>کانال‌های فروم دیسکورد ‏(نوع 15) پیام مستقیم نمی‌پذیرند — هر پست در فروم باید ترد باشد. هرمس کانال‌های فروم را خودکار تشخیص می‌دهد و هر وقت لازم باشد آنجا چیزی بفرستد، یک پست ترد جدید می‌سازد؛ پس پاسخ متنی، TTS، تصویر، پیام صوتی و پیوست فایل همه بدون هندلینگ خاص از سمت ایجنت کار می‌کنند.</p>
+<ul>
+  <li><strong>نام ترد</strong> از خط اول پیام مشتق می‌شود ‏(پیشوند heading مارک‌داون حذف، سقف ۱۰۰ کاراکتر). وقتی پیام فقط-پیوست است، نام فایل به‌عنوان نام ترد جایگزین می‌شود.</li>
+  <li><strong>پیوست‌ها</strong> روی پیام آغازین ترد جدید سوار می‌شوند — بدون گام آپلود جدا، بدون ارسال‌های نصفه.</li>
+  <li><strong>یک فراخوان، یک ترد</strong>: هر ارسال به فروم ترد جدیدی می‌سازد. ارسال‌های متوالی به یک فروم، تردهای جدا تولید می‌کنند.</li>
+  <li><strong>تشخیص سه‌لایه‌ای است</strong>: اول کش directory کانال‌ها، دوم کش probe محلی-پروسه، و در آخر probe زندهٔ <code>GET /channels/{id}</code> ‏(که نتیجه‌اش برای عمر پروسه memoize می‌شود).</li>
+</ul>
+<p>بازخوانی directory ‏(<code>/channels refresh</code> روی پلتفرم‌هایی که دارند، یا ری‌استارت گیت‌وی) کش را با کانال‌های فرومی که بعد از شروع بات ساخته شده‌اند پر می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲۰</span> عیب‌یابی</h2>
+
+<h3>بات آنلاین است ولی به پیام‌ها پاسخ نمی‌دهد</h3>
+<p><strong>علت:</strong> یا Message Content Intent خاموش است، یا احراز دیسکورد fail-closed می‌شود چون هیچ سیاست دسترسی‌ای پیکربندی نشده.</p>
+<p><strong>راه‌حل:</strong></p>
+<ol>
+  <li>به <a href="https://discord.com/developers/applications" target="_blank" rel="noopener">پرتال توسعه‌دهندگان</a> ← اپ شما ← Bot ← Privileged Gateway Intents ← فعال‌کردن <strong>Message Content Intent</strong> ← Save Changes.</li>
+  <li>تأیید کنید دست‌کم یک سیاست دسترسی دیسکورد پیکربندی شده:</li>
+</ol>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># توصیه‌شده: اجازه به کاربران خاص
+DISCORD_ALLOWED_USERS=284102345871466496
+
+# یا اجازه به یک guild/بات توسعه‌ای مطمئن شبیه دیسکوردِ قبل از 0.18
+DISCORD_ALLOW_ALL_USERS=true</code></pre>
+</div>
+<ol start="3">
+  <li>گیت‌وی را ری‌استارت کنید:</li>
+</ol>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes gateway restart</code></pre>
+</div>
+<p>اگر لاگ گیت‌وی می‌گوید دیسکورد متصل است و چک‌های REST API جواب می‌دهند ولی هر پیام ورودی بی‌صداست، این هشدار را در <code>~/.hermes/logs/gateway.log</code> جست‌وجو کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>No Discord access policy configured; inbound Discord messages will be denied by default.</code></pre>
+</div>
+<p>هرمس 0.18 عمداً روی آداپتورهای قابل‌دسترس-بیرونی fail-closed است. باتی با هیچ <code>DISCORD_ALLOWED_USERS</code>، ‏<code>DISCORD_ALLOWED_ROLES</code>، ‏<code>DISCORD_ALLOWED_CHANNELS</code> و فلگ allow-all صریح، با موفقیت وصل می‌شود ولی کاربران ورودی را پیش از هندل عادی پیام رد می‌کند.</p>
+
+<h3>خطای «Privileged intents» / ‏<code>PrivilegedIntentsRequired</code> هنگام شروع</h3>
+<p><strong>علت:</strong> هرمس intent های ممتازی درخواست می‌کند که برای بات شما در پرتال توسعه‌دهندگان فعال نیستند. دیسکورد اتصال WebSocket را رد می‌کند. هرمس همیشه <strong>Message Content Intent</strong> را می‌خواهد. وقتی فهرست مجازتان از یوزرنیم ‏(نه شناسهٔ عددی) استفاده کند یا <code>DISCORD_ALLOWED_ROLES</code> تنظیم باشد، <strong>Server Members Intent</strong> را هم می‌خواهد. Presence Intent لازم نیست.</p>
+<p><strong>راه‌حل:</strong></p>
+<ol>
+  <li>به پرتال توسعه‌دهندگان ← اپ شما ← Bot ← Privileged Gateway Intents بروید.</li>
+  <li><strong>Message Content Intent</strong> را فعال کنید ‏(الزامی). اگر یوزرنیم یا فهرست نقش دارید <strong>Server Members Intent</strong> را هم فعال کنید.</li>
+  <li><strong>Save Changes</strong> را بزنید و گیت‌وی را ری‌استارت کنید ‏(<code>hermes gateway restart</code>).</li>
+</ol>
+<p>لاگ گیت‌وی باید دقیقاً نام intent هایی که هرمس خواسته را بگوید. تا فعال‌شان نکنید دیسکورد اتصال را ادامه‌دار رد می‌کند — این خطای پیکربندی پرتال است نه مشکل شبکه.</p>
+
+<h3>بات در یک کانال مشخص پیام‌ها را نمی‌بیند</h3>
+<p><strong>علت:</strong> نقش بات دسترسی دیدن آن کانال را ندارد.</p>
+<p><strong>راه‌حل:</strong> در دیسکورد به تنظیمات کانال ← Permissions بروید و نقش بات را با <strong>View Channel</strong> و <strong>Read Message History</strong> فعال اضافه کنید.</p>
+
+<h3>خطاهای 403 Forbidden</h3>
+<p><strong>علت:</strong> بات دسترسی‌های لازم را ندارد.</p>
+<p><strong>راه‌حل:</strong> بات را با دسترسی‌های درست دوباره دعوت کنید ‏(URL گام ۵)، یا دسترسی‌های نقشش را دستی در Server Settings ← Roles اصلاح کنید.</p>
+
+<h3>بات آفلاین است</h3>
+<p><strong>علت:</strong> گیت‌وی هرمس اجرا نیست یا توکن اشتباه است.</p>
+<p><strong>راه‌حل:</strong> چک کنید <code>hermes gateway</code> در حال اجراست. ‏<code>DISCORD_BOT_TOKEN</code> را در <code>.env</code> تأیید کنید. اگر اخیراً توکن را ریست کرده‌اید، آن را به‌روز کنید.</p>
+
+<h3>«User not allowed» / بات شما را نادیده می‌گیرد</h3>
+<p><strong>علت:</strong> شناسهٔ کاربری شما در <code>DISCORD_ALLOWED_USERS</code> نیست.</p>
+<p><strong>راه‌حل:</strong> شناسه‌تان را به <code>DISCORD_ALLOWED_USERS</code> در <code>~/.hermes/.env</code> اضافه و گیت‌وی را ری‌استارت کنید.</p>
+
+<h3>افراد یک کانال ناخواسته زمینهٔ مشترک دارند</h3>
+<p><strong>علت:</strong> ‏<code>group_sessions_per_user</code> غیرفعال است، یا پلتفرم برای پیام‌های آن زمینه نمی‌تواند شناسهٔ کاربر بدهد.</p>
+<p><strong>راه‌حل:</strong> این را در <code>~/.hermes/config.yaml</code> بگذارید و گیت‌وی را ری‌استارت کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>group_sessions_per_user: true</code></pre>
+</div>
+<p>اگر عمداً گفتگوی مشترک اتاق می‌خواهید خاموشش بگذارید — فقط انتظار رونویسی مشترک و رفتار وقفهٔ مشترک را داشته باشید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲۱</span> امنیت</h2>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>همیشه <code>DISCORD_ALLOWED_USERS</code> ‏(یا <code>DISCORD_ALLOWED_ROLES</code>) را تنظیم کنید تا مشخص شود چه کسی با بات تعامل می‌کند. بدون هیچ‌کدام، گیت‌وی به‌عنوان اقدام ایمنی همهٔ کاربران را پیش‌فرض رد می‌کند. فقط افراد مورداطمینان را مجاز کنید — کاربران مجاز دسترسی کامل به قابلیت‌های ایجنت دارند شامل استفاده از ابزار و دسترسی سیستم.</p>
+</div>
+
+<h3>کنترل دسترسی مبتنی بر نقش (RBAC)</h3>
+<p>برای سرورهایی که دسترسی با نقش مدیریت می‌شود نه فهرست کاربران فردی ‏(تیم‌های ناظر، پشتیبانی، ابزار داخلی)، از <code>DISCORD_ALLOWED_ROLES</code> استفاده کنید — فهرست شناسه‌های نقش جدا با ویرگول. هر عضوی با یکی از آن نقش‌ها مجاز است.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash — ~/.hermes/.env</span><button class="copy-btn">کپی</button></div>
+  <pre><code># کنار DISCORD_ALLOWED_USERS یا به‌جای آن کار می‌کند
+DISCORD_ALLOWED_ROLES=987654321098765432,876543210987654321</code></pre>
+</div>
+<p>معناشناسی:</p>
+<ul>
+  <li><strong>OR با فهرست مجاز کاربران.</strong> کاربر مجاز است اگر شناسه‌اش در <code>DISCORD_ALLOWED_USERS</code> باشد <strong>یا</strong> هر نقشی از <code>DISCORD_ALLOWED_ROLES</code> را داشته باشد.</li>
+  <li><strong>Server Members Intent خودکار فعال می‌شود.</strong> با تنظیم <code>DISCORD_ALLOWED_ROLES</code> بات هنگام اتصال Members intent را روشن می‌کند — دیسکورد برای فرستادن اطلاعات نقش همراه رکورد اعضا به آن نیاز دارد.</li>
+  <li><strong>شناسهٔ نقش، نه اسم نقش.</strong> از دیسکورد بگیرید: ‏<strong>User Settings ← Advanced ← Developer Mode ON</strong>، سپس راست‌کلیک روی هر نقش ← <strong>Copy Role ID</strong>.</li>
+  <li><strong>جایگزین DM.</strong> در DM چک نقش، سرورهای مشترک را اسکن می‌کند؛ کاربری که در هر سرور مشترکی نقش مجاز داشته باشد در DM هم مجاز است.</li>
+</ul>
+<p>این الگوی ترجیحی وقتی تیم نظارت دست‌به‌دست می‌شود است — مادرهای جدید به‌محض گرفتن نقش دسترسی می‌گیرند، بدون ویرایش <code>.env</code> یا ری‌استارت گیت‌وی.</p>
+
+<h3>کنترل منشن</h3>
+<p>به‌طور پیش‌فرض هرمس مانع پینگ <code>@everyone</code>، ‏<code>@here</code> و منشن نقش‌ها توسط بات می‌شود، حتی اگر پاسخش این توکن‌ها را داشته باشد. این مانع می‌شود پرامپت بد-فرموله یا محتوای بازتاب‌شدهٔ کاربر کل سرور را اسپم کند. پینگ تکی <code>@user</code> و پینگ ریفرنس-ریپلای ‏(چیپ کوچک «در پاسخ به...») فعال می‌مانند تا گفتگوی عادی کار کند.</p>
+<p>این پیش‌فرض‌ها را با env یا config.yaml می‌توانید شل کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>discord:
+  allow_mentions:
+    everyone: false      # اجازه پینگ @everyone / @here به بات
+    roles: false         # اجازه پینگ @نقش به بات
+    users: true          # اجازه پینگ @کاربرهای تکی
+    replied_user: true   # هنگام ریپلای به پیام کسی، او را پینگ کن</code></pre>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash — ~/.hermes/.env (env بر config.yaml مقدم است)</span><button class="copy-btn">کپی</button></div>
+  <pre><code>DISCORD_ALLOW_MENTION_EVERYONE=false
+DISCORD_ALLOW_MENTION_ROLES=false
+DISCORD_ALLOW_MENTION_USERS=true
+DISCORD_ALLOW_MENTION_REPLIED_USER=true</code></pre>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>‏<code>everyone</code> و <code>roles</code> را مگر دقیقاً ندانید چرا لازمشان دارید <code>false</code> بگذارید. بسیار آسان است LLM رشتهٔ <code>@everyone</code> را داخل پاسخی عادی تولید کند؛ بدون این محافظ، آن رشته به همهٔ اعضای سرورتان اعلان می‌فرستد.</p>
+</div>
+<p>برای اطلاعات بیشتر دربارهٔ امن‌سازی استقرار هرمس ایجنت، <a href="../security.html">راهنمای امنیت</a> را ببینید.</p>
+</section>
+
+<div class="pager">
+  <a href="telegram.html"><span class="dir">→ قبلی</span><span class="ttl">تلگرام</span></a>
+  <a class="next" href="slack.html"><span class="dir">بعدی ←</span><span class="ttl">اسلک</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord" target="_blank" rel="noopener">Discord</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

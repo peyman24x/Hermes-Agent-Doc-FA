@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open WebUI — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/open-webui" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>Open WebUI</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>یکپارچه‌سازی Open WebUI</h1>
+<p><a href="https://github.com/open-webui/open-webui" target="_blank" rel="noopener">Open WebUI</a> ‏(۱۲۶ هزار ستاره) محبوب‌ترین رابط چت خودمیزبان برای هوش مصنوعی است. با سرور API داخلی هرمس ایجنت می‌توانید از Open WebUI به‌عنوان یک فرانت وب صیقل‌خورده برای ایجنت‌تان استفاده کنید — با مدیریت گفتگو، حساب کاربری و رابط چت مدرن.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> معماری</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Open WebUI (رابط مرورگر، پورت 3000)
+        │  POST /v1/chat/completions
+        ▼
+hermes-agent (سرور API گیت‌وی، پورت 8642)
+        │  پاسخ استریم SSE
+        ▼
+   Open WebUI</code></pre>
+</div>
+<p>‏Open WebUI مثل اتصال به OpenAI به سرور API هرمس ایجنت وصل می‌شود. هرمس درخواست‌ها را با تول‌ست کاملش هندل می‌کند — ترمینال، عملیات فایل، جست‌وجوی وب، حافظه، مهارت‌ها — و پاسخ نهایی را برمی‌گرداند.</p>
+<div class="callout note">
+  <div class="callout-title">📌 مکان runtime</div>
+  <p>سرور API یک <strong>runtime ایجنت هرمس</strong> است نه پروکسی خالص LLM. برای هر درخواست، هرمس یک ‏<code>AIAgent</code> سمت-سرور روی میزبان سرور API می‌سازد. فراخوانی‌های ابزار همانجا که سرور API اجراست اجرا می‌شوند.</p>
+  <p>مثلاً اگر لپ‌تاپی Open WebUI یا کلاینت سازگار-با-OpenAI دیگری را به سرور API هرمس روی ماشین راه‌دور اشاره دهد، ‏pwd، ابزارهای فایل، ابزارهای مرورگر، ابزارهای MCP محلی و سایر ابزارهای ورک‌اسپیس روی میزبانِ راه‌دورِ سرور API اجرا می‌شوند نه روی لپ‌تاپ.</p>
+</div>
+<p>‏Open WebUI سرور-به-سرور با هرمس حرف می‌زند، پس برای این یکپارچه‌سازی ‏<code>API_SERVER_CORS_ORIGINS</code> لازم نیست.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> راه‌اندازی سریع</h2>
+
+<h3>۱. فعال‌سازی سرور API</h3>
+<div class="codebox"><pre><code>hermes config set API_SERVER_ENABLED true
+hermes config set API_SERVER_KEY your-secret-key</code></pre></div>
+<p>‏<code>hermes config set</code> فلگ را خودکار به config.yaml و رمز را به ‏<code>~/.hermes/.env</code> مسیریابی می‌کند. اگر گیت‌وی از قبل اجراست ری‌استارتش کنید تا تغییر اعمال شود:</p>
+<div class="codebox"><pre><code>hermes gateway stop && hermes gateway</code></pre></div>
+
+<h3>۲. شروع گیت‌وی هرمس ایجنت</h3>
+<div class="codebox"><pre><code>hermes gateway</code></pre></div>
+<p>باید ببینید:</p>
+<div class="codebox"><pre><code>[API Server] API server listening on http://127.0.0.1:8642</code></pre></div>
+
+<h3>۳. تأیید قابل‌دسترس بودن سرور API</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>curl -s http://127.0.0.1:8642/health
+# {"status": "ok", ...}
+
+curl -s -H "Authorization: Bearer your-secret-key" http://127.0.0.1:8642/v1/models
+# {"object":"list","data":[{"id":"hermes-agent", ...}]}</code></pre>
+</div>
+<p>اگر ‏<code>/health</code> شکست خورد، گیت‌وی ‏<code>API_SERVER_ENABLED=true</code> را برنداشته — ری‌استارتش کنید. اگر ‏<code>/v1/models</code> مقدار ‏<code>401</code> برگرداند، هدر Authorization شما با ‏<code>API_SERVER_KEY</code> نمی‌خواند.</p>
+
+<h3>۴. شروع Open WebUI</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>docker run -d -p 3000:8080 \
+  -e OPENAI_API_BASE_URL=http://host.docker.internal:8642/v1 \
+  -e OPENAI_API_KEY=your-secret-key \
+  -e ENABLE_OLLAMA_API=false \
+  --add-host=host.docker.internal:host-gateway \
+  -v open-webui:/app/backend/data \
+  --name open-webui \
+  --restart always \
+  ghcr.io/open-webui/open-webui:main</code></pre>
+</div>
+<p>‏<code>ENABLE_OLLAMA_API=false</code> بک‌اند پیش‌فرض Ollama را سرکوب می‌کند که وگرنه خالی ظاهر شده و انتخاب‌گر مدل را شلوغ می‌کند. اگر واقعاً Ollama هم کنارش دارید حذفش کنید.</p>
+<p>اولین اجرا ۱۵ تا ۳۰ ثانیه طول می‌کشد: ‏Open WebUI بار اول مدل‌های embedding ‏sentence-transformer ‏(~۱۵۰MB) را دانلود می‌کند. قبل از بازکردن UI منتظر بمانید ‏<code>docker logs open-webui</code> آرام بگیرد.</p>
+
+<h3>۵. بازکردن UI</h3>
+<p>به ‏<strong>http://localhost:3000</strong> بروید. حساب ادمین بسازید ‏(اولین کاربر ادمین می‌شود). باید ایجنت‌تان را در کشویی مدل ببینید ‏(به نام پروفایل شما، یا ‏<strong>hermes-agent</strong> برای پروفایل پیش‌فرض). شروع به چت کنید!</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> راه‌اندازی Docker Compose</h2>
+<p>برای setup ماندگارتر یک ‏docker-compose.yml بسازید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    ports:
+      - "3000:8080"
+    volumes:
+      - open-webui:/app/backend/data
+    environment:
+      - OPENAI_API_BASE_URL=http://host.docker.internal:8642/v1
+      - OPENAI_API_KEY=your-secret-key
+      - ENABLE_OLLAMA_API=false
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: always
+
+volumes:
+  open-webui:</code></pre>
+</div>
+<p>سپس:</p>
+<div class="codebox"><pre><code>docker compose up -d</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پیکربندی از طریق Admin UI</h2>
+<p>اگر ترجیح می‌دهید اتصال را از طریق UI به‌جای متغیرهای محیطی پیکربندی کنید:</p>
+<ol>
+  <li>وارد Open WebUI شوید ‏(<strong>http://localhost:3000</strong>)</li>
+  <li>روی آواتار پروفایل کلیک ← <strong>Admin Settings</strong></li>
+  <li>به <strong>Connections</strong> بروید</li>
+  <li>تحت <strong>OpenAI API</strong> روی آیکون آچار ‏(Manage) کلیک کنید</li>
+  <li>روی <strong>+ Add New Connection</strong> کلیک کنید</li>
+  <li>وارد کنید:
+    <ul>
+      <li><strong>URL</strong>: ‏<code>http://host.docker.internal:8642/v1</code></li>
+      <li><strong>API Key</strong>: دقیقاً همان مقدار ‏<code>API_SERVER_KEY</code> در هرمس</li>
+    </ul>
+  </li>
+  <li>برای تأیید اتصال روی تیک کلیک کنید</li>
+  <li><strong>Save</strong> را بزنید</li>
+</ol>
+<p>مدل ایجنت‌تان حالا باید در کشویی مدل ظاهر شود ‏(به نام پروفایل، یا ‏<strong>hermes-agent</strong> برای پروفایل پیش‌فرض).</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>متغیرهای محیطی فقط روی <strong>اولین اجرای</strong> Open WebUI اثر دارند. بعد از آن تنظیمات اتصال در دیتابیس داخلی‌اش ذخیره می‌شود. برای تغییر بعدی از Admin UI استفاده کنید یا والوم Docker را حذف و از نو شروع کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> نوع API: ‏Chat Completions در برابر Responses</h2>
+<p>‏Open WebUI هنگام اتصال به بک‌اند دو حالت API دارد:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>حالت</th><th>قالب</th><th>کِی</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Chat Completions</strong> ‏(پیش‌فرض)</td><td><code>/v1/chat/completions</code></td><td>توصیه‌شده. از جعبه کار می‌کند.</td></tr>
+    <tr><td><strong>Responses</strong> ‏(آزمایشی)</td><td><code>/v1/responses</code></td><td>برای وضعیت گفتگوی سمت-سرور با ‏<code>previous_response_id</code>.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>استفاده از Chat Completions ‏(توصیه‌شده)</h3>
+<p>این پیش‌فرض است و پیکربندی اضافه نمی‌خواهد. ‏Open WebUI درخواست‌های استاندارد قالب OpenAI می‌فرستد و هرمس ایجنت مطابق جواب می‌دهد. هر درخواست تاریخچهٔ کامل گفتگو را شامل است.</p>
+
+<h3>استفاده از Responses API</h3>
+<p>برای حالت Responses API:</p>
+<ol>
+  <li>به ‏<strong>Admin Settings ← Connections ← OpenAI ← Manage</strong> بروید</li>
+  <li>اتصال hermes-agent را ویرایش کنید</li>
+  <li><strong>API Type</strong> را از «Chat Completions» به ‏<strong>«Responses (Experimental)»</strong> عوض کنید</li>
+  <li>ذخیره کنید</li>
+</ol>
+<p>با Responses API، ‏Open WebUI درخواست‌ها را در قالب Responses ‏(آرایهٔ input + instructions) می‌فرستد و هرمس ایجنت می‌تواند تاریخچهٔ کامل فراخوانی ابزار را بین نوبت‌ها با ‏<code>previous_response_id</code> حفظ کند. وقتی ‏<code>stream: true</code> باشد هرمس اقلام ‏<code>function_call</code> و ‏<code>function_call_output</code> بومی-مشخصات را هم استریم می‌کند که UI ساختاریافتهٔ سفارشیِ فراخوانی-ابزار را در کلاینت‌هایی که رویدادهای Responses را رندر می‌کنند ممکن می‌سازد.</p>
+<div class="callout note">
+  <div class="callout-title">📌 نکته</div>
+  <p>‏Open WebUI الان حتی در حالت Responses هم تاریخچهٔ گفتگو را سمت-کلاینت مدیریت می‌کند — به‌جای ‏<code>previous_response_id</code> تاریخچهٔ کامل پیام را در هر درخواست می‌فرستد. مزیت اصلی Responses امروز، جریان رویداد ساختاریافته است: دلتاهای متنی و اقلام ‏<code>function_call</code>/<code>function_call_output</code> به‌عنوان رویدادهای SSE مربوط به OpenAI Responses می‌آیند به‌جای chunk های Chat Completions.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> نحوهٔ کار</h2>
+<p>وقتی در Open WebUI پیام می‌فرستید:</p>
+<ol>
+  <li>‏Open WebUI یک درخواست ‏<code>POST /v1/chat/completions</code> با پیام و تاریخچهٔ گفتگوی شما می‌فرستد</li>
+  <li>هرمس ایجنت با پروفایل سرور API، پیکربندی مدل/ارائه‌دهنده، حافظه، مهارت‌ها و تول‌ست‌های پیکربندی‌شدهٔ سرور API یک نمونهٔ ‏<code>AIAgent</code> سمت-سرور می‌سازد</li>
+  <li>ایجنت درخواستتان را پردازش می‌کند — ممکن است روی میزبان سرور API ابزار صدا بزند ‏(ترمینال، عملیات فایل، جست‌وجوی وب و...)</li>
+  <li>هم‌زمان با اجرای ابزارها، <strong>پیام‌های پیشرفت درون‌خطی به UI استریم می‌شوند</strong> تا ببینید ایجنت چه می‌کند ‏(مثل ‏<code>`💻 ls -la`</code>، ‏<code>`🔍 Python 3.12 release`</code>)</li>
+  <li>پاسخ متنی نهایی ایجنت به Open WebUI استریم می‌شود</li>
+  <li>‏Open WebUI پاسخ را در رابط چتش نمایش می‌دهد</li>
+</ol>
+<p>ایجنت شما به همان ابزارها و قابلیت‌های نمونهٔ هرمسِ سرور API دسترسی دارد. اگر سرور API راه‌دور باشد آن ابزارها هم راه‌دورند.</p>
+<p>اگر امروز ابزارها باید علیه ورک‌اسپیس <strong>محلی</strong>‌تان اجرا شوند، هرمس را محلی اجرا کنید و به ارائه‌دهندهٔ خالص LLM یا پراکسی خالص مدل سازگار-با-OpenAI اشاره دهید ‏(مثل vLLM، ‏LiteLLM، ‏Ollama، ‏llama.cpp، ‏OpenAI، ‏OpenRouter و...). یک حالت split-runtime آینده برای «مغز راه‌دور، دست‌های محلی» در ‏<a href="https://github.com/NousResearch/hermes-agent/issues/18715" target="_blank" rel="noopener">issue شمارهٔ ۱۸۷۱۵</a> پیگیری می‌شود؛ رفتار فعلی سرور API این نیست.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 پیشرفت ابزار</div>
+  <p>با روشن بودن استریم ‏(پیش‌فرض)، حین اجرای ابزارها نشانگرهای کوتاه درون‌خطی می‌بینید — ایموجی ابزار و آرگومان کلیدی‌اش. این‌ها قبل از پاسخ نهایی ایجنت در جریان پاسخ می‌آیند و دید به آنچه پشت صحنه می‌گذرد می‌دهند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> مرجع پیکربندی</h2>
+<h3>هرمس ایجنت ‏(سرور API)</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>API_SERVER_ENABLED</code></td><td><code>false</code></td><td>فعال‌سازی سرور API</td></tr>
+    <tr><td><code>API_SERVER_PORT</code></td><td><code>8642</code></td><td>پورت سرور HTTP</td></tr>
+    <tr><td><code>API_SERVER_HOST</code></td><td><code>127.0.0.1</code></td><td>آدرس bind</td></tr>
+    <tr><td><code>API_SERVER_KEY</code></td><td><em>(الزامی)</em></td><td>توکن Bearer برای احراز. مطابق ‏OPENAI_API_KEY.</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>Open WebUI</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>OPENAI_API_BASE_URL</code></td><td>URL API هرمس ایجنت ‏(شامل ‏/v1)</td></tr>
+    <tr><td><code>OPENAI_API_KEY</code></td><td>باید غیرخالی باشد و با ‏API_SERVER_KEY بخواند.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> عیب‌یابی</h2>
+
+<h3>هیچ مدلی در کشویی ظاهر نمی‌شود</h3>
+<ul>
+  <li><strong>چک کنید URL پسوند ‏/v1 دارد</strong>: ‏<code>http://host.docker.internal:8642/v1</code> ‏(نه فقط ‏:8642)</li>
+  <li><strong>تأیید اجرای گیت‌وی</strong>: ‏<code>curl http://localhost:8642/health</code> باید ‏<code>{"status": "ok"}</code> برگرداند</li>
+  <li><strong>چک فهرست مدل‌ها</strong>: ‏<code>curl -H "Authorization: Bearer your-secret-key" http://localhost:8642/v1/models</code> باید فهرستی با ‏hermes-agent برگرداند</li>
+  <li><strong>شبکهٔ Docker</strong>: داخل Docker منظورت از localhost خود کانتینر است نه میزبان. از host.docker.internal یا ‏--network=host استفاده کنید.</li>
+  <li><strong>بک‌اند خالی Ollama سایه می‌اندازد</strong>: اگر ‏<code>ENABLE_OLLAMA_API=false</code> را حذف کردید، ‏Open WebUI بخش Ollama خالی بالای مدل‌های هرمس نشان می‌دهد. کانتینر را با ‏<code>-e ENABLE_OLLAMA_API=false</code> ری‌استارت یا Ollama را در ‏<strong>Admin Settings ← Connections</strong> خاموش کنید.</li>
+</ul>
+
+<h3>تست اتصال پاس می‌شود ولی مدلی لود نمی‌شود</h3>
+<p>تقریباً همیشه پسوند ‏/v1 جاافتاده است. تست اتصال Open WebUI فقط چک اتصال ساده است — فهرست‌شدن مدل را تأیید نمی‌کند.</p>
+
+<h3>پاسخ خیلی طول می‌کشد</h3>
+<p>هرمس ایجنت ممکن است چند فراخوانی ابزار ‏(خواندن فایل، اجرای فرمان، جست‌وجوی وب) قبل از تولید پاسخ نهایی اجرا کند. برای پرسش‌های پیچیده طبیعی است. پاسخ وقتی ایجنت تمام شد یک‌جا ظاهر می‌شود.</p>
+
+<h3>خطاهای «Invalid API key»</h3>
+<p>مطمئن شوید ‏<code>OPENAI_API_KEY</code> در Open WebUI با ‏<code>API_SERVER_KEY</code> هرمس ایجنت یکی است.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>‏Open WebUI بعد از اولین اجرا تنظیمات اتصال سازگار-با-OpenAI را در دیتابیس خودش ماندگار می‌کند. اگر اشتباهاً کلید اشتباهی در Admin UI ذخیره کردید، فقط اصلاح متغیرهای محیطی کافی نیست — اتصال ذخیره‌شده را در ‏<strong>Admin Settings ← Connections</strong> به‌روز یا حذف کنید، یا دایرکتوری داده / دیتابیس Open WebUI را ریست کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> راه‌اندازی چندکاربره با پروفایل‌ها</h2>
+<p>برای اجرای نمونه‌های جداگانهٔ هرمس به‌ازای هر کاربر — هرکدام با config، حافظه و مهارت‌های خودشان — از <a href="../profiles.html">پروفایل‌ها</a> استفاده کنید. هر پروفایل سرور API خودش را روی پورت مختلف اجرا و خودکار نام پروفایل را به‌عنوان مدل در Open WebUI اعلان می‌کند.</p>
+
+<h3>۱. ساخت پروفایل‌ها و پیکربندی سرورهای API</h3>
+<p>‏<code>API_SERVER_*</code> متغیر env هستند نه کلید YAML، پس در .env هر پروفایل بنویسیدشان. پورت‌های خارج از بازهٔ پلتفرم‌های پیش‌فرض انتخاب کنید ‏(<code>8644</code> آداپتور webhook، ‏<code>8645</code> wecom-callback، ‏<code>8646</code> msgraph-webhook)، مثلاً ‏<code>8650+</code>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes profile create alice
+cat >> ~/.hermes/profiles/alice/.env &lt;&lt;EOF
+API_SERVER_ENABLED=true
+API_SERVER_PORT=8650
+API_SERVER_KEY=alice-secret
+EOF
+
+hermes profile create bob
+cat >> ~/.hermes/profiles/bob/.env &lt;&lt;EOF
+API_SERVER_ENABLED=true
+API_SERVER_PORT=8651
+API_SERVER_KEY=bob-secret
+EOF</code></pre>
+</div>
+
+<h3>۲. شروع هر گیت‌وی</h3>
+<div class="codebox"><pre><code>hermes -p alice gateway &
+hermes -p bob gateway &</code></pre></div>
+
+<h3>۳. افزودن اتصال‌ها در Open WebUI</h3>
+<p>در ‏<strong>Admin Settings ← Connections ← OpenAI API ← Manage</strong> به‌ازای هر پروفایل یک اتصال اضافه کنید:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>اتصال</th><th>URL</th><th>API Key</th></tr></thead>
+  <tbody>
+    <tr><td>Alice</td><td><code>http://host.docker.internal:8650/v1</code></td><td><code>alice-secret</code></td></tr>
+    <tr><td>Bob</td><td><code>http://host.docker.internal:8651/v1</code></td><td><code>bob-secret</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>کشویی مدل ‏<code>alice</code> و ‏<code>bob</code> را به‌عنوان دو مدل مجزا نشان خواهد داد. می‌توانید از طریق پنل ادمین مدل‌ها را به کاربران Open WebUI تخصیص دهید و به هر کاربر ایجنت هرمس ایزولهٔ خودش را بدهید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نام مدل سفارشی</div>
+  <p>نام مدل پیش‌فرض نام پروفایل است. برای override، در ‏.env پروفایل ‏<code>API_SERVER_MODEL_NAME</code> را تنظیم کنید:</p>
+  <div class="codebox"><pre><code>hermes -p alice config set API_SERVER_MODEL_NAME "Alice's Agent"</code></pre></div>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> ‏Docker لینوکس ‏(بدون Docker Desktop)</h2>
+<p>روی لینوکس بدون Docker Desktop مقدار ‏<code>host.docker.internal</code> به‌طور پیش‌فرض حل نمی‌شود. گزینه‌ها:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># گزینهٔ ۱: افزودن نگاشت میزبان
+docker run --add-host=host.docker.internal:host-gateway ...
+
+# گزینهٔ ۲: شبکه‌سازی host
+docker run --network=host -e OPENAI_API_BASE_URL=http://localhost:8642/v1 ...
+
+# گزینهٔ ۳: IP bridge داکر
+docker run -e OPENAI_API_BASE_URL=http://172.17.0.1:8642/v1 ...</code></pre>
+</div>
+</section>
+
+<div class="pager">
+  <a href="dingtalk.html"><span class="dir">→ قبلی</span><span class="ttl">DingTalk</span></a>
+  <a class="next" href="wecom.html"><span class="dir">بعدی ←</span><span class="ttl">WeCom ‏(وی‌چت سازمانی)</span></a>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/open-webui" target="_blank" rel="noopener">Open WebUI</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raft — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/raft" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>Raft</strong>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی Raft</h1>
+<p>هرمس به‌عنوان یک ایجنت خارجی از طریق پل کانال-بیداری محلی به ‏<a href="https://raft.build" target="_blank" rel="noopener">Raft</a> وصل می‌شود. آداپتور یک نقطهٔ پایانی HTTP روی loopback راه می‌اندازد که سرنخ‌های بیداریِ بدون-محتوا را از پل می‌گیرد و به خط‌لولهٔ نشست گیت‌وی هرمس تزریق می‌کند. ایجنت پیام‌ها را از طریق CLI ‏Raft می‌خواند و می‌فرستد — آداپتور هیچ‌وقت بدنهٔ پیام‌ها یا نشانگرهای تحویل را لمس نمی‌کند.</p>
+<div class="callout note">
+  <div class="callout-title">📌 تقسیم کار</div>
+  <ul>
+    <li><strong>پل</strong> مالک: مصرف سرنخ بیداری، حذف تکرار، backoff، اتصال‌مجدد، تحویل حداقل-یک‌بار و لاگ اثبات است.</li>
+    <li><strong>آداپتور هرمس</strong> مالک: یک نقطهٔ پایانی wake روی localhost و تزریق یک اطلاع کوتاه در زمینهٔ ایجنت است.</li>
+    <li><strong>ایجنت</strong> مالک: کشیدن پیام‌ها ‏(<code>raft message check</code>)، پاسخ ‏(<code>raft message send</code>) و همهٔ تعاملات دیگر با Raft از طریق CLI.</li>
+  </ul>
+  <p>آداپتور هیچ اعتبارنامهٔ Raft ندارد — فقط یک توکن مشترک به‌ازای-نشست برای احراز localhost بین پل و نقطهٔ پایانی.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li>یک <strong>ورک‌اسپیس Raft</strong> که بتوانید در آن External Agent بسازید</li>
+  <li><strong>‏CLI ‏Raft</strong> نصب‌شده و وارد‌شده به آن پروفایل External Agent</li>
+  <li><strong>aiohttp</strong> — بستهٔ پایتونی ‏(در extras ‏<code>[all]</code> هرمس هست)</li>
+</ul>
+<p>در Raft منوی Agents را باز کنید، یک External Agent بسازید و کارت راه‌اندازی را برای نصب CLI و ورود پروفایل دنبال کنید. بعد از ساخت ایجنت، Raft یک راهنمای setup هرمس با متغیرهای محیطی و پیکربندی لازم برای شروع گیت‌وی نشان می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> راه‌اندازی</h2>
+<p>به <code>~/.hermes/.env</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>RAFT_PROFILE=your-agent-profile</code></pre>
+</div>
+<p>همین — آداپتور وقتی ‏<code>RAFT_PROFILE</code> تنظیم شود خودکار فعال می‌شود. توکن پل به‌ازای-نشست تولید، پورت گذرا انتخاب و پروسهٔ فرزند پل هنگام شروع گیت‌وی خودکار spawn می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> نحوهٔ کار</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Raft Server → Bridge (wake-hints SSE) → POST /wake → Hermes Adapter → Agent context
+Agent → raft message check → Raft Server (message bodies)
+Agent → raft message send → Raft Server (replies)</code></pre>
+</div>
+<ol>
+  <li>سرور Raft سرنخ‌های بیداری را از طریق SSE به پروسهٔ پل می‌فرستد.</li>
+  <li>پل هر سرنخ را به‌صورت ‏<code>POST /wake</code> به نقطهٔ پایانی loopback آداپتور فوروارد می‌کند.</li>
+  <li>آداپتور توکن پل را تأیید، مطمئن می‌شود payload بدون‌محتواست و یک اطلاع بیداری داخل نشست هرمس تزریق می‌کند.</li>
+  <li>ایجنت اطلاع بیداری را می‌بیند و با CLI ‏Raft پیام‌ها را می‌خواند و جواب می‌دهد.</li>
+</ol>
+<p>payload های بیداری <strong>طبق قرارداد بدون‌محتوایند</strong> — فقط متادیتا حمل می‌کنند ‏(شناسهٔ رویداد، شناسهٔ پیام، timestamp ها) و هرگز بدنهٔ پیام، نام کانال یا هویت فرستنده نه. آداپتور هر payloadی با فیلدهای محتوادار ‏(<code>text</code>، ‏<code>body</code>، ‏<code>content</code>، ‏<code>messages</code> و...) را رد می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پل ‏(Bridge)</h2>
+<p>آداپتور خودکار ‏<code>raft agent bridge</code> را به‌عنوان پروسهٔ فرزند spawn می‌کند و URL نقطهٔ پایانی و توکن را می‌دهد. پل با پروفایل پیکربندی‌شده به سرور Raft وصل و شروع به فوروارد سرنخ‌های بیداری می‌کند. هنگام خاموشی گیت‌وی خاتمه می‌یابد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> متغیرهای محیطی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>توضیح</th><th>پیش‌فرض</th></tr></thead>
+  <tbody>
+    <tr><td><code>RAFT_PROFILE</code></td><td>اسلاگ پروفایل ایجنت Raft — با تنظیم شدن آداپتور خودکار فعال می‌شود</td><td><em>(الزامی)</em></td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<div class="pager">
+  <a href="homeassistant.html"><span class="dir">→ قبلی</span><span class="ttl">Home Assistant</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">Buzz</span></span>
+</div>
+
+</main>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/raft" target="_blank" rel="noopener">Raft</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>
