@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اجراگر Codex ‏(اختیاری) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/codex-app-server-runtime" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>اجراگر Codex ‏(اختیاری)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>اجراگر App-Server ی Codex ‏(اختیاری)</h1>
+<p>هرمس می‌تواند به‌صورت اختیاری نوبت‌های <code>openai/*</code> و ‏<code>openai-codex/*</code> را به <a href="https://github.com/openai/codex" target="_blank" rel="noopener">app-server ی Codex CLI</a> بسپارد به‌جای اجرای حلقهٔ ابزار خودش. با فعال شدن، فرمان‌های ترمینال، ویرایش فایل‌ها، sandboxing و فراخوانی‌های ابزار MCP همگی داخل runtime ی Codex اجرا می‌شوند — هرمس پوستهٔ دور آن می‌شود ‏(پایگاه‌دادهٔ نشست‌ها، دستورات اسلش، گیت‌وی، حافظه و بازبینی مهارت‌ها).</p>
+<p>این <b>فقط-با-انتخاب شماست</b>. رفتار پیش‌فرض هرمس تا فلگ را نزنید تغییری نمی‌کند. هرمس هرگز خودکار شما را روی این runtime نمی‌برد.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 از OpenAI Codex استفاده نمی‌کنید؟</div>
+  <p>‏<code>hermes setup --portal</code> یک بک‌اند غیر-Codex با Claude/Gemini/و… در یک قدم پیکربندی می‌کند. بخش <a href="https://hermes-agent.nousresearch.com/docs/integrations/nous-portal" target="_blank" rel="noopener">Nous Portal</a> را ببینید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چرا</h2>
+<ul>
+  <li>اجرای نوبت‌های ایجنتی OpenAI روی <b>اشتراک ChatGPT تان</b> ‏(بدون نیاز به کلید API) با همان جریان auth ی که Codex CLI استفاده می‌کند.</li>
+  <li>استفاده از <b>تول‌ست و sandbox خودِ Codex</b> — ‏<code>shell</code> برای ترمینال/خواندن/نوشتن/جستجو، ‏<code>apply_patch</code> برای ویرایش‌های ساختاریافته، ‏<code>update_plan</code> برای برنامه‌ریزی؛ همه داخل sandboxing ی seatbelt/landlock.</li>
+  <li><b>پلاگین‌های native ی Codex</b> — Linear، ‏GitHub، ‏Gmail، ‏Calendar، ‏Canva و… — نصب‌شده با <code>codex plugin</code> خودکار مهاجرت و در نشست هرمس شما فعال می‌شوند.</li>
+  <li><b>ابزارهای غنی‌تر هرمس هم همراه می‌آیند</b> — ‏web_search، ‏web_extract، اتوماسیون مرورگر، بینایی، تولید تصویر، مهارت‌ها و TTS از طریق یک callback ی MCP کار می‌کنند. Codex برای ابزارهایی که داخلی ندارد به هرمس callback می‌زند.</li>
+  <li><b>نوخه‌های حافظه و مهارت همچنان کار می‌کنند</b> — رویدادهای Codex به شکل پیام هرمس تصویر می‌شوند تا حلقهٔ خودبهبودی transcript ای عادی ببیند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> مدل واقعاً چه ابزارهایی دارد</h2>
+<p>این همان بخشی است که بیشتر کاربران اول می‌خواهند بدانند. وقتی این runtime روشن است، مدلی که نوبت شما را اجرا می‌کند سه منبع مستقل ابزار دارد:</p>
+<h4>۱. تول‌ست داخلی Codex ‏(همیشه روشن)</h4>
+<p>اینها همراه خودِ <code>codex app-server</code> ارسال می‌شوند — بدون دخالت هرمس، بدون MCP، بدون پلاگین. هر پنج‌تا از لحظهٔ شروع runtime در دسترس‌اند:</p>
+<ul>
+  <li><b>‏<code>shell</code></b> — اجرای هر فرمان شل داخل sandbox. مدل با همین فایل می‌خواند ‏(<code>cat</code>، ‏<code>head</code>، ‏<code>tail</code>)، می‌نویسد ‏(<code>echo &gt; foo</code>، heredoc ها)، جستجو می‌کند ‏(<code>find</code>، ‏<code>rg</code>، ‏<code>grep</code>)، بین دایرکتوری‌ها حرکت می‌کند ‏(<code>ls</code>، ‏<code>cd</code>)، build می‌گیرد، پروسه‌ها را مدیریت می‌کند و هر کار دیگری که در bash می‌کردید.</li>
+  <li><b>‏<code>apply_patch</code></b> — اعمال یک diff ساختاریافتهٔ چندفایلی در فرمت patch ی Codex. مدل برای ویرایش‌های کدی غیرساده ‏(افزودن تابع، refactor بین چند فایل) از این استفاده می‌کند؛ heredoc های شل برای نوشتن‌های یک‌باره همچنان در دسترس‌اند.</li>
+  <li><b>‏<code>update_plan</code></b> — ردیاب todo/برنامه داخلی codex. معادل ابزار <code>todo</code> هرمس، اما کاملاً داخل runtime ی codex مدیریت می‌شود.</li>
+  <li><b>‏<code>view_image</code></b> — بارگذاری یک فایل تصویر محلی در گفتگو تا مدل آن را ببیند.</li>
+  <li><b>‏<code>web_search</code></b> — codex وقتی پیکربندی شده باشد جستجوی وب داخلی خودش را دارد. هرمس هم ‏<code>web_search</code> ‏(پشت‌بنده Firecrawl) را از طریق callback پایین expose می‌کند؛ مدل هر کدام را ترجیح دهد برمی‌دارد.</li>
+</ul>
+<p>پس <b>هر کاری که با ترمینال می‌کردید — خواندن/نوشتن/جستجو/یافتن/اجرا — codex به‌صورت native انجام می‌دهد</b>. پروفایل sandbox ‏(پیش‌فرض <code>:workspace</code> هنگام فعال کردن runtime) کنترل می‌کند چه چیزی قابل‌نوشتن است.</p>
+<h4>۲. پلاگین‌های native ی Codex ‏(مهاجرت‌یافته از نصب <code>codex plugin</code> شما)</h4>
+<p>وقتی runtime را فعال کنید هرمس RPC ی <code>plugin/list</code> ی codex را پرس‌وجو و برای هر پلاگین نصب‌شده‌تان یک ورودی <code>[plugins."&lt;name&gt;@openai-curated"]</code> می‌نویسد. خود پلاگین‌ها توسط codex مدیریت و یک بار از طریق UI خود codex مجوزدهی می‌شوند.</p>
+<p>نمونه‌ها ‏(همان‌هایی که thread ی OpenClaw «قابل-فیلم‌شدن-در-یوتیوب» خواند):</p>
+<ul>
+  <li><b>Linear</b> — یافتن/به‌روزرسانی issue ها</li>
+  <li><b>GitHub</b> — جستجوی کد، دیدن PR ها، کامنت</li>
+  <li><b>Gmail</b> — خواندن/ارسال ایمیل</li>
+  <li><b>Google Calendar</b> — ساخت/یافتن رویدادها</li>
+  <li><b>تقویم/ایمیل Outlook</b> — همان شکل از طریق connector ی Microsoft</li>
+  <li><b>Canva</b> — تولید طرح گرافیکی</li>
+  <li>…و هر چیز دیگری که با <code>codex plugin marketplace add openai-curated</code> + ‏<code>codex plugin install ...</code> نصب کرده باشید</li>
+</ul>
+<p>چه چیزی مهاجرت <b>نمی‌کند</b>:</p>
+<ul>
+  <li>پلاگین‌هایی که هنوز نصب نکرده‌اید — اول در Codex نصبشان کنید.</li>
+  <li>ورودی‌های marketplace اپ ChatGPT ‏(<code>app/list</code>) — اینها به لطف auth ی حسابتان از قبل داخل codex فعاله.</li>
+</ul>
+<h4>۳. Callback ی ابزار هرمس ‏(سرور MCP ثبت‌شده در <code>~/.codex/config.toml</code>)</h4>
+<p>هرمس خودش را به‌عنوان یک سرور MCP ثبت می‌کند تا codex برای ابزارهایی که همراه ندارد به او callback بزند. از طریق callback در دسترس است:</p>
+<ul>
+  <li><b>‏<code>web_search</code></b> / ‏<b><code>web_extract</code></b> — پشت‌بنده Firecrawl؛ برای محتوای ساختاریافته معمولاً تمیزتر از scraping است.</li>
+  <li><b>‏<code>browser_navigate</code> / ‏<code>browser_click</code> / ‏<code>browser_type</code> / ‏<code>browser_press</code> / ‏<code>browser_snapshot</code> / ‏<code>browser_scroll</code> / ‏<code>browser_back</code> / ‏<code>browser_get_images</code> / ‏<code>browser_console</code> / ‏<code>browser_vision</code></b> — اتوماسیون کامل مرورگر از طریق Camofox یا Browserbase.</li>
+  <li><b>‏<code>vision_analyze</code></b> — صدا زدن یک مدل بینایی جدا برای بررسی یک تصویر ‏(متفاوت از <code>view_image</code> ی codex که آن را وارد گفتگو می‌کند).</li>
+  <li><b>‏<code>image_generate</code></b> — تولید تصویر از طریق زنجیرهٔ پلاگین image_gen هرمس.</li>
+  <li><b>‏<code>skill_view</code> / ‏<code>skills_list</code></b> — خواندن از کتابخانهٔ مهارت‌های هرمس.</li>
+  <li><b>‏<code>text_to_speech</code></b> — TTS از طریق ارائه‌دهندهٔ پیکربندی‌شدهٔ هرمس.</li>
+</ul>
+<p>وقتی مدل یکی از اینها را بخواهد، codex زیرپروسهٔ <code>hermes_tools_mcp_server</code> را از طریق stdio MCP spawn می‌کند، فراخوانی از مسیر <code>model_tools.handle_function_call()</code> دیسپچ می‌شود ‏(همان مسیر کدِ runtime پیش‌فرض هرمس) و نتیجه مثل هر پاسخ MCP دیگری به codex برگردانده می‌شود.</p>
+<h4>چه چیزی روی این runtime در دسترس نیست</h4>
+<p>این چهار ابزار هرمس برای dispatch به زمینهٔ AIAgent ی درحال‌اجرا ‏(وضعیت وسط-حلقه) نیاز دارند و یک callback ی MCP ی stateless نمی‌تواند آنها را براند. وقتی به هرکدام لازم دارید به runtime پیش‌فرض برگردید ‏(<code>/codex-runtime auto</code>):</p>
+<ul>
+  <li><b>‏<code>delegate_task</code></b> — spawn کردن زیرایجنت‌ها</li>
+  <li><b>‏<code>memory</code></b> — انبار حافظهٔ پایدار هرمس</li>
+  <li><b>‏<code>session_search</code></b> — جستجوی بین-نشستی</li>
+  <li><b>‏<code>todo</code></b> — انبار todo ی هرمس ‏(<code>update_plan</code> ی codex معادل در-runtime است)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> قابلیت‌های گردش‌کار ‏(/goal، کانبان، کرون)</h2>
+<h3>‏<code>/goal</code> ‏(حلقهٔ Ralph)</h3>
+<p><b>روی این runtime کار می‌کند.</b> اهداف در <code>state_meta</code> کلیدخورده-با-شناسه-نشست ماندگارند، پرامپت ادامه از طریق <code>run_conversation()</code> مثل یک پیام عادی کاربر پس داده می‌شود و codex نوبت بعدی را native اجرا می‌کند. قاضی هدف از طریق کلاینت کمکی اجرا می‌شود ‏(پیکربندی با <code>auxiliary.goal_judge</code> در config.yaml)، مستقل از اینکه کدام runtime فعال است. رأیِ «blocked, needs user input» ی قاضی راه فرار تمیزی است اگر codex روی تأییدها بماند.</p>
+<p><b>یک نکته:</b> هر پرامپت ادامه یک نوبت codex تازه است، یعنی codex سیاست تأیید فرمان را از صفر دوباره ارزیابی می‌کند. اگر هدف بلندمدتی با نوشتن‌های زیاد دارید انتظار پرامپت‌های تأیید بیشتری نسبت به یک تسک تک-نشسته داشته باشید. ‏<code>default_permissions = ":workspace"</code> را ست کنید ‏(هرمس هنگام فعال کردن runtime خودکار همین کار را می‌کند) تا نوشتن‌های سادهٔ workspace نیازمند پرامپت نباشند.</p>
+<h3>کانبان ‏(dispatch چندایجنتی worktree)</h3>
+<p><b>روی این runtime کار می‌کند، با یک وابستگی ظریف.</b> dispatcher کانبان هر کارگر را به‌صورت زیرپروسهٔ جداگانهٔ <code>hermes chat -q</code> ای spawn می‌کند که config کاربر را می‌خواند — یعنی اگر <code>model.openai_runtime: codex_app_server</code> سراسری ست شده باشد، کارگرها هم روی runtime ی codex بالا می‌آیند.</p>
+<p>چه چیزهایی داخل یک کارگرِ codex-runtime کار می‌کند:</p>
+<ul>
+  <li>تول‌ست کامل codex ‏(shell، ‏apply_patch، ‏update_plan، ‏view_image، ‏web_search) — کارگر کار واقعی تسکش را native انجام می‌دهد</li>
+  <li>پلاگین‌های مهاجرت‌یافتهٔ codex — Linear، ‏GitHub و…</li>
+  <li>Callback ی ابزار هرمس برای browser_*، ‏vision، ‏image_gen، ‏skills، ‏TTS</li>
+</ul>
+<p>چه چیزهایی هم به لطف expose شدن در callback کار می‌کند:</p>
+<ul>
+  <li><b>‏<code>kanban_complete</code> / ‏<code>kanban_block</code> / ‏<code>kanban_comment</code> / ‏<code>kanban_heartbeat</code></b> — ابزارهای تحویل کارگر. اینها <code>HERMES_KANBAN_TASK</code> را از env می‌خوانند ‏(dispatcher ست می‌کند)، دسترسی را درست gate و در SQLite ی هر بردِ پین‌شده توسط <code>HERMES_KANBAN_DB</code> می‌نویسند. بدون اینها در callback، کارگرِ روی این runtime می‌توانست تسکش را انجام دهد ولی نمی‌توانست گزارش کند و تا timeout ی dispatcher معلق می‌ماند.</li>
+  <li><b>‏<code>kanban_show</code> / ‏<code>kanban_list</code></b> — پرس‌وجوهای فقط-خواندنی برد برای اینکه کارگر زمینهٔ خودش را چک کند.</li>
+  <li><b>‏<code>kanban_create</code> / ‏<code>kanban_unblock</code> / ‏<code>kanban_link</code></b> — عملیات مخصوص orchestrator. برای ایجنت‌های ارکستراتورِ روی runtime ی codex که باید تسک جدید dispatch کنند در دسترس‌اند.</li>
+</ul>
+<p>ابزارهای kanban با متغیر محیطی <code>HERMES_KANBAN_TASK</code> که dispatcher ست می‌کند gate می‌شوند — آن متغیر به زیرپروسهٔ codex منتقل ‏(codex env را به ارث می‌برد) و از آنجا به زیرپروسهٔ سرور MCP ی <code>hermes-tools</code> ی spawn‌شده می‌رسد. پس ابزارها شناسهٔ تسک درست را می‌بینند و درست gate می‌کنند. برای کارگرهای Codex app-server هرمس وقتی <code>HERMES_KANBAN_TASK</code> حاضر است override های باریک sandbox ی app-server هم پاس می‌دهد: حفظ sandboxing ی <code>workspace-write</code>، افزودن <b>دایرکتوری DB برد به‌علاوهٔ هر مسیر Kanban ی که dispatcher پین کرده</b> به‌عنوان ریشه‌های اضافی قابل‌نوشتن ‏(<code>HERMES_KANBAN_WORKSPACES_ROOT</code>، ‏<code>HERMES_KANBAN_WORKSPACE</code>، قدیمیِ ‏<code>HERMES_KANBAN_ROOT</code> — بدون تکرار، اول DB-dir)، و نگه داشتن شبکه به‌طور پیش‌فرض خاموش. این از راه‌حل شکنندهٔ ‏<code>:danger-no-sandbox</code> جلوگیری و همزمان اجازه می‌دهد ‏<code>kanban_complete</code>/<code>kanban_block</code> دیتابیس برد را به‌روز کنند <b>و</b> کارگرها گزارش/محصولات را زیر مانت‌های workspace بیرون از دایرکتوری DB بنویسند ‏(مثلاً <code>/media/.../kanban-workspaces/...</code> روی یک درایو جدا — ‏<a href="https://github.com/NousResearch/hermes-agent/issues/27941" target="_blank" rel="noopener">issue ‎#۲۷۹۴۱</a>).</p>
+<h3>Cron jobs</h3>
+<p><b>مخصوصاً تست نشده.</b> cron job ها از مسیر ‏<code>cronjob</code> ← ‏<code>AIAgent.run_conversation</code> اجرا می‌شوند، همان مسیر کدِ CLI. اگر config ی cron job مقدار <code>openai_runtime: codex_app_server</code> داشته باشد روی codex اجرا می‌شود. همان قواعد دسترسی ابزار برقرارند — داخلی‌های codex + پلاگین‌ها + callback ی MCP کار می‌کنند، ابزارهای حلقهٔ ایجنت ‏(delegate_task، ‏memory، ‏session_search، ‏todo) نه. اگر cron job تان به اینها تکیه دارد، cron را به پروفایلی محدود کنید که runtime پیش‌فرض دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مصالحه‌ها</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>runtime پیش‌فرض هرمس</th><th>App-server ی Codex ‏(انتخابی)</th></tr></thead>
+<tbody>
+<tr><td>زیرایجنت‌های ‏<code>delegate_task</code></td><td>بله</td><td>در دسترس نیست — زمینهٔ حلقهٔ ایجنت لازم دارد</td></tr>
+<tr><td>‏<code>memory</code>، ‏<code>session_search</code>، ‏<code>todo</code></td><td>بله</td><td>در دسترس نیست — زمینهٔ حلقهٔ ایجنت لازم دارند</td></tr>
+<tr><td>‏<code>web_search</code>، ‏<code>web_extract</code></td><td>بله</td><td>بله ‏(via callback ی MCP)</td></tr>
+<tr><td>اتوماسیون مرورگر ‏(Camofox/Browserbase)</td><td>بله</td><td>بله ‏(via callback ی MCP)</td></tr>
+<tr><td>‏<code>vision_analyze</code>، ‏<code>image_generate</code></td><td>بله</td><td>بله ‏(via callback ی MCP)</td></tr>
+<tr><td>‏<code>skill_view</code>، ‏<code>skills_list</code></td><td>بله</td><td>بله ‏(via callback ی MCP)</td></tr>
+<tr><td>‏<code>text_to_speech</code></td><td>بله</td><td>بله ‏(via callback ی MCP)</td></tr>
+<tr><td>‏<code>shell</code> ی Codex ‏(ترمینال/خواندن/نوشتن/جستجو/یافتن/اجرا)</td><td>—</td><td>بله ‏(داخلی Codex)</td></tr>
+<tr><td>‏<code>apply_patch</code> ی Codex ‏(ویرایش ساختاریافتهٔ چندفایلی)</td><td>—</td><td>بله ‏(داخلی Codex)</td></tr>
+<tr><td>‏<code>update_plan</code> ی Codex ‏(todo در-runtime)</td><td>—</td><td>بله ‏(داخلی Codex)</td></tr>
+<tr><td>‏<code>view_image</code> ی Codex ‏(بارگذاری تصویر در گفتگو)</td><td>—</td><td>بله ‏(داخلی Codex)</td></tr>
+<tr><td>sandbox ی Codex ‏(seatbelt/landlock، پروفایل‌ها)</td><td>—</td><td>بله ‏(داخلی Codex)</td></tr>
+<tr><td>احراز هویت اشتراک ChatGPT</td><td>—</td><td>بله ‏(از طریق ارائه‌دهندهٔ <code>openai-codex</code>)</td></tr>
+<tr><td>پلاگین‌های native ی Codex ‏(Linear، ‏GitHub و…)</td><td>—</td><td>بله ‏(مهاجرت خودکار)</td></tr>
+<tr><td>سرورهای MCP کاربر</td><td>بله</td><td>بله ‏(مهاجرت خودکار به codex)</td></tr>
+<tr><td>بازبینی حافظه + مهارت ‏(پس‌زمینه)</td><td>بله</td><td>بله ‏(via تصویرسازی item)</td></tr>
+<tr><td>گفتگوهای چند-نوبتی</td><td>بله</td><td>بله</td></tr>
+<tr><td>‏<code>/goal</code> ‏(حلقهٔ Ralph)</td><td>بله</td><td>بله</td></tr>
+<tr><td>dispatch ی کارگر کانبان</td><td>بله</td><td>بله ‏(via callback)</td></tr>
+<tr><td>ابزارهای orchestrator ی کانبان</td><td>بله</td><td>بله ‏(via callback)</td></tr>
+<tr><td>همهٔ پلتفرم‌های گیت‌وی</td><td>بله</td><td>بله</td></tr>
+<tr><td>ارائه‌دهنده‌های غیر-OpenAI</td><td>بله</td><td>n/a — محدود به OpenAI/Codex</td></tr>
+</tbody>
+</table>
+</div>
+<h3>نمایش زنده</h3>
+<p>اگرچه حلقهٔ ایجنت داخل زیرپروسهٔ Codex اجرا می‌شود، runtime جریان رویداد Codex را به همان مسیر نمایشی که runtime پیش‌فرض استفاده می‌کند پل می‌زند:</p>
+<ul>
+  <li>دلتاهای زندهٔ دستیار، استدلال ‏(شامل دلتاهای summary) و رویدادهای شروع/اتمام ابزار با-ID-پایدار در TUI، دسکتاپ و گیت‌وی‌های پیام‌رسانی همزمان با اجرای نوبت ظاهر می‌شوند. تصویرگر تاریخچهٔ فقط-تکمیل جدا می‌ماند تا نشستِ از-سر-گرفته‌شده همان کارت‌های ابزار نمایش‌داده‌شده در طول نوبت را hydrate کند.</li>
+  <li>کامنتاری گیت‌وی وقتی استریم توکن خاموش است هم مرئی می‌ماند و رویدادهای زندهٔ ابزار حتی برای نوتیفیکیشن‌های تخلیه‌شده قبل از یک درخواست تأیید forward می‌شوند. کامنتاری به <code>display.show_commentary</code> احترام می‌گذارد.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> پیش‌نیازها</h2>
+<ol>
+  <li><b>نصب بودن Codex CLI:</b>
+<div class="codebox"><pre><code>npm i -g @openai/codex
+codex --version   # 0.130.0 or newer</code></pre></div></li>
+  <li><b>ورود OAuth ی Codex.</b> زیرپروسهٔ codex ‏<code>~/.codex/auth.json</code> را می‌خواند. دو راه پر کردن آن:
+<div class="codebox"><pre><code>codex login                  # writes tokens to ~/.codex/auth.json</code></pre></div>
+‏<p>‏<code>hermes auth add openai-codex</code> ی خود هرمس در <code>~/.hermes/auth.json</code> می‌نویسد — نشست جداست. اگر نکرده‌اید <b>‏<code>codex login</code> را جداگانه اجرا کنید</b>.</p></li>
+  <li><b>‏(اختیاری) نصب پلاگین‌های Codex موردنظر.</b> هنگام فعال کردن runtime، هرمس هر پلاگین curated ی که از قبل با Codex CLI نصب کرده‌اید خودکار مهاجرت می‌دهد:
+<div class="codebox"><pre><code>codex plugin marketplace add openai-curated
+# then via codex's TUI, install Linear / GitHub / Gmail / etc.</code></pre></div>
+هرمس آنها را کشف و ورودی‌های <code>[plugins."&lt;name&gt;@openai-curated"]</code> را به‌طور خودکار در <code>~/.codex/config.toml</code> می‌نویسد.</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> فعال‌سازی</h2>
+<p>داخل یک نشست هرمس:</p>
+<div class="codebox"><pre><code>/codex-runtime codex_app_server</code></pre></div>
+<p>این فرمان:</p>
+<ul>
+  <li>نصب بودن CLI ی <code>codex</code> را بررسی می‌کند ‏(اگر نباشد با راهنمای نصب بلاک می‌کند).</li>
+  <li>‏<code>model.openai_runtime: codex_app_server</code> را در config.yaml شما ماندگار می‌کند.</li>
+  <li>سرورهای MCP کاربر را از <code>~/.hermes/config.yaml</code> به ‏<code>~/.codex/config.toml</code> مهاجرت می‌دهد.</li>
+  <li><b>پلاگین‌های native ی Codex نصب‌شده را کشف و مهاجرت می‌دهد</b> ‏(Linear، ‏GitHub، ‏Gmail، ‏Calendar، ‏Canva و…) با پرس‌وجوی RPC ی <code>plugin/list</code> ی Codex.</li>
+  <li><b>ابزارهای خود هرمس را به‌عنوان یک سرور MCP ثبت می‌کند</b> تا زیرپروسهٔ codex برای ابزارهایی که همراه ندارد callback بزند.</li>
+  <li><b>‏<code>default_permissions = ":workspace"</code> را می‌نویسد</b> تا sandbox نوشتن داخل workspace را بدون پرامپت برای هر عملیات اجازه دهد.</li>
+  <li>می‌گوید چه چیزهایی مهاجرت داده شد. روی نشستِ <b>بعدی</b> اثر می‌گذارد — ایجنت کش‌شدهٔ فعلی runtime قبلی را نگه می‌دارد تا کش‌های پرامپت سالم بمانند.</li>
+</ul>
+<p>مترادف‌ها: ‏<code>/codex-runtime on</code>، ‏<code>/codex-runtime off</code>، ‏<code>/codex-runtime auto</code>.</p>
+<p>برای دیدن وضعیت فعلی بدون تغییر چیزی:</p>
+<div class="codebox"><pre><code>/codex-runtime</code></pre></div>
+<p>می‌توانید دستی هم در <code>~/.hermes/config.yaml</code> ست کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>model:
+  openai_runtime: codex_app_server   # default is "auto" (= Hermes runtime)</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> حلقهٔ خودبهبودی ‏(نوخه‌های حافظه + مهارت)</h2>
+<p>خودبهبودی پس‌زمینه‌ای هرمس روی آستانه‌های شمارنده شلیک می‌شود:</p>
+<ul>
+  <li>هر ۱۰ پرامپت کاربر ← یک ایجنت بازبینی fork شده به گفتگو نگاه می‌کند و تصمیم می‌گیرد چیزی باید در حافظه ذخیره شود یا نه.</li>
+  <li>هر ۱۰ تکرار ابزار داخل یک نوبت ← همان ایده ولی برای مهارت‌ها ‏(نوشتن‌های <code>skill_manage</code>).</li>
+</ul>
+<p><b>هر دو روی runtime ی codex همچنان کار می‌کنند.</b> مسیر codex هر item تکمیل‌شدهٔ ‏<code>commandExecution</code> / ‏<code>fileChange</code> / ‏<code>mcpToolCall</code> / ‏<code>dynamicToolCall</code> را به یک پیام مصنوعی «assistant tool_call» + «tool» تصویر می‌کند، پس موقع اجرای بازبینی همان شکلی را می‌بیند که روی runtime پیش‌فرض هرمس می‌بیند.</p>
+<p>چطور wiring معادل می‌ماند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>runtime پیش‌فرض</th><th>runtime ی Codex</th></tr></thead>
+<tbody>
+<tr><td>افزایش <code>_turns_since_memory</code></td><td>به‌ازای هر پرامپت کاربر، در pre-loop ی run_conversation</td><td>همان مسیر کد، قبل از early-return</td></tr>
+<tr><td>افزایش <code>_iters_since_skill</code></td><td>به‌ازای هر تکرار ابزار در حلقهٔ chat-completions</td><td>با <code>turn.tool_iterations</code> بعد از برگشتن نوبت codex</td></tr>
+<tr><td>تریگر حافظه ‏(<code>_turns_since_memory &gt;= _memory_nudge_interval</code>)</td><td>در pre-loop محاسبه، بعد از پاسخ شلیک</td><td>در pre-loop محاسبه، عبور به helper ی codex</td></tr>
+<tr><td>تریگر مهارت ‏(<code>_iters_since_skill &gt;= _skill_nudge_interval</code>)</td><td>بعد از حلقه محاسبه</td><td>بعد از نوبت codex محاسبه</td></tr>
+<tr><td>فراخوانی <code>_spawn_background_review(messages_snapshot=..., review_memory=..., review_skills=...)</code></td><td>وقتی یکی از تریگرها شلیک کند</td><td>وقتی یکی از تریگرها شلیک کند دقیقاً مشابه</td></tr>
+</tbody>
+</table>
+</div>
+<p>یک جزئیات: خودِ fork بازبینی باید ابزارهای حلقهٔ ایجنت هرمس ‏(<code>memory</code>، ‏<code>skill_manage</code>) را صدا بزند که dispatch اختصاصی هرمس می‌خواهند. پس وقتی ایجنت والد روی <code>codex_app_server</code> است، fork بازبینی به <code>codex_responses</code> تنزل می‌یابد — همان اعتبارنامه‌های OAuth، همان ارائه‌دهندهٔ <code>openai-codex</code>، ولی مستقیم با Responses API ی OpenAI حرف می‌زند تا هرمس مالک حلقه باشد و ابزارهای حلقهٔ ایجنت کار کنند. برای کاربر نامرئی است.</p>
+<p>اثر خالص: runtime ی codex را فعال کنید و نوخه‌های حافظه + مهارت دقیقاً مثل قبل شلیک می‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> نحوهٔ کار تأییدها</h2>
+<p>‏Codex قبل از اجرای فرمان‌ها یا اعمال patch ها تأیید می‌خواهد. اینها به پرامپت استاندارد «Dangerous Command» هرمس ترجمه می‌شوند:</p>
+<pre dir="ltr"><code>╭───────────────────────────────────────╮
+│ Dangerous Command                     │
+│                                       │
+│ /bin/bash -lc 'echo hello &gt; foo.txt'  │
+│                                       │
+│ ❯ 1. Allow once                       │
+│   2. Allow for this session           │
+│   3. Deny                             │
+│                                       │
+│ Codex requests exec in /your/cwd      │
+╰───────────────────────────────────────╯</code></pre>
+<ul>
+  <li><b>Allow once</b> ← تأیید فقط همین فرمان.</li>
+  <li><b>Allow for this session</b> ← Codex برای فرمان‌های مشابه دوباره پرامپت نمی‌دهد.</li>
+  <li><b>Deny</b> ← فرمان رد می‌شود؛ Codex در حالت فقط-خواندنی ادامه می‌دهد.</li>
+</ul>
+<p>برای تأییدهای <code>apply_patch</code> ‏(ویرایش فایل)، وقتی codex داده را از طریق item ی مربوطهٔ <code>fileChange</code> بدهد، هرمس خلاصه‌ای از تغییرات نشان می‌دهد ‏(<code>1 add, 1 update: /tmp/new.py, /tmp/old.py</code>).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> پروفایل‌های مجوز</h2>
+<p>‏Codex سه پروفایل مجوز داخلی دارد:</p>
+<ul>
+  <li>‏<code>:read-only</code> — بدون نوشتن؛ هر فرمان شل تأیید می‌خواهد</li>
+  <li>‏<code>:workspace</code> — نوشتن داخل فضای‌کاری فعلی بدون پرامپت مجاز است ‏(پیش‌فرض هرمس هنگام فعال کردن runtime)</li>
+  <li>‏<code>:danger-no-sandbox</code> — اصلاً بدون sandbox ‏(استفاده نکنید مگر اینکه بدانید چه می‌کنید)</li>
+</ul>
+<p>می‌توانید پیش‌فرض را در <code>~/.codex/config.toml</code> بیرون از بلوک مدیریت‌شدهٔ هرمس بازنویسی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">toml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>default_permissions = ":read-only"</code></pre>
+</div>
+<p>‏(هرمس بازنویسی شما را تا وقتی بیرون نشانگرهای <code># managed by hermes-agent</code> زندگی کند در مهاجرت‌های بعدی حفظ می‌کند.)</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> تسک‌های کمکی و هزینهٔ توکن اشتراک ChatGPT</h2>
+<p>وقتی این runtime با ارائه‌دهندهٔ <code>openai-codex</code> روشن باشد، <b>تسک‌های کمکی ‏(تولید عنوان، فشرده‌سازی زمینه، آشکارسازی خودکار بینایی، fork بازبینی خودبهبودی پس‌زمینه) هم به‌طور پیش‌فرض از اشتراک ChatGPT شما عبور می‌کنند</b>، چون کلاینت کمکی هرمس وقتی override ی per-task ست نباشد از ارائه‌دهنده/مدل اصلی استفاده می‌کند.</p>
+<p>این مخصوص ‏<code>codex_app_server</code> نیست — برای مسیر موجودِ <code>codex_responses</code> هم صادق است — ولی اینجا محسوس‌تر است چون صریحاً برای صورتحساب اشتراک شرکت کرده‌اید.</p>
+<p>برای مسیریابی تسک‌های کمکی مشخص به مدلی ارزان‌تر/متفاوت، override های صریح در <code>~/.hermes/config.yaml</code> ست کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>auxiliary:
+  title_generation:
+    provider: openrouter
+    model: google/gemini-3-flash-preview
+  compression:
+    provider: openrouter
+    model: google/gemini-3-flash-preview
+  vision:
+    provider: openrouter
+    model: google/gemini-3-flash-preview
+  goal_judge:
+    provider: openrouter
+    model: google/gemini-3-flash-preview</code></pre>
+</div>
+<p>fork بازبینی خودبهبودی از طریق <code>_current_main_runtime()</code> runtime اصلی را به ارث می‌برد و هرمس خودکار آن را از <code>codex_app_server</code> به <code>codex_responses</code> تنزل می‌دهد ‏(تا fork واقعاً بتواند <code>memory</code> و <code>skill_manage</code> — ابزارهای حلقهٔ ایجنت خود هرمس — را صدا بزند). آن fork مگر اینکه تسک‌های کمکی را جایی دیگر مسیریابی کرده باشید، همچنان از auth اشتراک شما استفاده می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> ویرایش امن <code>~/.codex/config.toml</code></h2>
+<p>هرمس هرچه مدیریت می‌کند بین دو کامنت نشانگر می‌پیچد:</p>
+<pre dir="ltr"><code># managed by hermes-agent — `hermes codex-runtime migrate` regenerates this section
+default_permissions = ":workspace"
+[mcp_servers.filesystem]
+...
+[plugins."github@openai-curated"]
+...
+# end hermes-agent managed section</code></pre>
+<p>هر چیز <b>بیرون</b> آن بلوک متعلق به شماست. اجرای دوبارهٔ مهاجرت ‏(از طریق <code>/codex-runtime codex_app_server</code> یا هر بار toggle کردن runtime) بلوک مدیریت‌شده را در جا جایگزین ولی محتوای کاربری بالا و پایینش را verbatim حفظ می‌کند. یعنی می‌توانید:</p>
+<ul>
+  <li>سرورهای MCP خودتان را که هرمس نمی‌شناسد اضافه کنید</li>
+  <li>‏<code>default_permissions</code> را اگر پرامپت‌گرفتن را ترجیح می‌دهید روی <code>:read-only</code> بگذارید</li>
+  <li>گزینه‌های مخصوص codex را پیکربندی کنید ‏(model، ‏providers، ‏otel و…)</li>
+  <li>پروفایل‌های مجوز تعریف‌شده-توسط-کاربر در جدول‌های <code>[permissions.&lt;name&gt;]</code> اضافه کنید</li>
+</ul>
+<p>هر چه <b>داخل</b> بلوک مدیریت‌شده اضافه کنید در مهاجرت بعدی له می‌شود. اگر تغییری لازم دارید که ویرایش بلوک مدیریت‌شده را طلب می‌کند، یک issue ثبت کنید تا پیچش را اضافه کنیم.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> راه‌اندازی چند-پروفایل / چند-مستأجر</h2>
+<p>به‌طور پیش‌فرض هرمس زیرپروسهٔ codex را فارغ از پروفایل فعال هرمس به <code>~/.codex/</code> اشاره می‌دهد. یعنی ‏<code>hermes -p work</code> و ‏<code>hermes -p personal</code> همان auth، پلاگین‌ها و config ی Codex را شریک‌اند. برای بیشتر کاربران رفتار درست همین است — مطابق اجرای مستقیم CLI ی codex.</p>
+<p>اگر ایزوله‌سازی Codex per-profil می‌خواهید ‏(auth جدا، پلاگین‌های نصب‌شده جدا، config جدا)، ‏<code>CODEX_HOME</code> را صریحاً per-profil ست کنید. تمیزترین راه اشاره به دایرکتوری زیر <code>HERMES_HOME</code> تان است:</p>
+<div class="codebox"><pre><code># Inside the work profile, you might wrap hermes:
+CODEX_HOME=~/.hermes/profiles/work/codex hermes chat</code></pre></div>
+<p>یک بار باید <code>codex login</code> را با همان <code>CODEX_HOME</code> دوباره اجرا کنید تا توکن‌های OAuth در محل مخصوص-پروفایل فرود بیایند. بعد از آن ‏<code>hermes -p work</code> روی وضعیت Codex ی ایزوله کار می‌کند.</p>
+<p>این را خودکار scope نمی‌کنیم چون جابه‌جا کردن <code>~/.codex/</code> ی موجود، auth ی CLI ی Codex کاربر را بی‌سروصدا باطل می‌کند — هر کسی که قبلاً <code>codex login</code> کرده بود باید دوباره احراز هویت می‌شد. opt-in امن‌تر از غافلگیر کردن کاربران است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> عبور متغیر محیطی HOME</h2>
+<p>هرمس هنگام spawn کردن زیرپروسهٔ app-server ی codex مقدار <code>HOME</code> را بازنویسی <b>نمی‌کند</b> ‏(از <code>os.environ.copy()</code> استفاده و فقط <code>CODEX_HOME</code> و ‏<code>RUST_LOG</code> را overlay می‌کند). یعنی:</p>
+<ul>
+  <li>فرمان‌هایی که codex با ابزار <code>shell</code> اجرا می‌کند <code>HOME</code> واقعی کاربر را می‌بینند و ‏<code>~/.gitconfig</code>، ‏<code>~/.gh/</code>، ‏<code>~/.aws/</code>، ‏<code>~/.npmrc</code> و… را درست پیدا می‌کنند.</li>
+  <li>وضعیت داخلی codex از طریق <code>CODEX_HOME</code> ‏(که به‌طور پیش‌فرض به <code>~/.codex/</code> اشاره دارد) ایزوله می‌ماند.</li>
+</ul>
+<p>این همان مرزی است که OpenClaw بعد از کمی آزمایش اولیه به آن رسید: وضعیت Codex را ایزوله کن، خانهٔ کاربر را ول کن. ‏(Cf. openclaw/openclaw#81562.)</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> مهاجرت سرور MCP و پلاگین‌های native ی Codex</h2>
+<p>config ی <code>mcp_servers</code> هرمس خودکار به قالب TOML ی مورد انتظار Codex ترجمه می‌شود. مهاجرت هر بار که runtime را فعال کنید اجرا و idempotent است — اجراهای دوباره بخش مدیریت‌شده را جایگزین می‌کنند ولی config ی Codex ی ویرایش‌شده توسط کاربر را حفظ می‌کنند.</p>
+<p>چه چیزی ترجمه می‌شود:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>هرمس ‏(config.yaml)</th><th>Codex ‏(config.toml)</th></tr></thead>
+<tbody>
+<tr><td><code>command</code> + ‏<code>args</code> + ‏<code>env</code></td><td>transport ی stdio</td></tr>
+<tr><td><code>url</code> + ‏<code>headers</code></td><td>transport ی streamable_http</td></tr>
+<tr><td><code>timeout</code></td><td><code>tool_timeout_sec</code></td></tr>
+<tr><td><code>connect_timeout</code></td><td><code>startup_timeout_sec</code></td></tr>
+<tr><td><code>enabled: false</code></td><td><code>enabled = false</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>چه چیزی مهاجرت نمی‌شود:</p>
+<ul>
+  <li>کلیدهای مخصوص-هرمس مثل <code>sampling</code> ‏(کلاینت MCP ی Codex معادلی ندارد — با یک هشدار per-server رها می‌شوند).</li>
+</ul>
+<h3>مهاجرت پلاگین‌های native ی Codex</h3>
+<p>پلاگین‌های نصب‌شده با <code>codex plugin</code> ‏(Linear، ‏GitHub، ‏Gmail، ‏Calendar، ‏Canva و…) از طریق RPC ی <code>plugin/list</code> ی Codex کشف می‌شوند. برای هر پلاگینی که <code>installed: true</code> باشد، هرمس یک بلوک <code>[plugins."&lt;name&gt;@openai-curated"]</code> می‌نویسد که آن را در نشست هرمس شما فعال می‌کند.</p>
+<p>یعنی: وقتی دوستتان می‌گوید «Calendar و GitHub را در Codex CLI ام راه انداخته‌ام» و runtime ی codex هرمس را فعال کند، هرمس آنها را خودکار فعال می‌کند. هیچ پیکربندی دوباره لازم نیست.</p>
+<p>چه چیزی مهاجرت نمی‌شود:</p>
+<ul>
+  <li>پلاگین‌هایی که هنوز نصب نکرده‌اید — اول در Codex نصبشان کنید.</li>
+  <li>پلاگین‌هایی که codex گزارششان ‏<code>availability != AVAILABLE</code> است ‏(نصب خراب، ‏OAuth منقضی، حذف از marketplace و…). برای جلوگیری از نوشتن config ای که موقع فعال شدن شکست می‌خورد رد می‌شوند.</li>
+  <li>ورودی‌های marketplace اپ ChatGPT ‏(نتایج per-account ی <code>app/list</code> — به لطف auth حسابتان از قبل داخل codex فعاله).</li>
+  <li>OAuth ی پلاگین — هر پلاگین را یک بار داخل خود Codex مجوز می‌دهید؛ هرمس کاری با اعتبارنامه‌ها ندارد.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> Callback ی ابزار هرمس ‏(سرور جدید MCP)</h2>
+<p>تول‌ست داخلی Codex عملیات شل/فایل/patch را پوشش می‌دهد ولی جستجوی وب، اتوماسیون مرورگر، بینایی، تولید تصویر و… ندارد. تا اینها در یک نوبت codex قابل‌استفاده بمانند، هرمس خودش را به‌عنوان یک سرور MCP در <code>~/.codex/config.toml</code> ثبت می‌کند:</p>
+<pre dir="ltr"><code>[mcp_servers.hermes-tools]
+command = "/path/to/python"
+args = ["-m", "agent.transports.hermes_tools_mcp_server"]
+env = { HERMES_HOME = "/your/.hermes", PYTHONPATH = "...", HERMES_QUIET = "1" }
+startup_timeout_sec = 30.0
+tool_timeout_sec = 600.0</code></pre>
+<p>وقتی مدل <code>web_search</code> ‏(یا دیگر ابزار expose‌شدهٔ هرمس) را صدا بزند، codex زیرپروسهٔ <code>hermes_tools_mcp_server</code> را از طریق stdio spawn، درخواست از مسیر <code>model_tools.handle_function_call()</code> دیسپچ و نتیجه مثل هر پاسخ MCP دیگری به codex تصویر می‌شود.</p>
+<p><b>ابزارهای موجود از طریق callback:</b> ‏<code>web_search</code>، ‏<code>web_extract</code>، ‏<code>browser_navigate</code>، ‏<code>browser_click</code>، ‏<code>browser_type</code>، ‏<code>browser_press</code>، ‏<code>browser_snapshot</code>، ‏<code>browser_scroll</code>، ‏<code>browser_back</code>، ‏<code>browser_get_images</code>، ‏<code>browser_console</code>، ‏<code>browser_vision</code>، ‏<code>vision_analyze</code>، ‏<code>image_generate</code>، ‏<code>skill_view</code>، ‏<code>skills_list</code>، ‏<code>text_to_speech</code>.</p>
+<p><b>ابزارهای غیرموجود:</b> ‏<code>delegate_task</code>، ‏<code>memory</code>، ‏<code>session_search</code>، ‏<code>todo</code>. اینها برای dispatch به زمینهٔ AIAgent ی درحال‌اجرا نیاز دارند و callback ی stateless نمی‌تواند براندشان. وقتی لازم شدند از runtime پیش‌فرض هرمس ‏(<code>/codex-runtime auto</code>) استفاده کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> غیرفعال‌سازی</h2>
+<p>هر زمان برگردید:</p>
+<div class="codebox"><pre><code>/codex-runtime auto</code></pre></div>
+<p>روی نشست بعدی مؤثر است. بلوک مدیریت‌شدهٔ Codex در <code>~/.codex/config.toml</code> می‌ماند تا بعداً بدون از دست دادن config دوباره فعال کنید — یا اگر ترجیح می‌دهید دستی حذفش کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۷</span> محدودیت‌ها</h2>
+<p>این runtime <b>بتای انتخابی</b> است. تا Hermes Agent ۲۰۲۶٫۵ + Codex CLI ۰٫۱۳۰٫۰ کارا:</p>
+<ul>
+  <li>گفتگوهای چند-نوبتی</li>
+  <li>تأییدهای ‏<code>commandExecution</code> و ‏<code>fileChange</code> ‏(apply_patch) از طریق UI هرمس</li>
+  <li>فراخوانی ابزار MCP ‏(تأییدشده روی <code>@modelcontextprotocol/server-filesystem</code> و callback جدید <code>hermes-tools</code>)</li>
+  <li>مهاجرت پلاگین‌های native ی Codex ‏(تأییدشده روی موجودی Linear / GitHub / Calendar)</li>
+  <li>مسیرهای Deny/cancel</li>
+  <li>چرخهٔ toggle روشن/خاموش</li>
+  <li>شمارنده‌های نوخهٔ حافظه و مهارت ‏(تأیید زنده با تست‌های یکپارچگی)</li>
+  <li>web_search هرمس از طریق codex ‏(تأیید زنده: «OpenAI Codex CLI – Getting Started» سر-تا-سر برگشت)</li>
+</ul>
+<p>محدودیت‌های شناخته‌شده:</p>
+<ul>
+  <li><b>auth هرمس و auth codex دو نشست جداهستند.</b> تمیزترین UX هر دو را می‌خواهد: هم <code>codex login</code> هم ‏<code>hermes auth add openai-codex</code> ‏(runtime از نشست codex برای فراخوانی LLM استفاده می‌کند). انتخاب طراحی عمدی در <code>_import_codex_cli_tokens</code> ی هرمس است — هرمس وضعیت OAuth را با codex CLI شریک نمی‌کند تا در refresh توکن له هم نکنند.</li>
+  <li><b>‏<code>delegate_task</code>، ‏<code>memory</code>، ‏<code>session_search</code>، ‏<code>todo</code> روی این runtime در دسترس نیستند.</b> به زمینهٔ AIAgent درحال‌اجرا نیاز دارند که callback ی stateless نمی‌دهد. وقتی لازم شدند ‏<code>/codex-runtime auto</code>.</li>
+  <li><b>بدون پیش‌نمایش inline ی patch در پرامپت‌های تأیید وقتی codex changeset را ردیابی نمی‌کند.</b> پارامترهای تأیید <code>fileChange</code> ی codex همیشه changeset را حمل نمی‌کنند. هرمس داده را از نوتیفیکیشن <code>item/started</code> مربوطه تا حد امکان کش می‌کند ولی اگر تأیید قبل از استریم شدن item برسد، پرامپت به whatever ی <code>reason</code> ی codex fallback می‌کند.</li>
+  <li><b>لغو زیر-ثانیه تضمین نمی‌شود.</b> interrupt های وسط-استریم ‏(Ctrl+C وقتی codex در حال پاسخ دادن است) از طریق <code>turn/interrupt</code> فرستاده می‌شوند ولی اگر codex پیام نهایی را flush کرده باشد، پاسخ را به هر حال می‌گیرید.</li>
+</ul>
+<p>باگ پیدا کردید؟ <a href="https://github.com/NousResearch/hermes-agent/issues" target="_blank" rel="noopener">یک issue باز کنید</a> همراه خروجی <code>hermes logs --since 5m</code>. در عنوان <code>codex-runtime</code> را بنویسید تا triage راحت شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۸</span> معماری</h2>
+<pre dir="ltr"><code>                ┌─── Hermes shell (CLI / TUI / gateway) ───┐
+                │  sessions DB · slash commands · memory   │
+                │  &amp; skill review · cron · session pickers │
+                └──┬──────────────────────────────────────┬┘
+                   │ user_message               final     │
+                   ▼                            text +    │
+        ┌──────────────────────────────────┐   projected  │
+        │  AIAgent.run_conversation()       │   messages   │
+        │   if api_mode == codex_app_server │              │
+        │     → CodexAppServerSession       │              │
+        │   else: chat_completions / codex_responses (default)
+        └────┬─────────────────────────────┘              │
+             │ JSON-RPC over stdio                        │
+             ▼                                            │
+        ┌──────────────────────────────────┐              │
+        │  codex app-server (subprocess)    │──────────────┘
+        │   thread/start, turn/start        │
+        │   item/* notifications            │
+        │   shell + apply_patch + update_plan│
+        │   view_image + sandbox            │
+        │   ┌─────────────────────────┐     │
+        │   │  MCP client             │     │
+        │   │  ├─ user MCP servers    │     │
+        │   │  ├─ native plugins      │     │
+        │   │  │   (linear, github,   │     │
+        │   │  │    gmail, calendar,  │     │
+        │   │  │    canva, ...)       │     │
+        │   │  └─ hermes-tools ───────┼─────────────────┐
+        │   │       (callback to     │     │           │
+        │   │        Hermes' richer  │     │           │
+        │   │        tools)          │     │           │
+        │   └─────────────────────────┘     │           │
+        └──────────────────────────────────┘           │
+                                                        │
+                                                        ▼
+        ┌──────────────────────────────────────────────────────────┐
+        │  hermes_tools_mcp_server.py (subprocess on demand)        │
+        │   web_search, web_extract, browser_*, vision_analyze,    │
+        │   image_generate, skill_view, skills_list, text_to_speech│
+        └──────────────────────────────────────────────────────────┘</code></pre>
+<p>برای جزئیات پیاده‌سازی، ‏<a href="https://github.com/NousResearch/hermes-agent/pull/24182" target="_blank" rel="noopener">PR ‎#۲۴۱۸۲</a> و ‏<a href="https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md" target="_blank" rel="noopener">README ی پروتکل app-server ی Codex</a> را ببینید.</p>
+</section>
+
+<div class="pager">
+  <a href="spotify.html"><span class="dir">→ قبلی</span><span class="ttl">اسپاتیفای</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/codex-app-server-runtime" target="_blank" rel="noopener">Codex App-Server Runtime</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اسپاتیفای — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/spotify" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>اسپاتیفای</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>اسپاتیفای</h1>
+<p>هرمس می‌تواند اسپاتیفای را مستقیماً کنترل کند — پخش، صف، جستجو، پلی‌لیست‌ها، ترک‌ها/آلبوم‌های ذخیره‌شده و تاریخچهٔ شنیدن — با Web API رسمی اسپاتیفای و PKCE OAuth. توکن‌ها در <code>~/.hermes/auth.json</code> ذخیره و روی خطای 401 خودکار refresh می‌شوند؛ فقط یک بار به‌ازای هر ماشین وارد می‌شوید ‏(refresh token ها بعد از ~۶ ماه منقضی می‌شوند؛ موقعش دوباره <code>hermes auth spotify</code> را اجرا کنید).</p>
+<p>برخلاف یکپارچه‌سازی‌های OAuth داخلی هرمس ‏(Google، ‏GitHub Copilot، ‏Codex)، اسپاتیفای از هر کاربری می‌خواهد اپ دولوپر سبک خودش را ثبت کند. اسپاتیفای اجازه نمی‌دهد اشخاص ثالث یک اپ OAuth عمومی برای استفادهٔ همه ارسال کنند. حدود دو دقیقه وقت می‌گیرد و <code>hermes auth spotify</code> قدم‌به‌قدم همراهتان است.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li>یک حساب اسپاتیفای. حساب <b>Free</b> برای ابزارهای جستجو، پلی‌لیست، کتابخانه و فعالیت کار می‌کند. برای کنترل پخش ‏(play، ‏pause، ‏skip، ‏seek، ‏volume، افزودن به صف، انتقال) <b>Premium</b> لازم است.</li>
+  <li>Hermes Agent نصب‌شده و در حال اجرا.</li>
+  <li>برای ابزارهای پخش: یک <b>دستگاه فعال Spotify Connect</b> — اپ اسپاتیفای باید دست‌کم روی یک دستگاه ‏(گوشی، دسکتاپ، پخش‌کنندهٔ وب، بلندگو) باز باشد تا Web API چیزی برای کنترل داشته باشد. اگر هیچ‌چیز فعال نباشد خطای <code>403 Forbidden</code> با پیام «no active device» می‌گیرید؛ اسپاتیفای را روی هر دستگاهی باز کنید و دوباره تلاش کنید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> راه‌اندازی</h2>
+<h3>یک‌مرحله‌ای: ‏<code>hermes tools</code> یا setup اولین-اجرا</h3>
+<p>سریع‌ترین مسیر. اجرا کنید:</p>
+<div class="codebox"><pre><code>hermes tools</code></pre></div>
+<p>به <code>🎵 Spotify</code> اسکرول کنید، با space روشنش کنید و با <code>s</code> ذخیره کنید. همین toggle هنگام جریان اولین-اجرای <code>hermes setup</code> / ‏<code>hermes setup tools</code> هم موجود است. اسپاتیفای انتخابی می‌ماند، پس فعال کردنش همانجا پیکربندی آگاه-از-ارائه‌دهندهٔ مشابه <code>hermes tools</code> را اجرا می‌کند.</p>
+<p>هرمس مستقیم شما را به جریان OAuth می‌برد — اگر هنوز اپ اسپاتیفای ندارید، ساختش را inline قدم‌به‌قدم انجام می‌دهد. بعد از پایان، تول‌ست هم فعال است هم احراز هویت‌شده در یک پاس.</p>
+<p>اگر ترجیح می‌دهید مرحله‌ها جدا باشند ‏(یا بعداً re-auth می‌کنید) از جریان دومرحله‌ای پایین استفاده کنید.</p>
+<h3>جریان دومرحله‌ای</h3>
+<h4>۱. فعال کردن تول‌ست</h4>
+<div class="codebox"><pre><code>hermes tools</code></pre></div>
+<p>‏<code>🎵 Spotify</code> را روشن، ذخیره کنید و وقتی ویزارد inline باز شد آن را ببندید ‏(Ctrl+C). تول‌ست روشن می‌ماند؛ فقط مرحلهٔ auth به تعویق می‌افتد.</p>
+<h4>۲. اجرای ویزارد ورود</h4>
+<div class="codebox"><pre><code>hermes auth spotify</code></pre></div>
+<p>۷ ابزار Spotify فقط بعد از مرحلهٔ ۱ در تول‌ست ایجنت ظاهر می‌شوند — به‌طور پیش‌فرض خاموش‌اند تا کسانی که نمی‌خواهندشان schema های ابزار اضافه را در هر فراخوانی API حمل نکنند.</p>
+<p>اگر هیچ <code>HERMES_SPOTIFY_CLIENT_ID</code> ای ست نباشد، هرمس ثبت اپ را inline قدم‌به‌قدم انجام می‌دهد:</p>
+<ol>
+  <li>‏<code>https://developer.spotify.com/dashboard</code> را در مرورگرتان باز می‌کند</li>
+  <li>مقادیر دقیقِ قابل-چسباندن در فرم «Create app» اسپاتیفای را چاپ می‌کند</li>
+  <li>Client ID ی برگشتی را از شما می‌پرسد</li>
+  <li>در <code>~/.hermes/.env</code> ذخیره می‌کند تا اجراهای بعدی از این مرحله عبور کنند</li>
+  <li>مستقیم به جریان رضایت OAuth ادامه می‌دهد</li>
+</ol>
+<p>بعد از تأیید شما، توکن‌ها زیر <code>providers.spotify</code> در <code>~/.hermes/auth.json</code> نوشته می‌شوند. ارائه‌دهندهٔ inference فعال تغییر <b>نمی‌کند</b> — auth ی اسپاتیفای مستقل از ارائه‌دهندهٔ LLM شماست.</p>
+<h3>ساخت اپ اسپاتیفای ‏(آنچه ویزارد می‌خواهد)</h3>
+<p>وقتی داشبورد باز شد روی <b>Create app</b> کلیک و اینها را پر کنید:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فیلد</th><th>مقدار</th></tr></thead>
+<tbody>
+<tr><td>App name</td><td>هرچه ‏(مثلاً <code>hermes-agent</code>)</td></tr>
+<tr><td>App description</td><td>هرچه ‏(مثلاً <code>personal Hermes integration</code>)</td></tr>
+<tr><td>Website</td><td>خالی بگذارید</td></tr>
+<tr><td>Redirect URI</td><td><code>http://127.0.0.1:43827/spotify/callback</code></td></tr>
+<tr><td>Which API/SDKs?</td><td>‏<b>Web API</b> را تیک بزنید</td></tr>
+</tbody>
+</table>
+</div>
+<p>شرایط را قبول و <b>Save</b> کنید. در صفحهٔ بعد <b>Settings</b> ← کپی <b>Client ID</b> ← چسباندن در پرامپت هرمس. تنها مقداری که هرمس لازم دارد همین است — ‏PKCE از client secret استفاده نمی‌کند.</p>
+<h3>اجرا از طریق SSH / محیط headless</h3>
+<p>اگر <code>SSH_CLIENT</code> یا <code>SSH_TTY</code> ست باشد، هرمس هم در ویزارد هم در مرحلهٔ OAuth از باز شدن خودکار مرورگر صرف‌نظر می‌کند. URL داشبورد و URL مجوزی که هرمس چاپ می‌کند را کپی، در مرورگر ماشین محلی‌تان باز و عادی ادامه دهید — شنوندهٔ HTTP محلی همچنان روی میزبان راه‌دور و پورت <code>43827</code> اجراست. مرورگر لپ‌تاپ‌تان بدون SSH local-forward به loopback راه‌دور نمی‌رسد:</p>
+<div class="codebox"><pre><code>ssh -N -L 43827:127.0.0.1:43827 user@remote-host</code></pre></div>
+<p>برای راه‌اندازی‌های jump-box / bastion و گیراندازی‌های دیگر ‏(mosh، ‏tmux، تداخل پورت)، بخش <a href="https://hermes-agent.nousresearch.com/docs/guides/oauth-over-ssh" target="_blank" rel="noopener">OAuth over SSH / Remote Hosts</a> را ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> تأیید</h2>
+<div class="codebox"><pre><code>hermes auth status spotify</code></pre></div>
+<p>نشان می‌دهد توکن‌ها حاضرند و access token چه وقت منقضی می‌شود. Refresh خودکار است: هر فراخوانی API اسپاتیفای که 401 بدهد، کلاینت refresh token را مبادله و یک بار دوباره تلاش می‌کند. refresh token ها بین ری‌استارت‌های هرمس می‌مانند، پس فقط اگر اپ را از تنظیمات حساب اسپاتیفتان لغو کنید یا <code>hermes auth logout spotify</code> اجرا کنید دوباره auth می‌شوید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> استفاده</h2>
+<p>بعد از ورود، ایجنت به ۷ ابزار Spotify دسترسی دارد. طبیعی با ایجنت حرف می‌زنید — خودش ابزار و اقدام درست را برمی‌دارد. برای بهترین رفتار، ایجنت یک مهارت همراه بارگذاری می‌کند که الگوهای استاندارد مصرف را یاد می‌دهد ‏(اول-جستجو-بعد-پخش، چه وقت نباید preflight ی <code>get_state</code> کرد و…).</p>
+<pre dir="ltr"><code>&gt; play some miles davis
+&gt; what am I listening to
+&gt; add this track to my Late Night Jazz playlist
+&gt; skip to the next song
+&gt; make a new playlist called "Focus 2026" and add the last three songs I played
+&gt; which of my saved albums are by Radiohead
+&gt; search for acoustic covers of Blackbird
+&gt; transfer playback to my kitchen speaker</code></pre>
+<h3>مرجع ابزارها</h3>
+<p>همهٔ اقدامات تغییردهندهٔ پخش یک <code>device_id</code> اختیاری برای نشانه‌گیری دستگاه مشخص می‌پذیرند. اگر حذف شود اسپاتیفای از دستگاه فعال فعلی استفاده می‌کند.</p>
+<h4>‏<code>spotify_playback</code></h4>
+<p>کنترل و بازرسی پخش به‌علاوهٔ واکشی تاریخچهٔ اخیراً-پخش‌شده.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>اقدام</th><th>هدف</th><th>نیازمند Premium؟</th></tr></thead>
+<tbody>
+<tr><td><code>get_state</code></td><td>وضعیت کامل پخش ‏(ترک، دستگاه، پیشرفت، shuffle/repeat)</td><td>نه</td></tr>
+<tr><td><code>get_currently_playing</code></td><td>فقط ترک فعلی ‏(روی 204 خالی برمی‌گرداند — پایین را ببینید)</td><td>نه</td></tr>
+<tr><td><code>play</code></td><td>شروع/ادامهٔ پخش. اختیاری: ‏<code>context_uri</code>، ‏<code>uris</code>، ‏<code>offset</code>، ‏<code>position_ms</code></td><td>بله</td></tr>
+<tr><td><code>pause</code></td><td>توقف پخش</td><td>بله</td></tr>
+<tr><td><code>next</code> / ‏<code>previous</code></td><td>پرش ترک</td><td>بله</td></tr>
+<tr><td><code>seek</code></td><td>پرش به <code>position_ms</code></td><td>بله</td></tr>
+<tr><td><code>set_repeat</code></td><td>‏<code>state</code> = ‏<code>track</code> / ‏<code>context</code> / ‏<code>off</code></td><td>بله</td></tr>
+<tr><td><code>set_shuffle</code></td><td>‏<code>state</code> = ‏<code>true</code> / ‏<code>false</code></td><td>بله</td></tr>
+<tr><td><code>set_volume</code></td><td>‏<code>volume_percent</code> = ۰–۱۰۰</td><td>بله</td></tr>
+<tr><td><code>recently_played</code></td><td>آخرین ترک‌های پخش‌شده. اختیاری: ‏<code>limit</code>، ‏<code>before</code>، ‏<code>after</code> ‏(Unix ms)</td><td>نه</td></tr>
+</tbody>
+</table>
+</div>
+<h4>‏<code>spotify_devices</code></h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>اقدام</th><th>هدف</th></tr></thead>
+<tbody>
+<tr><td><code>list</code></td><td>هر دستگاه Spotify Connect ی که حساب شما می‌بیند</td></tr>
+<tr><td><code>transfer</code></td><td>انتقال پخش به <code>device_id</code>. ‏اختیاری <code>play: true</code> پخش را بعد از انتقال شروع می‌کند</td></tr>
+</tbody>
+</table>
+</div>
+<h4>بلندگوهای مدیریت‌شده توسط Home Assistant</h4>
+<p>اگر Home Assistant بلندگوهایی را مدیریت کند که از قبل Spotify Connect را پشتیبانی می‌کنند ‏(مثلاً Sonos، ‏Echo، ‏Nest یا سایر بلندگوهای Connect-capable)، هر وقت اسپاتیفای آنها را ببیند خودکار در <code>spotify_devices list</code> ظاهر می‌شوند. هرمس برای این مسیر به پُلی بین Home Assistant ↔ اسپاتیفای نیاز ندارد — اسپاتیفای مسیریابی دستگاه را native هندل می‌کند.</p>
+<p>از هرمس بخواهید پخش را با نام نمایشی بلندگو منتقل کند ‏(مثلاً «اسپاتیفای را ببر روی بلندگوی آشپزخانه»)، یا در اسکریپت‌نویسی ‏<code>spotify_devices list</code> را صدا و <code>device_id</code> دقیق را به <code>spotify_devices transfer</code> پاس دهید. اگر بلندگو غایب بود یک بار اپ اسپاتیفای یا یکپارچه‌سازی Spotify ی بلندگو را باز کنید تا اسپاتیفای آن را به‌عنوان هدف فعال Connect ثبت کند.</p>
+<h4>‏<code>spotify_queue</code></h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>اقدام</th><th>هدف</th><th>نیازمند Premium؟</th></tr></thead>
+<tbody>
+<tr><td><code>get</code></td><td>ترک‌های فعلاً در صف</td><td>نه</td></tr>
+<tr><td><code>add</code></td><td>الحاق <code>uri</code> به صف</td><td>بله</td></tr>
+</tbody>
+</table>
+</div>
+<h4>‏<code>spotify_search</code></h4>
+<p>جستجوی کاتالوگ. ‏<code>query</code> الزامی است. اختیاری: ‏<code>types</code> ‏(آرایه‌ای از ‏<code>track</code> / ‏<code>album</code> / ‏<code>artist</code> / ‏<code>playlist</code> / ‏<code>show</code> / ‏<code>episode</code>)، ‏<code>limit</code>، ‏<code>offset</code>، ‏<code>market</code>.</p>
+<h4>‏<code>spotify_playlists</code></h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>اقدام</th><th>هدف</th><th>آرگومان‌های الزامی</th></tr></thead>
+<tbody>
+<tr><td><code>list</code></td><td>پلی‌لیست‌های کاربر</td><td>—</td></tr>
+<tr><td><code>get</code></td><td>یک پلی‌لیست + ترک‌ها</td><td><code>playlist_id</code></td></tr>
+<tr><td><code>create</code></td><td>پلی‌لیست جدید</td><td><code>name</code> ‏(+ اختیاری ‏<code>description</code>، ‏<code>public</code>، ‏<code>collaborative</code>)</td></tr>
+<tr><td><code>add_items</code></td><td>افزودن ترک‌ها</td><td><code>playlist_id</code>، ‏<code>uris</code> ‏(اختیاری ‏<code>position</code>)</td></tr>
+<tr><td><code>remove_items</code></td><td>حذف ترک‌ها</td><td><code>playlist_id</code>، ‏<code>uris</code> ‏(+ اختیاری ‏<code>snapshot_id</code>)</td></tr>
+<tr><td><code>update_details</code></td><td>rename / ویرایش</td><td><code>playlist_id</code> + هر یک از ‏<code>name</code>، ‏<code>description</code>، ‏<code>public</code>، ‏<code>collaborative</code></td></tr>
+</tbody>
+</table>
+</div>
+<h4>‏<code>spotify_albums</code></h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>اقدام</th><th>هدف</th><th>آرگومان‌های الزامی</th></tr></thead>
+<tbody>
+<tr><td><code>get</code></td><td>متادیتای آلبوم</td><td><code>album_id</code></td></tr>
+<tr><td><code>tracks</code></td><td>فهرست ترک‌های آلبوم</td><td><code>album_id</code></td></tr>
+</tbody>
+</table>
+</div>
+<h4>‏<code>spotify_library</code></h4>
+<p>دسترسی یکپارچه به ترک‌ها و آلبوم‌های ذخیره‌شده. مجموعه را با آرگومان <code>kind</code> انتخاب کنید.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>اقدام</th><th>هدف</th></tr></thead>
+<tbody>
+<tr><td><code>list</code></td><td>فهرست صفحه‌بندی‌شدهٔ کتابخانه</td></tr>
+<tr><td><code>save</code></td><td>افزودن <code>ids</code> / ‏<code>uris</code> به کتابخانه</td></tr>
+<tr><td><code>remove</code></td><td>حذف <code>ids</code> / ‏<code>uris</code> از کتابخانه</td></tr>
+</tbody>
+</table>
+</div>
+<p>الزامی: ‏<code>kind</code> = ‏<code>tracks</code> یا ‏<code>albums</code>، به‌علاوهٔ <code>action</code>.</p>
+<h3>ماتریس قابلیت: Free در برابر Premium</h3>
+<p>ابزارهای فقط-خواندنی روی حساب‌های Free کار می‌کنند. هر چیزی که پخش یا صف را تغییر دهد Premium می‌خواهد.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>روی Free کار می‌کند</th><th>Premium لازم است</th></tr></thead>
+<tbody>
+<tr><td>‏<code>spotify_search</code> ‏(همه)</td><td>‏<code>spotify_playback</code> — play، ‏pause، ‏next، ‏previous، ‏seek، ‏set_repeat، ‏set_shuffle، ‏set_volume</td></tr>
+<tr><td>‏<code>spotify_playback</code> — get_state، ‏get_currently_playing، ‏recently_played</td><td>‏<code>spotify_queue</code> — add</td></tr>
+<tr><td>‏<code>spotify_devices</code> — list</td><td>‏<code>spotify_devices</code> — transfer</td></tr>
+<tr><td>‏<code>spotify_queue</code> — get</td><td></td></tr>
+<tr><td>‏<code>spotify_playlists</code> ‏(همه)</td><td></td></tr>
+<tr><td>‏<code>spotify_albums</code> ‏(همه)</td><td></td></tr>
+<tr><td>‏<code>spotify_library</code> ‏(همه)</td><td></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> زمان‌بندی: اسپاتیفای + cron</h2>
+<p>چون ابزارهای Spotify ابزارهای عادی هرمس‌اند، یک cron job که در نشست هرمس اجرا می‌شود می‌تواند پخش را در هر زمان‌بندی شروع کند. بدون کد جدید.</p>
+<h3>پلی‌لیست صبحگاهی</h3>
+<div class="codebox"><pre><code>hermes cron add \
+  --name "morning-commute" \
+  "0 7 * * 1-5" \
+  "Transfer playback to my kitchen speaker and start my 'Morning Commute' playlist. Volume to 40. Shuffle on."</code></pre></div>
+<p>ساعت ۷ صبح همهٔ روزهای هفته چه می‌شود:</p>
+<ol>
+  <li>Cron یک نشست هرمس headless بالا می‌آورد.</li>
+  <li>ایجنت پرامپت را می‌خواند، برای پیدا کردن «kitchen speaker» با نام ‏<code>spotify_devices list</code> را صدا و سپس ‏<code>spotify_devices transfer</code> ← ‏<code>spotify_playback set_volume</code> ← ‏<code>spotify_playback set_shuffle</code> ← ‏<code>spotify_search</code> + ‏<code>spotify_playback play</code> را اجرا می‌کند.</li>
+  <li>موزیک روی بلندگوی هدف شروع می‌شود. هزینهٔ کل: یک نشست، چند فراخوانی ابزار، بدون ورودی انسانی.</li>
+</ol>
+<h3>آرام‌سازی شبانه</h3>
+<div class="codebox"><pre><code>hermes cron add \
+  --name "wind-down" \
+  "30 22 * * *" \
+  "Pause Spotify. Then set volume to 20 so it's quiet when I start it again tomorrow."</code></pre></div>
+<h3>گیراندازی‌ها</h3>
+<ul>
+  <li><b>هنگام شلیک cron باید یک دستگاه فعال وجود داشته باشد.</b> اگر هیچ کلاینتی اسپاتیفای اجرا نباشد ‏(گوشی/دسکتاپ/بلندگوی Connect)، اقدامات پخش <code>403 no active device</code> برمی‌گردانند. برای پلی‌لیست‌های صبحگاهی ترفند این است که به دستگاهی همیشه-روشن نشانه‌گیری کنید ‏(Sonos، ‏Echo، یک بلندگوی هوشمند) نه گوشی‌تان.</li>
+  <li><b>Premium برای هر تغییری در پخش لازم است</b> — play، ‏pause، ‏skip، ‏volume، ‏transfer. cron job های فقط-خواندنی ‏(مثل «هر روز ترک‌های اخیراً پخش‌شده را ایمیل کن») روی Free هم بی‌نقص کار می‌کنند.</li>
+  <li><b>ایجنت cron تول‌ست‌های فعال شما را به ارث می‌برد.</b> اسپاتیفای باید در <code>hermes tools</code> فعال باشد تا نشست cron ابزارهای Spotify را ببیند.</li>
+  <li><b>cron job ها با ‏<code>skip_memory=True</code> اجرا می‌شوند</b> تا در انبار حافظه‌تان بنویسند.</li>
+</ul>
+<p>مرجع کامل cron: بخش <a href="cron.html">کارهای زمان‌بندی‌شده</a>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> خروج</h2>
+<div class="codebox"><pre><code>hermes auth logout spotify</code></pre></div>
+<p>توکن‌ها را از <code>~/.hermes/auth.json</code> حذف می‌کند. برای پاک کردن config اپ هم، ‏<code>HERMES_SPOTIFY_CLIENT_ID</code> ‏(و <code>HERMES_SPOTIFY_REDIRECT_URI</code> اگر ست کرده‌اید) را از <code>~/.hermes/.env</code> حذف کنید یا ویزارد را دوباره اجرا کنید.</p>
+<p>برای لغو اپ سمت اسپاتیفای به <a href="https://www.spotify.com/account/apps/" target="_blank" rel="noopener">اپ‌های متصل به حسابتان</a> بروید و <b>REMOVE ACCESS</b> را بزنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> عیب‌یابی</h2>
+<p><b>‏<code>403 Forbidden — Player command failed: No active device found</code></b> — اسپاتیفای باید دست‌کم روی یک دستگاه اجرا باشد. اپ اسپاتیفای را روی گوشی، دسکتاپ یا وب‌پلیر باز کنید، برای یک لحظه هر ترکی را پخش کنید تا ثبت شود و دوباره تلاش کنید. ‏<code>spotify_devices list</code> نشان می‌دهد الان چه چیزی مرئی است.</p>
+<p><b>‏<code>403 Forbidden — Premium required</code></b> — روی حساب Free هستید و اقدامی تغییردهندهٔ پخش زده‌اید. ماتریس قابلیت بالا را ببینید.</p>
+<p><b>‏<code>204 No Content</code> روی ‏<code>get_currently_playing</code></b> — روی هیچ دستگاهی چیزی پخش نمی‌شود. این پاسخ عادی اسپاتیفای است نه خطا؛ هرمس آن را به‌صورت نتیجهٔ خالیِ توضیحی نشان می‌دهد ‏(<code>is_playing: false</code>).</p>
+<p><b>‏<code>INVALID_CLIENT: Invalid redirect URI</code></b> — redirect URI در تنظیمات اپ اسپاتیفتان با چیزی که هرمس استفاده می‌کند یکی نیست. پیش‌فرض <code>http://127.0.0.1:43827/spotify/callback</code> است. یا آن را به URI های مجاز اپ اضافه کنید یا <code>HERMES_SPOTIFY_REDIRECT_URI</code> را در <code>~/.hermes/.env</code> روی همان که ثبت کرده‌اید بگذارید.</p>
+<p><b>‏<code>429 Too Many Requests</code></b> — rate limit اسپاتیفای. هرمس خطای دوستانه برمی‌گرداند؛ یک دقیقه صبر و تلاش دوباره. اگر ادامه یافت احتمالاً حلقهٔ فشرده‌ای در یک اسکریپت دارید — سهمیهٔ اسپاتیفای تقریباً هر ۳۰ ثانیه reset می‌شود.</p>
+<p><b>‏<code>401 Unauthorized</code> مدام برمی‌گردد</b> — refresh token تان ابطال شده ‏(معمولاً چون اپ را از حسابتان حذف کرده‌اید یا اپ delete شده). ‏<code>hermes auth spotify</code> را دوباره اجرا کنید.</p>
+<p><b>ویزارد مرورگر را باز نمی‌کند</b> — اگر روی SSH هستید یا در کانتینری بدون نمایشگر، هرمس تشخیص می‌دهد و auto-open را رد می‌کند. URL داشبوردی که چاپ می‌کند را کپی و دستی باز کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> پیشرفته: scope های سفارشی</h2>
+<p>به‌طور پیش‌فرض هرمس scope هایی را می‌خواهد که هر ابزار ارسال‌شده لازم دارد. برای محدود کردن دسترسی بازنویسی کنید:</p>
+<div class="codebox"><pre><code>hermes auth spotify --scope "user-read-playback-state user-modify-playback-state playlist-read-private"</code></pre></div>
+<p>مرجع scope ها: <a href="https://developer.spotify.com/documentation/web-api/concepts/scopes" target="_blank" rel="noopener">Spotify Web API scopes</a>. اگر scope کمتری از نیاز یک ابزار بخواهید، فراخوانی‌های آن ابزار با 403 شکست می‌خورند.</p>
+<h3>پیشرفته: client ID / redirect URI سفارشی</h3>
+<div class="codebox"><pre><code>hermes auth spotify --client-id &lt;id&gt; --redirect-uri http://localhost:3000/callback</code></pre></div>
+<p>یا برای همیشه در <code>~/.hermes/.env</code>:</p>
+<pre><code>HERMES_SPOTIFY_CLIENT_ID=&lt;your_id&gt;
+HERMES_SPOTIFY_REDIRECT_URI=http://localhost:3000/callback</code></pre>
+<p>redirect URI باید در تنظیمات اپ اسپاتیفتان allow-list شده باشد. پیش‌فرض برای تقریباً همه کار می‌کند — فقط اگر پورت ۴۳۸۲۷ اشغال است عوضش کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> فایل‌ها کجا زندگی می‌کنند</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فایل</th><th>محتوا</th></tr></thead>
+<tbody>
+<tr><td>‏<code>~/.hermes/auth.json</code> ← ‏<code>providers.spotify</code></td><td>access token، ‏refresh token، ‏انقضا، ‏scope، ‏redirect URI</td></tr>
+<tr><td>‏<code>~/.hermes/.env</code></td><td>‏<code>HERMES_SPOTIFY_CLIENT_ID</code>، ‏اختیاری ‏<code>HERMES_SPOTIFY_REDIRECT_URI</code></td></tr>
+<tr><td>اپ اسپاتیفای</td><td>متعلق به شما در <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">developer.spotify.com/dashboard</a>; شامل Client ID و allow-list ی redirect URI</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<div class="pager">
+  <a href="pets.html"><span class="dir">→ قبلی</span><span class="ttl">اسکات‌های خانگی ‏(Pets)</span></a>
+  <a class="next" href="codex-app-server-runtime.html"><span class="dir">بعدی ←</span><span class="ttl">اجراگر Codex ‏(اختیاری)</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/spotify" target="_blank" rel="noopener">Spotify</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>
