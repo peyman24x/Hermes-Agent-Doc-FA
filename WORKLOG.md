@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۶۱ از ۲۰۷ صفحه (۲۹٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۷۹ از ۲۰۷ صفحه (۳۸٪)** |
 
 ---
 
@@ -417,6 +417,20 @@ hermes-docs-fa/
 
 ---
 
+### نشست‌های ۴۳ تا ۴۸ (بازیابی‌شده) — 2026-08-24 — از کانبان تا wake-word
+> یادداشت بازیابی: نگارش قبلی این فایل در اثر خطای اسکریپت همگام‌سازی (نوشتن روی فایل پیش از اعتبارسنجی کدگذاری) خالی شد و از git HEAD بازگردانده شد؛ لاگ‌های تفصیلی نشست‌های ۴۳ تا ۴۸ از دست رفت و این خلاصه جایگزین آن‌هاست.
+- ترجمه و انتشار ۱۷ صفحهٔ بخش قابلیت‌ها به‌ترتیب زنجیرهٔ pager: kanban (۱۹ بخش، دومرحله‌ای)، kanban-worker-lanes، document-extraction، heartbeat، loops، deliverable-mode، context-references، vision، batch-processing، context-files، goals، image-generation، personality، code-execution، skins، wake-word
+- اصلاحات همان بازه: درج pager جاماندهٔ kanban؛ لینک صفحات ترجمه‌نشده (voice-mode، delegation و…) به نسخهٔ انگلیسی رسمی؛ رفع تایپوهای نویسه‌آمیخته؛ اصلاح جدول تلگرام
+- درس: نوشتن فایل فقط با الگوی اتمی (فایل موقت + os.replace) انجام شود تا خطای کدگذاری فایل را خالی نکند.
+
+### نشست ۴۹ — 2026-08-25 — 🔍 LSP + 🧩 پلاگین‌های داخلی — قابلیت‌ها ۱۹/۳۱
+- ترجمه و انتشار «تشخیص معنایی LSP» (۸ بخش): معماری سرورهای زبان پس‌زمینه ‏(pyright و ~۲۰ سرور)، گیت فضای‌کاری git، جدول ۲۷ زبان + بخش PowerShell، CLI، پیکربندی کامل yaml، مکان نصب، کارایی و عیب‌یابی
+- ترجمه و انتشار «پلاگین‌های داخلی» (۷ بخش، دومرحله‌ای): کشف چهارمنبعی، opt-in بودن، جدول ۱۱ پلاگین ارسالی، disk-cleanup / security-guidance / observability/langfuse کامل، مهاجرت NeMo Relay، google_meet، hermes-achievements و معیارهای داخلی‌شدن
+- زنجیرهٔ pager: wake-word ← lsp ← built-in-plugins ← (به‌زودی)
+- اصلاحات: حذف نویسهٔ CJK تصادفی در google_meet؛ تبدیل لینک markdown خام PowerShell به HTML
+- همگام‌سازی کامل شمارنده‌ها: جدول پیشرفت README با اعداد واقعی nav-data بازسازی شد (نسخهٔ قبلی کهنه بود)؛ ردیف‌های ۶۲ تا ۷۹ فهرست صفحات تکمیل شد
+- پیشرفت: **۷۹ از ۲۰۷ صفحه فعال (۳۸٪)** — قابلیت‌های اصلی ۱۹/۳۱ (۶۱٪)، پیام‌رسان‌ها ۳۳/۳۵ (۹۴٪)
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -484,6 +498,24 @@ hermes-docs-fa/
 | 60 | `user-guide/features/cron.html` | کارهای زمان‌بندی‌شده ‏(کرون) |
 | 61 | `user-guide/features/web-dashboard.html` | داشبورد وب |
 
+| 62 | `user-guide/features/kanban.html` | کانبان چندایجنت |
+| 63 | `user-guide/features/kanban-worker-lanes.html` | لِین‌های کارگر کانبان |
+| 64 | `user-guide/features/document-extraction.html` | استخراج متن اسناد |
+| 65 | `user-guide/features/heartbeat.html` | ضربان نشست (Heartbeat) |
+| 66 | `user-guide/features/loops.html` | حلقه‌های تکرارشونده (/loop) |
+| 67 | `user-guide/features/deliverable-mode.html` | حالت تحویل‌دادنی در چت |
+| 68 | `user-guide/features/context-references.html` | ارجاع‌های درون‌خطی (@) |
+| 69 | `user-guide/features/vision.html` | بینایی (تصاویر) |
+| 70 | `user-guide/features/batch-processing.html` | پردازش گروهی |
+| 71 | `user-guide/features/context-files.html` | فایل‌های زمینه (Context Files) |
+| 72 | `user-guide/features/goals.html` | اهداف پایدار |
+| 73 | `user-guide/features/image-generation.html` | تولید تصویر |
+| 74 | `user-guide/features/personality.html` | شخصیت و SOUL.md |
+| 75 | `user-guide/features/code-execution.html` | اجرای کد پایتون |
+| 76 | `user-guide/features/skins.html` | پوسته‌ها و تم‌ها |
+| 77 | `user-guide/features/wake-word.html` | کلمهٔ بیدارباش «هِی هرمس» |
+| 78 | `user-guide/features/lsp.html` | تشخیص معنایی LSP |
+| 79 | `user-guide/features/built-in-plugins.html` | پلاگین‌های داخلی |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

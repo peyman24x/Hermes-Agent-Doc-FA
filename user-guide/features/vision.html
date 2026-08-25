@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بینایی و چسباندن تصویر — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/vision" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>بینایی و چسباندن تصویر</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>بینایی و چسباندن تصویر</h1>
+<p>‏هرمس ایجنت از <b>بینایی چندوجهی</b> پشتیبانی می‌کند — می‌توانید تصاویر را مستقیم از کلیپ‌بورد داخل CLI بچسبانید و از ایجنت بخواهید تحلیل، توصیف یا کار با آن‌ها را انجام دهد. تصاویر به‌عنوان بلوک‌های محتوای base64-رمزگذاری‌شده به مدل فرستاده می‌شوند، پس هر مدل توانمند-بینایی می‌تواند پردازششان کند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>مشترکان Portal مدل‌های توانمند-بینایی ‏(Claude، ‏GPT-5، ‏Gemini) را در همان کاتالوگ می‌گیرند — بدون اعتبارنامهٔ اضافه. بخش Nous Portal را ببینید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نحوهٔ کار</h2>
+<ol>
+  <li>یک تصویر در کلیپ‌بورد کپی کنید ‏(اسکرین‌شات، تصویر مرورگر و...)</li>
+  <li>با یکی از روش‌های پایین الصاقش کنید</li>
+  <li>سؤالتان را تایپ و Enter بزنید</li>
+  <li>تصویر به‌صورت badge ‏<code>[📎 Image #1]</code> بالای ورودی ظاهر می‌شود</li>
+  <li>هنگام ارسال، تصویر به‌عنوان بلوک محتوای بینایی به مدل می‌رود</li>
+</ol>
+<p>می‌توانید قبل از ارسال چندین تصویر الصاق کنید — هرکدام badge خودش را می‌گیرد. برای پاک‌کردن همهٔ تصاویر الصاقی ‏<code>Ctrl+C</code> بزنید.</p>
+<p>تصاویر با نام‌فایل‌های مؤرخ به‌صورت PNG در ‏<code>~/.hermes/images/</code> ذخیره می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> روش‌های paste</h2>
+<p>نحوهٔ الصاق تصویر به محیط ترمینال شما بستگی دارد. همهٔ روش‌ها همه‌جا کار نمی‌کنند — تفکیک کامل:</p>
+<h3>فرمان ‏<code>/paste</code></h3>
+<p><b>مطمئن‌ترین fallback صریح الصاق تصویر.</b></p>
+<div class="codebox"><pre><code>/paste</code></pre></div>
+<p>‏<code>/paste</code> را تایپ و Enter بزنید. هرمس کلیپ‌بوردتان را برای تصویر چک و الصاق می‌کند. امن‌ترین گزینه وقتی ترمینال‌تان ‏<code>Cmd+V</code>/<code>Ctrl+V</code> را بازنویسی می‌کند، یا وقتی فقط تصویری کپی کرده‌اید و payload متنیِ bracketed-paste‌ای برای بازرسی نیست.</p>
+<h3>‏Ctrl+V / Cmd+V</h3>
+<p>هرمس الان paste را یک جریان لایه‌بندی‌شده تلقی می‌کند:</p>
+<ul>
+  <li>اول paste متن عادی</li>
+  <li>fallback متنِ کلیپ‌بورد-native / ‏OSC52 اگر ترمینال متن را تمیز تحویل نداد</li>
+  <li>الصاق تصویر وقتی کلیپ‌بورد یا payload چسبانده‌شده به تصویر یا مسیر تصویر حل شود</li>
+</ul>
+<p>یعنی مسیرهای temp اسکرین‌شات مک و URI های تصویری ‏<code>file://...</code> می‌توانند فوراً الصاق شوند به‌جای اینکه به‌صورت متن خام در کامپوزر بنشینند.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>اگر کلیپ‌بوردتان <b>فقط تصویر</b> دارد ‏(بدون متن)، ترمینال‌ها همچنان نمی‌توانند بایت‌های باینری تصویر را مستقیم بفرستند. از ‏<code>/paste</code> به‌عنوان fallback صریح الصاق تصویر استفاده کنید.</p>
+</div>
+<h3>‏<code>/terminal-setup</code> برای VS Code / Cursor / Windsurf</h3>
+<p>اگر TUI را داخل ترمینال یکپارچه خانواده-VS Code روی macOS اجرا می‌کنید، هرمس می‌تواند binding های پیشنهادی ‏<code>workbench.action.terminal.sendSequence</code> را برای هم‌ترازی بهتر multiline و undo/redo نصب کند:</p>
+<div class="codebox"><pre><code>/terminal-setup</code></pre></div>
+<p>مخصوصاً وقتی مفید است که ‏<code>Cmd+Enter</code>، ‏<code>Cmd+Z</code> یا ‏<code>Shift+Cmd+Z</code> توسط IDE رهگیری می‌شوند. فقط روی ماشین محلی اجرایش کنید — داخل نشست SSH نه.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> سازگاری پلتفرمی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>محیط</th><th>‏/paste</th><th>Cmd/Ctrl+V</th><th>‏/terminal-setup</th><th>یادداشت‌ها</th></tr></thead>
+  <tbody>
+    <tr><td><b>‏macOS Terminal / iTerm2</b></td><td>✅</td><td>✅</td><td>n/a</td><td>بهترین تجربه — کلیپ‌بورد native + بازیابی مسیر اسکرین‌شات</td></tr>
+    <tr><td><b>Apple Terminal</b></td><td>✅</td><td>✅</td><td>n/a</td><td>اگر Cmd+←/→/⌫ بازنویسی شد از fallback ‏Ctrl+A/Ctrl+E/Ctrl+U استفاده کنید</td></tr>
+    <tr><td><b>دسکتاپ Linux X11</b></td><td>✅</td><td>✅</td><td>n/a</td><td>‏<code>xclip</code> لازم دارد ‏(<code>apt install xclip</code>)</td></tr>
+    <tr><td><b>دسکتاپ Linux Wayland</b></td><td>✅</td><td>✅</td><td>n/a</td><td>‏<code>wl-paste</code> لازم دارد ‏(<code>apt install wl-clipboard</code>)</td></tr>
+    <tr><td><b>WSL2 ‏(Windows Terminal)</b></td><td>✅</td><td>✅</td><td>n/a</td><td>از ‏<code>powershell.exe</code> استفاده می‌کند — بدون نصب اضافه</td></tr>
+    <tr><td><b>VS Code / Cursor / Windsurf ‏(محلی)</b></td><td>✅</td><td>✅</td><td>✅</td><td>برای هم‌ترازی بهتر ‏Cmd+Enter / undo / redo توصیه می‌شود</td></tr>
+    <tr><td><b>VS Code / Cursor / Windsurf ‏(SSH)</b></td><td>❌²</td><td>❌²</td><td>❌³</td><td>به‌جایش ‏/terminal-setup را روی ماشین محلی اجرا کنید</td></tr>
+    <tr><td><b>ترمینال SSH ‏(هر کدام)</b></td><td>❌²</td><td>❌²</td><td>n/a</td><td>کلیپ‌بورد راه‌دور قابل‌دسترس نیست</td></tr>
+  </tbody>
+</table>
+</div>
+<p>² «SSH و نشست‌های راه‌دور» پایین را ببینید · ³ این فرمان binding های IDE محلی می‌نویسد و نباید از میزبان راه‌دور اجرا شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> setup مخصوص پلتفرم</h2>
+<h3>macOS</h3>
+<p><b>بدون setup.</b> هرمس از ‏<code>osascript</code> ‏(داخلی macOS) برای خواندن کلیپ‌بورد استفاده می‌کند. برای سرعت بیشتر اختیاراً ‏<code>pngpaste</code> نصب کنید:</p>
+<div class="codebox"><pre><code>brew install pngpaste</code></pre></div>
+<h3>لینوکس ‏(X11)</h3>
+<p>‏<code>xclip</code> نصب کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Ubuntu/Debian
+sudo apt install xclip
+
+# Fedora
+sudo dnf install xclip
+
+# Arch
+sudo pacman -S xclip</code></pre>
+</div>
+<h3>لینوکس ‏(Wayland)</h3>
+<p>دسکتاپ‌های مدرن لینوکس ‏(Ubuntu ‏۲۲.۰۴+، ‏Fedora ‏۳۴+) اغلب پیش‌فرض Wayland دارند. ‏<code>wl-clipboard</code> را نصب کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Ubuntu/Debian
+sudo apt install wl-clipboard
+
+# Fedora
+sudo dnf install wl-clipboard
+
+# Arch
+sudo pacman -S wl-clipboard</code></pre>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 چک کنید روی Wayland هستید</div>
+  <div class="codebox"><pre><code>echo $XDG_SESSION_TYPE
+# "wayland" = Wayland, "x11" = X11, "tty" = no display server</code></pre></div>
+</div>
+<h3>WSL2</h3>
+<p><b>بدون setup اضافه.</b> هرمس WSL2 را خودکار تشخیص می‌دهد ‏(از طریق ‏<code>/proc/version</code>) و از ‏<code>powershell.exe</code> برای دسترسی به کلیپ‌بورد ویندوز از طریق ‏System.Windows.Forms.Clipboard دات‌نت استفاده می‌کند. این جزء interop ویندوزِ WSL2 است — ‏powershell.exe پیش‌فرض موجود است.</p>
+<p>دادهٔ کلیپ‌بورد به‌صورت PNG رمزگذاری‌شده-base64 روی stdout منتقل می‌شود، پس نیازی به تبدیل مسیر فایل یا فایل‌های temp نیست.</p>
+<div class="callout note">
+  <div class="callout-title">📌 یادداشت WSLg</div>
+  <p>اگر WSLg دارید ‏(WSL2 با پشتیبانی GUI)، هرمس اول مسیر PowerShell را امتحان سپس به ‏<code>wl-paste</code> برمی‌گردد. پل کلیپ‌بورد WSLg برای تصاویر فقط قالب BMP را پشتیبانی می‌کند — هرمس BMP را با Pillow ‏(اگر نصب باشد) یا فرمان ‏<code>convert</code> مربوط به ImageMagick خودکار به PNG تبدیل می‌کند.</p>
+</div>
+<h4>تأیید دسترسی کلیپ‌بورد WSL2</h4>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># 1. Check WSL detection
+grep -i microsoft /proc/version
+
+# 2. Check PowerShell is accessible
+which powershell.exe
+
+# 3. Copy an image, then check
+powershell.exe -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Clipboard]::ContainsImage()"
+# Should print "True"</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> SSH و نشست‌های راه‌دور</h2>
+<p><b>Paste تصویر کلیپ‌بورد از طریق SSH کامل کار نمی‌کند.</b> وقتی با SSH وارد ماشین راه‌دوری می‌شوید، CLI هرمس روی میزبان راه‌دور اجرا می‌شود. ابزارهای کلیپ‌بورد ‏(<code>xclip</code>، ‏<code>wl-paste</code>، ‏<code>powershell.exe</code>، ‏<code>osascript</code>) کلیپ‌بورد ماشینی که رویش اجرا می‌شوند را می‌خوانند — یعنی سرور راه‌دور نه ماشین محلی شما. پس تصویر کلیپ‌بورد محلی‌تان از سمت راه‌دور غیرقابل‌دسترس است.</p>
+<p>متن گاهی همچنان از طریق paste ترمینال یا OSC52 پل می‌شود، ولی دسترسی کلیپ‌بورد-تصویری و مسیرهای temp اسکرین‌شات محلی به ماشینی که هرمس را اجرا می‌کند مقیدند.</p>
+<h4>راه‌حل‌های جایگزین برای SSH</h4>
+<ol>
+  <li><b>آپلود فایل تصویر</b> — تصویر را محلی ذخیره، از طریق ‏scp، فایل‌اکسپلورر VSCode ‏(drag-and-drop) یا هر روش انتقال فایلی به سرور راه‌دور ببرید. بعد با مسیر به آن ارجاع دهید. ‏<i>(یک فرمان ‏‎/attach &lt;filepath&gt; برای ریلیز آینده برنامه‌ریزی شده.)</i></li>
+  <li><b>استفاده از URL</b> — اگر تصویر آنلاین در دسترس است فقط URL را در پیامتان paste کنید. ایجنت می‌تواند با ‏<code>vision_analyze</code> مستقیماً به هر URL تصویری نگاه کند.</li>
+  <li><b>X11 forwarding</b> — با ‏<code>ssh -X</code> وصل شوید تا X11 فوروارد شود. این اجازه می‌دهد ‏xclip روی ماشین راه‌دور به کلیپ‌بورد X11 محلی شما برسد. سرور X در حال اجرای محلی می‌خواهد ‏(XQuartz روی macOS، داخلی در دسکتاپ‌های X11 لینوکس). برای تصاویر بزرگ کند است.</li>
+  <li><b>استفاده از پلتفرم پیام‌رسانی</b> — تصاویر را از طریق تلگرام، دیسکورد، اسلک یا واتساپ به هرمس بدهید. این پلتفرم‌ها آپلود تصویر را native هندل و تحت تأثیر محدودیت‌های کلیپ‌بورد/ترمینال نیستند.</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> چرا ترمینال‌ها نمی‌توانند تصویر paste کنند</h2>
+<p>منبع رایج سردرگمی است، پس توضیح فنی:</p>
+<p>ترمینال‌ها interface های <b>متنی</b> هستند. وقتی ‏Ctrl+V ‏(یا Cmd+V) می‌زنید شبیه‌ساز ترمینال:</p>
+<ol>
+  <li>کلیپ‌بورد را برای <b>محتوای متنی</b> می‌خواند</li>
+  <li>آن را در توالی‌های escape ‏<a href="https://en.wikipedia.org/wiki/Bracketed-paste" target="_blank" rel="noopener">bracketed paste</a> wrap می‌کند</li>
+  <li>از طریق جریان متنی ترمینال به اپلیکیشن می‌فرستد</li>
+</ol>
+<p>اگر کلیپ‌بورد فقط تصویر داشته باشد ‏(بدون متن)، ترمینال چیزی برای فرستادن ندارد. هیچ توالی escape ترمینالیِ استانداردی برای دادهٔ باینری تصویر وجود ندارد. ترمینال به‌سادگی هیچ نمی‌کند.</p>
+<p>به همین دلیل هرمس از چک جداگانهٔ کلیپ‌بورد استفاده می‌کند — به‌جای دریافت دادهٔ تصویر از طریق رویداد paste ترمینال، ابزارهای سطح-OS ‏(<code>osascript</code>، ‏<code>powershell.exe</code>، ‏<code>xclip</code>، ‏<code>wl-paste</code>) را مستقیم با subprocess صدا می‌زند تا کلیپ‌بورد را مستقل بخواند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> مدل‌های پشتیبانی‌شده</h2>
+<p>‏Paste تصویر با هر مدلی که بینایی دارد کار می‌کند. تصویر به‌صورت data URL رمزگذاری‌شده-base64 در قالب محتوای vision مربوط به OpenAI فرستاده می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{
+  "type": "image_url",
+  "image_url": {
+    "url": "data:image/png;base64,..."
+  }
+}</code></pre>
+</div>
+<p>بیشتر مدل‌های مدرن این قالب را پشتیبانی می‌کنند شامل ‏GPT-4 Vision، ‏Claude ‏(با بینایی)، ‏Gemini و مدل‌های چندوجهی متن‌بازِ سرو‌شده از طریق OpenRouter.</p>
+
+<h3>مسیریابی تصویر ‏(مدل‌های توانمند-بینایی در برابر فقط-متنی)</h3>
+<p>وقتی کاربری تصویری الصاق کند — از کلیپ‌بورد CLI، گیت‌وی ‏(عکس تلگرام/دیسکورد) یا هر نقطهٔ ورود دیگری — هرمس بر اساس اینکه مدل فعلی واقعاً از بینایی پشتیبانی می‌کند مسیریابی می‌کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مدل شما</th><th>با تصویر چه می‌شود</th></tr></thead>
+  <tbody>
+    <tr><td><b>توانمند-بینایی</b> ‏(GPT-4V، ‏Claude با بینایی، ‏Gemini، ‏Qwen-VL، ‏MiMo-VL و...)</td><td>به‌صورت <b>پیکسل واقعی</b> با قالب محتوای تصویری native ارائه‌دهنده بالا فرستاده می‌شود. بدون لایهٔ خلاصهٔ متنی.</td></tr>
+    <tr><td><b>فقط-متنی</b> ‏(DeepSeek V3، مدل‌های متن‌باز کوچکتر، endpoint های قدیمی فقط-چت)</td><td>از طریق ابزار کمکی ‏<code>vision_analyze</code> مسیریابی می‌شود — یک مدل بینایی کمکی تصویر را توصیف و توضیح متنی داخل گفتگو تزریق می‌شود.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>این را شما پیکربندی نمی‌کنید — هرمس قابلیت مدل فعلی‌تان را در متادیتای ارائه‌دهنده جست‌وجو و خودکار مسیر درست را انتخاب می‌کند. اثر عملی: می‌توانید وسط نشست بین مدل‌های بینایی‌دار و غیر-بینایی سوئیچ کنید و هندل تصویر «از خودش درست» بدون تغییر گردش‌کار. مدل‌های فقط-متنی زمینهٔ منسجم دربارهٔ تصویر می‌گیرند به‌جای payload چندوجهی شکسته‌ای که مجبور به رد کردنش باشند.</p>
+<p>اینکه کدام مدل کمکی مسیر توضیح-متنی را هندل کند زیر ‏<code>auxiliary.vision</code> قابل پیکربندی است — «مدل‌های کمکی» را در پیکربندی ببینید.</p>
+<h3>‏<code>vision_analyze</code> همان رفتار دوگانه را دارد</h3>
+<p>خود ابزار ‏<code>vision_analyze</code> همان مسیریابی را دنبال می‌کند. وقتی مدل اصلی فعال توانمند-بینایی <b>و</b> ارائه‌دهنده‌اش پشتیبان تصویر داخل نتایج ابزار باشد ‏(الان پشته‌های Anthropic، ‏OpenAI، ‏Azure-OpenAI و ‏Gemini ‏3.x)، ‏<code>vision_analyze</code> توصیف‌گر کمکی را short-circuit کرده و پیکسل خام تصویر را به‌صورت پاکت نتیجه-ابزار چندوجهی برمی‌گرداند. مدل اصلی نوبت بعدش تصویر را native می‌بیند — بدون فراخوانی کمکی، بدون افت اطلاعات خلاصهٔ متنی، بدون تأخیر اضافه.</p>
+<p>برای مدل‌های اصلی فقط-متنی ‏(یا ارائه‌دهنده‌هایی whose کانال نتیجه-ابزار تصویر حمل نمی‌کند)، ‏<code>vision_analyze</code> به مسیر قدیمی برمی‌گردد: از مدل بینایی کمکی پیکربندی‌شده می‌خواهد تصویر را توصیف کند و توضیح را به‌عنوان متن ساده برمی‌گرداند. در هر حالت امضای ابزار فراخواننده یکی است — ابزار هنگام runtime بر اساس مدل فعال تصمیم می‌گیرد کدام مسیر را برود.</p>
+</section>
+
+<div class="pager">
+  <a href="context-references.html"><span class="dir">→ قبلی</span><span class="ttl">مراجع زمینه</span></a>
+  <a class="next" href="batch-processing.html"><span class="dir">بعدی ←</span><span class="ttl">پردازش دسته‌ای</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/vision" target="_blank" rel="noopener">Vision &amp; Image Paste</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

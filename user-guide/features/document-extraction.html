@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استخراج اسناد — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/document-extraction" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>استخراج اسناد</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>استخراج اسناد</h1>
+<p>ابزار ‏<code>read_file</code> قالب‌های سند رایج را خودکار به متن خوانا تبدیل می‌کند تا ایجنت بتواند PDF یا صفحه‌گسترده را همان‌طور که کد مبدأ می‌خواند بازرسی کند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> قالب‌های پشتیبانی‌شده</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>قالب</th><th>پسوندها</th><th>تبدیل‌کننده</th><th>دسترس‌پذیری</th></tr></thead>
+  <tbody>
+    <tr><td>نوت‌بوک‌های Jupyter</td><td><code>.ipynb</code></td><td>داخلی ‏(stdlib)</td><td>همیشه</td></tr>
+    <tr><td>اسناد Word</td><td><code>.docx</code></td><td>داخلی ‏(stdlib)</td><td>همیشه</td></tr>
+    <tr><td>کتاب‌های کار Excel</td><td><code>.xlsx</code></td><td>داخلی ‏(stdlib)</td><td>همیشه</td></tr>
+    <tr><td>PDF</td><td><code>.pdf</code></td><td>تبدیل‌کنندهٔ اختیاری ‏anydoc</td><td>نصب خودکار در اولین استفاده*</td></tr>
+    <tr><td>آفیس قدیمی</td><td>‏<code>.doc</code>، ‏<code>.ppt</code>، ‏<code>.xls</code>، ‏<code>.pptx</code> و واریانت‌ها</td><td>تبدیل‌کنندهٔ اختیاری ‏anydoc</td><td>نصب خودکار در اولین استفاده*</td></tr>
+    <tr><td>OpenDocument</td><td>‏<code>.odt</code>، ‏<code>.ods</code>، ‏<code>.odp</code></td><td>تبدیل‌کنندهٔ اختیاری ‏anydoc</td><td>نصب خودکار در اولین استفاده*</td></tr>
+    <tr><td>متن غنی / کتاب الکترونیکی</td><td>‏<code>.rtf</code>، ‏<code>.epub</code></td><td>تبدیل‌کنندهٔ اختیاری ‏anydoc</td><td>نصب خودکار در اولین استفاده*</td></tr>
+  </tbody>
+</table>
+</div>
+<p>\* تبدیل‌کنندهٔ اختیاری بستهٔ ‏<code>firecrawl-anydoc</code> است که جایی که نصب مجاز است به‌صورت lazy نصب می‌شود ‏(<code>security.allow_lazy_installs</code> در config.yaml). بدون آن سه قالب stdlib همچنان کار می‌کنند؛ سایر قالب‌ها به گیتی فایل-باینری برمی‌گردند.</p>
+<p>خروجی تبدیل Markdown است که از طریق پنجرهٔ عادی ‏offset/limit مربوط به read_file صفحه‌بندی می‌شود. اسناد بالای ۵۰ مگابایت برای محدود ماندن نوبت‌های ابزار رد می‌شوند.</p>
+<p>استخراج با بک‌اندهای ترمینال راه‌دور هم کار می‌کند ‏(Docker، ‏Modal، ‏SSH): بایت‌های فایل از مرز بک‌اند عبور و سمت میزبان تبدیل می‌شود، پس سند داخل sandbox مثل سند محلی خوانده می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> ‏PDF های اسکن‌شده: هشدار پوشش</h2>
+<p>تبدیل PDF فقط <b>لایهٔ متنی</b> را می‌خواند. صفحاتی که تصویر اسکن‌شده‌اند — رایج در اسناد حقوقی، بسته‌های فروش مجدد، قراردادهای امضاشده، فکس — لایهٔ متنی ندارند و بی‌صدا به هیچ تبدیل نمی‌شوند. امضای گویا، تیترهایی با بدنهٔ خالی است.</p>
+<p>وقتی سهم معناداری از صفحات متنی تولید نکند ‏(بالای ۲۰٪ سند، یا مطلقاً ۱۰+ صفحه)، ‏read_file هشداری به ابتدای استخراج الصاق می‌کند. هر شکاف ناخوانا با آخرین متنی که قبلش استخراج شده برچسب می‌خورد — معمولاً جداکنندهٔ بخش — تا ایجنت فقط شکاف‌هایی را که واقعاً لازم دارد هدف بگیرد به‌جای OCR کردن کل سند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>[EXTRACTION COVERAGE WARNING: 198 of 311 pages in this PDF yielded no
+text. ... Unreadable gaps, each labeled with the last text extracted
+before it:
+  pages 42-77 (36 pages) — after "Antigua Maintenance Corp Bylaws" (p41)
+  pages 92-213 (122 pages) — after "... Covenants, Codes and Regulations" (p91)
+  page 224 (1 page) — after "... Insurance Declaration Pages" (p223)
+Decide which gaps you actually need — do NOT OCR or render everything. ...]</code></pre>
+</div>
+<p>هشدار بازه‌های دقیق صفحه و مسیرهای بازیابی را فهرست می‌کند:</p>
+<ol>
+  <li><b>چند صفحه — رندر + بینایی.</b> صفحات را به تصویر تبدیل و با ابزار vision بخوانید:</li>
+</ol>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>pdftoppm -jpeg -r 150 -f 92 -l 94 document.pdf /tmp/page</code></pre>
+</div>
+<p>سپس هر تصویر را با ‏<code>vision_analyze</code> بازرسی کنید. صفر وابستگی اضافه ‏(poppler برای خودِ تشخیص لازم است).</p>
+<ol start="2">
+  <li><b>صفحات زیاد — OCR.</b> مهارت ‏<code>ocr-and-documents</code> ‏OCR انبوه با marker-pdf را پوشش می‌دهد ‏(۹۰+ زبان، فرمول‌ها و جدول‌ها را هندل می‌کند؛ نصب ~۳–۵ GB).</li>
+</ol>
+<p>تشخیص از ‏pdftotext مربوط به poppler برای شمارش متن به‌ازای هر صفحه استفاده می‌کند. اگر poppler نصب نباشد استخراج همچنان کار می‌کند — چک پوشش بی‌صدا رد می‌شود.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>ایجنت خودش هشدار را هندل می‌کند — پیشنهاد رندر یا OCR صفحات غایب را می‌دهد. اگر خودتان استخراج‌ها را می‌خوانید، «تیتر با بدنهٔ خالی» را بخش اسکن‌شده تلقی کنید نه بخش گمشده.</p>
+</div>
+</section>
+
+<div class="pager">
+  <a href="kanban-worker-lanes.html"><span class="dir">→ قبلی</span><span class="ttl">لاین‌های worker کانبان</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">ضربان نشست (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/document-extraction" target="_blank" rel="noopener">Document Extraction</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

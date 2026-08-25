@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مراجع زمینه — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/context-references" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>مراجع زمینه</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>مراجع زمینه</h1>
+<p>‏<code>@</code> را تایپ کنید و به‌دنبالش یک ارجاع بیاورید تا محتوا مستقیماً داخل پیام شما تزریق شود. هرمس ارجاع را درجا بسط می‌دهد و محتوا را زیر بخش ‏<code>--- Attached Context ---</code> الصاق می‌کند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> ارجاع‌های پشتیبانی‌شده</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Syntax</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>@file:path/to/file.py</code></td><td>تزریق محتوای فایل</td></tr>
+    <tr><td><code>@file:path/to/file.py:10-25</code></td><td>تزریق بازهٔ خط مشخص ‏(۱مبنا، شامل خود بازه)</td></tr>
+    <tr><td><code>@folder:path/to/dir</code></td><td>تزریق فهرست درختی پوشه با متادیتای فایل‌ها</td></tr>
+    <tr><td><code>@diff</code></td><td>تزریق ‏<code>git diff</code> ‏(تغییرات unstaged درخت کاری)</td></tr>
+    <tr><td><code>@staged</code></td><td>تزریق ‏<code>git diff --staged</code> ‏(تغییرات staged)</td></tr>
+    <tr><td><code>@git:5</code></td><td>تزریق N کامیت آخر با patch ها ‏(حداکثر ۱۰)</td></tr>
+    <tr><td><code>@url:https://example.com</code></td><td>گرفتن و تزریق محتوای صفحهٔ وب</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>مثال‌های استفاده</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Review @file:src/main.py and suggest improvements
+
+What changed? @diff
+
+Compare @file:old_config.yaml and @file:new_config.yaml
+
+What's in @folder:src/components?
+
+Summarize this article @url:https://arxiv.org/abs/2301.00001</code></pre>
+</div>
+<p>چند ارجاع در یک پیام واحد کار می‌کنند:</p>
+<div class="codebox"><pre><code>Check @file:main.py, and also @file:test.py.</code></pre></div>
+<p>علامت‌های نگارشی انتهایی ‏(<code>,</code>، ‏<code>.</code>، ‏<code>;</code>، ‏<code>!</code>، ‏<code>?</code>) خودکار از مقادیر ارجاع حذف می‌شوند.</p>
+
+<h3>تکمیل Tab در CLI</h3>
+<p>در CLI تعاملی تایپ ‏<code>@</code> تکمیل‌خودکار را تریگر می‌کند:</p>
+<ul>
+  <li>‏<code>@</code> همهٔ انواع ارجاع را نشان می‌دهد ‏(<code>@diff</code>، ‏<code>@staged</code>، ‏<code>@file:</code>، ‏<code>@folder:</code>، ‏<code>@git:</code>، ‏<code>@url:</code>)</li>
+  <li>‏<code>@file:</code> و ‏<code>@folder:</code> تکمیل مسیر فایل‌سیستم با متادیتای حجم فایل را تریگر می‌کنند</li>
+  <li>‏<code>@</code> لخت + متن جزئی، فایل‌ها و پوشه‌های منطبق از دایرکتوری فعلی را نشان می‌دهد</li>
+</ul>
+
+<h3>بازه‌های خطی</h3>
+<p>ارجاع ‏<code>@file:</code> برای تزریق دقیق محتوا از بازهٔ خطی پشتیبانی می‌کند:</p>
+<div class="codebox"><pre><code>@file:src/main.py:42        # Single line 42
+@file:src/main.py:10-25     # Lines 10 through 25 (inclusive)</code></pre></div>
+<p>خطوط ۱مبنایند. بازه‌های نامعتبر بی‌صدا نادیده گرفته می‌شوند ‏(کل فایل برگردانده می‌شود).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> سقف‌های حجم</h2>
+<p>مراجع زمینه محدود شده‌اند تا پنجرهٔ زمینه مدل غرق نشود:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>آستانه</th><th>مقدار</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td>سقف نرم</td><td>۲۵٪ طول زمینه</td><td>هشدار الصاق، بسط ادامه می‌یابد</td></tr>
+    <tr><td>سقف سخت</td><td>۵۰٪ طول زمینه</td><td>بسط رد، پیام اصلی بدون تغییر برمی‌گردد</td></tr>
+    <tr><td>ورودی‌های پوشه</td><td>حداکثر ۲۰۰ فایل</td><td>موارد مازاد با ‏<code>- ...</code> جایگزین می‌شوند</td></tr>
+    <tr><td>کامیت‌های گیت</td><td>حداکثر ۱۰</td><td>‏<code>@git:N</code> به بازهٔ ‏[1, 10] clamp می‌شود</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> امنیت</h2>
+<h3>بلوک مسیرهای حساس</h3>
+<p>این مسیرها همیشه از ارجاع‌های ‏<code>@file:</code> بلاک می‌شوند تا جلوگیری از افشای اعتبارنامه:</p>
+<ul>
+  <li>کلیدها و پیکربندی SSH: ‏<code>~/.ssh/id_rsa</code>، ‏<code>~/.ssh/id_ed25519</code>، ‏<code>~/.ssh/authorized_keys</code>، ‏<code>~/.ssh/config</code></li>
+  <li>پروفایل‌های شل: ‏<code>~/.bashrc</code>، ‏<code>~/.zshrc</code>، ‏<code>~/.profile</code>، ‏<code>~/.bash_profile</code>، ‏<code>~/.zprofile</code></li>
+  <li>فایل‌های اعتبارنامه: ‏<code>~/.netrc</code>، ‏<code>~/.pgpass</code>، ‏<code>~/.npmrc</code>، ‏<code>~/.pypirc</code></li>
+  <li>env مربوط به هرمس: ‏<code>$HERMES_HOME/.env</code></li>
+</ul>
+<p>این پوشه‌ها کامل بلاک‌اند ‏(هر فایلی داخلشان): ‏<code>~/.ssh/</code>، ‏<code>~/.aws/</code>، ‏<code>~/.gnupg/</code>، ‏<code>~/.kube/</code>، ‏<code>$HERMES_HOME/skills/.hub/</code></p>
+<h3>محافظت از path traversal</h3>
+<p>همهٔ مسیرها نسبت به پوشهٔ کاری حل می‌شوند. ارجاعاتی که خارج از ریشهٔ مجاز ورک‌اسپیس حل شوند رد می‌گردند.</p>
+<h3>تشخیص فایل باینری</h3>
+<p>فایل‌های باینری از طریق MIME و اسکن null-byte تشخیص داده می‌شوند. پسوندهای متنیِ شناخته ‏(<code>.py</code>، ‏<code>.md</code>، ‏<code>.json</code>، ‏<code>.yaml</code>، ‏<code>.toml</code>، ‏<code>.js</code>، ‏<code>.ts</code> و...) از تشخیص MIME عبور می‌کنند. فایل‌های باینری با هشدار رد می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> در دسترس بودن پلتفرمی</h2>
+<p>مراجع زمینه اساساً یک <b>قابلیت CLI</b> هستند. در CLI تعاملی کار می‌کنند که ‏<code>@</code> تکمیل-tab تریگر و ارجاع‌ها قبل از رسیدن پیام به ایجنت بسط می‌یابند.</p>
+<p>در <b>پلتفرم‌های پیام‌رسانی</b> ‏(تلگرام، دیسکورد و...) syntax ‏<code>@</code> توسط گیت‌وی بسط نمی‌یابد — پیام‌ها عیناً عبور می‌کنند. خود ایجنت همچنان می‌تواند از طریق ابزارهای ‏<code>read_file</code>، ‏<code>search_files</code> و ‏<code>web_extract</code> به فایل‌ها ارجاع دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> تعامل با فشرده‌سازی زمینه</h2>
+<p>وقتی زمینهٔ گفتگو فشرده شود، محتوای بسط‌یافتهٔ ارجاع در خلاصهٔ فشرده‌سازی گنجانده می‌شود. یعنی:</p>
+<ul>
+  <li>محتوای فایل بزرگ تزریق‌شده با ‏<code>@file:</code> به مصرف زمینه کمک می‌کند</li>
+  <li>اگر گفتگو بعداً فشرده شود محتوای فایل خلاصه می‌شود ‏(نه حفظ تحت‌اللفظی)</li>
+  <li>برای فایل‌های خیلی بزرگ از بازه‌های خطی استفاده کنید ‏(<code>@file:main.py:100-200</code>) تا فقط بخش‌های مرتبط تزریق شود</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> الگوهای رایج</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Code review workflow
+Review @diff and check for security issues
+
+# Debug with context
+This test is failing. Here's the test @file:tests/test_auth.py
+and the implementation @file:src/auth.py:50-80
+
+# Project exploration
+What does this project do? @folder:src @file:README.md
+
+# Research
+Compare the approaches in @url:https://arxiv.org/abs/2301.00001
+and @url:https://arxiv.org/abs/2301.00002</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> هندل خطا</h2>
+<p>ارجاع‌های نامعتبر به‌جای شکست، هشدار درون‌خطی تولید می‌کنند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>شرط</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td>فایل پیدا نشد</td><td>هشدار: «file not found»</td></tr>
+    <tr><td>فایل باینری</td><td>هشدار: «binary files are not supported»</td></tr>
+    <tr><td>پوشه پیدا نشد</td><td>هشدار: «folder not found»</td></tr>
+    <tr><td>فرمان گیت شکست خورد</td><td>هشدار همراه stderr گیت</td></tr>
+    <tr><td>URL محتوایی برنگرداند</td><td>هشدار: «no content extracted»</td></tr>
+    <tr><td>مسیر حساس</td><td>هشدار: «path is a sensitive credential file»</td></tr>
+    <tr><td>مسیر بیرون ورک‌اسپیس</td><td>هشدار: «path is outside the allowed workspace»</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<div class="pager">
+  <a href="deliverable-mode.html"><span class="dir">→ قبلی</span><span class="ttl">حالت تحویل‌دادنی</span></a>
+  <a class="next" href="vision.html"><span class="dir">بعدی ←</span><span class="ttl">بینایی و چسباندن تصویر</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/context-references" target="_blank" rel="noopener">Context References</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

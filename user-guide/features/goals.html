@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اهداف پایدار ‏(‎/goal) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/goals" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>اهداف پایدار ‏(‎/goal)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>اهداف پایدار ‏(‏<code>/goal</code>)</h1>
+<p>‏<code>/goal</code> به هرمس هدفی ایستاده می‌دهد که بین نوبت‌ها جان می‌برد. بعد از هر نوبت یک مدل قاضی سبک‌وزن چک می‌کند آیا هدف توسط آخرین پاسخ دستیار برآورده شده. اگر نه، هرمس خودکار پرامپت ادامه را به همان نشست برمی‌گرداند و به کار ادامه می‌دهد — تا محقق شدن هدف، مکث یا پاک کردن توسط شما، یا اتمام بودجه نوبت.</p>
+<p>نسخهٔ ما از <b>حلقهٔ Ralph</b> است، مستقیماً الهام‌گرفته از ‏<a href="https://github.com/openai/codex" target="_blank" rel="noopener">‏<code>/goal</code> مربوط به Codex CLI 0.128.0</a> اثر Eric Traut ‏(OpenAI). ایدهٔ اصلی — زنده نگه داشتن هدف بین نوبت‌ها و توقف نکردن تا محقق شدن — متعلق به اوست. پیاده‌سازی اینجا مستقل و اقتباس‌شده برای معماری هرمس است.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> کِی استفاده کنیم</h2>
+<p>‏<code>/goal</code> را برای task هایی استفاده کنید که می‌خواهید هرمس خودش تکرار کند بدون اینکه شما هر نوبت دوباره پرامپت بدهید:</p>
+<ul>
+  <li>«هر خطای lint داخل ‏src/ را رفع کن و تأیید کن ‏ruff check پاس می‌شود»</li>
+  <li>«قابلیت X را از repo Y منتقل کن شامل تست‌ها و CI را سبز کن»</li>
+  <li>«بررسی کن چرا شناسه‌های نشست گاهی حین فشرده‌سازی میان-اجرایی واگرا می‌شوند و گزارش بنویس»</li>
+  <li>«یک CLI کوچک بساز که فایل‌ها را بر اساس تاریخ EXIF تغییرنام دهد و بعد روی پوشهٔ photos/ تستش کن»</li>
+</ul>
+<p>task هایی که ایجنت یک نوبت انجام و متوقف می‌شود به ‏<code>/goal</code> نیاز ندارند. task هایی که <em>وگرنه باید سه بار بگویید «ادامه بده»</em> جایی است که این می‌درخشد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> اهداف در برابر کانبان: کدام را می‌خواهم؟</h2>
+<p>‏<code>/goal</code> و <a href="kanban.html">کانبان</a> هر دو هرمس را بدون prompt مجدد شما مشغول نگه می‌دارند، پس وسوسه‌انگیز است فکر کنید یکی به دیگری سرریز شود. نمی‌شود — مرز تیز است:</p>
+<ul>
+  <li><b>‏<code>/goal</code> تک-نشستی است.</b> حلقه پرامپت‌های ادامه را داخل <em>همین</em> گفتگو برمی‌گرداند تا قاضی بگوید تمام. ست کردن هدف هرگز کارت کانبانی نمی‌سازد، کار را به پروفایل دیگری assign نمی‌کند و fan-out نمی‌کند. هیچ handoff‌ای به تخته نیست، ضمنی یا غیرضمنی.</li>
+  <li><b>کانبان تخته‌ای از چندین task است.</b> هر کارت به پروسهٔ worker خودش با نشست خودش dispatch می‌شود. کارت‌ها، وابستگی‌ها، assignee ها و handoff ها روی تخته زندگی می‌کنند نه در ‎/goal.</li>
+  <li><b>هم‌پوشانی عمدی و کوچک است.</b> کارت کانبانیِ ساخته‌شده با ‏<code>--goal</code> همان موتور ادامهٔ سبک-Ralph را اجرا می‌کند — ولی <em>داخل نشست worker همان یک کارت</em>. موتور را قرض می‌گیرد نه تخته را.</li>
+</ul>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>می‌خواهید</th><th>سراغ چه بروید</th></tr></thead>
+  <tbody>
+    <tr><td>ادامه دادن روی یک task در همین چت تا تمام شود</td><td>‏<code>/goal &lt;text&gt;</code></td></tr>
+    <tr><td>چند task مستقل با وابستگی، handoff یا چند پروفایل</td><td><a href="kanban.html">کانبان</a> — ‏<code>hermes kanban create …</code></td></tr>
+    <tr><td>یک کارت روی تخته که تا برآورده شدن معیارهای پذیرش تکرار کند</td><td>کارت کانبانی با ‏<code>--goal</code></td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 یادداشت</div>
+  <p>اگر کار روی تخته می‌خواهید خودتان آنجا بگذارید ‏(<code>hermes kanban create …</code>) — ‏<code>/goal</code> جای شما این کار را نمی‌کند. برعکس هم صادق است: مکث، ازسرگیری یا پاک کردن هدف در این چت هرگز کارت کانبانی نمی‌سازد، claim یا جابه‌جا نمی‌کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> شروع سریع</h2>
+<div class="codebox"><pre><code>/goal Fix every failing test in tests/hermes_cli/ and make sure scripts/run_tests.sh passes for that directory</code></pre></div>
+<p>چیزی که می‌بینید:</p>
+<ol>
+  <li><b>هدف پذیرفته شد</b> — ‏<code>⊙ Goal set (20-turn budget): &lt;your goal&gt;</code></li>
+  <li><b>نوبت ۱ اجرا می‌شود</b> — هرمس انگار هدف را پیام عادی فرستاده‌اید شروع به کار می‌کند.</li>
+  <li><b>قاضی اجرا می‌شود</b> — بعد از نوبت مدل قاضی تصمیم می‌گیرد ‏<code>done</code> یا ‏<code>continue</code>.</li>
+  <li><b>در صورت نیاز حلقه شلیک می‌شود</b> — اگر ‏continue باشد می‌بینید ‏<code>↻ Continuing toward goal (1/20): &lt;judge's reason&gt;</code> و هرمس خودش گام بعد را برمی‌دارد.</li>
+  <li><b>پایان می‌یابد</b> — در نهایت یا ‏<code>✓ Goal achieved: &lt;reason&gt;</code> می‌بینید یا ‏<code>⏸ Goal paused — N/20 turns used</code>.</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> فرمان‌ها</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرمان</th><th>چه می‌کند</th></tr></thead>
+  <tbody>
+    <tr><td><code>/goal &lt;text&gt;</code></td><td>ست ‏(یا جایگزینی) هدف ایستاده. فوراً اولین نوبت را راه می‌اندازد تا پیام جدا نفرستید.</td></tr>
+    <tr><td><code>/goal draft &lt;text&gt;</code></td><td>پیش‌نویس قرارداد تکمیل ساختاریافته از هدف به زبان ساده سپس ست می‌کند. «قراردادهای تکمیل» را ببینید.</td></tr>
+    <tr><td><code>/goal show</code></td><td>چاپ قرارداد تکمیل هدف فعال.</td></tr>
+    <tr><td><code>/goal</code> یا ‏<code>/goal status</code></td><td>نمایش هدف فعلی، وضعیت و نوبت‌های مصرف‌شده.</td></tr>
+    <tr><td><code>/goal pause</code></td><td>توقف حلقهٔ ادامهٔ خودکار بدون پاک‌کردن هدف.</td></tr>
+    <tr><td><code>/goal resume</code></td><td>ازسرگیری حلقه ‏(شمارندهٔ نوبت را صفر می‌کند).</td></tr>
+    <tr><td><code>/goal clear</code></td><td>دور انداختن کامل هدف.</td></tr>
+    <tr><td><code>/goal wait &lt;pid&gt; [reason]</code></td><td>پارک کردن حلقه روی پروسهٔ پس‌زمینه — تا اجرای پروسه هر نوبت آزاردهنده به ایجنت poke نمی‌کند و هنگام خروج خودکار ازسر می‌گیرد.</td></tr>
+    <tr><td><code>/goal unwait</code></td><td>برداشتن مانع انتظار و ازسرگیری فوری حلقه.</td></tr>
+    <tr><td><code>/goal gate add &lt;command&gt;</code></td><td>افزودن <b>گیتی کیفیت</b>: فرمان شلی که قبل از قضاوت done شدن هدف باید پاس شود. «گیتی‌های کیفیت» را ببینید.</td></tr>
+    <tr><td><code>/goal gate</code> یا ‏<code>/goal gate list</code></td><td>فهرست گیتی‌های هدف و وضعیت pass/fail‌شان.</td></tr>
+    <tr><td><code>/goal gate remove &lt;N&gt;</code></td><td>حذف Nامین گیت ‏(۱مبنا).</td></tr>
+    <tr><td><code>/goal gate clear</code></td><td>حذف همهٔ گیت‌ها.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>روی CLI و هر پلتفرم گیت‌وی ‏(تلگرام، دیسکورد، اسلک، ماتریکس، سیگنال، واتساپ، SMS، ‏iMessage، ‏Webhook، سرور API و داشبورد وب) یکسان کار می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> قراردادهای تکمیل</h2>
+<p>یک ‏<code>/goal &lt;text&gt;</code> لخت خوب کار می‌کند ولی هدف <em>مبهم</em> قضاوت مبهم می‌سازد — قاضی فقط می‌تواند چیزی را چک کند که بهش گفته‌اید بخواهید. راهنمای ‏<code>/goal</code> مربوط به Codex همین نکته را دارد: هدف ماندگار وقتی بهترین عمل را دارد که نام‌برد باشد <b>تمام یعنی چه، چطور ثابت می‌شود، چه نباید بشکند، چه در دامنه است و کِی توقف</b>. هرمس این را به‌صورت یک <b>قرارداد تکمیل</b> اختیاری لایه‌شده روی حلقه موجود هدف اقتباس می‌کند.</p>
+<p>قرارداد پنج فیلد دارد، همه اختیاری:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فیلد</th><th>معنی</th></tr></thead>
+  <tbody>
+    <tr><td><code>outcome</code></td><td>وضعیت پایانی واحدی که هنگام تمام شدن باید درست باشد.</td></tr>
+    <tr><td><code>verification</code></td><td>تست / فرمان / آرتیفکت مشخصی که نتیجه را <em>اثبات</em> می‌کند.</td></tr>
+    <tr><td><code>constraints</code></td><td>چه نباید تغییر یا پسرفت کند.</td></tr>
+    <tr><td><code>boundaries</code></td><td>کدام فایل‌ها، پوشه‌ها، ابزارها یا سیستم‌ها در دامنه‌اند.</td></tr>
+    <tr><td><code>stop_when</code></td><td>شرطی که تحت آن هرمس باید توقف و ورودی بخواهد.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>با تنظیم قرارداد هر دو پرامپت عوض می‌شوند: <b>پرامپت ادامه</b> به ایجنت می‌گوید سطح verification را هدف بگیرد و constraints را رعایت کند، و <b>پرامپت قاضی</b> ‏done را فقط وقتی اعلام می‌کند که معیار تأیید با شواهد عینی ‏(نتیجه فرمان، گزیده فایل، خروجی تست) برآورده شده — نه ادعای آزادِ «به نظر می‌رسد تمام است». این مستقیماً رایج‌ترین حالت شکست ‏<code>/goal</code> ‏(تکمیل زودهنگام یا ادامه بی‌پایان روی هدف کم-مشخص) را سفت می‌کند.</p>
+<h3>دو راه ست کردن قرارداد</h3>
+<p><b>۱. پیش‌نویس را به هرمس بسپارید</b> ‏(توصیه‌شده — اقتباس از نکتهٔ Codex «بگذار ایجنت هدف را پیش‌نویس کند»):</p>
+<div class="codebox"><pre><code>/goal draft Migrate the auth service from session cookies to JWT</code></pre></div>
+<p>هرمس یک‌خطی شما را از طریق مدل کمکی ‏goal_judge به یک قرارداد کامل باز می‌کند، ست و نتیجه را نشان می‌دهد تا هر فیلدی را بازبینی یا سفت کنید. اگر مدل کمکی در دسترس نباشد به هدف آزاد ساده برمی‌گردد — پیش‌نویس هرگز ست شدن هدف را بلاک نمی‌کند.</p>
+<p><b>۲. درجا بنویسید</b> با خطوط ‏<code>field: value</code>:</p>
+<div class="codebox"><pre><code>/goal Migrate auth to JWT
+verify: pytest tests/auth passes
+constraints: keep the /login response shape unchanged
+boundaries: only touch services/auth and its tests
+stop when: a DB schema migration is required</code></pre></div>
+<p>خط(های) غیر-فیلدی ابتدایی سرتیتر هدف هستند؛ پیشوندهای فیلد شناخته‌شده ‏(<code>verify:</code>، ‏<code>verified by:</code>، ‏<code>constraints:</code>، ‏<code>preserve:</code>، ‏<code>boundaries:</code>، ‏<code>scope:</code>، ‏<code>stop when:</code>، ‏<code>blocked:</code> و...) قرارداد را پر می‌کنند. هدف ساده با دونقطه تصادفی ‏(<code>Fix bug: the parser drops commas</code>) <b>خراب نمی‌شود</b> — فقط پیشوندهای فیلد شناخته‌شده بیرون کشیده می‌شوند.</p>
+<p>با ‏<code>/goal show</code> قرارداد فعال را بازبینی کنید. قراردادها در ‏SessionDB.state_meta کنار هدف ماندگارند، پس از ‏<code>/resume</code> جان می‌برند. هدف‌های قدیمی قبل از این قابلیت بدون تغییر لود می‌شوند ‏(بدون قرارداد). قراردادها با معیارهای ‏<code>/subgoal</code> ترکیب می‌شوند: زیراهداف به‌عنوان معیارهای اضافه‌ای که قاضی باید برآورده کند داخل قرارداد جمع می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> افزودن معیار وسط هدف: ‏<code>/subgoal</code></h2>
+<p>حین فعال بودن هدف می‌توانید با ‏<code>/subgoal &lt;text&gt;</code> معیار پذیرش اضافی الصاق کنید بدون ریست حلقه. هر فراخوانی یک آیتم شماره‌دار به فهرست زیرهدف هدف اضافه می‌کند؛ <b>پرامپت ادامه</b> که ایجنت نوبت بعد می‌بیند هدف اصلی + بلوکی «معیارهای اضافه‌ای که کاربر میان-حلقه اضافه کرد» را شامل می‌شود و <b>پرامپت قاضی</b> بازنویسی می‌شود تا رأی باید همهٔ زیرهدف‌ها را هم لحاظ کند — هدف تا برآورده شدن هدف اصلی <b>و</b> هر زیرهدف done علامت نمی‌خورد.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرمان</th><th>چه می‌کند</th></tr></thead>
+  <tbody>
+    <tr><td><code>/subgoal &lt;text&gt;</code></td><td>الحاق معیار جدید به هدف فعال. نیازمند ‏<code>/goal</code> فعال.</td></tr>
+    <tr><td><code>/subgoal</code> ‏(بدون آرگومان)</td><td>نمایش فهرست شماره‌دار زیرهدف‌های فعلی.</td></tr>
+    <tr><td><code>/subgoal remove &lt;N&gt;</code></td><td>حذف Nامین زیرهدف ‏(۱مبنا).</td></tr>
+    <tr><td><code>/subgoal clear</code></td><td>دور انداختن همهٔ زیرهدف‌ها با حفظ هدف اصلی.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>زیرهدف‌ها کنار هدف در ‏SessionDB.state_meta ماندگارند، پس از ‏<code>/resume</code> جان می‌برند. ست کردن ‏<code>/goal &lt;text&gt;</code> جدید هدف را جایگزین و فهرست زیرهدف را پاک می‌کند؛ ‏<code>/goal clear</code> هم همین‌طور.</p>
+<p>وقتی از این استفاده کنید که حلقه‌ای را شروع کرده‌اید («تست‌های شکسته را رفع کن») و میانه راه می‌بینید «و برای باگی که وصله کردی یک تست regression هم اضافه کن» لازم دارید — ‏<code>/subgoal add a regression test</code> معیارهای موفقیت را بدون شکستن حلقه در حال اجرا سفت می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> گیتی‌های کیفیت</h2>
+<p>قرارداد تکمیل قاضی را سخت‌گیرتر می‌کند ولی قاضی همچنان LLM‌ای است که نثر می‌خواند. <b>گیتی کیفیت</b> قوی‌تر است: یک فرمان شل قطعی که باید exit 0 بدهد تا اصلاً هدف بتواند تمام شود. الهام‌گرفته از حالت خودکارِ محدود Prime-Agent ‏(<code>--autonomous-gate</code>).</p>
+<div class="codebox"><pre><code>/goal Fix the flaky session tests
+/goal gate add scripts/run_tests.sh tests/hermes_cli/test_goals.py</code></pre></div>
+<p>نحوهٔ کار، در هر نوبت:</p>
+<ol>
+  <li><b>گیتی‌ها قبل از قاضی اجرا می‌شوند.</b> اگر هر گیتی شکست بخورد قاضی <em>فراخوانی نمی‌شود</em> — گیت قرمز شاهد قطعیِ تمام‌نبودن هدف است. exit code و دُم خروجی گیت ‏(~۳ KB آخر) تبدیل به پرامپت ادامه می‌شود، پس ایجنت علیه شکست واقعی تکرار می‌کند نه علیه یک حس و حال.</li>
+  <li><b>همهٔ گیتی‌ها پاس شدند ← قضاوت عادی.</b> قاضی LLM بعد دقیقاً مثل قبل done/continue/wait را تصمیم می‌گیرد.</li>
+  <li><b>ورک‌اسپیس بدون تغییر ← بدون اجرای مجدد.</b> اگر گیت شکست خورده و از آن موقع چیزی در ورک‌اسپیس عوض نشده ‏(ردیابی با fingerprint گیت از HEAD + وضعیت درخت کاری)، گیت دوباره اجرا نمی‌شود — شکست ثبت‌شده بازپخش و شمارندهٔ تلاش جلو می‌رود. ایجنت گیرکرده نمی‌تواند ساعت دیواری با اجرای مجدد همان سوئیت قرمز یکسان بسوزاند. بیرون مخزن گیت، گیتی‌ها همیشه دوباره اجرا می‌شوند.</li>
+  <li><b>retry ها محدودند.</b> هر گیت پیش‌فرض ۳ retry و timeout ۵ دقیقه دارد. وقتی گیتی retry هایش تمام شود هدف خودکار مکث می‌کند ‏(مثل بودجه نوبت) با پیامی که می‌گوید دستی رفعش کنید، گیت را حذف کنید یا ‏<code>/goal resume</code> بزنید.</li>
+</ol>
+<p>گیتی‌ها همراه هدف در ‏SessionDB.state_meta ماندگارند ‏(از ‏/resume و فشرده‌سازی زمینه جان می‌برند) و مدیریت گیت ‏(<code>/goal gate …</code>) حین اجرا روی گیت‌وی امن است — گیتی‌ها فقط در مرز نوبت اجرا می‌شوند.</p>
+<p>گیتی‌ها و قراردادها ترکیب می‌شوند: قرارداد را استفاده کنید تا <b>ایجنت چه چیزی را هدف بگیرد</b> شکل بگیرد و گیتی‌ها تا «done» به‌طور مکانیکی قابل‌چک شود. با تنظیم هر دو، گیتی‌ها اول اجرا می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> پارک روی پروسهٔ پس‌زمینه: خودکار با override دستی</h2>
+<p>بعضی اهداف گیتی‌خورده‌اند روی چیزی که دقیقه‌ها طول می‌کشد و خودش اجرا می‌شود — CI روی PR push‌شده، build طولانی، ماتریس تست، deploy، cooldown سقف-نرخ. بدون کمک، حلقهٔ هدف هر نوبت ایجنت را در کار بیهوده «هنوز تمام نشده؟» poke می‌کرد در حال انتظار.</p>
+<p><b>این خودکار هندل می‌شود.</b> هر نوبت قاضی پروسه‌های پس‌زمینهٔ زندهٔ ایجنت را می‌بیند ‏(رجیستری ‏<code>terminal(background=true)</code> — pid، شناسه نشست، فرمان، uptime، خروجی اخیر و هر تریگر ‏watch_patterns/notify_on_complete) در کنار هدف و پاسخ ایجنت. وقتی پیشرفت ایجنت واقعاً گیتی‌خورده روی یکی از آن‌هاست، قاضی به‌جای ‏continue رأی <b>wait</b> برمی‌گرداند و حلقه <b>پارک می‌شود</b>: نوبت‌های بعدی رد می‌شوند ‏(نه فراخوانی قاضی، نه ادامه، نه مصرف نوبت) تا انتظار برآورده شود — بعد عادی ازسر گرفته می‌شود با نتیجه در دست. قاضی می‌تواند بر اساس <b>زمان</b> هم پارک کند ‏(<code>wait_for_seconds</code>) برای انتظارهای backoff/cooldown. ‏<code>/goal status</code> حین پارک ‏<code>⏳ Goal (parked …)</code> نشان می‌دهد.</p>
+<p>قاضی نوع درست انتظار را از سیگنال خود پروسه انتخاب می‌کند:</p>
+<ul>
+  <li><b>‏<code>wait_on_session &lt;id&gt;</code></b> — وقتی <em>تریگر خودِ</em> پروسه شلیک شود آزاد می‌شود: خارج می‌شود، <b>یا</b> ‏(اگر با ‏watch_patterns شروع شده) الگوش تطبیق یابد. این همان گزینه برای watcher/server/poller بلند-عمرِ سیگنال‌دهنده <b>میان-اجرا</b> است ‏(مثل پروسهٔ build که ‏BUILD SUCCESSFUL چاپ می‌کند و به اجرا ادامه می‌دهد، یا watcher ‏notify_on_complete) و شاید هرگز خودش خارج نشود.</li>
+  <li><b>‏<code>wait_on_pid &lt;pid&gt;</code></b> — فقط با خروج پروسه آزاد می‌شود.</li>
+  <li><b>‏<code>wait_for_seconds &lt;n&gt;</code></b> — بعد از تأخیر ثابت آزاد می‌شود.</li>
+</ul>
+<p>شما چیزی تایپ نمی‌کنید — تصمیم قاضی است، گرفته از زمینهٔ پروسه‌ای که حلقه بهش می‌دهد. فرمان‌های دستی به‌عنوان override وجود دارند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرمان</th><th>چه می‌کند</th></tr></thead>
+  <tbody>
+    <tr><td><code>/goal wait &lt;pid&gt; [reason]</code></td><td>پارک دستی حلقه تا خروج پروسهٔ دارای آن PID.</td></tr>
+    <tr><td><code>/goal unwait</code></td><td>پاک‌کردن هر مانع انتظاری ‏(قاضی-ست یا دستی) و ازسرگیری فوری.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>مانع ‏(pid-محور یا زمانی) همراه هدف در ‏SessionDB.state_meta ماندگار است، پس از ‏<code>/resume</code> جان می‌برد. ‏<code>/goal pause</code>، ‏<code>/goal resume</code> و ‏<code>/goal clear</code> همه آن را دور می‌ریزند. اگر PID هنگام ست شدن مانع قبلاً مرده باشد ‏(یا حین پارک بمیرد)، یا مهلت زمانی بگذرد، مانع در چک بعدی پاک می‌شود — مانع کهنه هرگز حلقه را گیر نمی‌اندازد.</p>
+<p>جریان معمول: ایجنت PR را push، watcher ‏CI را با ‏<code>terminal(background=true, notify_on_complete=true)</code> شروع و گزارش می‌دهد «مراقب CI هستم». قاضی پروسهٔ watcher را هنوز در حال اجرا می‌بیند، روی pid‌اش ‏wait برمی‌گرداند و حلقه ساکت می‌شود — بعد لحظهٔ پایان CI برمی‌گردد و هدف را علیه نتیجه واقعی قضاوت می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> جزئیات رفتار</h2>
+<h3>قاضی</h3>
+<p>بعد از هر نوبت هرمس یک مدل کمکی با این‌ها صدا می‌زند:</p>
+<ul>
+  <li>متن هدف ایستاده</li>
+  <li>آخرین پاسخ نهایی ایجنت ‏(~۴ KB آخر متن)</li>
+  <li>پرامپت سیستمی که به قاضی می‌گوید با JSON یک‌خطیِ سخت‌گیرانه جواب دهد: ‏<code>{"verdict": "done" | "continue" | "wait", "reason": "&lt;one-sentence rationale&gt;"}</code> ‏(رأی‌های wait مقدار ‏wait_on_session/wait_on_pid/wait_for_seconds می‌افزایند؛ شکل قدیمی ‏<code>{"done": &lt;bool&gt;, "reason": "..."}</code> هنوز پذیرفته می‌شود)</li>
+</ul>
+<p>قاضی عمداً محافظه‌کار است: هدف را فقط وقتی ‏done علامت می‌زند که پاسخ <b>صریحاً</b> کامل بودن هدف را تأیید کند، deliverable نهایی واضح تولید شده باشد، یا هدف غیرقابل‌دستیابی/گیتی‌خورده باشد ‏(به‌عنوان DONE با دلیل بلاک تلقی می‌شود تا بودجه روی task های ناممکن نسوزد).</p>
+<h3>معناشناسی fail-open</h3>
+<p>اگر قاضی خطا بدهد ‏(لغزش شبکه، پاسخ بدفرم، کلاینت کمکی ناموجود)، هرمس رأی را ‏continue تلقی می‌کند — قاضی خراب هرگز پیشرفت را گیر نمی‌اندازد. <b>بودجه نوبت</b> پشتیبان واقعی است.</p>
+<h3>بودجه نوبت</h3>
+<p>پیش‌فرض ۲۰ نوبت ادامه است ‏(<code>goals.max_turns</code> در config.yaml). با رسیدن بودجه هرمس خودکار مکث و دقیقاً می‌گوید چطور ادامه دهید:</p>
+<div class="codebox"><pre><code>⏸ Goal paused — 20/20 turns used. Use /goal resume to keep going, or /goal clear to stop.</code></pre></div>
+<p>‏<code>/goal resume</code> شمارنده را صفر می‌کند تا در قطعه‌های اندازه‌گیری‌شده ادامه دهید.</p>
+<h3>پیام‌های کاربر همیشه مقدم‌اند</h3>
+<p>هر پیام واقعی که حین فعال بودن هدف بفرستید بر حلقهٔ ادامه مقدم است. روی CLI پیام شما در ‏_pending_input جلوی continuation صف‌شده می‌نشیند؛ روی گیت‌وی از طریق FIFO آداپتور همین‌طور. قاضی بعد از نوبت شما دوباره اجرا می‌شود — پس اگر پیامت اتفاقاً هدف را کامل کند قاضی می‌گیردش و متوقف می‌شود.</p>
+<h3>امنیت میان-اجرا ‏(گیت‌وی)</h3>
+<p>وقتی ایجنت از قبل در حال اجراست، ‏<code>/goal status</code>، ‏<code>/goal pause</code>، ‏<code>/goal clear</code>، ‏<code>/goal wait</code> و ‏<code>/goal unwait</code> امن‌اند — فقط وضعیت control-plane را لمس می‌کنند و نوبت جاری را قطع نمی‌کنند. ست کردن هدف <b>جدید</b> حین اجرا ‏(<code>/goal &lt;new text&gt;</code>) با پیامی رد می‌شود که می‌گوید اول ‏<code>/stop</code> بزنید، تا continuation قدیمی با جدید race نکند.</p>
+<h3>ماندگاری</h3>
+<p>وضعیت هدف در ‏SessionDB.state_meta با کلید ‏<code>goal:&lt;session_id&gt;</code> زندگی می‌کند. یعنی ‏<code>/resume</code> دقیقاً از همان‌جا برمی‌گردد — هدف ست کنید، لپ‌تاپ را ببندید، فردا برگردید، ‏<code>/resume</code> بزنید و هدف همچنان دقیقاً مثل قبل ایستاده است ‏(فعال، مکث یا تمام).</p>
+<h3>کش پرامپت</h3>
+<p>پرامپت ادامه یک پیام عادی نقش-کاربر الصاقی-به-تاریخچه است. پرامپت سیستمی را جهش <b>نمی‌دهد</b>، تول‌ست‌ها را عوض نمی‌کند و به هیچ شکلی گفتگو را طوری لمس نمی‌کند که کش پرامپت هرمس باطل شود. اجرای هدف ۲۰نوبتی از نظر کش همان‌قدر هزینه دارد که ۲۰ نوبت گفتگوی عادی.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> پیکربندی</h2>
+<p>به ‏<code>~/.hermes/config.yaml</code> بیفزایید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>goals:
+  # Max continuation turns before Hermes auto-pauses and asks you to
+  # /goal resume. Default 20. Lower this if you want tighter loops;
+  # raise it for long-running refactors.
+  max_turns: 20</code></pre>
+</div>
+<h3>انتخاب مدل قاضی</h3>
+<p>قاضی از task کمکی ‏goal_judge استفاده می‌کند. پیش‌فرض به مدل اصلی شما حل می‌شود. اگر می‌خواهید قاضی را به مدلی ارزان و سریع برای کاهش هزینه مسیریابی کنید override بیفزایید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>auxiliary:
+  goal_judge:
+    provider: openrouter
+    model: google/gemini-3-flash-preview</code></pre>
+</div>
+<p>فراخوانی قاضی کوچک است ‏(~۲۰۰ توکن خروجی) و هر نوبت یک‌بار اجرا می‌شود، پس مدل ارزان سریع معمولاً انتخاب درست است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> walkthrough مثال</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>You: /goal Create four files /tmp/note_{1..4}.txt, one per turn, each containing its number as text
+
+  ⊙ Goal set (20-turn budget): Create four files /tmp/note_{1..4}.txt, one per turn, each containing its number as text
+
+Hermes: Creating /tmp/note_1.txt now.
+  💻 echo "1" > /tmp/note_1.txt   (0.1s)
+  I've created /tmp/note_1.txt with the content "1". I'll continue with the remaining files on the next turn as you specified.
+
+  ↻ Continuing toward goal (1/20): Only 1 of 4 files has been created; 3 files remain.
+
+Hermes: [Continuing toward your standing goal]
+  💻 echo "2" > /tmp/note_2.txt   (0.1s)
+  Created /tmp/note_2.txt. Two more to go.
+
+  ↻ Continuing toward goal (2/20): 2 of 4 files created; 2 remain.
+
+Hermes: [Continuing toward your standing goal]
+  💻 echo "3" > /tmp/note_3.txt   (0.1s)
+  Created /tmp/note_3.txt.
+
+  ↻ Continuing toward goal (3/20): 3 of 4 files created; 1 remains.
+
+Hermes: [Continuing toward your standing goal]
+  💻 echo "4" > /tmp/note_4.txt   (0.1s)
+  All four files have been created: /tmp/note_1.txt through /tmp/note_4.txt, each containing its number.
+
+  ✓ Goal achieved: All four files were created with the specified content, completing the goal.
+
+You: _</code></pre>
+</div>
+<p>چهار نوبت، یک فراخوانی ‏<code>/goal</code>، صفر پرامپت «ادامه بده» از طرف شما.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> وقتی قاضی اشتباه می‌کند</h2>
+<p>هیچ قاضی‌ای کامل نیست. دو حالت شکست قابل توجه:</p>
+<p><b>منفی-کاذب — قاضی continue می‌گوید وقتی هدف واقعاً تمام است.</b> بودجه نوبت این را می‌گیرد. ‏<code>⏸ Goal paused</code> خواهید دید و می‌توانید ‏<code>/goal clear</code> یا فقط پیام جدید بفرستید.</p>
+<p><b>مثبت-کاذب — قاضی done می‌گوید وقتی کار مانده.</b> ‏<code>✓ Goal achieved</code> می‌بینید ولی شما بهتر می‌دانید. پیام پیگیری بفرستید تا ادامه یابد، یا هدف را دقیق‌تر دوباره ست کنید: ‏<code>/goal &lt;more specific text&gt;</code>. پرامپت سیستمی قاضی عمداً محافظه‌کار است تا مثبت-کاذب‌ها کمیاب‌تر از منفی‌کاذب‌ها باشند.</p>
+<p>اگر رأی قاضی را قانع‌کننده ندانید، متن دلیل در خط ‏<code>↻ Continuing toward goal</code> یا ‏<code>✓ Goal achieved</code> دقیقاً می‌گوید قاضی چه دیده. معمولاً برای تشخیص اینکه متن هدف مبهم بوده یا پاسخ مدل کافی است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> انتساب</h2>
+<p>‏<code>/goal</code> نسخهٔ هرمس از الگوی <b>حلقهٔ Ralph</b> است. طراحی رو-به-کاربر — زنده نگه‌داشتن هدف بین نوبت‌ها، توقف نکردن تا محقق شدن، با کنترل‌های create/pause/resume/clear — توسط ‏<a href="https://github.com/openai/codex" target="_blank" rel="noopener">Codex CLI 0.128.0</a> به‌دست Eric Traut از تیم Codex OpenAI محبوب و عرضه شد. پیاده‌سازی ما مستقل است ‏(رجیستری مرکزی CommandDef، ماندگاری SessionDB.state_meta، قاضی کلاینت-کمکی، continuation با adapter-FIFO سمت گیت‌وی) ولی ایده مال آنهاست. اعتبار جایی است که باید.</p>
+</section>
+
+<div class="pager">
+  <a href="context-files.html"><span class="dir">→ قبلی</span><span class="ttl">فایل‌های زمینه</span></a>
+  <a class="next" href="image-generation.html"><span class="dir">بعدی ←</span><span class="ttl">تولید تصویر</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/goals" target="_blank" rel="noopener">Persistent Goals</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پلاگین‌های داخلی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/built-in-plugins" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>پلاگین‌های داخلی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>پلاگین‌های داخلی</h1>
+<p>هرمس مجموعهٔ کوچکی از پلاگین‌ها را همراه مخزن ارائه می‌کند. آنها زیر مسیر <code>&lt;repo&gt;/plugins/&lt;name&gt;/</code> زندگی می‌کنند و به‌طور خودکار در کنار پلاگین‌های نصب‌شدهٔ کاربر در <code>~/.hermes/plugins/</code> بارگذاری می‌شوند. آنها از همان سطح API پلاگینِ پلاگین‌های ثالث استفاده می‌کنند — هوک‌ها، ابزارها، دستورات اسلش — فقط اینکه داخل خود مخزن نگهداری می‌شوند.</p>
+<p>برای سیستم کلی پلاگین‌ها صفحهٔ <a href="plugins.html">پلاگین‌ها</a> و برای نوشتن پلاگین اختصاصی خودتان <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت یک پلاگین هرمس</a> را ببینید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نحوهٔ کشف پلاگین‌ها</h2>
+<p>‏<code>PluginManager</code> چهار منبع را به این ترتیب اسکن می‌کند:</p>
+<ol>
+  <li><b>داخلی ‏(Bundled)</b> — <code>&lt;repo&gt;/plugins/&lt;name&gt;/</code> ‏(همان چیزی که این صفحه مستند می‌کند)</li>
+  <li><b>کاربر</b> — <code>~/.hermes/plugins/&lt;name&gt;/</code></li>
+  <li><b>پروژه</b> — <code>./.hermes/plugins/&lt;name&gt;/</code> ‏(نیازمند <code>HERMES_ENABLE_PROJECT_PLUGINS=1</code>)</li>
+  <li><b>نقاط ورود Pip</b> — <code>hermes_agent.plugins</code></li>
+</ol>
+<p>در برخورد نام، منابع بعدی برنده می‌شوند — یک پلاگین کاربری با نام <code>disk-cleanup</code> نسخهٔ داخلی را جایگزین می‌کند.</p>
+<p>دایرکتوری‌های <code>plugins/memory/</code> و <code>plugins/context_engine/</code> عمداً از اسکن پلاگین‌های داخلی مستثنی شده‌اند. آن دایرکتوری‌ها مسیر کشف مخصوص خودشان را دارند چون ارائه‌دهندگان حافظه و موتورهای زمینه، ارائه‌دهنده‌های تک‌انتخابی هستند که از طریق <code>hermes memory setup</code> و <code>context.engine</code> در config پیکربندی می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پلاگین‌های داخلی به‌صورت انتخابی فعال می‌شوند</h2>
+<p>پلاگین‌های داخلی غیرفعال ارسال می‌شوند. کشف، آنها را پیدا می‌کند (در <code>hermes plugins list</code> و رابط تعاملی <code>hermes plugins</code> ظاهر می‌شوند)، ولی هیچ‌کدام بارگذاری نمی‌شوند تا اینکه صریحاً فعالشان کنید:</p>
+<div class="codebox"><pre><code>hermes plugins enable disk-cleanup</code></pre></div>
+<p>یا از طریق <code>~/.hermes/config.yaml</code>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>plugins:
+  enabled:
+    - disk-cleanup</code></pre>
+</div>
+<p>این همان سازوکار پلاگین‌های نصب‌شدهٔ کاربر است. پلاگین‌های داخلی هیچ‌وقت خودکار فعال نمی‌شوند — نه روی نصب تازه، نه برای کاربران فعلی که به هرمس جدیدتر ارتقا می‌دهند. شما همیشه صریحاً انتخاب می‌کنید.</p>
+<p>برای خاموش کردن دوبارهٔ یک پلاگین داخلی:</p>
+<div class="codebox"><pre><code>hermes plugins disable disk-cleanup
+# یا: آن را از plugins.enabled در config.yaml حذف کنید</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پلاگین‌هایی که هم‌اکنون ارسال می‌شوند</h2>
+<p>مخزن این پلاگین‌های داخلی را زیر <code>plugins/</code> ارائه می‌کند. همه انتخابی هستند — با <code>hermes plugins enable &lt;name&gt;</code> فعالشان کنید.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پلاگین</th><th>نوع</th><th>هدف</th></tr></thead>
+<tbody>
+<tr><td><code>disk-cleanup</code></td><td>هوک‌ها + دستور اسلش</td><td>پیگیری خودکار فایل‌های زودگذر و پاکسازی آنها در پایان نشست</td></tr>
+<tr><td><code>security-guidance</code></td><td>هوک‌ها</td><td>تطبیق الگوی کد خطرناک روی <code>write_file</code>/<code>patch</code> و افزودن هشدار امنیتی (یا بلاک) — ۲۵ قانون (انشعاب Apache-2.0 از الگوهای <code>claude-plugins-official</code> شرکت Anthropic)</td></tr>
+<tr><td><code>observability/langfuse</code></td><td>هوک‌ها</td><td>ردیابی نوبت‌ها / فراخوانی‌های LLM / ابزارها در <a href="https://langfuse.com" target="_blank" rel="noopener">Langfuse</a></td></tr>
+<tr><td><code>teams_pipeline</code></td><td>مستقل</td><td>خط‌لوله جلسات Microsoft Teams — پشتیبانی Graph، خلاصه‌های جلسه با اولویت رونوشت</td></tr>
+<tr><td><code>spotify</code></td><td>بک‌اند (۷ ابزار)</td><td>پخش بومی Spotify، صف، جستجو، پلی‌لیست‌ها، آلبوم‌ها، کتابخانه</td></tr>
+<tr><td><code>google_meet</code></td><td>مستقل</td><td>پیوستن به تماس‌های Meet، رونویسی زیرنویس زنده، صدای دوطرفهٔ بلادرنگ اختیاری</td></tr>
+<tr><td><code>image_gen/openai</code></td><td>بک‌اند تصویر</td><td>بک‌اند تولید تصویر <code>gpt-image-2</code> شرکت OpenAI (جایگزین FAL)</td></tr>
+<tr><td><code>image_gen/openai-codex</code></td><td>بک‌اند تصویر</td><td>تولید تصویر OpenAI از طریق OAuth ی Codex</td></tr>
+<tr><td><code>image_gen/xai</code></td><td>بک‌اند تصویر</td><td>بک‌اند <code>grok-2-image</code> شرکت xAI</td></tr>
+<tr><td><code>hermes-achievements</code></td><td>تب داشبورد</td><td>نشان‌های کلکسیونی به سبک Steam که از تاریخچهٔ واقعی نشست‌های هرمس شما ساخته می‌شوند</td></tr>
+<tr><td><code>kanban/dashboard</code></td><td>تب داشبورد</td><td>رابط برد کانبان برای dispatcher چندایجنت — تسک‌ها، کامنت‌ها، fan-out، جابه‌جایی بین بردها. بخش <a href="kanban.html">کانبان چندایجنت</a> را ببینید.</td></tr>
+</tbody>
+</table>
+</div>
+<p>ارائه‌دهندگان حافظه (<code>plugins/memory/*</code>) و موتورهای زمینه (<code>plugins/context_engine/*</code>) جداگانه در صفحهٔ <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory-providers" target="_blank" rel="noopener">ارائه‌دهندگان حافظه</a> فهرست شده‌اند — آنها از طریق <code>hermes memory</code> و <code>hermes plugins</code> مدیریت می‌شوند. جزئیات کامل هر پلاگین برای دو پلاگین بلندمدتِ هوک-محور در ادامه آمده است.</p>
+<h3>disk-cleanup</h3>
+<p>فایل‌های زودگذری که در طول نشست‌ها ساخته می‌شوند — اسکریپت‌های تست، خروجی‌های موقت، لاگ‌های cron، پروفایل‌های کهنه chrome — را به‌طور خودکار پیگیری و حذف می‌کند، بدون اینکه ایجنت لازم باشد یادش بماند ابزاری را صدا بزند.</p>
+<p><b>نحوهٔ کار:</b></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>هوک</th><th>رفتار</th></tr></thead>
+<tbody>
+<tr><td><code>post_tool_call</code></td><td>وقتی <code>write_file</code> / <code>terminal</code> / <code>patch</code> فایلی مطابق <code>test_*</code>، ‏<code>tmp_*</code> یا <code>*.test.*</code> داخل <code>HERMES_HOME</code> یا <code>/tmp/hermes-*</code> می‌سازد، آن را بی‌صدا به‌عنوان <code>test</code> / <code>temp</code> / <code>cron-output</code> پیگیری می‌کند.</td></tr>
+<tr><td><code>on_session_end</code></td><td>اگر در طول نوبت فایل تستی پیگیری شده باشد، پاکسازی امنِ <code>quick</code> را اجرا و خلاصه‌ای یک‌خطی لاگ می‌کند. در غیر این صورت ساکت می‌ماند.</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>قواعد حذف:</b></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>دسته</th><th>آستانه</th><th>تأیید</th></tr></thead>
+<tbody>
+<tr><td><code>test</code></td><td>پایان هر نشست</td><td>هرگز</td></tr>
+<tr><td><code>temp</code></td><td>بیش از ۷ روز از پیگیری</td><td>هرگز</td></tr>
+<tr><td><code>cron-output</code></td><td>بیش از ۱۴ روز از پیگیری</td><td>هرگز</td></tr>
+<tr><td>دایرکتوری‌های خالی زیر HERMES_HOME</td><td>همیشه</td><td>هرگز</td></tr>
+<tr><td><code>research</code></td><td>بیش از ۳۰ روز، خارج از ۱۰ مورد جدیدتر</td><td>همیشه (فقط deep)</td></tr>
+<tr><td><code>chrome-profile</code></td><td>بیش از ۱۴ روز از پیگیری</td><td>همیشه (فقط deep)</td></tr>
+<tr><td>فایل‌های بالای ‎۵۰۰ MB</td><td>هرگز خودکار</td><td>همیشه (فقط deep)</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>دستور اسلش</b> — <code>/disk-cleanup</code> هم در نشست‌های CLI و هم گیت‌وی در دسترس است:</p>
+<div class="codebox"><pre><code>/disk-cleanup status                     # breakdown + top-10 largest
+/disk-cleanup dry-run                    # preview without deleting
+/disk-cleanup quick                      # run safe cleanup now
+/disk-cleanup deep                       # quick + list items needing confirmation
+/disk-cleanup track &lt;path&gt; &lt;category&gt;    # manual tracking
+/disk-cleanup forget &lt;path&gt;              # stop tracking (does not delete)</code></pre></div>
+<p><b>وضعیت</b> — همه‌چیز در <code>$HERMES_HOME/disk-cleanup/</code> قرار دارد:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فایل</th><th>محتوا</th></tr></thead>
+<tbody>
+<tr><td><code>tracked.json</code></td><td>مسیرهای پیگیری‌شده همراه دسته، حجم و زمان</td></tr>
+<tr><td><code>tracked.json.bak</code></td><td>نسخهٔ پشتیبانِ نوشتن-اتمی موارد بالا</td></tr>
+<tr><td><code>cleanup.log</code></td><td>ردپای ممیزیِ فقط-الحاقی از هر عملیات پیگیری / رد شدن / reject / حذف</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>ایمنی</b> — پاکسازی فقط مسیرهای زیر <code>HERMES_HOME</code> یا <code>/tmp/hermes-*</code> را لمس می‌کند. مانت‌های ویندوز (<code>/mnt/c/...</code>) رد می‌شوند. دایرکتوری‌های وضعیت شناخته‌شدهٔ سطح-بالا (<code>logs/</code>، ‏<code>memories/</code>، ‏<code>sessions/</code>، ‏<code>cron/</code>، ‏<code>cache/</code>، ‏<code>skills/</code>، ‏<code>plugins/</code> و خودِ <code>disk-cleanup/</code>) حتی وقتی خالی‌اند هرگز حذف نمی‌شوند — یک نصب تازه در اولین پایان نشست تخلیه نمی‌شود.</p>
+<p><b>فعال‌سازی:</b> ‏<code>hermes plugins enable disk-cleanup</code> ‏(یا تیک زدن در <code>hermes plugins</code>).</p>
+<p><b>غیرفعال‌سازی دوباره:</b> ‏<code>hermes plugins disable disk-cleanup</code>.</p>
+<h3>security-guidance</h3>
+<p>هشدارهای امنیتی سریع و مبتنی بر تطبیق الگو روی نوشتن فایل‌ها. وقتی فراخوانی‌های <code>write_file</code> / <code>patch</code> / <code>skill_manage</code> ایجنت محتوایی حمل کند که با یکی از الگوهای کدِ شناخته‌شدهٔ خطرناک تطبیق بخورد — ‏<code>pickle.load</code>، ‏<code>yaml.load</code> بدون <code>SafeLoader</code>، ‏<code>eval(</code>، ‏<code>os.system</code>، ‏<code>subprocess(..., shell=True)</code>، ‏<code>child_process.exec</code> جاوااسکریپت، ‏<code>dangerouslySetInnerHTML</code> ری‌اکت، ‏<code>.innerHTML =</code> / ‏<code>.outerHTML =</code> / ‏<code>document.write</code> خام، ‏<code>crypto.createCipher</code> در Node، حالت AES ECB، غیرفعال بودن تأیید TLS، پارسرهای مستعد XXE مثل <code>xml.etree</code> / <code>minidom</code>، ‏<code>&lt;script src="//..."&gt;</code> بدون SRI، ‏<code>torch.load</code> بدون <code>weights_only=True</code>، تزریق <code>${{ github.event.* }}</code> در GitHub Actions — پلاگین یک بلوک «⚠️ Security guidance» به نتیجهٔ ابزار اضافه می‌کند.</p>
+<p>فایل همچنان نوشته می‌شود. مدل هشدار را در پیام ابزارِ نوبت بعدی می‌خواند و می‌تواند یا کد را اصلاح کند یا مستند سازد که چرا این سازه در این زمینه امن است. تطبیق الگو نرخ مثبت-کاذب قابل توجهی دارد؛ به همین دلیل warn (و نه block) پیش‌فرض است.</p>
+<p><b>پوشش:</b> در مجموع ۲۵ قانون، شامل deserialization ناامن، تزریق فرمان، sinkهای XSS، خطاهای رایج رمزنگاری، XXE، زنجیرهٔ تأمین (SRI) و تزریق workflow در CI/CD. دادهٔ الگوها انشعاب عیناً Apache-2.0 از <a href="https://github.com/anthropics/claude-plugins-official/tree/main/plugins/security-guidance/hooks" target="_blank" rel="noopener">claude-plugins-official</a> شرکت Anthropic است — برای مشخصات، فایل‌های <code>LICENSE</code> و <code>NOTICE</code> پلاگین را ببینید.</p>
+<p><b>حالت‌ها:</b></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>متغیر محیطی</th><th>اثر</th></tr></thead>
+<tbody>
+<tr><td>(تنظیم‌نشده)</td><td><b>حالت warn</b> (پیش‌فرض) — فایل نوشته می‌شود و هشدار به نتیجه اضافه می‌گردد</td></tr>
+<tr><td><code>SECURITY_GUIDANCE_BLOCK=1</code></td><td><b>حالت block</b> — نوشتن رد می‌شود و هشدار به‌عنوان دلیل بلاک برگردانده می‌شود</td></tr>
+<tr><td><code>SECURITY_GUIDANCE_DISABLE=1</code></td><td>کلید قطع — پلاگین بارگذاری می‌شود ولی کاری نمی‌کند</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>فعال‌سازی:</b> ‏<code>hermes plugins enable security-guidance</code> ‏(یا تیک زدن در <code>hermes plugins</code>).</p>
+<p><b>غیرفعال‌سازی دوباره:</b> ‏<code>hermes plugins disable security-guidance</code>.</p>
+<p><b>کاری که هنوز انجام نمی‌دهد:</b> پلاگین بالادستی Anthropic دو لایهٔ دیگر دارد — بازبینی diff توسط LLM روی هر نوبتِ ایجنتی که فایل‌ها را لمس کرده، و یک بازبینی agentic در زمان commit که جریان داده را بین فایل‌ها دنبال می‌کند. هیچ‌کدام پرتاب نشده‌اند. ایجنت همین حالا هم می‌تواند این بازبینی‌ها را در صورت نیاز از طریق <code>delegate_task</code> اجرا کند.</p>
+<h3>observability/langfuse</h3>
+<p>نوبت‌های هرمس، فراخوانی‌های LLM و فراخوانی ابزارها را در <a href="https://langfuse.com" target="_blank" rel="noopener">Langfuse</a> ردیابی می‌کند — یک پلتفرم متن‌باز observability برای LLM. یک span برای هر نوبت، یک generation برای هر فراخوانی API و یک مشاهدهٔ tool برای هر فراخوانی ابزار. جمع مصرف، تعداد توکن به تفکیک نوع و تخمین هزینه‌ها از اعداد مرجع <code>agent.usage_pricing</code> هرمس بیرون می‌آیند، پس داشبورد Langfuse همان تفکیک (input / output / <code>cache_read_input_tokens</code> / <code>cache_creation_input_tokens</code> / <code>reasoning_tokens</code>) را می‌بیند که در <code>hermes logs</code> ظاهر می‌شود.</p>
+<p>این پلاگین fail-open است: نبود SDK، نبود اعتبارنامه یا خطای گذرای Langfuse — همه به یک no-op بی‌صدای داخل هوک تبدیل می‌شوند. حلقهٔ ایجنت هیچ‌وقت تحت تأثیر قرار نمی‌گیرد.</p>
+<p><b>راه‌اندازی (تعاملی — پیشنهادشده):</b></p>
+<div class="codebox"><pre><code>hermes tools          # → Langfuse Observability → Cloud or Self-Hosted</code></pre></div>
+<p>ویزارد کلیدهایتان را جمع می‌کند، SDK ی <code>langfuse</code> را با <code>pip install</code> نصب می‌کند و <code>observability/langfuse</code> را برایتان به <code>plugins.enabled</code> اضافه می‌کند. هرمس را ری‌استارت کنید و نوبت بعدی یک trace ارسال می‌کند.</p>
+<p><b>راه‌اندازی (دستی):</b></p>
+<div class="codebox"><pre><code>pip install langfuse
+hermes plugins enable observability/langfuse</code></pre></div>
+<p>سپس اعتبارنامه‌ها را در <code>~/.hermes/.env</code> بگذارید:</p>
+<div class="codebox"><pre><code>HERMES_LANGFUSE_PUBLIC_KEY=pk-lf-...
+HERMES_LANGFUSE_SECRET_KEY=sk-lf-...
+HERMES_LANGFUSE_BASE_URL=https://cloud.langfuse.com   # or your self-hosted URL</code></pre></div>
+<p><b>نحوهٔ کار:</b></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>هوک</th><th>رفتار</th></tr></thead>
+<tbody>
+<tr><td><code>pre_api_request</code> / <code>pre_llm_call</code></td><td>یک span ریشهٔ «Hermes turn» به‌ازای هر نوبت باز (یا بازاستفاده) می‌کند. برای این فراخوانی API یک مشاهدهٔ فرزند <code>generation</code> با پیام‌های اخیر سریالایز‌شده به‌عنوان ورودی شروع می‌کند.</td></tr>
+<tr><td><code>post_api_request</code> / <code>post_llm_call</code></td><td>generation را می‌بندد و <code>usage_details</code>، ‏<code>cost_details</code>، ‏<code>finish_reason</code>، خروجی دستیار + فراخوانی ابزارها را الصاق می‌کند. اگر فراخوانی ابزاری نباشد و محتوا غیرخالی باشد، نوبت بسته می‌شود.</td></tr>
+<tr><td><code>pre_tool_call</code></td><td>یک مشاهدهٔ فرزند <code>tool</code> با <code>args</code> پاک‌سازی‌شده شروع می‌کند.</td></tr>
+<tr><td><code>post_tool_call</code></td><td>مشاهدهٔ tool را با <code>result</code> پاک‌سازی‌شده می‌بندد. payloadهای <code>read_file</code> خلاصه می‌شوند (سر + دم + تعداد خطوط حذف‌شده) تا خواندن یک فایل عظیم زیر سقف <code>HERMES_LANGFUSE_MAX_CHARS</code> بماند.</td></tr>
+</tbody>
+</table>
+</div>
+<p>گروه‌بندی نشست از روی شناسهٔ نشست هرمس (یا شناسهٔ تسک برای زیرایجنت‌ها) از طریق <code>langfuse.propagate_attributes</code> کلید می‌خورد، پس همه‌چیز در یک نشست <code>hermes chat</code> زیر یک نشست Langfuse زندگی می‌کند.</p>
+<p><b>تأیید:</b></p>
+<div class="codebox"><pre><code>hermes plugins list                 # observability/langfuse should show "enabled"
+hermes chat -q "hello"              # check the Langfuse UI for a "Hermes turn" trace</code></pre></div>
+<p><b>تنظیم دقیق اختیاری</b> (در <code>.env</code>):</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>متغیر</th><th>پیش‌فرض</th><th>هدف</th></tr></thead>
+<tbody>
+<tr><td><code>HERMES_LANGFUSE_ENV</code></td><td>—</td><td>برچسب محیط روی traceها (<code>production</code>، ‏<code>staging</code> و…)</td></tr>
+<tr><td><code>HERMES_LANGFUSE_RELEASE</code></td><td>—</td><td>برچسب release / نسخه</td></tr>
+<tr><td><code>HERMES_LANGFUSE_SAMPLE_RATE</code></td><td><code>1.0</code></td><td>نرخ نمونه‌برداری پاس‌داده‌شده به SDK (۰٫۰ تا ۱٫۰)</td></tr>
+<tr><td><code>HERMES_LANGFUSE_MAX_CHARS</code></td><td><code>12000</code></td><td>برش هر-فیلد برای محتوای پیام / args ابزار / نتایج ابزار</td></tr>
+<tr><td><code>HERMES_LANGFUSE_DEBUG</code></td><td><code>false</code></td><td>لاگ پرحجم پلاگین در <code>agent.log</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>هم متغیرهای با-پیشوند Hermes و هم متغیرهای استاندارد SDK (<code>LANGFUSE_PUBLIC_KEY</code>، ‏<code>LANGFUSE_SECRET_KEY</code>، ‏<code>LANGFUSE_BASE_URL</code>) پذیرفته می‌شوند — وقتی هر دو ست شده باشند پیشوند-دارِ هرمس برنده است.</p>
+<p><b>کارایی:</b> کلاینت Langfuse بعد از اولین فراخوانی هوک کش می‌شود. اگر اعتبارنامه یا SDK غایب باشد آن تصمیم هم کش می‌شود — هوک‌های بعدی بدون بررسی دوبارهٔ متغیرهای محیطی یا بارگذاری config سریع برمی‌گردند.</p>
+<p><b>غیرفعال‌سازی:</b> ‏<code>hermes plugins disable observability/langfuse</code>. ماژول پلاگین همچنان کشف می‌شود ولی تا فعال‌سازی مجدد هیچ کدی از ماژول اجرا نمی‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> یکپارچگی بومی NeMo Relay ‏(یادداشت مهاجرت)</h2>
+<p>‏NeMo Relay دیگر یک پلاگین داخلی هرمس نیست. دستور <code>hermes plugins enable observability/nemo_relay</code> را اجرا نکنید؛ هستهٔ هرمس اکنون مالک چرخه‌حیات Relay session، ‏turn، ‏LLM و tool است.</p>
+<p>برای انتخاب middleware یا exporterهای Relay، یک <code>plugins.toml</code> استاندارد Relay بسازید و سپس پیش از شروع هرمس، <code>HERMES_NEMO_RELAY_PLUGINS_TOML</code> را روی آن فایل ست کنید. این سیاست برای کل پروسه و همهٔ پروفایل‌های میزبانی‌شده توسط آن پروسهٔ هرمس اعمال می‌شود. گزینه‌های ATOF، ‏ATIF و OpenTelemetry را در <a href="https://docs.nvidia.com/nemo/relay/configure-plugins/observability/about" target="_blank" rel="noopener">مستندات observability مربوط به NeMo Relay</a> ببینید.</p>
+<p>تنظیمات قدیمی <code>HERMES_NEMO_RELAY_ATOF_*</code> و <code>HERMES_NEMO_RELAY_ATIF_*</code> دیگر exporterها را فعال نمی‌کنند. وقتی <code>plugins.toml</code> جایگزینی انتخاب نشده باشد، دستور <code>hermes doctor</code> این تنظیمات کهنه را گزارش می‌کند.</p>
+<h3>بخش‌بندی span نشست ‏(نشست‌های پیوسته)</h3>
+<p>‏Relay یک span را هنگام بسته شدن scope آن export می‌کند. یک نشست گیت‌وی پیوسته ممکن است span نشستش را روزها باز نگه دارد، حتی اگر span هر نوبت به‌طور عادی export شود. بخش‌بندی اختیاری فقط scope نشست را در مرز یک نوبت می‌چرخاند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  telemetry:
+    session_segments:
+      on_compaction: false  # rotate after context compaction
+      max_turns: 0          # 0 = unlimited; N = turns per segment</code></pre>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>کلید</th><th>پیش‌فرض</th><th>رفتار</th></tr></thead>
+<tbody>
+<tr><td><code>on_compaction</code></td><td><code>false</code></td><td>پس از تکمیل فشرده‌سازی ‏(compaction)، در مرز نوبت بعدی می‌چرخد.</td></tr>
+<tr><td><code>max_turns</code></td><td><code>0</code></td><td>بعد از هر N نوبتِ کامل‌شده می‌چرخد؛ ‏<code>0</code> سقف را غیرفعال می‌کند.</td></tr>
+</tbody>
+</table>
+</div>
+<p>هر دو پیش‌فرض یک scope نشست واحد را برای کل نشست حفظ می‌کنند. spanهای چرخیده همان <code>session_id</code> را نگه می‌دارند و <code>hermes.session.segment</code> به‌علاوهٔ <code>hermes.session.segment_reason</code> ‏(<code>compaction</code> یا <code>max_turns</code>) را اضافه می‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> google_meet</h2>
+<p>به ایجنت اجازه می‌دهد <b>به تماس‌های Google Meet بپیوندد، آنها را رونویسی و در آنها شرکت کند</b> — یادداشت‌برداری از جلسه، خلاصه‌سازی گفت‌وگوها بعد از تماس، پیگیری نقاط مشخص و (به‌صورت اختیاری) گفتن پاسخ‌ها با TTS داخل خود تماس.</p>
+<p><b>چه چیزی اضافه می‌کند:</b></p>
+<ul>
+  <li>یک شرکت‌کنندهٔ مجازی headless که با اتوماسیون مرورگر به URL ی Meet می‌پیوندد</li>
+  <li>رونویسی زندهٔ صدای جلسه از طریق ارائه‌دهندهٔ STT پیکربندی‌شده</li>
+  <li>مجموعه ابزار <code>meet_join</code> / <code>meet_status</code> / <code>meet_transcript</code> / <code>meet_leave</code> / <code>meet_say</code> که ایجنت برای پیوستن به تماس‌ها، پایش رونوشت زنده و عمل بر اساس شنیده‌ها فراخوانی می‌کند</li>
+  <li>محصولات پس از جلسه (رونوشت، وضعیت) زیر <code>~/.hermes/workspace/meetings/&lt;meeting_id&gt;/</code> ذخیره می‌شوند</li>
+</ul>
+<p><b>راه‌اندازی:</b></p>
+<div class="codebox"><pre><code>hermes plugins enable google_meet
+hermes meet setup   # preflight: playwright, chromium, auth file
+hermes meet auth    # opens a browser to sign into Google and saves session state —
+                    # needs a Google account with Meet access. Host approval may be
+                    # required if the meeting enforces "only invited participants can join".</code></pre></div>
+<p>استفاده از داخل چت:</p>
+<blockquote dir="ltr"><p>«Join meet.google.com/abc-defg-hij and take notes. After the call, send me a summary with action items.»</p></blockquote>
+<p>ایجنت پیوستن به جلسه را آغاز می‌کند، رونویسی را همزمان با پیشرفت تماس به زمینهٔ خودش استریم می‌کند و وقتی جلسه تمام شد (یا شما بگویید متوقف شود) یک خلاصهٔ ساختاریافته تولید می‌کند.</p>
+<p><b>چه زمانی از آن استفاده کنید:</b> استندآپ‌های تکرارشونده که می‌خواهید ربات برای غایبان، رونویسی + خلاصه بسازد؛ مصاحبه‌های بازجویی‌گونه که یادداشت ساختاریافته می‌خواهند؛ هر موردی که در آن مجبور بودید از Fireflies / Otter / Grain استفاده کنید. وقتی نمی‌خواهید یک AI به گفتگو گوش دهد — فعالش نکنید.</p>
+<p><b>غیرفعال‌سازی:</b> ‏<code>hermes plugins disable google_meet</code>. رونوشت‌های ذخیره‌شده تا وقتی خودتان حذفشان کنید در <code>~/.hermes/workspace/meetings/</code> می‌مانند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> hermes-achievements</h2>
+<p>یک <b>تب دستاوردهای به سبک Steam به داشبورد اضافه می‌کند</b> — بیش از ۶۰ نشان کلکسیونی و طبقه‌بندی‌شده که از تاریخچهٔ واقعی نشست‌های هرمس شما ساخته می‌شوند. رکوردهای زنجیرهٔ ابزار، الگوهای دیباگ، رگبارهای vibe-coding، مصرف مهارت/حافظه، تنوع مدل/ارائه‌دهنده و رفتارهای سبک زندگی (نشست‌های آخر هفته و شبانه). در اصل توسط <a href="https://github.com/PCinkusz" target="_blank" rel="noopener">@PCinkusz</a> به‌عنوان پلاگین خارجی نوشته شده بود و برای هماهنگ ماندن با تغییرات قابلیت‌های هرمس به داخل مخزن آورده شد.</p>
+<p><b>نحوهٔ کار:</b></p>
+<ul>
+  <li>کل تاریخچهٔ نشست‌های <code>~/.hermes/state.db</code> را در بک‌اند داشبورد اسکن می‌کند</li>
+  <li>آمار هر نشست با اثر انگشت <code>(started_at, last_active)</code> کش می‌شود، پس در اسکن‌های بعدی فقط نشست‌های جدید یا تغییرکرده دوباره تحلیل می‌شوند</li>
+  <li>اولین اسکن در یک thread پس‌زمینه اجرا می‌شود — داشبورد هیچ‌وقت منتظر آن نمی‌ماند، حتی روی پایگاه‌داده‌هایی با هزاران نشست</li>
+  <li>وضعیت باز شدن نشان‌ها در <code>$HERMES_HOME/plugins/hermes-achievements/state.json</code> ذخیره می‌شود</li>
+</ul>
+<p><b>پیشرفت طبقات:</b> مس ← نقره‌ای ← طلا ← الماس ← المپ‌بر. هر کارت بخش «What counts» دارد که معیار دقیق تحت پیگیری را فهرست می‌کند.</p>
+<p><b>وضعیت‌های دستاورد:</b></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>وضعیت</th><th>معنا</th></tr></thead>
+<tbody>
+<tr><td>Unlocked</td><td>حداقل یک طبقه به دست آمده است</td></tr>
+<tr><td>Discovered</td><td>دستاورد شناخته شده، پیشرفت قابل مشاهده است، هنوز کسب نشده</td></tr>
+<tr><td>Secret</td><td>پنهان می‌ماند تا هرمس اولین سیگنال مرتبط را در تاریخچهٔ شما آشکار کند</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>API</b> — مسیرها زیر <code>/api/plugins/hermes-achievements/</code> سوار می‌شوند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>نقطهٔ پایانی</th><th>هدف</th></tr></thead>
+<tbody>
+<tr><td><code>GET /achievements</code></td><td>کاتالوگ کامل همراه وضعیت باز شدن هر نشان (در حال اجرای اولین اسکن سرد، یک placeholder در انتظار برمی‌گرداند)</td></tr>
+<tr><td><code>GET /scan-status</code></td><td>وضعیت اسکنر پس‌زمینه: <code>idle</code> / <code>running</code> / <code>failed</code>، آخرین مدت، تعداد اجرا</td></tr>
+<tr><td><code>GET /recent-unlocks</code></td><td>بیست نشان اخیراً باز‌شده، جدیدترین اول</td></tr>
+<tr><td><code>GET /sessions/{id}/badges</code></td><td>نشان‌هایی که عمدتاً در یک نشست خاص کسب شده‌اند</td></tr>
+<tr><td><code>POST /rescan</code></td><td>اسکن مجدد دستی و همگام (بلاک می‌کند؛ برای کلیک کاربر روی دکمهٔ rescan)</td></tr>
+<tr><td><code>POST /reset-state</code></td><td>پاک کردن تاریخچهٔ باز شدن‌ها و snapshot کش‌شده</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>فایل‌های وضعیت</b> — زیر <code>$HERMES_HOME/plugins/hermes-achievements/</code>:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فایل</th><th>محتوا</th></tr></thead>
+<tbody>
+<tr><td><code>state.json</code></td><td>تاریخچهٔ باز شدن‌ها: کدام نشان‌ها و چه زمانی. در برابر به‌روزرسانی‌های هرمس پایدار است.</td></tr>
+<tr><td><code>scan_snapshot.json</code></td><td>آخرین payload اسکن کامل‌شده (هنگام بارگذاری داشبورد بلافاصله سرو می‌شود)</td></tr>
+<tr><td><code>scan_checkpoint.json</code></td><td>کش آمار هر-نشست کلیدخورده با اثر انگشت (rescanهای گرم را سریع می‌کند)</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>نکات کارایی:</b></p>
+<ul>
+  <li>اسکن سرد روی حدود ۸٬۰۰۰ نشست چند دقیقه طول می‌کشد. در اولین درخواست داشبورد در یک thread پس‌زمینه اجرا می‌شود؛ رابط کاربری placeholder در انتظار می‌بیند و <code>/scan-status</code> را poll می‌کند.</li>
+  <li><b>نتایج افزایشی حین اسکن سرد</b> — اسکنر هر حدود ۲۵۰ نشست یک snapshot جزئی منتشر می‌کند تا هر بار refresh کردن داشبورد نشان‌های باز‌شدهٔ بیشتری در جریان اسکن ببینید. نه خیره شدن چند دقیقه‌ای به صفرها.</li>
+  <li>اسکن گرمِ مجدد آمار هر-نشست را برای هر نشستی که اثر انگشت <code>started_at</code> + <code>last_active</code> اش با checkpoint بخورد دوباره استفاده می‌کند — حتی روی تاریخچه‌های بزرگ در چند ثانیه تمام می‌شود.</li>
+  <li>TTL ی snapshot درون-حافظه ۱۲۰ ثانیه است؛ درخواست‌های کهنه فوراً snapshot قبلی را می‌گیرند و یک refresh پس‌زمینه راه می‌افتد. هیچ‌وقت فقط به این دلیل که TTL منقضی شده پشت spinner منتظر نمی‌مانید.</li>
+</ul>
+<p><b>فعال‌سازی:</b> چیزی برای فعال کردن نیست — ‏<code>hermes-achievements</code> یک پلاگین فقط-داشبوردی است (بدون هوک‌های چرخه‌حیات، بدون ابزار قابل‌مشاهده برای مدل). در اولین اجرای <code>hermes dashboard</code> خودکار به‌عنوان تب ثبت نام می‌شود. پیکربندی <code>plugins.enabled</code> فقط پلاگین‌های lifecycle/tool را گیت می‌کند؛ پلاگین‌های داشبورد صرفاً از طریق <code>dashboard/manifest.json</code> خود کشف می‌شوند.</p>
+<p><b>انصراف:</b> فایل <code>plugins/hermes-achievements/dashboard/manifest.json</code> را حذف یا rename کنید، یا آن را با یک پلاگین کاربری همنام در <code>~/.hermes/plugins/hermes-achievements/</code> که داشبوردی ندارد بازنویسی کنید. فایل‌های وضعیت پلاگین زیر <code>$HERMES_HOME/plugins/hermes-achievements/</code> باقی می‌مانند — نصب دوباره، تاریخچهٔ باز شدن‌هایتان را حفظ می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> افزودن یک پلاگین داخلی</h2>
+<p>پلاگین‌های داخلی دقیقاً مثل هر پلاگین دیگری هرمس نوشته می‌شوند — بخش <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت یک پلاگین هرمس</a> را ببینید. تنها تفاوت‌ها:</p>
+<ul>
+  <li>دایرکتوری به‌جای <code>~/.hermes/plugins/&lt;name&gt;/</code> در <code>&lt;repo&gt;/plugins/&lt;name&gt;/</code> قرار می‌گیرد</li>
+  <li>منبع manifest در <code>hermes plugins list</code> به‌صورت <code>bundled</code> گزارش می‌شود</li>
+  <li>پلاگین‌های کاربری همنام، نسخهٔ داخلی را بازنویسی می‌کنند</li>
+</ul>
+<p>یک پلاگین وقتی نامزد خوبی برای داخلی شدن است که:</p>
+<ul>
+  <li>وابستگی اختیاری نداشته باشد (یا آنها از قبل جزو <code>pip install .[all]</code> باشند)</li>
+  <li>رفتارش برای بیشتر کاربران سودمند باشد و به‌جای opt-in از نوع opt-out باشد</li>
+  <li>منطقش به هوک‌های چرخه‌حیات گره بخورد که ایجنت در غیر این صورت باید خودش یادش می‌ماند فراخوانی کند</li>
+  <li>یک قابلیت هسته را کامل کند بدون اینکه سطح ابزارهای قابل‌مشاهده برای مدل را بزرگ کند</li>
+</ul>
+<p>مثال‌های نقض — چیزهایی که باید به‌صورت پلاگین قابل‌نصب توسط کاربر بمانند نه داخلی: یکپارچه‌سازی‌های ثالث دارای کلید API، گردش‌کارهای خاص و کم‌مصرف، درخت‌های وابستگی بزرگ، و هر چیزی که به‌طور محسوس رفتار ایجنت را به‌صورت پیش‌فرض تغییر دهد.</p>
+</section>
+
+<div class="pager">
+  <a href="lsp.html"><span class="dir">→ قبلی</span><span class="ttl">تشخیص معنایی LSP</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/built-in-plugins" target="_blank" rel="noopener">Built-in Plugins</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

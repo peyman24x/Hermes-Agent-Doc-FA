@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>کانبان ‏(تختهٔ چند-ایجنتی) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>کانبان ‏(تختهٔ چند-ایجنتی)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>کانبان — همکاری چند-پروفایلیِ چند-ایجنتی</h1>
+<p><strong>راهنمای گام‌به‌گام می‌خواهید؟</strong> <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban-tutorial" target="_blank" rel="noopener">آموزش کانبان</a> را بخوانید — چهار داستان کاربری ‏(توسعه‌دهندهٔ تنها، مزرعهٔ ناوگان، خط‌لولهٔ نقش‌محور با retry، مدارشکن) با اسکرین‌شات داشبورد هرکدام. این صفحه مرجع است؛ آموزش روایت است.</p>
+<p>هرمس کانبان یک تختهٔ کار ماندگار، مشترک بین همهٔ پروفایل‌های هرمس شماست که اجازه می‌دهد چند ایجنت نام‌دار روی کار همکاری کنند بدون ازدحام‌های شکنندهٔ زیرایجنت درون-پروسه. هر task یک ردیف در ‏<code>~/.hermes/kanban.db</code> است؛ هر handoff ردیفی است که هر کسی می‌تواند بخواند و بنویسد؛ هر worker یک پروسهٔ کامل OS با هویت خودش است.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> دو سطح: مدل از طریق ابزار حرف می‌زند، شما از طریق CLI</h2>
+<p>تخته دو در ورودی دارد که هر دو پشت همان ‏<code>~/.hermes/kanban.db</code> هستند:</p>
+<ul>
+  <li><strong>ایجنت‌ها تخته را از طریق تول‌ست اختصاصی ‏<code>kanban_*</code> می‌رانند</strong> — ‏<code>kanban_show</code>، ‏<code>kanban_list</code>، ‏<code>kanban_complete</code>، ‏<code>kanban_request_review</code>، ‏<code>kanban_request_changes</code>، ‏<code>kanban_block</code>، ‏<code>kanban_heartbeat</code>، ‏<code>kanban_comment</code>، ‏<code>kanban_attach</code>، ‏<code>kanban_attach_url</code>، ‏<code>kanban_attachments</code>، ‏<code>kanban_create</code>، ‏<code>kanban_link</code>، ‏<code>kanban_unblock</code>. ‏dispatcher هر worker را با این ابزارها از قبل در schema‌اش spawn می‌کند؛ پروفایل‌های ارکستراتور هم می‌توانند تول‌ست ‏<code>kanban</code> را صریحاً فعال کنند. مدل task ها را با فراخوانی مستقیم ابزار می‌خواند و مسیریابی می‌کند، *نه* با شل‌کردن به ‏<code>hermes kanban</code>.</li>
+  <li><strong>شما ‏(و اسکریپت‌ها و کرون) تخته را با ‏<code>hermes kanban …</code></strong> روی CLI، ‏<code>/kanban …</code> به‌عنوان فرمان اسلش یا داشبورد می‌رانند. این‌ها برای انسان‌ها و اتوماسیون‌اند — جاهایی بدون مدل فراخوانی‌کنندهٔ ابزار پشتشان.</li>
+</ul>
+<p>هر دو سطح از همان لایهٔ ‏<code>kanban_db</code> عبور می‌کنند، پس خواندها نمای سازگار می‌بینند و نوشته‌ها واگرایی پیدا نمی‌کنند. بقیهٔ این صفحه مثال‌های CLI را نشان می‌دهد چون کپی-پیست‌شان راحت است ولی هر فعل CLI معادل فراخوانی-ابزاری دارد که مدل استفاده می‌کند.</p>
+<p>این شکلی است که workload های ‏<code>delegate_task</code> را که نمی‌تواند پوشش دهد:</p>
+<ul>
+  <li><strong>triage تحقیقاتی</strong> — محقق‌های موازی + تحلیلگر + نویسنده، انسان-در-حلقه.</li>
+  <li><strong>عملیات زمان‌بندی‌شده</strong> — خلاصه‌های روزانهٔ تکرارشونده که طی هفته‌ها ژورنال می‌سازند.</li>
+  <li><strong>دوقلوهای دیجیتال</strong> — دستیارهای نام‌دارِ ماندگار ‏(<code>inbox-triage</code>، ‏<code>ops-review</code>) که با گذر زمان حافظه جمع می‌کنند.</li>
+  <li><strong>خط‌لوله‌های مهندسی</strong> — تجزیه ← پیاده‌سازی موازی در worktree ها ← بازبینی ← تکرار ← PR.</li>
+  <li><strong>کار ناوگانی</strong> — یک متخصص که N سوژه را مدیریت می‌کند ‏(۵۰ اکانت شبکه اجتماعی، ۱۲ سرویس تحت‌مانیتور).</li>
+</ul>
+<p>برای rationale طراحی کامل، تحلیل تطبیقی با Cline Kanban/Paperclip/NanoClaw/Google Gemini Enterprise و هشت الگوی همکاری مرجع، فایل ‏<code>docs/hermes-kanban-v1-spec.pdf</code> در مخزن را ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> کانبان در برابر ‏<code>delegate_task</code></h2>
+<p>شبیه به نظر می‌رسند؛ primitive واحدی نیستند.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th></th><th>‏<code>delegate_task</code></th><th>Kanban</th></tr></thead>
+  <tbody>
+    <tr><td>شکل</td><td>فراخوانی RPC ‏(fork ← join)</td><td>صف پیام ماندگار + ماشین وضعیت</td></tr>
+    <tr><td>والد</td><td>بلاک می‌شود تا فرزند برگردد</td><td>fire-and-forget بعد از ‏create</td></tr>
+    <tr><td>هویت فرزند</td><td>زیرایجنت بی‌نام</td><td>پروفایل نام‌دار با حافظهٔ ماندگار</td></tr>
+    <tr><td>قابلیت ازسرگیری</td><td>هیچ — شکست = شکست</td><td>block ← unblock ← اجرای مجدد؛ کرش ← reclaim</td></tr>
+    <tr><td>انسان در حلقه</td><td>پشتیبانی نمی‌شود</td><td>کامنت / unblock در هر لحظه</td></tr>
+    <tr><td>ایجنت‌ها به‌ازای task</td><td>یک فراخوانی = یک زیرایجنت</td><td>N ایجنت در طول عمر task ‏(retry، بازبینی، پیگیری)</td></tr>
+    <tr><td>رد حسابرسی</td><td>با فشرده‌سازی زمینه گم می‌شود</td><td>ردیف‌های ماندگار SQLite برای همیشه</td></tr>
+    <tr><td>هماهنگی</td><td>سلسله‌مراتبی ‏(فراخوان ← فراخوانی‌شده)</td><td>همتا — هر پروفایل هر task را می‌خواند/می‌نویسد</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>تمایز یک‌جمله‌ای:</strong> ‏<code>delegate_task</code> یک فراخوانی تابع است؛ Kanban صف کاری است که هر handoff آن ردیفی است که هر پروفایل ‏(یا انسان) می‌تواند ببیند و ویرایش کند.</p>
+<p><strong>‏delegate_task را وقتی استفاده کنید که</strong> ایجنت والد قبل از ادامه به یک جواب استدلالی کوتاه نیاز دارد، انسانی در میان نیست و نتیجه به زمینهٔ والد برمی‌گردد.</p>
+<p><strong>Kanban را وقتی استفاده کنید که</strong> کار از مرز ایجنت‌ها عبور می‌کند، باید از ری‌استارت‌ها جان ببرد، ممکن است ورودی انسانی بخواهد، ممکن است نقش دیگری برداردش، یا باید بعداً قابل‌یافتن باشد.</p>
+<p>آن‌ها همزیستی دارند: یک worker کانبانی ممکن است حین اجرایش داخلا ‏<code>delegate_task</code> صدا بزند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> مفاهیم اصلی</h2>
+<ul>
+  <li><strong>Board</strong> — یک صف مستقل از task ها با دیتابیس SQLite، پوشهٔ workspaces و حلقهٔ dispatcher خودش. یک نصب واحد می‌تواند board های زیادی داشته باشد ‏(مثلاً یکی به‌ازای هر پروژه/repo/دامنه)؛ «Board ها (چند-پروژه‌ای)» پایین را ببینید. کاربران تک-پروژه روی board ‏<code>default</code> می‌مانند و بیرون از همین بخش مستندات هرگز کلمهٔ «board» را نمی‌بینند.</li>
+  <li><strong>Task</strong> — ردیفی با عنوان، بدنهٔ اختیاری، یک assignee ‏(نام پروفایل)، وضعیت ‏(<code>triage | todo | ready | running | blocked | review | done | archived</code>)، namespace اختیاری tenant و کلید idempotency اختیاری ‏(dedup برای اتوماسیون‌های تکراری).</li>
+  <li><strong>Link</strong> — ردیف ‏<code>task_links</code> ثبت‌کنندهٔ وابستگی والد ← فرزند. ‏dispatcher وقتی همهٔ والدین ‏<code>done</code> شوند ‏<code>todo → ready</code> را ارتقا می‌دهد.</li>
+  <li><strong>Comment</strong> — پروتکل بین-ایجنتی. ایجنت‌ها و انسان‌ها کامنت اضافه می‌کنند؛ وقتی worker ‏(مجدداً) spawn می‌شود کل رشتهٔ کامنت را جزء زمینه‌اش می‌خواند.</li>
+  <li><strong>Workspace</strong> — پوشه‌ای که worker در آن عمل می‌کند. سه نوع:
+    <ul>
+      <li>‏<code>scratch</code> ‏(پیش‌فرض) — پوشهٔ tmp تازه زیر ‏<code>~/.hermes/kanban/workspaces/&lt;id&gt;/</code> ‏(یا ‏<code>~/.hermes/kanban/boards/&lt;slug&gt;/workspaces/&lt;id&gt;/</code> روی board های غیر-default). <b>وقتی task تمام شود حذف می‌شود</b> — scratch عمداً گذراست. فایل‌هایی که صریحاً از طریق ‏<code>kanban_complete(artifacts=[...])</code> اعلام شده باشند قبل از پاکسازی داخل ذخیرهٔ ماندگار پیوست به‌ازای-task کپی می‌شوند؛ مسیرهای deliverable موجود در خلاصه‌های اتمام قدیمی همان رفتار را می‌گیرند. سایر فایل‌های scratch حذف می‌شوند. آرتیفکت scratch اعلام‌شدهٔ غایب task را در-جراحی نگه می‌دارد تا worker مسیر را اصلاح و retry کند. وقتی کل workspace باید در دسترس بماند از ‏<code>worktree:</code> یا ‏<code>dir:&lt;path&gt;</code> استفاده کنید. اولین بار که workspace اسکرچی روی یک نصب ساخته شود dispatcher هشدار لاگ و رویداد ‏<code>tip_scratch_workspace</code> روی task صادر می‌کند ‏(قابل‌مشاهده از ‏<code>hermes kanban show &lt;id&gt;</code>).</li>
+      <li>‏<code>dir:&lt;path&gt;</code> — یک پوشهٔ مشترک موجود ‏(vault اوبسیدین، پوشهٔ عملیات ایمیل، پوشهٔ به‌ازای-اکانت). <b>باید مسیر مطلق باشد.</b> مسیرهای نسبی مثل ‏<code>dir:../tenants/foo/</code> هنگام dispatch رد می‌شوند چون نسبت به هر CWD ای که dispatcher اتفاقی در آن است حل می‌شدند که مبهم و بردار فرار confused-deputy است. در غیر این صورت مسیر مطمئن تلقی می‌شود — ماشین شما، فایل‌سیستم شما، worker با uid شما اجرا می‌شود. این مدل تهدید کاربر-محلی-مطمئن است؛ کانبان عمداً تک-میزبان است. <b>هنگام اتمام حفظ می‌شود.</b></li>
+      <li>‏<code>worktree</code> — یک git worktree زیر ‏<code>.worktrees/&lt;id&gt;/</code> برای کارهای کدنویسی. برای pin کردن دقیق مسیر هدف از ‏<code>worktree:&lt;path&gt;</code> استفاده کنید. سمت-worker ‏<code>git worktree add</code> می‌سازدش و وقتی داده شده از ‏<code>--branch</code> استفاده می‌کند. <b>هنگام اتمام حفظ می‌شود.</b></li>
+    </ul>
+  </li>
+  <li><strong>Dispatcher</strong> — حلقهٔ طولانی‌عمری که هر N ثانیه ‏(پیش‌فرض ۶۰): claim های کهنه را پس می‌گیرد، worker های کرش‌کرده را پس می‌گیرد ‏(PID رفته ولی TTL هنوز منقضی نشده)، task های ready را ارتقا می‌دهد، اتمیک claim و پروفایل‌های تعیین‌شده را spawn می‌کند. پیش‌فرض <b>داخل گیت‌وی</b> اجرا می‌شود ‏(<code>kanban.dispatch_in_gateway: true</code>). یک dispatcher همهٔ board ها را در هر تیک sweep می‌کند؛ worker ها با ‏<code>HERMES_KANBAN_BOARD</code> قفل‌شده spawn می‌شوند تا board های دیگر را نبینند. بعد از ‏<code>kanban.failure_limit</code> شکست متوالی spawn روی همان task ‏(پیش‌فرض: ۲) dispatcher خودکار آن را با آخرین خطا به‌عنوان دلیل بلاک می‌کند — مانع thrash شدن روی task هایی که پروفایلشان وجود ندارد یا workspace قابل mount نیست و... .</li>
+  <li><strong>Tenant</strong> — namespace رشته‌ای اختیاری *داخل* یک board. یک ناوگان متخصص می‌تواند به چند کسب‌وکار خدمت کند ‏(<code>--tenant business-a</code>) با جداسازی داده از طریق مسیر workspace و پیشوند کلید حافظه. ‏tenant ها فیلتر نرم‌اند؛ board ها مرز ایزولاسیون سخت‌اند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> Board ها ‏(چند-پروژه‌ای)</h2>
+<p>‏Board ها اجازه می‌دهند جریان‌های کاری نامرتبط — یکی به‌ازای هر پروژه، repo یا دامنه — به صف‌های ایزوله تفکیک شوند. نصب جدید دقیقاً یک board به نام ‏<code>default</code> دارد ‏(DB روی ‏<code>~/.hermes/kanban.db</code> برای سازگاری رو-به-عقب). کاربرانی که فقط یک جریان کار می‌خواهند هیچ‌وقت لازم نیست از board ها خبر داشته باشند؛ قابلیت انتخابی است.</p>
+<p>ایزولاسیون به‌ازای-board مطلق است:</p>
+<ul>
+  <li>دیتابیس SQLite جداگانه به‌ازای هر board ‏(<code>~/.hermes/kanban/boards/&lt;slug&gt;/kanban.db</code>).</li>
+  <li>پوشه‌های جداگانهٔ ‏<code>workspaces/</code> و ‏<code>logs/</code>.</li>
+  <li>worker های spawn‌شده برای یک task <b>فقط</b> task های board خودشان را می‌بینند — dispatcher مقدار ‏<code>HERMES_KANBAN_BOARD</code> را در env فرزند ست و هر ابزار ‏<code>kanban_*</code> که worker به آن دسترسی دارد آن را می‌خواند.</li>
+  <li>لینک‌کردن task ها بین board ها مجاز نیست ‏(schema ساده می‌ماند؛ اگر واقعاً ارجاع بین-پروژه‌ای لازم دارید از منشن‌های متنی آزاد استفاده و با شناسه دستی پیدایشان کنید).</li>
+</ul>
+<h3>مدیریت board ها از CLI</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># See what's on disk. Fresh installs show only "default".
+hermes kanban boards list
+
+# Create a new board.
+hermes kanban boards create atm10-server \
+    --name "ATM10 Server" \
+    --description "Minecraft modded server ops" \
+    --icon 🎮 \
+    --switch                   # optional: make it the active board
+
+# Operate on a specific board without switching.
+hermes kanban --board atm10-server list
+hermes kanban --board atm10-server create "Restart ATM server" --assignee ops
+
+# Change which board is "current" for subsequent calls.
+hermes kanban boards switch atm10-server
+hermes kanban boards show             # who's active right now?
+
+# Rename the display name (the slug is immutable — it's the directory name).
+hermes kanban boards rename atm10-server "ATM10 (Prod)"
+
+# Archive (default) — moves the board's dir to boards/_archived/&lt;slug&gt;-&lt;ts&gt;/.
+# Recoverable by moving the dir back.
+hermes kanban boards rm atm10-server
+
+# Hard delete — `rm -rf` the board dir. No recovery.
+hermes kanban boards rm atm10-server --delete</code></pre>
+</div>
+<p>ترتیب حل board ‏(بالاترین تقدم اول):</p>
+<ol>
+  <li>‏<code>--board &lt;slug&gt;</code> صریح روی فراخوانی CLI.</li>
+  <li>متغیر env ‏<code>HERMES_KANBAN_BOARD</code> ‏(توسط dispatcher هنگام spawn worker ست می‌شود تا worker ها board های دیگر را نبینند).</li>
+  <li>‏<code>~/.hermes/kanban/current</code> — اسلاگی که ‏<code>hermes kanban boards switch</code> ماندگار کرده.</li>
+  <li>‏<code>default</code>.</li>
+</ol>
+<p>‏slug ها اعتبارسنجی می‌شوند: حروف کوچک الفبایی + خط‌تیره + زیرخط، ‏۱–۶۴ کاراکتر، باید با حرف شروع شوند. ورودی بزرگ خودکار کوچک می‌شود. هر چیز دیگر ‏(اسلش، فاصله، نقطه، ‎..‎‎) در لایهٔ CLI رد می‌شود تا ترفندهای path-traversal نتوانند نام یک board باشند.</p>
+<h3>مدیریت board ها از داشبورد</h3>
+<p>‏<code>hermes dashboard</code> ← تب Kanban به‌محض وجود بیش از یک board ‏(یا هر board دارای task) سوییچر board بالای صفحه نشان می‌دهد. کاربران تک-board فقط دکمهٔ کوچک ‏<code>+ New board</code> می‌بینند؛ سوییچر تا وقتی مهم نشود مخفی است.</p>
+<ul>
+  <li><strong>کشویی Board</strong> — board فعال را انتخاب کنید. انتخابتان در ‏localStorage مرورگر ذخیره می‌شود تا بین reload ها بماند بدون اینکه pointer ‏current مربوط به CLI را از زیر ترمینال بازِ شما جابه‌جا کند.</li>
+  <li><strong>+ New board</strong> — modalی می‌دهد برای slug، نام نمایشی، توضیح و آیکون. گزینهٔ سوئیچ خودکار به board جدید.</li>
+  <li><strong>Settings</strong> — modalی برای ویرایش نام نمایشی، توضیح و <strong>پوشهٔ پروژه</strong> ‏(<code>default_workdir</code>) board فعلی. پوشهٔ پروژه پیش‌فرض workspace در سطح-board است که هر task جدید ارث می‌برد ‏(repo گیت ← worktree حفظ‌شده، پوشهٔ ساده ← پوشهٔ حفظ‌شده)؛ هر task همچنان می‌تواند هنگام ساخت override‌اش کند. پاک‌کردن فیلد task های جدید را به workspace های scratch دورریزنی برمی‌گرداند.</li>
+  <li><strong>Archive</strong> — فقط روی board های غیر-default نشان داده می‌شود. تأیید می‌گیرد و بعد پوشهٔ board را به ‏<code>boards/_archived/</code> منتقل می‌کند.</li>
+</ul>
+<p>همهٔ endpoint های API داشبورد ‏<code>?board=&lt;slug&gt;</code> را برای scoping می‌پذیرند. WebSocket رویدادها هنگام اتصال به یک board قفل می‌شود؛ سوئیچ در UI یک WS تازه علیه board جدید باز می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> پیوست‌های فایل</h2>
+<p>task ها می‌توانند پیوست فایل حمل کنند — PDF، تصویر، سند مبدأ — تا worker مواد مبدأ لازم را داشته باشد بدون اینکه شما مسیرها را داخل بدنه بچپانید و امیدوار باشید پیدایشان کند.</p>
+<ul>
+  <li><strong>Upload</strong> — task را در drawer داشبورد باز کنید و از بخش <strong>Attachments</strong> دکمهٔ *Upload file* را بزنید ‏(چند فایل هم‌زمان اوکی است). هر آپلود سقف ۲۵ مگابایت دارد.</li>
+  <li><strong>Storage</strong> — فایل‌ها برای board پیش‌فرض زیر ‏<code>&lt;hermes-home&gt;/kanban/attachments/&lt;task_id&gt;/</code> و برای board نام‌دار زیر ‏<code>&lt;hermes-home&gt;/kanban/boards/&lt;slug&gt;/attachments/&lt;task_id&gt;/</code> می‌نشینند. برای قفل‌کردن محل سفارشی ‏<code>HERMES_KANBAN_ATTACHMENTS_ROOT</code> را ست کنید.</li>
+  <li><strong>worker چه می‌بیند</strong> — وقتی dispatcher task را به worker می‌دهد، زمینهٔ worker بخشی به نام <strong>Attachments</strong> دارد که نام هر فایل و <strong>مسیر مطلقش</strong> را فهرست می‌کند. worker دسترسی کامل ابزار فایل/ترمینال دارد، پس پیوست‌ها را مستقیم می‌خواند ‏(<code>read_file</code> یا ابزارهای شلی مثل ‏pdftotext).</li>
+  <li><strong>Download / remove</strong> — drawer هر پیوست را با لینک دانلود و کنترل حذف ‏(×) فهرست می‌کند. حذف پیوست هم ردیف متادیتا هم فایل روی دیسک را پاک می‌کند.</li>
+</ul>
+<div class="callout note">
+  <div class="callout-title">📌 بک‌اندهای ترمینال راه‌دور</div>
+  <p>مسیرهای پیوست روی بک‌اند ترمینال <strong>محلی</strong> مستقیم حل می‌شوند که پیش‌فرض worker های Kanban است. اگر worker ها را روی بک‌اند راه‌دور اجرا می‌کنید ‏(Docker، ‏Modal)، پوشهٔ ‏attachments مربوط به board را داخل sandbox مانت کنید تا مسیرهای مطلق داخل زمینهٔ worker قابل‌رسید باشند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> شروع سریع</h2>
+<p>فرمان‌های پایین <strong>شما</strong> ‏(انسان) هستید که board را راه می‌اندازید و task می‌سازید. بعد از assign شدن یک task، dispatcher پروفایل تعیین‌شده را به‌عنوان worker spawn می‌کند و از آن به بعد <strong>مدل task را از طریق فراخوانی‌های ابزار ‏<code>kanban_*</code> می‌رانند نه فرمان‌های CLI</strong>.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># 1. Create the board (you)
+hermes kanban init
+
+# 2. Start the gateway (hosts the embedded dispatcher)
+hermes gateway start
+
+# 3. Create a task (you — or an orchestrator agent via kanban_create)
+hermes kanban create "research AI funding landscape" --assignee researcher
+
+# 4. Watch activity live (you)
+hermes kanban watch
+
+# 5. See the board (you)
+hermes kanban list
+hermes kanban stats</code></pre>
+</div>
+<p>وقتی dispatcher ‏<code>t_abcd</code> را برمی‌دارد و پروفایل ‏<code>researcher</code> را spawn می‌کند، اولین کاری که مدل آن worker می‌کند صدازدن ‏<code>kanban_show()</code> برای خواندن task‌اش است. ‏<code>hermes kanban show t_abcd</code> را اجرا نمی‌کند.</p>
+<h3>dispatcher جاسازی‌شده در گیت‌وی ‏(پیش‌فرض)</h3>
+<p>‏dispatcher داخل پروسهٔ گیت‌وی اجرا می‌شود. چیزی برای نصب نیست، سرویس جداگانه‌ای برای مدیریت نیست — اگر گیت‌وی بالا باشد task های ready در تیک بعدی برداشته می‌شوند ‏(پیش‌فرض ۶۰ ثانیه).</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># config.yaml
+kanban:
+  dispatch_in_gateway: true        # default
+  dispatch_interval_seconds: 60    # default
+  review_dispatch: true            # default: spawn the assigned profile with
+                                   # the bundled sdlc-review skill. Set false
+                                   # for human-only review boards.</code></pre>
+</div>
+<p>فلگ پیکربندی را در runtime با ‏<code>HERMES_KANBAN_DISPATCH_IN_GATEWAY=0</code> برای دیباگ override کنید. نظارت استاندارد گیت‌وی اعمال می‌شود: ‏<code>hermes gateway start</code> را مستقیم اجرا یا گیت‌وی را به‌عنوان unit کاربر systemd سیم کنید ‏(مستندات گیت‌وی را ببینید). بدون گیت‌وی در حال اجرا، task های ‏ready سر جایشان می‌مانند تا یکی بالا بیاید — ‏<code>hermes kanban create</code> هنگام ساخت درباره‌اش هشدار می‌دهد.</p>
+<p>اجرای ‏<code>hermes kanban daemon</code> به‌عنوان پروسهٔ جداگانه <strong>deprecated</strong> است؛ از گیت‌وی استفاده کنید. اگر واقعاً نمی‌توانید گیت‌وی را اجرا کنید ‏(سیاست میزبان headless سرویس‌های بلند-عمر را ممنوع می‌کند و...) دریچهٔ ‏<code>--force</code> دیمون مستقل قدیمی را یک چرخهٔ ریلیز زنده نگه می‌دارد ولی اجرای هم‌زمان dispatcher جاسازی‌شده-در-گیت‌وی <em>و</em> دیمون مستقل روی همان ‏kanban.db باعث race های claim می‌شود و پشتیبانی نمی‌شود.</p>
+<h3>create ایدمپوتنت ‏(برای اتوماسیون / وب‌هوک‌ها)</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># First call creates the task. Any subsequent call with the same key
+# returns the existing task id instead of duplicating.
+hermes kanban create "nightly ops review" \
+    --assignee ops \
+    --idempotency-key "nightly-ops-$(date -u +%Y-%m-%d)" \
+    --json</code></pre>
+</div>
+<h3>افعال انبوه CLI</h3>
+<p>همهٔ افعال چرخهٔ حیات چند شناسه می‌پذیرند تا batch را در یک فرمان پاکسازی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes kanban complete t_abc t_def t_hij --result "batch wrap"
+hermes kanban archive  t_abc t_def t_hij
+hermes kanban unblock  t_abc t_def
+hermes kanban block    t_abc "need input" --ids t_def t_hij</code></pre>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 task رفع‌بلاک‌شده کجا می‌نشیند</div>
+  <p>‏<code>unblock</code> فاز مبدأ امن را بازیابی می‌کند: <b>review</b> برای کارهای برخاسته-از-بازبین که والدینشان کامل‌اند، <b>ready</b> برای کارهای پیاده‌سازی که والدینشان کامل‌اند، یا <b>todo</b> وقتی هنوز والدی باز است. یک task ‏todo اثبات فاز-مبدأ خودش را نگه می‌دارد و وقتی گیتی وابستگی پاک شد خودکار به ‏review یا ready برمی‌گردد. ‏unblock هرگز مستقیم به ‏triage مسیریابی نمی‌کند.</p>
+  <p>اگر taskی را unblock کردید و بعداً در <b>triage</b> ظاهر شد، unblock نیست که آنجا برده. یک <em>بلاک-مجدد به همان دلیل</em> بعدی چنین کرده: بعد از اینکه task ‏blocked ← unblocked ← re-blocked برای همان علت به تعداد ‏BLOCK_RECURRENCE_LIMIT بار ‏(پیش‌فرض ‏۲) شود، مدارشکن حلقهٔ unblock دیگر آن را به ‏blocked نفرستاده — جایی که یک cron مدام unblock‌اش می‌کرد — و برای تصمیم انسانی به ‏triage مسیریابی می‌کند. این یک محافظ DB قطعی است نه قضاوت LLM و متن بدنهٔ task نمی‌تواند از آن معاف شود: شمارندهٔ تکرار عمداً از هر unblock جان می‌برد ‏(فقط با complete موفق ریست می‌شود). برای نگه‌داشتن task رفع‌بلاک‌شده در pool کار، قبل از unblock «چرا مدام دوباره بلاک می‌شود» را حل کنید ‏(والد ناتمام، ورودی غایب، قابلیت برآورده‌نشده) یا اگر حلقه انتظار می‌رود ‏BLOCK_RECURRENCE_LIMIT را بالا ببرید.</p>
+</div>
+</section>
+
+<section class="doc-sec" id="workers-board">
+<h2><span class="secnum">۷</span> نحوهٔ تعامل worker ها با تخته</h2>
+<p><strong>‏Worker ها به ‏<code>hermes kanban</code> شل نمی‌زنند.</strong> وقتی dispatcher worker را spawn می‌کند مقدار ‏<code>HERMES_KANBAN_TASK=t_abcd</code> را در env فرزند ست می‌کند و آن متغیر یک <strong>تول‌ست اختصاصی kanban</strong> را در schema مدل روشن می‌کند. همان تول‌ست برای پروفایل‌های ارکستراتوری که ‏<code>kanban</code> را در پیکربندی تول‌ست‌هایشان فعال کرده‌اند هم موجود است. این ابزارها مثل CLI مستقیماً از طریق لایهٔ پایتونی ‏<code>kanban_db</code> تخته را می‌خوانند و تغییر می‌دهند. یک worker در حال اجرا این‌ها را مثل هر ابزار دیگری صدا می‌زند؛ هرگز CLI ‏<code>hermes kanban</code> را نه می‌بیند نه لازم دارد.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ابزار</th><th>هدف</th><th>پارامترهای الزامی</th></tr></thead>
+  <tbody>
+    <tr><td><code>kanban_show</code></td><td>خواندن task فعلی ‏(عنوان، بدنه، تلاش‌های قبلی، handoff های والد، کامنت‌ها، ‏<code>worker_context</code> کاملِ پیش-قالب‌بندی‌شده). پیش‌فرض شناسهٔ task مربوط به env.</td><td>—</td></tr>
+    <tr><td><code>kanban_list</code></td><td>فهرست خلاصهٔ task ها با فیلترهای ‏assignee، ‏status، ‏tenant، دید archived و limit. برای ارکستراتورهایی که کارِ board را کشف می‌کنند.</td><td>—</td></tr>
+    <tr><td><code>kanban_complete</code></td><td>پایان با handoff ساختاریافتهٔ ‏<code>summary</code> + ‏<code>metadata</code>.</td><td>دست‌کم یکی از ‏summary / ‏result</td></tr>
+    <tr><td><code>kanban_request_review</code></td><td>شروع بازبینی همان-کارت با ‏summary ماندگار، ‏metadata اختیاری و بازبین اختیاری. task به ‏review می‌رود؛ این block نیست.</td><td><code>summary</code></td></tr>
+    <tr><td><code>kanban_request_changes</code></td><td>رأی بازبین از یک اجرای بازبینی فعال. آن اجرا را می‌بندد، گیتی والد را دوباره اعمال و task را بدون حساب‌داری حلقه-بلاک به پیاده‌ساز اصلی برمی‌گرداند.</td><td><code>reason</code></td></tr>
+    <tr><td><code>kanban_block</code></td><td>توقف کار و مسیریابی بر اساس چرا: ‏<code>kind=dependency</code> ‏(در todo منتظر می‌ماند، خودکار ازسرمی‌گیرد)، ‏needs_input/capability/transient ‏(به انسان سطح می‌آید). بلاک‌های مکرر هم‌نوع خودکار به triage تشدید می‌شوند.</td><td><code>reason</code></td></tr>
+    <tr><td><code>kanban_heartbeat</code></td><td>علامت زنده‌بودن حین عملیات‌های طولانی. صرفاً side-effect.</td><td>—</td></tr>
+    <tr><td><code>kanban_comment</code></td><td>افزودن یادداشت ماندگار به رشتهٔ task.</td><td><code>task_id</code>، ‏<code>body</code></td></tr>
+    <tr><td><code>kanban_attach</code></td><td>الصاق فایل به task با دادن بایت‌هایش درجا ‏(base64)؛ زیر پوشهٔ attachments مربوط به task ذخیره می‌شود ‏(سقف ۲۵ MB).</td><td>بایت فایل + نام</td></tr>
+    <tr><td><code>kanban_attach_url</code></td><td>الصاق فایل به task با URL.</td><td><code>url</code></td></tr>
+    <tr><td><code>kanban_attachments</code></td><td>فهرست پیوست‌های یک task.</td><td>—</td></tr>
+    <tr><td><code>kanban_create</code></td><td>‹(ارکستراتورها)› fan-out به task های فرزند با ‏assignee و ‏parents/skills و... اختیاری.</td><td><code>title</code>، ‏<code>assignee</code></td></tr>
+    <tr><td><code>kanban_link</code></td><td>‹(ارکستراتورها)› افزودن یال وابستگی ‏parent_id ← child_id بعد از واقعیت.</td><td><code>parent_id</code>، ‏<code>child_id</code></td></tr>
+    <tr><td><code>kanban_unblock</code></td><td>‹(ارکستراتورها)› بازیابی task بلاک‌شده به فاز مبدأ ‏(review یا ready)، یا todo وقتی والدی باز مانده.</td><td><code>task_id</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>یک نوبت معمول worker:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Model's tool calls, in order:
+kanban_show()                                     # no args — uses HERMES_KANBAN_TASK
+# (model reads the returned worker_context, does the work via terminal/file tools)
+kanban_heartbeat(note="halfway through — 4 of 8 files transformed")
+# (more work)
+kanban_complete(
+    summary="migrated limiter.py to token-bucket; added 14 tests, all pass",
+    metadata={"changed_files": ["limiter.py", "tests/test_limiter.py"], "tests_run": 14},
+)</code></pre>
+</div>
+<p>یک worker <strong>ارکستراتور</strong> به‌جایش fan-out می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>kanban_show()
+kanban_create(
+    title="research ICP funding 2024-2026",
+    assignee="researcher-a",
+    body="focus on seed + series A, North America, AI-adjacent",
+)
+# → returns {"task_id": "t_r1", ...}
+kanban_create(title="research ICP funding — EU angle", assignee="researcher-b", body="…")
+# → returns {"task_id": "t_r2", ...}
+kanban_create(
+    title="synthesize findings into launch brief",
+    assignee="writer",
+    parents=["t_r1", "t_r2"],                     # promotes to ready when both complete
+    body="one-pager, 300 words, neutral tone",
+)
+kanban_complete(summary="decomposed into 2 research tasks + 1 writer; linked dependencies")</code></pre>
+</div>
+<p>ابزارهای «‹ارکستراتورها›» — ‏<code>kanban_list</code>، ‏<code>kanban_create</code>، ‏<code>kanban_link</code>، ‏<code>kanban_unblock</code> و ‏<code>kanban_comment</code> روی task های خارجی — از طریق همان تول‌ست در دسترس‌اند؛ قاعدهٔ غیررسمی ‏(رمزگذاری‌شده در راهنمای کانبانِ خودکار-تزریق‌شده) این است که پروفایل‌های worker fan-out نمی‌کنند یا کار نامرتبط را مسیریابی نمی‌کنند و پروفایل‌های ارکستراتور کارِ پیاده‌سازی اجرا نمی‌کنند. worker های spawn‌شده توسط dispatcher برای عملیات چرخه-حیات مخرب همچنان task-scoped هستند و نمی‌توانند task های نامرتبط را تغییر دهند.</p>
+
+<h3>چرا ابزار به‌جای شل‌زدن به ‏<code>hermes kanban</code></h3>
+<p>سه دلیل:</p>
+<ol>
+  <li><strong>قابلیت حمل بک‌اند.</strong> worker هایی که ابزار ترمینالشان به بک‌اند راه‌دور اشاره می‌کند ‏(Docker/Modal/Singularity/SSH) ‏<code>hermes kanban complete</code> را <em>داخل</em> کانتینر اجرا می‌کردند، جایی که hermes نصب نیست و ‏<code>~/.hermes/kanban.db</code> مانت نشده. ابزارهای کانبان در پروسهٔ Python خود ایجنت اجرا می‌شوند و فارغ از بک‌اند ترمینال همیشه به ‏<code>~/.hermes/kanban.db</code> می‌رسند.</li>
+  <li><strong>بدون شکنندگی quoting شل.</strong> پاس‌دادن ‏<code>--metadata '{"files": [...]}'</code> از میان shlex + argparse تلهٔ پنهانی است. آرگومان‌های ساختاریافته ابزار کلاً از آن می‌گذرند.</li>
+  <li><strong>خطاهای بهتر.</strong> نتایج ابزار JSON ساختاریافته‌ای است که مدل می‌تواند درباره‌اش استدلال کند نه رشته stderr که باید parse کند.</li>
+</ol>
+<p><strong>صفر ردپای schema روی نشست‌های عادی.</strong> یک نشست عادی ‏<code>hermes chat</code> مگر پروفایل فعال صریحاً تول‌ست ‏<code>kanban</code> را برای کار ارکستراسیون فعال کند هیچ ابزار ‏<code>kanban_*</code> در schema ندارد. worker های task‌ایِ spawn‌شده-توسط-dispatcher چون ‏<code>HERMES_KANBAN_TASK</code> ست است ابزارهای task-scoped می‌گیرند؛ پروفایل‌های ارکستراتور سطح مسیریابی پهن‌تر را از طریق config می‌گیرند. بدون تورم ابزار برای کاربرانی که هرگز به کانبان دست نمی‌زنند.</p>
+<p>راهنمای کانبانِ خودکار-تزریق‌شده به مدل یاد می‌دهد کدام ابزار را کِی و به چه ترتیبی صدا بزند.</p>
+
+<h3>شواهد handoff توصیه‌شده</h3>
+<p>‏<code>kanban_complete(summary=..., metadata={...})</code> عمداً منعطف است: summary بستنِ خوانا-برای-انسان است و metadata handoff ماشین‌خوانی که ایجنت‌های پایین‌دستی، بازبین‌ها یا داشبوردها می‌توانند بدون خراشیدن نثر بازمصرفش کنند.</p>
+<p>برای task های مهندسی و بازبینی، این شکل اختیاری metadata را ترجیح دهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{
+  "changed_files": ["path/to/file.py"],
+  "verification": ["pytest tests/hermes_cli/test_kanban_db.py -q"],
+  "dependencies": ["parent task id or external issue, if any"],
+  "blocked_reason": null,
+  "retry_notes": "what failed before, if this was a retry",
+  "residual_risk": ["what was not tested or still needs human review"]
+}</code></pre>
+</div>
+<p>این کلیدها قاعده‌اند نه الزام schema. خاصیت مفید این است که هر worker به‌اندازه‌ای شواهد بگذارد که خواننده بعدی چهار سؤال را سریع جواب دهد:</p>
+<ol>
+  <li>چه چیزی تغییر کرد؟</li>
+  <li>چطور اعتبارسنجی شد؟</li>
+  <li>اگر شکست بخورد چه چیزی می‌تواند unblock یا retry‌اش کند؟</li>
+  <li>چه ریسکی هنوز عمداً باز مانده؟</li>
+</ol>
+<p>‏رمزها، لاگ خام، توکن‌ها، مواد OAuth و رونویسی‌های نامرتبط را داخل metadata نگذارید. به‌جایش pointer و خلاصه ذخیره کنید. اگر taskی فایل یا تستی ندارد، صریحاً در summary بگویید و metadata را برای شواهدی که هست به کار ببرید مثل URL های مبدأ، شناسه‌های issue یا گام‌های بازبینی دستی.</p>
+
+<h3>چرخهٔ حیات worker</h3>
+<p>هر پروفایلی که کارِ کانبانی می‌کند خودکار چرخهٔ حیات worker را می‌گیرد — هنگام spawn داخل پرامپت سیستمی worker تزریق می‌شود ‏(بلوک ‏KANBAN_GUIDANCE)، پس <b>هیچ چیزی برای نصب یا پیکربندی نیست</b>. چرخهٔ حیات کامل را به worker در <b>فراخوانی‌های ابزار</b> یاد می‌دهد نه فرمان‌های CLI:</p>
+<ol>
+  <li>هنگام spawn ‏<code>kanban_show()</code> را صدا بزن تا عنوان + بدنه + handoff های والد + تلاش‌های قبلی + کل رشتهٔ کامنت را بخوانی.</li>
+  <li>‏<code>cd $HERMES_KANBAN_WORKSPACE</code> ‏(از طریق ابزار terminal) و کار را آنجا انجام بده.</li>
+  <li>در عملیات‌های طولانی هر چند دقیقه ‏<code>kanban_heartbeat(note="...")</code> را صدا بزن. <b>اگر کارت ممکن است بیش از ۱ ساعت طول بکشد دست‌کم ساعتی یک‌بار ‏kanban_heartbeat بزن</b> — dispatcher task هایی که از ‏<code>kanban.dispatch_stale_timeout_seconds</code> ‏(پیش‌فرض ۴ ساعت) گذشته و در ساعت اخیر ضربانی نداشته‌اند را پس می‌گیرد با این فرض که worker بدون پاکسازی کرش کرده. reclaim بی‌آزار است ‏(task بدون تیک شمارندهٔ شکست به ready برای dispatch مجدد برمی‌گردد) ولی پیشرفت اجرای فعلی‌ات را از دست می‌دهی.</li>
+  <li>با ‏<code>kanban_complete(summary="...", metadata={...})</code> تمام کن، یا اگر گیر کردی ‏<code>kanban_block(reason="...")</code>.</li>
+</ol>
+<p>همان فراخوانی نهایی ‏<code>kanban_complete</code>/<code>kanban_block</code> جزء پروتکل worker است. اگر پروسهٔ worker با وضعیت ۰ خارج شود در حالی که task هنوز ‏running است، dispatcher آن را نقض پروتکل تلقی و رویداد ‏<code>protocol_violation</code> صادر می‌کند.</p>
+<p><b>پیشگیری سمت-ایجنت:</b> قبل از خروج worker، هرمس وقتی تشخیص دهد مدل در آستانهٔ توقف بدون فراخوانی ابزار پایانیِ board است تا دو سرکش مصنوعی تزریق می‌کند. این حالت رایج را می‌گیرد که مدل گام بعد را روایت می‌کند ‏(«Let me write the report») و با ‏finish_reason=stop می‌ایستد. سرکش مدل را یادآوری می‌کند فوراً ‏kanban_complete یا ‏kanban_block را صدا بزند. این محافظ فقط برای worker های spawn‌شده-توسط-dispatcher فعال است ‏(<code>HERMES_KANBAN_TASK</code> ست است) و با ‏<code>HERMES_KANBAN_STOP_NUDGE=0</code> خاموش می‌شود.</p>
+<p><b>بازیابی سمت-dispatcher:</b> اگر سرکش‌ها تمام شده یا worker قبل از رسیدن به سرکش کرش کرده باشد، dispatcher به نقض پروتکل <b>retry محدود</b> می‌دهد ‏(تا ‏_PROTOCOL_VIOLATION_FAILURE_LIMIT نقض متوالی، پیش‌فرض ۳) قبل از اینکه به‌جای respawn کردنش به همان حلقه، task را خودکار بلاک کند. بودجه فقط نقض‌های خروج-تمیزِ <em>متوالی</em> را می‌شمارد — requeue های rate-limit‌شدهٔ درمیانی خنثی‌اند و هر نوع شکست دیگر streak را ریست می‌کند — و ‏max_retries به‌ازای-task روی حد غلبه می‌کند. این معمولاً یعنی مدل یک جواب plain-text نوشته و بدون استفاده از سطح ابزار کانبان خارج شده است.</p>
+<p>چرخهٔ حیات به‌اضافهٔ جزئیات مرجع بار-بر ‏(انواع workspace، آرتیفکت‌های deliverable، گرفتن کارت‌های ساخته‌شده) در همان بلوک پرامپت-سیستمی عرضه می‌شود، پس هر worker فارغ از پروفایلی که زیرش اجرا می‌شود آنها را دارد — بدون setup مهارت به‌ازای-پروفایل.</p>
+
+<h3>Pin کردن مهارت‌های اضافی به یک task مشخص</h3>
+<p>گاهی یک task تنها به زمینهٔ متخصصی نیاز دارد که پروفایل assignee به‌طور پیش‌فرض حمل نمی‌کند — کار ترجمه‌ای که مهارت ‏translation می‌خواهد، task بازبینی که ‏github-code-review می‌خواهد، audit امنیتی که ‏security-pr-audit می‌خواهد. به‌جای هر بار ویرایش پروفایل assignee، مهارت‌ها را مستقیم به task الصاق کنید.</p>
+<p><b>از یک ایجنت ارکستراتور</b> ‏(حالت رایج — یک ایجنت کار را به دیگری مسیریابی می‌کند) آرایهٔ ‏<code>skills</code> ابزار ‏<code>kanban_create</code> را استفاده کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>kanban_create(
+    title="translate README to Japanese",
+    assignee="linguist",
+    skills=["translation"],
+)
+
+kanban_create(
+    title="audit auth flow",
+    assignee="reviewer",
+    skills=["security-pr-audit", "github-code-review"],
+)</code></pre>
+</div>
+<p><b>از یک انسان ‏(CLI / فرمان اسلش)</b> برای هرکدام ‏<code>--skill</code> را تکرار کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes kanban create "translate README to Japanese" \
+    --assignee linguist \
+    --skill translation
+
+hermes kanban create "audit auth flow" \
+    --assignee reviewer \
+    --skill security-pr-audit \
+    --skill github-code-review</code></pre>
+</div>
+<p><b>از داشبورد</b> مهارت‌ها را با کاما داخل فیلد <b>skills</b> دیالوگ ساخت task تایپ کنید.</p>
+<p>‏dispatcher به‌ازای هر مهارت فهرست‌شده یک فلگ ‏<code>--skills &lt;name&gt;</code> صادر می‌کند، پس worker با همهٔ آنها لود‌شده روی راهنمای کانبانِ خودکار-تزریق‌شده spawn می‌شود. نام مهارت‌ها باید با مهارت‌هایی که واقعاً روی پروفایل assignee نصب‌اند بخواند ‏(‏<code>hermes skills list</code> را بزنید تا ببینید چه هست)؛ نصب runtime وجود ندارد.</p>
+
+<h3>override مدل به‌ازای-task</h3>
+<p>worker یک task را به مدل مشخصی ‏(و اختیاراً ارائه‌دهنده) قفل کنید، مستقل از پیش‌فرض پروفایل assignee:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># At creation
+hermes kanban create "hard refactor" --assignee coder \
+    --model claude-opus-4.6 --provider anthropic
+
+# Or later — takes effect on the next dispatch
+hermes kanban set-model t_abcd claude-opus-4.6 --provider anthropic
+hermes kanban set-model t_abcd none    # clear the override</code></pre>
+</div>
+<p>‏dispatcher worker را با مدل pinned spawn می‌کند ‏(‏<code>--provider &lt;name&gt;</code> وقتی ست شده پاس می‌شود؛ ‏--provider مدل می‌خواهد). کشویی مدل به‌ازای-task در داشبورد همان فیلد ‏model_override را می‌رانند. بدون override، worker از مدل پیکربندی‌شدهٔ پروفایلش استفاده می‌کند.</p>
+
+<h3>استراتژی هزینه: ارکستراتور frontier، worker های ارزان</h3>
+<p>پیکربندی‌های به‌ازای-پروفایل کانبان تفکیک هزینهٔ planner/worker را طبیعی می‌کند. تجزیهٔ یک پروژه به کارت‌های خوش-دامنه قضاوت سطح-frontier می‌خواهد؛ اجرای کارتی که از قبل هدف، زمینه و شواهد handoff روشنی حمل می‌کند معمولاً نه — و worker ها جایی‌اند که اکثریت قاطع توکن خرج می‌شود، پس مدل worker جایی است که هزینه زندگی می‌کند. پروفایل ارکستراتور/dispatcher خود را روی مدل frontier اجرا و پروفایل‌های worker را به مدل‌های ارزان اشاره دهید. هر پروفایل config.yaml خودش را زیر ‏<code>~/.hermes/profiles/&lt;name&gt;/</code> دارد و dispatcher هنگام spawn ‏<code>hermes -p &lt;assignee&gt;</code> مقدار ‏HERMES_HOME scoped-به-پروفایل را تزریق می‌کند، پس هر worker تنظیمات مدل پروفایل خودش را می‌خواند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ~/.hermes/config.yaml (orchestrator / dispatcher profile)
+model:
+  default: "your-frontier-model"
+
+# ~/.hermes/profiles/coder/config.yaml (worker profile)
+model:
+  default: "your-inexpensive-model"
+
+# ~/.hermes/profiles/researcher/config.yaml (another worker profile)
+model:
+  default: "your-inexpensive-model"</code></pre>
+</div>
+<p>برای کارت‌های گاه‌به‌گاهِ حساس-به-کیفیت فقط همان task را با <a href="#model-override">override مدل به‌ازای-task</a> به مدلی قوی‌تر pin کنید ‏(--model/--provider هنگام ساخت، ‏<code>hermes kanban set-model</code> بعداً، یا کشویی مدل داشبورد) — بدون ویرایش پروفایل.</p>
+
+<h3>هوک‌های افزونهٔ چرخهٔ حیات</h3>
+<p>جابه‌جایی‌های board هوک‌های افزونه شلیک می‌کنند: ‏<code>kanban_task_claimed</code>، ‏<code>kanban_task_completed</code> و ‏<code>kanban_task_blocked</code>، هرکدام حامل ‏task_id و ‏profile_name. هوک‌ها <b>بعد از</b> commit شدن تغییر DB مربوط به board شلیک می‌شوند، پس callback ها همیشه وضعیت ماندگار را می‌بینند. تقسیم پروسه را توجه کنید: ‏<code>kanban_task_claimed</code> در پروسهٔ <b>dispatcher</b> شلیک می‌شود در حالی که ‏completed/blocked در پروسهٔ <b>worker</b> شلیک می‌شوند — برای مشاهدهٔ مرکزی هر جابه‌جایی، هوک را در پروفایل dispatcher ثبت کنید.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>def register(ctx):
+    def on_blocked(task_id=None, profile_name=None, **kw):
+        ctx.dispatch_tool("terminal", {"command": f"notify-send 'kanban blocked: {task_id}'"})
+    ctx.register_hook("kanban_task_blocked", on_blocked)</code></pre>
+</div>
+
+<h3>کارت‌های حالت-هدف ‏(<code>--goal</code>)</h3>
+<p>پیش‌فرض هر worker <b>یک شانس</b> برای کارتش دارد — کار را انجام بده، ‏kanban_complete/kanban_block را صدا بزن، خارج شو. ‏<code>--goal</code> ‏(CLI) یا ‏<code>goal_mode=True</code> ‏(ابزار ‏kanban_create / داشبورد) را بدهید تا به‌جایش آن worker در یک <b>حلقهٔ هدف</b> اجرا شود، همان موتور سبک-Ralph پشت فرمان اسلش ‏/goal: بعد از هر نوبت یک قاضی کمکی خروجی worker را با عنوان + بدنهٔ کارت ‏(به‌عنوان معیارهای پذیرش) مقایسه می‌کند و اگر کار تمام نشده — و بودجهٔ نوبت باقی است — worker <b>در همان نشست</b> ادامه می‌دهد تا قاضی موافقت کند، خود worker task را پایان دهد، یا بودجه تمام شود ‏(که کارت را به‌جای خروج بی‌صدا برای بازبینی انسانی <b>بلاک</b> می‌کند).</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes kanban create "Translate the docs site to French" \
+    --body "Acceptance: every page translated, no English left, links intact." \
+    --assignee linguist \
+    --goal \
+    --goal-max-turns 15      # optional; default 20</code></pre>
+</div>
+<p>برای کارت‌های باز، چندمرحله‌ای یا «ادامه بده تا X درست شود» استفاده‌اش کنید. برای کارهای one-shot ارزان ردش کنید — overhead قاضی به‌ازای-نوبت نمی‌ارزد و retry/مدارشکن موجود dispatcher شکست‌های گذرای worker را همین الان هندل می‌کند. قاضی فقط به خوبی متن هدف شماست، پس بدنه را به‌صورت <b>معیارهای پذیرش صریح</b> بنویسید.</p>
+<div class="callout note">
+  <div class="callout-title">📌 کارت‌های حالت-هدف موتور ‎/goal را قرض می‌گیرند — به آن وصله نمی‌شوند</div>
+  <p>‏<code>--goal</code> حلقهٔ ادامه را <em>داخل نشست worker همان یک کارت</em> اجرا می‌کند. موتور را با فرمان اسلش ‏[<code>/goal</code>] ‏(goals) شریک می‌کند نه وضعیت را: ست کردن یک ‏/goal در نشست چت هرگز کارت کانبانی نمی‌سازد، نمی‌گیرد یا جابه‌جا نمی‌کند و حلقهٔ کارت حالت-هدف برای ‏<code>/goal status</code> هیچ نشست چتی نامرئی است. اگر می‌خواهید این گفتگو به تکرار ادامه دهد از [<code>/goal</code>] استفاده کنید؛ اگر کار روی تخته می‌خواهید کارت بسازید.</p>
+</div>
+
+<h3>رفتار ارکستراتور</h3>
+<p><b>ارکستراتور خوش‌رفتار خودش کار را انجام نمی‌دهد.</b> هدف کاربر را به task ها تجزیه، لینک، هرکدام را به یکی از پروفایل‌هایی که راه انداخته‌اید assign و عقب می‌نشیند. راهنمای ارکستراتور — قواعد ضدوسوسه، پرامپت Step-0 کشف-پروفایل ‏(dispatcher روی نام‌های assignee ناشناخته بی‌صدا شکست می‌خورد، پس ارکستراتور باید هر کارت را در پروفایل‌هایی که واقعاً روی ماشینتان وجود دارند زمین‌گیری کند) و کتاب بازی تجزیه کلید‌خورده روی ‏<code>kanban_create</code>/<code>kanban_link</code>/<code>kanban_comment</code> — خودکار داخل پرامپت سیستمی worker تزریق می‌شود؛ چیزی برای نصب نیست.</p>
+<p>یک نوبت مرجع ارکستراتور ‏(دو محقق موازی که به نویسنده handoff می‌دهند):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Goal from user: "draft a launch post on the ICP funding landscape"
+kanban_create(title="research ICP funding, NA angle",  assignee="researcher-a", body="…")  # → t_r1
+kanban_create(title="research ICP funding, EU angle",  assignee="researcher-b", body="…")  # → t_r2
+kanban_create(
+    title="synthesize ICP funding research into launch post draft",
+    assignee="writer",
+    parents=["t_r1", "t_r2"],        # promoted to 'ready' when both researchers complete
+    body="one-pager, neutral tone, cite sources inline",
+)                                     # → t_w1
+# Optional: add cross-cutting deps discovered later without re-creating tasks
+kanban_link(parent_id="t_r1", child_id="t_followup")
+kanban_complete(
+    summary="decomposed into 2 parallel research tasks → 1 synthesis task; writer starts when both researchers finish",
+)</code></pre>
+</div>
+<p>راهنمای ارکستراتور خودکار در پرامپت سیستمی worker عرضه می‌شود — هیچ چیزی برای نصب یا sync به‌ازای-پروفایل نیست.</p>
+<p><b>قبل از fan-out تصمیم بگیرید.</b> تصمیم‌های طراحی مال ارکستراتورند نه worker ها. اگر دو کارت موازی هرکدام باید همان یک چیز را انتخاب کنند — طرح نام‌گذاری، schema، فرمت فایل، شکل API — ارکستراتور یک‌بار تصمیم می‌گیرد و آن را داخل بدنهٔ <b>هر دو</b> کارت مهر می‌زند. worker ها کارت‌های خواهر را نمی‌بینند، پس بدنهٔ هر کارت فرزند باید هر تصمیمی که به آن وابسته است را حمل کند. مثال: برای کارت‌های موازی «build the exporter» و «build the importer» نگذارید هر worker فرمت فایل خودش را اختراع کند — از بالا یکی انتخاب کنید ‏(مثلاً JSON جداشده-با-خط‌جدید با فیلد version) و در هر دو بدنه بنویسید، وگرنه دو نیمه هرگز round-trip نخواهند شد.</p>
+<p>برای بهترین نتیجه آن را با پروفایلی جفت کنید که تول‌ست‌هایش به عملیات board محدود شده ‏(<code>kanban</code>، ‏<code>gateway</code>، ‏<code>memory</code>) تا ارکستراتور حتی اگر تلاش کند واقعاً نتواند task پیاده‌سازی اجرا کند.</p>
+</section>
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> داشبورد ‏(GUI)</h2>
+<p>‏CLI و فرمان اسلش ‏<code>/kanban</code> برای اجرای headless تخته کافی‌اند ولی تختهٔ بصری غالباً رابط درست برای انسان‌های-در-حلقه است: triage، سرپرستی بین-پروفایلی، خواندن رشته‌های کامنت و کشیدن کارت‌ها بین ستون‌ها. هرمس این را به‌عنوان یک <b>افزونهٔ همراه‌بستهٔ داشبورد</b> در ‏<code>plugins/kanban/</code> عرضه می‌کند — نه قابلیت هسته، نه سرویس جداگانه — مطابق مدلی که در <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/extending-the-dashboard" target="_blank" rel="noopener">توسعه داشبورد</a> ترسیم شده.</p>
+<p>باز کردنش:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes kanban init      # one-time: create kanban.db if not already present
+hermes dashboard        # "Kanban" tab appears in the nav, after "Skills"</code></pre>
+</div>
+<h3>افزونه چه چیزی به شما می‌دهد</h3>
+<ul>
+  <li>تب <strong>Kanban</strong> با یک ستون به‌ازای هر وضعیت: ‏<code>triage</code>، ‏<code>todo</code>، ‏<code>ready</code>، ‏<code>running</code>، ‏<code>blocked</code>، ‏<code>done</code> ‏(+ ‏<code>archived</code> وقتی toggle روشن است).
+    <ul><li>‏<code>triage</code> ستون پارک ایده‌های خام است. پیش‌فرض ‏(<code>kanban.auto_decompose: true</code>)، dispatcher خودکار <b>تجزیه‌گر</b> را روی task هایی که اینجا می‌نشینند اجرا می‌کند. تجزیه‌گر داخلی مسیر مدل ‏<code>auxiliary.kanban_decomposer</code> را استفاده، فهرست پروفایل‌های شما ‏(با توضیحات) را می‌خواند و task را به یک گراف کوچک از کارت‌های فرزندِ مسیریابی‌شده-به-بهترین-متخصص fan-out می‌کند. task اصلی به‌عنوان والد هر فرزند زنده می‌ماند تا assignee‌اش ‏(<code>kanban.orchestrator_profile</code> یا پروفایل پیش‌فرض فعال وقتی unset است) وقتی همه تمام شد بیدار شود و تکمیل را قضاوت کند. قرص <b>Orchestration: Auto/Manual</b> بالای صفحه ‏(زمردی = Auto، خاکستری بی‌رنگ = Manual) را برگردانید یا مستقیم config.yaml را ویرایش کنید. هر دو حالت با ‏<code>hermes kanban specify</code> همزیستی دارند — آن همچنان به‌عنوان بازنویسی spec تک-task وقتی fan-out نمی‌خواهید موجود است.</li></ul></li>
+  <li>کارت‌ها شناسهٔ task، عنوان، badge اولویت، تگ tenant، پروفایل assign شده، شمارش کامنت/لینک، <b>قرص پیشرفت</b> ‏(<code>N/M</code> فرزند انجام‌شده وقتی task وابسته دارد) و «ساخته‌شده N قبل» را نشان می‌دهند. چک‌باکس به‌ازای هر کارت چندانتخابی را ممکن می‌کند.</li>
+  <li><strong>لاین‌های به‌ازای-پروفایل داخل Running</strong> — چک‌باکس نوار ابزار زیرگروه‌بندی ستون Running بر اساس assignee را toggle می‌کند.</li>
+  <li><strong>به‌روزرسانی زنده از طریق WebSocket</strong> — افزونه جدول الحاقیِ <code>task_events</code> را روی interval پول کوتاه دنبال می‌کند؛ تخته لحظهٔ اقدام هر پروفایل ‏(CLI، گیت‌وی یا تب دیگرِ داشبورد) تغییرات را بازتاب می‌دهد. reload ها debounce می‌شوند تا رگبار رویداد فقط یک refetch تریگر کند.</li>
+  <li><strong>Drag-drop</strong> کارت‌ها بین ستون‌ها برای تغییر وضعیت. drop مقدار ‏<code>PATCH /api/plugins/kanban/tasks/:id</code> را می‌فرستد که از همان کد ‏<code>kanban_db</code> مربوط به CLI عبور می‌کند — سه سطح هرگز واگرا نمی‌یابند. جابه‌جایی به وضعیت‌های مخرب ‏(<code>done</code>، ‏<code>archived</code>، ‏<code>blocked</code>) تأیید می‌گیرد. دستگاه‌های لمسی fallback مبتنی-بر-pointer دارند تا تخته از تبلت هم قابل استفاده باشد.</li>
+  <li><strong>دیالوگ ساخت task</strong> — روی <code>+</code> هر سربرگ ستون کلیک کنید تا modal با فیلدهای برچسب‌دار باز شود: عنوان، assignee، اولویت، مهارت‌ها، نوع/مسیر workspace ‏(seed‌شده از پوشهٔ پروژه board؛ override به‌ازای-task)، حالت هدف و ‏(اختیاری) task والد از کشویی روی همهٔ task های موجود. Enter برای ساخت، Shift+Enter برای خط جدید در فیلد عنوان، Escape برای لغو. ساخت از ستون Triage خودکار task جدید را در triage پارک می‌کند.</li>
+  <li><strong>چندانتخاب با اکشن‌های انبوه</strong> — shift/ctrl-click روی کارت یا تیک چک‌باکسش آن را به انتخاب اضافه می‌کند. نوار اکشن انبوه بالای صفحه ظاهر می‌شود با جابه‌جایی وضعیت گروهی، آرشیو و reassign ‏(از کشویی پروفایل یا «(unassign)»). batch های مخرب اول تأیید می‌گیرند. شکست‌های جزئی per-id بدون قطع بقیه گزارش می‌شوند.</li>
+  <li><strong>کلیک روی کارت</strong> ‏(بدون shift/ctrl) drawer کناری باز می‌کند ‏(Escape یا کلیک-بیرون می‌بندد) با:
+    <ul>
+      <li><b>عنوان قابل‌ویرایش</b> — روی heading کلیک کنید تا rename شود.</li>
+      <li><b>assignee / اولویت قابل‌ویرایش</b> — روی ردیف متا کلیک کنید تا بازنویسی شود.</li>
+      <li><b>توضیح قابل‌ویرایش</b> — پیش‌فرض markdown-رندر ‏(تیتر، ضخیم، ایتالیک، کد درون‌خطی، بلوک کد محصور، لینک‌های http(s)/mailto، فهرست گلوله‌ای) با دکمهٔ «edit» که textarea عوض می‌کند. رندر مارک‌داون یک renderer کوچک XSS-safe است — هر جانشینی روی ورودی HTML-escape اجرا می‌شود، فقط لینک‌های http(s)/mailto عبور می‌کنند و همیشه ‏target="_blank" + ‏rel="noopener noreferrer" ست می‌شود.</li>
+      <li><b>ویرایشگر وابستگی</b> — فهرست چیپ والدین و فرزندان هرکدام با × برای unlink، به‌اضافهٔ کشویی روی همهٔ task های دیگر برای افزودن والد یا فرزند جدید. تلاش‌های چرخه سمت سرور با پیام واضح رد می‌شوند.</li>
+      <li><b>ردیف اکشن وضعیت</b> ‏(→ triage / → ready / → running / block / unblock / complete / archive) با پرامپت تأیید برای جابه‌جایی‌های مخرب. برای کارت‌های ستون <b>Triage</b> دو اکشن LLM-محور هم دارد: <b>⚗ Decompose</b> که task را به گرافی از task های فرزند مسیریابی‌شده-به-پروفایل‌های متخصص بر اساس توضیح fan-out می‌کند و <b>✨ Specify</b> که یک بازنویسی spec تک-task انجام می‌دهد. Decompose وقتی LLM تشخیص دهد task از fan-out سود نمی‌برد به ارتقای سبک-spec برمی‌گردد، پس ابرمجموعهٔ سخت‌گیرانه است. هر دو از CLI ‏(<code>hermes kanban decompose &lt;id&gt;</code>/<code>specify &lt;id&gt;</code>/<code>--all</code>)، از هر پلتفرم گیت‌وی ‏(<code>/kanban decompose &lt;id&gt;</code>) و programmatik از طریق ‏<code>POST /api/plugins/kanban/tasks/:id/decompose</code> و ‏<code>…/specify</code> در دسترس‌اند. مدل‌ها را زیر ‏<code>auxiliary.kanban_decomposer</code> و ‏<code>auxiliary.triage_specifier</code> در config.yaml پیکربندی کنید.</li>
+      <li>بخش نتیجه ‏(هم markdown-رندر)، رشتهٔ کامنت با Enter-to-submit و ۲۰ رویداد آخر.</li>
+    </ul></li>
+  <li><b>فیلترهای نوار ابزار</b> — جست‌وجوی متن آزاد، کشویی tenant ‏(پیش‌فرض از ‏<code>dashboard.kanban.default_tenant</code>)، کشویی assignee، toggle «show archived»، toggle «lanes by profile» و دکمهٔ <b>Nudge dispatcher</b> تا لازم نباشد منتظر تیک ۶۰ ثانیه بعدی بمانید.</li>
+</ul>
+<p>از نظر بصری هدف، چیدمان آشنای Linear/Fusion است: تم تیره، سربرگ ستون با شمارنده‌ها، نقاط وضعیت رنگی، قرص‌های chip برای اولویت و tenant. افزونه فقط CSS var های تم را می‌خواند ‏(--color-*، --radius، --font-mono و...)، پس با هر تم فعال داشبورد خودکار reskin می‌شود.</p>
+
+<h3 id="auto-manual">Auto در برابر Manual ارکستراسیون</h3>
+<p>تخته کانبان دو راه برای هندل کردن taskی که داخل ستون Triage می‌اندازید دارد:</p>
+<p><b>Auto ‏(پیش‌فرض)</b> — ‏<code>kanban.auto_decompose: true</code>. dispatcher جاسازی‌شده-در-گیت‌وی در هر تیک تجزیه‌گر را اجرا می‌کند، محدود به ‏<code>kanban.auto_decompose_per_tick</code> ‏(پیش‌فرض ۳ task در هر تیک) تا بار انبوه task های triage باعث خرج انفجاری LLM کمکی نشود. تجزیه‌گر پرامپت تجزیه داخلی + مسیر مدل ‏<code>auxiliary.kanban_decomposer</code> را استفاده، پروفایل‌های نصب‌شده + توضیحاتشان را می‌خواند و از LLM می‌خواهد گراف JSON task تولید کند: کدام task ها spawn شوند، به چه کسی بروند و کدام به کدام وابسته‌اند. task اصلی triage والد هر برگ گراف می‌شود، پس تا کامل شدن کل گراف زنده می‌ماند — و سپس به ‏ready برمی‌گردد تا assignee‌اش ‏(<code>kanban.orchestrator_profile</code> یا پروفایل پیش‌فرض فعال) تکمیل را قضاوت و اگر کار تمام نیست task بیشتری اضافه کند. این جریانِ «یک خط بینداز و برو» است.</p>
+<p><b>Manual</b> — ‏<code>kanban.auto_decompose: false</code>. task های triage تا اقدام شما در triage می‌مانند. دکمهٔ <b>⚗ Decompose</b> روی کارت را کلیک، ‏<code>hermes kanban decompose &lt;id&gt;</code> ‏(یا ‏<code>--all</code>) را اجرا یا از چت ‏<code>/kanban decompose &lt;id&gt;</code> را بزنید. این رفتار قبل-از-تجزیه‌گر تخته را مطابقت می‌دهد؛ وقتی کنترل کامل دارید که چه چیزی کِی اجرا شود مفید است.</p>
+<p><b>مرز مهم:</b> حالت Manual فقط تجزیه‌گر داخلی Triage را غیرفعال می‌کند. مانع ‏<code>kanban_create</code> توسط پروفایل نمی‌شود و بیدارشدن‌های نشست-سازنده را هم خاموش نمی‌کند. با ‏<code>kanban.auto_subscribe_on_create: true</code>، رویداد پایانی task ایجنت مبدأ را با یک نوبت وضعیت مصنوعی ازسر می‌گیرد تا handoff را بازرسی و تصمیم بگیرد آیا کار پیگیریِ واقعاً جدیدی لازم است. وقتی تکمیل باید منفعل بماند ‏<code>auto_subscribe_on_create: false</code> کنید. برای provenance، فرزندان تجزیه‌گر داخلی ‏<code>created_by=auto-decomposer</code> دارند؛ task های ساخته‌شده توسط پروفایل ازسرگرفته‌شده نام همان پروفایل را حمل می‌کنند.</p>
+<p>جابه‌جایی بین دو حالت از قرص <b>Orchestration: Auto/Manual</b> بالای صفحه کانبان ‏(زمردی = Auto، خاکستری بی‌رنگ = Manual)، یا ویرایش مستقیم config.yaml. هر دو حالت با ‏<code>hermes kanban specify</code> همزیستی دارند — همچنان به‌عنوان بازنویسی spec تک-task موجود است.</p>
+<p>تصمیم‌های مسیریابی تجزیه‌گر به توضیحات پروفایل وابسته است که primitive برچسب‌گذاری به‌ازای-پروفایلی است با ‏<code>hermes profile create --description "..."</code>، ‏<code>hermes profile describe &lt;name&gt; --text "..."</code>، ‏<code>hermes profile describe &lt;name&gt; --auto</code> ‏(LLM از مهارت‌ها + مدل نصب‌شدهٔ پروفایل تولید می‌کند) یا ویرایشگر به‌ازای-پروفایل داشبورد داخل پنل گستردهٔ <b>Orchestration settings</b>. پروفایل‌های بدون توضیح همچنان در فهرست می‌آیند — با نام قابل مسیریابی‌اند فقط دقیق‌تر نیستند. تجزیه‌گر هرگز فرزندی با ‏<code>assignee=None</code> زمین نمی‌زند: وقتی LLM پروفایل ناشناخته‌ای انتخاب کند فرزند به ‏<code>kanban.default_assignee</code> ‏(یا پروفایل پیش‌فرض فعال اگر unset باشد) مسیریابی می‌شود.</p>
+<p>‏<code>kanban.orchestrator_profile</code> پرامپت، مهارت‌ها یا منطق سفارشی آن پروفایل را داخل فراخوانی تجزیه لود نمی‌کند. تعیین می‌کند بعد از fan-out چه کسی مالک task ریشه/ارکستراسیون است. برای تغییر مدل/ارائه‌دهندهٔ تجزیه‌گر ‏<code>auxiliary.kanban_decomposer</code> را پیکربندی کنید. برای استفاده از منطق تقسیم-کارِ سفارشی یک پروفایل به‌جای تجزیه‌گر داخلی، به Manual سوئیچ کنید و بگذارید آن پروفایل صریحاً task بسازد یا تجزیه کند.</p>
+<p>کلیدهای پیکربندی ‏(همه زیر ‏<code>kanban:</code> در ‏<code>~/.hermes/config.yaml</code>):</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید</th><th>پیش‌فرض</th><th>هدف</th></tr></thead>
+  <tbody>
+    <tr><td><code>auto_decompose</code></td><td><code>true</code></td><td>dispatcher خودکار تجزیه‌گر داخلی را برای task های Triage در هر تیک اجرا می‌کند. گیتی روی فراخوانی‌های ‏kanban_create پروفایل‌محور یا نوبت‌های بیداری سازنده نیست.</td></tr>
+    <tr><td><code>auto_decompose_per_tick</code></td><td><code>3</code></td><td>سقف تجزیه‌ها به‌ازای هر تیک dispatcher. مازاد به تیک بعدی موکول می‌شود.</td></tr>
+    <tr><td><code>orchestrator_profile</code></td><td><code>""</code></td><td>پروفایل اختصاص‌یافته به task ریشه/ارکستراسیون بعد از تجزیه. خالی = برگشت به پروفایل پیش‌فرض فعال.</td></tr>
+    <tr><td><code>default_assignee</code></td><td><code>""</code></td><td>جایی که فرزند وقتی LLM پروفایل ناشناخته‌ای انتخاب کرد می‌نشیند. خالی = برگشت به پیش‌فرض فعال.</td></tr>
+    <tr><td><code>auto_subscribe_on_create</code></td><td><code>true</code></td><td>وقتی ‏kanban_create داخل یک نشست ماندگار گیت‌وی/TUI اجرا شود، رویدادهای پایانی ایجنت مبدأ را با نوبت وضعیت مصنوعی ازسر می‌گیرند. برای تکمیل منفعل یا الزام فراخوانی‌های صریح ‏kanban_notify-subscribe مقدار false. مستقل از auto_decompose.</td></tr>
+    <tr><td><code>done_sub_retention_days</code></td><td><code>30</code></td><td>اشتراک‌های notify از ‏done جان می‌برند ‏(امن-برای-reopen) و روی ‏archived حذف می‌شوند. ‏GC نوتیفایر اشتراک‌هایی که task‌شان این تعداد روز بدون رویداد جدید در done بوده را purge می‌کند و رشد جدول sub را روی board هایی که هرگز آرشیو نمی‌کنند محدود می‌سازد. ‏<code>0</code> sweep را خاموش می‌کند.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>و دو اسلات LLM کمکی:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید</th><th>هدف</th></tr></thead>
+  <tbody>
+    <tr><td><code>auxiliary.kanban_decomposer</code></td><td>مدلی که گراف task تولید می‌کند ‏(فراخوانی‌شده توسط Decompose). مقدار provider/model را ست کنید تا مدل چت اصلی override شود.</td></tr>
+    <tr><td><code>auxiliary.profile_describer</code></td><td>مدلی که توضیحات پروفایل را خودکار تولید می‌کند ‏(فراخوانی‌شده توسط ‏hermes profile describe --auto).</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>معماری</h3>
+<p>‏GUI سخت‌گیرانه یک لایهٔ <b>خواندن-از-طریق-DB + نوشتن-از-طریق-kanban_db</b> است بدون هیچ منطق دامنه‌ای خودش:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>┌────────────────────────┐      WebSocket (tails task_events)
+│   React SPA (plugin)   │ ◀──────────────────────────────────┐
+│   HTML5 drag-and-drop  │                                    │
+└──────────┬─────────────┘                                    │
+           │ REST over fetchJSON                              │
+           ▼                                                  │
+┌────────────────────────┐     writes call kanban_db.*        │
+│  FastAPI router        │     directly — same code path      │
+│  plugins/kanban/       │     the CLI /kanban verbs use      │
+│  dashboard/plugin_api.py                                    │
+└──────────┬─────────────┘                                    │
+           │                                                  │
+           ▼                                                  │
+┌────────────────────────┐                                    │
+│  ~/.hermes/kanban.db   │ ───── append task_events ──────────┘
+│  (WAL, shared)         │
+└────────────────────────┘</code></pre>
+</div>
+
+<h3>سطح REST</h3>
+<p>همهٔ مسیرها زیر ‏<code>/api/plugins/kanban/</code> mount و توسط توکن نشست گذرا داشبورد محافظت می‌شوند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متد</th><th>مسیر</th><th>هدف</th></tr></thead>
+  <tbody>
+    <tr><td><code>GET</code></td><td><code>/board?tenant=&lt;name&gt;&amp;include_archived=…</code></td><td>تخته کامل گروه‌بندی‌شده بر اساس ستون وضعیت، به‌اضافهٔ tenants + assignee ها برای کشویی‌های فیلتر</td></tr>
+    <tr><td><code>GET</code></td><td><code>/tasks/:id</code></td><td>task + کامنت‌ها + رویدادها + لینک‌ها</td></tr>
+    <tr><td><code>POST</code></td><td><code>/tasks</code></td><td>ساخت ‏(wrap ‏kanban_db.create_task، می‌پذیرد ‏triage: bool و ‏parents: [id, …])</td></tr>
+    <tr><td><code>PATCH</code></td><td><code>/tasks/:id</code></td><td>وضعیت / assignee / اولویت / عنوان / بدنه / نتیجه</td></tr>
+    <tr><td><code>POST</code></td><td><code>/tasks/bulk</code></td><td>اعمال همان patch ‏(وضعیت/آرشیو/assignee/اولویت) روی همهٔ شناسه‌های داخل ids. شکست‌های per-id بدون قطع خواهران گزارش می‌شوند</td></tr>
+    <tr><td><code>POST</code></td><td><code>/tasks/:id/comments</code></td><td>الحاق کامنت</td></tr>
+    <tr><td><code>POST</code></td><td><code>/tasks/:id/specify</code></td><td>اجرای specifier مربوط به triage — LLM کمکی بدنهٔ task را پرورش و از triage به todo ارتقا می‌دهد. ‏{ok, task_id, reason, new_title} برمی‌گرداند؛ ‏ok=false با دلیل خوانا برای «در triage نیست» / نبودن کلاینت کمکی / خطای LLM مقدار 200 است نه 4xx</td></tr>
+    <tr><td><code>POST</code></td><td><code>/tasks/:id/decompose</code></td><td>اجرای تجزیه‌گر کانبان — LLM کمکی گراف task تولید و helper اتمیک فرزندان را می‌سازد + ریشه را لینک + ‏triage ← todo را flip می‌کند. ‏{ok, task_id, reason, fanout, child_ids, new_title} برمی‌گرداند. همین قاعدهٔ 200-on-LLM-error مثل specify</td></tr>
+    <tr><td><code>GET</code></td><td><code>/profiles</code></td><td>فهرست پروفایل‌های نصب‌شده با توضیحاتشان ‏(مصرف‌شده توسط ویرایشگر توضیح-پروفایل داشبورد و picker ارکستراتور)</td></tr>
+    <tr><td><code>PATCH</code></td><td><code>/profiles/:name</code></td><td>ست/پاک‌کردن توضیح پروفایل ‏(نوشتهٔ کاربر — description_auto: false). ‏{ok, profile, description} برمی‌گرداند</td></tr>
+    <tr><td><code>POST</code></td><td><code>/profiles/:name/describe-auto</code></td><td>تولید توضیح برای پروفایل از طریق ‏auxiliary.profile_describer. با ‏description_auto: true ذخیره می‌شود تا داشبورد badge «review» سطح کند</td></tr>
+    <tr><td><code>GET</code></td><td><code>/orchestration</code></td><td>خواندن تنظیمات ارکستراسیون کانبان ‏(orchestrator_profile، default_assignee، auto_decompose) به‌اضافهٔ مقادیر مؤثر حل‌شده بعد از fallback ها</td></tr>
+    <tr><td><code>PUT</code></td><td><code>/orchestration</code></td><td>به‌روزرسانی یکی یا بیشتر از سه کلید ارکستراسیون در config.yaml. اعتبارسنجی می‌کند نام‌های پروفایل غیرخالی واقعاً وجود داشته باشند</td></tr>
+    <tr><td><code>POST</code></td><td><code>/links</code></td><td>افزودن وابستگی ‏(parent_id ← child_id)</td></tr>
+    <tr><td><code>DELETE</code></td><td><code>/links?parent_id=…&amp;child_id=…</code></td><td>حذف وابستگی</td></tr>
+    <tr><td><code>POST</code></td><td><code>/dispatch?max=…&amp;dry_run=…</code></td><td>سرکوب dispatcher — رد شدن از انتظار ۶۰ ثانیه</td></tr>
+    <tr><td><code>GET</code></td><td><code>/config</code></td><td>خواندن ترجیحات ‏dashboard.kanban از config.yaml — default_tenant، lane_by_profile، include_archived_by_default، render_markdown</td></tr>
+    <tr><td><code>WS</code></td><td><code>/events?since=&lt;event_id&gt;</code></td><td>استریم زندهٔ ردیف‌های task_events</td></tr>
+  </tbody>
+</table>
+</div>
+<p>هر هندلر wrapper نازکی است — افزونه حدود ۷۰۰ خط پایتون است ‏(router + tail ‏WebSocket + batcher انبوه + خواننده config) و منطق کسب‌وکار جدیدی نمی‌افزاید. helper کوچک ‏<code>_conn()</code> روی هر خواندن و نوشتن ‏kanban.db را خودکار init می‌کند، پس نصب تازه فارغ از اینکه کاربر اول داشبورد را باز کرده، مستقیم REST را زده یا ‏<code>hermes kanban init</code> را اجرا کرده کار می‌کند.</p>
+
+<h3>پیکربندی داشبورد</h3>
+<p>هرکدام از این کلیدها زیر ‏<code>dashboard.kanban</code> در ‏<code>~/.hermes/config.yaml</code> پیش‌فرض‌های تب را عوض می‌کند — افزونه هنگام لود با ‏<code>GET /config</code> می‌خواندشان:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>dashboard:
+  kanban:
+    default_tenant: acme              # preselects the tenant filter
+    lane_by_profile: true             # default for the "lanes by profile" toggle
+    include_archived_by_default: false
+    render_markdown: true             # set false for plain &lt;pre&gt; rendering</code></pre>
+</div>
+<p>هر کلید اختیاری است و به پیش‌فرض نمایش‌داده‌شده برمی‌گردد.</p>
+
+<h3>مدل امنیت</h3>
+<p>middleware احراز HTTP داشبورد صریحاً از ‏<code>/api/plugins/</code> می‌گذرد — مسیرهای افزونه عمداً بدون احراز هستند چون داشبورد پیش‌فرض به localhost بایند می‌شود. یعنی سطح REST کانبان از هر پروسه‌ای روی میزبان قابل‌رسید است.</p>
+<p>WebSocket یک گام اضافی برمی‌دارد: توکن نشست گذرا داشبورد را به‌عنوان پارامتر query ‏<code>?token=…</code> می‌خواهد ‏(مرورگرها روی درخواست upgrade نمی‌توانند Authorization ست کنند)، مطابق الگوی پل PTY درون-مرورگری.</p>
+<p>اگر ‏<code>hermes dashboard --host 0.0.0.0</code> اجرا کنید هر مسیر افزونه — کانبان هم شامل — از شبکه قابل‌رسید می‌شود. <b>روی میزبان مشترک این کار را نکنید.</b> تخته بدنهٔ task ها، کامنت‌ها و مسیرهای workspace را دارد؛ مهاجمی که به این مسیرها برسد دسترسی خواندن به کل سطح همکاری شما می‌گیرد و می‌تواند task بسازد / reassign / archive کند.</p>
+<p>‏task ها در ‏<code>~/.hermes/kanban.db</code> عمداً پروفایل-بی‌تفاوت‌اند ‏(همان primitive هماهنگی است). اگر داشبورد را با ‏<code>hermes -p &lt;profile&gt; dashboard</code> باز کنید تخته همچنان task های ساخته‌شده توسط هر پروفایل دیگر روی میزبان را نشان می‌دهد. یک کاربر همهٔ پروفایل‌ها را مالک است ولی اگر چند persona همزیستی دارند دانستنش ارزش دارد.</p>
+
+<h3>به‌روزرسانی‌های زنده</h3>
+<p>‏<code>task_events</code> جدول SQLite الحاقی با ‏id یکنواست. endpoint ‏WebSocket آخرین شناسهٔ رویداد دیده‌شده هر کلاینت را نگه و ردیف‌های جدید را به‌محض فرود push می‌کند. وقتی رگبار رویداد برسد فرانت endpoint ارزانِ تخته را reload می‌کند — ساده‌تر و درست‌تر از تلاش برای وصله‌کردن وضعیت محلی از هر نوع رویداد. حالت WAL یعنی حلقهٔ خواندن هرگز تراکنش‌های claim ‏BEGIN IMMEDIATE مربوط به dispatcher را بلاک نمی‌کند.</p>
+
+<h3>توسعه‌دادنش</h3>
+<p>افزونه قرارداد استاندارد افزونهٔ داشبورد هرمس را استفاده می‌کند — مرجع کامل manifest، slot های shell، slot های page-scoped و Plugin SDK را در «توسعه داشبورد» ببینید. ستون‌های اضافه، chrome سفارشی کارت، layout های فیلتر-tenant یا جایگزین‌های کامل ‏tab.override همه بدون fork کردن این افزونه بیان‌پذیرند.</p>
+<p>غیرفعال‌کردن بدون حذف: ‏<code>dashboard.plugins.kanban.enabled: false</code> را به config.yaml بیفزایید ‏(یا ‏plugins/kanban/dashboard/manifest.json را حذف کنید).</p>
+
+<h3>مرز دامنه</h3>
+<p>‏GUI عمداً لاغر است. هرچه افزونه انجام می‌دهد از CLI قابل‌رسید است؛ افزونه فقط آن را برای انسان‌ها راحت می‌کند. auto-assignment، بودجه‌ها، گیتی‌های حاکمیتی و نماهای چارت-سازمانی در فضای-کاربر می‌مانند — یک پروفایل router، افزونهٔ دیگری، یا بازاستفاده از ‏tools/approval.py — دقیقاً طبق بخش خارج-از-دامنهٔ spec طراحی.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> مرجع فرمان‌های CLI</h2>
+<p>این سطحی است که <b>شما</b> ‏(یا اسکریپت‌ها، کرون، داشبورد) برای راندن تخته استفاده می‌کنید. worker های در حال اجرا داخل dispatcher برای همین عملیات سطح <a href="#workers-board">ابزار kanban_*</a> را استفاده می‌کنند — CLI اینجا و ابزارها آنجا هر دو از kanban_db عبور می‌کنند، پس دو سطح از نظر ساخت هم‌نظرند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes kanban init                                     # create kanban.db + print daemon hint
+hermes kanban create "&lt;title&gt;" [--body ...] [--assignee &lt;profile&gt;]
+                                [--parent &lt;id&gt;]... [--tenant &lt;name&gt;]
+                                [--workspace scratch|worktree|worktree:&lt;path&gt;|dir:&lt;path&gt;]
+                                [--branch &lt;name&gt;]
+                                [--priority N] [--triage] [--idempotency-key KEY]
+                                [--max-runtime 30m|2h|1d|&lt;seconds&gt;]
+                                [--max-retries N]
+                                [--goal] [--goal-max-turns N]
+                                [--skill &lt;name&gt;]...
+                                [--json]
+hermes kanban list [--mine] [--assignee P] [--status S] [--tenant T] [--archived]
+        [--workflow-template-id &lt;id&gt;] [--current-step-key &lt;key&gt;]
+        [--sort created|created-desc|priority|priority-desc|status|assignee|title|updated]
+        [--json]
+hermes kanban show &lt;id&gt; [--json]
+hermes kanban assign &lt;id&gt; &lt;profile&gt;                    # or 'none' to unassign
+hermes kanban reassign &lt;id&gt;... &lt;profile&gt;               # bulk re-assign tasks to a profile
+hermes kanban edit &lt;id&gt; [--title ...] [--body ...]     # edit task title / body / priority in place
+        [--priority N]
+hermes kanban promote &lt;id&gt;...                          # move todo/blocked tasks to ready (recovery)
+hermes kanban schedule &lt;id&gt; --at &lt;ISO8601&gt;             # set/clear a task's scheduled_at start time
+hermes kanban diagnostics [--json]                     # board health snapshot (alias: diag)
+hermes kanban link &lt;parent_id&gt; &lt;child_id&gt;
+hermes kanban unlink &lt;parent_id&gt; &lt;child_id&gt;
+hermes kanban claim &lt;id&gt; [--ttl SECONDS]
+hermes kanban comment &lt;id&gt; "&lt;text&gt;" [--author NAME]
+
+# Bulk verbs — accept multiple ids:
+hermes kanban complete &lt;id&gt;... [--result "..."]
+hermes kanban block &lt;id&gt; "&lt;reason&gt;" [--ids &lt;id&gt;...]
+hermes kanban unblock &lt;id&gt;...
+hermes kanban archive &lt;id&gt;...
+
+hermes kanban request-review &lt;id&gt; [--summary "..."] [--metadata JSON] [--reviewer PROFILE]
+hermes kanban request-changes &lt;id&gt; "&lt;required changes&gt;"               # active reviewer -&gt; implementer
+hermes kanban reopen-review  &lt;id&gt;... [--reason "..."]                 # changes requested: 'review' -&gt; ready/todo
+
+hermes kanban tail &lt;id&gt;                                # follow a single task's event stream
+hermes kanban watch [--assignee P] [--tenant T]        # live stream ALL events to the terminal
+        [--kinds completed,blocked,…] [--interval SECS]
+hermes kanban heartbeat &lt;id&gt; [--note "..."]            # worker liveness signal for long ops
+hermes kanban runs &lt;id&gt; [--json]                       # attempt history (one row per run)
+hermes kanban assignees [--json]                       # profiles on disk + per-assignee task counts
+hermes kanban dispatch [--dry-run] [--max N]           # one-shot pass
+        [--failure-limit N] [--json]
+hermes kanban daemon --force                           # DEPRECATED — standalone dispatcher (use `hermes gateway start` instead)
+        [--failure-limit N] [--pidfile PATH] [-v]
+hermes kanban stats [--json]                           # per-status + per-assignee counts
+hermes kanban log &lt;id&gt; [--tail BYTES]                  # worker log from ~/.hermes/kanban/logs/
+hermes kanban notify-subscribe &lt;id&gt;                    # gateway bridge hook (used by /kanban in the gateway)
+        --platform &lt;name&gt; --chat-id &lt;id&gt; [--thread-id &lt;id&gt;] [--user-id &lt;id&gt;]
+        [--chat-type dm|group|channel|thread] [--delivery-mode notify|notify+wake|wake]
+hermes kanban notify-list [&lt;id&gt;] [--json]
+hermes kanban notify-unsubscribe &lt;id&gt;
+        --platform &lt;name&gt; --chat-id &lt;id&gt; [--thread-id &lt;id&gt;]
+hermes kanban context &lt;id&gt;                             # what a worker sees
+hermes kanban specify [&lt;id&gt; | --all] [--tenant T]      # flesh out a triage-column idea
+        [--author NAME] [--json]                       #   into a full spec and promote to todo
+hermes kanban gc [--event-retention-days N]            # workspaces + old events + old logs
+        [--log-retention-days N]</code></pre>
+</div>
+<p>همهٔ فرمان‌ها به‌عنوان فرمان اسلش هم در CLI تعاملی و گیت‌وی پیام‌رسانی موجودند ‏(فرمان اسلش ‎/kanban پایین را ببینید).</p>
+<p>‏<code>--max-retries</code> مدارشکن به‌ازای-task برای dispatcher است. ‏<code>--max-retries 1</code> task را روی اولین تلاش ناموفق بلاک می‌کند و ‏<code>--max-retries 3</code> دو retry اجازه و روی شکست سوم بلاک می‌کند. حذفش کنید تا ‏<code>kanban.failure_limit</code> از config.yaml و بعد پیش‌فرض داخلی استفاده شود.</p>
+
+<h3>پیکربندی هم‌زمانی، زمان‌بندی و ارتقای فرزند</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید پیکربندی</th><th>پیش‌فرض</th><th>چه می‌کند</th></tr></thead>
+  <tbody>
+    <tr><td><code>kanban.max_in_progress</code></td><td>unset ‏(بی‌حد)</td><td>تعداد task های هم‌زمان-در-جراحی را سقف می‌زند. وقتی تخته از قبل N running دارد dispatcher spawn بیشتر را رد می‌کند — برای worker های کند ‏(LLM های محلی، میزبان‌های کم‌منبع) مفید است تا قبل از تلنبار شدن بیشتر، موجودها را تمام کنند. مقادیر نامعتبر یا زیر ۱ هشدار لاگ و مثل بی‌حد رفتار می‌کنند.</td></tr>
+    <tr><td><code>kanban.max_in_progress_per_profile</code></td><td>unset ‏(بی‌حد)</td><td>واریانت به‌ازای-پروفایل max_in_progress — سقف می‌زند یک پروفایل assignee واحد چند task هم‌زمان اجرا کند. وقتی یک پروفایل کند یا rate-limit است ولی بقیه باید جریان داشته باشند مفید است. در کنار ‏max_in_progress سراسری-board اعمال می‌شود؛ هر دو باید اجازه دهند تا spawn ادامه یابد.</td></tr>
+    <tr><td><code>kanban.auto_promote_children</code></td><td><code>true</code></td><td>بعد از اینکه ‏decompose_triage_task() فرزندانی بدون وابستگی والد-گیتی تولید کرد خودکار به ready ارتقا می‌یابند تا dispatcher برداردشان. ‏false کنید تا بازبینی دستی الزامی شود — فرزندان در todo می‌مانند تا شما ارتقا دهید.</td></tr>
+    <tr><td><code>kanban.default_workdir</code></td><td>unset</td><td>پیش‌فرض پوشهٔ کاری در سطح-board که روی task های جدید وقتی نه --workspace نه خود task override‌اش کند اعمال می‌شود. ‏workspace به‌ازای-task همچنان برنده است.</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>kanban:
+  max_in_progress: 2
+  auto_promote_children: false
+  default_workdir: ~/work/active-project</code></pre>
+</div>
+
+<h3>شروع‌های زمان‌بندی‌شدهٔ task ‏(scheduled_at)</h3>
+<p>‏scheduled_at را روی taskی ست کنید تا dispatch تا زمان مشخصی به تعویق بیفتد. dispatcher task های ready دارای scheduled_at آینده را رد و در اولین تیک بعد از آن timestamp برداشتشان می‌کند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes kanban create "nightly backup audit" \
+  --assignee ops --scheduled-at "2026-06-01T03:00:00Z"</code></pre>
+</div>
+
+<h3>نگهبان respawn</h3>
+<p>‏dispatcher از respawn مجدد یک task ready وقتی اجرای قبلی خطای quota/auth/429 خورده بود ‏(blocker_auth)، یا یک اجرا داخل پنجرهٔ نگهبان موفق کامل شده بود ‏(recent_success)، یا کامنت اخیر task به PR گیت‌هابی لینک می‌دهد ‏(active_pr) امتناع می‌کند. مانع طوفان‌های مکرر worker روی همان باگ یا task می‌شود تا انسان عقب برسد. ردیف ‏<code>respawn_guarded</code> در مرجع رویداد را ببینید.</p>
+
+<h3>کشیدن-به-حذف و حذف انبوه ‏(داشبورد)</h3>
+<p>داشبورد یک <b>منطقهٔ drop سطل‌زباله</b> روی صفحه کانبان expose می‌کند — هر کارتی را داخلش بکشید تا task حذف شود ‏(آبشاری از طریق task_events، لینک‌های فرزند و اشتراک‌ها). پرامپت تأییدی مانع تصادف است. حذف انبوه هم از طریق ‏<code>DELETE /api/plugins/kanban/tasks</code> با بدنهٔ JSON ‏<code>{"ids": ["t_abc", "t_def", ...]}</code> در دسترس است.</p>
+
+<h3>endpoint های دید worker</h3>
+<p>API افزونهٔ داشبورد الان این endpoint های فقط-خواندنی ‏(+ یک فعل کنترل-اجرا) را برای مانیتورهای خارجی expose می‌کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Endpoint</th><th>برمی‌گرداند</th></tr></thead>
+  <tbody>
+    <tr><td><code>GET /api/plugins/kanban/workers/active</code></td><td>worker های الان spawn‌شده با PID، پروفایل، شناسهٔ task، زمان شروع، آخرین heartbeat</td></tr>
+    <tr><td><code>GET /api/plugins/kanban/runs/{id}</code></td><td>جزئیات تک-اجرا — شناسهٔ task، وضعیت، شروع/پایان، exit code، مسیر لاگ</td></tr>
+    <tr><td><code>POST /api/plugins/kanban/runs/{run_id}/terminate</code></td><td>پایان دادن به اجرایی قابل-reclaim — worker را متوقف و task را برای dispatch مجدد آزاد می‌کند</td></tr>
+    <tr><td><code>GET /api/plugins/kanban/inspect</code></td><td>snapshot ترکیبی dispatcher — backlog، شمارش در-جراحی نسبت به max_in_progress، رویدادهای اخیر</td></tr>
+  </tbody>
+</table>
+</div>
+<p>همه با همان auth افزونهٔ داشبورد بقیهٔ API افزونهٔ کانبان گیت می‌خورند.</p>
+
+<h3>helper توپولوژی Kanban Swarm</h3>
+<p>‏<code>hermes kanban swarm</code> گراف ماندگار <b>Kanban Swarm v1</b> را یک‌جا می‌سازد: یک کارت ریشه/blackboard کامل‌شده، N کارت worker موازی، یک کارت verifier گیت‌خورده-روی-همهٔ-worker ها و یک کارت synthesizer گیت‌خورده-روی-verifier. زمینهٔ مشترک swarm ‏(«blackboard») به‌صورت کامنت‌های JSON ساختاریافته روی کارت ریشه ذخیره می‌شود تا هر worker بخواندش.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes kanban swarm "Design a multi-region failover plan" \
+  --workers researcher,architect,sre \
+  --verifier reviewer --synthesizer writer</code></pre>
+</div>
+<p>گراف حاصل اتمیک commit می‌شود: dispatcher ها و خواننده‌های داشبورد یا هیچ swarm جدیدی یا توپولوژی کامل می‌بینند، هرگز گراف ریشه/worker/verifier جزئی‌لینک‌شده نه. سپس عادی dispatch می‌شود — worker ها موازی اجرا می‌شوند، verifier بعد از اتمام همه بیدار می‌شود و synthesizer بعد از اینکه verifier کار را تمیز علامت زد بیدار می‌شود.</p>
+</section>
+
+<section class="doc-sec" id="kanban-slash-command">
+<h2><span class="secnum">۱۰</span> فرمان اسلش ‏<code>/kanban</code></h2>
+<p>هر فعل ‏<code>hermes kanban &lt;action&gt;</code> به‌صورت ‏<code>/kanban &lt;action&gt;</code> هم قابل‌رسید است — از داخل نشست تعاملی ‏<code>hermes chat</code> <b>و</b> از هر پلتفرم گیت‌وی ‏(تلگرام، دیسکورد، اسلک، واتساپ، سیگنال، ماتریکس، Mattermost، ایمیل، SMS). هر دو سطح دقیقاً همان نقطهٔ ورودی ‏<code>hermes_cli.kanban.run_slash()</code> را صدا می‌زنند که درخت argparse مربوط به ‏<code>hermes kanban</code> را بازمصرف می‌کند، پس سطح آرگومان، فلگ‌ها و قالب خروجی بین CLI، ‏/kanban و ‏hermes kanban یکسان‌اند. لازم نیست برای راندن تخته چت را ترک کنید.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/kanban list
+/kanban show t_abcd
+/kanban create "write launch post" --assignee writer --parent t_research
+/kanban comment t_abcd "looks good, ship it"
+/kanban unblock t_abcd
+/kanban dispatch --max 3
+/kanban specify t_abcd                  # flesh out a triage one-liner into a real spec
+/kanban specify --all --tenant engineering  # sweep every triage task in one tenant</code></pre>
+</div>
+<p>آرگومان‌های چندواژه‌ای همانطور که روی شل quote کنید — ‏run_slash بقیهٔ خط را با ‏<code>shlex.split</code> parse می‌کند، پس ‏"..." و ‏'...' هر دو کار می‌کنند.</p>
+<h3>استفاده میان-اجرا: ‏/kanban از گیتی agent-در-حال-اجرا می‌گذرد</h3>
+<p>گیت‌وی معمولاً فرمان‌های اسلش و پیام‌های کاربر را وقتی ایجنت هنوز در حال فکر کردن است صف می‌کند — همان چیزی که مانع شروع اتفاقی نوبت دوم وقتی اولی در جراحی است می‌شود. <b>‏/kanban صریحاً از این گیت معاف است.</b> تخته در ‏<code>~/.hermes/kanban.db</code> زندگی می‌کند نه در وضعیت ایجنت در حال اجرا، پس خوانده‌ها ‏(list، ‏show، ‏context، ‏tail، ‏watch، ‏stats، ‏runs) و نوشته‌ها ‏(comment، ‏unblock، ‏block، ‏assign، ‏archive، ‏create، ‏link و...) همه فوراً عبور می‌کنند حتی میان-نوبت.</p>
+<p>این کل هدف جداسازی است:</p>
+<ul>
+  <li>workerی بلاک شد منتظر همتا ← شما از گوشی ‏<code>/kanban unblock t_abcd</code> می‌فرستید و dispatcher همتا را در تیک بعدی برمی‌دارد. worker بلاک‌شده قطع نمی‌شود — فقط دیگر بلاک نیست.</li>
+  <li>کارتی می‌بینید که زمینهٔ انسانی لازم دارد ← ‏<code>/kanban comment t_xyz "use the 2026 schema, not 2025"</code> روی رشتهٔ task می‌نشیند و <em>اجراهای بعدی</em> آن task آن را در ‏<code>kanban_show()</code> می‌خوانند.</li>
+  <li>می‌خواهید بدانید ناوگانتان چه می‌کند بدون توقف ارکستراتور ← ‏<code>/kanban list --mine</code> یا ‏<code>/kanban stats</code> تخته را بدون دست‌زدن به گفتگوی اصلی‌تان بازرسی می‌کند.</li>
+</ul>
+<h3>اشتراک خودکار روی ‏/kanban create ‏(فقط گیت‌وی)</h3>
+<p>وقتی از گیت‌وی با ‏<code>/kanban create "…"</code> task بسازید، چت مبدأ ‏(پلتفرم + شناسهٔ چت + شناسهٔ ترد) خودکار به رویدادهای پایانی آن task ‏(completed، ‏blocked، ‏gave_up، ‏crashed، ‏timed_out) مشترک می‌شود. به‌ازای هر رویداد پایانی یک پیام می‌گیرید — شامل خط اول خلاصهٔ نتیجهٔ worker روی completed — بدون polling یا یادسپاری شناسهٔ task.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>you&gt; /kanban create "transcribe today's podcast" --assignee transcriber
+bot&gt; Created t_9fc1a3  (ready, assignee=transcriber)
+     (subscribed — you'll be notified when t_9fc1a3 completes or blocks)
+
+… ~8 minutes later …
+
+bot&gt; ✓ t_9fc1a3 completed by transcriber
+     transcribed 42 minutes, saved to podcast/2026-05-04.md</code></pre>
+</div>
+<p>اشتراک‌ها از رسیدن task به ‏done جان می‌برند — تکمیل برگشت‌پذیر است ‏(بازبین یا کنترل‌گر می‌تواند task انجام‌شده را reopen کند)، پس نشست مبدأ از طریق چرخه‌های reopen به گرفتن اعلان ادامه می‌دهد. روی ‏archived ‏(وضعیت پایانی برگشت‌ناپذیر) خودحذف می‌شوند. روی board هایی که هرگز آرشیو نمی‌کنند sweep ‏GC اشتراک‌های task هایی را که ‏kanban.done_sub_retention_days روز ‏(پیش‌فرض ۳۰؛ ۰ برای خاموشی) بدون فعالیت جدید در done نشسته‌اند purge می‌کند تا ردیف‌های کهنه برای همیشه جمع نشوند. اگر create را با ‏--json اسکریپت کنید ‏(خروجی ماشینی) auto-subscribe رد می‌شود — فرض این است که فراخواننده‌های اسکریپتی می‌خواهند اشتراک‌ها را صریحاً با ‏<code>/kanban notify-subscribe</code> مدیریت کنند.</p>
+<p>auto-subscribe برخاسته-از-چت در حالت ‏notify+wake ساخته می‌شود: روی رویداد پایانی ایجنت مقصد هم پیام منفعل می‌گیرد <b>و</b> نوبت واقعی می‌زند، پس می‌تواند زمینهٔ board را بخواند و به صدای خودش جواب دهد. «حالت‌های تحویل» پایین را ببینید.</p>
+<h3>برش خروجی در پیام‌رسانی</h3>
+<p>پلتفرم‌های گیت‌وی سقف عملی طول پیام دارند. اگر ‏<code>/kanban list</code>، ‏<code>/kanban show</code> یا ‏<code>/kanban tail</code> بیش از ~۳۸۰۰ کاراکتر خروجی تولید کنند پاسخ با فوتر ‏<code>… (truncated; use \`hermes kanban …\` in your terminal for full output)</code> بریده می‌شود. سطح CLI چنین سقفی ندارد.</p>
+<h3>Autocomplete</h3>
+<p>در CLI تعاملی تایپ ‏<code>/kanban </code> و زدن Tab بین فهرست زیرفرمان‌های داخلی می‌چرخد ‏(list، ‏ls، ‏show، ‏create، ‏assign، ‏link، ‏unlink، ‏claim، ‏comment، ‏complete، ‏block، ‏unblock، ‏archive، ‏tail، ‏dispatch، ‏context، ‏init، ‏gc). افعال باقی‌ماندهٔ فهرست‌شده در مرجع CLI بالا ‏(watch، ‏stats، ‏runs، ‏log، ‏assignees، ‏heartbeat، ‏notify-subscribe، ‏notify-list، ‏notify-unsubscribe، ‏daemon) هم کار می‌کنند — فقط هنوز در فهرست سرنخ autocomplete نیستند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> الگوهای همکاری</h2>
+<p>تخته این هشت الگو را بدون هیچ primitive جدیدی پشتیبانی می‌کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>الگو</th><th>شکل</th><th>مثال</th></tr></thead>
+  <tbody>
+    <tr><td><b>P1 Fan-out</b></td><td>N خواهر، نقش واحد</td><td>«تحقیق ۵ زاویه به‌صورت موازی»</td></tr>
+    <tr><td><b>P2 Pipeline</b></td><td>زنجیرهٔ نقش: scout → editor → writer</td><td>اسمبل خلاصهٔ روزانه</td></tr>
+    <tr><td><b>P3 Voting / quorum</b></td><td>N خواهر + ۱ تجمیع‌گر</td><td>۳ محقق → ۱ بازبین انتخاب می‌کند</td></tr>
+    <tr><td><b>P4 Long-running journal</b></td><td>همان پروفایل + پوشهٔ مشترک + cron</td><td>vault اوبسیدین</td></tr>
+    <tr><td><b>P5 Human-in-the-loop</b></td><td>worker بلاک می‌شود ← کاربر کامنت ← unblock</td><td>تصمیم‌های مبهم</td></tr>
+    <tr><td><b>P6 @mention</b></td><td>مسیریابی درون‌خطی از نثر</td><td>‏<code>@reviewer look at this</code></td></tr>
+    <tr><td><b>P7 Thread-scoped workspace</b></td><td>‏<code>/kanban here</code> داخل یک ترد</td><td>تردهای گیت‌وی به‌ازای-پروژه</td></tr>
+    <tr><td><b>P8 Fleet farming</b></td><td>یک پروفایل، N سوژه</td><td>۵۰ اکانت شبکه اجتماعی</td></tr>
+    <tr><td><b>P9 Triage specifier</b></td><td>ایدهٔ خام ← triage ← ‏hermes kanban specify بدنه را پرورش ← todo</td><td>«این یک‌خطی را به task spec‌دار تبدیل کن»</td></tr>
+  </tbody>
+</table>
+</div>
+<p>برای مثال‌های کاربردی هرکدام ‏<code>docs/hermes-kanban-v1-spec.pdf</code> را ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> تحویل زمینه به کارت‌های پیگیری (لینک والد)</h2>
+<p>لینک والد فقط گیتی زمان‌بندی نیست — کانال تحویل زمینه از کارت <b>کامل‌شده</b> به کارت جدید است. وقتی کارتی با ‏<code>--parent &lt;done-card-id&gt;</code> می‌سازید دو اتفاق می‌افتد:</p>
+<ol>
+  <li><b>بلافاصله واجد شرایط است.</b> ‏create_task وضعیت را بر اساس وضعیت والدی ست می‌کند: فرزندی که والدینش همه ‏done هستند مستقیماً در ‏ready ساخته می‌شود — بدون انتظار، بدون ارتقای دستی. ‏(فرزندان والدین باز در todo می‌نشینند تا ‏recompute_ready وقتی آخرین والد تمام شد ارتقایشان دهد.)</li>
+  <li><b>handoff والد سوار می‌شود.</b> زمینهٔ worker ساخته‌شده برای فرزند ‏(build_worker_context، همان چیزی که ‏kanban_show() برمی‌گرداند) بخشی به نام ‏<code>## Parent task results</code> دارد با ‏summary و ‏metadata تکمیل هر والد، عیناً:</li>
+</ol>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>## Parent task results
+### t_77c26979 (completed just now)
+Added exponential backoff with jitter to the retry helper.
+_metadata_: `{"changed_files": ["hermes_cli/retry.py", "tests/test_retry.py"], "decisions": ["capped backoff at 60s", "jitter = full"]}`</code></pre>
+</div>
+<p>به همین دلیل الگوی کارِ پیگیری روی کارت تمام‌شده <b>یک کارت فرزند جدید است نه reopen کردن کارت done</b>. کارت‌های کامل‌شده تاریخچهٔ تغییرناپذیرند — زمینه‌شان از طریق لینک والد به جلو جریان می‌یابد. بازکاری همان-کارت ‏(حلقه‌های retry روی کارت در حال شکست) مکانیزم متفاوتی است: تلاش‌های قبلی روی <em>همان</em> کارت به‌عنوان «prior attempts» در زمینهٔ خودِ همان کارت surface می‌شوند.</p>
+<p>worktree یا branch به‌تنهایی جایگزین نیست: وضعیت repo به worker پیگیری می‌گوید کد <em>چه شکلی</em> است ولی نه <em>چرا</em> — تصمیم‌ها، تست‌های اجراشده و فایل‌های دست‌خورده در handoff ساختاریافته والد زندگی می‌کنند نه در گیت. شاهدی که موقع تکمیل والد وجود نداشت ‏(مثلاً لاگ CI که بعداً شکست خورد) جای‌اش بدنهٔ کارت جدید است.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Implementation card t_impl is done. CI fails two hours later.
+hermes kanban create "Fix CI failure from t_impl: test_retry flakes on 3.11" \
+    --assignee coder \
+    --parent t_impl \
+    --body "$(cat &lt;&lt;'EOF'
+CI run #4812 failed after t_impl merged.
+Log excerpt: FAILED tests/test_retry.py::test_backoff_jitter - TimeoutError
+Acceptance: tests/test_retry.py green on 3.11 and 3.12 in CI.
+Use a fresh worktree/branch; do not force-push the original branch.
+EOF
+)"</code></pre>
+</div>
+<p>worker اصلاح با summary و metadata کارت اصلی ‏(فایل‌های تغییر یافته، تصمیم‌ها) از قبل در زمینه spawn می‌شود به‌اضافهٔ شواهد تازه‌ای که در بدنه گذاشته‌اید.</p>
+
+<h3>آشتی‌دادن شاخه‌های متضاد worker ها</h3>
+<p>در خط‌لوله‌های مهندسی ‏(P1/P2 با worktree ها) شاخه‌های دو worker هنگام merge می‌توانند تداخل کنند. نگذارید هیچ‌یک از دو worker خودش داوری کند — ایجنتِ متضاد زمینهٔ همتایش را ندارد و به‌طور قابل‌اتکا سمت دیگر را overwrite یا کار خودش را رها می‌کند. به‌جایش یک کارت آشتی به یک <b>پروفایل سومِ بی‌طرف</b> assign کنید با <b>هر دو</b> کارت متضاد به‌عنوان والد لینک‌شده: لینک‌های والد خلاصه‌های تکمیل هر دو طرف را وارد زمینهٔ آشتی‌گر می‌کنند، پس هم هر دو diff و هم هر دو نیت را می‌گیرد. مهارت همراه‌بستهٔ <a href="https://github.com/NousResearch/hermes-agent/blob/main/skills/autonomous-ai-agents/merge-reconciler/SKILL.md" target="_blank" rel="noopener">merge-reconciler</a> به آن worker رویهٔ کامل را می‌دهد: طبقه‌بندی هر hunk متضاد، حل منصفانه، تأیید و برگرداندن summary‌ای که هر تصمیم را نام می‌برد.</p>
+
+<h3>نقاط داغ برخورد در کارزارهای موازی</h3>
+<p>در کارزارهای پهن بعضی فایل‌ها آهنربای برخورد می‌شوند: خیلی worker ها هرکدام کمی به همان فایل اضافه می‌کنند، هیچ‌کس مالک کوچک‌نگه‌داشتنش نیست و تبدیل به محل دائمی conflict های merge می‌شود. mitigation یک قاعدهٔ کامنت است نه primitive جدید. worker‌ای که متوجه شود diff‌اش مدام با خواهرانش در یک فایل تداخل دارد — یا فایلی که لمس می‌کند مدام در کامنت‌های اخیر کارت‌های دیگر ظاهر می‌شود — نباید بی‌صدا روی هم بریزد. به‌جایش روی کارت خودش کامنتی با پیشوند قابل‌تشخیص می‌گذارد:</p>
+<div class="codebox"><pre><code>hotspot: hermes_cli/kanban_db.py — third conflicting edit to the dispatch loop this wave</code></pre></div>
+<p>و فلگ را در metadata تکمیلش تکرار می‌کند. ارکستراتورها ‏(یا انسان‌هایی که تخته را بازبینی می‌کنند) که <b>دو یا بیشتر کامنت hotspot: نام‌برندهٔ همان مسیر</b> ببینند باید <b>قبل از</b> صف‌کردن کار بیشتری که بهش دست می‌زند یک کارت اختصاصی refactor/تجزیه برای آن فایل بسازند — شکافتن فایل آهنربا ارزان‌تر از آشتی‌دادن هر برخورد آینده‌ای است که ایجاد می‌کند. برای conflict هایی که <em>قبلاً</em> رخ داده از الگوی کارت-آشتی بالا با مهارت merge-reconciler استفاده کنید؛ فلگ‌گذاری hotspot اصلاح بالادستی است که مانع می‌شود آشتی‌گر تبدیل به لاین دائمی شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> استفاده چند-مستأجری</h2>
+<p>وقتی یک ناوگان متخصص به چند کسب‌وکار خدمت می‌کند هر task را با tenant تگ کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes kanban create "monthly report" \
+    --assignee researcher \
+    --tenant business-a \
+    --workspace dir:~/tenants/business-a/data/</code></pre>
+</div>
+<p>‏worker ها ‏<code>$HERMES_TENANT</code> دریافت و نوشته‌های حافظه‌شان را با پیشوند namespace می‌کنند. تخته، dispatcher و تعاریف پروفایل همگی مشترک‌اند؛ فقط داده scoped است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> اعلان‌های دسکتاپ</h2>
+<p>افزونهٔ Kanban اپ Desktop همان رویدادهای پایانی را native سطح می‌کند — بدون نیاز به پلتفرم گیت‌وی. وقتی سوکت رویداد زندهٔ تخته متصل است هر رویداد ‏completed، ‏blocked، ‏gave_up، ‏crashed، ‏timed_out یا مسیریابی-به-triage ‏(block_loop_detected) یک toast درون-اپ با handoff مربوط به worker ‏(خلاصه، دلیل بلاک یا خطا) و اکشن «Open Kanban» بالا می‌آورد. وقتی از پنجرهٔ هرمس دورید همان رویداد اعلان OS native هم شلیک می‌کند ‏(گیت‌خورده با ‏Settings ▸ Notifications ▸ Plugin notifications)، پس task‌ای که در اپ دیگری هستید به مانع می‌خورد همچنان به شما می‌رسد.</p>
+<p>پنجرهٔ پوشش: اعلان‌های دسکتاپ روی استریم رویداد زنده سوارند، پس فقط وقتی اپ در حال اجرا با افزونهٔ Kanban فعال است شلیک می‌شوند. رویدادهایی که وقتی اپ بسته است می‌رسند در launch بعدی به‌عنوان اعلان بازپخش نمی‌شوند — برای تحویلی که باید از بسته‌بودن اپ جان ببرد از اشتراک گیت‌وی ‏(پایین) استفاده کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> اعلان‌های گیت‌وی</h2>
+<p>وقتی ‏<code>/kanban create …</code> را از گیت‌وی ‏(تلگرام، دیسکورد، اسلک و...) اجرا کنید چت مبدأ خودکار به task جدید مشترک می‌شود. notifier پس‌زمینهٔ گیت‌وی هر چند ثانیه ‏task_events را poll و به‌ازای هر رویداد پایانی ‏(completed، ‏blocked، ‏gave_up، ‏crashed، ‏timed_out) یک پیام به آن چت تحویل می‌دهد. task های کامل‌شده خط اول ‏--result مربوط به worker را هم می‌فرستند تا بدون ‏<code>/kanban show</code> نتیجه را ببینید.</p>
+<p>اشتراک‌ها را از CLI هم صریحاً می‌شود مدیریت کرد — وقتی اسکریپت/job کرونی بخواهد چتی را که خودش ازش برنیامده مطلع کند مفید است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes kanban notify-subscribe t_abcd \
+    --platform telegram --chat-id 12345678 --thread-id 7 \
+    --chat-type group --delivery-mode notify+wake
+hermes kanban notify-list
+hermes kanban notify-unsubscribe t_abcd \
+    --platform telegram --chat-id 12345678 --thread-id 7</code></pre>
+</div>
+<p>اشتراک به‌محض رسیدن task به ‏done یا ‏archived خودش را حذف می‌کند؛ cleanup لازم نیست.</p>
+<h3>حالت‌های تحویل</h3>
+<p>‏<code>--delivery-mode</code> کنترل می‌کند notifier <b>چگونه</b> به رویداد پایانی واکنش دهد. هر اشتراک در یکی از سه حالت است ‏(notify پیش‌فرض و رفتار اصلی است):</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>حالت</th><th>پیام منفعل</th><th>ایجنت را بیدار می‌کند</th><th>کِی استفاده کنید</th></tr></thead>
+  <tbody>
+    <tr><td><code>notify</code></td><td>بله</td><td>خیر</td><td>فقط پیام خبری در چت می‌خواهید ‏(پیش‌فرض).</td></tr>
+    <tr><td><code>notify+wake</code></td><td>بله</td><td>بله</td><td>می‌خواهید ایجنت مقصد هم نوبت واقعی بزند — زمینهٔ board را بخواند و به صدای خودش جواب دهد. auto-subscribe های برخاسته-از-چت همین‌اند.</td></tr>
+    <tr><td><code>wake</code></td><td>خیر</td><td>بله</td><td>فقط می‌خواهید ایجنت روی رویداد عمل کند بدون ping جداگانه.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>«wake» یک پیام ورودی مصنوعی به ایجنت گیت‌وی مقصد جعل می‌کند تا نوبت عادی بزند ‏(کامنت + نتیجه را می‌خواند، استدلال، ریپلای می‌دهد) به‌جای اعلان منفعل یک‌خطی. فقط وقتی شلیک می‌شود که notifier داخل یک پروسهٔ گیت‌وی زنده اجرا شود؛ وگرنه اشتراک ‏notify+wake همچنان پیام منفعلش را تحویل می‌دهد در حالی که اشتراک فقط-wake در آن پروسه هیچ نمی‌کند.</p>
+<p>‏<code>--chat-type</code> ‏(dm | group | channel | thread) نوع چت مبدأ را ثبت می‌کند تا نوبت بیدارشده نشست <b>واقعیِ</b> اپراتور را حل کند: ‏build_session_key گروه‌ها، کانال‌ها و تردها را متفاوت از DM ها کلید می‌زند، پس chat_type نادرست wake را به نشست جدا و بی‌زمینه مسیریابی می‌کرد. مسیرهای auto-subscribe و فرمان-اسلش ‏/kanban این را خودکار می‌گیرند — فقط وقتی از اسکریپت یا cron چتی را مشترک می‌کنید دستی ست می‌شود. حذفش کنید تا اشتراک موجود تغییری نکند ‏(اشتراک‌های جدید پیش‌فرض dm).</p>
+<h3>setup های چند-پروفایلی: تحویل متعلق-به-پروفایل است</h3>
+<p>در استقرار یک-گیت‌وی-به‌ازای-پروفایل ‏(یک dispatcher، پروسه‌های گیت‌وی جدا برای writer، admin و... — راهنمای multi-gateway در مخزن را ببینید) dispatch و تحویل مالک‌های جدا دارند:</p>
+<ul>
+  <li><b>Dispatch تک-مالک می‌ماند.</b> دقیقاً یک گیت‌وی ‏<code>kanban.dispatch_in_gateway: true</code> نگه و dispatcher را اجرا می‌کند؛ هر گیت‌وی دیگر آن را false می‌کند.</li>
+  <li><b>تحویل اعلان متعلق-به-پروفایل است.</b> هر گیت‌وی — شامل غیر-dispatch — notifier را اجرا و فقط اشتراک‌هایی را poll می‌کند که با پروفایلی مهر خورده‌اند whose آداپتورهای پلتفرمش را میزبانی می‌کند. task‌ای که از تلگرام پروفایل writer ساخته شده پیام completed/blocked‌اش توسط گیت‌وی writer تحویل می‌گیرد حتی اگر گیت‌وی default کار dispatch را کرده باشد.</li>
+  <li><b>اشتراک‌های قدیمی</b> ساخته‌شده قبل از مهر-پروفایل ‏(بدون notifier_profile روی ردیف) فقط توسط گیت‌وی‌ای تحویل می‌گیرند که قفل singleton واقعی dispatcher را دارد، تا دو گیت‌وی هرگز برایشان race نکنند.</li>
+</ul>
+<p>تحویل تکراری بین گیت‌وی‌ها با claim اتمیک به‌ازای-رویداد در DB تخته پیشگیری می‌شود. هیچ relay، اشتراک اعتبارنامه یا dispatcher اضافه لازم نیست — هر گیت‌وی پروفایل به‌سادگی از آداپتورهای خودش تحویل می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> اجراها ‏(Runs) — یک ردیف به‌ازای هر تلاش</h2>
+<p>task واحد منطقی کار است؛ <b>run</b> یک تلاش برای اجرای آن است. وقتی dispatcher یک task ready را claim می‌کند ردیفی در ‏<code>task_runs</code> می‌سازد و ‏<code>tasks.current_run_id</code> را به آن اشاره می‌دهد. وقتی آن تلاش تمام شود — completed، blocked، crashed، timed_out، spawn-failed، reclaimed — ردیف run با یک ‏outcome بسته و pointer مربوط به task پاک می‌شود. task‌ای که سه بار تلاش شده سه ردیف ‏task_runs دارد.</p>
+<p>چرا دو جدول به‌جای صرفاً جهش‌دادن task: برای postmortem های دنیای واقعی به <b>تاریخچهٔ کامل تلاش</b> نیاز دارید ‏(«تلاش دومِ بازبین به approve رسید، سومی merge کرد») و مکان تمیزی برای آویزان‌کردن متادیتای به‌ازای-تلاش لازم دارید — کدام فایل‌ها عوض شدند، کدام تست‌ها اجرا شدند، کدام یافته‌ها را بازبین یادداشت کرد. آن‌ها حقایق run هستند نه حقایق task.</p>
+<p>‏Runs جایی است که <b>handoff ساختاریافته</b> هم زندگی می‌کند. وقتی worker taskی را کامل می‌کند ‏(با ‏<code>kanban_complete(...)</code>) می‌تواند بدهد:</p>
+<ul>
+  <li>‏<code>summary</code> ‏(پارامتر ابزار)/‏<code>--summary</code> ‏(CLI) — handoff انسانی؛ روی run می‌نشیند؛ فرزندان پایین‌دستی در build_worker_context خودش می‌بینند.</li>
+  <li>‏<code>metadata</code> ‏(پارامتر ابزار)/‏<code>--metadata</code> ‏(CLI) — dict ‏JSON آزاد روی run؛ فرزندان سری‌شده را کنار summary می‌بینند.</li>
+  <li>‏<code>result</code> ‏(پارامتر ابزار)/‏<code>--result</code> ‏(CLI) — خط لاگ کوتاه که روی ردیف task می‌نشیند ‏(فیلد قدیمی، برای سازگاری حفظ شده).</li>
+</ul>
+<p>فرزندان پایین‌دستی summary + metadata آخرین run کامل‌شدهٔ هر والد را می‌خوانند. worker های retry‌کننده تلاش‌های قبلی روی task خودشان را ‏(outcome، summary، error) می‌خوانند تا مسیری که قبلاً شکست خورده را تکرار نکنند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code># What a worker actually does — a tool call, from inside the agent loop:
+kanban_complete(
+    summary="implemented token bucket, keys on user_id with IP fallback, all tests pass",
+    metadata={"changed_files": ["limiter.py", "tests/test_limiter.py"], "tests_run": 14},
+    result="rate limiter shipped",
+)</code></pre>
+</div>
+<p>همان handoff از CLI هم وقتی شما ‏(انسان) باید taskی را که worker نمی‌تواند ببندید در دسترس است — مثلاً taskی رهاشده، یا یکی که از داشبورد دستی done علامت زده‌اید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes kanban complete t_abcd \
+    --result "rate limiter shipped" \
+    --summary "implemented token bucket, keys on user_id with IP fallback, all tests pass" \
+    --metadata '{"changed_files": ["limiter.py", "tests/test_limiter.py"], "tests_run": 14}'
+
+# Review the attempt history on a retried task:
+hermes kanban runs t_abcd
+#   #  OUTCOME       PROFILE           ELAPSED  STARTED
+#   1  blocked       worker               12s  2026-04-27 14:02
+#        → BLOCKED: need decision on rate-limit key
+#   2  completed     worker                8m   2026-04-27 15:18
+#        → implemented token bucket, keys on user_id with IP fallback</code></pre>
+</div>
+<p>‏Runs روی داشبورد هم expose می‌شوند ‏(بخش Run History در drawer، یک ردیف رنگی به‌ازای هر تلاش) و روی REST API ‏(<code>GET /api/plugins/kanban/tasks/:id</code> آرایهٔ ‏runs[] برمی‌گرداند). ‏<code>PATCH /api/plugins/kanban/tasks/:id</code> با ‏{status: "done"، summary، metadata} هر دو را به کرنل فوروارد می‌کند، پس دکمهٔ «mark done» داشبورد هم‌ارز CLI است. ردیف‌های ‏task_events ‏run_id متعلقشان را حمل می‌کنند تا UI بتواند بر اساس تلاش گروه‌بندی‌شان کند و رویداد completed خلاصهٔ خط-اول را در payload‌اش تعبیه می‌کند ‏(سقف ۴۰۰ کاراکتر) تا notifier های گیت‌وی بتوانند handoff ساختاریافته را بدون round-trip دوم SQL رندر کنند.</p>
+<p><b>نکتهٔ بستن انبوه.</b> ‏<code>hermes kanban complete a b c --summary X</code> رد می‌شود — handoff ساختاریافته به‌ازای-run است، پس کپی-پیست همان summary برای N task تقریباً همیشه غلط است. بستن انبوه <em>بدون</em> ‏--summary/--metadata برای حالت رایج «یک تلنبار کار اداری را تمام کردم» همچنان کار می‌کند.</p>
+<p><b>‏Run های reclaim‌شده از تغییرات وضعیت.</b> اگر task در حال اجرایی را در داشبورد از running بکشید بیرون ‏(به ready، یا مستقیم به todo) یا taskی را که هنوز در حال اجراست آرشیو کنید، run در-جراحی با ‏outcome='reclaimed' بسته می‌شود به‌جای یتیم ماندن. ردیف ‏task_runs همیشه در وضعیت پایانی است وقتی ‏tasks.current_run_id برابر NULL باشد و برعکس — این ناوردا بین CLI، داشبورد، dispatcher و notifier برقرار است.</p>
+<p><b>‏Run های مصنوعی برای تکمیل‌های هرگز-claim-نشده.</b> کامل یا بلاک کردن taskی که هرگز claim نشده ‏(مثلاً انسانی task ‏ready را از داشبورد با summary می‌بندد، یا کاربر CLI ‏<code>hermes kanban complete &lt;ready-task&gt; --summary X</code> می‌زند) وگرنه handoff را دور می‌ریزد. به‌جایش کرنل ردیف run با مدت-صفر ‏(started_at == ended_at) حامل summary/metadata/reason درج می‌کند تا تاریخچهٔ تلاش کامل بماند. ‏run_id رویداد completed/blocked به آن ردیف اشاره می‌کند.</p>
+<p><b>refresh زندهٔ drawer.</b> وقتی استریم رویداد WebSocket داشبورد رویدادهای جدید برای taskی که کاربر الان می‌بیند گزارش کند drawer خودش را reload می‌کند ‏(با شمارندهٔ رویداد به‌ازای-task رشته‌شده در لیست وابستگی useEffect). دیگر نیازی به بستن و باز کردن برای دیدن ردیف جدید یا outcome به‌روز یک run نیست.</p>
+<h3>سازگاری رو-به-جلو</h3>
+<p>دو ستون nullable روی ‏tasks برای مسیریابی workflow نسخهٔ v2 رزرو شده‌اند: ‏<code>workflow_template_id</code> ‏(این task متعلق به کدام template است) و ‏<code>current_step_key</code> ‏(کدام گام آن template فعلی است). کرنل v1 آنها را برای مسیریابی نادیده ولی نوشتن توسط کلاینت‌ها را اجازه می‌دهد، تا ریلیز v2 بتواند ماشین‌کاری مسیریابی را بدون migration اسکیمای دیگر بیفزاید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۷</span> مرجع رویدادها</h2>
+<p>هر جابه‌جایی ردیفی به ‏task_events الصاق می‌کند. هر ردیف ‏run_id اختیاری حمل می‌کند تا UI ها بتوانند رویدادها را بر اساس تلاش گروه کنند. انواع در سه خوشه گروه می‌شوند تا فیلتر راحت باشد ‏(<code>hermes kanban watch --kinds completed,gave_up,timed_out</code>):</p>
+<p><b>چرخهٔ حیات</b> ‏(چه دربارهٔ task به‌عنوان واحد منطقی تغییر کرد):</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نوع</th><th>Payload</th><th>کِی</th></tr></thead>
+  <tbody>
+    <tr><td><code>created</code></td><td>{assignee, status, parents, tenant}</td><td>Task درج شد. ‏run_id برابر NULL.</td></tr>
+    <tr><td><code>promoted</code></td><td>—</td><td>‏todo ← ready چون همهٔ والدین به done رسیدند. ‏run_id برابر NULL.</td></tr>
+    <tr><td><code>claimed</code></td><td>{lock, expires, run_id}</td><td>Dispatcher اتمیک یک task ‏ready را برای spawn گرفت.</td></tr>
+    <tr><td><code>completed</code></td><td>{result_len, summary?}</td><td>Worker مقدار --result/--summary نوشت و task به done رسید. ‏summary همان handoff خط-اول است ‏(سقف ۴۰۰ کاراکتر)؛ نسخهٔ کامل روی ردیف run زندگی می‌کند. اگر ‏complete_task روی task هرگز-claim-نشده با فیلدهای handoff صدا زده شود یک run با مدت-صفر مصنوع می‌شود تا run_id همچنان به چیزی اشاره کند.</td></tr>
+    <tr><td><code>blocked</code></td><td>{reason, kind, recurrences}</td><td>Worker یا انسان task را به blocked برگرداند. ‏kind دلیل بلاک typed است ‏(needs_input، ‏capability، ‏transient یا null برای بلاک عمومی)؛ ‏recurrences شمارندهٔ حلقه-unblock است. وقتی روی task هرگز-claim-نشده با --reason صدا زده شود run با مدت-صفر مصنوع می‌کند.</td></tr>
+    <tr><td><code>dependency_wait</code></td><td>{reason, kind}</td><td>Worker با ‏kind=dependency بلاک شد — task فقط منتظر task دیگری است، پس به todo مسیریابی می‌شود ‏(گیتی-والد، خودارتقا) به‌جای blocked. انسان لازم نیست.</td></tr>
+    <tr><td><code>block_loop_detected</code></td><td>{reason, kind, recurrences, limit}</td><td>Taskی unblock و برای همان دلیل BLOCK_RECURRENCE_LIMIT بار ‏(پیش‌فرض ۲) دوباره بلاک شد. به‌جای نشستن مجدد در blocked — جایی که cron مدام unblock‌اش می‌کرد — به triage برای تصمیم انسانی می‌رود و حلقهٔ unblock↔re-block را می‌شکند.</td></tr>
+    <tr><td><code>unblocked</code></td><td>—</td><td>‏blocked ← ready ‏(یا todo اگر والدین بازند)، دستی یا از طریق ‎/unblock. ‏consecutive_failures مربوط به dispatcher را ریست ولی عمداً block_recurrences را حفظ می‌کند تا مدارشکن حلقه حافظه‌اش بماند. ‏run_id برابر NULL.</td></tr>
+    <tr><td><code>archived</code></td><td>—</td><td>از تخته پیش‌فرض مخفی می‌شود. اگر task هنوز در حال اجرا بود ‏run_id اجرایی که به‌عنوان side effect پس گرفته شد را حمل می‌کند.</td></tr>
+  </tbody>
+</table>
+</div>
+<p><b>ویرایش‌ها</b> ‏(تغییرات انسان‌محور که جابه‌جایی نیستند):</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نوع</th><th>Payload</th><th>کِی</th></tr></thead>
+  <tbody>
+    <tr><td><code>assigned</code></td><td>{assignee}</td><td>Assignee عوض شد ‏(شامل unassignment).</td></tr>
+    <tr><td><code>edited</code></td><td>{fields}</td><td>عنوان یا بدنه به‌روز شد.</td></tr>
+    <tr><td><code>reprioritized</code></td><td>{priority}</td><td>اولویت عوض شد.</td></tr>
+    <tr><td><code>status</code></td><td>{status}</td><td>Drag-drop داشبورد مستقیم وضعیت نوشت ‏(مثل todo ← ready). ‏run_id اجرایی که هنگام کشیدن بیرون از running پس گرفته شد را حمل می‌کند؛ وگرنه NULL.</td></tr>
+  </tbody>
+</table>
+</div>
+<p><b>تلمتری worker</b> ‏(دربارهٔ پروسهٔ اجرا، نه task منطقی):</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نوع</th><th>Payload</th><th>کِی</th></tr></thead>
+  <tbody>
+    <tr><td><code>spawned</code></td><td>{pid}</td><td>Dispatcher با موفقیت پروسهٔ worker را شروع کرد.</td></tr>
+    <tr><td><code>heartbeat</code></td><td>{note?}</td><td>Worker برای علامت دادن زنده‌بودن حین عملیات طولانی ‏hermes kanban heartbeat $TASK را صدا زد.</td></tr>
+    <tr><td><code>reclaimed</code></td><td>{stale_lock}</td><td>TTL claim بدون تکمیل منقضی شد؛ task به ready برمی‌گردد.</td></tr>
+    <tr><td><code>crashed</code></td><td>{pid, claimer}</td><td>PID worker دیگر زنده نیست ولی TTL هنوز منقضی نشده بود.</td></tr>
+    <tr><td><code>timed_out</code></td><td>{pid, elapsed_seconds, limit_seconds, sigkill}</td><td>‏max_runtime_seconds گذشت؛ dispatcher ‏SIGTERM داد ‏(سپس بعد از ۵ ثانیه grace ‏SIGKILL) و دوباره صف کرد.</td></tr>
+    <tr><td><code>stale</code></td><td>{elapsed_seconds, last_heartbeat_at, heartbeat_age_seconds, timeout_seconds, pid, terminated}</td><td>Task بیشتر از ‏kanban.dispatch_stale_timeout_seconds ‏(پیش‌فرض ۴ ساعت) اجرا شد <b>و</b> در ساعت اخیر هیچ ‏kanban_heartbeat‌ای نرسید. Dispatcher worker میزبان-محلی را ‏(اگر بود) SIGTERM، task را برای dispatch مجدد به ready ریست می‌کند. شمارندهٔ شکست را تیک نمی‌زند ‏(stale تشخیص غیبت سمت-dispatcher است نه خطای worker). Worker هایی که عملیات طولانی اجرا می‌کنند باید دست‌کم ساعتی یک‌بار kanban_heartbeat بزنند تا از این در امان باشند.</td></tr>
+    <tr><td><code>reconciled</code></td><td>{reason, claim_lock, claim_expires, worker_pid}</td><td>آشتی کارت-یتیم: کارت running بود با حساب‌داری claim خراب ‏(claim_lock یا claim_expires برابر NULL — کرش وسط claim، SQL دستی، بازیابی DB) و هیچ worker زنده‌ای نداشت، پس هیچ مسیر TTL/crash/stale‌ای هرگز بازیابی‌اش نمی‌کرد. Dispatcher آن را با کامنت توضیحی به ready صف کرد. گیتی با ‏kanban.reconcile_orphans در config.yaml ‏(پیش‌فرض true).</td></tr>
+    <tr><td><code>respawn_guarded</code></td><td>{reason}</td><td>Dispatcher از respawn مجدد این task ready در این تیک امتناع کرد. دلایل: ‏blocker_auth ‏(آخرین شکست خطای quota/auth/429 بود — صبر برای ریست پنجرهٔ نرخ)، ‏recent_success ‏(اجرای کامل‌شده در ساعت اخیر بوده — قبل از اجرای مجدد منتظر بازبینی باشید)، ‏active_pr ‏(URL PR گیت‌هابی در کامنت اخیر است — worker قبلی PR باز کرده). Task در ready می‌ماند؛ تیک بعدی شانس spawn دیگری می‌گیرد. اگر شرط زمینه‌ای پابرجا باشد مدارشکن عادی consecutive_failures بعد از failure_limit شکست از طریق gave_up خودکار بلاک می‌کند.</td></tr>
+    <tr><td><code>spawn_failed</code></td><td>{error, failures}</td><td>یک تلاش spawn شکست خورد ‏(PATH غایب، workspace غیرقابل-mount و...). شمارنده افزایش؛ task برای retry به ready برمی‌گردد.</td></tr>
+    <tr><td><code>protocol_violation</code></td><td>{pid, claimer, exit_code, protocol_violation}</td><td>Worker با موفقیت خارج شد در حالی که task هنوز running بود، معمولاً چون بدون صدازدن ‏kanban_complete یا ‏kanban_block جواب داد. روی هر نقض صادر می‌شود ‏(نشانگر protocol_violation: true داخل payload به متادیتای run کپی و به بودجهٔ retry فقط-نقض تغذیه می‌شود). زیر بودجه — تا ‏_PROTOCOL_VIOLATION_FAILURE_LIMIT ‏(پیش‌فرض ۳) نقض <em>متوالی</em>، با override ‏max_retries به‌ازای-task — task به‌سادگی برای تلاش دیگر به ready برمی‌گردد؛ وقتی streak به حد برسد dispatcher ‏gave_up هم صادر و خودکار بلاک می‌کند.</td></tr>
+    <tr><td><code>gave_up</code></td><td>{failures, effective_limit, limit_source, error}</td><td>مدارشکن بعد از N تلاش متوالی ناموفق شلیک شد. Task با آخرین خطا خودکار بلاک می‌شود. حد مؤثر به‌ترتیب حل می‌شود: ‏max_retries مربوط به task، بعد ‏failure_limit مربوط به dispatcher / ‏kanban.failure_limit، بعد پیش‌فرض داخلی.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>‏<code>hermes kanban tail &lt;id&gt;</code> این‌ها را برای یک task نشان می‌دهد. ‏<code>hermes kanban watch</code> سراسر تخته استریم‌شان می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۸</span> خارج از دامنه</h2>
+<p>کانبان عمداً تک-میزبان است. ‏<code>~/.hermes/kanban.db</code> فایل SQLite محلی است و dispatcher worker ها را روی همان ماشین spawn می‌کند. اجرای تختهٔ مشترک بین دو میزبان پشتیبانی نمی‌شود — primitive هماهنگی برای «worker X روی میزبان A، worker Y روی میزبان B» وجود ندارد و مسیر تشخیص-کرش فرض می‌کند PID ها میزبان-محلی‌اند. اگر چند-میزبانی لازم دارید یک board مستقل به‌ازای هر میزبان اجرا و با ‏<code>delegate_task</code>/صف پیام پل بزنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۹</span> spec طراحی</h2>
+<p>طراحی کامل — معماری، صحت هم‌زمانی، مقایسه با سیستم‌های دیگر، طرح پیاده‌سازی، ریسک‌ها، سؤالات باز — در ‏<code>docs/hermes-kanban-v1-spec.pdf</code> زندگی می‌کند. قبل از ثبت هر PR تغییر-رفتار آن را بخوانید.</p>
+</section>
+
+<div class="pager">
+  <a href="web-dashboard.html"><span class="dir">→ قبلی</span><span class="ttl">داشبورد وب</span></a>
+  <a class="next" href="kanban-worker-lanes.html"><span class="dir">بعدی ←</span><span class="ttl">لاین‌های worker کانبان</span></a>
+</div>
+
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban" target="_blank" rel="noopener">Kanban (Multi-Agent Board)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

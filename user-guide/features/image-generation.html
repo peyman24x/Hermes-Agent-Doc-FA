@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تولید تصویر — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/image-generation" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>تولید تصویر</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>تولید تصویر</h1>
+<p>‏هرمس ایجنت تصاویر را از پرامپت‌های متنی از طریق FAL.ai تولید می‌کند. یازده مدل پیش‌فرض پشتیبانی می‌شود، هرکدام با موازنهٔ متفاوت سرعت، کیفیت و هزینه. مدل فعال توسط کاربر از طریق ‏<code>hermes tools</code> قابل تنظیم است و در config.yaml ماندگار می‌شود.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> مدل‌های پشتیبانی‌شده</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مدل</th><th>سرعت</th><th>نقاط قوت</th><th>قیمت</th></tr></thead>
+  <tbody>
+    <tr><td><code>fal-ai/flux-2/klein/9b</code> ‏<i>(پیش‌فرض)</i></td><td><code>&lt;1s</code></td><td>سریع، متن واضح</td><td>$0.006/MP</td></tr>
+    <tr><td><code>fal-ai/flux-2-pro</code></td><td>~6s</td><td>واقع‌گرایی استودیویی</td><td>$0.03/MP</td></tr>
+    <tr><td><code>fal-ai/z-image/turbo</code></td><td>~2s</td><td>دوزبانه EN/CN، ‏۶B پارامتر</td><td>$0.005/MP</td></tr>
+    <tr><td><code>fal-ai/nano-banana-pro</code></td><td>~8s</td><td>‏Gemini 3 Pro، عمق استدلال، رندر متن</td><td>$0.15/تصویر ‏(۱K)</td></tr>
+    <tr><td><code>fal-ai/gpt-image-1.5</code></td><td>~15s</td><td>پایبندی به پرامپت</td><td>$0.034/تصویر</td></tr>
+    <tr><td><code>fal-ai/gpt-image-2</code></td><td>~20s</td><td>رندر متن SOTA + ‏CJK، واقع‌گرایی جهان-آگاه</td><td>$0.04–0.06/تصویر</td></tr>
+    <tr><td><code>fal-ai/ideogram/v3</code></td><td>~5s</td><td>بهترین تایپوگرافی</td><td>$0.03–0.09/تصویر</td></tr>
+    <tr><td><code>fal-ai/recraft/v4/pro/text-to-image</code></td><td>~8s</td><td>طراحی، سیستم‌های برند، آماده-تولید</td><td>$0.25/تصویر</td></tr>
+    <tr><td><code>fal-ai/qwen-image</code></td><td>~12s</td><td>مبتنی-بر-LLM، متن پیچیده</td><td>$0.02/MP</td></tr>
+    <tr><td><code>fal-ai/krea/v2/medium/text-to-image</code></td><td>~15-25s</td><td>تصویرسازی، انیمه، نقاشی، سبک‌های بیانگر/هنری</td><td>$0.030–0.035/تصویر</td></tr>
+    <tr><td><code>fal-ai/krea/v2/large/text-to-image</code></td><td>~25-60s</td><td>واقع‌گرایی، ظاهرهای خام بافت‌دار ‏(motion blur، دانه، فیلم)</td><td>$0.060–0.065/تصویر</td></tr>
+  </tbody>
+</table>
+</div>
+<p>قیمت‌ها قیمت‌گذاری FAL هنگام نگارش است؛ اعداد فعلی را در <a href="https://fal.ai/" target="_blank" rel="noopener">fal.ai</a> چک کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> راه‌اندازی</h2>
+<div class="callout tip">
+  <div class="callout-title">💡 مشترکان Nous</div>
+  <p>اگر اشتراک پرداختی ‏<a href="https://portal.nousresearch.com" target="_blank" rel="noopener">Nous Portal</a> دارید، می‌توانید تولید تصویر را از طریق <b>Tool Gateway</b> بدون کلید API فال استفاده کنید. انتخاب مدل شما بین هر دو مسیر ماندگار است. نصب‌های جدید می‌توانند ‏<code>hermes setup --portal</code> را اجرا کنند تا وارد شوند و همهٔ ابزارهای گیت‌وی را یکجا روشن کنند؛ نصب‌های موجود می‌توانند از طریق ‏<code>hermes tools</code> مقدار <b>Nous Subscription</b> را به‌عنوان بک‌اند image-gen انتخاب کنند.</p>
+  <p>اگر گیت‌وی مدیریتی برای مدلی خاص ‏HTTP 4xx برگرداند، آن مدل هنوز سمت portal پروکسی نشده — ایجنت همین را با گام‌های اصلاح به شما می‌گوید ‏(سوییچ به FAL.ai در ‏hermes tools با ‏FAL_KEY خودتان برای دسترسی مستقیم، یا انتخاب مدل دیگر).</p>
+</div>
+<h3>گرفتن کلید API فال</h3>
+<ol>
+  <li>در <a href="https://fal.ai/" target="_blank" rel="noopener">fal.ai</a> ثبت‌نام کنید</li>
+  <li>از داشبوردتان کلید API بسازید</li>
+</ol>
+<h3>پیکربندی و انتخاب مدل</h3>
+<p>فرمان tools را اجرا کنید:</p>
+<div class="codebox"><pre><code>hermes tools</code></pre></div>
+<p>به <b>🎨 Image Generation</b> بروید، بک‌اند‌تان را انتخاب کنید ‏(Nous Subscription یا FAL.ai)، سپس انتخاب‌گر همهٔ مدل‌های پشتیبانی‌شده را در جدول هم‌تراز ستونی نشان می‌دهد — کلیدهای جهت‌دار برای حرکت، Enter برای انتخاب:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>  Model                          Speed    Strengths                    Price
+  fal-ai/flux-2/klein/9b         &lt;1s      Fast, crisp text             $0.006/MP   ← currently in use
+  fal-ai/flux-2-pro              ~6s      Studio photorealism          $0.03/MP
+  fal-ai/z-image/turbo           ~2s      Bilingual EN/CN, 6B          $0.005/MP
+  ...</code></pre>
+</div>
+<p>انتخاب شما در config.yaml ذخیره می‌شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>image_gen:
+  provider: fal                 # `nous` اگر Nous Subscription انتخاب کرده باشید
+  model: fal-ai/flux-2/klein/9b
+  max_parallel_requests: 4      # تصاویر هم‌زمان در یک batch فراخوانی-ابزار</code></pre>
+</div>
+<p>‏<code>image_gen.provider</code> کلید انتخاب واحد است: ‏<code>nous</code> از طریق Tool Gateway مدیریتی مسیریابی می‌کند؛ نام فروشنده ‏(<code>fal</code>، ‏<code>openai</code>، ‏<code>xai</code>، ‏<code>krea</code> و...) مستقیم با کلید خودتان می‌رود. runtime همیشه از همین انتخاب ذخیره‌شده پیروی می‌کند — وقتی ‏<code>provider: nous</code> باشد یک ‏FAL_KEY داخل .env نادیده گرفته می‌شود و ‏<code>provider: fal</code> بدون ‏FAL_KEY خطای ‏<code>image_gen is configured to use fal (set via hermes tools), but FAL_KEY is not set. Run 'hermes tools' to change it.</code> می‌دهد نه اینکه بی‌صدا بازمسیریابی کند. ارائه‌دهنده‌ها را از طریق ‏<code>hermes tools</code> عوض کنید نه با افزودن/حذف کلیدها. ‏(بولین قدیمی ‏<code>use_gateway</code> میراثی است — همچنان هنگام ‏true به‌صورت ‏<code>nous</code> خوانده ولی دیگر نوشته نمی‌شود.)</p>
+<p>‏<code>max_parallel_requests</code> پیش‌فرض ‏<code>4</code> دارد. هرمس آن را حداقل به یکی و حداکثر به سقف tool-worker سراسری clamp می‌کند تا ارائه‌دهنده‌های تصویر درخواست‌های موازی محدود دریافت کنند بدون اینکه batch تصویری از سقف هم‌زمانی ایجنت عبور کند.</p>
+
+<h3>‏OpenRouter: کاتالوگ کامل Image API</h3>
+<p>با ‏<code>image_gen.provider: openrouter</code>، انتخاب‌گر مدل کل کاتالوگ زندهٔ تصویری OpenRouter را فهرست می‌کند — مدل‌های اختصاصی <a href="https://openrouter.ai/docs/guides/overview/multimodal/image-generation" target="_blank" rel="noopener">Image API</a> ‏(Seedream، ‏FLUX.2، ‏Recraft، ‏Qwen Image، ‏MAI، ‏Krea، ‏Riverflow، ‏Grok Imagine و بیشتر — ۴۰+ شناسه) ادغام‌شده با مدل‌های تصویری chat-completions. کاتالوگ زنده از ‏<code>GET /images/models</code> و ‏<code>GET /models</code> گرفته می‌شود، پس مدل‌های جدید به‌محض سرو شدن توسط OpenRouter در انتخاب‌گر ظاهر می‌شوند؛ بدون به‌روزرسانی هرمس. تولید هر مدل را به سطحی که سروش می‌کند ‏(‏<code>POST /images/generations</code> اختصاصی vs chat-completions) خودکار مسیریابی می‌کند. ‏Nous Portal فقط پروتکل chat-completions را پروکسی می‌کند، پس انتخاب‌گرش مدل‌های chat-served را پیشنهاد می‌دهد.</p>
+<p>دسته‌های اختیاری به‌ازای-درخواست برای مدل‌های Image API زیر بخش پیکربندی scoped می‌روند ‏(یا متغیرهای env ‏<code>OPENROUTER_IMAGE_API_*</code>):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>image_gen:
+  provider: openrouter
+  model: bytedance-seed/seedream-4.5
+  openrouter:
+    resolution: 2K        # model-dependent: 1K / 2K / 4K
+    quality: high         # gpt-image models
+    output_format: png</code></pre>
+</div>
+<h3>کیفیت ‏GPT-Image</h3>
+<p>کیفیت درخواست ‏<code>fal-ai/gpt-image-1.5</code> و ‏<code>fal-ai/gpt-image-2</code> روی ‏<code>medium</code> قفل شده ‏(~$0.034–$0.06/تصویر در ۱۰۲۴×۱۰۲۴). سطوح ‏<code>low</code>/<code>high</code> را به‌عنوان گزینهٔ رو-به-کاربر expose نمی‌کنیم تا صورتحساب Nous Portal برای همهٔ کاربران قابل‌پیش‌بینی بماند — پراکندگی هزینه بین سطوح ۳ تا ۲۲ برابر است. اگر گزینهٔ ارزان‌تر می‌خواهید Klein 9B یا Z-Image Turbo را بردارید؛ اگر کیفیت بالاتر می‌خواهید Nano Banana Pro یا Recraft V4 Pro استفاده کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> استفاده</h2>
+<p>schema رو-به-ایجنت عمداً حداقلی است — مدل هرچه پیکربندی کرده باشید را برمی‌دارد:</p>
+<div class="codebox"><pre><code>Generate an image of a serene mountain landscape with cherry blossoms</code></pre></div>
+<div class="codebox"><pre><code>Create a square portrait of a wise old owl — use the typography model</code></pre></div>
+<div class="codebox"><pre><code>Make me a futuristic cityscape, landscape orientation</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> تصویر-به-تصویر / ویرایش</h2>
+<p>همان ابزار ‏<code>image_generate</code> وقتی مدل فعال پشتیبانی کند <b>تصاویر موجود را ویرایش هم می‌کند</b> — تصویر مبدأ بدهید و بک‌اند خودکار به endpoint ویرایشش مسیریابی می‌کند ‏(آینهٔ نحوهٔ هندل image-to-video توسط ‏video_generate). حذف تصویر مبدأ یعنی text-to-image ساده.</p>
+<div class="codebox"><pre><code>Take this photo and make it a rainy Tokyo street at night → &lt;image&gt;</code></pre></div>
+<div class="codebox"><pre><code>Blend these two product shots into one hero image → &lt;image1&gt; &lt;image2&gt;</code></pre></div>
+<p>دو ورودی ویرایش را می‌رانند:</p>
+<ul>
+  <li><b>‏<code>image_url</code></b> — تصویر مبدأ اصلی برای ویرایش/تبدیل ‏(URL عمومی یا مسیر محلی).</li>
+  <li><b>‏<code>reference_image_urls</code></b> — ارجاع‌های اضافی سبک/ترکیب ‏(سقف به‌ازای-مدل).</li>
+</ul>
+<h3>کدام بک‌اندها ویرایش را پشتیبانی می‌کنند</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>بک‌اند</th><th>تصویر-به-تصویر</th><th>سقف مرجع</th><th>چگونه</th></tr></thead>
+  <tbody>
+    <tr><td><b>‏FAL.ai</b> ‏(مدل‌های edit-capable پایین)</td><td>✓</td><td>تا ۹</td><td>به endpoint ‏/edit مربوط به مدل مسیریابی می‌کند</td></tr>
+    <tr><td><b>‏OpenAI</b> ‏(<code>gpt-image-2</code>)</td><td>✓</td><td>تا ۱۶</td><td>‏<code>images.edit()</code></td></tr>
+    <tr><td><b>‏xAI</b> ‏(Grok Imagine)</td><td>✓</td><td>۱</td><td>‏<code>/v1/images/edits</code> ‏(<code>grok-imagine-image-quality</code>)</td></tr>
+    <tr><td><b>Krea</b> ‏(<code>Krea 2</code>)</td><td>✓</td><td>تا ۱۰</td><td>تولید راهنمایی-با-ارجاع ‏(<code>image_style_references</code>)</td></tr>
+    <tr><td><b>‏OpenAI ‏(احراز Codex)</b></td><td>✓</td><td>تا ۱۶</td><td>ابزار ‏image_generation مربوط به Codex Responses با بخش‌های محتوایی ‏input_image</td></tr>
+    <tr><td><b>‏OpenRouter</b> ‏(مدل‌های Image API)</td><td>✓</td><td>تا ۱۴–۱۶ ‏(به‌ازای مدل)</td><td>‏<code>input_references</code> روی ‏<code>POST /images/generations</code>؛ مدل‌های chat-served از بخش‌های محتوایی ‏image_url ‏(تا ۳) استفاده می‌کنند</td></tr>
+  </tbody>
+</table>
+</div>
+<p>مدل‌های FAL دارای endpoint ویرایش: ‏<code>flux-2/klein/9b</code>، ‏<code>flux-2-pro</code>، ‏<code>nano-banana-pro</code>، ‏<code>gpt-image-1.5</code>، ‏<code>gpt-image-2</code>، ‏<code>ideogram/v3</code> و ‏<code>qwen-image</code>. مدل‌های FAL صرفاً-text-to-image ‏(<code>z-image/turbo</code>، ‏<code>recraft</code>، ‏<code>krea/*</code>) ورودی‌های تصویری را با خطای واضحی که به مدلی edit-capable اشاره می‌کند رد می‌کنند.</p>
+<div class="callout note">
+  <div class="callout-title">📌 OpenAI ‏(احراز Codex) بهترین-تلاش است</div>
+  <p>سطح Codex ‏(<code>chatgpt.com/backend-api/codex</code>) مقدار ‏image_generation را به‌عنوان ابزاری که مدل چت ممکن است صدا بزند میزبانی می‌کند و هرمس نمی‌تواند فراخوانی را اجبار کند — بک‌اند هر شکل ‏tool_choice را برای ابزارهای میزبانی‌شده رد می‌کند، پس درخواست به دستورالعمل‌ها برای هدایت مدل اتکا دارد. وقتی مدل میزبان از invoke کردن ابزار سر باز زند فراخوانی با ‏<code>empty_response</code> شکست می‌خورد. گزارش شده که حتی قابلیت رسیدن به ابزار تصویری میزبانی‌شده بین حساب‌ها متغیر است. اگر نیاز دارید تولید تصویر قطعی کار کند به‌جایش بک‌اند <b>OpenAI</b> ‏(کلید API)، ‏<b>FAL</b> یا ‏<b>xAI</b> را پیکربندی کنید.</p>
+</div>
+<p>قابلیت ویرایش مدل فعال هنگام runtime در توضیح ابزار surface می‌شود، پس ایجنت قبل از صدازدن ابزار می‌داند آیا ‏<code>image_url</code> محترم شمرده خواهد شد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> نسبت‌های ابعادی</h2>
+<p>هر مدل از دید ایجنت همان سه نسبت ابعادی را می‌پذیرد. درون، spec اندازهٔ native هر مدل خودکار پر می‌شود:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ورودی ایجنت</th><th>image_size ‏(flux/z-image/qwen/recraft/ideogram)</th><th>aspect_ratio ‏(nano-banana-pro)</th><th>image_size ‏(gpt-image-1.5)</th><th>image_size ‏(gpt-image-2)</th></tr></thead>
+  <tbody>
+    <tr><td><code>landscape</code></td><td><code>landscape_16_9</code></td><td><code>16:9</code></td><td><code>1536x1024</code></td><td><code>landscape_4_3</code> ‏(۱۰۲۴×۷۶۸)</td></tr>
+    <tr><td><code>square</code></td><td><code>square_hd</code></td><td><code>1:1</code></td><td><code>1024x1024</code></td><td><code>square_hd</code> ‏(۱۰۲۴×۱۰۲۴)</td></tr>
+    <tr><td><code>portrait</code></td><td><code>portrait_16_9</code></td><td><code>9:16</code></td><td><code>1024x1536</code></td><td><code>portrait_4_3</code> ‏(۷۶۸×۱۰۲۴)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>‏GPT Image 2 به preset های ۴:۳ نگاشت می‌شود نه ۱۶:۹ چون حداقل تعداد پیکسلش ۶۵۵٬۳۶۰ است — preset ‏<code>landscape_16_9</code> ‏(۱۰۲۴×۵۷۶ = ۵۸۹٬۸۲۴) رد می‌شد.</p>
+<p>این ترجمه در ‏<code>_build_fal_payload()</code> اتفاق می‌افتد — کد ایجنت هرگز لازم نیست تفاوت‌های schema به‌ازای-مدل را بداند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> Upscaling</h2>
+<h3>فقط-با-انتخاب</h3>
+<p>هیچ مدلی پیش‌فرض upscale نمی‌کند. مدل‌های مدرن تصویر بهترین کیفیتشان را native تولید می‌کنند و upscaler های موجود <em>بهبوددهنده‌های</em> خلاقند ‏(pass های diffusion) که می‌توانند محتوا را ظریف بازترسیم کنند — افت متن رندرشده، صورت‌ها و جزئیات دقیق. ‏Upscaling فقط وقتی اجرا می‌شود که ایجنت صریحاً درخواستش کند.</p>
+<h3>پارامتر ‏<code>upscale</code> ‏(انتخاب به‌ازای-فراخوانی)</h3>
+<ul>
+  <li>‏<code>upscale: true</code> — بعد از تولید یک pass با-وضوح-بالا زنجیر می‌شود:</li>
+</ul>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>بک‌اند</th><th>Upscaler</th></tr></thead>
+  <tbody>
+    <tr><td><b>FAL.ai</b></td><td>Clarity Upscaler ‏(۲×، +$0.03/MP)</td></tr>
+    <tr><td><b>Krea</b></td><td>Krea Enhance ‏(۲×، سقف تا ۸K)</td></tr>
+    <tr><td>سایر بک‌اندها</td><td>بدون upscaler؛ رزولوشن native برگردانده می‌شود</td></tr>
+  </tbody>
+</table>
+</div>
+<ul>
+  <li>‏<code>upscale: false</code>/حذف‌شده — رزولوشن native ‏(پیش‌فرض)</li>
+</ul>
+<p>‏<code>video_generate</code> هم روی بک‌اند FAL مقدار ‏<code>upscale: true</code> می‌پذیرد و upscaler ویدیویی <b>SeedVR2</b> شرکت ByteDance ‏(۲×، ‏$0.001/MP ویدیوی خروجی) را بعد از تولید زنجیر می‌کند.</p>
+<p>وقتی pass تصویری FAL اجرا شود از این تنظیمات استفاده می‌کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>تنظیم</th><th>مقدار</th></tr></thead>
+  <tbody>
+    <tr><td>ضریب upscale</td><td>۲×</td></tr>
+    <tr><td>Creativity</td><td>۰٫۳۵</td></tr>
+    <tr><td>Resemblance</td><td>۰٫۶</td></tr>
+    <tr><td>Guidance scale</td><td>۴</td></tr>
+    <tr><td>Inference steps</td><td>۱۸</td></tr>
+  </tbody>
+</table>
+</div>
+<p>اگر upscaling شکست بخورد ‏(مشکل شبکه، rate limit)، تصویر اصلی خودکار برمی‌گردد. پاسخ ‏<code>upscaled: true/false</code> را گزارش می‌کند تا ایجنت بداند چه رزولوشنی گرفته.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> نحوهٔ کار داخلی</h2>
+<ol>
+  <li><b>حل مدل</b> — ‏<code>_resolve_fal_model()</code> مقدار ‏<code>image_gen.model</code> را از config.yaml می‌خواند، به متغیر env ‏<code>FAL_IMAGE_MODEL</code> و بعد به ‏<code>fal-ai/flux-2/klein/9b</code> برمی‌گردد.</li>
+  <li><b>ساخت payload</b> — ‏<code>_build_fal_payload()</code> مقدار ‏aspect_ratio شما را به قالب native مدل ترجمه می‌کند ‏(enum preset، enum نسبت ابعاد یا literal مربوط به GPT)، پارامترهای پیش‌فرض مدل را merge، override های فراخواننده را اعمال و بعد به لیست سفید ‏<code>supports</code> مدل فیلتر می‌کند تا کلیدهای پشتیبان‌نشده هرگز فرستاده نشوند.</li>
+  <li><b>ارسال</b> — ‏<code>_submit_fal_request()</code> طبق انتخاب ذخیره‌شدهٔ ‏<code>image_gen.provider</code> از طریق اعتبارنامه‌های مستقیم FAL یا دروازهٔ مدیریتی Nous مسیریابی می‌کند.</li>
+  <li><b>Upscaling</b> — فقط وقتی اجرا می‌شود که ایجنت ‏<code>upscale: true</code> داده باشد؛ پیش‌فرض کاتالوگ همهٔ مدل‌ها خاموش است.</li>
+  <li><b>تحویل</b> — URL تصویر نهایی به ایجنت برمی‌گردد که تگ ‏<code>MEDIA:&lt;url&gt;</code> صادر می‌کند و آداپتورهای پلتفرم به رسانهٔ native تبدیلش می‌کنند.</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> دیباگ</h2>
+<p>لاگ دیباگ را فعال کنید:</p>
+<div class="codebox"><pre><code>export IMAGE_TOOLS_DEBUG=true</code></pre></div>
+<p>لاگ‌های دیباگ به ‏<code>./logs/image_tools_debug_&lt;session_id&gt;.json</code> می‌روند با جزئیات به‌ازای-فراخوانی ‏(مدل، پارامترها، زمان‌بندی، خطاها).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> تحویل پلتفرمی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>پلتفرم</th><th>تحویل</th></tr></thead>
+  <tbody>
+    <tr><td><b>CLI</b></td><td>URL تصویر چاپ‌شده به‌صورت markdown ‏<code>![](url)</code> — کلیک برای باز کردن</td></tr>
+    <tr><td><b>Telegram</b></td><td>پیام عکس با پرامپت به‌عنوان کپشن</td></tr>
+    <tr><td><b>Discord</b></td><td>embed داخل پیام</td></tr>
+    <tr><td><b>Slack</b></td><td>URL توسط Slack باز می‌شود</td></tr>
+    <tr><td><b>WhatsApp</b></td><td>پیام رسانه‌ای</td></tr>
+    <tr><td><b>سایر</b></td><td>URL به‌صورت متن ساده</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> محدودیت‌ها</h2>
+<ul>
+  <li><b>نیازمند اعتبارنامه</b> برای بک‌اند فعال ‏(‏FAL ‏<code>FAL_KEY</code> / اشتراک Nous، ‏<code>OPENAI_API_KEY</code>، ‏OAuth مربوط به xAI، ‏<code>KREA_API_KEY</code>)</li>
+  <li><b>ویرایش وابسته-به-مدل است</b> — تصویر-به-تصویر فقط روی مدل‌های edit-capable کار می‌کند ‏(جدول بالا)؛ مدل‌های صرفاً-text-to-image ورودی‌های تصویری را با خطای واضح رد می‌کنند</li>
+  <li><b>URL های گذرا</b> — بک‌اندها URLهای میزبانی‌شده‌ای برمی‌گردانند که بعد از ساعت‌ها/روزها منقضی می‌شوند؛ هرمس آنها را به کش محلی materialize می‌کند تا تحویل بعد از انقضا هم کار کند</li>
+  <li><b>محدودیت‌های به‌ازای-مدل</b> — بعضی مدل‌ها ‏<code>seed</code>، ‏<code>num_inference_steps</code> و... را پشتیبانی نمی‌کنند. فیلتر ‏<code>supports</code>/<code>edit_supports</code> پارامترهای پشتیبان‌نشده را بی‌صدا حذف می‌کند؛ این رفتار موردانتظار است</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="goals.html"><span class="dir">→ قبلی</span><span class="ttl">اهداف پایدار ‏(‎/goal)</span></a>
+  <a class="next" href="personality.html"><span class="dir">بعدی ←</span><span class="ttl">شخصیت و SOUL.md</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/image-generation" target="_blank" rel="noopener">Image Generation</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

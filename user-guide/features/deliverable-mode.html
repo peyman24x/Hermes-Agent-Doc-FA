@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حالت تحویل‌دادنی ‏(آرتیفکت‌ها در چت) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/deliverable-mode" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>حالت تحویل‌دادنی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>حالت تحویل‌دادنی ‏(آرتیفکت‌ها در چت)</h1>
+<p>وقتی هرمس ایجنت داخل یک گیت‌وی پیام‌رسانی اجرا می‌شود ‏(Slack، ‏Discord، ‏Telegram، ‏WhatsApp، ‏Signal و...)، می‌تواند فایل‌های تولیدی را مستقیم داخل چت تحویل دهد — نه به‌صورت مسیرهایی که کاربر باید کپی کند بلکه به‌عنوان پیوست بومی.</p>
+<p>نمودار به‌صورت تصویر درون‌خطی ظاهر می‌شود. گزارش PDF به‌صورت دانلود فایل می‌آید. صفحه‌گسترده به‌صورت ‏<code>.xlsx</code> آپلود می‌شود. ایجنت لازم نیست تگ ‏<code>MEDIA:</code> بنویسد یا کار خاصی بکند — فقط فایل را تولید و مسیر مطلقش را در پاسخ ذکر می‌کند. گیت‌وی مسیر را از متن بیرون می‌کشد، از پیام مرئی حذف و فایل را native آپلود می‌کند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نحوهٔ کار</h2>
+<p>سه قطعه کنار هم می‌نشینند:</p>
+<ol>
+  <li><b>ایجنت ابزارهایی دارد که فایل تولید می‌کنند.</b> ‏<code>execute_code</code> برای نمودار با matplotlib، مهارت ‏<code>docx</code> برای اسناد Word، مهارت ‏<code>xlsx</code> برای صفحات گسترده، مهارت‌های ‏<code>pdf</code> و ‏<code>latex-pdf-report</code> برای PDF ها، مهارت ‏<code>powerpoint</code> برای اسلایدها، ‏<code>image_generate</code> برای تصاویر، ‏<code>text_to_speech</code> برای صدا و غیره.</li>
+  <li><b>گیت‌وی پاسخ‌های ایجنت را برای مسیرهای فایل اسکن می‌کند.</b> هر مسیر مطلق ‏(<code>/tmp/...</code>) یا مسیر نسبی-به-خانه ‏(<code>~/...</code>) که با پسوند پشتیبانی‌شده تمام شود استخراج می‌شود. مسیرهای داخل بلوک‌های کد و کد درون‌خطی نادیده گرفته می‌شوند تا نمونه‌کدها هرگز مثله نشوند.</li>
+  <li><b>گیت‌وی بر اساس نوع فایل dispatch می‌کند.</b> تصاویر هرجا پلتفرم پشتیبانی کند درون‌خطی embed می‌شوند؛ ویدیوها درون‌خطی؛ صدا به پیوست voice/audio مسیریابی می‌شود؛ بقیه به‌عنوان پیوست فایل آپلود می‌شوند.</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پسوندهای فایل پشتیبانی‌شده</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>دسته</th><th>پسوندها</th><th>تحویل</th></tr></thead>
+  <tbody>
+    <tr><td>تصاویر</td><td>‏<code>.png .jpg .jpeg .gif .webp .bmp .tiff .svg</code></td><td>embed درون‌خطی</td></tr>
+    <tr><td>ویدیو</td><td>‏<code>.mp4 .mov .avi .mkv .webm .3gp</code></td><td>embed درون‌خطی ‏(هرجا پشتیبانی شود)</td></tr>
+    <tr><td>صوت</td><td>‏<code>.mp3 .m2a .wav .ogg .opus .m4a .flac</code></td><td>پیوست voice / audio</td></tr>
+    <tr><td>اسناد</td><td>‏<code>.pdf .docx .doc .odt .rtf .txt .md .epub</code></td><td>آپلود فایل</td></tr>
+    <tr><td>داده</td><td>‏<code>.xlsx .xls .ods .csv .tsv .json .xml .yaml .yml</code></td><td>آپلود فایل</td></tr>
+    <tr><td>زمین‌مکانی</td><td>‏<code>.kmz .kml .geojson .gpx</code></td><td>آپلود فایل</td></tr>
+    <tr><td>ارائه‌ها</td><td>‏<code>.pptx .ppt .odp .key</code></td><td>آپلود فایل</td></tr>
+    <tr><td>آرشیوها</td><td>‏<code>.zip .tar .gz .tgz .bz2 .xz .7z .rar .apk .ipa</code></td><td>آپلود فایل</td></tr>
+    <tr><td>وب</td><td>‏<code>.html .htm</code></td><td>آپلود فایل</td></tr>
+  </tbody>
+</table>
+</div>
+<p>‏<code>.py</code>، ‏<code>.log</code> و سایر پسوندهای فایل-مبدأ عمداً مستثنا شده‌اند تا ایجنت فایل‌های مبدأ دلخواه را خودکار حمل نکند؛ اگر می‌خواهید کدی به کاربر بفرستید از بلوک کد استفاده کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> تشویق ایجنت به تولید آرتیفکت</h2>
+<p>ایجنت پیش‌فرض سراغ آرتیفکت نمی‌رود — باید بداند که باید. دو راه سرکش کردنش:</p>
+<p><b>به‌ازای-نشست:</b> صریحاً بخواهید ‏(«مقایسه را به‌صورت نمودار برایم بفرست»، «داده را CSV برگردان») یا دستورالعمل سفارشی/ورودی شخصیتی خودتان را طوری بنویسید که روی پلتفرم‌های پیام‌رسانی به ریپلای‌های سبک-آرتیفکت تمایل پیدا کند.</p>
+<p><b>در سطح پروژه:</b> تمایل را به ‏AGENTS.md / ‏CLAUDE.md / ‏.cursorrules پروژه‌ای که ایجنت از آن کار می‌کند، به persona سراسری‌تان در ‏<code>~/.hermes/SOUL.md</code>، یا به‌عنوان preset نام‌دار زیر ‏<code>agent.personalities</code> در ‏<code>~/.hermes/config.yaml</code> بیفزایید ‏(قابل تعویض به‌ازای نشست با ‎/personality).</p>
+<p>مکانیکی که ایجنت باید استفاده کند ساده است: فایل را به یک مسیر مطلق رندر کنید ‏(مثلاً ‏<code>/tmp/q3-revenue.png</code>) و آن مسیر را به‌صورت متن ساده در ریپلای ذکر کنید. بقیه‌اش با گیت‌وی است. مسیرهای داخل بلوک‌های کد محصور یا backtick ها نادیده گرفته می‌شوند تا نمونه‌کدها هرگز مثله نشوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> کانبان: آرتیفکت‌ها سوار اعلان‌های تکمیل می‌شوند</h2>
+<p>اگر از گردش‌کار چند-ایجنتیِ کانبان هرمس استفاده می‌کنید، worker ها می‌توانند فایل‌های deliverable را به فراخوانی ‏<code>kanban_complete</code> خودشان الصاق کنند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>kanban_complete(
+    summary="rendered Q3 revenue chart and report",
+    artifacts=[
+        "/tmp/q3-revenue.png",
+        "/tmp/q3-report.pdf",
+    ],
+)</code></pre>
+</div>
+<p>وقتی notifier گیت‌وی پیام «task تکمیل شد» را به مشترکِ task در Slack/Telegram/و... تحویل می‌دهد، هر آرتیفکت را هم به‌عنوان پیوست native به همان چت آپلود می‌کند. انسان deliverable و خلاصه را یک‌جا می‌گیرد.</p>
+<p>فایل‌هایی که موقع اجرای notifier روی دیسک موجود نباشند بی‌صدا رد می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> اتصال سرویس‌های بیشتر با MCP</h2>
+<p>فراتر از خط‌لوله تحویل آرتیفکت، ایجنت می‌تواند از طریق MCP ‏(Model Context Protocol) به سرویس‌های دیگر دست بزند. اکوسیستم MCP سرورهای اجتماعی برای اغلب ابزارهای محبوب دارد — هرکدام که لازم دارید نصب کنید:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>سرویس</th><th>چه چیزی باز می‌کند</th></tr></thead>
+  <tbody>
+    <tr><td><b>Notion</b></td><td>خواندن/نوشتن صفحات Notion، دیتابیس‌ها، query ورک‌اسپیس</td></tr>
+    <tr><td><b>GitHub</b></td><td>issue ها، PR ها، کامنت‌ها، جست‌وجوی repo فراتر از CLI ‏gh</td></tr>
+    <tr><td><b>Linear</b></td><td>تیکت‌ها، پروژه‌ها، چرخه‌ها</td></tr>
+    <tr><td><b>Slack</b></td><td>جست‌وجوی کل-ورک‌اسپیس، خواندن کانال‌های دیگر</td></tr>
+    <tr><td><b>Gmail</b></td><td>triage صندوق ورودی، ارسال ایمیل، مدیریت برچسب‌ها</td></tr>
+    <tr><td><b>Salesforce</b></td><td>لیدها، فرصت‌ها، دادهٔ حساب‌ها</td></tr>
+    <tr><td><b>Snowflake / BigQuery</b></td><td>SQL علیه انبارهای داده</td></tr>
+    <tr><td><b>Google Drive</b></td><td>جست‌وجوی فایل، محتویات، مدیریت اشتراک‌گذاری</td></tr>
+  </tbody>
+</table>
+</div>
+<p>سرورهای MCP را از طریق بخش ‏<code>mcp_servers</code> در ‏<code>~/.hermes/config.yaml</code> نصب کنید. راهنمای کامل setup در <a href="mcp.html">یکپارچه‌سازی MCP</a>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> مقایسه با Perplexity Computer در Slack</h2>
+<p>یکپارچه‌سازی Slack مربوط به Perplexity Computer حول همان ایده ساخته شده: ایجنت یک deliverable تولید ‏(نمودار، PDF، اسلاید) و به‌عنوان پیوست native به همان ترد پست برمی‌گرداند. حالت deliverable مربوط به هرمس ایجنت همان الگوی رو-به-کاربر را محلی فراهم می‌کند:</p>
+<ul>
+  <li>تولید داخل venv/sandbox خود کاربر اتفاق می‌افتد ‏(بدون tenant راه‌دور).</li>
+  <li>فایل‌ها از طریق همان API ‏<code>files.uploadV2</code> اسلک وارد چت می‌شوند.</li>
+  <li>پهنای connector از طریق MCP می‌آید به‌جای کاتالوگ منتخبِ ۴۰۰ یکپارچه‌سازی میزبانی‌شده — همان‌هایی که واقعاً استفاده می‌کنید نصب کنید.</li>
+</ul>
+<p>توکن‌های OAuth روی ماشین کاربر در ‏<code>auth.json</code>/<code>.env</code> می‌مانند. بدون مخزن توکن میزبانی‌شده. بدون microVM چند-مستأجری. همان نتیجهٔ نهایی.</p>
+</section>
+
+<div class="pager">
+  <a href="loops.html"><span class="dir">→ قبلی</span><span class="ttl">حلقه‌های تکرارشونده ‏(‎/loop)</span></a>
+  <a class="next" href="context-references.html"><span class="dir">بعدی ←</span><span class="ttl">مراجع زمینه</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/deliverable-mode" target="_blank" rel="noopener">Deliverable Mode (Artifacts in Chat)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

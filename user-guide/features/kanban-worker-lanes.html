@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لاین‌های worker کانبان — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban-worker-lanes" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>لاین‌های worker کانبان</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>لاین‌های worker کانبان</h1>
+<p><b>لاین worker</b> کلاسی از پروسه است که dispatcher کانبان می‌تواند task ها را به آن مسیریابی کند. هر لاین یک هویت دارد ‏(رشتهٔ assignee)، یک مکانیزم spawn و قراردادی برای اینکه با task بعد از spawn چه باید بکند.</p>
+<p>این صفحه همان قرارداد است و برای دو مخاطب وجود دارد:</p>
+<ul>
+  <li><b>اپراتورهایی</b> که انتخاب می‌کنند کدام لاین‌ها را به یک board سیم کنند ‏(کدام پروفایل‌ها ساخته شوند، کدام assignee ها استفاده شوند).</li>
+  <li><b>نویسندگان افزونه/یکپارچه‌سازی</b> که می‌خواهند شکل لاین جدیدی بیفزایند ‏(worker CLI که Codex/Claude Code/OpenCode را wrap می‌کند، worker بازبینی کانتینری، سرویس غیر-هرمسی که از طریق API کار می‌کشد).</li>
+</ul>
+<p>اگر خودِ کد worker را می‌نویسید — ایجنتی که <em>داخل</em> یک لاین اجرا می‌شود — چرخهٔ حیات کانبان و جزئیات مرجع خودکار در پرامپت سیستمی worker تزریق می‌شوند ‏(بلوک ‏<code>KANBAN_GUIDANCE</code> در ‏<code>agent/prompt_builder.py</code> مخزن).</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> سلسله‌مراتب</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>Hermes Kanban  =  canonical task lifecycle + audit trail
+Worker lane    =  implementation executor for one assigned card
+Reviewer       =  human or human-proxy that gates "done"
+GitHub PR      =  upstreamable artifact (optional, for code lanes)</code></pre>
+</div>
+<p>‏Hermes Kanban مالک حقیقت چرخهٔ حیات است — ‏<code>ready</code> ← ‏<code>running</code> ← ‏<code>review</code>/<code>blocked</code>/<code>done</code>/<code>archived</code>. لاین‌های worker کار را اجرا می‌کنند ولی هرگز مالک آن حقیقت نیستند؛ هر کاری می‌کنند از طریق ابزارهای ‏<code>kanban_*</code> ‏(یا برای worker های خارجی غیر-هرمس، از طریق API) به کرنل کانبان برمی‌گردد. بازبین‌ها گذر از «تغییر کد نوشته شد» به «task تمام شد» را گیت می‌زنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> یک لاین چه چیزی فراهم می‌کند</h2>
+<p>برای تبدیل‌شدن به یک لاین worker کانبان، یکپارچه‌سازی باید سه چیز فراهم کند:</p>
+<h3>۱. رشتهٔ assignee</h3>
+<p>‏dispatcher مقدار ‏<code>task.assignee</code> را یا با نام پروفایل هرمس ‏(شکل پیش‌فرض لاین) یا شناسهٔ ثبت‌شدهٔ غیر-spawn‌پذیر تطبیق می‌دهد ‏(شکل لاین افزونه — «افزودن لاین worker خارجی CLI» پایین). ‏task هایی که assignee‌شان حل نمی‌شود روی ‏<code>ready</code> با رویداد ‏<code>skipped_nonspawnable</code> رها می‌شوند تا اپراتور board اصلاحشان کند؛ بی‌صدا دور ریخته یا توسط fallback دلخواه اجرا نمی‌شوند.</p>
+<h3>۲. مکانیزم spawn</h3>
+<p>برای لاین‌های پروفایل هرمس، ‏<code>_default_spawn</code> مربوط به dispatcher مقدار ‏<code>hermes -p &lt;assignee&gt; chat -q &lt;prompt&gt;</code> ‏(یا فرم ماژول معادل وقتی shim ‏<code>hermes</code> روی ‏$PATH نیست) را داخل workspace قفل‌شدهٔ task اجرا می‌کند با این env ها:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متغیر</th><th>حمل‌کننده</th></tr></thead>
+  <tbody>
+    <tr><td><code>HERMES_KANBAN_TASK</code></td><td>شناسهٔ task‌ای که worker رویش کار می‌کند</td></tr>
+    <tr><td><code>HERMES_KANBAN_DB</code></td><td>مسیر مطلق فایل SQLite به‌ازای-board</td></tr>
+    <tr><td><code>HERMES_KANBAN_BOARD</code></td><td>slug مربوط به board</td></tr>
+    <tr><td><code>HERMES_KANBAN_WORKSPACES_ROOT</code></td><td>ریشهٔ درخت workspace مربوط به board</td></tr>
+    <tr><td><code>HERMES_KANBAN_WORKSPACE</code></td><td>مسیر مطلق workspace <em>همین</em> task</td></tr>
+    <tr><td><code>HERMES_KANBAN_RUN_ID</code></td><td>شناسهٔ run فعلی ‏(برای گیتی چرخهٔ حیات)</td></tr>
+    <tr><td><code>HERMES_KANBAN_CLAIM_LOCK</code></td><td>رشتهٔ قفل claim ‏(<code>&lt;host&gt;:&lt;pid&gt;:&lt;uuid&gt;</code>)</td></tr>
+    <tr><td><code>HERMES_PROFILE</code></td><td>نام پروفایل خود worker ‏(برای انتساب نویسندهٔ kanban_comment)</td></tr>
+    <tr><td><code>HERMES_TENANT</code></td><td>namespace مربوط به tenant اگر task داشته باشد</td></tr>
+  </tbody>
+</table>
+</div>
+<p>برای لاین‌های غیر-هرمس ‏(ثبت‌شده از طریق افزونه) افزونه ‏<code>spawn_fn</code> callable خودش را می‌دهد که ‏task، ‏workspace و ‏board می‌گیرد و pid اختیاری برای تشخیص کرش برمی‌گرداند.</p>
+<h3>۳. پایان‌دهندهٔ چرخهٔ حیات</h3>
+<p>هر claim باید دقیقاً به یکی از این‌ها بینجامد:</p>
+<ul>
+  <li>‏<code>kanban_complete(summary=..., metadata=...)</code> — task موفق می‌شود، وضعیت به ‏done flip می‌شود.</li>
+  <li>‏<code>kanban_request_review(summary=..., metadata=..., reviewer=...)</code> — پیاده‌سازی همان-کارت کامل و وارد بازبینی درجه‌یک می‌شود؛ وضعیت به ‏review flip می‌شود. dispatcher مهارت همراه‌بستهٔ ‏<code>sdlc-review</code> را لود می‌کند مگر ‏<code>kanban.review_dispatch</code> خاموش شده باشد. بازبین با ‏<code>kanban_complete</code> تأیید، با ‏<code>kanban_request_changes</code> بازکاری actionable برمی‌گرداند یا مانع خارجی واقعی را با ‏<code>kanban_block</code> تشدید می‌کند.</li>
+  <li>‏<code>kanban_block(reason=...)</code> — task منتظر ورودی انسانی است، وضعیت به ‏blocked flip می‌شود. dispatcher وقتی ‏<code>kanban_unblock</code> اجرا شود دوباره spawn می‌کند.</li>
+  <li>پروسهٔ worker بدون فراخوانی ابزار خارج می‌شود. کرنل آن را reap و ‏<code>crashed</code> ‏(PID مرد)، ‏<code>gave_up</code> ‏(مدارشکن شکست متوالی تریگر شد) یا ‏<code>timed_out</code> ‏(max_runtime گذشت) صادر می‌کند. این مسیر شکست است؛ worker های سالم اینجا تمام نمی‌شوند.</li>
+</ul>
+<p>کرنل کانبان الزام می‌کند دقیقاً یکی از این‌ها هر run را پایان دهد. worker‌ای که هیچ‌کدام را صدا نزند و عادی خارج شود crashed تلقی می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> خروجی‌ها و handoff بازبینی</h2>
+<p>برای task های تغییر-دهندهٔ کد، مدل بازبینی رمزگذاری‌شده توسط گراف task را انتخاب کنید:</p>
+<ul>
+  <li><b>بازبینی همان-کارت:</b> ‏<code>kanban_request_review(summary=..., metadata=..., reviewer=...)</code> را صدا بزنید. Task بدون دست‌زدن به حساب‌داری تکرار-بلاک وارد ‏review می‌شود. ‏dispatcher به‌طور پیش‌فرض آن را با مهارت همراه‌بستهٔ ‏sdlc-review claim می‌کند. بازبین با ‏<code>kanban_complete</code> تأیید، ‏<code>kanban_request_changes(reason=...)</code> را برای بستن run بازبینی و برگرداندن task به پیاده‌ساز اصلی صدا می‌زند یا فقط برای تشدید خارجی واقعی بلاک می‌کند.</li>
+  <li><b>کارت پایین‌دستیِ از-قبل‌ساختهٔ بازبینی/QA/release:</b> ‏<code>kanban_show</code> شناسه‌های فرزند را فهرست می‌کند؛ قبل از انتخاب اکشن پایانی آن کارت‌ها را با ‏<code>kanban_show(task_id=...)</code> بازرسی کنید. وقتی فرزندی فاز پایین‌دستیِ بازبینی/QA/release است، روی فاز پیاده‌سازی ‏<code>kanban_complete</code> را صدا بزنید. آن فرزند تا این والد done/archived نشود نمی‌تواند ارتقا یابد. بازبینی همان-کارت را هم‌زمان درخواست نکنید و هرگز والد را با ‏<code>review-required:</code> چسبناک-بلاک نکنید — هر انتخاب، لاین پایین‌دستی را معلق یا تکراری می‌کند.</li>
+  <li><b>board های فقط-انسانی:</b> ‏<code>kanban.review_dispatch: false</code> را ست کنید. Task می‌تواند در review بماند تا انسانی تأیید کند یا با ‏reopen-review/داشبورد به ready/todo برگردد.</li>
+</ul>
+<p>هر دو مدل بازبینی handoff ساختاریافته‌شان را روی خود جابه‌جایی چرخهٔ حیات حمل می‌کنند. رمزها، توکن‌ها یا PII خام داخل summary یا metadata نگذارید؛ ردیف‌های run ماندگارند.</p>
+<p>‏KANBAN_GUIDANCE تزریق‌شده هر دو شکل گراف، ‏<code>kanban_complete</code>، حلقهٔ بازبینی همان-کارت و ‏<code>kanban_block</code> برای موانع واقعی را پوشش می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> لاگ‌ها و رد حسابرسی</h2>
+<p>‏dispatcher خروجی stdout/stderr مربوط به worker هر task را در ‏<code>&lt;board-root&gt;/logs/&lt;task_id&gt;.log</code> می‌نویسد. لاگ‌ها از متادیتای کانبان قابل حسابرسی‌اند:</p>
+<ul>
+  <li>ردیف‌های ‏<code>task_runs</code> مقدار ‏log_path، exit code ‏(هرجا موجود)، summary و metadata را حمل می‌کنند.</li>
+  <li>ردیف‌های ‏<code>task_events</code> هر جابه‌جایی وضعیت را حمل می‌کنند ‏(promoted، ‏claimed، ‏heartbeat، ‏completed، ‏blocked، ‏review_requested، ‏changes_requested، ‏review_reopened، ‏gave_up، ‏crashed، ‏timed_out، ‏reclaimed، ‏claim_extended).</li>
+  <li>‏<code>kanban_show</code> هر دو را برمی‌گرداند، پس بازبین ‏(یا worker پیگیری) که task را می‌خواند کل تاریخچه را بدون نیاز به دسترسی داشبورد می‌گیرد.</li>
+</ul>
+<p>داشبورد تاریخچهٔ اجرا را با خلاصه‌ها، بلوک‌های metadata و badge های وضعیت خروج رندر می‌کند. کاربران CLI برای دنبال‌کردن زنده ‏<code>hermes kanban tail &lt;task_id&gt;</code> و برای فهرست تاریخی تلاش‌ها ‏<code>hermes kanban runs &lt;task_id&gt;</code> را اجرا می‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> اشکال لاین موجود</h2>
+<h3>لاین پروفایل هرمس ‏(پیش‌فرض)</h3>
+<p>شکلی که امروز هر worker کانبانی می‌گیرد: assignee نام پروفایلی است، dispatcher ‏<code>hermes -p &lt;profile&gt;</code> را spawn، worker بلوک پرامپت سیستمی KANBAN_GUIDANCE را خودکار تزریق‌شده می‌گیرد و برای پایان دادن به run از ابزارهای ‏<code>kanban_*</code> استفاده می‌کند. بدون setup فراتر از تعریف پروفایل.</p>
+<p>وقتی برای ناوگانتان پروفایل می‌سازید نام‌هایی متناسب با <em>نقشی</em> که می‌خواهید ارکستراتور به آن مسیریابی کند انتخاب کنید. ارکستراتور ‏(وقتی وجود دارد) نام‌های پروفایل شما را از طریق ‏<code>hermes profile list</code> کشف می‌کند — سیستم هیچ فهرست ثابتی فرض نمی‌کند ‏(سمت ارکستراتور قرارداد جزء KANBAN_GUIDANCE تزریق‌شده است).</p>
+<h3>لاین پروفایل ارکستراتور</h3>
+<p>تخصصی‌سازی لاین پروفایل: ارکستراتور پروفایل هرمسی است whose تول‌ست شامل ‏<code>kanban</code> ولی فاقد ‏<code>terminal</code>/<code>file</code>/<code>code</code>/<code>web</code> برای پیاده‌سازی است. کارش تجزیه هدف سطح-بالا به task های فرزند از طریق ‏<code>kanban_create</code> + ‏<code>kanban_link</code> و عقب‌نشینی است. مهارت ارکستراتور قواعد ضدوسوسه را رمزگذاری می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> افزودن لاین worker خارجی CLI</h2>
+<p>سیم‌کشی یک ابزار CLI غیر-هرمس ‏(Codex CLI، ‏Claude Code CLI، ‏OpenCode CLI، اجراکنندهٔ مدل-کدنویس محلی و...) به‌عنوان لاین worker کانبانی <em>هنوز مسیر هموارشده‌ای نیست</em>. تابع spawn dispatcher قابل‌افزودن است ‏(<code>spawn_fn</code> پارامتری روی ‏dispatch_once است) و افزونه می‌تواند ‏spawn_fn خودش را برای یک assignee غیر-هرمس ثبت کند ولی کار یکپارچه‌سازی اطراف — wrap کردن exit code مربوط به CLI داخل فراخوانی‌های ‏<code>kanban_complete</code>/<code>kanban_block</code>، نگاشت قواعد workspace/sandbox مربوط به CLI روی env ‏<code>HERMES_KANBAN_WORKSPACE</code> مربوط به dispatcher، هندل احراز و سیاست به‌ازای-CLI — هنوز طراحی per-integration است.</p>
+<p>اگر افزودن لاین CLI را مد نظر دارید issue ای با توصیف CLI مشخص و گردش‌کار موردنظرتان باز کنید. قرارداد بالا محدودیت‌هایی است که هر چنین لاینی باید ارضا کند؛ شکل پیاده‌سازی ‏(یک افزونه به‌ازای هر CLI در برابر افزونهٔ عمومی runner-CLI پارامتری‌شده با config) باز است.</p>
+<p>issue تاریخی این موضوع ‏<a href="https://github.com/NousResearch/hermes-agent/issues/19931" target="_blank" rel="noopener">#19931</a> و PR مخصوص-Codexِ بسته‌نشده-ولی-ادغام‌نشدهٔ ‏<a href="https://github.com/NousResearch/hermes-agent/pull/19924" target="_blank" rel="noopener">#19924</a> است — این‌ها پیشنهاد معماری اصلی را شرح می‌دهند ولی runner‌ای فرود نیاوردند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> حالت‌های شکستی که dispatcher هندل می‌کند</h2>
+<p>تا نویسندگان لاین مجبور به بازپیاده‌سازی این‌ها نباشند:</p>
+<ul>
+  <li><b>TTL claim کهنه</b> — worker‌ای که claim می‌کند و سپس هرگز heartbeat/completes/blocks نمی‌شود بعد از ‏DEFAULT_CLAIM_TTL_SECONDS ‏(پیش‌فرض ۱۵ دقیقه) پس گرفته می‌شود — ولی فقط اگر پروسهٔ worker واقعاً مرده باشد. worker زنده ‏(مدل کند که ۲۰+ دقیقه در یک فراخوانی LLM بدون-ابزار می‌گذراند) به‌جای کشته شدن claim‌اش <em>تمدید</em> می‌شود؛ فقط PID مرده پس گرفته می‌شود.</li>
+  <li><b>worker کرش‌کرده</b> — worker‌ای whose PID میزبان-محلی غیبش زده توسط ‏detect_crashed_workers تشخیص و reap می‌شود؛ task مقدار ‏consecutive_failures افزایش و ممکن است وقتی مدارشکن تریگر شود خودکار بلاک شود.</li>
+  <li><b>retry در سطح-run</b> — وقتی taskی retry می‌شود ‏(پس از بلاک، پس از کرش، پس از reclaim) worker می‌تواند پارامتر ‏<code>expected_run_id</code> روی ابزارهای پایانی را استفاده کند تا اگر run خودش قبلاً جایگزین شده سریع شکست بخورد.</li>
+  <li><b>حداکثر runtime به‌ازای-task</b> — ‏<code>task.max_runtime_seconds</code> زمان دیواری هر run را مستقل از زنده‌بودن PID سخت سقف می‌زند. worker های واقعاً بن‌بست‌شده را می‌گیرد که extension ‏live-PID وگرنه اجازه ادامه‌شان می‌داد.</li>
+  <li><b>تشخیص task معلق</b> — task ‏ready‌ای که assignee‌اش ظرف ‏<code>kanban.stranded_threshold_seconds</code> ‏(پیش‌فرض ۳۰ دقیقه) هیچ claim‌ای تولید نکند در ‏<code>hermes kanban diagnostics</code> به‌صورت هشدار ‏<code>stranded_in_ready</code> ظاهر می‌شود. شدت در ۲× آستانه به خطا و در ۶× به critical تشدید می‌شود. assignee های غلط‌تایپی، پروفایل‌های حذف‌شده و pool های worker خارجیِ پایین را در یک سیگنال می‌گیرد — مستقل-از-هویت، بدون لیست مجاز به‌ازای-board برای نگهداشت.</li>
+  <li><b>بن‌بست وابستگی بازبینی قدیمی</b> — والدِ چسبناک-بلاک‌شده با ‏<code>review-required:</code> در حالی که یک یا چند فرزند مستقیم همچنان گیتی-والد در todo هستند بلافاصله خطای ‏<code>review_dependency_deadlock</code> تولید می‌کند. تشخیص فقط-خواندنی است: تکمیل فاز تمام‌شده یا unlink کردن یال غلط را پیشنهاد می‌دهد ولی هرگز بلاک کاربر را خودکار برنمی‌دارد.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> مرتبط</h2>
+<ul>
+  <li><a href="kanban.html">نمای کلی کانبان</a> — معرفی رو-به-کاربر.</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban-tutorial" target="_blank" rel="noopener">آموزش کانبان</a> — walkthrough با داشبورد باز.</li>
+  <li><a href="https://github.com/NousResearch/hermes-agent/blob/main/agent/prompt_builder.py" target="_blank" rel="noopener">‏KANBAN_GUIDANCE</a> — چرخهٔ حیات worker + ارکستراتور که در پرامپت سیستمی هر worker کانبانی تزریق می‌شود.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="kanban.html"><span class="dir">→ قبلی</span><span class="ttl">کانبان ‏(تختهٔ چند-ایجنتی)</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">استخراج اسناد (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban-worker-lanes" target="_blank" rel="noopener">Kanban worker lanes</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

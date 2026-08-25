@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>واژهٔ بیدارباش ‏(Hey Hermes) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/wake-word" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>واژهٔ بیدارباش ‏(Hey Hermes)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>واژهٔ بیدارباش ‏(«Hey Hermes»)</h1>
+<p>‏واژهٔ بیدارباش هرمس را در CLI، ‏TUI و اپ دسکتاپ به دستیار بدون-دست تبدیل می‌کند: با یک تنظیم روشن، هرمس در پس‌زمینه گوش می‌دهد تا عبارت تریگر گفته شود. بگوییدش و هرمس نشست تازه‌ای شروع، میکروفون را باز، فرمانتان را از طریق خط‌لوله عادی صوتی ضبط و جواب می‌دهد — دقیقاً مثل «Hey Siri» یا «Alexa». با ‏<code>surface</code> انتخاب کنید کدام گوش می‌دهد.</p>
+<p>تشخیص <b>کاملاً روی-دستگاه</b> اجرا می‌شود. شنوندهٔ همیشه-روشن فقط واژهٔ بیداری را زیر نظر دارد؛ هیچ صدایی از ماشین شما خارج نمی‌شود تا واقعاً فرمانی به ایجنت بگویید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نحوهٔ کار</h2>
+<ol>
+  <li>با ‏<code>wake_word.enabled: true</code> ‏(یا بعد از ‎<code>/wake on</code>)، آشکارساز سبک hotword روی دستگاه ورودی پیکربندی‌شده‌تان یا میکروفون پیش‌فرض پروسه وقتی ‏wake_word.input_device ست نیست گوش می‌دهد.</li>
+  <li>وقتی عبارت بیداری را بشنود خودش را مکث می‌کند ‏(میکروفون آزاد)، نشست جدیدی شروع و یک گفته با تشخیص سکوت حالت صوتی ضبط می‌کند.</li>
+  <li>سخنتان رونویسی و به ایجنت فرستاده می‌شود. بعد از ریپلای، شنونده خودکار ازسر گرفته و منتظر واژهٔ بیدارباش بعدی می‌ماند.</li>
+</ol>
+<p><b>پیش‌فرض خاموش است</b> — تا روشنش نکنید هیچ‌چیز گوش نمی‌دهد.</p>
+<p>در اپ دسکتاپ، گفتگوی صوتی بدون-دست با صرفاً <b>گفتن «stop»</b> تمام می‌شود ‏(یا «never mind»، «goodbye»، «cancel»، «that's all») — فرمان گفتاری گفتگو را تمام می‌کند به‌جای اینکه به ایجنت برود. فقط فرمان stop کل-گفته تطبیق می‌یابد، پس درخواست واقعی مثل «stop the docker container» همچنان عادی عبور می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> دسکتاپ راه‌دور ‏(گرفتن سمت-کلاینت)</h2>
+<p>وقتی اپ دسکتاپ به یک بک‌اند هرمسِ <b>راه‌دور</b> وصل می‌شود ‏(مثلاً میزبان headless داکری یا ماشینی در اتاق دیگر)، بک‌اند اغلب <b>هیچ میکروفونی ندارد</b>. PortAudio سمت-سرور بعداً با «Failed to open the wake-word microphone.» شکست می‌خورد.</p>
+<p>هرمس برای این مورد <b>گرفتن سمت-کلاینت</b> را پشتیبانی می‌کند:</p>
+<ol>
+  <li>دسکتاپ wake را با ‏<code>capture: client</code> مسلح می‌کند ‏(خودکار برای GUI وقتی بک‌اند دستگاه ورودی محلی ندارد، یا صریحاً پایین ست کنید).</li>
+  <li>‏openWakeWord همچنان <b>روی بک‌اند</b> اجرا می‌شود ‏(همان موتورها، همان مدل‌ها).</li>
+  <li>دسکتاپ <b>میکروفون محلی Mac/PC</b> را باز، به ۱۶kHz مونو int16 resample و فریم‌های کوتاه از طریق RPC ‏<code>wake.feed</code> استریم می‌کند.</li>
+  <li>هنگام تشخیص بک‌اند مثل همیشه ‏<code>wake.detected</code> صادر می‌کند؛ دسکتاپ خط‌لوله عادی صوتی را روی میکروفون کلاینت شروع می‌کند.</li>
+</ol>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>wake_word:
+  enabled: true
+  capture: auto    # auto | local | client
+  # auto   — local PortAudio unless the desktop arms with client_capture
+  # local  — always open the backend mic (CLI/TUI default)
+  # client — always expect wake.feed PCM from the desktop (remote-friendly)</code></pre>
+</div>
+<p>‏GUI دسکتاپ همیشه روی ‏<code>wake.start</code> مقدار ‏<code>client_capture: true</code> می‌دهد، پس بک‌اندهای راه‌دور بدون میکروفون خودکار در حالت client مسلح می‌شوند. CLI و TUI مگر صریحاً ‏<code>capture: client</code> بگذارید گرفتن محلی نگه می‌دارند.</p>
+<p>یادداشت حریم خصوصی: با گرفتن سمت-کلاینت، PCM مربوط به wake از طریق WebSocket احرازشدهٔ دسکتاپ↔بک‌اند سفر می‌کند ‏(همان کانال بقیهٔ نشست). تشخیص همچنان صدا را به APIهای wake شخص ثالث نمی‌فرستد؛ موتور داخل پروسهٔ بک‌اند است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> موتورها</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>موتور</th><th>هزینه</th><th>کلید API</th><th>یادداشت‌ها</th></tr></thead>
+  <tbody>
+    <tr><td><b>openWakeWord</b> ‏(پیش‌فرض)</td><td>رایگان</td><td>هیچ</td><td>مدل‌های ONNX محلی. مدل همراه‌بستهٔ <b>«hey hermes»</b> عرضه می‌کند ‏(پیش‌فرض)؛ همچنین ‏hey_jarvis، ‏alexa، ‏hey_mycroft و... و مدل‌های سفارشی را پشتیبانی می‌کند</td></tr>
+    <tr><td><b>sherpa</b></td><td>رایگان</td><td>هیچ</td><td><b>واژگان باز</b> — هر عبارت تایپی را با صفر آموزش تشخیص می‌دهد. مدل انگلیسی کوچک در اولین استفاده خودبارگیری می‌شود ‏(~۱۳ MB)</td></tr>
+    <tr><td><b>Porcupine</b></td><td>سطح رایگان / پرداختی</td><td>‏<code>PORCUPINE_ACCESS_KEY</code></td><td>موتور Picovoice؛ کلیدواژه‌های داخلی + فایل‌های سفارشی .ppn</td></tr>
+  </tbody>
+</table>
+</div>
+<p>پیش‌فرض عبارت <b>«hey hermes»</b> است — مدلی برای آن همراه هرمس عرضه می‌شود، پس از جعبه و بدون آموزش کار می‌کند. ‏(در اولین استفاده openWakeWord مدل‌های اشتراکی استخراج-ویژگی خودش را دانلود می‌کند — یک دریافت کوچک یک‌باره.)</p>
+<p>هر دو اولین بار که واژهٔ بیدارباش را فعال کنید lazy-install می‌شوند ‏(نصب‌های دسکتاپ ساخته‌شده با ‏<code>--include-desktop</code> آنها را پیش‌نصب می‌کنند تا گوش فوراً کار کند). نصب پیش‌ازموعد:</p>
+<div class="codebox"><pre><code>cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[wake]"</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> شروع سریع</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># In an interactive `hermes` session:
+/wake on        # start listening (installs the engine on first use)
+/wake status    # show phrase, provider, and state
+/wake off       # stop listening</code></pre>
+</div>
+<p>در اپ دسکتاپ روی آیکون گوش در کامپوزر کلیک کنید.</p>
+<p>کلید toggle خودِ تنظیم است: روشن/خاموش کردن واژهٔ بیدارباش — از طریق ‏<code>/wake</code> یا دکمهٔ گوش دسکتاپ — مقدار ‏<code>wake_word.enabled</code> را هم در config.yaml می‌نویسد، پس انتخاب شما بین نشست‌ها ماندگار است. دستی هم می‌توانید برگردانید:</p>
+<div class="codebox"><pre><code>wake_word:
+  enabled: true</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> پیکربندی</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>wake_word:
+  enabled: false
+  surface: auto               # eligible surface: "auto" | "cli" | "tui" | "gui"
+  input_device: null           # PortAudio input index or device-name substring; null = process default
+  capture: auto               # auto | local | client — where PCM is captured (see Remote desktop)
+  provider: openwakeword      # "openwakeword" (free, local) | "sherpa" (free, any phrase) | "porcupine"
+  phrase: "hey hermes"        # cosmetic label only — detection is keyed by the model/keyword below
+  sensitivity: 0.6            # 0.0-1.0 — higher = stricter (fewer false triggers), consistent across all engines
+  confirmation_frames: 3      # openWakeWord only — consecutive over-threshold frames required to fire
+  start_new_session: true     # start a fresh session on wake vs. continue the current one
+  openwakeword:
+    model: hey_hermes         # bundled default; OR a built-in name OR a path to a custom .onnx/.tflite
+    inference_framework: ""   # "" (auto) | "onnx" | "tflite"
+  porcupine:
+    keyword: jarvis           # built-in keyword OR path to a custom .ppn</code></pre>
+</div>
+<p>‏<code>sensitivity</code>، ‏<code>phrase</code> و ‏<code>start_new_session</code> روی هر دو موتور اعمال می‌شوند. بلوک‌های ‏<code>openwakeword</code> و ‏<code>porcupine</code> مدل تشخیص واقعی را انتخاب می‌کنند.</p>
+<p>‏<code>input_device</code> مستقیم به استریم PortAudio ‏(<code>sounddevice</code>) مربوط به شنونده wake داده می‌شود. یا اندیس عددی دستگاه یا زیررشتهٔ بی‌ابهام نام دستگاه را بدهید. این تنظیم فقط گرفتن wake-word را عوض می‌کند؛ push-to-talk دسکتاپ همچنان مسیر میکروفون اپلیکیشن دسکتاپ را استفاده می‌کند.</p>
+<h3>کاهش تریگرهای کاذب روی گفتگوی محیطی</h3>
+<p>‏openWakeWord هر بار یک فریم صوتی کوتاه ‏(~۸۰ms) را امتیاز می‌دهد، پس یک واک خالص در گفتگوی پس‌زمینه گاهی می‌تواند یک فریم واحد را بالای آستانه ببرد و واژهٔ بیدارباش را ناخواسته شلیک کند. دو کلید این را کنترل می‌کنند:</p>
+<ul>
+  <li><b>‏<code>confirmation_frames</code></b> ‏(پیش‌فرض ‏<code>3</code>، فقط openWakeWord) — چند فریم <em>متوالی</em> بالای آستانه لازم است تا wake شلیک شود. یک «hey hermes» واقعی امتیاز بالا را چندین فریم نگه می‌دارد؛ یک لرزش محیطی فقط یکی را می‌زند. اگر هنوز در اتاق پرصدا تریگر کاذب دارید بالا ببرید ‏(مثلاً ‏<code>4</code>–<code>5</code>)؛ هزینه چند ده میلی‌ثانیه تأخیر اضافه است. ‏<code>1</code> رفتار قدیمیِ شلیک-در-اولین-فریم را برمی‌گرداند.</li>
+  <li><b>‏<code>sensitivity</code></b> ‏(پیش‌فرض ‏<code>0.6</code>) — آستانهٔ تشخیص، ‏<code>0.0</code>–<code>1.0</code>. بالاتر = سخت‌گیرانه‌تر ‏(تریگر کاذب کمتر). جهت در همهٔ موتورها سازگار است — برای openWakeWord همان آستانهٔ امتیاز خام به‌ازای-فریم، برای sherpa به آستانهٔ کلیدواژه نگاشت و برای Porcupune داخلی معکوس می‌شود تا «بالاتر = سخت‌گیرانه‌تر» آنجا هم برقرار باشد. پیش‌فرض ‏<code>0.6</code> بالاتر از خط پایه سهل‌گیرِ ‏0.5 مربوط به openWakeWord است که اجازه می‌داد near-miss هایی مثل «hey hor» عبور کنند؛ اگر هنوز شلیک کاذب دارید به ‏<code>0.8</code> نزدیک و اگر گفته‌های واقعی «hey hermes» از دست می‌روند پایینش بیاورید.</li>
+</ul>
+<p>موتورهای ‏<code>sherpa</code> و ‏<code>porcupine</code> کل عبارت را داخلی decode می‌کنند، پس مشکل spike تک-فریمی ندارند و ‏<code>confirmation_frames</code> را نادیده می‌گیرند ‏(ولی ‏sensitivity را همچنان رعایت می‌کنند).</p>
+<p>‏<code>inference_framework</code> بک‌اند openWakeWord را انتخاب می‌کند. خالی بگذارید ‏(پیش‌فرض) تا هرمس به‌ازای هر پلتفرم انتخاب کند: <b>tflite روی Apple Silicon</b>، جای دیگر onnx. بک‌اند onnx مربوط به openWakeWord روی macOS ARM64 امتیازهای تقریباً-صفر برمی‌گرداند ‏(<a href="https://github.com/dscripka/openWakeWord/issues/336" target="_blank" rel="noopener">issue ‏#336</a>)، پس شنونده‌ای که آنجا روی ‏onnx قفل شده مسلح، در وضعیت گوش‌دادن نمایش و هرگز شلیک نمی‌کند. بک‌اند tflite روی macOS به ‏<code>ai-edge-litert</code> نیاز دارد که هرمس هنگام نیاز کنار سایر وابستگی‌های wake-word نصب می‌کند.</p>
+<h3>سطوح ‏(CLI، ‏TUI، ‏GUI)</h3>
+<p>‏واژهٔ بیدارباش در هر سه سطح هرمس کار می‌کند و ‏<code>surface</code> تعیین می‌کند کدام مالک شنونده باشد و هنگام شلیک نشست جدید باز کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>‏<code>surface</code></th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>auto</code> ‏(پیش‌فرض)</td><td>همهٔ سطوح محلی واجد شرایط‌اند؛ اولینی که مسلح شود مالک شنونده می‌شود.</td></tr>
+    <tr><td><code>cli</code></td><td>فقط CLI کلاسیک ‏<code>hermes</code>.</td></tr>
+    <tr><td><code>tui</code></td><td>فقط ‏<code>hermes --tui</code>.</td></tr>
+    <tr><td><code>gui</code></td><td>فقط اپ دسکتاپ.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>آشکارساز روی-دستگاه و تک-میکروفونی است، پس در هر لحظه فقط یک سطح گوش می‌دهد حتی وقتی سطوح هرمس در پروسه‌های جدا اجرا می‌شوند. مالکیت چسبناک است: اولین مدعی واجدشرایط شنونده را نگه می‌دارد تا متوقف، قطع یا پروسه‌اش خارج شود. هرمس بی‌صدا به سطح دیگری failover نمی‌کند. وقتی می‌خواهید مالکیت را pin کنید به‌جای برنده-شدن-اولین-مدعی، مقدار ‏<code>surface</code> را ست کنید. ‏TUI و GUI دسکتاپ همان بک‌اند Python را شریک‌اند ‏(<code>tui_gateway</code>) که آشکارساز را سمت-سرور اجرا و حین ضبط فرمان میکروفون را به گرفتن صدا واگذار می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> استفاده از عبارت متفاوت</h2>
+<p>«Hey Hermes» از جعبه کار می‌کند — مدل همراه‌بستهٔ openWakeWord ‏(<code>model: hey_hermes</code>) پیش‌فرض است. برای بیدار شدن روی چیز دیگر، ساده‌ترین مسیر موتور واژگان-باز است:</p>
+<h4>گزینه A — sherpa ‏(هر عبارتی، صفر آموزش)</h4>
+<p>عبارت موردنظرتان را تایپ کنید؛ هنگام runtime توکنیزه می‌شود — «hey coder»، «computer»، «wake up neo»، هر چیزی:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>wake_word:
+  enabled: true
+  provider: sherpa
+  phrase: "hey coder"        # detection key — just type your phrase</code></pre>
+</div>
+<p>مدل کوچک KWS انگلیسی ‏(~۱۳ MB) یک‌بار در اولین استفاده دانلود می‌شود. هر پروفایل می‌تواند عبارت خودش را داشته باشد — «hey &lt;profile&gt;» برای هر پروفیلی که اجرا می‌کنید.</p>
+<h4>بیدارکردن یک پروفایل مشخص ‏(دسکتاپ)</h4>
+<p>با موتور sherpa، <b>یک</b> شنونده می‌تواند هر پروفایلی را بیدار کند. هر پروفایلی که ‏<code>wake_word.enabled: true</code> در پیکربندی‌اش دارد خودکار ثبت می‌شود؛ عبارتش وقتی unset باشد پیش‌فرض ‏<code>hey &lt;profile name&gt;</code> است. عبارت پروفایلی را بگویید و اپ دسکتاپ زنده به آن پروفایل سوئیچ، نشست تازه‌ای آنجا باز و صدای بدون-دست را شروع می‌کند:</p>
+<ul>
+  <li>«hey hermes» ← پروفایل پیش‌فرض</li>
+  <li>«hey coder» ← پروفایل ‏<code>coder</code></li>
+  <li>«hey trader» ← پروفایل ‏<code>trader</code></li>
+</ul>
+<p>برای انصراف و گوش‌دادن فقط به عبارت خودش، ‏<code>wake_word.profile_routing: false</code> را روی پروفایل شنونده ست کنید. CLI و TUI پروسه‌های تک-پروفایلی‌اند: عبارت بیداری متعلق به پروفایل دیگری فرمان سوییچ ‏(<code>hermes -p &lt;profile&gt;</code>) را چاپ می‌کند به‌جای مسیریابی.</p>
+<p>نام‌ها آکوستیک بر اساس زیرواژه‌های انگلیسی‌شان تطبیق می‌یابند: عبارت‌های دومعمودی با نام‌های مجزا و ۲+ بخشی بهترین عمل را دارند. نام‌های خیلی کوتاه، آواشناسی سنگین غیرانگلیسی یا دو پروفایل با نام‌های هم‌صدا دقت را افت می‌دهند — در صورت نیاز ‏<code>sensitivity</code> به‌ازای-پروفایل را تنظیم کنید.</p>
+<h4>گزینه B — openWakeWord ‏(رایگان، مدل آموزش‌دیده)</h4>
+<p>مدل داخلی نام‌برد کنید ‏(<code>hey_jarvis</code>، ‏<code>alexa</code>، ‏<code>hey_mycroft</code> و...) یا مدل سفارشی آموزش دهید ‏(~۷۵–۹۰ دقیقه روی GPU رایگان/Colab) برای بیشترین مقاومت، فایل ‏.onnx را جایی بیندازید و ارجاع دهید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>wake_word:
+  enabled: true
+  provider: openwakeword
+  phrase: "computer"
+  openwakeword:
+    model: ~/.hermes/wakewords/computer.onnx   # or a built-in name like hey_jarvis</code></pre>
+</div>
+<p>مراجع آموزش:</p>
+<ul>
+  <li><a href="https://github.com/dscripka/openWakeWord" target="_blank" rel="noopener">openWakeWord</a></li>
+  <li><a href="https://github.com/alfiedennen/openwakeword-colab-2026" target="_blank" rel="noopener">Colab آموزش ۲۰۲۶</a></li>
+</ul>
+<div class="callout tip">
+  <div class="callout-title">💡 عبارت متمایز انتخاب کنید</div>
+  <p>عبارت‌های بیداری که با گفتار روزمره تداخل ندارند بهترین تعمیم را دارند. دو بخشی با واژه‌ای غیررایج («hermes» واجد شرایط است) بر واژه‌های رایج مثل «hello» یا «stop» می‌چربد.</p>
+</div>
+<h4>گزینه C — Porcupine ‏(کلیدواژه سفارشی ظرف چند ثانیه)</h4>
+<p>کلیدواژه «Hey Hermes» را در <a href="https://console.picovoice.ai/" target="_blank" rel="noopener">Picovoice Console</a> بسازید، فایل ‏.ppn را دانلود و:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>wake_word:
+  enabled: true
+  provider: porcupine
+  phrase: "hey hermes"
+  porcupine:
+    keyword: ~/.hermes/wakewords/hey_hermes.ppn</code></pre>
+</div>
+<p>کلید دسترسی‌تان را در ‏<code>~/.hermes/.env</code> ست کنید:</p>
+<div class="codebox"><pre><code>PORCUPINE_ACCESS_KEY=your-key-here</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> الزامات</h2>
+<ul>
+  <li>میکروفون کارا و پشتهٔ صدای ‏<code>sounddevice</code> + ‏<code>numpy</code> ‏(مشترک با حالت صوتی).</li>
+  <li>یک ارائه‌دهندهٔ STT برای رونویسی فرمان گفتاری — ‏<code>faster-whisper</code> محلی از جعبه کار می‌کند؛ فهرست کامل ارائه‌دهنده‌ها در <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/voice-mode" target="_blank" rel="noopener">حالت صوتی</a>.</li>
+  <li>یک ارائه‌دهندهٔ TTS برای گفتن پاسخ ‏(<code>edge-tts</code> پیش‌فرض بدون کلید کار می‌کند). جریان wake کاملاً بدون-دست است، پس کلید toggle تا هر دو STT و TTS آماده نباشند از مسلح شدن امتناع می‌کند — ‏<code>hermes tools</code> ‏(بخش Voice) آنها را راه می‌اندازد.</li>
+  <li>وابستگی‌های موتور wake ‏(خودکار نصب، یا ‏<code>hermes-agent[wake]</code>).</li>
+</ul>
+<p>اگر شنونده شروع نشود ‏<code>/wake status</code> دقیقاً گزارش می‌کند چه چیزی غایب است.</p>
+<h3>«گوش می‌دهد» ولی هرگز بیدار نمی‌شود ‏(macOS)</h3>
+<p>‏macOS دسترسی میکروفون را به‌ازای <b>پروسه</b> اعطا می‌کند. کار کردن STT در اپ دسکتاپ ثابت می‌کند <em>رندرر</em> دسترسی میکروفون دارد — شنونده wake در <em>بک‌اند</em> Python اجرا می‌شود که grant خودش را می‌خواهد. بدون آن CoreAudio به بک‌اند استریمی «کارا» می‌دهد که فقط سکوت تحویل می‌دهد، پس گوش نشان می‌دهد گوش می‌دهد ولی عبارت هرگز شلیک نمی‌شود. هرمس این را تشخیص می‌دهد ‏(<code>/wake status</code> نشان می‌دهد «mic delivers only silence»؛ tooltip گوش دسکتاپ همین سرنخ را حمل می‌کند). اصلاح: System Settings ← Privacy &amp; Security ← Microphone ← فعال‌سازی بک‌اند هرمس ‏(شاید به‌نام ترمینال، ‏python یا Hermes ظاهر شود)، سپس واژهٔ بیدارباش را خاموش/روشن کنید.</p>
+<h3>«گوش می‌دهد» ولی سکوت دریافت می‌کند ‏(Windows)</h3>
+<p>‏push-to-talk دسکتاپ و گرفتن wake-word از مسیرهای میکروفون متفاوتی استفاده می‌کنند. ‏push-to-talk از گرفتن مرورگریِ اپلیکیشن دسکتاپ استفاده می‌کند در حالی که شنونده wake-word یک استریم PortAudio در بک‌اند Python باز می‌کند. ممکن است یکی کار کند در حالی که دیگری ورودی ویندوزیِ بی‌صدای یا غیرقابل‌استفاده‌ای را انتخاب کرده.</p>
+<p>‏<code>/wake status</code> دستگاه ورودی انتخابی و audio host API ویندوز را گزارش می‌کند. وقتی سکوت گزارش کرد ‏<code>wake_word.input_device</code> را روی اندیس عددی یا نام بی‌ابهام ورودی PortAudio کارا ست و بعد واژهٔ بیدارباش را toggle کنید:</p>
+<div class="codebox"><pre><code>hermes config set wake_word.input_device "Microphone Array"</code></pre></div>
+<p>برای برگشت به پیش‌فرض پروسه از ‏<code>null</code> استفاده کنید:</p>
+<div class="codebox"><pre><code>hermes config set wake_word.input_device null</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> یادداشت‌ها و حدود</h2>
+<ul>
+  <li><b>فقط سطوح محلی.</b> واژهٔ بیدارباش در CLI، TUI و GUI دسکتاپ اجرا می‌شود — هرجا میکروفون محلی موجود باشد. در گیت‌وی پیام‌رسانی ‏(تلگرام، دیسکورد و...) اجرا نمی‌شود که میکروفون ندارد.</li>
+  <li><b>یک میکروفون در لحظه.</b> آشکارساز حین ضبط فرمان میکروفون را آزاد و بعد از پایان نوبت پس می‌گیرد، پس با گرفتن صدا نجنگد.</li>
+  <li><b>حریم خصوصی.</b> تشخیص hotword محلی است. اگر تریگر کاذب گرفتید ‏<code>sensitivity</code> را بالا و اگر شمارا از دست می‌دهد پایین ببرید.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="skins.html"><span class="dir">→ قبلی</span><span class="ttl">پوسته‌ها و تم‌ها</span></a>
+  <a class="next" href="lsp.html"><span class="dir">بعدی ←</span><span class="ttl">تشخیص معنایی LSP</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/wake-word" target="_blank" rel="noopener">Wake Word ("Hey Hermes")</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

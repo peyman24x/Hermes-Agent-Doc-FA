@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پوسته‌ها و تم‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skins" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>پوسته‌ها و تم‌ها</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>پوسته‌ها و تم‌ها ‏(Skins &amp; Themes)</h1>
+<p>‏پوسته‌ها <b>ارائهٔ بصری</b> مربوط به CLI هرمس را کنترل می‌کنند: رنگ‌های بنر، صورتک‌ها و فعل‌های spinner، برچسب‌های جعبه پاسخ، متن برندینگ و پیشوند فعالیت ابزار.</p>
+<p>سبک گفتاری و سبک بصری مفاهیم جدایند:</p>
+<ul>
+  <li><b>شخصیت</b> لحن و واژگان ایجنت را عوض می‌کند.</li>
+  <li><b>پوسته</b> ظاهر CLI را عوض می‌کند.</li>
+</ul>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> تغییر پوسته‌ها</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>/skin                # show the current skin and list available skins
+/skin ares           # switch to a built-in skin
+/skin mytheme        # switch to a custom skin from ~/.hermes/skins/mytheme.yaml</code></pre>
+</div>
+<p>یا پوستهٔ پیش‌فرض را در config.yaml ست کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>display:
+  skin: default</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پوسته‌های داخلی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>پوسته</th><th>توضیح</th><th>برندینگ ایجنت</th><th>شخص بصری</th></tr></thead>
+  <tbody>
+    <tr><td><code>default</code></td><td>هرمس کلاسیک — طلایی و بامزه</td><td>‏<code>Hermes Agent</code></td><td>حاشیه‌های طلایی گرم، متن cornsilk، صورتک‌های بامزه در spinner ها. بنر آشنای عصای دوشاخه. تمیز و دلنشین.</td></tr>
+    <tr><td><code>ares</code></td><td>تم خداوند جنگ — زرشکی و برنز</td><td>‏<code>Ares Agent</code></td><td>حاشیه‌های زرشکی عمیق با اکسنت‌های برنزی. فعل‌های تهاجمی spinner («forging»، «marching»، «tempering steel»). بنر ASCII سفارشی شمشیر-و-سپر.</td></tr>
+    <tr><td><code>mono</code></td><td>تک‌رنگ — خاکستری تمیز</td><td>‏<code>Hermes Agent</code></td><td>همه خاکستری — بدون رنگ. حاشیه‌ها ‏<code>#555555</code>، متن ‏<code>#c9d1d9</code>. ایده‌آل برای setup های ترمینال مینیمال یا ضبط صفحه.</td></tr>
+    <tr><td><code>slate</code></td><td>آبی خنک — توسعه‌دهنده‌محور</td><td>‏<code>Hermes Agent</code></td><td>حاشیه‌های آبی سلطنتی ‏(<code>#4169e1</code>)، متن آبی ملایم. آرام و حرفه‌ای. بدون spinner سفارشی — از صورتک‌های پیش‌فرض استفاده می‌کند.</td></tr>
+    <tr><td><code>daylight</code></td><td>تم روشن برای ترمینال‌های روشن با متن تیره و اکسنت‌های آبی خنک</td><td>‏<code>Hermes Agent</code></td><td>طراحی برای ترمینال‌های سفید یا روشن. متن slate تیره با حاشیه‌های آبی، سطوح وضعیت کم‌رنگ و منوی تکمیل روشنی که در پروفایل‌های روشن ترمینال خوانا می‌ماند.</td></tr>
+    <tr><td><code>warm-lightmode</code></td><td>متن قهوه‌ای/طلایی گرم برای پس‌زمینه‌های روشن ترمینال</td><td>‏<code>Hermes Agent</code></td><td>تن‌های پوست‌مانند گرم برای ترمینال‌های روشن. متن قهوه‌ای تیره با اکسنت‌های قهوه‌ای زین، سطوح وضعیت کرم. جایگزین خاکیِ گزینهٔ سردتر daylight.</td></tr>
+    <tr><td><code>poseidon</code></td><td>تم خداوند اقیانوس — آبی عمیق و سبز دریایی</td><td>‏<code>Poseidon Agent</code></td><td>گرادیان آبی عمیق تا سبز دریایی. spinner های اقیانوسی ‏(«charting currents»، «sounding the depth»). بنر ASCII سه‌شاخه.</td></tr>
+    <tr><td><code>sisyphus</code></td><td>تم سیزیفی — خاکستری سخت‌گیرانه با پشتکار</td><td>‏<code>Sisyphus Agent</code></td><td>خاکستری‌های روشن با کنتراست شدید. spinner های سنگ-محور ‏(«pushing uphill»، «resetting the boulder»، «enduring the loop»). بنر ASCII سنگ-و-تپه.</td></tr>
+    <tr><td><code>charizard</code></td><td>تم آتشفشانی — نارنجی سوخته و اخگر</td><td>‏<code>Charizard Agent</code></td><td>گرادیان نارنجی سوخته گرم تا اخگری. spinner های آتشین ‏(«banking into the draft»، «measuring burn»). بنر ASCII سیلوئت اژدها.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> فهرست کامل کلیدهای قابل پیکربندی</h2>
+<h3>رنگ‌ها ‏(<code>colors:</code>)</h3>
+<p>همهٔ مقادیر رنگ در سراسر CLI را کنترل می‌کند. مقادیر رشتهٔ رنگ hex هستند.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید</th><th>توضیح</th><th>پیش‌فرض ‏(پوستهٔ default)</th></tr></thead>
+  <tbody>
+    <tr><td><code>banner_border</code></td><td>حاشیهٔ پنل دور بنر شروع</td><td><code>#CD7F32</code> ‏(برنز)</td></tr>
+    <tr><td><code>banner_title</code></td><td>رنگ متن عنوان داخل بنر</td><td><code>#FFD700</code> ‏(طلایی)</td></tr>
+    <tr><td><code>banner_accent</code></td><td>سربرگ‌های بخش بنر ‏(Available Tools و...)</td><td><code>#FFBF00</code> ‏(کهربایی)</td></tr>
+    <tr><td><code>banner_dim</code></td><td>متن کم‌رنگ بنر ‏(جداکننده‌ها، برچسب‌های ثانویه)</td><td><code>#B8860B</code> ‏(goldenrod تیره)</td></tr>
+    <tr><td><code>banner_text</code></td><td>متن بدنه بنر ‏(نام ابزارها، نام مهارت‌ها)</td><td><code>#FFF8DC</code> ‏(cornsilk)</td></tr>
+    <tr><td><code>ui_accent</code></td><td>رنگ اکسنت عمومی UI ‏(هایلایت‌ها، عناصر فعال)</td><td><code>#FFBF00</code></td></tr>
+    <tr><td><code>ui_label</code></td><td>برچسب‌ها و تگ‌های UI</td><td><code>#DAA520</code> ‏(goldenrod)</td></tr>
+    <tr><td><code>ui_ok</code></td><td>نشانگرهای موفقیت ‏(تیک، تکمیل)</td><td><code>#4caf50</code> ‏(سبز)</td></tr>
+    <tr><td><code>ui_error</code></td><td>نشانگرهای خطا ‏(شکست، بلاک)</td><td><code>#ef5350</code> ‏(قرمز)</td></tr>
+    <tr><td><code>ui_warn</code></td><td>نشانگرهای هشدار ‏(احتیاط، پرامپت تأیید)</td><td><code>#ffa726</code> ‏(نارنجی)</td></tr>
+    <tr><td><code>prompt</code></td><td>رنگ متن پرامپت تعاملی</td><td><code>#FFF8DC</code></td></tr>
+    <tr><td><code>input_rule</code></td><td>خط افقی بالای ناحیه ورودی</td><td><code>#CD7F32</code></td></tr>
+    <tr><td><code>response_border</code></td><td>حاشیه دور جعبه پاسخ ایجنت ‏(escape مربوط به ANSI)</td><td><code>#FFD700</code></td></tr>
+    <tr><td><code>session_label</code></td><td>رنگ برچسب نشست</td><td><code>#DAA520</code></td></tr>
+    <tr><td><code>session_border</code></td><td>رنگ کم‌رنگ حاشیه شناسه نشست</td><td><code>#8B8682</code></td></tr>
+    <tr><td><code>status_bar_bg</code></td><td>رنگ پس‌زمینه نوار وضعیت/مصرف TUI</td><td><code>#1a1a2e</code></td></tr>
+    <tr><td><code>voice_status_bg</code></td><td>رنگ پس‌زمینه badge وضعیت حالت صوتی</td><td><code>#1a1a2e</code></td></tr>
+    <tr><td><code>selection_bg</code></td><td>پس‌زمینه هایلایتر انتخاب موس TUI. وقتی unset به ‏completion_menu_current_bg برمی‌گردد.</td><td><code>#3a3a55</code></td></tr>
+    <tr><td><code>completion_menu_bg</code></td><td>پس‌زمینه فهرست منوی تکمیل</td><td><code>#1a1a2e</code></td></tr>
+    <tr><td><code>completion_menu_current_bg</code></td><td>پس‌زمینه ردیف فعال تکمیل</td><td><code>#333355</code></td></tr>
+    <tr><td><code>completion_menu_meta_bg</code></td><td>پس‌زمینه ستون متای تکمیل</td><td><code>#1a1a2e</code></td></tr>
+    <tr><td><code>completion_menu_meta_current_bg</code></td><td>پس‌زمینه ستون متای فعال تکمیل</td><td><code>#333355</code></td></tr>
+  </tbody>
+</table>
+</div>
+<h3>Spinner ‏(<code>spinner:</code>)</h3>
+<p>spinner متحرکی که حین انتظار برای پاسخ API نمایش داده می‌شود را کنترل می‌کند.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید</th><th>نوع</th><th>توضیح</th><th>مثال</th></tr></thead>
+  <tbody>
+    <tr><td><code>waiting_faces</code></td><td>فهرست رشته</td><td>صورتک‌های چرخان حین انتظار پاسخ API</td><td>‏<code>["(⚔)", "(⛨)", "(▲)"]</code></td></tr>
+    <tr><td><code>thinking_faces</code></td><td>فهرست رشته</td><td>صورتک‌های چرخان حین استدلال مدل</td><td>‏<code>["(⚔)", "(⌁)", "(<>)"]</code></td></tr>
+    <tr><td><code>thinking_verbs</code></td><td>فهرست رشته</td><td>افعالی که در پیام‌های spinner نشان داده می‌شوند</td><td>‏<code>["forging", "plotting", "hammering plans"]</code></td></tr>
+    <tr><td><code>wings</code></td><td>فهرست جفت [چپ، راست]</td><td>براکت‌های تزئینی دور spinner</td><td>‏<code>[["⟪⚔", "⚔⟫"], ["⟪▲", "▲⟫"]]</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>وقتی مقادیر spinner خالی باشند ‏(مثل ‏<code>default</code> و ‏<code>mono</code>) از پیش‌فرض‌های هاردکد ‏display.py استفاده می‌شود.</p>
+<h3>برندینگ ‏(<code>branding:</code>)</h3>
+<p>رشته‌های متنی استفاده‌شده در سراسر interface مربوط به CLI.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید</th><th>توضیح</th><th>پیش‌فرض</th></tr></thead>
+  <tbody>
+    <tr><td><code>agent_name</code></td><td>نام نشان‌داده‌شده در عنوان بنر و نمایش وضعیت</td><td><code>Hermes Agent</code></td></tr>
+    <tr><td><code>welcome</code></td><td>پیام خوش‌آمد هنگام شروع CLI</td><td><code>Welcome to Hermes Agent! Type your message or /help for commands.</code></td></tr>
+    <tr><td><code>goodbye</code></td><td>پیام هنگام خروج</td><td><code>Goodbye! ⚕</code></td></tr>
+    <tr><td><code>response_label</code></td><td>برچسب روی سربرگ جعبه پاسخ</td><td><code> ⚕ Hermes </code></td></tr>
+    <tr><td><code>prompt_symbol</code></td><td>سمبل قبل از پرامپت ورودی کاربر ‏(توکن لخت؛ رندرکننده‌ها فاصله انتهایی می‌افزایند)</td><td><code>❯</code></td></tr>
+    <tr><td><code>help_header</code></td><td>متن سربرگ خروجی فرمان ‏/help</td><td><code>(^_^)? Available Commands</code></td></tr>
+  </tbody>
+</table>
+</div>
+<h3>سایر کلیدهای سطح‌بالا</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید</th><th>نوع</th><th>توضیح</th><th>پیش‌فرض</th></tr></thead>
+  <tbody>
+    <tr><td><code>tool_prefix</code></td><td>رشته</td><td>کاراکتر پیشوند خطوط خروجی ابزار در CLI</td><td><code>┊</code></td></tr>
+    <tr><td><code>tool_emojis</code></td><td>dict</td><td>override ایموجی به‌ازای هر ابزار برای spinner ها و پیشرفت ‏({tool_name: emoji})</td><td><code>{}</code></td></tr>
+    <tr><td><code>banner_logo</code></td><td>رشته</td><td>لوگو هنری ASCII با markup غنی ‏(جایگزین بنر پیش‌فرض HERMES_AGENT)</td><td><code>""</code></td></tr>
+    <tr><td><code>banner_hero</code></td><td>رشته</td><td>هنر hero با Rich-markup ‏(جایگزین هنر پیش‌فرض عصای دوشاخه)</td><td><code>""</code></td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پوسته‌های سفارشی</h2>
+<p>فایل‌های YAML زیر ‏<code>~/.hermes/skins/</code> بسازید. پوسته‌های کاربری مقادیر غایب را از پوستهٔ داخلی ‏<code>default</code> ارث می‌برند، پس فقط کلیدهایی که می‌خواهید عوض شوند را لازم است مشخص کنید.</p>
+<h3>قالب کامل YAML پوسته سفارشی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/skins/mytheme.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Complete skin template — all keys shown. Delete any you don't need;
+# missing values automatically inherit from the 'default' skin.
+
+name: mytheme
+description: My custom theme
+
+colors:
+  banner_border: "#CD7F32"
+  banner_title: "#FFD700"
+  banner_accent: "#FFBF00"
+  banner_dim: "#B8860B"
+  banner_text: "#FFF8DC"
+  ui_accent: "#FFBF00"
+  ui_label: "#4dd0e1"
+  ui_ok: "#4caf50"
+  ui_error: "#ef5350"
+  ui_warn: "#ffa726"
+  prompt: "#FFF8DC"
+  input_rule: "#CD7F32"
+  response_border: "#FFD700"
+  session_label: "#DAA520"
+  session_border: "#8B8682"
+  status_bar_bg: "#1a1a2e"
+  voice_status_bg: "#1a1a2e"
+  selection_bg: "#333355"
+  completion_menu_bg: "#1a1a2e"
+  completion_menu_current_bg: "#333355"
+  completion_menu_meta_bg: "#1a1a2e"
+  completion_menu_meta_current_bg: "#333355"
+
+spinner:
+  waiting_faces:
+    - "(⚔)"
+    - "(⛨)"
+    - "(▲)"
+  thinking_faces:
+    - "(⚔)"
+    - "(⌁)"
+    - "(&lt;&gt;)"
+  thinking_verbs:
+    - "processing"
+    - "analyzing"
+    - "computing"
+    - "evaluating"
+  wings:
+    - ["⟪⚡", "⚡⟫"]
+    - ["⟪●", "●⟫"]
+
+branding:
+  agent_name: "My Agent"
+  welcome: "Welcome to My Agent! Type your message or /help for commands."
+  goodbye: "See you later! ⚡"
+  response_label: " ⚡ My Agent "
+  prompt_symbol: "⚡"
+  help_header: "(⚡) Available Commands"
+
+tool_prefix: "┊"
+
+# Per-tool emoji overrides (optional)
+tool_emojis:
+  terminal: "⚔"
+  web_search: "🔮"
+  read_file: "📄"
+
+# Custom ASCII art banners (optional, Rich markup supported)
+# banner_logo: |
+#   [bold #FFD700] MY AGENT [/]
+# banner_hero: |
+#   [#FFD700]  Custom art here  [/]</code></pre>
+</div>
+<h3>مثال پوسته سفارشی حداقلی</h3>
+<p>چون همه‌چیز از ‏<code>default</code> ارث می‌برد، یک پوسته حداقلی فقط نیاز دارد تفاوت‌ها را عوض کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>name: cyberpunk
+description: Neon terminal theme
+
+colors:
+  banner_border: "#FF00FF"
+  banner_title: "#00FFFF"
+  banner_accent: "#FF1493"
+
+spinner:
+  thinking_verbs: ["jacking in", "decrypting", "uploading"]
+  wings:
+    - ["⟨⚡", "⚡⟩"]
+
+branding:
+  agent_name: "Cyber Agent"
+  response_label: " ⚡ Cyber "
+
+tool_prefix: "▏"</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> ‏Hermes Mod — ویرایشگر بصری پوسته</h2>
+<p><a href="https://github.com/cocktailpeanut/hermes-mod" target="_blank" rel="noopener">Hermes Mod</a> یک UI وب ساخته‌شده توسط جامعه برای ساخت و مدیریت بصری پوسته‌هاست. به‌جای نوشتن دستی YAML، یک ویرایشگر اشاره-و-کلیک با پیش‌نمایش زنده می‌گیرید.</p>
+<p><b>چه کاری می‌کند:</b></p>
+<ul>
+  <li>همهٔ پوسته‌های داخلی و سفارشی را فهرست می‌کند</li>
+  <li>هر پوسته را در یک ویرایشگر بصری با همهٔ فیلدهای پوسته هرمس باز می‌کند ‏(رنگ‌ها، spinner، برندینگ، پیشوند ابزار، ایموجی ابزارها)</li>
+  <li>هنر متنی ‏<code>banner_logo</code> را از یک پرامپت متنی تولید می‌کند</li>
+  <li>تصاویر آپلودی ‏(PNG، ‏JPG، ‏GIF، ‏WEBP) را به هنر ASCII ‏<code>banner_hero</code> با چند سبک رندر تبدیل می‌کند ‏(braille، ramp مربوط به ASCII، بلوک‌ها، نقاط)</li>
+  <li>مستقیم در ‏<code>~/.hermes/skins/</code> ذخیره می‌کند</li>
+  <li>پوسته را با به‌روزرسانی ‏<code>~/.hermes/config.yaml</code> فعال می‌کند</li>
+  <li>YAML تولیدشده و یک پیش‌نمایش زنده نشان می‌دهد</li>
+</ul>
+<h4>نصب</h4>
+<p><b>گزینه ۱ — Pinokio ‏(یک کلیک):</b> آن را در ‏<a href="https://pinokio.computer" target="_blank" rel="noopener">pinokio.computer</a> پیدا و با یک کلیک نصب کنید.</p>
+<p><b>گزینه ۲ — npx ‏(سریع‌ترین از ترمینال):</b></p>
+<div class="codebox"><pre><code>npx -y hermes-mod</code></pre></div>
+<p><b>گزینه ۳ — دستی:</b></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>git clone https://github.com/cocktailpeanut/hermes-mod.git
+cd hermes-mod/app
+npm install
+npm start</code></pre>
+</div>
+<h4>استفاده</h4>
+<ol>
+  <li>اپ را اجرا کنید ‏(از طریق Pinokio یا ترمینال).</li>
+  <li><b>Skin Studio</b> را باز کنید.</li>
+  <li>یک پوسته داخلی یا سفارشی برای ویرایش انتخاب کنید.</li>
+  <li>لوگو را از متن تولید و/یا تصویری برای هنر hero آپلود کنید. سبک رندر و عرض را انتخاب کنید.</li>
+  <li>رنگ‌ها، spinner، برندینگ و سایر فیلدها را ویرایش کنید.</li>
+  <li><b>Save</b> را کلیک کنید تا YAML پوسته در ‏<code>~/.hermes/skins/</code> نوشته شود.</li>
+  <li><b>Activate</b> را کلیک کنید تا به‌عنوان پوسته فعلی ست شود ‏(display.skin را در config.yaml به‌روز می‌کند).</li>
+</ol>
+<p>‏Hermes Mod متغیر محیطی ‏<code>HERMES_HOME</code> را رعایت می‌کند، پس با <a href="../profiles.html">پروفایل‌ها</a> هم کار می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> یادداشت‌های عملیاتی</h2>
+<ul>
+  <li>پوسته‌های داخلی از ‏<code>hermes_cli/skin_engine.py</code> لود می‌شوند.</li>
+  <li>پوسته‌های ناشناخته خودکار به ‏<code>default</code> برمی‌گردند.</li>
+  <li>‏<code>/skin</code> تم فعال CLI را برای نشست جاری فوراً به‌روز می‌کند.</li>
+  <li>پوسته‌های کاربری در ‏<code>~/.hermes/skins/</code> بر پوسته‌های داخلی هم‌نام مقدم‌اند.</li>
+  <li>تغییرات پوسته از طریق ‏<code>/skin</code> مخصوص همان نشست است. برای دائمی کردن، در config.yaml ست کنید.</li>
+  <li>فیلدهای ‏<code>banner_logo</code> و ‏<code>banner_hero</code> از markup کنسول Rich ‏(مثل ‏<code>[bold #FF0000]text[/]</code>) برای هنر ASCII رنگی پشتیبانی می‌کنند.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="code-execution.html"><span class="dir">→ قبلی</span><span class="ttl">اجرای کد</span></a>
+  <a class="next" href="wake-word.html"><span class="dir">بعدی ←</span><span class="ttl">واژهٔ بیدارباش ‏(Hey Hermes)</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skins" target="_blank" rel="noopener">Skins &amp; Themes</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

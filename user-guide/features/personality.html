@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شخصیت و SOUL.md — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/personality" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>شخصیت و SOUL.md</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>شخصیت و SOUL.md</h1>
+<p>شخصیت هرمس ایجنت کاملاً قابل سفارشی‌سازی است. ‏<code>SOUL.md</code> <b>هویت اصلی</b> است — اولین چیز در پرامپت سیستمی و تعیین‌کنندهٔ اینکه ایجنت کیست.</p>
+<ul>
+  <li>‏<code>SOUL.md</code> — فایل شخصیت ماندگاری که در ‏HERMES_HOME زندگی می‌کند و هویت ایجنت است ‏(اسلات #۱ پرامپت سیستمی)</li>
+  <li>‏preset های داخلی یا سفارشی ‏<code>/personality</code> — overlay های سطح-نشستِ پرامپت سیستمی</li>
+</ul>
+<p>اگر می‌خواهید هویت هرمس را عوض کنید — یا جایگزینش با یک شخصیت ایجنتی کاملاً متفاوت — ‏<code>SOUL.md</code> را ویرایش کنید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نحوهٔ کار فعلی SOUL.md</h2>
+<p>هرمس الان یک ‏SOUL.md پیش‌فرض خودکار در این مسیر seed می‌کند:</p>
+<div class="codebox"><pre><code>~/.hermes/SOUL.md</code></pre></div>
+<p>دقیق‌تر، از ‏HERMES_HOME نمونهٔ فعلی استفاده می‌کند، پس اگر هرمس را با دایرکتوری خانه سفارشی اجرا کنید:</p>
+<div class="codebox"><pre><code>$HERMES_HOME/SOUL.md</code></pre></div>
+<h3>رفتار مهم</h3>
+<ul>
+  <li><b>‏SOUL.md هویت اصلی ایجنت است.</b> اسلات #۱ پرامپت سیستمی را اشغال می‌کند و هویت پیش‌فرض هاردکد را جایگزین می‌کند.</li>
+  <li>هرمس اگر ‏SOUL.md موجود نباشد خودکار یکی starter می‌سازد</li>
+  <li>فایل‌های ‏SOUL.md کاربرانِ موجود هرگز overwrite نمی‌شوند</li>
+  <li>هرمس ‏SOUL.md را فقط از ‏HERMES_HOME لود می‌کند</li>
+  <li>هرمس برای ‏SOUL.md در پوشهٔ کاری جاری جست‌وجو نمی‌کند</li>
+  <li>اگر ‏SOUL.md موجود ولی خالی باشد یا قابل لود نباشد، هرمس به هویت پیش‌فرض داخلی برمی‌گردد</li>
+  <li>اگر ‏SOUL.md محتوا داشته باشد، محتوا بعد از اسکن امنیتی و برش تحت‌اللفظی تزریق می‌شود</li>
+  <li>‏SOUL.md در بخش فایل‌های زمینه <b>تکرار نمی‌شود</b> — فقط یک‌بار به‌عنوان هویت ظاهر می‌شود</li>
+</ul>
+<p>این باعث می‌شود ‏SOUL.md یک هویت واقعی به‌ازای-کاربر یا به‌ازای-نمونه باشد نه صرفاً یک لایهٔ افزودنی.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> چرا این طراحی</h2>
+<p>این طراحی شخصیت را قابل‌پیش‌بینی نگه می‌دارد.</p>
+<p>اگر هرمس ‏SOUL.md را از هر پوشه‌ای که اتفاقی در آن لانچ شده لود کند، شخصیت شما ممکن بود بین پروژه‌ها غیرمنتظره عوض شود. با لود کردن فقط از ‏HERMES_HOME، شخصیت متعلق به خود نمونهٔ هرمس است.</p>
+<p>همچنین آموزش کاربران را ساده‌تر می‌کند: «برای تغییر شخصیت پیش‌فرض هرمس ‏<code>~/.hermes/SOUL.md</code> را ویرایش کنید.»</p>
+<h3>کجا ویرایشش کنیم</h3>
+<p>برای بیشتر کاربران:</p>
+<div class="codebox"><pre><code>~/.hermes/SOUL.md</code></pre></div>
+<p>اگر خانهٔ سفارشی دارید:</p>
+<div class="codebox"><pre><code>$HERMES_HOME/SOUL.md</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> چه چیزی باید داخل SOUL.md برود؟</h2>
+<p>برای راهنمای صدای ماندگار و شخصیت استفاده‌اش کنید، مثل:</p>
+<ul>
+  <li>لحن</li>
+  <li>سبک ارتباط</li>
+  <li>سطح مستقی‌گری</li>
+  <li>سبک پیش‌فرض تعامل</li>
+  <li>چه چیزی از نظر سبکی باید اجتناب شود</li>
+  <li>هرمس چگونه عدم‌قطعیت، مخالفت یا ابهام را هندل کند</li>
+</ul>
+<p>کمتر برای:</p>
+<ul>
+  <li>دستورالعمل‌های تک‌موردی پروژه</li>
+  <li>مسیرهای فایل</li>
+  <li>قواعد repo</li>
+  <li>جزئیات گردش‌کار موقت</li>
+</ul>
+<p>آن‌ها جای‌شان ‏AGENTS.md است نه ‏SOUL.md.</p>
+<h3>محتوای خوب SOUL.md</h3>
+<p>یک SOUL خوب:</p>
+<ul>
+  <li>بین زمینه‌ها پایدار است</li>
+  <li>به‌قدر کافی عام است که در گفتگوهای زیاد اعمال شود</li>
+  <li>به‌قدر کافی خاص است که صدا را واقعاً شکل دهد</li>
+  <li>متمرکز بر ارتباط و هویت است نه دستورالعمل‌های task-محور</li>
+</ul>
+<h4>مثال</h4>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">markdown</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Personality
+
+You are a pragmatic senior engineer with strong taste.
+You optimize for truth, clarity, and usefulness over politeness theater.
+
+## Style
+- Be direct without being cold
+- Prefer substance over filler
+- Push back when something is a bad idea
+- Admit uncertainty plainly
+- Keep explanations compact unless depth is useful
+
+## What to avoid
+- Sycophancy
+- Hype language
+- Repeating the user's framing if it's wrong
+- Overexplaining obvious things
+
+## Technical posture
+- Prefer simple systems over clever systems
+- Care about operational reality, not idealized architecture
+- Treat edge cases as part of the design, not cleanup</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> هرمس چه چیزی داخل پرامپت تزریق می‌کند</h2>
+<p>محتوای ‏<code>SOUL.md</code> مستقیماً به اسلات #۱ پرامپت سیستمی می‌رود — موقعیت هویت ایجنت. هیچ زبان wrapper‌ای دورش اضافه نمی‌شود.</p>
+<p>محتوا از این‌ها عبور می‌کند:</p>
+<ul>
+  <li>اسکن prompt-injection</li>
+  <li>برش اگر خیلی بزرگ باشد</li>
+</ul>
+<p>اگر فایل خالی، فقط-فاصله یا غیرقابل‌خواندن باشد، هرمس به هویت پیش‌فرض داخلی برمی‌گردد ‏(«You are Hermes Agent, an intelligent AI assistant created by Nous Research...»). این fallback وقتی ‏<code>skip_context_files</code> ست شده هم اعمال می‌شود ‏(مثلاً در زمینه‌های زیرایجنت/واگذاری).</p>
+<h3>اسکن امنیتی</h3>
+<p>‏<code>SOUL.md</code> مثل سایر فایل‌های حامل-زمینه قبل از گنجاندن برای الگوهای prompt injection اسکن می‌شود.</p>
+<p>یعنی همچنان باید روی persona/صدای متمرکزش نگه دارید و سعی نکنید دستورالعمل‌های متا عجیب قاچاق کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> ‏SOUL.md در برابر AGENTS.md</h2>
+<p>مهم‌ترین تمایز همین است.</p>
+<h3>‏SOUL.md</h3>
+<p>استفاده برای:</p>
+<ul>
+  <li>هویت</li>
+  <li>لحن</li>
+  <li>سبک</li>
+  <li>پیش‌فرض‌های ارتباط</li>
+  <li>رفتار سطح-شخصیت</li>
+</ul>
+<h3>‏AGENTS.md</h3>
+<p>استفاده برای:</p>
+<ul>
+  <li>معماری پروژه</li>
+  <li>قواعد کدنویسی</li>
+  <li>ترجیحات ابزار</li>
+  <li>گردش‌کارهای خاص-repo</li>
+  <li>فرمان‌ها، پورت‌ها، مسیرها، یادداشت‌های deployment</li>
+</ul>
+<p>یک قاعدهٔ مفید:</p>
+<ul>
+  <li>اگر باید همه‌جا همراهتان باشد جای‌اش ‏SOUL.md است</li>
+  <li>اگر متعلق به یک پروژه است جای‌اش ‏AGENTS.md است</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> ‏SOUL.md در برابر ‏<code>/personality</code></h2>
+<p>‏<code>SOUL.md</code> شخصیت پیش‌فرض ماندگار شماست.</p>
+<p>‏<code>/personality</code> یک overlay سطح-نشست است که پرامپت سیستمی فعلی را تغییر یا تکمیل می‌کند.</p>
+<p>پس:</p>
+<ul>
+  <li>‏<code>SOUL.md</code> = صدای پایه</li>
+  <li>‏<code>/personality</code> = سوئیچ حالت موقت</li>
+</ul>
+<p>مثال‌ها:</p>
+<ul>
+  <li>یک SOUL عملگرا نگه دارید و بعد برای گفتگوی آموزشی ‏<code>/personality teacher</code> استفاده کنید</li>
+  <li>یک SOUL موجز نگه دارید و بعد برای brainstorming ‏<code>/personality creative</code> بزنید</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> شخصیت‌های داخلی</h2>
+<p>هرمس شخصیت‌های داخلی‌ای عرضه می‌کند که با ‏<code>/personality</code> می‌توانید سوییچ کنید.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نام</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><b>helpful</b></td><td>دستیار دوستانه همه‌منظوره</td></tr>
+    <tr><td><b>concise</b></td><td>پاسخ‌های موجز و خلاصه</td></tr>
+    <tr><td><b>technical</b></td><td>متخصص فنی دقیق و مفصل</td></tr>
+    <tr><td><b>creative</b></td><td>تفکر نوآورانه خارج-از-چارچوب</td></tr>
+    <tr><td><b>teacher</b></td><td>آموزگار صبور با مثال‌های روشن</td></tr>
+    <tr><td><b>kawaii</b></td><td>اصطلاحات بامزه، برق و شور ★</td></tr>
+    <tr><td><b>catgirl</b></td><td>Neko-chan با اصطلاحات گربه‌وار، nya~</td></tr>
+    <tr><td><b>pirate</b></td><td>ناخدا Hermes، دزد دریایی فنی</td></tr>
+    <tr><td><b>shakespeare</b></td><td>نثر شاعرانه با شکوه نمایشی</td></tr>
+    <tr><td><b>surfer</b></td><td>حال‌وهوای خیلی ریلکس</td></tr>
+    <tr><td><b>noir</b></td><td>روایت کارآگاه سخت‌گیر قدیمی</td></tr>
+    <tr><td><b>uwu</b></td><td>حداکثر بامزگی با صحبت uwu</td></tr>
+    <tr><td><b>philosopher</b></td><td>تأمل عمیق روی هر پرسش</td></tr>
+    <tr><td><b>hype</b></td><td>حداکثر انرژی و هیجان!!!</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>سوییچ شخصیت‌ها با فرمان‌ها</h3>
+<h4>CLI</h4>
+<div class="codebox"><pre><code>/personality
+/personality concise
+/personality technical</code></pre></div>
+<h4>پلتفرم‌های پیام‌رسانی</h4>
+<div class="codebox"><pre><code>/personality teacher</code></pre></div>
+<p>این‌ها overlay های راحتند ولی ‏SOUL.md سراسری‌تان همچنان شخصیت پیش‌فرض ماندگار هرمس را می‌دهد مگر overlay معناداراً آن را عوض کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> شخصیت‌های سفارشی در config</h2>
+<p>شخصیت‌های داخلی همیشه روی هر سطح ‏(CLI، پلتفرم‌های پیام‌رسانی، TUI و اپ دسکتاپ) در دسترس‌اند. می‌توانید خودتان اضافه کنید — یا یک داخلی را با بازاستفاده نامش override کنید — در ‏<code>~/.hermes/config.yaml</code> زیر ‏<code>agent.personalities</code>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>agent:
+  personalities:
+    codereviewer: &gt;
+      You are a meticulous code reviewer. Identify bugs, security issues,
+      performance concerns, and unclear design choices. Be precise and constructive.</code></pre>
+</div>
+<p>سپس سوییچ کنید:</p>
+<div class="codebox"><pre><code>/personality codereviewer</code></pre></div>
+<p>انتخاب شما به‌عنوان نامی در ‏<code>display.personality</code> ذخیره می‌شود. شخصیت‌ها هرگز ‏<code>agent.system_prompt</code> را لمس نمی‌کنند — آن فیلد برای پرامپت سیستمی دستی که خودتان می‌نویسید رزرو شده و فقط وقتی هیچ شخصیتی انتخاب نشده اعمال می‌شود.</p>
+<h3>ریست به پیش‌فرض</h3>
+<p>برای لغو overlay شخصیت فعال و برگشت به رفتار پایه ‏(persona ‏SOUL.md شما، به‌اضافهٔ ‏agent.system_prompt اگر ست کرده باشید) هرکدام از این‌ها:</p>
+<div class="codebox"><pre><code>/personality none
+/personality default
+/personality neutral</code></pre></div>
+<p>هر سه انتخاب ‏(<code>display.personality</code>) را پاک و تغییر روی پیام بعدی شما اعمال می‌شود. اجرای ‏<code>/personality</code> بدون آرگومان هم مقدار ‏none را کنار preset های موجود فهرست و فعال را علامت می‌زند.</p>
+<div class="callout note">
+  <div class="callout-title">📌 ریست یک‌باره هنگام ارتقا</div>
+  <p>نسخه‌های قدیمی‌تر هرمس وضعیت شخصیت را بین سطوح ناسازگار ذخیره می‌کردند که می‌توانست شخصیتی را که قبلاً خاموش کرده بودید دوباره فعال کند. در اولین اجرا بعد از ارتقا، هر انتخاب شخصیت ذخیره‌شده یک‌بار به ‏<code>none</code> ریست می‌شود ‏(migration چاپ می‌کند کدام شخصیت پاک شد). اگر هنوز می‌خواهیدش با ‏<code>/personality &lt;name&gt;</code> دوباره فعالش کنید. متن دستی ‏agent.system_prompt هرگز لمس نمی‌شود.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> گردش‌کار توصیه‌شده</h2>
+<p>یک setup پیش‌فرض قوی:</p>
+<ol>
+  <li>یک ‏SOUL.md سراسری اندیشمندانه در ‏<code>~/.hermes/SOUL.md</code> نگه دارید</li>
+  <li>دستورالعمل‌های پروژه را در ‏AGENTS.md بگذارید</li>
+  <li>از ‏<code>/personality</code> فقط وقتی تغییر حالت موقت می‌خواهید استفاده کنید</li>
+</ol>
+<p>این به شما می‌دهد:</p>
+<ul>
+  <li>صدای پایدار</li>
+  <li>رفتار خاص-پروژه در جای درستش</li>
+  <li>کنترل موقت وقتی لازم است</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> تعامل شخصیت با کل پرامپت</h2>
+<p>در سطح بالا، پشتهٔ پرامپت شامل این‌هاست:</p>
+<ol>
+  <li><b>‏SOUL.md</b> ‏(هویت ایجنت — یا fallback داخلی اگر SOUL.md در دسترس نباشد)</li>
+  <li>راهنمای رفتار آگاه-از-ابزار</li>
+  <li>حافظه/زمینهٔ کاربر</li>
+  <li>راهنمای مهارت‌ها</li>
+  <li>فایل‌های زمینه ‏(AGENTS.md، ‏.cursorrules)</li>
+  <li>timestamp</li>
+  <li>سرنخ‌های قالب‌بندی خاص-پلتفرم</li>
+  <li>overlay های اختیاری پرامپت سیستمی مثل ‏<code>/personality</code></li>
+</ol>
+<p>‏<code>SOUL.md</code> بنیان است — بقیه روی آن ساخته می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> ظاهر CLI در برابر شخصیت گفتاری</h2>
+<p>شخصیت گفتاری و ظاهر CLI جدایند:</p>
+<ul>
+  <li>‏<code>SOUL.md</code>، ‏<code>agent.system_prompt</code> و ‏<code>/personality</code> بر نحوهٔ صحبت هرمس اثر دارند</li>
+  <li>‏<code>display.skin</code> و ‏<code>/skin</code> بر نحوهٔ دیده‌شدن هرمس در ترمینال اثر دارند</li>
+</ul>
+<p>برای ظاهر ترمینال <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/skins" target="_blank" rel="noopener">پوسته‌ها و تم‌ها</a> را ببینید.</p>
+<h3>مستندات مرتبط</h3>
+<ul>
+  <li><a href="context-files.html">فایل‌های زمینه</a></li>
+  <li><a href="../configuration.html">پیکربندی</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/guides/tips" target="_blank" rel="noopener">نکات و بهترین شیوه‌ها</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/guides/use-soul-with-hermes" target="_blank" rel="noopener">راهنمای SOUL.md</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="image-generation.html"><span class="dir">→ قبلی</span><span class="ttl">تولید تصویر</span></a>
+  <a class="next" href="code-execution.html"><span class="dir">بعدی ←</span><span class="ttl">اجرای کد ‏(فراخوانی برنامکی ابزار)</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/personality" target="_blank" rel="noopener">Personality &amp; SOUL.md</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

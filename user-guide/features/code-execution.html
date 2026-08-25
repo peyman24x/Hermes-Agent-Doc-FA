@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اجرای کد ‏(فراخوانی برنامکی ابزار) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/code-execution" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>اجرای کد</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>اجرای کد ‏(فراخوانی برنامکی ابزار)</h1>
+<p>ابزار ‏<code>execute_code</code> اجازه می‌دهد ایجنت اسکریپت‌های پایتونی بنویسد که ابزارهای هرمس را به‌صورت برنامکی صدا بزنند و گردش‌کارهای چندمرحله‌ای را در یک نوبت LLM فشرده کنند. اسکریپت در پروسهٔ فرزند روی میزبان ایجنت اجرا و از طریق RPC سوکت دامنه-یونیکس با هرمس حرف می‌زند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نحوهٔ کار</h2>
+<ol>
+  <li>ایجنت اسکریپتی پایتونی با ‏<code>from hermes_tools import ...</code> می‌نویسد</li>
+  <li>هرمس ماژول stub ‏<code>hermes_tools.py</code> با توابع RPC تولید می‌کند</li>
+  <li>هرمس یک سوکت دامنه-یونیکس باز و thread شنوندهٔ RPC را شروع می‌کند</li>
+  <li>اسکریپت در پروسهٔ فرزند اجرا می‌شود — فراخوانی‌های ابزار روی سوکت به هرمس برمی‌گردند</li>
+  <li>فقط خروجی ‏<code>print()</code> اسکریپت به LLM برگردانده می‌شود؛ نتایج میانی ابزار هرگز وارد پنجرهٔ زمینه نمی‌شوند</li>
+</ol>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code># The agent can write scripts like:
+from hermes_tools import web_search, web_extract
+
+results = web_search("Python 3.13 features", limit=5)
+for r in results["data"]["web"]:
+    content = web_extract([r["url"]])
+    # ... filter and process ...
+print(summary)</code></pre>
+</div>
+<p><b>ابزارهای موجود داخل اسکریپت‌ها:</b> ‏<code>web_search</code>، ‏<code>web_extract</code>، ‏<code>read_file</code>، ‏<code>write_file</code>، ‏<code>search_files</code>، ‏<code>patch</code>، ‏<code>terminal</code> ‏(فقط foreground).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> کِی ایجنت از این استفاده می‌کند</h2>
+<p>ایجنت وقتی ‏<code>execute_code</code> را استفاده می‌کند که باشد:</p>
+<ul>
+  <li><b>۳+ فراخوانی ابزار</b> با منطق پردازش بینشان</li>
+  <li>فیلتر داده انبوه یا انشعاب شرطی</li>
+  <li>حلقه زدن روی نتایج</li>
+</ul>
+<p>مزیت کلیدی: نتایج میانی ابزار هرگز وارد پنجرهٔ زمینه نمی‌شوند — فقط خروجی نهایی ‏<code>print()</code> برمی‌گردد که مصرف توکن را شدیداً کم می‌کند.</p>
+<h3>مثال‌های عملی</h3>
+<h4>خط‌لوله پردازش داده</h4>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>from hermes_tools import search_files, read_file
+import json
+
+# Find all config files and extract database settings
+matches = search_files("database", path=".", file_glob="*.yaml", limit=20)
+configs = []
+for match in matches.get("matches", []):
+    content = read_file(match["path"])
+    configs.append({"file": match["path"], "preview": content["content"][:200]})
+
+print(json.dumps(configs, indent=2))</code></pre>
+</div>
+<h4>تحقیق وب چندمرحله‌ای</h4>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>from hermes_tools import web_search, web_extract
+import json
+
+# Search, extract, and summarize in one turn
+results = web_search("Rust async runtime comparison 2025", limit=5)
+summaries = []
+for r in results["data"]["web"]:
+    page = web_extract([r["url"]])
+    for p in page.get("results", []):
+        if p.get("content"):
+            summaries.append({
+                "title": r["title"],
+                "url": r["url"],
+                "excerpt": p["content"][:500]
+            })
+
+print(json.dumps(summaries, indent=2))</code></pre>
+</div>
+<h4>Refactor انبوه فایل</h4>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>from hermes_tools import search_files, read_file, patch
+
+# Find all Python files using deprecated API and fix them
+matches = search_files("old_api_call", path="src/", file_glob="*.py")
+fixed = 0
+for match in matches.get("matches", []):
+    result = patch(
+        path=match["path"],
+        old_string="old_api_call(",
+        new_string="new_api_call(",
+        replace_all=True
+    )
+    if "error" not in str(result):
+        fixed += 1
+
+print(f"Fixed {fixed} files out of {len(matches.get('matches', []))} matches")</code></pre>
+</div>
+<h4>خط‌لوله build و تست</h4>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">python</span><button class="copy-btn">کپی</button></div>
+  <pre><code>from hermes_tools import terminal, read_file
+import json
+
+# Run tests, parse results, and report
+result = terminal("cd /project && python -m pytest --tb=short -q 2>&amp;1", timeout=120)
+output = result.get("output", "")
+
+# Parse test output
+passed = output.count(" passed")
+failed = output.count(" failed")
+errors = output.count(" error")
+
+report = {
+    "passed": passed,
+    "failed": failed,
+    "errors": errors,
+    "exit_code": result.get("exit_code", -1),
+    "summary": output[-500:] if len(output) &gt; 500 else output
+}
+
+print(json.dumps(report, indent=2))</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> حالت اجرا</h2>
+<p>‏<code>execute_code</code> دو حالت اجرا دارد که با ‏<code>code_execution.mode</code> در config.yaml کنترل می‌شوند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>حالت</th><th>پوشهٔ کاری</th><th>مفسر Python</th></tr></thead>
+  <tbody>
+    <tr><td><b>‏<code>project</code></b> ‏(پیش‌فرض)</td><td>پوشهٔ کاری نشست ‏(همان ‏terminal())</td><td>‏python مربوط به ‏VIRTUAL_ENV/CONDA_PREFIX فعال با fallback به python خود هرمس</td></tr>
+    <tr><td>‏<code>strict</code></td><td>یک پوشهٔ staging temp جدا از پروژهٔ کاربر</td><td>‏<code>sys.executable</code> ‏(python خود هرمس)</td></tr>
+  </tbody>
+</table>
+</div>
+<p><b>کِی روی project بگذارید:</b> می‌خواهید ‏<code>import pandas</code>، ‏<code>from my_project import foo</code> یا مسیرهای نسبی مثل ‏<code>open(".env")</code> همانطور که در ‏<code>terminal()</code> کار می‌کنند کار کنند. تقریباً همیشه همین چیزی است که می‌خواهید.</p>
+<p><b>کِی به strict سوییچ کنید:</b> حداکثر بازتولید‌پذیری لازم دارید — هر نشست همان مفسر را بخواهید فارغ از venv فعال کاربر، و اسکریپت‌ها از درخت پروژه قرنطینه شوند ‏(بدون ریسک خواندن تصادفی فایل‌های پروژه از طریق مسیر نسبی).</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>code_execution:
+  mode: project   # or "strict"</code></pre>
+</div>
+<p>رفتار fallback در حالت ‏project: اگر ‏VIRTUAL_ENV/CONDA_PREFIX unset، خراب یا اشاره‌گر به Python قدیمی‌تر از ۳٫۸ باشد، resolver تمیزانه به ‏sys.executable برمی‌گردد — هرگز ایجنت را بدون مفسر کارا رها نمی‌کند.</p>
+<p>ناورداهای امنیتی-حیاتی بین هر دو حالت یکسان‌اند:</p>
+<ul>
+  <li>پاکسازی محیط ‏(حذف کلیدهای API، توکن‌ها، اعتبارنامه‌ها)</li>
+  <li>لیست‌سفید ابزار ‏(اسکریپت‌ها نمی‌توانند ‏execute_code بازگشتی، ‏delegate_task یا ابزارهای MCP صدا بزنند)</li>
+  <li>سقف منابع ‏(timeout، cap خروجی، cap فراخوانی-ابزار)</li>
+</ul>
+<p>تغییر حالت فقط عوض می‌کند اسکریپت‌ها کجا اجرا و کدام مفسر اجرایشان کند، نه اینکه چه اعتبارنامه‌هایی می‌بینند یا کدام ابزارها را می‌توانند صدا بزنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> سقف‌های منابع</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>منبع</th><th>حد</th><th>یادداشت‌ها</th></tr></thead>
+  <tbody>
+    <tr><td><b>Timeout</b></td><td>۵ دقیقه ‏(۳۰۰ ثانیه)</td><td>اسکریپت با SIGTERM کشته سپس بعد از ۵ ثانیه grace ‏SIGKILL</td></tr>
+    <tr><td><b>Stdout</b></td><td>۵۰ KB</td><td>خروجی با اعلان ‏[output truncated at 50KB] بریده می‌شود</td></tr>
+    <tr><td><b>Stderr</b></td><td>۱۰ KB</td><td>روی خروج غیرصفر برای دیباگ داخل خروجی گنجانده می‌شود</td></tr>
+    <tr><td><b>فراخوانی ابزار</b></td><td>۵۰ به‌ازای هر اجرا</td><td>با رسیدن به حد خطا برمی‌گردد</td></tr>
+  </tbody>
+</table>
+</div>
+<p>همهٔ حدود از طریق config.yaml قابل پیکربندی‌اند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>code_execution:
+  mode: project      # project (default) | strict
+  timeout: 300       # Max seconds per script (default: 300)
+  max_tool_calls: 50 # Max tool calls per execution (default: 50)</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> نحوهٔ کار فراخوانی ابزار داخل اسکریپت‌ها</h2>
+<p>وقتی اسکریپتتان تابعی مثل ‏<code>web_search("query")</code> را صدا بزند:</p>
+<ol>
+  <li>فراخوانی به JSON سری و از طریق سوکت دامنه-یونیکس به پروسهٔ والد فرستاده می‌شود</li>
+  <li>والد از طریق هندلر استاندارد ‏<code>handle_function_call</code> dispatch می‌کند</li>
+  <li>نتیجه از طریق سوکت برمی‌گردد</li>
+  <li>تابع نتیجهٔ parse‌شده را برمی‌گرداند</li>
+</ol>
+<p>یعنی فراخوانی‌های ابزار داخل اسکریپت‌ها عیناً مثل فراخوانی‌های عادی رفتار می‌کنند — همان سقف‌های نرخ، همان هندل خطا، همان قابلیت‌ها. تنها محدودیت این است که ‏<code>terminal()</code> فقط-foreground است ‏(بدون پارامترهای ‏background یا ‏pty).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> هندل خطا</h2>
+<p>وقتی اسکریپتی شکست بخورد ایجنت اطلاعات خطای ساختاریافته می‌گیرد:</p>
+<ul>
+  <li><b>Exit code غیرصفر:</b> stderr در خروجی گنجانده می‌شود تا ایجنت traceback کامل را ببیند</li>
+  <li><b>Timeout:</b> اسکریپت کشته و ایجنت می‌بیند ‏<code>"Script timed out after 300s and was killed."</code></li>
+  <li><b>وقفه:</b> اگر کاربر حین اجرا پیام جدیدی بفرستد اسکریپت پایان و ایجنت می‌بیند ‏<code>[execution interrupted — user sent a new message]</code></li>
+  <li><b>سقف فراخوانی ابزار:</b> با رسیدن به حد ۵۰ فراخوانی، فراخوانی‌های بعدی پیام خطا برمی‌گردانند</li>
+</ul>
+<p>پاسخ همیشه شامل ‏<code>status</code> ‏(success/error/timeout/interrupted)، ‏<code>output</code>، ‏<code>tool_calls_made</code> و ‏<code>duration_seconds</code> است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> امنیت</h2>
+<div class="callout warning">
+  <div class="callout-title">🚨 مدل امنیت</div>
+  <p>پروسهٔ فرزند با <b>محیط حداقلی</b> اجرا می‌شود. کلیدهای API، توکن‌ها و اعتبارنامه‌ها پیش‌فرض حذف می‌شوند. اسکریپت فقط از طریق کانال RPC به ابزارها دسترسی دارد — نمی‌تواند رمزها را از متغیرهای محیطی بخواند مگر صریحاً اجازه داده شود.</p>
+</div>
+<p>متغیرهای محیطی دارای ‏KEY، ‏TOKEN، ‏SECRET، ‏PASSWORD، ‏CREDENTIAL، ‏PASSWD یا ‏AUTH در نامشان مستثنی می‌شوند. فقط متغیرهای سیستمی امن ‏(PATH، ‏HOME، ‏LANG، ‏SHELL، ‏PYTHONPATH، ‏VIRTUAL_ENV و...) عبور می‌کنند.</p>
+<h3>عبور متغیر env مهارت‌ها</h3>
+<p>وقتی مهارتی ‏<code>required_environment_variables</code> را در frontmatter اعلام کند، آن متغیرها بعد از لود شدن مهارت <b>خودکار به</b> پروسه‌های فرزند ‏execute_code و terminal عبور داده می‌شوند. این اجازه می‌دهد مهارت‌ها از کلیدهای API اعلام‌شده‌شان استفاده کنند بدون تضعیف وضعیت امنیتی برای کد دلخواه.</p>
+<p>برای موارد غیر-مهارتی می‌توانید متغیرها را صریحاً در config.yaml لیست‌سفید کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>terminal:
+  env_passthrough:
+    - MY_CUSTOM_KEY
+    - ANOTHER_TOKEN</code></pre>
+</div>
+<p>جزئیات کامل در راهنمای امنیت، بخش «عبور متغیر محیطی».</p>
+<h3>متغیرهای ‏<code>HERMES_*</code> در فرزند</h3>
+<p>پروسهٔ فرزند فقط مجموعه کوچک ثابتی از متغیرهای عملیاتی ‏<code>HERMES_*</code> را با نام دقیق دریافت می‌کند:</p>
+<ul>
+  <li>‏<code>HERMES_HOME</code> · ‏<code>HERMES_PROFILE</code> · ‏<code>HERMES_CONFIG</code> · ‏<code>HERMES_ENV</code></li>
+</ul>
+<p>‹+ ‏HERMES_RPC_DIR / HERMES_RPC_SOCKET / TZ / HOME که هرمس صریحاً تزریق می‌کند تا کانال RPC کار کند›.</p>
+<div class="callout note">
+  <div class="callout-title">📌 تغییر رفتار</div>
+  <p>نسخه‌های قبلی <b>هر</b> متغیری که نامش با ‏<code>HERMES_</code> شروع می‌شد را به فرزند عبور می‌دادند. آن پیشوند پهن برای سخت‌سازی امنیتی حذف شد: می‌توانست پیکربندی ‏HERMES_*-نامی را که با زیررشتهٔ رمز تطبیق نمی‌کرد ‏(مثل ‏HERMES_BASE_URL، ‏HERMES_KANBAN_DB یا endpoint ‏HERMES_*_WEBHOOK) به کد sandbox‌شدهٔ دلخواه لو بدهد.</p>
+  <p>اگر یک اسکریپت ‏execute_code — یا ماژول repo/افزونه‌ای که هنگام ایمپورت بار می‌کند — به متغیر ‏HERMES_*</code> خارج از چهار نام عملیاتی بالا اتکا داشت، الان آن متغیر را در فرزند <b>unset</b> می‌یابد. حذف عمدی است نه باگ.</p>
+</div>
+<p><b>راه‌حل — بازگرداندن صریح متغیر.</b> هر دو مسیر متغیر را به فرزندان ‏execute_code <em>و</em> terminal عبور می‌دهند و هیچ‌کدام تضمین حذف-رمز را ضعیف نمی‌کنند ‏(اعتبارنامه‌های ارائه‌دهندهٔ مدیریت‌شده توسط هرمس هرگز این‌طور مجاز نمی‌شوند):</p>
+<ol>
+  <li><b>به‌ازای-ماشین، در config.yaml</b> — نام دقیق متغیر را به لیست‌سفید passthrough بیفزایید:
+    <div class="codebox">
+      <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+      <pre><code>terminal:
+  env_passthrough:
+    - HERMES_KANBAN_DB
+    - HERMES_BASE_URL</code></pre>
+    </div>
+  </li>
+  <li><b>به‌ازای-مهارت، در frontmatter مهارت</b> — اعلام کنید تا هر بار لود شدن آن مهارت خودکار ثبت شود:
+    <div class="codebox">
+      <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+      <pre><code>required_environment_variables:
+  - HERMES_KANBAN_DB</code></pre>
+    </div>
+  </li>
+</ol>
+<p><b>تشخیص.</b> وقتی فرزند یک یا چند متغیر ‏HERMES_* غیر-لیست‌سفیدی را دور می‌ریزد هرمس لاگ ‏debug یک‌خطی صادر می‌کند که آنها را نام می‌برد و به دریچهٔ ‏env_passthrough اشاره می‌کند. با لاگ دیباگ اجرا کنید ‏(<code>hermes logs --level DEBUG</code> یا چک ‏<code>~/.hermes/logs/agent.log</code>) و دنبال ‏<code>execute_code: dropped N non-allowlisted HERMES_* var(s)</code> بگردید اگر اسکریپتی طوری رفتار کرد که انگار متغیر ‏HERMES_*</code>ای غایب است.</p>
+<p>هرمس اسکریپت و stub ‏RPC تولیدشدهٔ خودکار ‏<code>hermes_tools.py</code> را همیشه داخل یک پوشهٔ staging موقت می‌نویسد که بعد از اجرا پاک می‌شود. در حالت ‏strict اسکریپت آنجا هم <em>اجرا</em> می‌شود؛ در حالت ‏project در پوشهٔ کاری نشست اجرا می‌شود ‏(پوشهٔ staging روی PYTHONPATH می‌ماند تا ایمپورت‌ها همچنان حل شوند). پروسهٔ فرزند در process group خودش اجرا می‌شود تا روی timeout یا وقفه تمیز کشته شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> ‏execute_code در برابر terminal</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کاربرد</th><th>execute_code</th><th>terminal</th></tr></thead>
+  <tbody>
+    <tr><td>گردش‌کارهای چندمرحله‌ای با فراخوانی ابزار بین‌شان</td><td>✅</td><td>❌</td></tr>
+    <tr><td>فرمان شل ساده</td><td>❌</td><td>✅</td></tr>
+    <tr><td>فیلتر/پردازش خروجی‌های بزرگ ابزار</td><td>✅</td><td>❌</td></tr>
+    <tr><td>اجرای build یا سوئیت تست</td><td>❌</td><td>✅</td></tr>
+    <tr><td>حلقه زدن روی نتایج جست‌وجو</td><td>✅</td><td>❌</td></tr>
+    <tr><td>پروسه‌های تعاملی/پس‌زمینه</td><td>❌</td><td>✅</td></tr>
+    <tr><td>نیاز به کلیدهای API در محیط</td><td>⚠️ فقط از طریق <a href="../security.html">passthrough</a></td><td>✅ ‏(بیشترشان عبور می‌کنند)</td></tr>
+  </tbody>
+</table>
+</div>
+<p><b>قاعدهٔ سرانگشتی:</b> وقتی باید ابزارهای هرمس را برنامکی با منطق بین فراخوانی‌ها صدا بزنید از ‏<code>execute_code</code> استفاده کنید. برای اجرای فرمان‌های شل، build ها و پروسه‌ها از ‏<code>terminal</code>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> پشتیبانی پلتفرمی</h2>
+<p>اجرای کد روی <b>لینوکس، macOS و ویندوز</b> در دسترس است. روی لینوکس و macOS کانال RPC از سوکت دامنه-یونیکس استفاده می‌کند؛ روی ویندوز که ‏AF_UNIX غیرقابل‌اتکاست هرمس خودکار به سوکت TCP loopback برای ترنسپورت RPC سندباکس برمی‌گردد. بک‌اندهای ترمینال راه‌دور ‏(Docker/SSH/Modal/و...) به‌جایش از ترنسپورت RPC مبتنی-بر-فایل استفاده و به‌اضافه Python 3 داخل بک‌اند می‌خواهند.</p>
+</section>
+
+<div class="pager">
+  <a href="personality.html"><span class="dir">→ قبلی</span><span class="ttl">شخصیت و SOUL.md</span></a>
+  <a class="next" href="skins.html"><span class="dir">بعدی ←</span><span class="ttl">پوسته‌ها و تم‌ها</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/code-execution" target="_blank" rel="noopener">Code Execution</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

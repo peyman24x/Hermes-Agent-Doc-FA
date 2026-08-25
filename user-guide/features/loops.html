@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حلقه‌های تکرارشونده ‏(‎/loop) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/loops" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>حلقه‌های تکرارشونده ‏(‎/loop)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>حلقه‌های تکرارشونده ‏(‏<code>/loop</code>)</h1>
+<p>‏<code>/loop</code> یک پرامپت ‏(یا فرمان اسلش) را با ضرباهجهٔ تکرارشونده <b>داخل نشست فعلی شما</b> دوباره اجرا می‌کند. هر بیداری یک نوبت واقعی ایجنتی است: هرمس وضعیت فعلی را تازه می‌خواند — آخرین نتیجه CI، عمیق‌ترین عمق صف، فایل به همان شکل که الان است — کار را انجام، گزارش و تا تیک بعدی ساکت می‌شود.</p>
+<p>نسخهٔ هرمس از <b>‏<code>/loop</code> مربوط به Claude Code</b> است ‏(و alias ‏<code>/proactive</code> آن که اینجا هم کار می‌کند). جایی که <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/goals" target="_blank" rel="noopener">‏<code>/goal</code></a> قاضی-محور است — «تا رسیدن به این هدف به کار ادامه بده» — ‏<code>/loop</code> تایمر-محور است: «این را هر N دقیقه ‏(یا هر وقت منطقی بود) دوباره انجام بده تا چیزی بگوید بس».</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> کِی استفاده کنیم</h2>
+<ul>
+  <li><b>Poll کردن وضعیت خارجی.</b> «مراقب deploy / اجرای CI / صف باش و وقتی عوض شد خبرم کن.» حالت کلاسیک استفاده.</li>
+  <li><b>تکرار-تا-سبز‌شدن.</b> «تست‌ها را اجرا کن، شکست‌ها را رفع کن، تا پاس شدن تکرار کن.»</li>
+  <li><b>مانیتورینگ حین نشست کاری.</b> حین کار دیگرتان در همین گفتگو، مراقب نرخ خطاها یا پیشرفت job طولانی باشید.</li>
+  <li><b>خانه‌تکانی دوره‌ای.</b> در یک نشست طولانی هر N دقیقه یک pass lint یا خلاصهٔ وضعیت دوباره اجرا کنید.</li>
+</ul>
+<p>وقتی کار باید <b>بی‌نگهبان</b> اجرا شود — شبانه، طبق برنامهٔ واقعی، جان‌سپر ری‌استارت ترمینال‌تان — به‌جایش از یک <a href="cron.html">کار کرون</a> استفاده کنید. ‏<code>/loop</code> داخل یک نشست زندگی می‌کند؛ cron بیرون همهٔ آن‌ها. و وقتی task یک هدف واحد با تعریف «انجام‌شده» است معمولاً <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/goals" target="_blank" rel="noopener">‏<code>/goal</code></a> انتخاب بهتری است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> شروع سریع</h2>
+<div class="codebox"><pre><code>/loop 5m check the deploy status and tell me if it's live yet</code></pre></div>
+<p>چیزی که می‌بینید:</p>
+<ol>
+  <li><b>حلقه پذیرفته شد</b> — ‏<code>↻ Loop set (every 5m): check the deploy status…</code></li>
+  <li><b>اولین بیداری در ۵ دقیقه</b> — وقتی نشست بیکار است هرمس بیداری را تزریق و یک نوبت عادی علیه وضعیت فعلی اجرا می‌کند.</li>
+  <li><b>تکرار</b> — هر ۵ دقیقه، تا شرط توقف شلیک شود یا خودتان متوقفش کنید.</li>
+</ol>
+<p>یک فرمان اسلش هم به همین سادگی loop می‌شود:</p>
+<div class="codebox"><pre><code>/loop 10m /recap</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> دو حالت ضرباهجه</h2>
+<p><b>فاصله ثابت — ساعت را شما ست می‌کنید.</b> یک interval بدهید ‏(<code>30s</code>، ‏<code>5m</code>، ‏<code>2h</code>، ‏<code>1h30m</code>) و حلقه طبق همان برنامه شلیک می‌کند. وقتی چیزی که زیر نظر دارید روی خط زمانی خودش عوض می‌شود استفاده کنید:</p>
+<div class="codebox"><pre><code>/loop 2m poll the build at ci.example.com/job/42 and ping me the moment it finishes</code></pre></div>
+<p><b>خود-ضرباهجه — ساعت را هرمس ست می‌کند.</b> interval را حذف کنید و حلقه خودش ضرباهجه می‌گیرد: از کف شروع می‌کند ‏(پیش‌فرض ۱ دقیقه) و وقتی ریپلای‌های ایجنت دیگر عوض نمی‌شوند نمایی عقب می‌نشیند — ‏۲m، ‏۴m، ‏۸m، تا سقف ‏(پیش‌فرض ۱۵ دقیقه). لحظه‌ای که ریپلای با قبلی متفاوت شود ضرباهجه فوراً به کف برمی‌گردد. تشخیص تغییر مقایسهٔ digest محلی است ‏(timestamp ها نادیده گرفته می‌شوند)، پس انتظارهای بی‌کاری هزینه اضافه ندارند:</p>
+<div class="codebox"><pre><code>/loop keep an eye on the migration and summarize progress</code></pre></div>
+<p>قاعدهٔ سرانگشتی: <b>فاصلهٔ ثابت وقتی ساعت خارجی کار را می‌رانَد؛ خود-ضرباهجه وقتی کار ضرباهجه را تعیین می‌کند.</b></p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> شرط‌های توقف</h2>
+<p>حلقه وقتی تمام می‌شود که یکی از این‌ها شلیک شود:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>شرط</th><th>چطور</th></tr></thead>
+  <tbody>
+    <tr><td>ایجنت تصمیم بگیرد تمام است</td><td>پرامپت بیداری به ایجنت یاد می‌دهد وقتی کار تمام یا بی‌موضوع شد ریپلایش را با ‏<code>LOOP_COMPLETE</code> در یک خط مستقل پایان دهد.</td></tr>
+    <tr><td>سقف اجرا</td><td>‏<code>--times N</code> — توقف بعد از N بیداری.</td></tr>
+    <tr><td>شرط مبتنی-بر-شواهد</td><td>‏<code>--until &lt;condition&gt;</code> — بعد از هر بیداری همان قاضی کمکیِ قدرت‌دهنده به ‎/goal ریپلای را علیه شرط شما چک می‌کند ‏(fail-open: قاضی خراب هرگز حلقه را گیر نمی‌اندازد).</td></tr>
+    <tr><td>شما</td><td>‏<code>/loop stop</code> ‏(یا ‏<code>/loop pause</code> برای نگه‌داشتنش).</td></tr>
+    <tr><td>بودجه پشتیبان</td><td>‏<code>loops.max_ticks</code> ‏(پیش‌فرض ۱۰۰) حلقه را pause می‌کند تا نشست بی‌نگهبان تا ابد توکن نسوزاند. ‏<code>0</code> = نامحدود.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>مثال‌ها:</p>
+<div class="codebox"><pre><code>/loop 2m poll CI --times 30
+/loop 5m watch the queue --until queue depth reaches zero</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> فرمان‌ها</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرمان</th><th>چه می‌کند</th></tr></thead>
+  <tbody>
+    <tr><td><code>/loop [interval] &lt;prompt&gt; [--times N] [--until &lt;cond&gt;]</code></td><td>شروع ‏(یا جایگزینی) حلقه برای این نشست.</td></tr>
+    <tr><td><code>/loop</code> یا ‏<code>/loop status</code></td><td>نمایش ضرباهجه، تیک‌های شلیک‌شده و زمان تا بیداری بعدی.</td></tr>
+    <tr><td><code>/loop pause</code></td><td>توقف شلیک بدون از دست دادن حلقه.</td></tr>
+    <tr><td><code>/loop resume</code></td><td>برداشتن مجددش.</td></tr>
+    <tr><td><code>/loop stop</code></td><td>پایان دادن به حلقه.</td></tr>
+    <tr><td><code>/proactive …</code></td><td>نام جایگزین ‏/loop ‏(هم‌ترازی با Claude Code).</td></tr>
+  </tbody>
+</table>
+</div>
+<p>روی CLI، ‏TUI ‏(<code>hermes --tui</code>)، چت داشبورد وب، اپ دسکتاپ و همهٔ پلتفرم‌های گیت‌وی ‏(تلگرام، دیسکورد، اسلک، واتساپ و...) کار می‌کند. روی پلتفرم‌های پیام‌رسانی گیت‌وی حتی بین پیام‌های شما بیداری‌ها را شلیک می‌کند — حلقه متعلق به نشست چت است و نتایجش مثل ریپلای‌های عادی می‌رسند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> ترکیب با ‏<code>/goal</code></h2>
+<p>هر دو قابلیت نوبت‌های مصنوعی را در مرزهای بیکاری تزریق می‌کنند، پس یک قاعده دارند: <b>هدف فعال مالک نشست است.</b> وقتی یک ‏<code>/goal</code> فعالانه می‌رانَد ‏(قاضی می‌گوید «ادامه بده»)، بیداری‌های loop موکول می‌شوند. حلقه به‌محض تمام/مکث شدن هدف یا پارک‌شدنش روی مانع انتظار ‏(<code>/goal wait</code> یا رأی WAIT خودکار قاضی) با زمان بیکاری ازسر گرفته می‌شود. هدفِ پارک‌شده + یک ‏<code>/loop</code> ترکیب طبیعی است: هدف منتظر کار بزرگ ناهمگام می‌ماند در حالی که حلقه ضربان چیزی دیگر را نگه می‌دارد.</p>
+<p>پیام واقعی کاربر همیشه بر هر دو می‌چربد — بیداری‌ها فقط وقتی شلیک می‌شوند که نشست بیکار باشد و هیچ چیز شما صف نباشد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> جزئیات رفتار</h2>
+<ul>
+  <li><b>بیداری یک نوبت عادی نقش-کاربر است.</b> بدون جهش پرامپت-سیستمی، بدون تعویض تول‌ست — کش پرامپت دست‌نخورده می‌ماند.</li>
+  <li><b>از ‏/resume و فشرده‌سازی جان می‌برد.</b> وضعیت حلقه به‌ازای هر نشست ماندگار است و مثل ‏/goal از مرزهای فشرده‌سازی زمینه عبور می‌کند.</li>
+  <li><b>یک حلقه به‌ازای هر نشست.</b> ست کردن ‏/loop جدید قدیمی را جایگزین می‌کند. چند حلقه را با اجرای چند نشست داشته باشید ‏(یا برای ناوگانی از برنامه‌ها از cron).</li>
+  <li><b>قطع یک نوبت بیداری ‏(Ctrl+C) حلقه را pause می‌کند</b> — با ‏<code>/loop resume</code> بازیابی می‌شود، پس لغو واقعاً یعنی لغو.</li>
+  <li><b>هزینهٔ توکن با ضرباهجه مقیاس می‌یابد.</b> هر تیک یک نوبت کامل ایجنتی است. فاصله را با تناوب تغییر واقعی وضعیت تطبیق دهید؛ برای انتظارهای بی‌کار خود-ضرباهجه را ترجیح دهید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> پیکربندی</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml — ~/.hermes/config.yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>loops:
+  min_interval_seconds: 30       # floor for fixed intervals
+  max_ticks: 100                 # backstop budget (0 = unlimited)
+  self_paced_floor_seconds: 60   # self-paced starting cadence
+  self_paced_ceiling_seconds: 900  # self-paced max backoff</code></pre>
+</div>
+<p>قاضی ‏<code>--until</code> از طریق task کمکی ‏goal_judge مسیریابی می‌شود، پس override های ‏<code>auxiliary.goal_judge.*</code> ‏(provider، ‏model، ‏max_tokens) روی شرط‌های حلقه هم اعمال می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> ‏<code>/loop</code> در برابر ‏<code>/goal</code> در برابر cron</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th></th><th>‏<code>/loop</code></th><th>‏<code>/goal</code></th><th>cron</th></tr></thead>
+  <tbody>
+    <tr><td><b>تریگر</b></td><td>تایمر ‏(یا خود-ضرباهجه)</td><td>رأی قاضی بعد از هر نوبت</td><td>برنامه، خارج از هر نشستی</td></tr>
+    <tr><td><b>زندگی در</b></td><td>نشست فعلی شما</td><td>نشست فعلی شما</td><td>نشست خودش به‌ازای هر اجرا</td></tr>
+    <tr><td><b>تمام می‌شود وقتی</b></td><td>شرط توقف / سقف‌ها / شما</td><td>هدف محقق / بودجه / شما</td><td>job را حذف کنید</td></tr>
+    <tr><td><b>بهترین برای</b></td><td>Poll، مانیتورینگ، اجرای مجدد دوره‌ای</td><td>یک هدف، تکرار تا انجام</td><td>بی‌نگهبان، برنامه‌های بلند-افق</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<div class="pager">
+  <a href="heartbeat.html"><span class="dir">→ قبلی</span><span class="ttl">ضربان نشست ‏(‎/heartbeat)</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">حالت تحویل‌دادنی (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/loops" target="_blank" rel="noopener">Recurring Loops</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

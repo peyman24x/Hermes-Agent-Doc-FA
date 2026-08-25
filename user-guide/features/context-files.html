@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>فایل‌های زمینه — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>فایل‌های زمینه</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>فایل‌های زمینه</h1>
+<p>‏هرمس ایجنت خودکار فایل‌های زمینه‌ای را که رفتارش را شکل می‌دهند کشف و لود می‌کند. بعضی محلی-پروژه‌اند و از پوشهٔ کاری شما کشف می‌شوند. ‏<code>SOUL.md</code> الان سراسری برای نمونهٔ هرمس است و فقط از ‏<code>HERMES_HOME</code> لود می‌شود.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> فایل‌های زمینهٔ پشتیبانی‌شده</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فایل</th><th>هدف</th><th>کشف</th></tr></thead>
+  <tbody>
+    <tr><td><b>.hermes.md / HERMES.md</b></td><td>دستورالعمل پروژه ‏(بالاترین اولویت)</td><td>تا ریشهٔ گیت می‌رود</td></tr>
+    <tr><td><b>AGENTS.override.md</b></td><td>override شخصی به‌ازای-پوشه از AGENTS.md ‏(معمولاً gitignored)</td><td>CWD هنگام شروع + زیرپوشه‌ها به‌صورت تدریجی</td></tr>
+    <tr><td><b>AGENTS.md</b></td><td>دستورالعمل، قواعد و معماری پروژه</td><td>CWD هنگام شروع + زیرپوشه‌ها به‌صورت تدریجی</td></tr>
+    <tr><td><b>CLAUDE.md</b></td><td>فایل‌های زمینهٔ Claude Code ‏(تشخیص داده هم می‌شود)</td><td>CWD هنگام شروع + زیرپوشه‌ها به‌صورت تدریجی</td></tr>
+    <tr><td><b>SOUL.md</b></td><td>شخصیت و لحن سراسری برای این نمونهٔ هرمس</td><td>فقط ‏<code>HERMES_HOME/SOUL.md</code></td></tr>
+    <tr><td><b>.cursorrules</b></td><td>قواعد کدنویسی Cursor IDE</td><td>فقط CWD</td></tr>
+    <tr><td><b>.cursor/rules/*.mdc</b></td><td>ماژول‌های قاعدهٔ Cursor IDE</td><td>فقط CWD</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 سیستم اولویت</div>
+  <p>در هر نشست فقط <b>یک</b> نوع زمینهٔ پروژه لود می‌شود ‏(اولین تطبیق برنده است): ‏<code>.hermes.md</code> ← ‏<code>AGENTS.override.md</code> ← ‏<code>AGENTS.md</code> ← ‏<code>CLAUDE.md</code> ← ‏<code>.cursorrules</code>. <b>‏SOUL.md</b> همیشه مستقل به‌عنوان هویت ایجنت لود می‌شود ‏(اسلات #۱).</p>
+  <p>اگر ‏<code>AGENTS.override.md</code> کنار ‏<code>AGENTS.md</code> وجود داشته باشد override به‌جای فایل کامیت‌شده لود می‌شود — وقتی دستورالعمل متفاوتی از چیزی که داخل repo است می‌خواهید بدون ویرایش ‏AGENTS.md ردیابی‌شده، یک ‏AGENTS.override.md شخصی ‏(معمولاً gitignored) نگه دارید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> AGENTS.md</h2>
+<p>‏<code>AGENTS.md</code> فایل اصلی زمینهٔ پروژه است. به ایجنت می‌گوید پروژه‌تان چگونه ساختار دارد، چه قواعدی را دنبال کند و هر دستورالعمل ویژه‌ای.</p>
+<h3>زنجیرهٔ پوشه‌ها ‏(ریشهٔ گیت ← پوشهٔ کاری)</h3>
+<p>وقتی پوشهٔ کاری‌تان داخل یک مخزن گیت است هرمس هنگام شروع نشست یک <b>زنجیرهٔ ادغام‌شده</b> از فایل‌های ‏AGENTS.md لود می‌کند: اول ‏AGENTS.md ریشهٔ گیت، بعد ‏AGENTS.md هر پوشهٔ واسطه تا پوشهٔ کاری شما. فایل‌های عمیق‌تر بعدتر در پرامپت می‌آیند تا راهنمای خاص‌تر مقدم شود. هر فایل سربرگ provenance خودش را می‌گیرد ‏(مثل ‏<code>## ../../AGENTS.md</code>) و کپی‌های یکسان در طول زنجیره dedupe می‌شوند.</p>
+<div class="codebox"><pre><code>monorepo/                   (git root, cwd = packages/webapp/)
+├── AGENTS.md              ← Loaded first (repo-wide conventions)
+└── packages/
+    ├── AGENTS.md          ← Loaded second
+    └── webapp/
+        └── AGENTS.md      ← Loaded last (most specific, takes precedence)</code></pre></div>
+<p>بیرون مخزن گیت فقط خودِ پوشهٔ کاری چک می‌شود — هرگز به والدین سرک نمی‌شود، پس ‏AGENTS.md کاشته‌شده در ‎/tmp یا ‏$HOME نمی‌تواند به نشست‌های نامرتبط نشت کند.</p>
+<h3>کشف تدریجی زیرپوشه‌ای</h3>
+<p>هنگام شروع نشست هرمس ‏AGENTS.md پوشهٔ کاری شما را داخل پرامپت سیستمی لود می‌کند. وقتی ایجنت حین نشست به زیرپوشه‌ها حرکت می‌کند ‏(از طریق ‏read_file، ‏terminal، ‏search_files و...)، آن فایل‌های زمینه را <b>به‌صورت تدریجی کشف</b> و در لحظهٔ مرتبط شدنشان داخل گفتگو تزریق می‌کند.</p>
+<div class="codebox"><pre><code>my-project/
+├── AGENTS.md              ← Loaded at startup (system prompt)
+├── frontend/
+│   └── AGENTS.md          ← Discovered when agent reads frontend/ files
+├── backend/
+│   └── AGENTS.md          ← Discovered when agent reads backend/ files
+└── shared/
+    └── AGENTS.md          ← Discovered when agent reads shared/ files</code></pre></div>
+<p>این رویکرد دو مزیت نسبت به لود کردن همه‌چیز هنگام شروع دارد:</p>
+<ul>
+  <li><b>بدون بادکردن پرامپت سیستمی</b> — سرنخ‌های زیرپوشه فقط وقتی لازم‌اند ظاهر می‌شوند</li>
+  <li><b>حفظ کش پرامپت</b> — پرامپت سیستمی بین نوبت‌ها پایدار می‌ماند</li>
+</ul>
+<p>هر زیرپوشه حداکثر یک‌بار به‌ازای هر نشست چک می‌شود. کشف به پوشه‌های والد هم صعود می‌کند، پس خواندن ‏backend/src/main.py حتی اگر ‏backend/src/ فایل زمینه خودش را نداشته باشد ‏backend/AGENTS.md را کشف می‌کند.</p>
+<div class="callout note">
+  <div class="callout-title">📌 نکته</div>
+  <p>فایل‌های زمینهٔ زیرپوشه‌ای از همان <a href="#security-scan">اسکن امنیتی</a> فایل‌های شروع عبور می‌کنند. فایل‌های مخرب بلاک می‌شوند.</p>
+</div>
+<h3>مثال AGENTS.md</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">markdown</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Project Context
+
+This is a Next.js 14 web application with a Python FastAPI backend.
+
+## Architecture
+- Frontend: Next.js 14 with App Router in `/frontend`
+- Backend: FastAPI in `/backend`, uses SQLAlchemy ORM
+- Database: PostgreSQL 16
+- Deployment: Docker Compose on a Hetzner VPS
+
+## Conventions
+- Use TypeScript strict mode for all frontend code
+- Python code follows PEP 8, use type hints everywhere
+- All API endpoints return JSON with `{data, error, meta}` shape
+- Tests go in `__tests__/` directories (frontend) or `tests/` (backend)
+
+## Important Notes
+- Never modify migration files directly — use Alembic commands
+- The `.env.local` file has real API keys, don't commit it
+- Frontend port is 3000, backend is 8000, DB is 5432</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> SOUL.md</h2>
+<p>‏<code>SOUL.md</code> شخصیت، لحن و سبک ارتباط ایجنت را کنترل می‌کند. جزئیات کامل در صفحهٔ <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/personality" target="_blank" rel="noopener">شخصیت</a>.</p>
+<p><b>محل:</b></p>
+<ul>
+  <li>‏<code>~/.hermes/SOUL.md</code></li>
+  <li>یا ‏<code>$HERMES_HOME/SOUL.md</code> اگر هرمس را با دایرکتوری خانه سفارشی اجرا کنید</li>
+</ul>
+<p>جزئیات مهم:</p>
+<ul>
+  <li>هرمس اگر هنوز ‏SOUL.md وجود نداشته باشد خودکار یک پیش‌فرض seed می‌کند</li>
+  <li>هرمس ‏SOUL.md را فقط از ‏HERMES_HOME لود می‌کند</li>
+  <li>هرمس برای ‏SOUL.md در پوشهٔ کاری جست‌وجو نمی‌کند</li>
+  <li>اگر فایل خالی باشد هیچ چیزی از SOUL.md به پرامپت اضافه نمی‌شود</li>
+  <li>اگر فایل محتوا داشته باشد، محتوا بعد از اسکن و برش تحت‌اللفظی تزریق می‌شود</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> .cursorrules</h2>
+<p>هرمس با فایل ‏.cursorrules و ماژول‌های قاعدهٔ ‏.cursor/rules/*.mdc مربوط به Cursor IDE سازگار است. اگر این فایل‌ها در ریشهٔ پروژه‌تان باشند و هیچ فایل زمینهٔ بالاتر-اولویتی ‏(.hermes.md، ‏AGENTS.md یا ‏CLAUDE.md) پیدا نشود، به‌عنوان زمینهٔ پروژه لود می‌شوند.</p>
+<p>یعنی قواعد Cursor موجودتان هنگام استفاده از هرمس خودکار اعمال می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> نحوهٔ لود فایل‌های زمینه</h2>
+<h3>هنگام شروع ‏(پرامپت سیستمی)</h3>
+<p>فایل‌های زمینه توسط ‏<code>build_context_files_prompt()</code> در ‏<code>agent/prompt_builder.py</code> لود می‌شوند:</p>
+<ol>
+  <li><b>اسکن پوشهٔ کاری</b> — چک ‏<code>.hermes.md</code> ← ‏<code>AGENTS.md</code> ← ‏<code>CLAUDE.md</code> ← ‏<code>.cursorrules</code> ‏(اولین تطبیق برنده)</li>
+  <li><b>خواندن محتوا</b> — هر فایل به‌عنوان متن UTF-8 خوانده می‌شود</li>
+  <li><b>اسکن امنیتی</b> — محتوا برای الگوهای prompt injection چک می‌شود</li>
+  <li><b>برش</b> — فایل‌های فراتر از سقف کاراکتری head/tail بریده می‌شوند ‏(۷۰٪ سر، ‏۲۰٪ دُم، با نشانگری وسط). سقف مقدار صریح ‏<code>context_file_max_chars</code> از config.yaml است وقتی ست باشد؛ وگرنه دینامیک با پنجرهٔ زمینه مدل مقیاس می‌یابد ‏(کف ۲۰٬۰۰۰ کاراکتر، سقف ۵۰۰٬۰۰۰)</li>
+  <li><b>اسمبل</b> — همهٔ بخش‌ها زیر سربرگ ‏<code># Project Context</code> ترکیب می‌شوند</li>
+  <li><b>تزریق</b> — محتوای اسمبل‌شده به پرامپت سیستمی افزوده می‌شود</li>
+</ol>
+<h3>حین نشست ‏(کشف تدریجی)</h3>
+<p>‏<code>SubdirectoryHintTracker</code> در ‏<code>agent/subdirectory_hints.py</code> آرگومان‌های فراخوانی ابزار را برای مسیرهای فایل زیر نظر دارد:</p>
+<ol>
+  <li><b>استخراج مسیر</b> — بعد از هر فراخوانی ابزار مسیرهای فایل از آرگومان‌ها ‏(path، ‏workdir، فرمان‌های شل) استخراج می‌شود</li>
+  <li><b>صعود اجداد</b> — پوشه و تا ۵ والد بررسی می‌شوند ‏(توقف روی پوشه‌های قبلاً بازدید‌شده)</li>
+  <li><b>لود سرنخ</b> — اگر ‏AGENTS.md، ‏CLAUDE.md یا ‏.cursorrules پیدا شود لود می‌شود ‏(اولین تطبیق به‌ازای هر پوشه)</li>
+  <li><b>اسکن امنیتی</b> — همان اسکن prompt injection فایل‌های شروع</li>
+  <li><b>برش</b> — سقف ۸٬۰۰۰ کاراکتر به‌ازای هر فایل</li>
+  <li><b>تزریق</b> — به نتیجهٔ ابزار الصاق می‌شود تا مدل طبیعی در زمینه ببیندش</li>
+</ol>
+<p>بخش نهایی پرامپت تقریباً این شکل را دارد:</p>
+<div class="codebox"><pre><code># Project Context
+
+The following project context files have been loaded and should be followed:
+
+## AGENTS.md
+
+[Your AGENTS.md content here]
+
+## .cursorrules
+
+[Your .cursorrules content here]
+
+[Your SOUL.md content here]</code></pre></div>
+<p>توجه کنید محتوای SOUL مستقیم تزریق می‌شود بدون متن wrapper اضافه.</p>
+</section>
+
+<section class="doc-sec" id="security-scan">
+<h2><span class="secnum">۶</span> امنیت: محافظت prompt injection</h2>
+<p>همهٔ فایل‌های زمینه قبل از گنجانده شدن برای prompt injection احتمالی اسکن می‌شوند. اسکنر این‌ها را چک می‌کند:</p>
+<ul>
+  <li><b>تلاش‌های override دستورالعمل:</b> «ignore previous instructions»، «disregard your rules»</li>
+  <li><b>الگوهای فریب:</b> «do not tell the user»</li>
+  <li><b>override پرامپت سیستمی:</b> «system prompt override»</li>
+  <li><b>کامنت‌های HTML مخفی:</b> ‏<code>&lt;!-- ignore instructions --&gt;</code></li>
+  <li><b>عناصر div مخفی:</b> ‏<code>&lt;div style="display:none"&gt;</code></li>
+  <li><b>خروج برداشتگاه اعتبارنامه:</b> ‏<code>curl ... $API_KEY</code></li>
+  <li><b>دسترسی فایل رمز:</b> ‏<code>cat .env</code>، ‏<code>cat credentials</code></li>
+  <li><b>کاراکترهای نامرئی:</b> فاصله‌های zero-width، overrides دوجهته، word joiner ها</li>
+</ul>
+<p>اگر هر الگوی تهدیدی تشخیص داده شود فایل بلاک می‌شود:</p>
+<div class="codebox"><pre><code>[BLOCKED: AGENTS.md contained potential prompt injection (prompt_injection). Content not loaded.]</code></pre></div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>این اسکنر در برابر الگوهای رایج تزریق محافظت می‌کند ولی جایگزین بازبینی فایل‌های زمینه در مخازن مشترک نیست. همیشه محتوای AGENTS.md را در پروژه‌هایی که خودتان ننوشته‌اید اعتبارسنجی کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> سقف‌های حجم</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>حد</th><th>مقدار</th></tr></thead>
+  <tbody>
+    <tr><td>حداکثر کاراکتر به‌ازای هر فایل</td><td>‏<code>context_file_max_chars</code> وقتی ست باشد؛ وگرنه دینامیک ‏(با پنجرهٔ زمینه مدل مقیاس می‌یابد، کف ۲۰٬۰۰۰، سقف ۵۰۰٬۰۰۰)</td></tr>
+    <tr><td>نسبت برش سر</td><td>۷۰٪</td></tr>
+    <tr><td>نسبت برش دُم</td><td>۲۰٪</td></tr>
+    <tr><td>نشانگر برش</td><td>۱۰٪ ‏(تعداد کاراکتر را نشان و استفاده از ابزارهای فایل را پیشنهاد می‌دهد)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>وقتی فایلی از حد پیکربندی بگذرد پیام برش چنین می‌خواند:</p>
+<div class="codebox"><pre><code>[...truncated AGENTS.md: kept 14000+4000 of 25000 chars. Use file tools to read the full file.]</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> نکاتی برای فایل‌های زمینهٔ مؤثر</h2>
+<div class="callout tip">
+  <div class="callout-title">💡 بهترین شیوه‌ها برای AGENTS.md</div>
+  <ol>
+    <li><b>مختصر نگه دارید</b> — زیر ‏<code>context_file_max_chars</code> پیکربندی‌شده بمانید؛ ایجنت هر نوبت می‌خواندش</li>
+    <li><b>با تیتر ساختار دهید</b> — از بخش‌های ‏## برای معماری، قواعد و یادداشت‌های مهم</li>
+    <li><b>مثال‌های عینی بیاورید</b> — الگوهای کد ترجیحی، شکل API، قواعد نام‌گذاری را نشان دهید</li>
+    <li><b>بگویید چه نباید کرد</b> — «هرگز فایل‌های migration را مستقیم تغییر نده»</li>
+    <li><b>مسیرها و پورت‌های کلیدی را فهرست کنید</b> — ایجنت برای فرمان‌های ترمینال استفاده‌شان می‌کند</li>
+    <li><b>همراه تحول پروژه به‌روز کنید</b> — زمینه کهنه بدتر از نبود زمینه است</li>
+  </ol>
+</div>
+<h3>زمینه به‌ازای-زیرپوشه</h3>
+<p>برای monorepo ها دستورالعمل خاص-زیرپوشه را در فایل‌های AGENTS.md تو در تو بگذارید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">markdown — frontend/AGENTS.md</span><button class="copy-btn">کپی</button></div>
+  <pre><code>&lt;!-- frontend/AGENTS.md --&gt;
+# Frontend Context
+
+- Use `pnpm` not `npm` for package management
+- Components go in `src/components/`, pages in `src/app/`
+- Use Tailwind CSS, never inline styles
+- Run tests with `pnpm test`</code></pre>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">markdown — backend/AGENTS.md</span><button class="copy-btn">کپی</button></div>
+  <pre><code>&lt;!-- backend/AGENTS.md --&gt;
+# Backend Context
+
+- Use `poetry` for dependency management
+- Run the dev server with `poetry run uvicorn main:app --reload`
+- All endpoints need OpenAPI docstrings
+- Database models are in `models/`, schemas in `schemas/`</code></pre>
+</div>
+</section>
+
+<div class="pager">
+  <a href="batch-processing.html"><span class="dir">→ قبلی</span><span class="ttl">پردازش دسته‌ای</span></a>
+  <a class="next" href="goals.html"><span class="dir">بعدی ←</span><span class="ttl">اهداف پایدار ‏(‎/goal)</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files" target="_blank" rel="noopener">Context Files</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

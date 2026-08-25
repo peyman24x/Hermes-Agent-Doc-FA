@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ضربان نشست ‏(‎/heartbeat) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/heartbeat" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>ضربان نشست ‏(‎/heartbeat)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>ضربان نشست‌ها ‏(‏<code>/heartbeat</code>)</h1>
+<p>‏<code>/heartbeat</code> به <b>نشست فعلی</b> یک دستورالعمل تکرارشونده می‌دهد. هر وقت نشست بیکار باشد و فاصلهٔ زمانی سپری شده باشد، پرامپت مثل یک نوبت عادی کاربر شلیک می‌شود — همان گفتگو، همان زمینه، همان کش پرامپت.</p>
+<div class="codebox"><pre><code>/heartbeat every 10m Check the deployment and report meaningful changes</code></pre></div>
+<p>الهام‌گرفته از ‏<code>/heartbeat</code> مربوط به Prime-Agent. اقتباس هرمس ناورداهای سخت جریان-پیام را حفظ می‌کند: ضربان فقط بین نوبت‌ها تزریق می‌شود ‏(هرگز میان-اجرا نه)، به‌عنوان یک پیام عادی با نقش کاربر.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> ‏Heartbeat در برابر cron: کدام را می‌خواهم؟</h2>
+<p>شبیه به نظر می‌رسند ولی کارهای متفاوتی انجام می‌دهند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th></th><th>‏<code>/heartbeat</code></th><th><a href="cron.html">‏<code>hermes cron</code></a></th></tr></thead>
+  <tbody>
+    <tr><td>اجرا در</td><td><b>همین گفتگو</b> — زمینهٔ کامل، حافظهٔ بحث</td><td>نشست ایزولهٔ تازه به‌ازای هر تیک</td></tr>
+    <tr><td>جان‌سپردن از ری‌استارت پروسه</td><td>وضعیت جان می‌برد ‏(SessionDB)؛ شلیک دفعه بعد که نشست رانده شود ازسر می‌گیرد</td><td>بله — زمان‌بند کاملاً ماندگار</td></tr>
+    <tr><td>چندتا</td><td>یکی به‌ازای هر نشست</td><td>job های نامحدود</td></tr>
+    <tr><td>بهترین برای</td><td>«حین کارمان <em>در همین رشته</em> مراقب X باش»</td><td>job های ثابت، گزارش‌ها، watchdog ها، تحویل‌ها</td></tr>
+  </tbody>
+</table>
+</div>
+<p>قاعدهٔ سرانگشتی: اگر پرامپت تکرارشونده به زمینهٔ گفتگو نیاز دارد از ‏<code>/heartbeat</code> استفاده کنید. اگر job خودبسنده است از cron.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> فرمان‌ها</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فرمان</th><th>چه می‌کند</th></tr></thead>
+  <tbody>
+    <tr><td><code>/heartbeat every &lt;interval&gt; &lt;prompt&gt;</code></td><td>ست ‏(یا جایگزینی) ضربان نشست. فواصل: ‏<code>90s</code>، ‏<code>10m</code>، ‏<code>2h</code>، ‏<code>1d</code> ‏(حداقل ۶۰ ثانیه).</td></tr>
+    <tr><td><code>/heartbeat</code> یا ‏<code>/heartbeat status</code></td><td>نمایش ضربان، فاصله و زمان تا شلیک بعدی.</td></tr>
+    <tr><td><code>/heartbeat pause</code></td><td>توقف شلیک بدون پاک‌کردن.</td></tr>
+    <tr><td><code>/heartbeat resume</code></td><td>ازسرگیری ‏(تایمر دوباره لنگر می‌اندازد — بدون شلیک کهنهٔ آنی).</td></tr>
+    <tr><td><code>/heartbeat clear</code></td><td>حذف ضربان.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>‏<code>/hb</code> نام جایگزین است. روی CLI و پلتفرم‌های گیت‌وی کار می‌کند ‏(روی Slack از ‏<code>/hermes heartbeat …</code> استفاده کنید).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> جزئیات رفتار</h2>
+<ul>
+  <li><b>فقط-بیکاری.</b> ضربان هرگز نوبت در حال اجرا را قطع نمی‌کند. اگر ایجنت هنگام سررسید تیک مشغول باشد، در poll بیکاری بعدی شلیک می‌شود.</li>
+  <li><b>تیک‌های از‌دست‌رفته ادغام می‌شوند.</b> اگر نشست چند interval مشغول بود ‏(یا پروسه اجرا نباشد) فقط <b>یک</b> نوبت ضربان می‌گیرید نه backlog. تایمر با هر شلیک دوباره لنگر می‌اندازد.</li>
+  <li><b>پیام‌های کاربر برنده‌اند.</b> پیام صف‌شدهٔ کاربر همیشه اولویت دارد؛ ضربان منتظر تخلیهٔ صف ورودی می‌ماند.</li>
+  <li><b>امن-برای-کش.</b> پرامپت تزریق‌شده یک پیام معمولی کاربر است. هیچ جهش پرامپت-سیستمی، هیچ تغییر تول‌ست.</li>
+  <li><b>ماندگاری.</b> وضعیت در ‏SessionDB.state_meta با کلید ‏<code>heartbeat:&lt;session_id&gt;</code> زندگی می‌کند — از ‏<code>/resume</code> جان می‌برد و از چرخه‌های نشستِ فشرده‌سازی-زمینه عبور می‌کند. شلیک نیازمند اجرای پروسهٔ مالک ‏(نشست CLI یا گیت‌وی) است؛ برای برنامه‌هایی که باید از همه‌چیز جان ببرند از cron استفاده کنید.</li>
+  <li><b>گیتی ابداع-کار.</b> پرامپت تزریق‌شده به ایجنت می‌گوید وقتی هیچ تغییر معناداری نبود کوتاه جواب بدهد و متوقف شود، تا ضربان بی‌کار کار بیهوده تولید نکند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مثال</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>You: /heartbeat every 15m Check whether the CI run for PR #1234 finished; summarize the result when it does
+
+  ♥ Heartbeat set (every 15m): Check whether the CI run for PR #1234 finished; ...
+
+[15 minutes of you working on other things in the same session]
+
+Hermes: [Heartbeat — recurring instruction, fires every 15m]
+  💻 gh pr checks 1234   (1.2s)
+  CI is still running (14/37 checks complete). Nothing to report yet.</code></pre>
+</div>
+<p>وقتی جواب دیگر عوض نمی‌شود آن را ‏<code>/heartbeat clear</code> کنید — یا بگذارید مراقبت را ادامه دهد.</p>
+</section>
+
+<div class="pager">
+  <a href="document-extraction.html"><span class="dir">→ قبلی</span><span class="ttl">استخراج اسناد</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">حلقه‌های تکرارشونده (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/heartbeat" target="_blank" rel="noopener">Session Heartbeats</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تشخیص معنایی LSP — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/lsp" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>تشخیص معنایی LSP</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>‏سرور زبان ‏(LSP) — تشخیص معنایی</h1>
+<p>هرمس سرورهای زبانِ کامل — ‏pyright، ‏gopls، ‏rust-analyzer، ‏typescript-language-server، ‏clangd و حدود ۲۰ مورد دیگر — را به‌صورت زیرپروسه‌های پس‌زمینه اجرا می‌کند و تشخیص‌های معنایی آنها را به بررسی lint پس از نوشتن، که توسط <code>write_file</code> و <code>patch</code> استفاده می‌شود، تزریق می‌کند. وقتی ایجنت فایلی را ویرایش می‌کند دقیقاً همان خطاهایی را می‌بیند که همان ویرایش ایجاد کرده است — نه فقط خطاهای نحوی، بلکه <b>خطاهای نوع، نام‌های تعریف‌نشده، importهای جاافتاده و مسائل معنایی در مقیاس کل پروژه</b> که سرور زبان آشکار می‌کند.</p>
+<p>این همان معماری‌ای است که بهترین ایجنت‌های کدنویسی رده‌بالا استفاده می‌کنند. هرمس آن را خودکفا ارائه می‌دهد: نیازی به میزبان ویرایشگر نیست، پلاگینی برای نصب نیست و دیمون جداگانه‌ای برای مدیریت وجود ندارد.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> LSP چه زمانی اجرا می‌شود</h2>
+<p>اجرای LSP منوط به <b>تشخیص فضای‌کاری git</b> است. وقتی دایرکتوری کاری ایجنت (یا فایلِ در حال ویرایش) داخل یک مخزن git باشد، LSP روی همان فضای‌کاری اجرا می‌شود. وقتی هیچ‌کدام داخل مخزن git نباشند، LSP خوابیده می‌ماند — این برای گیت‌وی‌های پیام‌رسانی مفید است که دایرکتوری کاری‌شان خانهٔ کاربر است و پروژه‌ای برای تشخیص وجود ندارد.</p>
+<p>بررسی لایه‌بندی‌شده است: نخست بررسی نحوی درون-پروسه (در حد میکروثانیه)، سپس در صورت تمیز بودن نحو، تشخیص‌های LSP در مرحلهٔ دوم. یک سرور زبانِ بی‌ثبات یا غایب هرگز نمی‌تواند عملیات نوشتن را از کار بیندازد — هر مسیر شکست LSP بی‌صدا به نتیجهٔ فقط-نحوی برمی‌گردد.</p>
+<p>به‌طور مشخص، در هر <code>write_file</code> یا <code>patch</code> موفق:</p>
+<ol>
+  <li>هرمس یک وضعیت پایه ‏(baseline) از تشخیص‌های فعلی فایل ثبت می‌کند.</li>
+  <li>عملیات نوشتن را انجام می‌دهد.</li>
+  <li>دوباره از سرور زبان پرس‌وجو می‌کند، تشخیص‌هایی را که از قبل در وضعیت پایه حضور داشتند فیلتر می‌کند و فقط موارد جدید را نمایش می‌دهد.</li>
+</ol>
+<p>خروجی‌ای که ایجنت می‌بیند چیزی شبیه این است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{
+  "bytes_written": 42,
+  "dirs_created": false,
+  "lint": {"status": "ok", "output": ""},
+  "lsp_diagnostics": "LSP diagnostics introduced by this edit:\n&lt;diagnostics file=\"/path/to/foo.py\"&gt;\nERROR [42:5] Cannot find name 'foo' [reportUndefinedVariable] (Pyright)\nERROR [50:1] Argument of type \"str\" is not assignable to \"int\" [reportArgumentType] (Pyright)\n&lt;/diagnostics&gt;"
+}</code></pre>
+</div>
+<p>فیلد <code>lint</code> نتیجهٔ بررسی نحوی را حمل می‌کند (تجزیهٔ درون-پروسهٔ میکروثانیه‌ای از طریق <code>ast.parse</code>، ‏<code>json.loads</code> و…؛ فیلد <code>lsp_diagnostics</code> تشخیص‌های معنایی سرور زبان واقعی را حمل می‌کند. دو کانال با سیگنال‌های مستقل — ایجنت فایلی با نحو تمیز ولی مشکلات معنایی را به‌صورت <code>lint: ok</code> به‌همراه یک <code>lsp_diagnostics</code> پُر می‌بیند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> زبان‌های پشتیبانی‌شده</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>زبان</th><th>سرور</th><th>نصب خودکار</th></tr></thead>
+<tbody>
+<tr><td>Python</td><td><code>pyright-langserver</code></td><td>npm</td></tr>
+<tr><td>TypeScript / JavaScript / JSX / TSX</td><td><code>typescript-language-server</code></td><td>npm</td></tr>
+<tr><td>Vue</td><td><code>@vue/language-server</code></td><td>npm</td></tr>
+<tr><td>Svelte</td><td><code>svelte-language-server</code></td><td>npm</td></tr>
+<tr><td>Astro</td><td><code>@astrojs/language-server</code></td><td>npm</td></tr>
+<tr><td>Go</td><td><code>gopls</code></td><td><code>go install</code></td></tr>
+<tr><td>Rust</td><td><code>rust-analyzer</code></td><td>دستی (rustup)</td></tr>
+<tr><td>C / C++</td><td><code>clangd</code></td><td>دستی (LLVM)</td></tr>
+<tr><td>Bash / Zsh</td><td><code>bash-language-server</code></td><td>npm</td></tr>
+<tr><td>YAML</td><td><code>yaml-language-server</code></td><td>npm</td></tr>
+<tr><td>Lua</td><td><code>lua-language-server</code></td><td>دستی (نسخه‌های GitHub)</td></tr>
+<tr><td>PHP</td><td><code>intelephense</code></td><td>npm</td></tr>
+<tr><td>OCaml</td><td><code>ocaml-lsp</code></td><td>دستی (opam)</td></tr>
+<tr><td>Dockerfile</td><td><code>dockerfile-language-server-nodejs</code></td><td>npm</td></tr>
+<tr><td>Terraform</td><td><code>terraform-ls</code></td><td>دستی</td></tr>
+<tr><td>Dart</td><td><code>dart language-server</code></td><td>دستی (dart sdk)</td></tr>
+<tr><td>Haskell</td><td><code>haskell-language-server</code></td><td>دستی (ghcup)</td></tr>
+<tr><td>Julia</td><td><code>julia</code> + ‏LanguageServer.jl</td><td>دستی</td></tr>
+<tr><td>Clojure</td><td><code>clojure-lsp</code></td><td>دستی</td></tr>
+<tr><td>Nix</td><td><code>nixd</code></td><td>دستی</td></tr>
+<tr><td>Zig</td><td><code>zls</code></td><td>دستی</td></tr>
+<tr><td>Gleam</td><td><code>gleam lsp</code></td><td>دستی (gleam install)</td></tr>
+<tr><td>Elixir</td><td><code>elixir-ls</code></td><td>دستی</td></tr>
+<tr><td>Prisma</td><td><code>prisma language-server</code></td><td>دستی</td></tr>
+<tr><td>Kotlin</td><td><code>kotlin-language-server</code></td><td>دستی</td></tr>
+<tr><td>Java</td><td><code>jdtls</code></td><td>دستی</td></tr>
+<tr><td>PowerShell</td><td><code>PowerShellEditorServices</code> ‏(میزبان <code>pwsh</code>)</td><td>دستی (فایل zip انتشار)</td></tr>
+</tbody>
+</table>
+</div>
+<p>برای ردیف‌های «دستی»، سرور را از طریق هر ابزار مدیریت زنجیره‌ابزارِ مناسبِ آن زبان ‏(rustup، ‏ghcup، ‏opam، ‏brew و…) نصب کنید. هرمس باینری را به‌طور خودکار روی PATH یا در مسیر <code>&lt;HERMES_HOME&gt;/lsp/bin/</code> آشکار می‌کند.</p>
+<h3>PowerShell</h3>
+<p>‏PowerShellEditorServices یک باینری واحد نیست — این یک بستهٔ ماژول PowerShell است که توسط میزبان <code>pwsh</code> ‏(PowerShell 7 به بالا) یا <code>powershell</code> راه‌اندازی می‌شود. مراحل نصب:</p>
+<ol>
+  <li><a href="https://github.com/PowerShell/PowerShell" target="_blank" rel="noopener">PowerShell</a> را نصب کنید تا <code>pwsh</code> ‏(یا <code>powershell</code> در ویندوز) روی PATH باشد.</li>
+  <li>آخرین فایل zip انتشار را از <a href="https://github.com/PowerShell/PowerShellEditorServices/releases" target="_blank" rel="noopener">انتشارهای PowerShellEditorServices</a> دانلود و استخراج کنید.</li>
+  <li>هرمس را به بستهٔ استخراج‌شده اشاره دهید — دایرکتوری‌ای که شامل <code>PowerShellEditorServices/Start-EditorServices.ps1</code> است. یکی از این راه‌ها:
+    <ul>
+      <li>تنظیم <code>lsp.servers.powershell.command: ["/path/to/bundle"]</code> در <code>config.yaml</code>، یا</li>
+      <li>استخراج آن در مسیر <code>&lt;HERMES_HOME&gt;/lsp/PowerShellEditorServices</code>، یا</li>
+      <li>تنظیم متغیر محیطی <code>PSES_BUNDLE_PATH=/path/to/bundle</code>.</li>
+    </ul>
+  </li>
+</ol>
+<p>دستور <code>hermes lsp status</code> به‌محض پیدا شدن <code>pwsh</code> وضعیت <code>installed</code> را گزارش می‌کند؛ اگر بسته غایب باشد یک هشدار یک‌باره همراه با لینک دانلود در لاگ‌ها می‌بینید.</p>
+<p>چند سرور در کنار یک وابستگی هم‌بسته نصب می‌شوند که npm آن را خودکار نمی‌کشد. مورد فعلی <code>typescript-language-server</code> است که به SDK ی <code>typescript</code> قابل-import از همان درخت <code>node_modules</code> نیاز دارد — هرمس هنگام اجرای <code>hermes lsp install typescript</code> یا فعال شدن نصب خودکار در اولین استفاده، هر دو پکیج را با هم نصب می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> رابط خط فرمان</h2>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hermes lsp status          # service state + per-server install status
+hermes lsp list            # registry, optionally --installed-only
+hermes lsp install &lt;id&gt;    # eagerly install one server
+hermes lsp install-all     # try every server with a known recipe
+hermes lsp restart         # tear down running clients
+hermes lsp which &lt;id&gt;      # print resolved binary path</code></pre>
+</div>
+<p><code>hermes lsp status</code> بهترین نقطهٔ شروع است — نشان می‌دهد امروز کدام زبان‌ها تشخیص معنایی می‌گیرند و کدام‌ها برای نصب باینری نیاز به اقدام دارند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پیکربندی</h2>
+<p>پیش‌فرض‌ها برای راه‌اندازی‌های معمول کار می‌کنند؛ اگر باینری‌ها روی PATH باشند چیزی برای تنظیم کردن وجود ندارد.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># config.yaml
+lsp:
+  # Master toggle. Disabling skips the entire subsystem — no servers
+  # spawn, no background event loop runs.
+  enabled: true
+
+  # How long to wait for diagnostics after each write.
+  wait_mode: document      # "document" or "full"
+  # Max seconds to wait for the server to re-check the file after an
+  # edit. Only *fresh* diagnostics (produced for the post-edit
+  # content) are ever reported; if the server doesn't finish within
+  # this budget, the edit reports "no LSP data" rather than stale
+  # errors from before the edit. Raise this for slow servers on big
+  # projects (tsserver, rust-analyzer mid-indexing).
+  wait_timeout: 5.0
+
+  # How to handle missing server binaries.
+  #   auto    — install via npm/pip/go install into &lt;HERMES_HOME&gt;/lsp/bin
+  #   manual  — only use binaries already on PATH
+  install_strategy: auto
+
+  # How long an unused language-server client stays alive (seconds).
+  # Idle servers are shut down automatically and respawned on the next
+  # relevant file operation. Set to 0 to disable idle reaping and keep
+  # servers alive for the life of the process. Values below 30s are
+  # clamped to 30 so a sweep can never reap a client mid-operation.
+  idle_timeout: 600
+
+  # Per-server overrides (all optional).
+  servers:
+    pyright:
+      disabled: false
+      command: ["/abs/path/to/pyright-langserver", "--stdio"]
+      env: { PYRIGHT_LOG_LEVEL: "info" }
+      initialization_options:
+        python:
+          analysis:
+            typeCheckingMode: "strict"
+    typescript:
+      disabled: true       # skip TS even when its extensions match</code></pre>
+</div>
+<h3>کلیدهای هر-سرور</h3>
+<ul>
+  <li><code>disabled: true</code> — این سرور کاملاً رد می‌شود حتی وقتی پسوندهایش با یک فایل تطبیق می‌خورد.</li>
+  <li><code>command: [bin, ...args]</code> — مسیر یک باینری سفارشی را پین می‌کند و از نصب خودکار عبور می‌کند.</li>
+  <li><code>env: {KEY: value}</code> — متغیرهای محیطی اضافه‌ای که به پروسهٔ spawn‌شده پاس داده می‌شود.</li>
+  <li><code>initialization_options: {...}</code> — در payload ی <code>initializationOptions</code> مربوط به LSP که در هندشیک <code>initialize</code> فرستاده می‌شود ادغام می‌گردد. مخصوص هر سرور است؛ مستندات خود سرور زبان را ببینید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> مکان‌های نصب</h2>
+<p>وقتی <code>install_strategy: auto</code> باشد، هرمس باینری‌ها را در <code>&lt;HERMES_HOME&gt;/lsp/bin/</code> نصب می‌کند. پکیج‌های NPM در <code>&lt;HERMES_HOME&gt;/lsp/node_modules/</code> جای می‌گیرند و symlinkهای bin یک سطح بالاتر قرار می‌گیرند. باینری‌های Go از طریق <code>go install</code> با <code>GOBIN</code> اشاره‌کننده به دایرکتوری staging می‌آیند.</p>
+<p>هیچ‌چیز هرگز در <code>/usr/local/</code>، ‏<code>~/.local/</code> یا هر مکان مشترک دیگری نصب نمی‌شود — دایرکتوری staging کاملاً در اختیار هرمس است و هنگام ریست پروفایل حذف می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> ویژگی‌های کارایی</h2>
+<p>سرورهای LSP <b>با تأخیر و در اولین استفاده</b> spawn می‌شوند. ویرایش یک فایل پایتون در پروژه‌ای که تا حالا ترافیکی از نوع <code>.py</code> نداشته، pyright را spawn می‌کند؛ این spawn برای بیشتر سرورها ۱ تا ۳ ثانیه طول می‌کشد ‏(rust-analyzer روی پروژهٔ سرد ممکن است بیش از ۱۰ ثانیه طول بدهد). ویرایش‌های بعدی در همان فضای‌کاری از سرورِ در حال اجرا دوباره استفاده می‌کنند.</p>
+<p>لایهٔ LSP وقتی هیچ تشخیصی صادر نشود فقط چند میلی‌ثانیه به نوشتن‌های تمیز اضافه می‌کند. وقتی تشخیصی صادر شود، بودجهٔ انتظار برابر <code>wait_timeout</code> ثانیه است — به‌طور معمول سرور برای pyright/tsserver در حد ده‌ها میلی‌ثانیه و برای rust-analyzer در میانهٔ ایندکس‌گذاری چند ثانیه پاسخ می‌دهد.</p>
+<p>تشخیص‌ها <b>دارای گیت تازگی</b> هستند: یک نتیجه فقط وقتی حساب می‌شود که سرور آن را برای محتوای ویرایش فعلی تولید کرده باشد ‏(یک push از نوع <code>publishDiagnostics</code> در لحظهٔ تغییر یا بعد از آن، یا پاسخ یک pull request که بعد از تغییر آمده باشد). سرورهای کندی که هنوز بازرسی نکرده‌اند برای آن ویرایش «بدون داده» به بار می‌آورند — هرگز خطاهای دیروز به‌عنوان خطاهای فعلی دوباره گزارش نمی‌شوند.</p>
+<p>سرورها تا وقتی در حال استفاده هستند زنده نگه داشته می‌شوند و بعد از <code>lsp.idle_timeout</code> ثانیه ‏(پیش‌فرض ۶۰۰) بدون فعالیت فایلی خاموش می‌شوند — یک گیت‌وی بلندمدت که با many worktreeها کار دیگر تا همیشه برای هر فضای‌کاری یک پروسهٔ سرور زبان انباشته نمی‌کند. سروری که جمع‌آوری ‏(reap) شده در اولین عملیات فایل مرتبط به‌طور خودکار دوباره spawn می‌شود. برای غیرفعال کردن جمع‌آوری و گرم نگه داشتن اندیس همهٔ سرورها تا پایان عمر پروسه، <code>idle_timeout: 0</code> را ست کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> غیرفعال‌سازی</h2>
+<p>برای غیرفعال کردن کل زیرسیستم <code>lsp.enabled: false</code> را در <code>config.yaml</code> ست کنید. بررسی پس از نوشتن به بررسی نحوی درون-پروسه (<code>ast.parse</code> برای پایتون، ‏<code>json.loads</code> برای JSON و…) برمی‌گردد که بدون تغییر از نسخه‌های قبل‌تر ارائه می‌شود.</p>
+<p>برای غیرفعال کردن فقط یک زبان بدون از کار انداختن کل لایه:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>lsp:
+  servers:
+    rust-analyzer:
+      disabled: true</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> عیب‌یابی</h2>
+<h3>‏<code>hermes lsp status</code> یک سرور را «missing» نشان می‌دهد</h3>
+<p>باینری نه روی PATH هست و نه در <code>&lt;HERMES_HOME&gt;/lsp/bin/</code>. برای تلاش برای نصب خودکار <code>hermes lsp install &lt;server_id&gt;</code> را اجرا کنید یا باینری را از طریق زنجیره‌ابزار عادی آن زبان به‌صورت دستی نصب کنید.</p>
+<h3>بخش «Backend warnings» در <code>hermes lsp status</code></h3>
+<p>بعضی سرورها پوشش‌های نازک دور یک CLI خارجی برای تشخیص واقعی هستند — تمیز spawn می‌شوند و درخواست‌ها را می‌پذیرند ولی وقتی باینری sidecar غایب است هرگز خطایی صادر نمی‌کنند. رایج‌ترین مورد <code>bash-language-server</code> است که تشخیص‌ها را به <code>shellcheck</code> واگذار می‌کند. وقتی <code>hermes lsp status</code> بخش «Backend warnings» نشان داد، ابزار نام‌برده را از طریق مدیر پکیج سیستم‌عامل نصب کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>apt install shellcheck      # Debian / Ubuntu
+brew install shellcheck     # macOS
+scoop install shellcheck    # Windows</code></pre>
+</div>
+<p>همین هشدار یک‌باره در زمان spawn سرور در <code>~/.hermes/logs/agent.log</code> لاگ می‌شود.</p>
+<h3>سرور شروع می‌شود ولی هرگز تشخیصی برنمی‌گرداند</h3>
+<p>فایل <code>~/.hermes/logs/agent.log</code> را برای ورودی‌های <code>[agent.lsp.client]</code> بررسی کنید — هم stderr سرور زبان و هم خطاهای پروتکل آنجا فرود می‌آیند. بعضی سرورها (به‌خصوص rust-analyzer) باید پیش از صدور تشخیص‌های هر-فایل، ایندکس کل پروژه را تمام کنند؛ اولین ویرایش بعد از شروع سرور ممکن است بدون تشخیص تمام شود و ویرایش‌های بعدی آنها را دریافت کنند.</p>
+<h3>سرور کرش کرده است</h3>
+<p>سرورِ کرش‌شده به مجموعهٔ خراب‌ها اضافه می‌شود و تا پایان نشست دوباره تلاش نمی‌شود. برای پاک کردن مجموعه <code>hermes lsp restart</code> را اجرا کنید؛ ویرایش بعدی دوباره spawn می‌کند.</p>
+<h3>ویرایش فایلی بیرون از هر مخزن git</h3>
+<p>بنا به طراحی، LSP فقط داخل مخزن git اجرا می‌شود. اگر پروژه هنوز مقداردهی اولیه نشده، برای فعال‌سازی تشخیص‌های LSP دستور <code>git init</code> را اجرا کنید. در غیر این صورت fallback فقط-نحوی درون-پروسه اعمال می‌شود.</p>
+</section>
+
+<div class="pager">
+  <a href="wake-word.html"><span class="dir">→ قبلی</span><span class="ttl">واژهٔ بیدارباش ‏(Hey Hermes)</span></a>
+  <a class="next" href="built-in-plugins.html"><span class="dir">بعدی ←</span><span class="ttl">پلاگین‌های داخلی</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/lsp" target="_blank" rel="noopener">Language Server Protocol (LSP)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

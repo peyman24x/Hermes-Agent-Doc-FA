@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پردازش دسته‌ای — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/batch-processing" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>پردازش دسته‌ای</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>پردازش دسته‌ای ‏(Batch Processing)</h1>
+<p>پردازش دسته‌ای اجازه می‌دهد ایجنت هرمس را روی صدها یا هزاران پرامپت به‌صورت موازی اجرا و دادهٔ مسیر (trajectory) ساختاریافته تولید کنید. کاربرد اصلی آن <b>تولید دادهٔ آموزشی</b> است — تولید مسیرهای قالب ShareGPT با آمار استفاده از ابزار که برای fine-tuning یا ارزیابی قابل استفاده‌اند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نمای کلی</h2>
+<p>اجراکنندهٔ دسته‌ای ‏(<code>batch_runner.py</code>) یک دیتاست JSONL از پرامپت‌ها را پردازش و هرکدام را از یک نشست کامل ایجنتی با دسترسی ابزار عبور می‌دهد. هر پرامپت محیط ایزولهٔ خودش را می‌گیرد. خروجی، دادهٔ مسیر ساختاریافته با تاریخچهٔ کامل گفتگو، آمار فراخوانی ابزار و متریک‌های پوشش استدلال است.</p>
+<h3>شروع سریع</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Basic batch run
+python batch_runner.py \
+    --dataset_file=data/prompts.jsonl \
+    --batch_size=10 \
+    --run_name=my_first_run \
+    --model=anthropic/claude-sonnet-4.6 \
+    --num_workers=4
+
+# Resume an interrupted run
+python batch_runner.py \
+    --dataset_file=data/prompts.jsonl \
+    --batch_size=10 \
+    --run_name=my_first_run \
+    --resume
+
+# List available toolset distributions
+python batch_runner.py --list_distributions</code></pre>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 هزینهٔ قابل‌پیش‌بینی در مقیاس</div>
+  <p>اجراهای دسته‌ای نشست‌های ایجنتی هم‌زمان زیادی بالا می‌آورند که هرکدام فراخوانی مدل و ابزار می‌زنند. اشتراک ‏<a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tool-gateway" target="_blank" rel="noopener">Nous Portal</a> دسترسی مدل + جست‌وجوی وب، تولید تصویر، TTS و مرورگرهای ابری را زیر یک قبضه جمع می‌کند — برای هزینهٔ ثابت به‌ازای-هر-مسیر بدون juggle کردن سقف نرخ بین پنج حساب فروشنده مفید است. با ‏<code>hermes setup --portal</code> راه بیندازید و بعد ‏<code>--model</code> را به مدلی از Nous اشاره دهید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> قالب دیتاست</h2>
+<p>دیتاست ورودی فایل JSONL است ‏(یک آبجکت JSON در هر خط). هر ورودی باید فیلد ‏<code>prompt</code> داشته باشد:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">jsonl</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{"prompt": "Write a Python function that finds the longest palindromic substring"}
+{"prompt": "Create a REST API endpoint for user authentication using Flask"}
+{"prompt": "Debug this error: TypeError: cannot unpack non-iterable NoneType object"}</code></pre>
+</div>
+<p>ورودی‌ها اختیاراً می‌توانند شامل باشند:</p>
+<ul>
+  <li>‏<code>image</code> یا ‏<code>docker_image</code>: ایمیج کانتینری برای sandbox همین پرامپت ‏(با بک‌اندهای Docker، ‏Modal و ‏Singularity کار می‌کند)</li>
+  <li>‏<code>cwd</code>: override پوشهٔ کاری برای نشست ترمینال task</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گزینه‌های پیکربندی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>پارامتر</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>--dataset_file</code></td><td>‹الزامی›</td><td>مسیر دیتاست JSONL</td></tr>
+    <tr><td><code>--batch_size</code></td><td>‹الزامی›</td><td>پرامپت به‌ازای هر batch</td></tr>
+    <tr><td><code>--run_name</code></td><td>‹الزامی›</td><td>نام این اجرا ‏(برای پوشهٔ خروجی و checkpointing)</td></tr>
+    <tr><td><code>--distribution</code></td><td><code>"default"</code></td><td>توزیع تول‌ست برای نمونه‌گیری</td></tr>
+    <tr><td><code>--model</code></td><td><code>claude-sonnet-4.6</code></td><td>مدل مورد استفاده</td></tr>
+    <tr><td><code>--base_url</code></td><td><code>https://openrouter.ai/api/v1</code></td><td>URL پایهٔ API</td></tr>
+    <tr><td><code>--api_key</code></td><td>‹متغیر env›</td><td>کلید API مدل</td></tr>
+    <tr><td><code>--max_turns</code></td><td><code>10</code></td><td>حداکثر iteration های فراخوانی-ابزار به‌ازای هر پرامپت</td></tr>
+    <tr><td><code>--num_workers</code></td><td><code>4</code></td><td>پروسه‌های worker موازی</td></tr>
+    <tr><td><code>--resume</code></td><td><code>false</code></td><td>ازسرگیری از checkpoint</td></tr>
+    <tr><td><code>--verbose</code></td><td><code>false</code></td><td>فعال‌سازی لاگ پرجزئیات</td></tr>
+    <tr><td><code>--max_samples</code></td><td>همه</td><td>فقط N نمونهٔ اول دیتاست پردازش شود</td></tr>
+    <tr><td><code>--max_tokens</code></td><td>پیش‌فرض مدل</td><td>حداکثر توکن به‌ازای هر پاسخ مدل</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>مسیریابی ارائه‌دهنده ‏(OpenRouter)</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>پارامتر</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>--providers_allowed</code></td><td>ارائه‌دهنده‌های مجاز جداشده با ویرگول ‏(مثل ‏<code>"anthropic,openai"</code>)</td></tr>
+    <tr><td><code>--providers_ignored</code></td><td>ارائه‌دهنده‌های نادیده جداشده با ویرگول ‏(مثل ‏<code>"together,deepinfra"</code>)</td></tr>
+    <tr><td><code>--providers_order</code></td><td>ترتیب ترجیحی ارائه‌دهنده‌ها جداشده با ویرگول</td></tr>
+    <tr><td><code>--provider_sort</code></td><td>مرتب‌سازی بر اساس ‏<code>"price"</code>، ‏<code>"throughput"</code> یا ‏<code>"latency"</code></td></tr>
+  </tbody>
+</table>
+</div>
+<h3>کنترل استدلال</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>پارامتر</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>--reasoning_effort</code></td><td>سطح استدلال: ‏<code>none</code>، ‏<code>minimal</code>، ‏<code>low</code>، ‏<code>medium</code>، ‏<code>high</code>، ‏<code>xhigh</code>، ‏<code>max</code>، ‏<code>ultra</code></td></tr>
+    <tr><td><code>--reasoning_disabled</code></td><td>غیرفعال‌سازی کامل توکن‌های استدلال/تفکر</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>گزینه‌های پیشرفته</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>پارامتر</th><th>توضیح</th></tr></thead>
+  <tbody>
+    <tr><td><code>--ephemeral_system_prompt</code></td><td>پرامپت سیستمیِ استفاده‌شده حین اجرا ولی <b>ذخیره‌نشده</b> در مسیرها</td></tr>
+    <tr><td><code>--log_prefix_chars</code></td><td>کاراکترهای نمایش‌داده‌شده در پیش‌نمایش لاگ ‏(پیش‌فرض: ۱۰۰)</td></tr>
+    <tr><td><code>--prefill_messages_file</code></td><td>مسیر فایل JSON دارای پیام‌های prefill برای priming چند-نمونه‌ای</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> توزیع‌های تول‌ست</h2>
+<p>هر پرامپت مجموعه‌ای نمونه‌گیری‌تصادفی از تول‌ست‌ها از یک <b>توزیع</b> می‌گیرد. این تضمین می‌کند دادهٔ آموزشی ترکیب‌های متنوع ابزار را پوشش دهد. برای دیدن همهٔ توزیع‌ها از ‏<code>--list_distributions</code> استفاده کنید.</p>
+<p>در پیاده‌سازی فعلی، توزیع‌ها به <b>هر تول‌ست منفرد</b> یک احتمال اختصاص می‌دهند. نمونه‌گیر هر تول‌ست را مستقل flip می‌کند و بعد تضمین می‌کند دست‌کم یک تول‌ست فعال باشد. این با جدول دست‌نویسِ ترکیب‌های از-قبل-ساخته متفاوت است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> قالب خروجی</h2>
+<p>همهٔ خروجی به ‏<code>data/&lt;run_name&gt;/</code> می‌رود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">text</span><button class="copy-btn">کپی</button></div>
+  <pre><code>data/my_run/
+├── trajectories.jsonl    # Combined final output (all batches merged)
+├── batch_0.jsonl         # Individual batch results
+├── batch_1.jsonl
+├── ...
+├── checkpoint.json       # Resume checkpoint
+└── statistics.json       # Aggregate tool usage stats</code></pre>
+</div>
+<h3>قالب مسیر ‏(Trajectory)</h3>
+<p>هر خط در ‏<code>trajectories.jsonl</code> یک آبجکت JSON است:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">json</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{
+  "prompt_index": 42,
+  "conversations": [
+    {"from": "human", "value": "Write a function..."},
+    {"from": "gpt", "value": "I'll create that function...",
+     "tool_calls": [...]},
+    {"from": "tool", "value": "..."},
+    {"from": "gpt", "value": "Here's the completed function..."}
+  ],
+  "metadata": {
+    "batch_num": 2,
+    "timestamp": "2026-01-15T10:30:00",
+    "model": "anthropic/claude-sonnet-4.6"
+  },
+  "completed": true,
+  "partial": false,
+  "api_calls": 3,
+  "toolsets_used": ["terminal", "file"],
+  "tool_stats": {
+    "terminal": {"count": 2, "success": 2, "failure": 0},
+    "read_file": {"count": 1, "success": 1, "failure": 0}
+  },
+  "tool_error_counts": {
+    "terminal": 0,
+    "read_file": 0
+  }
+}</code></pre>
+</div>
+<p>فیلد ‏<code>conversations</code> از قالب شبیه-ShareGPT با فیلدهای ‏<code>from</code> و ‏<code>value</code> استفاده می‌کند. آمار ابزار نرمال‌سازی می‌شود تا همهٔ ابزارهای ممکن با پیش‌فرض صفر گنجانده شوند و schema بین ورودی‌ها برای سازگاری با دیتاست‌های HuggingFace یکسان بماند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> Checkpointing</h2>
+<p>اجراکنندهٔ دسته‌ای checkpointing مطمئنی برای تحمل خطا دارد:</p>
+<ul>
+  <li><b>فایل checkpoint:</b> بعد از تکمیل هر batch ذخیره می‌شود و ردیابی می‌کند کدام اندیس‌های پرامپت تمام شده‌اند</li>
+  <li><b>resume مبتنی-بر-محتوا:</b> روی ‏<code>--resume</code> اجراکننده فایل‌های batch موجود را اسکن و پرامپت‌های کامل‌شده را بر اساس متن واقعی‌شان تطبیق می‌دهد ‏(نه فقط اندیس‌ها)، تا بازیابی حتی اگر ترتیب دیتاست عوض شده باشد ممکن شود</li>
+  <li><b>پرامپت‌های شکست‌خورده:</b> فقط پرامپت‌های موفقانه کامل‌شdone علامت می‌خورند — پرامپت‌های شکسته هنگام resume دوباره تلاش می‌شوند</li>
+  <li><b>ادغام batch ها:</b> هنگام اتمام همهٔ فایل‌های batch ‏(شامل اجراهای قبلی) داخل یک ‏<code>trajectories.jsonl</code> واحد ادغام می‌شوند</li>
+</ul>
+<h3>نحوهٔ کار resume</h3>
+<ol>
+  <li>اسکن همهٔ فایل‌های ‏<code>batch_*.jsonl</code> برای پرامپت‌های کامل‌شده ‏(با تطبیق محتوا)</li>
+  <li>فیلتر دیتاست برای حذف پرامپت‌های قبلاً کامل‌شده</li>
+  <li>بچ‌کردن مجدد پرامپت‌های باقی‌مانده</li>
+  <li>پردازش فقط پرامپت‌های باقی‌مانده</li>
+  <li>ادغام همهٔ فایل‌های batch ‏(قدیم + جدید) در خروجی نهایی</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> فیلتر کیفیت</h2>
+<p>اجراکنندهٔ دسته‌ای فیلتر کیفیت خودکار اعمال می‌کند:</p>
+<ul>
+  <li><b>فیلتر بدون-استدلال:</b> نمونه‌هایی که صفر نوبت assistant دارای استدلال است ‏(بدون ‏<code>&lt;REASONING_SCRATCHPAD&gt;</code> یا توکن‌های تفکر native) دور ریخته می‌شوند</li>
+  <li><b>فیلتر ورودی خراب:</b> ورودی‌هایی با نام ابزار توهم‌زده ‏(خارج از فهرست معتبر ابزارها) هنگام merge نهایی فیلتر می‌شوند</li>
+  <li><b>آمار استدلال:</b> درصد نوبت‌های دارای/فاقد استدلال در کل اجرا ردیابی می‌شود</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> آمار</h2>
+<p>بعد از اتمام اجراکننده آمار جامعی چاپ می‌کند:</p>
+<ul>
+  <li><b>مصرف ابزار:</b> تعداد فراخوانی، نرخ موفقیت/شکست به‌ازای هر ابزار</li>
+  <li><b>پوشش استدلال:</b> درصد نوبت‌های assistant دارای استدلال</li>
+  <li><b>نمونه‌های دور ریخته‌شده:</b> تعداد نمونه‌های فیلترشده به دلیل فقدان استدلال</li>
+  <li><b>مدت:</b> کل زمان پردازش</li>
+</ul>
+<p>آمار برای تحلیل programmatik در ‏<code>statistics.json</code> هم ذخیره می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> موارد استفاده</h2>
+<h3>تولید دادهٔ آموزشی</h3>
+<p>تولید مسیرهای متنوع استفاده-از-ابزار برای fine-tuning:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>python batch_runner.py \
+    --dataset_file=data/coding_prompts.jsonl \
+    --batch_size=20 \
+    --run_name=coding_v1 \
+    --model=anthropic/claude-sonnet-4.6 \
+    --num_workers=8 \
+    --distribution=default \
+    --max_turns=15</code></pre>
+</div>
+<h3>ارزیابی مدل</h3>
+<p>ارزیابی اینکه مدل چقدر خوب روی پرامپت‌های استاندارد از ابزار استفاده می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
+  <pre><code>python batch_runner.py \
+    --dataset_file=data/eval_suite.jsonl \
+    --batch_size=10 \
+    --run_name=eval_gpt4 \
+    --model=openai/gpt-4o \
+    --num_workers=4 \
+    --max_turns=10</code></pre>
+</div>
+<h3>ایمیج کانتینری به‌ازای-هر-پرامپت</h3>
+<p>برای بنچمارک‌هایی که محیط خاص می‌خواهند، هر پرامپت می‌تواند ایمیج کانتینر خودش را مشخص کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">jsonl</span><button class="copy-btn">کپی</button></div>
+  <pre><code>{"prompt": "Install numpy and compute eigenvalues of a 3x3 matrix", "image": "python:3.11-slim"}
+{"prompt": "Compile this Rust program and run it", "image": "rust:1.75"}
+{"prompt": "Set up a Node.js Express server", "image": "node:20-alpine", "cwd": "/app"}</code></pre>
+</div>
+<p>اجراکنندهٔ دسته‌ای قبل از اجرای هر پرامپت تأیید می‌کند ایمیج Docker قابل‌دسترس است.</p>
+</section>
+
+<div class="pager">
+  <a href="vision.html"><span class="dir">→ قبلی</span><span class="ttl">بینایی و چسباندن تصویر</span></a>
+  <a class="next" href="context-files.html"><span class="dir">بعدی ←</span><span class="ttl">فایل‌های زمینه</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/batch-processing" target="_blank" rel="noopener">Batch Processing</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>
