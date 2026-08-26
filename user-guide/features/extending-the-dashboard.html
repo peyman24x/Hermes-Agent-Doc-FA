@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>گسترش داشبورد وب — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/extending-the-dashboard" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>گسترش داشبورد وب</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>گسترش داشبورد وب ‏(Extending the Dashboard)</h1>
+<p>داشبورد وب هرمس ‏(<code>hermes dashboard</code>) برای ریسکین و گسترش بدون fork کردن کدبیس ساخته شده. سه لایه expose شده است:</p>
+<ol>
+  <li><b>تم‌ها</b> — فایل‌های YAML که پالت، تایپوگرافی، چیدمان و chrome ی هر-کامپوننت داشبورد را رنگ می‌کنند. یک فایل در ‏<code>~/.hermes/dashboard-themes/</code> بگذارید؛ در انتخاب‌گر تم ظاهر می‌شود.</li>
+  <li><b>پلاگین‌های UI</b> — یک دایرکتوری شامل ‏<code>manifest.json</code> + بستهٔ JavaScript که یک تب ثبت می‌کند، صفحهٔ داخلی را جایگزین، از طریق slot های مخصوص-صفحه غنی می‌کند یا کامپوننت‌هایی به shell slot های نام‌دار تزریق می‌کند.</li>
+  <li><b>پلاگین‌های بک‌اند</b> — یک فایل پایتون داخل همان دایرکتوری پلاگین که یک ‏<code>router</code> ی FastAPI expose می‌کند؛ مسیرها زیر ‏<code>/api/plugins/&lt;name&gt;/</code> سوار و از UI پلاگین صدا زده می‌شوند.</li>
+</ol>
+<p>هر سه <b>drop-in در runtime هستند</b>: بدون clone مخزن، بدون ‏<code>npm run build</code>، بدون وصله زدن به سورس داشبورد. این صفحه مرجع رسمی هر سه است.</p>
+<p>اگر فقط می‌خواهید از داشبورد استفاده کنید بخش <a href="web-dashboard.html">داشبورد وب</a> را ببینید. اگر می‌خواهید CLI ترمینال را ریسکین کنید ‏(نه داشبورد وب)، بخش <a href="skins.html">پوسته‌ها و تم‌ها</a> را ببینید — سیستم پوستهٔ CLI ربطی به تم‌های داشبورد ندارد.</p>
+<div class="callout note">
+  <div class="callout-title">📌 این صفحه اپ دسکتاپ نیست</div>
+  <p>این صفحه سیستم پلاگینِ <b>داشبورد وب</b> ‏(<code>hermes dashboard</code>) را پوشش می‌دهد — ‏<code>window.__HERMES_PLUGIN_SDK__</code>، یک ‏<code>manifest.json</code> و یک باندل JS از پیش ساخته‌شده. <b>اپ دسکتاپ native</b> ‏(<code>hermes desktop</code>) SDK ی جدا و بی‌ربط خودش را دارد — ‏<code>@hermes/plugin-sdk</code>، یک فایل ESM واحد بدون مرحله build — که در بخش <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/desktop-plugin-sdk" target="_blank" rel="noopener">Desktop Plugin SDK</a> مستند شده. فقط namespace ی بک‌اندِ ‏<code>plugin_api.py</code> ‏(<code>/api/plugins/&lt;name&gt;</code>) بین آنها مشترک است.</p>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 قطعه‌ها چطور کنار هم می‌نشینند</div>
+  <p>تم‌ها و پلاگین‌ها مستقل اما هم‌افزا هستند. یک تم می‌تواند تنها باشد ‏(فقط یک فایل YAML). یک پلاگین می‌تواند تنها باشد ‏(فقط یک تب). با هم اجازه می‌دهند یک ریسکین کامل بصری با HUD های سفارشی بسازید — دموی نمونهٔ ‏<code>strike-freedom-cockpit</code> ‏(در مخزن همراه hermes-example-plugins — برای مراحل نصب بخش <a href="#combined-theme--plugin-demo">دموی ترکیبی تم + پلاگین</a>) دقیقاً همین کار را می‌کند.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> تم‌ها</h2>
+<p>تم‌ها فایل‌های YAML ذخیره‌شده در ‏<code>~/.hermes/dashboard-themes/</code> هستند. نام فایل مهم نیست ‏(فیلد ‏<code>name:</code> ی تم همان چیزی است که سیستم استفاده می‌کند) ولی قرارداد ‏<code>&lt;name&gt;.yaml</code> است. هر فیلدی اختیاری است — کلیدهای غایب به تم داخلی <code>default</code> برمی‌گردند، پس یک تم می‌تواند به کوچکی یک رنگ باشد.</p>
+<h3>شروع سریع — اولین تم شما</h3>
+<div class="codebox"><pre><code>mkdir -p ~/.hermes/dashboard-themes</code></pre></div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ~/.hermes/dashboard-themes/neon.yaml
+name: neon
+label: Neon
+description: Pure magenta on black
+
+palette:
+  background: "#000000"
+  midground: "#ff00ff"</code></pre>
+</div>
+<p>داشبورد را refresh کنید. روی آیکن پالت در header کلیک و <b>Neon</b> را بردارید. پس‌زمینه سیاه، متن و اکسنت‌ها مجنتا می‌شوند و هر رنگ مشتق‌شده ‏(card، ‏border، ‏muted، ‏ring و…) از آن دو-تایی رنگ از طریق ‏<code>color-mix()</code> در CSS محاسبه دوباره می‌شود.</p>
+<p>کل onboarding همین بود: یک فایل، دو رنگ. هرچه پایین‌تر می‌آید اصلاح اختیاری است.</p>
+<h3>پالت، تایپوگرافی، چیدمان</h3>
+<p>این سه بلوک قلب یک تم‌اند. هرکدام مستقل‌اند — یکی را override کنید، بقیه را ول کنید.</p>
+<h4>پالت ‏(۳ لایه)</h4>
+<p>پالت سه‌تاییِ لایه‌های رنگ به‌علاوهٔ یک رنگ vignette ی warm-glow و ضریب نویز دانه است. آبشار سیستم طراحی داشبورد هر توکن سازگار-با-shadcn ‏(card، ‏popover، ‏muted، ‏border، ‏primary، ‏destructive، ‏ring و…) را از این سه‌تایی از طریق ‏<code>color-mix()</code> ی CSS مشتق می‌کند. override کردن سه رنگ به کل UI آبشار می‌شود.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>کلید</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>palette.background</code></td><td>عمیق‌ترین رنگ بوم — معمولاً نزدیک سیاه. پس‌زمینهٔ صفحه و fill ی card ها را می‌راند.</td></tr>
+<tr><td><code>palette.midground</code></td><td>متن اصلی و اکسنت. بیشتر chrome های UI این را می‌خوانند ‏(متن foreground، outline دکمه‌ها، حلقه‌های فوکوس).</td></tr>
+<tr><td><code>palette.foreground</code></td><td>هایلایت لایهٔ بالا. تم پیش‌فرض این را سفید با alpha صفر ‏(نامرئی) ست می‌کند؛ تم‌هایی که اکسنت روشنی روی همه‌چیز می‌خواهند alpha اش را بالا ببرند.</td></tr>
+<tr><td><code>palette.warmGlow</code></td><td>رشتهٔ ‏<code>rgba(...)</code> که به‌عنوان رنگ vignette توسط ‏<code>&lt;Backdrop /&gt;</code> استفاده می‌شود.</td></tr>
+<tr><td><code>palette.noiseOpacity</code></td><td>ضریب ۰–۱٫۲ روی overlay ی دانه. کمتر = نرم‌تر، بیشتر = زمخت‌تر.</td></tr>
+</tbody>
+</table>
+</div>
+<p>هر لایه یا ‏<code>{hex: "#RRGGBB", alpha: 0.0–1.0}</code> می‌پذیرد یا یک رشتهٔ hex ی لخت ‏(alpha پیش‌فرض ۱٫۰).</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>palette:
+  background:
+    hex: "#05091a"
+    alpha: 1.0
+  midground: "#d8f0ff"          # bare hex, alpha = 1.0
+  foreground:
+    hex: "#ffffff"
+    alpha: 0                    # invisible top layer
+  warmGlow: "rgba(255, 199, 55, 0.24)"
+  noiseOpacity: 0.7</code></pre>
+</div>
+<h4>تایپوگرافی</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>کلید</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>fontSans</code></td><td>string</td><td>پشتهٔ font-family ی CSS برای متن بدنه ‏(اعمال روی html و body).</td></tr>
+<tr><td><code>fontMono</code></td><td>string</td><td>پشتهٔ CSS برای بلوک‌های کد، ‏<code>&lt;code&gt;</code> و utility های ‏<code>.font-mono</code>.</td></tr>
+<tr><td><code>fontDisplay</code></td><td>string</td><td>پشتهٔ اختیاری عنوان/display. به ‏fontSans برمی‌گردد.</td></tr>
+<tr><td><code>fontUrl</code></td><td>string</td><td>URL ی stylesheet خارجی اختیاری. موقع تعویض تم به‌صورت ‏<code>&lt;link rel="stylesheet"&gt;</code> در head تزریق می‌شود. همان URL هرگز دوبار تزریق نمی‌شود. با Google Fonts، ‏Bunny Fonts و برگه‌های self-hosted ‏@font-face کار می‌کند — هر چیزی linkable.</td></tr>
+<tr><td><code>baseSize</code></td><td>string</td><td>اندازهٔ فونت ریشه — مقیاس rem را کنترل می‌کند. مثلاً ‏<code>"14px"</code>، ‏<code>"16px"</code>.</td></tr>
+<tr><td><code>lineHeight</code></td><td>string</td><td>line-height پیش‌فرض. مثلاً ‏<code>"1.5"</code>، ‏<code>"1.65"</code>.</td></tr>
+<tr><td><code>letterSpacing</code></td><td>string</td><td>letter-spacing پیش‌فرض. مثلاً ‏<code>"0"</code>، ‏<code>"0.01em"</code>، ‏<code>"-0.01em"</code>.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>typography:
+  fontSans: '"Orbitron", "Eurostile", "Impact", sans-serif'
+  fontMono: '"Share Tech Mono", ui-monospace, monospace'
+  fontDisplay: '"Orbitron", "Eurostile", sans-serif'
+  fontUrl: "https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&amp;family=Share+Tech+Mono&amp;display=swap"
+  baseSize: "14px"
+  lineHeight: "1.5"
+  letterSpacing: "0.04em"</code></pre>
+</div>
+<h5>تعویض فونت از UI ‏(بدون YAML)</h5>
+<p>انتخاب‌گر تم در header ی داشبورد زیر فهرست تم‌ها یک بخش <b>Font</b> دارد. هر فونتی آنجا بردارید فونت بدنه‌ی هر تم فعالی را override می‌کند — انتخاب مستقل از تم است و بین تعویض‌های تم می‌ماند ‏(در config.yaml زیر ‏dashboard.font ذخیره می‌شود). برای پاک کردن override و برگشت به ‏fontSans ی خود تم فعال، <b>Theme default</b> را انتخاب کنید.</p>
+<p>انتخاب‌گر یک کاتالوگ منتخب ارائه می‌دهد ‏(پشته‌های سیستمی به‌علاوهٔ مجموعه‌ای از خانواده‌های Google-Fonts در سه سبک sans / serif / mono). عمداً URL فونت آزاد نمی‌پذیرد — stylesheet فونت به‌صورت ‏<link> تزریق می‌شود، پس کاتالوگ origin های تزریق را ثابت نگه می‌دارد. برای فونت کاملاً سفارشی مثل بالا در تم YAML مقدار ‏<code>fontSans</code> + ‏<code>fontUrl</code> را ست کنید. فونت ‏<code>fontMono</code> ی تم ‏(بلوک‌های کد، ترمینال) همیشه دست‌نخورده از override ی UI می‌ماند.</p>
+<h4>چیدمان</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>کلید</th><th>مقادیر</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>radius</code></td><td>هر طول CSS ‏(<code>"0"</code>، ‏<code>"0.25rem"</code>، ‏<code>"0.5rem"</code>، ‏<code>"1rem"</code> و…)</td><td>توکن گردی گوشه‌ها. به ‏<code>--radius</code> نگاشت و به ‏<code>--radius-sm/md/lg/xl</code> آبشار می‌شود — هر عنصر گرد با هم جابه‌جا می‌شود.</td></tr>
+<tr><td><code>density</code></td><td>‏<code>compact</code> | ‏<code>comfortable</code> | ‏<code>spacious</code></td><td>ضریب فاصله که به‌صورت متغیر CSS ی ‏<code>--spacing-mul</code> اعمال می‌شود. ‏compact = ‎۰٫۸۵×‎، ‏comfortable = ‎۱٫۰×‎ ‏(پیش‌فرض)، ‏spacious = ‎۱٫۲×‎. فاصله‌گذاری پایه Tailwind را مقیاس می‌دهد، پس padding، ‏gap و utility های space-between همه تناسبی شیفت می‌خورند.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>layout:
+  radius: "0"
+  density: compact</code></pre>
+</div>
+<h3>انواع چیدمان ‏(Layout variants)</h3>
+<p>‏<code>layoutVariant</code> چیدمان کلی پوسته را برمی‌گزیند. در غیاب آن پیش‌فرض <code>"standard"</code> است.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>نوع</th><th>رفتار</th></tr></thead>
+<tbody>
+<tr><td><code>standard</code></td><td>تک‌ستونی، عرض بیشینه ‎۱۶۰۰px‎ ‏(پیش‌فرض).</td></tr>
+<tr><td><code>cockpit</code></td><td>ریل sidebar چپ ‏(‎۲۶۰px‎) + محتوای اصلی. توسط پلاگین‌ها از طریق slot ی <code>sidebar</code> پر می‌شود — بخش Shell slots را ببینید. بدون پلاگین، ریل placeholder نشان می‌دهد.</td></tr>
+<tr><td><code>tiled</code></td><td>سقف max-width را حذف می‌کند تا صفحات کل عرض viewport را بگیرند.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="codebox"><pre><code>layoutVariant: cockpit</code></pre></div>
+<p>نوع فعلی به‌عنوان ‏<code>document.documentElement.dataset.layoutVariant</code> expose می‌شود، پس CSS خام داخل ‏customCSS می‌تواند با ‏<code>:root[data-layout-variant="cockpit"] ...</code> نشانه‌گیری‌اش کند.</p>
+<h3>asset های تم ‏(تصاویر به‌عنوان CSS var)</h3>
+<p>URL های artwork را همراه تم بفرستید. هر slot نام‌دار یک CSS var می‌شود ‏(<code>--theme-asset-&lt;name&gt;</code>) که پوستهٔ داخلی و هر پلاگینی می‌تواند بخواند. slot ی <code>bg</code> خودکار به backdrop سیم‌کشی می‌شود؛ سایر slot ها رو-به-پلاگین‌اند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>assets:
+  bg: "https://example.com/hero-bg.jpg"           # auto-wired into &lt;Backdrop /&gt;
+  hero: "/my-images/strike-freedom.png"           # for plugin sidebars
+  crest: "/my-images/crest.svg"                   # for header-left plugins
+  logo: "/my-images/logo.png"
+  sidebar: "/my-images/rail.png"
+  header: "/my-images/header-art.png"
+  custom:
+    scanLines: "/my-images/scanlines.png"         # → --theme-asset-custom-scanLines</code></pre>
+</div>
+<p>مقادیر اینها را می‌پذیرند:</p>
+<ul>
+  <li>URL های لخت — خودکار در ‏<code>url(...)</code> پیچیده می‌شوند.</li>
+  <li>عبارات از-قبل-پیچیده‌شدهٔ ‏<code>url(...)</code>، ‏<code>linear-gradient(...)</code>، ‏<code>radial-gradient(...)</code> — همان‌طور استفاده می‌شوند.</li>
+  <li>‏<code>"none"</code> — انصراف صریح.</li>
+</ul>
+<p>هر asset همچنین به‌صورت ‏<code>--theme-asset-&lt;name&gt;-raw</code> ‏(URL باز‌شده) هم emit می‌شود، برای اینکه پلاگین لازم داشت به ‏<code>&lt;img src&gt;</code> پاسش دهد نه background-image.</p>
+<p>پلاگین‌ها با CSS یا JS ساده می‌خوانند:</p>
+<pre dir="ltr"><code>// In a plugin slot
+const hero = getComputedStyle(document.documentElement)
+  .getPropertyValue("--theme-asset-hero").trim();</code></pre>
+<h3>بازنویسی chrome ی کامپوننت‌ها</h3>
+<p>‏<code>componentStyles</code> کامپوننت‌های منفرد پوسته را بدون نوشتن selector ی CSS ری‌استایل می‌کند. ورودی‌های هر bucket به CSS var تبدیل می‌شوند ‏(<code>--component-&lt;bucket&gt;-&lt;kebab-property&gt;</code>) که کامپوننت‌های مشترک پوسته می‌خوانند. پس override های ‏<code>card:</code> روی هر ‏<code>&lt;Card&gt;</code> اعمال می‌شود و ‏<code>header:</code> روی نوار اپ و… .</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>componentStyles:
+  card:
+    clipPath: "polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)"
+    background: "linear-gradient(180deg, rgba(10, 22, 52, 0.85), rgba(5, 9, 26, 0.92))"
+    boxShadow: "inset 0 0 0 1px rgba(64, 200, 255, 0.28)"
+  header:
+    background: "linear-gradient(180deg, rgba(16, 32, 72, 0.95), rgba(5, 9, 26, 0.9))"
+  tab:
+    clipPath: "polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)"
+  sidebar: {}
+  backdrop: {}
+  footer: {}
+  progress: {}
+  badge: {}
+  page: {}</code></pre>
+</div>
+<p>bucket های پشتیبانی‌شده: ‏<code>card</code>، ‏<code>header</code>، ‏<code>footer</code>، ‏<code>sidebar</code>، ‏<code>tab</code>، ‏<code>progress</code>، ‏<code>badge</code>، ‏<code>backdrop</code>، ‏<code>page</code>.</p>
+<p>نام property ها camelCase است ‏(<code>clipPath</code>) و به kebab emit می‌شود ‏(<code>clip-path</code>). مقادیر رشته‌های CSS ساده‌اند — هر چیزی که CSS قبول کند ‏(<code>clip-path</code>، ‏<code>border-image</code>، ‏<code>background</code>، ‏<code>box-shadow</code>، ‏<code>animation</code> و…).</p>
+<h3>بازنویسی رنگ‌ها</h3>
+<p>بیشتر تم‌ها به این نیاز ندارند — پالت ۳لایه هر توکن shadcn را مشتق می‌کند. از ‏<code>colorOverrides</code> وقتی استفاده کنید که اکسنت خاصی می‌خواهید که مشتق‌سازی تولیدش نمی‌کند ‏(قرمز destructive ملایم‌تر برای تم پاستلی، سبز success مشخص برای یک برند).</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>colorOverrides:
+  primary: "#ffce3a"
+  primaryForeground: "#05091a"
+  accent: "#3fd3ff"
+  ring: "#3fd3ff"
+  destructive: "#ff3a5e"
+  border: "rgba(64, 200, 255, 0.28)"</code></pre>
+</div>
+<p>کلیدهای پشتیبانی‌شده: ‏<code>card</code>، ‏<code>cardForeground</code>، ‏<code>popover</code>، ‏<code>popoverForeground</code>، ‏<code>primary</code>، ‏<code>primaryForeground</code>، ‏<code>secondary</code>، ‏<code>secondaryForeground</code>، ‏<code>muted</code>، ‏<code>mutedForeground</code>، ‏<code>accent</code>، ‏<code>accentForeground</code>، ‏<code>destructive</code>، ‏<code>destructiveForeground</code>، ‏<code>success</code>، ‏<code>warning</code>، ‏<code>border</code>، ‏<code>input</code>، ‏<code>ring</code>.</p>
+<p>هر کلید یک‌به-یک به CSS var ی ‏<code>--color-&lt;kebab&gt;</code> نگاشت می‌شود ‏(مثلاً ‏primaryForeground ← ‏--color-primary-foreground). هر کلیدی اینجا ست شود فقط برای تم فعال بر آبشار پالت مقدم است — سوئیچ به تم دیگر override ها را پاک می‌کند.</p>
+<h3>‏<code>customCSS</code> خام</h3>
+<p>برای chrome سطح-selector که componentStyles نمی‌رسد — pseudo-element ها، انیمیشن‌ها، media query ها، override های مخصوص-تم — CSS خام را داخل ‏customCSS بریزید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">css</span><button class="copy-btn">کپی</button></div>
+  <pre><code>customCSS: |
+  /* Scanline overlay — only visible when cockpit variant is active. */
+  :root[data-layout-variant="cockpit"] body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    background: repeating-linear-gradient(to bottom,
+      transparent 0px, transparent 2px,
+      rgba(64, 200, 255, 0.035) 3px, rgba(64, 200, 255, 0.035) 4px);
+    mix-blend-mode: screen;
+  }</code></pre>
+</div>
+<p>CSS هنگام apply شدن تم به‌صورت یک تگ scoped واحد ‏<code>&lt;style data-hermes-theme-css&gt;</code> تزریق و موقع تعویض تم پاک می‌شود. <b>سقف ۳۲ KiB به‌ازای هر تم.</b></p>
+<h3>تم‌های داخلی</h3>
+<p>هر تم داخلی پالت، تایپوگرافی و چیدمان خودش را دارد — سوئیچ کردن تغییراتی فراتر از رنگ تولید می‌کند.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>تم</th><th>پالت</th><th>تایپوگرافی</th><th>چیدمان</th></tr></thead>
+<tbody>
+<tr><td><b>Hermes Teal</b> ‏(<code>default</code>)</td><td>سبز-آبی تیره + کرم</td><td>پشتهٔ سیستمی، ‎۱۵px</td><td>radius ی ‏۰٫۵rem، comfortable</td></tr>
+<tr><td><b>Hermes Teal ‏(Large)</b> ‏(<code>default-large</code>)</td><td>مثل default</td><td>پشتهٔ سیستمی، ‎۱۸px، ‏line-height ‏۱٫۶۵</td><td>radius ی ‏۰٫۵rem، spacious</td></tr>
+<tr><td><b>Midnight</b> ‏(<code>midnight</code>)</td><td>آبی-بنفش عمیق</td><td>Inter + JetBrains Mono، ‏۱۴px</td><td>radius ی ‏۰٫۷۵rem، comfortable</td></tr>
+<tr><td><b>Ember</b> ‏(<code>ember</code>)</td><td>سرخ گرم + برنز</td><td>Spectral ‏(سریف) + IBM Plex Mono، ‏۱۵px</td><td>radius ی ‏۰٫۲۵rem، comfortable</td></tr>
+<tr><td><b>Mono</b> ‏(<code>mono</code>)</td><td>خاکستری‌محور</td><td>IBM Plex Sans + IBM Plex Mono، ‏۱۳px</td><td>radius صفر، compact</td></tr>
+<tr><td><b>Cyberpunk</b> ‏(<code>cyberpunk</code>)</td><td>سبز نئونی روی سیاه</td><td>Share Tech Mono همه‌جا، ‏۱۴px</td><td>radius صفر، compact</td></tr>
+<tr><td><b>Rosé</b> ‏(<code>rose</code>)</td><td>صورتی + عاج</td><td>Fraunces ‏(سریف) + DM Mono، ‏۱۶px</td><td>radius ی ‏۱rem، spacious</td></tr>
+</tbody>
+</table>
+</div>
+<p>تم‌هایی که به Google Fonts ارجاع می‌دهند ‏(همه جز Hermes Teal) stylesheet را on-demand بارگذاری می‌کنند — اولین باری که سوئیچ کنید یک تگ ‏<link> به head تزریق می‌شود.</p>
+<h3>مرجع کامل YAML ی تم</h3>
+<p>همهٔ پیچ‌ومهره‌ها در یک فایل — کپی کنید و آنچه لازم ندارید را حذف کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ~/.hermes/dashboard-themes/ocean.yaml
+name: ocean
+label: Ocean Deep
+description: Deep sea blues with coral accents
+
+# 3-layer palette (accepts {hex, alpha} or bare hex)
+palette:
+  background:
+    hex: "#0a1628"
+    alpha: 1.0
+  midground:
+    hex: "#a8d0ff"
+    alpha: 1.0
+  foreground:
+    hex: "#ffffff"
+    alpha: 0.0
+  warmGlow: "rgba(255, 107, 107, 0.35)"
+  noiseOpacity: 0.7
+
+typography:
+  fontSans: "Poppins, system-ui, sans-serif"
+  fontMono: "Fira Code, ui-monospace, monospace"
+  fontDisplay: "Poppins, system-ui, sans-serif"   # optional
+  fontUrl: "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&amp;family=Fira+Code:wght@400;500&amp;display=swap"
+  baseSize: "15px"
+  lineHeight: "1.6"
+  letterSpacing: "-0.003em"
+
+layout:
+  radius: "0.75rem"
+  density: comfortable
+
+layoutVariant: standard        # standard | cockpit | tiled
+
+assets:
+  bg: "https://example.com/ocean-bg.jpg"
+  hero: "/my-images/kraken.png"
+  crest: "/my-images/anchor.svg"
+  logo: "/my-images/logo.png"
+  custom:
+    pattern: "/my-images/waves.svg"
+
+componentStyles:
+  card:
+    boxShadow: "inset 0 0 0 1px rgba(168, 208, 255, 0.18)"
+  header:
+    background: "linear-gradient(180deg, rgba(10, 22, 40, 0.95), rgba(5, 9, 26, 0.9))"
+
+colorOverrides:
+  destructive: "#ff6b6b"
+  ring: "#ff6b6b"
+
+customCSS: |
+  /* Any additional selector-level tweaks */</code></pre>
+</div>
+<p>بعد از ساخت فایل داشبورد را refresh کنید. تم‌ها را زنده از نوار header عوض کنید — روی آیکن پالت کلیک کنید. انتخاب در config.yaml زیر ‏dashboard.theme ماندگار و بعد از reload بازیابی می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پلاگین‌ها</h2>
+<p>پلاگین داشبورد یک دایرکتوری با ‏<code>manifest.json</code>، یک باندل JS از پیش ساخته‌شده و به‌صورت اختیاری یک فایل CSS و یک فایل پایتون با مسیرهای FastAPI است. پلاگین‌ها کنار دیگر پلاگین‌های هرمس در ‏<code>~/.hermes/plugins/&lt;name&gt;/</code> زندگی می‌کنند — گسترش داشبورد یک زیرپوشهٔ ‏<code>dashboard/</code> داخل همان دایرکتوری پلاگین است، پس یک پلاگین از یک نصب واحد هم CLI/گیت‌وی را گسترش می‌دهد هم داشبورد را.</p>
+<p>پلاگین‌ها React یا کامپوننت‌های UI را bundle نمی‌کنند. از <b>Plugin SDK</b> ای که روی ‏<code>window.__HERMES_PLUGIN_SDK__</code> expose شده استفاده می‌کنند. این باندل‌های پلاگین را ریز نگه می‌دارد ‏(معمولاً چند KB) و از تداخل نسخه‌ها جلوگیری می‌کند.</p>
+<h3>شروع سریع — اولین پلاگین شما</h3>
+<p>ساختار دایرکتوری را بسازید:</p>
+<div class="codebox"><pre><code>mkdir -p ~/.hermes/plugins/my-plugin/dashboard/dist</code></pre></div>
+<p>manifest را بنویسید:</p>
+<pre dir="ltr"><code>// ~/.hermes/plugins/my-plugin/dashboard/manifest.json
+{
+  "name": "my-plugin",
+  "label": "My Plugin",
+  "icon": "Sparkles",
+  "version": "1.0.0",
+  "tab": {
+    "path": "/my-plugin",
+    "position": "after:skills"
+  },
+  "entry": "dist/index.js"
+}</code></pre>
+<p>باندل JS را بنویسید ‏(یک IIFE ساده — بدون نیاز به build):</p>
+<pre dir="ltr"><code>// ~/.hermes/plugins/my-plugin/dashboard/dist/index.js
+(function () {
+  "use strict";
+
+  const SDK = window.__HERMES_PLUGIN_SDK__;
+  const { React } = SDK;
+  const { Card, CardHeader, CardTitle, CardContent } = SDK.components;
+
+  function MyPage() {
+    return React.createElement(Card, null,
+      React.createElement(CardHeader, null,
+        React.createElement(CardTitle, null, "My Plugin"),
+      ),
+      React.createElement(CardContent, null,
+        React.createElement("p", { className: "text-sm text-muted-foreground" },
+          "Hello from my custom dashboard tab.",
+        ),
+      ),
+    );
+  }
+
+  window.__HERMES_PLUGINS__.register("my-plugin", MyPage);
+})();</code></pre>
+<p>داشبورد را refresh کنید — تب شما در نوار nav، بعد از <b>Skills</b> ظاهر می‌شود.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 رد شدن از React.createElement</div>
+  <p>اگر JSX ترجیح می‌دهید، هر bundler ای ‏(esbuild، ‏Vite، ‏rollup) را با React به‌عنوان external و خروجی IIFE به کار ببرید. تنها الزام سخت این است که فایل نهایی یک فایل JS ی واحد قابل‌بارگذاری از طریق ‏<code>&lt;script&gt;</code> باشد. React هرگز bundle نمی‌شود؛ از ‏<code>SDK.React</code> می‌آید.</p>
+</div>
+<h3>چیدمان دایرکتوری</h3>
+<pre dir="ltr"><code>~/.hermes/plugins/my-plugin/
+├── plugin.yaml              # optional — existing CLI/gateway plugin manifest
+├── __init__.py              # optional — existing CLI/gateway hooks
+└── dashboard/               # dashboard extension
+    ├── manifest.json        # required — tab config, icon, entry point
+    ├── dist/
+    │   ├── index.js         # required — pre-built JS bundle (IIFE)
+    │   └── style.css        # optional — custom CSS
+    └── plugin_api.py        # optional — backend API routes (FastAPI)</code></pre>
+<p>یک دایرکتوری پلاگین واحد می‌تواند سه گسترش عمود بر هم حمل کند:</p>
+<ul>
+  <li>‏<code>plugin.yaml</code> + ‏<code>__init__.py</code> — پلاگین CLI/گیت‌وی ‏(بخش <a href="plugins.html">پلاگین‌ها</a>).</li>
+  <li>‏<code>dashboard/manifest.json</code> + ‏<code>dashboard/dist/index.js</code> — پلاگین UI ی داشبورد.</li>
+  <li>‏<code>dashboard/plugin_api.py</code> — مسیرهای بک‌اند داشبورد.</li>
+</ul>
+<p>هیچ‌کدام الزامی نیست؛ فقط لایه‌هایی را که لازم دارید بگنجانید.</p>
+<h3>مرجع manifest</h3>
+<pre dir="ltr"><code>{
+  "name": "my-plugin",
+  "label": "My Plugin",
+  "description": "What this plugin does",
+  "icon": "Sparkles",
+  "version": "1.0.0",
+  "tab": {
+    "path": "/my-plugin",
+    "position": "after:skills",
+    "override": "/",
+    "hidden": false
+  },
+  "slots": ["sidebar", "header-left"],
+  "entry": "dist/index.js",
+  "css": "dist/style.css",
+  "api": "plugin_api.py"
+}</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فیلد</th><th>الزامی</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>name</code></td><td>بله</td><td>شناسهٔ یکتای پلاگین. حروف کوچک، خط تیره مجاز. در URLها و ثبت استفاده می‌شود.</td></tr>
+<tr><td><code>label</code></td><td>بله</td><td>نام نمایشی که در تب nav نشان داده می‌شود.</td></tr>
+<tr><td><code>description</code></td><td>نه</td><td>توضیح کوتاه ‏(در سطح‌های admin ی داشبورد نمایش داده می‌شود).</td></tr>
+<tr><td><code>icon</code></td><td>نه</td><td>نام آیکن Lucide. پیش‌فرض ‏<code>Puzzle</code>. نام‌های ناشناخته بی‌سروصدا به ‏Puzzle برمی‌گردند.</td></tr>
+<tr><td><code>version</code></td><td>نه</td><td>رشتهٔ Semver. پیش‌فرض ‏<code>0.0.0</code>.</td></tr>
+<tr><td><code>tab.path</code></td><td>بله</td><td>مسیر URL برای تب ‏(مثلاً ‏<code>/my-plugin</code>).</td></tr>
+<tr><td><code>tab.position</code></td><td>نه</td><td>کجا تب درج شود. ‏<code>"end"</code> ‏(پیش‌فرض)، ‏<code>"after:&lt;path&gt;"</code> یا ‏<code>"before:&lt;path&gt;"</code> — مقدار بعد از دونقطه <b>segment ی مسیر</b> تب هدف است ‏(بدون اسلش ابتدایی). مثال‌ها: ‏<code>"after:skills"</code>، ‏<code>"before:config"</code>.</td></tr>
+<tr><td><code>tab.override</code></td><td>نه</td><td>روی یک مسیر route داخلی ‏(<code>"/"</code>، ‏<code>"/sessions"</code>، ‏<code>"/config"</code> و…) ست کنید تا به‌جای افزودن تب جدید آن صفحه را <b>جایگزین</b> کند. بخش جایگزینی صفحات داخلی را ببینید.</td></tr>
+<tr><td><code>tab.hidden</code></td><td>نه</td><td>وقتی true باشد کامپوننت و هر slot را ثبت می‌کند بدون افزودن تب به nav. استفاده توسط پلاگین‌های فقط-slot.</td></tr>
+<tr><td><code>slots</code></td><td>نه</td><td>shell slot های نام‌داری که این پلاگین پر می‌کند. <b>فقط کمک مستندات</b> — ثبت واقعی از باندل JS از طریق ‏registerSlot() انجام می‌شود. فهرست کردن slotها سطوح کشف را اطلاعات‌مندتر می‌کند.</td></tr>
+<tr><td><code>entry</code></td><td>بله</td><td>مسیر باندل JS نسبت به ‏<code>dashboard/</code>. پیش‌فرض ‏<code>dist/index.js</code>.</td></tr>
+<tr><td><code>css</code></td><td>نه</td><td>مسیر فایل CSS برای تزریق به‌عنوان تگ ‏<code>&lt;link&gt;</code>.</td></tr>
+<tr><td><code>api</code></td><td>نه</td><td>مسیر فایل پایتون حامل مسیرهای FastAPI. زیر ‏<code>/api/plugins/&lt;name&gt;/</code> سوار می‌شود.</td></tr>
+</tbody>
+</table>
+</div>
+<h4>آیکن‌های موجود</h4>
+<p>پلاگین‌ها از نام‌های آیکن Lucide استفاده می‌کنند. داشبورد با نام نگاشت‌شان می‌کند — نام‌های ناشناخته بی‌سروصدا به Puzzle برمی‌گردند.</p>
+<p>فعلاً نگاشت‌شده: ‏<code>Activity</code>، ‏<code>BarChart3</code>، ‏<code>Clock</code>، ‏<code>Code</code>، ‏<code>Database</code>، ‏<code>Eye</code>، ‏<code>FileText</code>، ‏<code>Globe</code>، ‏<code>Heart</code>، ‏<code>KeyRound</code>، ‏<code>MessageSquare</code>، ‏<code>Package</code>، ‏<code>Puzzle</code>، ‏<code>Settings</code>، ‏<code>Shield</code>، ‏<code>Sparkles</code>، ‏<code>Star</code>، ‏<code>Terminal</code>، ‏<code>Wrench</code>، ‏<code>Zap</code>.</p>
+<p>آیکن دیگری می‌خواهید؟ به ‏<code>ICON_MAP</code> ی ‏<code>web/src/App.tsx</code> یک PR بزنید — تغییر کاملاً افزایشی است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> Plugin SDK</h2>
+<p>هر چه یک پلاگین لازم دارد روی ‏<code>window.__HERMES_PLUGIN_SDK__</code> است. پلاگین‌ها هرگز نباید React را مستقیم import کنند.</p>
+<pre dir="ltr"><code>const SDK = window.__HERMES_PLUGIN_SDK__;
+
+// React + hooks
+SDK.React                    // the React instance
+SDK.hooks.useState
+SDK.hooks.useEffect
+SDK.hooks.useCallback
+SDK.hooks.useMemo
+SDK.hooks.useRef
+SDK.hooks.useContext
+SDK.hooks.createContext
+
+// UI components (shadcn/ui primitives)
+SDK.components.Card
+SDK.components.CardHeader
+SDK.components.CardTitle
+SDK.components.CardContent
+SDK.components.Badge
+SDK.components.Button
+SDK.components.Input
+SDK.components.Label
+SDK.components.Select
+SDK.components.SelectOption
+SDK.components.Separator
+SDK.components.Tabs
+SDK.components.TabsList
+SDK.components.TabsTrigger
+SDK.components.PluginSlot    // render a named slot (useful for nested plugin UIs)
+
+// Hermes API client + raw fetcher
+SDK.api                      // typed client — getStatus, getSessions, getConfig, ...
+SDK.fetchJSON                // raw fetch for custom endpoints (plugin-registered routes)
+
+// Utilities
+SDK.utils.cn                 // Tailwind class merger (clsx + twMerge)
+SDK.utils.timeAgo            // "5m ago" from unix timestamp
+SDK.utils.isoTimeAgo         // "5m ago" from ISO string
+
+// Hooks
+SDK.useI18n                  // i18n hook for multi-language plugins</code></pre>
+<h4>صدا زدن بک‌اند پلاگین خودتان</h4>
+<pre dir="ltr"><code>SDK.fetchJSON("/api/plugins/my-plugin/data")
+  .then((data) =&gt; console.log(data))
+  .catch((err) =&gt; console.error("API call failed:", err));</code></pre>
+<p>‏<code>fetchJSON</code> توکن auth ی نشست را تزریق، خطاها را به‌صورت exception پرتاب و JSON را خودکار parse می‌کند.</p>
+<h4>صدا زدن نقطه‌پایان‌های داخلی هرمس</h4>
+<pre dir="ltr"><code>// Agent status
+SDK.api.getStatus().then((s) =&gt; console.log("Version:", s.version));
+
+// Recent sessions
+SDK.api.getSessions(10).then((resp) =&gt; console.log(resp.sessions.length));</code></pre>
+<p>فهرست کامل را در بخش <a href="web-dashboard.html#rest-api">داشبورد وب ← REST API</a> ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> Shell slots</h2>
+<p>slot ها به پلاگین اجازه می‌دهد کامپوننت‌هایی به مکان‌های نام‌دار پوسته اپ تزریق کند — ریل cockpit، ‏header، ‏footer، لایهٔ overlay — بدون تصاحب یک تب کامل. چند پلاگین می‌توانند همان slot را پر کنند؛ روی هم در ترتیب ثبت رندر می‌شوند.</p>
+<p>از داخل باندل پلاگین ثبت کنید:</p>
+<pre dir="ltr"><code>window.__HERMES_PLUGINS__.registerSlot("my-plugin", "sidebar", MySidebar);
+window.__HERMES_PLUGINS__.registerSlot("my-plugin", "header-left", MyCrest);</code></pre>
+<h3>کاتالوگ slot ها</h3>
+<p><b>slot های سراسری-پوسته</b> ‏(در هر جای chrome ی اپ رندر می‌شوند):</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Slot</th><th>موقعیت</th></tr></thead>
+<tbody>
+<tr><td><code>backdrop</code></td><td>داخل پشتهٔ لایه‌های ‏<code>&lt;Backdrop /&gt;</code>، بالای لایهٔ نویز.</td></tr>
+<tr><td><code>header-left</code></td><td>قبل از برند هرمس در نوار بالا.</td></tr>
+<tr><td><code>header-right</code></td><td>قبل از سوئیچ‌گرهای تم/زبان در نوار بالا.</td></tr>
+<tr><td><code>header-banner</code></td><td>نوار تمام-عرض زیر nav.</td></tr>
+<tr><td><code>sidebar</code></td><td>ریل sidebar ی cockpit — <b>فقط وقتی ‏<code>layoutVariant === "cockpit"</code></b> رندر می‌شود.</td></tr>
+<tr><td><code>pre-main</code></td><td>بالای خروجی route ‏(داخل main).</td></tr>
+<tr><td><code>post-main</code></td><td>زیر خروجی route ‏(داخل main).</td></tr>
+<tr><td><code>footer-left</code></td><td>محتوای خانهٔ footer ‏(جایگزین پیش‌فرض).</td></tr>
+<tr><td><code>footer-right</code></td><td>محتوای خانهٔ footer ‏(جایگزین پیش‌فرض).</td></tr>
+<tr><td><code>overlay</code></td><td>لایهٔ fixed بالای همه‌چیز. برای chrome هایی ‏(scanline، vignette) که customCSS به‌تنهایی نمی‌رسد مفید است.</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>slot های مخصوص-صفحه</b> ‏(فقط روی صفحهٔ داخلی نام‌برده رندر می‌شوند — برای تزریق widget، کارت یا toolbar به صفحهٔ موجود بدون override کردن کل route):</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Slot</th><th>کجا رندر می‌شود</th></tr></thead>
+<tbody>
+<tr><td>‏<code>sessions:top</code> / ‏<code>sessions:bottom</code></td><td>بالا / پایین صفحهٔ ‏<code>/sessions</code>.</td></tr>
+<tr><td>‏<code>analytics:top</code> / ‏<code>analytics:bottom</code></td><td>بالا / پایین صفحهٔ ‏<code>/analytics</code>.</td></tr>
+<tr><td>‏<code>logs:top</code> / ‏<code>logs:bottom</code></td><td>بالا ‏(بالای toolbar فیلتر) / پایین ‏(زیر نمایشگر لاگ) در ‏<code>/logs</code>.</td></tr>
+<tr><td>‏<code>cron:top</code> / ‏<code>cron:bottom</code></td><td>بالا / پایین صفحهٔ ‏<code>/cron</code>.</td></tr>
+<tr><td>‏<code>skills:top</code> / ‏<code>skills:bottom</code></td><td>بالا / پایین صفحهٔ ‏<code>/skills</code>.</td></tr>
+<tr><td>‏<code>config:top</code> / ‏<code>config:bottom</code></td><td>بالا / پایین صفحهٔ ‏<code>/config</code>.</td></tr>
+<tr><td>‏<code>env:top</code> / ‏<code>env:bottom</code></td><td>بالا / پایین صفحهٔ ‏<code>/env</code> ‏(Keys).</td></tr>
+<tr><td>‏<code>docs:top</code> / ‏<code>docs:bottom</code></td><td>بالا ‏(بالای iframe) / پایین ‏<code>/docs</code>.</td></tr>
+<tr><td>‏<code>chat:top</code> / ‏<code>chat:bottom</code></td><td>بالا / پایین ‏<code>/chat</code> ‏(فقط وقتی چت تعبیه‌شده فعال باشد).</td></tr>
+</tbody>
+</table>
+</div>
+<p>مثال — افزودن یک کارت بنر به بالای صفحهٔ Sessions:</p>
+<pre dir="ltr"><code>function PinnedSessionsBanner() {
+  return React.createElement(Card, null,
+    React.createElement(CardContent, { className: "py-2 text-xs" },
+      "Pinned note injected by my-plugin"),
+  );
+}
+
+window.__HERMES_PLUGINS__.registerSlot("my-plugin", "sessions:top", PinnedSessionsBanner);</code></pre>
+<p>slot های مخصوص-صفحه را با ‏<code>tab.hidden: true</code> ترکیب کنید اگر پلاگین فقط صفحات موجود را غنی می‌کند و تب مستقل در sidebar نمی‌خواهد.</p>
+<p>پوسته فقط برای slotهای بالا ‏<code>&lt;PluginSlot name="..." /&gt;</code> را رندر می‌کند. نام‌های اضافی توسط registry برای UI های تو-در-تو پذیرفته می‌شوند — پلاگین می‌تواند slot های خودش را از طریق ‏<code>SDK.components.PluginSlot</code> expose کند.</p>
+<h3>ثبت دوباره و HMR</h3>
+<p>اگر همان جفت ‏(plugin، slot) دو بار ثبت شود، فراخوانی بعدی قبلی را جایگزین می‌کند — مطابق رفتاری که React HMR از remount شدن پلاگین‌ها انتظار دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> جایگزینی صفحات داخلی، غنی‌سازی و پلاگین‌های فقط-slot</h2>
+<h3>جایگزینی صفحات داخلی ‏(‏<code>tab.override</code>)</h3>
+<p>ست کردن ‏<code>tab.override</code> روی یک مسیر route داخلی باعث می‌شود کامپوننت پلاگین آن صفحه را جایگزین کند نه اینکه تب جدیدی اضافه کند. وقتی مفید است که تمی بخواهد صفحهٔ خانه سفارشی ‏(<code>/</code>) داشته باشد ولی بقیهٔ داشبورد سالم بماند.</p>
+<pre dir="ltr"><code>{
+  "name": "my-home",
+  "label": "Home",
+  "tab": {
+    "path": "/my-home",
+    "override": "/",
+    "position": "end"
+  },
+  "entry": "dist/index.js"
+}</code></pre>
+<p>با ست بودن override:</p>
+<ul>
+  <li>کامپوننت اصلی صفحه در ‏<code>/</code> از router حذف می‌شود.</li>
+  <li>پلاگین شما به‌جایش در ‏<code>/</code> رندر می‌شود.</li>
+  <li>برای ‏tab.path هیچ تب nav اضافه نمی‌شود ‏(نقطهٔ override همین است).</li>
+</ul>
+<p>فقط یک پلاگین می‌تواند یک مسیر مشخص را override کند. اگر دو پلاگین ادعای override یکسان کنند اولی برنده است و دومی با هشدار dev-mode نادیده گرفته می‌شود.</p>
+<p>اگر فقط نیاز به افزودن کارت یا toolbar به صفحهٔ موجود دارید بدون تصاحبش، به‌جایش از slot های مخصوص-صفحه استفاده کنید.</p>
+<h3>غنی‌سازی صفحات داخلی ‏(slot های مخصوص-صفحه)</h3>
+<p>جایگزینی کامل با tab.override سنگین است — پلاگین حالا مالک کل صفحه است شامل هر به‌روزرسانی آینده‌ای که ما برایش ارسال کنیم. بیشتر وقت‌ها فقط می‌خواهید بنر، کارت یا toolbar ای به صفحهٔ موجود اضافه کنید. کارِ slot های مخصوص-صفحه دقیقاً همین است.</p>
+<p>هر صفحهٔ داخلی slot های ‏<code>&lt;page&gt;:top</code> و ‏<code>&lt;page&gt;:bottom</code> را در بالا و پایین ناحیه محتوایش expose می‌کند. پلاگین با فراخوانی registerSlot() یکی را پر می‌کند — صفحهٔ داخلی عادی کار می‌کند و کامپوننت شما کنارش رندر می‌شود.</p>
+<p>slot های موجود: ‏<code>sessions:*</code>، ‏<code>analytics:*</code>، ‏<code>logs:*</code>، ‏<code>cron:*</code>، ‏<code>skills:*</code>، ‏<code>config:*</code>، ‏<code>env:*</code>، ‏<code>docs:*</code>، ‏<code>chat:*</code> ‏(هر کدام با ‏:top و ‏:bottom). کاتالوگ کامل را در بخش Shell slots ببینید.</p>
+<p>مثال مینیمال — پین کردن بنری به بالای صفحهٔ Sessions:</p>
+<pre dir="ltr"><code>// ~/.hermes/plugins/session-notes/dashboard/manifest.json
+{
+  "name": "session-notes",
+  "label": "Session Notes",
+  "tab": { "path": "/session-notes", "hidden": true },
+  "slots": ["sessions:top"],
+  "entry": "dist/index.js"
+}</code></pre>
+<pre dir="ltr"><code>// ~/.hermes/plugins/session-notes/dashboard/dist/index.js
+(function () {
+  const SDK = window.__HERMES_PLUGIN_SDK__;
+  const { React } = SDK;
+  const { Card, CardContent } = SDK.components;
+
+  function Banner() {
+    return React.createElement(Card, null,
+      React.createElement(CardContent, { className: "py-2 text-xs" },
+        "Remember to label important sessions before archiving."),
+    );
+  }
+
+  // Placeholder for the hidden tab.
+  window.__HERMES_PLUGINS__.register("session-notes", function () { return null; });
+
+  // The real work.
+  window.__HERMES_PLUGINS__.registerSlot("session-notes", "sessions:top", Banner);
+})();</code></pre>
+<p>نکات کلیدی:</p>
+<ul>
+  <li>‏<code>tab.hidden: true</code> پلاگین را از sidebar دور نگه می‌دارد — صفحهٔ مستقلی ندارد.</li>
+  <li>فیلد manifest ی ‏<code>slots</code> فقط مستندات است. binding واقعی در باندل JS با registerSlot() انجام می‌شود.</li>
+  <li>چند پلاگین می‌توانند مدعی همان slot ی مخصوص-صفحه شوند. روی هم در ترتیب ثبت رندر می‌شوند.</li>
+  <li>بدون هیچ پلاگین ثبت‌شده صفر footprint: صفحهٔ داخلی دقیقاً مثل قبل رندر می‌شود.</li>
+</ul>
+<p>یک پلاگین مرجع ‏(<code>example-dashboard</code> در مخزن ‏<a href="https://github.com/NousResearch/hermes-example-plugins/tree/main/example-dashboard" target="_blank" rel="noopener">hermes-example-plugins</a>) دموی زنده‌ای دارد که بنری به ‏<code>sessions:top</code> تزریق می‌کند — نصبش کنید تا الگو را سر-تا-سر ببینید.</p>
+<h3>پلاگین‌های فقط-slot ‏(‏<code>tab.hidden</code>)</h3>
+<p>وقتی ‏<code>tab.hidden: true</code>، پلاگین کامپوننتش ‏(برای بازدید مستقیم URL) و هر slot اش را ثبت می‌کند ولی هرگز تب به ناوبری اضافه نمی‌کند. استفاده توسط پلاگین‌هایی که فقط برای تزریق به slot ها وجود دارند — crest ی header، ‏HUD ی sidebar، یک overlay.</p>
+<pre dir="ltr"><code>{
+  "name": "header-crest",
+  "label": "Header Crest",
+  "tab": {
+    "path": "/header-crest",
+    "position": "end",
+    "hidden": true
+  },
+  "slots": ["header-left"],
+  "entry": "dist/index.js"
+}</code></pre>
+<p>باندل همچنان register() را با یک کامپوننت placeholder صدا می‌زند ‏(رویهٔ خوب برای اینکه کسی مستقیم URL را باز کرد) و بعد registerSlot() برای کار واقعی.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> مسیرهای API ی بک‌اند</h2>
+<p>پلاگین‌ها با ست کردن ‏<code>api</code> در manifest مسیرهای FastAPI ثبت می‌کنند. فایل را بسازید و یک ‏<code>router</code> export کنید:</p>
+<pre dir="ltr"><code># ~/.hermes/plugins/my-plugin/dashboard/plugin_api.py
+from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/data")
+async def get_data():
+    return {"items": ["one", "two", "three"]}
+
+@router.post("/action")
+async def do_action(body: dict):
+    return {"ok": True, "received": body}</code></pre>
+<p>مسیرها زیر ‏<code>/api/plugins/&lt;name&gt;/</code> سوار می‌شوند، پس بالا می‌شود:</p>
+<ul>
+  <li>‏<code>GET /api/plugins/my-plugin/data</code></li>
+  <li>‏<code>POST /api/plugins/my-plugin/action</code></li>
+</ul>
+<p>مسیرهای API ی پلاگین پشت گate احراز هویت عادی داشبورد نشسته‌اند — درخواست احراز-نشده قبل از اجرای مسیر پلاگین ‏401 می‌گیرد و درخواست‌ها به مسیرهای پلاگین غیرفعال در لحظهٔ درخواست reject می‌شوند. با این حال <b>اگر پلاگین‌های نامعتبر اجرا می‌کنید داشبورد را با ‎--host 0.0.0.0‎ روی یک interface عمومی expose نکنید</b> — یک نشست احراز-هویت‌شده هم به مسیرهایشان می‌رسد.</p>
+<h3>دسترسی به internals ی هرمس</h3>
+<p>مسیرهای بک‌اند داخل پروسهٔ داشبورد اجرا می‌شوند، پس می‌توانند مستقیماً از codebase ی hermes-agent ایمپورت کنند:</p>
+<pre dir="ltr"><code>from fastapi import APIRouter
+from hermes_state import SessionDB
+from hermes_cli.config import load_config
+
+router = APIRouter()
+
+@router.get("/session-count")
+async def session_count():
+    db = SessionDB()
+    try:
+        count = len(db.list_sessions(limit=9999))
+        return {"count": count}
+    finally:
+        db.close()
+
+@router.get("/config-snapshot")
+async def config_snapshot():
+    cfg = load_config()
+    return {"model": cfg.get("model", {})}</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> CSS ی اختصاصی per-plugin و کشف/reload پلاگین‌ها</h2>
+<h3>CSS اختصاصی هر پلاگین</h3>
+<p>اگر پلاگینتان به استایل‌هایی فراتر از کلاس‌های Tailwind و ‏inline style= نیاز دارد، یک فایل CSS اضافه و در manifest ارجاع دهید:</p>
+<pre dir="ltr"><code>{
+  "css": "dist/style.css"
+}</code></pre>
+<p>فایل موقع بارگذاری پلاگین به‌عنوان تگ ‏<link> تزریق می‌شود. از نام کلاس‌های خاص استفاده کنید تا با استایل‌های داشبورد تداخل نکند و برای theme-aware ماندن به CSS var های داشبورد ارجاع دهید:</p>
+<pre dir="ltr"><code>/* dist/style.css */
+.my-plugin-chart {
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-card-foreground);
+  padding: 1rem;
+}
+.my-plugin-chart:hover {
+  border-color: var(--color-ring);
+}</code></pre>
+<p>داشبورد هر توکن shadcn را به‌صورت ‏<code>--color-*</code> به‌علاوهٔ extras ی تم ‏(<code>--theme-asset-*</code>، ‏<code>--component-&lt;bucket&gt;-*</code>، ‏<code>--radius</code>، ‏<code>--spacing-mul</code>) expose می‌کند. به آنها ارجاع دهید تا پلاگین‌تان خودکار با تم فعال ریسکین شود.</p>
+<h3>کشف و reload ی پلاگین‌ها</h3>
+<p>داشبورد سه دایرکتوری را برای ‏<code>dashboard/manifest.json</code> اسکن می‌کند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>اولویت</th><th>دایرکتوری</th><th>برچسب منبع</th></tr></thead>
+<tbody>
+<tr><td>۱ ‏(برنده در تداخل)</td><td>‏<code>~/.hermes/plugins/&lt;name&gt;/dashboard/</code></td><td><code>user</code></td></tr>
+<tr><td>۲</td><td>‏<code>&lt;repo&gt;/plugins/memory/&lt;name&gt;/dashboard/</code></td><td><code>bundled</code></td></tr>
+<tr><td>۲</td><td>‏<code>&lt;repo&gt;/plugins/&lt;name&gt;/dashboard/</code></td><td><code>bundled</code></td></tr>
+<tr><td>۳</td><td>‏<code>./.hermes/plugins/&lt;name&gt;/dashboard/</code></td><td><code>project</code> — فقط وقتی HERMES_ENABLE_PROJECT_PLUGINS ست باشد</td></tr>
+</tbody>
+</table>
+</div>
+<p>نتایج کشف per-processe ی داشبورد کش می‌شوند. بعد از افزودن پلاگین جدید یا:</p>
+<div class="codebox"><pre><code># Force a rescan without restart
+curl http://127.0.0.1:9119/api/dashboard/plugins/rescan</code></pre></div>
+<p>…یا ری‌استارت ‏<code>hermes dashboard</code>.</p>
+<h3>چرخه‌حیات بارگذاری پلاگین</h3>
+<ol>
+  <li>داشبورد بارگذاری می‌شود. ‏main.tsx مقدار SDK را روی ‏window.__HERMES_PLUGIN_SDK__ و registry را روی ‏window.__HERMES_PLUGINS__ expose می‌کند.</li>
+  <li>App.tsx مقدار ‏usePlugins() را صدا می‌زند ← واکشی ‏GET /api/dashboard/plugins.</li>
+  <li>برای هر manifest: اول ‏<link> ی CSS تزریق می‌شود ‏(اگر اعلام شده باشد)، بعد تگ ‏script باندل JS را بارگذاری می‌کند.</li>
+  <li>IIFE ی پلاگین اجرا و ‏window.__HERMES_PLUGINS__.register(name, Component) را صدا می‌زند — و به‌طور اختیاری ‏registerSlot(name, slot, Component) برای هر slot.</li>
+  <li>داشبورد کامپوننت ثبت‌شده را علیه manifest حل، تب را به ناوبری اضافه ‏(مگر hidden) و کامپوننت را به‌عنوان route mount می‌کند.</li>
+</ol>
+<p>پلاگین‌ها تا <b>۲ ثانیه</b> بعد از بارگذاری اسکریپتشان وقت دارند register() را صدا بزنند. بعدش داشبورد منتظر ماندن را قطع و رندر اولیه را تمام می‌کند. اگر پلاگینی بعداً ثبت شود همچنان ظاهر می‌شود — nav واکنشی است.</p>
+<p>اگر اسکریپت پلاگینی بارگذاری نشود ‏(۴۰۴، خطای نحو، exception داخل IIFE)، داشبورد هشداری به console مرورگر لاگ و بدون آن ادامه می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> دموی ترکیبی تم + پلاگین</h2>
+<p>پلاگین ‏<a href="https://github.com/NousResearch/hermes-example-plugins/tree/main/strike-freedom-cockpit" target="_blank" rel="noopener">strike-freedom-cockpit</a> ‏(مخزن همراه hermes-example-plugins) یک دموی ریسکین کامل است. یک YAML تم را با یک پلاگین فقط-slot جفت می‌کند تا بدون fork کردن داشبورد یک HUD به سبک کابین تولید کند.</p>
+<p><b>چه چیزی نشان می‌دهد:</b></p>
+<ul>
+  <li>یک تم کامل با palette، ‏typography، ‏fontUrl، ‏layoutVariant: cockpit، ‏assets، ‏componentStyles ‏(گوشه‌های notch دار card، پس‌زمینه‌های گرادیانی)، ‏colorOverrides و ‏customCSS ‏(overlay ی scanline).</li>
+  <li>یک پلاگین فقط-slot ‏(<code>tab.hidden: true</code>) که در سه slot ثبت می‌شود:
+    <ul>
+      <li>‏<code>sidebar</code> — پنل MS-STATUS با نوارهای تلمتری زنده رانده توسط ‏SDK.api.getStatus().</li>
+      <li>‏<code>header-left</code> — crest ی جناحی که ‏--theme-asset-crest را از تم فعال می‌خواند.</li>
+      <li>‏<code>footer-right</code> — tagline سفارشی جایگزین خط پیش‌فرض سازمان.</li>
+    </ul>
+  </li>
+  <li>پلاگین artwork ی تأمین-تم را از طریق CSS var ها می‌خواند، پس تعویض تم hero/crest را بدون تغییر کد پلاگین عوض می‌کند.</li>
+</ul>
+<p><b>نصب:</b></p>
+<div class="codebox"><pre><code>git clone https://github.com/NousResearch/hermes-example-plugins.git
+
+# Theme
+cp hermes-example-plugins/strike-freedom-cockpit/theme/strike-freedom.yaml \
+   ~/.hermes/dashboard-themes/
+
+# Plugin
+cp -r hermes-example-plugins/strike-freedom-cockpit ~/.hermes/plugins/</code></pre></div>
+<p>داشبورد را باز و از انتخاب‌گر تم <b>Strike Freedom</b> را بردارید. sidebar ی کابین ظاهر می‌شود، crest در header نمایش داده می‌شود و tagline جایگزین footer می‌شود. برگردید روی <b>Hermes Teal</b>؛ پلاگین نصب مانده اما نامرئی است ‏(slot ی sidebar فقط زیر نوع چیدمان cockpit رندر می‌شود).</p>
+<p>سورس پلاگین ‏(<code>strike-freedom-cockpit/dashboard/dist/index.js</code> در مخزن همراه) را بخوانید تا ببینید چطور CSS var می‌خواند، در برابر داشبوردهای قدیمی‌ترِ بدون پشتیبانی slot گارد می‌گذارد و از یک باندل سه slot ثبت می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> مرجع API</h2>
+<h3>نقطه‌پایان‌های تم</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>نقطهٔ پایانی</th><th>متد</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>/api/dashboard/themes</code></td><td>GET</td><td>فهرست تم‌های موجود + نام فعال. داخلی‌ها ‏{name, label, description} برمی‌گردانند؛ تم‌های کاربر فیلد <code>definition</code> با آبجکت تم نرمال‌شدهٔ کامل هم دارند.</td></tr>
+<tr><td><code>/api/dashboard/theme</code></td><td>PUT</td><td>ست کردن تم فعال. بدنه: ‏<code>{"name": "midnight"}</code>. در config.yaml زیر dashboard.theme ماندگار می‌شود.</td></tr>
+</tbody>
+</table>
+</div>
+<h3>نقطه‌پایان‌های پلاگین</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>نقطهٔ پایانی</th><th>متد</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>/api/dashboard/plugins</code></td><td>GET</td><td>فهرست پلاگین‌های کشف‌شده ‏(با manifest ها منهای فیلدهای داخلی).</td></tr>
+<tr><td><code>/api/dashboard/plugins/rescan</code></td><td>GET</td><td>اسکن دوبارهٔ اجباری دایرکتوری‌های پلاگین بدون ری‌استارت.</td></tr>
+<tr><td><code>/dashboard-plugins/&lt;name&gt;/&lt;path&gt;</code></td><td>GET</td><td>سرو assets ایستا از دایرکتوری dashboard/ پلاگین. مسیر traversal بلاک است.</td></tr>
+<tr><td><code>/api/plugins/&lt;name&gt;/*</code></td><td>*</td><td>مسیرهای بک‌اند ثبت‌شده توسط پلاگین.</td></tr>
+</tbody>
+</table>
+</div>
+<h3>SDK روی window</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Global</th><th>نوع</th><th>تأمین‌کننده</th></tr></thead>
+<tbody>
+<tr><td><code>window.__HERMES_PLUGIN_SDK__</code></td><td>object</td><td>‏registry.ts — React، هوک‌ها، کامپوننت‌های UI، کلاینت API، utils.</td></tr>
+<tr><td><code>window.__HERMES_PLUGINS__.register(name, Component)</code></td><td>function</td><td>ثبت کامپوننت اصلی پلاگین.</td></tr>
+<tr><td><code>window.__HERMES_PLUGINS__.registerSlot(name, slot, Component)</code></td><td>function</td><td>ثبت در shell slot نام‌دار.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> عیب‌یابی</h2>
+<p><b>تمم در انتخاب‌گر ظاهر نمی‌شود.</b><br>بررسی کنید فایل در ‏<code>~/.hermes/dashboard-themes/</code> باشد و با ‏<code>.yaml</code> یا ‏<code>.yml</code> تمام شود. صفحه را refresh کنید. ‏<code>curl http://127.0.0.1:9119/api/dashboard/themes</code> را اجرا کنید — تم شما باید در پاسخ باشد. اگر YAML خطای parse دارد داشبورد در errors.log زیر ‏<code>~/.hermes/logs/</code> لاگ می‌کند.</p>
+<p><b>تب پلاگینم نشان داده نمی‌شود.</b></p>
+<ol>
+  <li>بررسی کنید manifest در ‏<code>~/.hermes/plugins/&lt;name&gt;/dashboard/manifest.json</code> باشد ‏(به زیرپوشهٔ dashboard توجه کنید).</li>
+  <li>‏<code>curl http://127.0.0.1:9119/api/dashboard/plugins/rescan</code> برای کشف دوبارهٔ اجباری.</li>
+  <li>dev tools مرورگر ← Network — تأیید کنید ‏manifest.json و index.js و هر CSS بدون ۴۰۴ لود شده‌اند.</li>
+  <li>dev tools مرورگر ← Console — دنبال خطاهای حین IIFE یا ‏<code>window.__HERMES_PLUGINS__ is undefined</code> باشید ‏(یعنی SDK مقداردهی نشده، معمولاً کرش رندر React ی زودهنگام).</li>
+  <li>تأیید کنید باندل شما register(...) را با <b>همان نامی</b> که در ‏manifest.json:name هست صدا می‌زند.</li>
+</ol>
+<p><b>کامپوننت‌های ثبت‌شده در slot رندر نمی‌شوند.</b><br>slot ی sidebar فقط وقتی تم فعال ‏layoutVariant: cockpit داشته باشد رندر می‌شود. سایر slot ها همیشه رندر می‌شوند. اگر در slot ای ثبت می‌کنید که hit ندارد، داخل registerSlot یک console.log اضافه کنید تا تأیید شود اصلاً باندل پلاگین اجرا شده.</p>
+<p><b>مسیرهای بک‌اند پلاگین ۴۰۴ می‌دهند.</b></p>
+<ol>
+  <li>تأیید کنید manifest مقدار ‏<code>"api": "plugin_api.py"</code> دارد که به فایل موجود داخل dashboard/ اشاره کند.</li>
+  <li>‏<code>hermes dashboard</code> را ری‌استارت کنید — مسیرهای API ی پلاگین یک بار هنگام startup سوار می‌شوند، <b>نه</b> هنگام rescan.</li>
+  <li>بررسی کنید plugin_api.py یک ‏<code>router = APIRouter()</code> سطح-ماژول export کند. سایر نام‌های export برداشته نمی‌شوند.</li>
+  <li>‏<code>~/.hermes/logs/errors.log</code> را tail کنید برای «Failed to load plugin &lt;name&gt; API routes» — خطاهای import آنجا لاگ می‌شوند.</li>
+</ol>
+<p><b>تعویض تم، colorOverrides هایم را می‌اندازد.</b><br>‏colorOverrides ها به تم فعال scope شده و موقع تعویض تم پاک می‌شوند — عمدی است. اگر override های ماندگار می‌خواهید در YAML خود تم بگذاریدشان نه در switcher زنده.</p>
+<p><b>customCSS ی تمم بریده می‌شود.</b><br>بلوک customCSS سقف ۳۲ KiB به‌ازای هر تم دارد. stylesheet های بزرگ را بین چند تم بشکنید یا به پلاگینی سوئیچ کنید که از طریق فیلد css اش یک stylesheet کامل تزریق می‌کند ‏(بدون سقف حجمی).</p>
+<p><b>می‌خواهم پلاگینی روی PyPI منتشر کنم.</b><br>پلاگین‌های داشبورد با چیدمان دایرکتوری نصب می‌شوند نه pip entry point. تمیزترین مسیر توزیع امروز مخزن git ای است که کاربر در ‏~/.hermes/plugins/ کلون می‌کند. نصاب pip-محور برای پلاگین‌های داشبورد فعلاً سیم‌کشی نشده است.</p>
+</section>
+
+<div class="pager">
+  <a href="memory-providers.html"><span class="dir">→ قبلی</span><span class="ttl">ارائه‌دهندگان حافظهٔ خارجی</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/extending-the-dashboard" target="_blank" rel="noopener">Extending the Dashboard</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

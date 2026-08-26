@@ -55,7 +55,7 @@ window.HERMES_NAV = [
   { p:"user-guide/features/computer-use.html",         t:"کنترل کامپیوتر",                      d:1 },
   { p:"user-guide/features/deliverable-mode.html",     t:"حالت تحویل‌دادنی در چت",             d:1 },
   { p:"user-guide/features/document-extraction.html",  t:"استخراج متن اسناد",                   d:1 },
-  { p:"user-guide/features/extending-the-dashboard.html", t:"گسترش داشبورد وب",                 d:0 },
+  { p:"user-guide/features/extending-the-dashboard.html", t:"گسترش داشبورد وب",                 d:1 },
   { p:"user-guide/features/heartbeat.html",            t:"ضربان نشست (Heartbeat)",             d:1 },
   { p:"user-guide/features/kanban-worker-lanes.html",  t:"لِین‌های کارگر کانبان",               d:1 },
   { p:"user-guide/features/loops.html",                t:"حلقه‌های تکرارشونده (/loop)",         d:1 },

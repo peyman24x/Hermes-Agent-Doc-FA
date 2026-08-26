@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۹۲ از ۲۰۷ صفحه (۴۴٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۹۳ از ۲۰۷ صفحه (۴۵٪)** |
 
 ---
 
@@ -476,6 +476,12 @@ hermes-docs-fa/
 - زنجیرهٔ pager: …computer-use ← memory-providers ← (به‌زودی)
 - پیشرفت: **۹۲ از ۲۰۷ صفحه فعال (۴۴٪)** — قابلیت‌های اصلی ۲۹/۳۱ (فقط extending-the-dashboard مانده)
 
+### نشست ۵۷ — 2026-08-26 — 🎨 گسترش داشبورد وب — 🎉 قابلیت‌های اصلی ۳۱/۳۱ کامل شد
+- ترجمه و انتشار «گسترش داشبورد وب» (۱۰ بخش، بزرگ‌ترین صفحهٔ پروژه تاکنون، دومرحله‌ای): سه لایهٔ گسترش ‏(تم‌ها / پلاگین‌های UI / پلاگین‌های بک‌اند)، تم‌ها با شروع سریع دو‌رنگی، پالت ۳لایه، تایپوگرافی با تعویض فونت از UI، چیدمان و layoutVariant های standard/cockpit/tiled، asset های تصویری به‌صورت CSS var، componentStyles و colorOverrides و customCSS ‏(سقف ۳۲KiB)، جدول ۷ تم داخلی، مرجع کامل YAML؛ پلاگین‌ها با شروع سریع IIFE بدون build، چیدمان دایرکتوری، مرجع کامل manifest + آیکن‌ها، Plugin SDK کامل روی window.__HERMES_PLUGIN_SDK__، کاتالوگ shell slot ها سراسری/مخصوص-صفحه، tab.override و tab.hidden، مسیرهای FastAPI بک‌اند با دسترسی به internals هرمس، CSS per-plugin، کشف سه‌دیرکتوری و چرخهٔ بارگذاری با مهلت ۲ثانیه register، دموی strike-freedom-cockpit، مرجع API ی تم/پلاگین/SDK و عیب‌یابی هفت‌سناریویی
+- 🎉 گروه «قابلیت‌های اصلی» کاملاً ترجمه شد: ۳۱ از ۳۱ صفحه
+- زنجیرهٔ pager: …memory-providers ← extending-the-dashboard ← (به‌زودی)
+- پیشرفت: **۹۳ از ۲۰۷ صفحه فعال (۴۵٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -574,6 +580,7 @@ hermes-docs-fa/
 | 90 | `user-guide/features/codex-app-server-runtime.html` | اجراگر Codex (اختیاری) |
 | 91 | `user-guide/features/computer-use.html` | کنترل کامپیوتر |
 | 92 | `user-guide/features/memory-providers.html` | ارائه‌دهندگان حافظهٔ خارجی |
+| 93 | `user-guide/features/extending-the-dashboard.html` | گسترش داشبورد وب |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|
