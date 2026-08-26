@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>صدا و TTS — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tts" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>صدا و TTS</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>صدا و TTS ‏(Voice &amp; Text-to-Speech)</h1>
+<p>هرمس ایجنت هم خروجی تبدیل متن به گفتار و هم رونویسی پیام صوتی را روی همهٔ پلتفرم‌های پیام‌رسانی پشتیبانی می‌کند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 مشترکان Nous</div>
+  <p>اگر اشتراک پولی <a href="https://portal.nousresearch.com" target="_blank" rel="noopener">Nous Portal</a> دارید، OpenAI TTS از طریق <a href="tool-gateway.html">Tool Gateway</a> بدون کلید API ی جداگانهٔ OpenAI در دسترس است. نصب‌های تازه می‌توانند ‏<code>hermes setup --portal</code> را اجرا کنند تا وارد شوند و همهٔ ابزارهای گیت‌وی را یکجا روشن کنند؛ نصب‌های موجود فقط برای TTS از طریق ‏<code>hermes model</code> یا ‏<code>hermes tools</code> مقدار <b>Nous Subscription</b> را بردارند.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> تبدیل متن به گفتار ‏(TTS)</h2>
+<p>تبدیل متن به گفتار با ۱۱ ارائه‌دهنده:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>کیفیت</th><th>هزینه</th><th>کلید API</th></tr></thead>
+<tbody>
+<tr><td><b>Edge TTS</b> ‏(پیش‌فرض)</td><td>خوب</td><td>رایگان</td><td>نیازی نیست</td></tr>
+<tr><td><b>ElevenLabs</b></td><td>عالی</td><td>پولی</td><td><code>ELEVENLABS_API_KEY</code></td></tr>
+<tr><td><b>OpenAI TTS</b></td><td>خوب</td><td>پولی</td><td><code>VOICE_TOOLS_OPENAI_KEY</code></td></tr>
+<tr><td><b>MiniMax TTS</b></td><td>عالی</td><td>پولی</td><td><code>MINIMAX_API_KEY</code> یا ‏<code>MINIMAX_CN_API_KEY</code></td></tr>
+<tr><td><b>Mistral ‏(Voxtral TTS)</b></td><td>عالی</td><td>پولی</td><td><code>MISTRAL_API_KEY</code></td></tr>
+<tr><td><b>Google Gemini TTS</b></td><td>عالی</td><td>تیر رایگان</td><td><code>GEMINI_API_KEY</code></td></tr>
+<tr><td><b>xAI TTS</b></td><td>عالی</td><td>پولی</td><td><code>XAI_API_KEY</code></td></tr>
+<tr><td><b>DeepInfra TTS</b></td><td>خوب</td><td>پولی</td><td><code>DEEPINFRA_API_KEY</code></td></tr>
+<tr><td><b>NeuTTS</b></td><td>خوب</td><td>رایگان ‏(محلی)</td><td>نیازی نیست</td></tr>
+<tr><td><b>KittenTTS</b></td><td>خوب</td><td>رایگان ‏(محلی)</td><td>نیازی نیست</td></tr>
+<tr><td><b>Piper</b></td><td>خوب</td><td>رایگان ‏(محلی)</td><td>نیازی نیست</td></tr>
+</tbody>
+</table>
+</div>
+<h3>تحویل پلتفرمی</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پلتفرم</th><th>تحویل</th><th>فرمت</th></tr></thead>
+<tbody>
+<tr><td>تلگرام</td><td>حباب صوتی ‏(داخل چت پخش می‌شود)</td><td>Opus ‏.ogg</td></tr>
+<tr><td>دیسکورد</td><td>حباب صوتی ‏(Opus/OGG)، با fallback به پیوست فایل</td><td>Opus/MP3</td></tr>
+<tr><td>واتساپ</td><td>پیوست فایل صوتی</td><td>MP3</td></tr>
+<tr><td>CLI</td><td>ذخیره در ‏<code>~/.hermes/audio_cache/</code></td><td>MP3</td></tr>
+</tbody>
+</table>
+</div>
+<h3>پیکربندی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># In ~/.hermes/config.yaml
+tts:
+  provider: "edge"              # "edge" | "elevenlabs" | "openai" | "minimax" | "mistral" | "gemini" | "xai" | "deepinfra" | "neutts" | "kittentts" | "piper" — or "nous" for the managed Tool Gateway (written when you pick Nous Subscription in `hermes tools`)
+  speed: 1.0                    # Global speed multiplier (provider-specific settings override this)
+  edge:
+    voice: "en-US-AriaNeural"   # 322 voices, 74 languages
+    speed: 1.0                  # Converted to rate percentage (+/-%)
+  elevenlabs:
+    voice_id: "pNInz6obpgDQGcFmaJgB"  # Adam
+    model_id: "eleven_multilingual_v2"
+  openai:
+    model: "gpt-4o-mini-tts"
+    voice: "alloy"              # alloy, echo, fable, onyx, nova, shimmer
+    base_url: "https://api.openai.com/v1"  # Override for OpenAI-compatible TTS endpoints
+    speed: 1.0                  # 0.25 - 4.0
+    # language: "es"            # Sent as lang_code — only for OpenAI-compatible endpoints that support it (e.g. Kokoro)
+  minimax:
+    region: "global"           # "global" or "cn"; see selection rules below
+    model: "speech-02-hd"     # speech-02-hd (default), speech-02-turbo
+    voice_id: "English_expressive_narrator"  # See https://platform.minimax.io/faq/system-voice-id
+    speed: 1                    # 0.5 - 2.0
+    vol: 1                      # 0 - 10
+    pitch: 0                    # -12 - 12
+    # base_url: "https://tts.example/v1/t2a_v2"  # Optional endpoint override for the selected region
+  mistral:
+    model: "voxtral-mini-tts-2603"
+    voice_id: "c69964a6-ab8b-4f8a-9465-ec0925096ec8"  # Paul - Neutral (default)
+  gemini:
+    model: "gemini-2.5-flash-preview-tts"  # or gemini-3.1-flash-tts-preview
+    voice: "Kore"               # 30 prebuilt voices: Zephyr, Puck, Kore, Enceladus, Gacrux, etc.
+    audio_tags: false           # Enable hidden Gemini 3.1 TTS audio-tag insertion
+    persona_prompt_file: ""      # Optional Markdown/text file with Gemini voice direction
+  xai:
+    voice_id: "eve"             # or a custom voice ID — see docs below
+    language: "en"              # BCP-47 code (e.g. "en", "pt-BR") or "auto" for detection
+    speed: 1.0                  # 0.7–1.5, playback speed (default: 1.0)
+    auto_speech_tags: false     # insert expressive audio tags via LLM rewrite
+    text_normalization: false   # normalize numbers/abbreviations/symbols to spoken form
+    optimize_streaming_latency: 0  # 0–2, trades quality for lower latency (default: 0)
+    sample_rate: 24000          # 22050 / 24000 (default) / 44100 / 48000
+    bit_rate: 128000            # MP3 bitrate; only applies when codec=mp3
+    # base_url: "https://api.x.ai/v1"   # Override via XAI_BASE_URL env var
+  neutts:
+    ref_audio: ''
+    ref_text: ''
+    model: neuphonic/neutts-air-q4-gguf
+    device: cpu
+  kittentts:
+    model: KittenML/kitten-tts-nano-0.8-int8   # 25MB int8; also: kitten-tts-micro-0.8 (41MB), kitten-tts-mini-0.8 (80MB)
+    voice: Jasper                               # Jasper, Bella, Luna, Bruno, Rosie, Hugo, Kiki, Leo
+    speed: 1.0                                  # 0.5 - 2.0
+    clean_text: true                            # Expand numbers, currencies, units
+  piper:
+    voice: en_US-lessac-medium                  # voice name (auto-downloaded) OR absolute path to .onnx
+    # voices_dir: ''                            # default: ~/.hermes/cache/piper-voices/
+    # use_cuda: false                           # requires onnxruntime-gpu
+    # length_scale: 1.0                         # 2.0 = twice as slow
+    # noise_scale: 0.667
+    # noise_w_scale: 0.8
+    # volume: 1.0                               # 0.5 = half as loud
+    # normalize_audio: true</code></pre>
+</div>
+<p>‏MiniMax TTS ناحیه، نقطهٔ پایانی و اعتبارنامه را با هم انتخاب می‌کند:</p>
+<ul>
+  <li>‏<code>region: "global"</code> از ‏<code>https://api.minimax.io/v1/t2a_v2</code> با ‏<code>MINIMAX_API_KEY</code> استفاده می‌کند.</li>
+  <li>‏<code>region: "cn"</code> از ‏<code>https://api.minimaxi.com/v1/t2a_v2</code> با ‏<code>MINIMAX_CN_API_KEY</code> استفاده می‌کند.</li>
+  <li>اگر region حذف شود، ‏MINIMAX_API_KEY برای سازگاری با گذشته مقدم می‌ماند. اگر فقط MINIMAX_CN_API_KEY پیکربندی شده باشد هرمس ‏cn را برمی‌گزیند.</li>
+  <li>ناحیهٔ صریحاً انتخاب‌شده باید اعتبارنامهٔ متناظر خودش را داشته باشد. هرمس هرگز کلید ناحیهٔ دیگر را قرض نمی‌گیرد. بازنویسی base_url اعتبارنامهٔ انتخاب‌شده را عوض نمی‌کند و بازنویسی‌ای که به نقطهٔ پایانی رسمیِ ناحیهٔ دیگر اشاره کند reject می‌شود.</li>
+</ul>
+<p><b>کنترل سرعت:</b> مقدار سراسری ‏<code>tts.speed</code> به‌طور پیش‌فرض روی همهٔ ارائه‌دهنده‌ها اعمال می‌شود. هر ارائه‌دهنده می‌تواند با تنظیم speed خودش آن را override کند ‏(مثلاً ‏<code>tts.openai.speed: 1.5</code>). سرعت مخصوص-ارائه‌دهنده بر مقدار سراسری مقدم است. پیش‌فرض ‏۱٫۰ است ‏(سرعت عادی).</p>
+<h3>پرامپت‌های شخصیت Gemini</h3>
+<p>‏Gemini TTS می‌تواند جهت اجرایی زبان-طبیعی را دنبال کند. مقدار ‏<code>tts.gemini.persona_prompt_file</code> را روی یک فایل Markdown یا متنی محلی ست کنید که شخصیت صدا را توصیف می‌کند. فایل می‌تواند بخش‌هایی به سبک Gemini مثل ‏AUDIO PROFILE، ‏SCENE، ‏DIRECTOR'S NOTES، ‏SAMPLE CONTEXT و TRANSCRIPT داشته باشد.</p>
+<p>اگر فایل شامل ‏<code>{transcript}</code> یا ‏<code>{{ transcript }}</code> باشد، هرمس همان placeholder را با متن زندهٔ TTS جایگزین می‌کند. در غیر این صورت هرمس خودکار بخشی برچسب‌دار TRANSCRIPT الحاق می‌کند. پرامپت شخصیت محلی می‌ماند و در پاسخ چت نشان داده نمی‌شود.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>tts:
+  provider: gemini
+  gemini:
+    voice: Algieba
+    persona_prompt_file: ~/.hermes/tts/butler-voice.md</code></pre>
+</div>
+<h3>تگ‌های صوتی ‏(Gemini و xAI)</h3>
+<p>‏Gemini 3.1 Flash TTS گوگل و Grok TTS ی xAI از تگ‌های صوتی آزاد کروشه‌ای مثل ‏<code>[whispers]</code>، ‏<code>[excitedly]</code>، ‏<code>[very slow]</code>، ‏<code>[laughs]</code> و سایر یادداشت‌های اجرایی ابرازکننده پشتیبانی می‌کنند. ‏<code>tts.gemini.audio_tags</code> یا ‏<code>tts.xai.auto_speech_tags</code> را روشن کنید تا هرمس یک پاس بازنویسی مخفی قبل از TTS اجرا کند. بازنویسی فقط تگ‌های inline را داخل اسکریپت TTS درج می‌کند؛ پاسخ مرئی چت تغییر نمی‌کند.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>tts:
+  provider: gemini
+  gemini:
+    model: gemini-3.1-flash-tts-preview
+    audio_tags: true
+  xai:
+    auto_speech_tags: true</code></pre>
+</div>
+<p>بازنویسی از ‏<code>auxiliary.tts_audio_tags</code> استفاده می‌کند که پیش‌فرضش مدل اصلی چت شماست. آن تسک کمکی را override کنید اگر می‌خواهید درج تگ توسط مدلی ارزان‌تر یا سریع‌تر انجام شود.</p>
+<p><b>زبان ‏(نقاط پایانی سازگار-با-OpenAI):</b> ‏<code>tts.openai.language</code> به‌صورت پارامتر درخواست ‏lang_code به نقطهٔ پایانی forward می‌شود. برای سرورهای TTS سازگار-با-OpenAI است که ‏lang_code را پشتیبانی می‌کنند — مثلاً ‏<a href="https://github.com/remsky/Kokoro-FastAPI" target="_blank" rel="noopener">Kokoro-FastAPI</a> که در آن ‏<code>language: "es"</code> phonemizer اسپانیایی را به‌جای پیش‌فرض انگلیسی برمی‌گزیند. هنگام استفاده از API رسمی OpenAI که این پارامتر را نمی‌پذیرد unset بگذارید. وقتی unset باشد چیزی اضافه فرستاده نمی‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> محدودیت‌های طول ورودی</h2>
+<p>هر ارائه‌دهنده سقف مستند نویسه ورودی به‌ازای هر درخواست دارد. هرمس پاسخ‌های بلندتر را قبل از صدا زدن ارائه‌دهنده به chunk های مرتب و آگاه-از-جمله می‌شکند، پس متن کامل نرمال‌شده حفظ می‌شود نه اینکه بی‌سروصدا بریده شود:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>سقف پیش‌فرض ‏(نویسه)</th></tr></thead>
+<tbody>
+<tr><td>Edge TTS</td><td>۵۰۰۰</td></tr>
+<tr><td>OpenAI</td><td>۴۰۹۶</td></tr>
+<tr><td>xAI</td><td>۱۵۰۰۰</td></tr>
+<tr><td>MiniMax</td><td>۱۰۰۰۰</td></tr>
+<tr><td>Mistral</td><td>۴۰۰۰</td></tr>
+<tr><td>Google Gemini</td><td>۳۲۰۰۰</td></tr>
+<tr><td>ElevenLabs</td><td>آگاه-از-مدل ‏(پایین را ببینید)</td></tr>
+<tr><td>NeuTTS</td><td>۲۰۰۰</td></tr>
+<tr><td>KittenTTS</td><td>۲۰۰۰</td></tr>
+<tr><td>Piper</td><td>۵۰۰۰</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>ElevenLabs</b> سقف را از ‏model_id ی پیکربندی‌شده برمی‌دارد:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>‏model_id</th><th>سقف ‏(نویسه)</th></tr></thead>
+<tbody>
+<tr><td><code>eleven_flash_v2_5</code></td><td>۴۰۰۰۰</td></tr>
+<tr><td><code>eleven_flash_v2</code></td><td>۳۰۰۰۰</td></tr>
+<tr><td><code>eleven_multilingual_v2</code> ‏(پیش‌فرض)، ‏<code>eleven_multilingual_v1</code>، ‏<code>eleven_english_sts_v2</code>، ‏<code>eleven_english_sts_v1</code></td><td>۱۰۰۰۰</td></tr>
+<tr><td><code>eleven_v3</code>، ‏<code>eleven_ttv_v3</code></td><td>۵۰۰۰</td></tr>
+<tr><td>مدل ناشناخته</td><td>به پیش‌فرض ارائه‌دهنده برمی‌گردد ‏(۱۰۰۰۰)</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>بازنویسی per-provider</b> با ‏<code>max_text_length:</code> زیر بخش ارائه‌دهنده در config ی TTS:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>tts:
+  openai:
+    max_text_length: 8192   # raise or lower the provider cap</code></pre>
+</div>
+<p>فقط اعداد صحیح مثبت پذیرفته می‌شوند. مقادیر صفر، منفی، غیرعددی یا بولی به پیش‌فرض ارائه‌دهنده برمی‌گردند تا config ی خراب نتواند تصادفاً از حد درخواست ارائه‌دهنده عبور کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> حباب‌های صوتی تلگرام و ffmpeg</h2>
+<p>حباب‌های صوتی تلگرام فرمت Opus/OGG می‌خواهند:</p>
+<ul>
+  <li><b>OpenAI، ‏ElevenLabs و Mistral</b> natively Opus تولید می‌کنند — بدون setup اضافه</li>
+  <li><b>Edge TTS</b> ‏(پیش‌فرض) MP3 خروجی می‌دهد و به <b>ffmpeg</b> برای تبدیل نیاز دارد</li>
+  <li><b>MiniMax TTS</b> MP3 خروجی می‌دهد و برای حباب صوتی تلگرام به ffmpeg نیاز دارد</li>
+  <li><b>Google Gemini TTS</b> PCM خام خروجی می‌دهد و برای کدگذاری مستقیم Opus در حباب‌های تلگرام از ffmpeg استفاده می‌کند</li>
+  <li><b>xAI TTS</b> MP3 خروجی می‌دهد و برای حباب صوتی تلگرام به ffmpeg نیاز دارد</li>
+  <li><b>NeuTTS</b> WAV خروجی می‌دهد و هم برای حباب صوتی تلگرام به ffmpeg نیاز دارد</li>
+  <li><b>KittenTTS</b> WAV خروجی می‌دهد و هم برای حباب صوتی تلگرام به ffmpeg نیاز دارد</li>
+  <li><b>Piper</b> WAV خروجی می‌دهد و هم برای حباب صوتی تلگرام به ffmpeg نیاز دارد</li>
+</ul>
+<div class="codebox"><pre><code># Ubuntu/Debian
+sudo apt install ffmpeg
+
+# macOS
+brew install ffmpeg
+
+# Fedora
+sudo dnf install ffmpeg</code></pre></div>
+<p>بدون ffmpeg، صدای Edge TTS، ‏MiniMax TTS، ‏NeuTTS، ‏KittenTTS و Piper به‌عنوان فایل صوتی معمولی فرستاده می‌شود ‏(قابل‌پخش، ولی به‌صورت پخش‌کنندهٔ مستطیلی نمایش داده می‌شود نه حباب صوتی).</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>اگر حباب صوتی بدون نصب ffmpeg می‌خواهید به ارائه‌دهندهٔ OpenAI، ‏ElevenLabs یا Mistral سوئیچ کنید.</p>
+</div>
+<h3>صداهای سفارشی xAI ‏(همانندسازی صدا)</h3>
+<p>‏xAI از همانندسازی صدای شما و استفاده از آن در TTS پشتیبانی می‌کند. در <a href="https://console.x.ai/team/default/voice/voice-library" target="_blank" rel="noopener">کنسول xAI</a> یک صدای سفارشی بسازید و سپس ‏voice_id ی حاصل را در config ست کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>tts:
+  provider: xai
+  xai:
+    voice_id: "nlbqfwie"   # your custom voice ID</code></pre>
+</div>
+<p>جزئیات ضبط، فرمت‌های پشتیبانی‌شده و محدودیت‌ها را در <a href="https://docs.x.ai/developers/model-capabilities/audio/custom-voices" target="_blank" rel="noopener">مستندات Custom Voices ی xAI</a> ببینید.</p>
+<h3>Piper ‏(محلی، ۴۴ زبان)</h3>
+<p>‏Piper موتور TTS عصبی سریع و محلی از Open Home Foundation ‏(نگهدارندگان Home Assistant) است. کاملاً روی CPU اجرا می‌شود، <b>۴۴ زبان</b> با صداهای از-پیش-آموزش‌دیده دارد و کلید API نمی‌خواهد.</p>
+<p><b>نصب با hermes tools</b> ← Voice &amp; TTS ← Piper — هرمس ‏<code>pip install piper-tts</code> را برایتان اجرا می‌کند. یا دستی نصب کنید: ‏<code>pip install piper-tts</code>.</p>
+<p><b>سوئیچ به Piper:</b></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>tts:
+  provider: piper
+  piper:
+    voice: en_US-lessac-medium</code></pre>
+</div>
+<p>در اولین فراخوانی TTS برایصدایی که محلی کش نشده، هرمس ‏<code>python -m piper.download_voices &lt;name&gt;</code> را اجرا و مدل را ‏(~۲۰–۹۰MB بسته به سطح کیفیت) داخل ‏<code>~/.hermes/cache/piper-voices/</code> دانلود می‌کند. فراخوانی‌های بعدی از مدل کش‌شده استفاده می‌کنند.</p>
+<p><b>انتخاب صدا.</b> <a href="https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/VOICES.md" target="_blank" rel="noopener">کاتالوگ کامل صداها</a> انگلیسی، اسپانیایی، فرانسوی، آلمانی، ایتالیایی، هلندی، پرتغالی، روسی، لهستانی، ترکی، چینی، عربی، هندی و بیشتر را پوشش می‌دهد — هر کدام با سطوح کیفیت ‏x_low / low / medium / high. نمونه‌ی صداها را در ‏<a href="https://rhasspy.github.io/piper-samples/" target="_blank" rel="noopener">rhasspy.github.io/piper-samples</a> بشنوید.</p>
+<p><b>استفاده از صدای از-قبل-دانلود‌شده.</b> ‏<code>tts.piper.voice</code> را روی مسیر مطلقی که به ‏onnx ختم می‌شود ست کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>tts:
+  piper:
+    voice: /path/to/my-custom-voice.onnx</code></pre>
+</div>
+<p><b>پیچ‌ومهره‌های پیشرفته</b> ‏(<code>tts.piper.length_scale</code>/<code>noise_scale</code>/<code>noise_w_scale</code>/<code>volume</code>/<code>normalize_audio</code>، ‏<code>use_cuda</code>) یک‌به-یک معادل SynthesisConfig ی Piper هستند. روی نسخه‌های قدیمی‌تر piper-tts نادیده گرفته می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> ارائه‌دهنده‌های فرمان سفارشی ‏(TTS)</h2>
+<p>اگر موتور TTS موردنظرتان natively پشتیبانی نمی‌شود ‏(VoxCPM، ‏MLX-Kokoro، ‏XTTS CLI، یک اسکریپت همانندسازی صدا، هر چیزی که CLI دارد)، می‌توانید آن را به‌عنوان یک <b>ارائه‌دهندهٔ نوع-فرمان</b> بدون نوشتن هیچ پایتونی سیم‌کشی کنید. هرمس متن ورودی را در یک فایل temp ی UTF-8 می‌نویسد، فرمان شل شما را اجرا و فایل صدایی که فرمان تولید کرده می‌خواند.</p>
+<p>یک یا چند ارائه‌دهنده زیر ‏<code>tts.providers.&lt;name&gt;</code> اعلام و بین آنها با ‏<code>tts.provider: &lt;name&gt;</code> سوئیچ کنید — دقیقاً مثل تعویض بین داخلی‌ها مثل edge و openai.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>tts:
+  provider: voxcpm                 # pick any name under tts.providers
+  providers:
+    voxcpm:
+      type: command
+      command: "voxcpm --ref ~/voice.wav --text-file {input_path} --out {output_path}"
+      output_format: mp3
+      timeout: 180
+      voice_compatible: true       # try to deliver as a Telegram voice bubble
+
+    mlx-kokoro:
+      type: command
+      command: "python -m mlx_kokoro --in {input_path} --out {output_path} --voice {voice}"
+      voice: af_sky
+      output_format: wav
+
+    piper-custom:                  # native Piper also supports custom .onnx via tts.piper.voice
+      type: command
+      command: "piper -m /path/to/custom.onnx -f {output_path} &lt; {input_path}"
+      output_format: wav</code></pre>
+</div>
+<p><b>مقادیر پشتیبانی‌شدهٔ output_format:</b> ‏<code>mp3</code> ‏(پیش‌فرض)، ‏<code>wav</code>، ‏<code>ogg</code>، ‏<code>flac</code>، ‏<code>m4a</code>، ‏<code>aac</code>، ‏<code>amr</code>، ‏<code>opus</code>. فرمان شما باید واقعاً آن فرمت را تولید کند ‏(مثلاً از طریق ffmpeg)؛ هرمس فقط مقدار اعلام‌شده را اعتبارسنجی و نام فایل خروجی را مطابق آن می‌گذارد. مقدار ناشناخته به mp3 برمی‌گردد. فرمت انتخابی به‌عنوان placeholder ی ‏<code>{format}</code> هم به فرمان expose می‌شود.</p>
+<p><b>محیط زیرپروسه:</b> ارائه‌دهنده‌های فرمان ‏(TTS و STT) با secrets ی هرمس پاک‌سازی‌شده از env فرزند اجرا می‌شوند — توکن بات‌های گیت‌وی، کلیدهای API ی ارائه‌دهندگان LLM و اعتبارنامه‌های relay داخلی حذف می‌شوند؛ ‏PATH، ‏HOME، locale و سایر متغیرهای عادی حفظ می‌شوند. اگر قالب فرمان‌تان کلید API ی خودش را از محیط می‌خواهد ‏(مثلاً یک خط curl)، نام متغیرها را زیر ‏<code>env_passthrough</code> در config ی ارائه‌دهنده بنویسید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>tts:
+  providers:
+    mycloud:
+      type: command
+      command: 'curl -s -H "Authorization: Bearer $MYCLOUD_API_KEY" ... -o {output_path}'
+      env_passthrough: [MYCLOUD_API_KEY]</code></pre>
+</div>
+<h4>مثال: Doubao ‏(seed-tts-2.0 چینی)</h4>
+<p>برای TTS چینی باکیفیت از طریق API ی استریم دوطرفهٔ ‏<a href="https://www.volcengine.com/docs/6561/1257544" target="_blank" rel="noopener">seed-tts-2.0</a> ی ByteDance، پکیج PyPI ی ‏<a href="https://pypi.org/project/doubao-speech/" target="_blank" rel="noopener">doubao-speech</a> را نصب و به‌عنوان ارائه‌دهندهٔ فرمان سیم‌کشی کنید:</p>
+<div class="codebox"><pre><code>pip install doubao-speech
+export VOLCENGINE_APP_ID="your-app-id"
+export VOLCENGINE_ACCESS_TOKEN="your-access-token"</code></pre></div>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>tts:
+  provider: doubao
+  providers:
+    doubao:
+      type: command
+      command: "doubao-speech say --text-file {input_path} --out {output_path}"
+      output_format: mp3
+      max_text_length: 1024
+      timeout: 30</code></pre>
+</div>
+<p>اعتبارنامه‌ها از محیط شل ‏(VOLCENGINE_APP_ID / VOLCENGINE_ACCESS_TOKEN) یا ‏<code>~/.doubao-speech/config.yaml</code> می‌آیند. صدا را با افزودن ‏<code>--voice zh-female-warm</code> ‏(یا هر alias دیگری از ‏<code>doubao-speech list-voices</code>) به فرمان برگزینید. ‏doubao-speech یک ASR ی استریم هم همراه دارد — یکپارچه‌سازی با هرمس را در بخش STT پایین ببینید. سورس و مستندات کامل: ‏<a href="https://github.com/Hypnus-Yuan/doubao-speech" target="_blank" rel="noopener">github.com/Hypnus-Yuan/doubao-speech</a>.</p>
+<h4>Placeholder ها</h4>
+<p>قالب فرمان می‌تواند به این placeholder ها ارجاع دهد. هرمس موقع render جایگزین و هر مقدار را برای زمینهٔ اطراف shell-quote می‌کند ‏(لخت / تک-کوتیشن / دابل-کوتیشن)، پس مسیرهای دارای فاصله و سایر نویسه‌های حساس-به-شل امن هستند.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Placeholder</th><th>معنا</th></tr></thead>
+<tbody>
+<tr><td><code>{input_path}</code></td><td>مسیر فایل متنی temp ی UTF-8 که هرمس نوشته</td></tr>
+<tr><td><code>{text_path}</code></td><td>نام مستعار {input_path}</td></tr>
+<tr><td><code>{output_path}</code></td><td>مسیری که فرمان باید صدا را در آن بنویسد</td></tr>
+<tr><td><code>{format}</code></td><td>‏mp3 / wav / ogg / flac</td></tr>
+<tr><td><code>{voice}</code></td><td>‏<code>tts.providers.&lt;name&gt;.voice</code>؛ خالی وقتی ست نیست</td></tr>
+<tr><td><code>{model}</code></td><td>‏<code>tts.providers.&lt;name&gt;.model</code></td></tr>
+<tr><td><code>{speed}</code></td><td>ضریب سرعت حل‌شده ‏(ارائه‌دهنده یا سراسری)</td></tr>
+</tbody>
+</table>
+</div>
+<p>برای آکولاد لفظی از ‏<code>{{</code> و ‏<code>}}</code> استفاده کنید.</p>
+<h4>کلیدهای اختیاری</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>کلید</th><th>پیش‌فرض</th><th>معنا</th></tr></thead>
+<tbody>
+<tr><td><code>timeout</code></td><td><code>120</code></td><td>ثانیهٔ بی‌کاری؛ خروجی stdout یا stderr مهلت را reset می‌کند. درخت پروسه بعد از بی‌کاری کشته می‌شود ‏(killpg یونیکس، ‏taskkill /T ویندوز).</td></tr>
+<tr><td><code>output_format</code></td><td><code>mp3</code></td><td>یکی از ‏mp3 / wav / ogg / flac. اگر هرمس مسیر را خودش انتخاب کند از پسوند خروجی استنتاج می‌شود.</td></tr>
+<tr><td><code>voice_compatible</code></td><td><code>false</code></td><td>وقتی true، هرمس خروجی MP3/WAV را با ffmpeg به Opus/OGG تبدیل می‌کند تا تلگرام حباب صوتی رندر کند.</td></tr>
+<tr><td><code>max_text_length</code></td><td><code>5000</code></td><td>حداکثر نویسه ورودی به‌ازای هر فراخوانی فرمان؛ متن بلندتر به chunk های مرتب شکسته می‌شود.</td></tr>
+<tr><td><code>voice</code> / ‏<code>model</code></td><td>خالی</td><td>فقط به‌عنوان مقادیر placeholder به فرمان پاس داده می‌شود.</td></tr>
+</tbody>
+</table>
+</div>
+<h4>یادداشت‌های رفتاری</h4>
+<ul>
+  <li><b>نام‌های داخلی همیشه برنده‌اند.</b> یک ورودی ‏tts.providers.openai هرگز ارائه‌دهندهٔ native ی OpenAI را سایه نمی‌اندازد، پس هیچ config ی کاربری نمی‌تواند بی‌سروصدا داخلی را جایگزین کند.</li>
+  <li><b>تحویل پیش‌فرض یک document است.</b> ارائه‌دهنده‌های فرمان روی همهٔ پلتفرم‌ها به‌صورت پیوست صوتی عادی تحویل می‌دهند. تحویل حباب-صوتی را per-provider با ‏<code>voice_compatible: true</code> انتخاب کنید.</li>
+  <li><b>شکست‌های فرمان به ایجنت surface می‌شوند.</b> کد خروج غیرصفر، خروجی خالی یا timeout همه خطایی همراه stderr/stdout ی فرمان برمی‌گردانند تا ارائه‌دهنده را از داخل گفتگو دیباگ کنید.</li>
+  <li><b>‏type: command وقتی command ست شده پیش‌فرض است.</b> نوشتن صریح type: command رویهٔ خوبی است ولی لازم نیست؛ ورودی با رشتهٔ command ی غیرخالی ارائه‌دهندهٔ فرمان حساب می‌شود.</li>
+  <li><b>‏{input_path} / {text_path} جایگزین هم‌اند.</b> هر کدام که در فرمانتان خواناتر بود.</li>
+</ul>
+<h4>امنیت</h4>
+<p>ارائه‌دهنده‌های نوع-فرمان هر فرمان شلی را که پیکربندی می‌کنید با مجوزهای کاربر شما اجرا می‌کنند. هرمس مقادیر placeholder را quote و timeout را اعمال می‌کند ولی خود قالب فرمان ورودی محلیِ مورد-اعتماد است — با آن مثل یک اسکریپت شل روی PATH تان رفتار کنید.</p>
+<h3>ارائه‌دهنده‌های پلاگین پایتونی ‏(TTS)</h3>
+<p>برای موتورهای TTS که با یک فرمان شل واحد بیان نمی‌شوند — SDK های پایتونی بدون CLI، موتورهای استریم، API های فهرست صدا، auth های refresh شونده OAuth — یک پلاگین پایتونی از طریق ‏<code>ctx.register_tts_provider()</code> ثبت کنید. پلاگین <b>همراه</b> registry ی ارائه‌دهنده‌های فرمان سفارشی زندگی می‌کند ‏(جایگزینش نمی‌شود)؛ سطح مناسب موتورتان را بردارید.</p>
+<h4>کی کدام را انتخاب کنیم</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>بک‌اند شما…</th><th>استفاده</th></tr></thead>
+<tbody>
+<tr><td>یک CLI ی واحد که متن را از فایل/stdin می‌خواند و صدا را به فایل/stdout می‌نویسد</td><td><b>ارائه‌دهندهٔ فرمان</b> ‏(بدون پایتون)</td></tr>
+<tr><td>دو سه CLI زنجیر‌شده با pipe های شل</td><td><b>ارائه‌دهندهٔ فرمان</b></td></tr>
+<tr><td>فقط یک SDK ی پایتون — بدون CLI</td><td><b>پلاگین</b></td></tr>
+<tr><td>بایت‌های استریم که می‌خواهید chunked تحویل شوند ‏(حباب صوتی وسط-تولید)</td><td><b>پلاگین</b> ‏(override ی stream())</td></tr>
+<tr><td>API ی فهرست صدا که hermes setup استفاده می‌کند</td><td><b>پلاگین</b> ‏(override ی list_voices())</td></tr>
+<tr><td>جریان refresh ی OAuth ‏(نه bearer token ایستا)</td><td><b>پلاگین</b></td></tr>
+</tbody>
+</table>
+</div>
+<p>داخلی‌ها همیشه برنده‌اند و ارائه‌دهنده‌های فرمان بر پلاگین همنام برتری دارند — پس ثبت پلاگین روی هر نامِ غیر-داخلی امن است بدون نگرانی از سایه‌انداختن روی config فعلی‌تان.</p>
+<h4>حداقل پلاگین</h4>
+<p>این را در ‏<code>~/.hermes/plugins/my-tts/</code> بگذارید:</p>
+<p>‏<code>plugin.yaml</code>:</p>
+<pre dir="ltr"><code>name: my-tts
+version: 0.1.0
+description: "My custom Python TTS backend"</code></pre>
+<p>‏<code>__init__.py</code>:</p>
+<pre dir="ltr"><code>from agent.tts_provider import TTSProvider
+
+
+class MyTTSProvider(TTSProvider):
+    @property
+    def name(self) -&gt; str:
+        return "my-tts"  # what tts.provider matches against
+
+    @property
+    def display_name(self) -&gt; str:
+        return "My Custom TTS"
+
+    def is_available(self) -&gt; bool:
+        # Return False when credentials/deps are missing — picker skips
+        # this row but the dispatcher still routes here on explicit config.
+        import os
+        return bool(os.environ.get("MY_TTS_API_KEY"))
+
+    def synthesize(self, text, output_path, *, voice=None, model=None,
+                   speed=None, format="mp3", **extra) -&gt; str:
+        # Write audio bytes to output_path, return the path.
+        # Raise on failure — the dispatcher converts exceptions to a
+        # standard error envelope.
+        import my_tts_sdk
+        client = my_tts_sdk.Client()
+        audio_bytes = client.synthesize(text=text, voice=voice or "default")
+        with open(output_path, "wb") as f:
+            f.write(audio_bytes)
+        return output_path
+
+
+def register(ctx):
+    ctx.register_tts_provider(MyTTSProvider())</code></pre>
+<p>فعالش کنید ‏(<code>hermes plugins enable my-tts</code>)، ‏tts.provider را به آن اشاره دهید ‏(<code>tts.provider: my-tts</code> در config.yaml) و ابزار ‏text_to_speech از پلاگین شما عبور خواهد کرد.</p>
+<h4>هوک‌های اختیاری</h4>
+<ul>
+  <li>‏<code>list_voices()</code> ← فهرستی از dict های ‏{id, display, language, gender, preview_url} که در hermes tools نشان داده می‌شود.</li>
+  <li>‏<code>list_models()</code> ← فهرستی از dict های ‏{id, display, languages, max_text_length}.</li>
+  <li>‏<code>get_setup_schema()</code> ← برگرداندن ‏{name, badge, tag, env_vars: [{key, prompt, url}]} برای قدرت دادن به ردیف picker در hermes tools / hermes setup. بدون این پلاگین همچنان کار می‌کند ولی ردیفش در picker مینیمال است.</li>
+  <li>‏<code>stream(text, *, voice, model, format, **extra)</code> ← iterator ای که بایت‌های صوتی برای تحویل استریمی yield می‌کند ‏(پیش‌فرض NotImplementedError).</li>
+  <li>property ی ‏<code>voice_compatible</code> ← True بگذارید اگر خروجی‌تان Opus-compatible است و گیت‌وی باید حباب صوتی تحویل دهد ‏(پیش‌فرض False = پیوست صوتی عادی).</li>
+</ul>
+<p>ABC ی کامل همراه docstring ها را در ‏<code>agent/tts_provider.py</code> ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> رونویسی پیام صوتی ‏(STT)</h2>
+<p>پیام‌های صوتی فرستاده‌شده در تلگرام، ‏دیسکورد، ‏واتساپ، ‏اسلک یا سیگنال خودکار رونویسی و به‌صورت متن داخل گفتگو تزریق می‌شوند. ایجنت transcript را مثل متن عادی می‌بیند.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>کیفیت</th><th>هزینه</th><th>کلید API</th></tr></thead>
+<tbody>
+<tr><td><b>Local Whisper</b> ‏(پیش‌فرض)</td><td>خوب</td><td>رایگان</td><td>نیازی نیست</td></tr>
+<tr><td><b>Groq Whisper API</b></td><td>خوب تا بهترین</td><td>تیر رایگان</td><td><code>GROQ_API_KEY</code></td></tr>
+<tr><td><b>OpenAI Whisper API</b></td><td>خوب تا بهترین</td><td>پولی</td><td><code>VOICE_TOOLS_OPENAI_KEY</code> یا ‏<code>OPENAI_API_KEY</code></td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 بدون پیکربندی</div>
+  <p>رونویسی محلی وقتی faster-whisper نصب باشد همان اول کار می‌کند. اگر آن موجود نباشد هرمس می‌تواند از CLI ی محلی whisper از مکان‌های نصب رایج ‏(مثل ‏/opt/homebrew/bin) یا یک فرمان سفارشی از طریق HERMES_LOCAL_STT_COMMAND استفاده کند.</p>
+</div>
+<h3>پیکربندی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># In ~/.hermes/config.yaml
+stt:
+  provider: "local"           # "local" | "groq" | "openai" | "mistral" | "xai" | "elevenlabs" | "deepinfra"
+  language: "en"              # Global language hint applied to every provider unless a per-provider language overrides it; set "" to restore auto-detect
+  local:
+    model: "base"             # tiny, base, small, medium, large-v3
+    language: ""              # optional ISO-639-1 hint; blank = use HERMES_LOCAL_STT_LANGUAGE if set, else auto-detect
+  groq:
+    language: ""              # optional ISO-639-1 hint; blank = use HERMES_LOCAL_STT_LANGUAGE if set, else auto-detect
+  openai:
+    model: "whisper-1"        # whisper-1, gpt-4o-mini-transcribe, gpt-4o-transcribe, gpt-transcribe
+  mistral:
+    model: "voxtral-mini-latest"  # voxtral-mini-latest, voxtral-mini-2602
+  xai:
+    model: "grok-stt"         # xAI Grok STT
+    language: ""              # optional ISO-639-1 hint; blank = use HERMES_LOCAL_STT_LANGUAGE if set, else "en"</code></pre>
+</div>
+<h3>جزئیات ارائه‌دهنده‌ها</h3>
+<p><b>محلی ‏(faster-whisper)</b> — Whisper را به‌صورت محلی از طریق <a href="https://github.com/SYSTRAN/faster-whisper" target="_blank" rel="noopener">faster-whisper</a> اجرا می‌کند. پیش‌فرض CPU و در صورت وجود GPU. اندازه‌های مدل:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مدل</th><th>حجم</th><th>سرعت</th><th>کیفیت</th></tr></thead>
+<tbody>
+<tr><td><code>tiny</code></td><td>~۷۵MB</td><td>سریع‌ترین</td><td>پایه</td></tr>
+<tr><td><code>base</code></td><td>~۱۵۰MB</td><td>سریع</td><td>خوب ‏(پیش‌فرض)</td></tr>
+<tr><td><code>small</code></td><td>~۵۰۰MB</td><td>متوسط</td><td>بهتر</td></tr>
+<tr><td><code>medium</code></td><td>~۱٫۵GB</td><td>کندتر</td><td>عالی</td></tr>
+<tr><td><code>large-v3</code></td><td>~۳GB</td><td>کندترین</td><td>بهترین</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>Groq API</b> — ‏GROQ_API_KEY لازم دارد. fallback ابری خوب وقتی گزینهٔ STT میزبانی‌شده رایگان می‌خواهید. ‏<code>stt.groq.language</code> ‏(یا متغیر سراسری HERMES_LOCAL_STT_LANGUAGE) را ست کنید تا auto-detect ی Whisper رد شود و تأخیر روی صدای زبان-معلوم کم شود.</p>
+<p><b>OpenAI API</b> — اول VOICE_TOOLS_OPENAI_KEY را می‌پذیرد و بعد به OPENAI_API_KEY برمی‌گردد. ‏whisper-1، ‏gpt-4o-mini-transcribe، ‏gpt-4o-transcribe و gpt-transcribe را پشتیبانی می‌کند.</p>
+<p><b>Mistral API ‏(Voxtral Transcribe)</b> — ‏MISTRAL_API_KEY لازم دارد. از مدل‌های ‏<a href="https://docs.mistral.ai/capabilities/audio/speech_to_text/" target="_blank" rel="noopener">Voxtral Transcribe</a> ی Mistral استفاده می‌کند. ‏۱۳ زبان، diarization ی گوینده و timestamp های سطح-واژه را پشتیبانی می‌کند. نصب: ‏<code>cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[mistral]"</code>.</p>
+<p><b>xAI Grok STT</b> — ‏XAI_API_KEY لازم دارد. به ‏<code>https://api.x.ai/v1/stt</code> به‌صورت multipart/form-data پست می‌کند. انتخاب خوب اگر از قبل برای چت یا TTS از xAI استفاده می‌کنید و یک کلید API برای همه‌چیز می‌خواهید. ترتیب آشکارسازی خودکار آن را بعد از Groq می‌گذارد — صریحاً ‏<code>stt.provider: xai</code> ست کنید تا اجبار شود.</p>
+<p><b>Fallback ی CLI ی محلی سفارشی</b> — اگر می‌خواهید هرمس مستقیماً یک فرمان رونویسی محلی را صدا بزند ‏HERMES_LOCAL_STT_COMMAND را ست کنید. قالب فرمان placeholder های ‏{input_path}، ‏{output_dir}، ‏{language} و {model} را پشتیبانی می‌کند. هرمس قالب رندر شده را به فهرست آرگومان tokenize و بدون شل اجرا می‌کند، پس عملگرهای ‏|، ‏&gt;، ‏&& و ؛ به‌عنوان آرگومان تحت‌اللفظی پاس داده می‌شوند. فرمان شما باید یک transcript با پسوند .txt جایی زیر {output_dir} بنویسد.</p>
+<h4>مثال: Doubao / Volcengine ASR</h4>
+<p>اگر از ‏doubao-speech برای TTS ی Doubao استفاده می‌کنید، همان پکیج تبدیل گفتار-به-متن را از طریق مسیر STT ی فرمان-محلی هندل می‌کند:</p>
+<div class="codebox"><pre><code>pip install doubao-speech
+export VOLCENGINE_APP_ID="your-app-id"
+export VOLCENGINE_ACCESS_TOKEN="your-access-token"
+export HERMES_LOCAL_STT_COMMAND='doubao-speech transcribe {input_path} --out {output_dir}/transcript.txt'</code></pre></div>
+<p>اگر یک قالب محلی مورد-اعتماد عمداً به pipe، redirect یا ویژگی شل دیگری نیاز دارد، شل را صریحاً invoke کنید. مسیرهای داینامیک را بیرون برنامهٔ شل نگه دارید و به‌عنوان آرگومان موقعیتی پاس دهید:</p>
+<pre dir="ltr"><code>export HERMES_LOCAL_STT_COMMAND='sh -c '\''whisper "$1" --output_format txt --output_dir "$2" | tee "$2/whisper.log"'\'' _ {input_path} {output_dir}'</code></pre>
+<p>روی ویندوز به‌جایش از wrapper ی صریح ‏cmd /c یا PowerShell استفاده کنید. wrapper ی صریح تفسیر شل را بخشی opt-in از argv ی پیکربندی‌شده می‌کند نه ویژگی ضمنی هر قالب STT محلی.</p>
+<div class="codebox"><pre><code>stt:
+  provider: local_command</code></pre></div>
+<p>هرمس پیام صوتی ورودی را در {input_path} می‌نویسد، فرمان را اجرا و فایل .txt تولیدشده زیر {output_dir} را می‌خواند. زبان توسط نقطهٔ پایانی bigmodel ی Volcengine خودآشکار می‌شود.</p>
+<h3>رفتار Fallback</h3>
+<p>انتخاب صریحِ ‏stt.provider ‏(نوشته‌شده در config.yaml مثلاً از طریق hermes tools) سخت‌گیرانه محترم شمرده می‌شود — اگر آن ارائه‌دهنده نتواند اجرا شود رونویسی با خطای شفاف شکست می‌خورد ‏(<code>stt is configured to use &lt;provider&gt; (set via hermes tools), but &lt;failure&gt;. Run 'hermes tools' to change it.</code>) نه اینکه بی‌سروصدا موتور عوض کند. توجه کنید ‏stt.provider: local ی نوشته‌شده در config شما انتخاب صریح حساب می‌شود.</p>
+<p>وقتی <b>هیچ ارائه‌دهنده‌ای هرگز انتخاب نشده باشد</b> هرمس از آنچه موجود است خودآشکار می‌کند:</p>
+<ul>
+  <li>faster-whisper ی محلی غیرموجود ← قبل از ارائه‌دهنده‌های ابری CLI ی محلی whisper یا HERMES_LOCAL_STT_COMMAND را امتحان می‌کند</li>
+  <li>کلید Groq ست نیست ← رد می‌شود؛ ارائه‌دهندهٔ بعدی موجود</li>
+  <li>کلید OpenAI ست نیست ← رد می‌شود؛ ارائه‌دهندهٔ بعدی موجود</li>
+  <li>کلید/SDK ی Mistral ست نیست ← در آشکارسازی خودکار رد؛ به ارائه‌دهندهٔ بعدی می‌رسد</li>
+  <li>هیچ‌چیز موجود نبود ← پیام‌های صوتی با یادداشت دقیقی برای کاربر passthrough می‌شوند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> ارائه‌دهنده‌های فرمان سفارشی STT</h2>
+<p>اگر موتور STT موردنظرتان natively پشتیبانی نمی‌شود ‏(Doubao ASR، ‏NVIDIA Parakeet، یک build ی whisper.cpp، یک CLI ی متن‌باز SenseVoice، هر چیزی که فرمان شل دارد)، بدون نوشتن هیچ پایتونی به‌عنوان <b>ارائه‌دهندهٔ نوع-فرمان</b> سیم‌کشی‌اش کنید. هرمس فرمان شل شما را روی فایل صوتی اجرا و transcript را برمی‌گرداند.</p>
+<p>یک یا چند ارائه‌دهنده زیر ‏<code>stt.providers.&lt;name&gt;</code> اعلام و بین آنها با ‏<code>stt.provider: &lt;name&gt;</code> سوئیچ کنید — هم‌شکل registry ی ارائه‌دهنده-فرمان TTS، تطبیق‌یافته برای جهت ورودی=صدا ← خروجی=transcript.</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>stt:
+  provider: parakeet                # pick any name under stt.providers
+  providers:
+    parakeet:
+      type: command
+      command: "parakeet-asr --model nvidia/parakeet-tdt-0.6b-v2 --in {input_path} --out {output_path}"
+      format: txt
+      language: en
+      timeout: 300
+
+    whispercpp:
+      type: command
+      command: "whisper-cli -m ~/models/ggml-large-v3.bin -f {input_path} -otxt -of {output_dir}/transcript"
+      format: txt
+
+    sensevoice:
+      type: command
+      command: "sensevoice-cli {input_path} --json | tee {output_path}"
+      format: json</code></pre>
+</div>
+<p>این مکمل hatch قدیمی ‏HERMES_LOCAL_STT_COMMAND است از طریق مسیر داخلی local_command. برخلاف registry ی رانده-با-شل، قالب قدیمی به argv ی tokenize شده و بدون تفسیر ضمنی شل اجرا می‌شود. وقتی ‏<b>چندین</b> موتور STT رانده-با-شل می‌خواهید، نامی که با ‏stt.provider قابل‌انتخاب باشد، یا چیزی که ‏language/model/timeout ی per-provider لازم دارد از ‏stt.providers.&lt;name&gt; استفاده کنید.</p>
+<h4>placeholder های STT</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Placeholder</th><th>معنا</th></tr></thead>
+<tbody>
+<tr><td><code>{input_path}</code></td><td>مسیر مطلق فایل صدای ورودی ‏(محل اصلی، فقط-خواندنی)</td></tr>
+<tr><td><code>{output_path}</code></td><td>مسیر مطلقی که فرمان باید transcript را در آن بنویسد</td></tr>
+<tr><td><code>{output_dir}</code></td><td>دایرکتوری والد {output_path} ‏(برای ابزارهای سبک whisper handy است)</td></tr>
+<tr><td><code>{format}</code></td><td>فرمت خروجی پیکربندی‌شده: ‏txt / json / srt / vtt</td></tr>
+<tr><td><code>{language}</code></td><td>کد زبان پیکربندی‌شده ‏(پیش‌فرض en)</td></tr>
+<tr><td><code>{model}</code></td><td>‏<code>stt.providers.&lt;name&gt;.model</code>؛ خالی وقتی ست نیست</td></tr>
+</tbody>
+</table>
+</div>
+<p>برای آکولاد لفظی از ‏{{ و }} استفاده کنید ‏(وقتی snippet ی JSON داخل فرمان تعبیه می‌کنید handy است).</p>
+<h4>نحوهٔ بازخوانی transcript</h4>
+<p>بعد از خروج موفق فرمان شما:</p>
+<ol>
+  <li>اگر {output_path} وجود داشته باشد و غیرخالی باشد ← هرمس آن را به‌عنوان متن UTF-8 می‌خواند.</li>
+  <li>در غیر این صورت اگر فرمان به stdout نوشته باشد ← هرمس همان را استفاده می‌کند.</li>
+  <li>در غیر این صورت ← خطا: «Command STT provider wrote no output file and produced no stdout».</li>
+</ol>
+<p>این اجازه می‌دهد registry را هم برای CLI های فایل‌نویس ‏(whisper-cli، ‏parakeet-asr) هم برای خط‌های-یگانه سبک curl که transcript را به stdout می‌دهند ‏(<code>curl … | jq -r .text</code>) به کار ببرید.</p>
+<p>برای ‏<code>format: json</code>/<code>srt</code>/<code>vtt</code> هرمس محتوای خام فایل را به‌عنوان فیلد transcript برمی‌گرداند. استخراج text از JSON خارج از دامنه runner است — یا ‏format: txt پیکربندی کنید یا JSON را پایین‌دستی post-process کنید.</p>
+<h4>کلیدهای اختیاری ارائه‌دهندهٔ فرمان STT</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>کلید</th><th>پیش‌فرض</th><th>معنا</th></tr></thead>
+<tbody>
+<tr><td><code>timeout</code></td><td><code>300</code></td><td>ثانیه؛ درخت پروسه در انقضا کشته می‌شود ‏(start_new_session یونیکس، ‏taskkill /T ویندوز).</td></tr>
+<tr><td><code>format</code></td><td><code>txt</code></td><td>یکی از txt / json / srt / vtt. پسوند {output_path} را ست می‌کند.</td></tr>
+<tr><td><code>language</code></td><td><code>en</code></td><td>به {language} forward می‌شود. پیش‌فرض ‏stt.language سپس en.</td></tr>
+<tr><td><code>model</code></td><td>خالی</td><td>به {model} forward می‌شود. آرگومان model= به transcribe_audio() این را override می‌کند.</td></tr>
+</tbody>
+</table>
+</div>
+<h4>یادداشت‌های رفتاری ارائه‌دهندهٔ فرمان STT</h4>
+<ul>
+  <li><b>داخلی‌ها همیشه برنده‌اند.</b> اعلام ‏stt.providers.openai با type: command هندلر واقعی Whisper ی OpenAI را override نمی‌کند. نام داخلی قبل از اجرای resolver ی ارائه‌دهنده-فرمان short-circuit می‌شود.</li>
+  <li><b>پاکسازی درخت پروسه.</b> فرمانی که از timeout عبور کند کل درخت پروسه‌اش کشته می‌شود نه فقط wrapper ی شل. خط‌لوله‌های ASR ی بلندمدتی که زیرپروسه‌های بارگذاری مدل fork می‌کنند قابل‌اعتماد جمع می‌شوند.</li>
+  <li><b>shell-quoting خودکار است.</b> placeholder ها داخل '…' با escaping امن-تک-کوتیشن؛ داخل "…" با escaping ی $/`/"؛ بیرون کوتیشن با shlex.quote. مقادیر placeholder را از قبل quote نکنید.</li>
+</ul>
+<h4>امنیت ارائه‌دهندهٔ فرمان STT</h4>
+<p>فرمان شل زیر همان کاربر هرمس با دسترسی کامل فایل‌سیستم اجرا می‌شود — همان مدل اعتماد ‏tts.providers.&lt;name&gt;: type: command و ‏HERMES_LOCAL_STT_COMMAND. فقط ارائه‌دهنده‌های فرمان از منابع مورد اعتماد اعلام کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> ارائه‌دهنده‌های پلاگین پایتونی ‏(STT)</h2>
+<p>برای موتورهای STT ای که داخلی نیستند <b>و</b> نمی‌توانند به‌عنوان فرمان شل بیان شوند ‏(SDK ی پایتون لازم دارند، auth ی refresh شونده OAuth، chunk های استریم و…)، یک پلاگین پایتونی از طریق ‏<code>ctx.register_transcription_provider()</code> ثبت کنید. پلاگین همراه ۸ ارائه‌دهندهٔ داخلی ‏(local، ‏local_command، ‏groq، ‏openai، ‏mistral، ‏xai، ‏elevenlabs، ‏deepinfra) و registry ی ‏stt.providers.&lt;name&gt;: type:command زندگی می‌کند — داخلی‌ها پیاده‌سازی native شان را حفظ و در تداخل نام همیشه برنده‌اند؛ ارائه‌دهنده‌های فرمان بر پلاگین‌های همنام برتری دارند ‏(config محلی‌تر از نصب پلاگین است).</p>
+<h4>کی کدام را انتخاب کنیم ‏(STT)</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>بک‌اند دارد…</th><th>استفاده</th></tr></thead>
+<tbody>
+<tr><td>یک فرمان شل واحد که فایل صوتی می‌گیرد و متن می‌دهد</td><td>‏<code>stt.providers.&lt;name&gt;: type: command</code> ‏(بدون پایتون)</td></tr>
+<tr><td>فقط hatch ی تک-فرمانی قدیمی مدنظر است</td><td>متغیر محیطی HERMES_LOCAL_STT_COMMAND ‏(argv-tokenized؛ بدون شل ضمنی)</td></tr>
+<tr><td>SDK ی پایتون بدون CLI</td><td>پلاگین ‏register_transcription_provider()</td></tr>
+<tr><td>auth ی refresh شونده OAuth، chunk های استریم، متادیتای فهرست صداها</td><td>پلاگین ‏register_transcription_provider()</td></tr>
+<tr><td>داخلی‌ای از قبل پوششش می‌دهد ‏(local، groq، openai و…)</td><td>‏<code>stt.provider: &lt;name&gt;</code> — داخلی‌ها inline هستند</td></tr>
+</tbody>
+</table>
+</div>
+<h4>ترتیب حل</h4>
+<ol>
+  <li><b>‏stt.provider یک نام داخلی است</b> ← dispatch داخلی. <b>همیشه برنده.</b></li>
+  <li><b>‏stt.provider با stt.providers.&lt;name&gt; دارای command: بخورد</b> ← runner ی ارائه‌دهنده-فرمان. بر پلاگین همنام برتری دارد.</li>
+  <li><b>‏stt.provider با TranscriptionProvider ثبت‌شده توسط پلاگین بخورد</b> ← dispatch پلاگینی:
+    <ul>
+      <li>اگر ‏is_available() ی پلاگین False برگرداند ‏(creds یا SDK غایب)، فراخوانی پاکت خطای غیرقابل‌دسترس‌بودنی می‌دهد که پلاگین را مشخص می‌کند — نه پیام عمومی «No STT provider available».</li>
+      <li>در غیر این صورت ‏transcribe() ی پلاگین با model ‏(از آرگومان عمومی model= با fallback به stt.&lt;provider&gt;.model) و language ‏(از stt.&lt;provider&gt;.language) صدا زده می‌شود.</li>
+    </ul>
+  </li>
+  <li><b>بدون تطبیق</b> ← خطای «No STT provider available».</li>
+</ol>
+<h4>namespace ی config ی per-provider</h4>
+<p>پلاگین‌ها پیکربندی per-provider شان را از ‏stt.&lt;provider&gt; در config.yaml می‌خوانند، آینهٔ روشی که داخلی‌ها ‏stt.openai.model / stt.mistral.model را می‌خوانند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>stt:
+  provider: my-stt
+  my-stt:
+    model: whisper-large-v3
+    language: ja          # forwarded as language= to transcribe()
+    # any other plugin-specific keys go here; read them via your
+    # own config.yaml access in __init__/is_available/transcribe</code></pre>
+</div>
+<p>dispatcher مقدار model و language را از این بخش forward می‌کند؛ بقیه را پلاگین خودش می‌خواند.</p>
+<h4>حداقل پلاگین</h4>
+<p>این را در ‏<code>~/.hermes/plugins/my-stt/</code> بگذارید:</p>
+<p>‏<code>plugin.yaml</code>:</p>
+<pre dir="ltr"><code>name: my-stt
+version: 0.1.0
+description: "My custom Python STT backend"</code></pre>
+<p>‏<code>__init__.py</code>:</p>
+<pre dir="ltr"><code>from agent.transcription_provider import TranscriptionProvider
+
+
+class MySTTProvider(TranscriptionProvider):
+    @property
+    def name(self) -&gt; str:
+        return "my-stt"  # what stt.provider matches against
+
+    @property
+    def display_name(self) -&gt; str:
+        return "My Custom STT"
+
+    def is_available(self) -&gt; bool:
+        # Return False when credentials/deps are missing — picker skips
+        # this row but the dispatcher still routes here on explicit config.
+        import os
+        return bool(os.environ.get("MY_STT_API_KEY"))
+
+    def transcribe(self, file_path, *, model=None, language=None, **extra):
+        # Return the standard transcribe envelope:
+        #   {"success": bool, "transcript": str, "provider": str, "error": str}
+        # Do NOT raise — convert exceptions to the error envelope so the
+        # gateway/CLI caller sees a consistent shape on failure.
+        try:
+            import my_stt_sdk
+            client = my_stt_sdk.Client()
+            text = client.transcribe(open(file_path, "rb"))
+            return {
+                "success": True,
+                "transcript": text,
+                "provider": "my-stt",
+            }
+        except Exception as exc:
+            return {
+                "success": False,
+                "transcript": "",
+                "error": f"my-stt failed: {exc}",
+                "provider": "my-stt",
+            }
+
+
+def register(ctx):
+    ctx.register_transcription_provider(MySTTProvider())</code></pre>
+<p>فعالش کنید ‏(<code>hermes plugins enable my-stt</code>)، ‏stt.provider: my-stt را در config.yaml ست کنید و رونویسی پیام صوتی از پلاگین شما عبور خواهد کرد.</p>
+<h4>هوک‌های اختیاری</h4>
+<ul>
+  <li>‏<code>list_models()</code> ← فهرستی از dict های ‏{id, display, languages, max_audio_seconds}.</li>
+  <li>‏<code>default_model()</code> ← رشته‌ای که وقتی کاربر مدل را override نکرده برگردانده می‌شود.</li>
+  <li>‏<code>get_setup_schema()</code> ← برگرداندن ‏{name, badge, tag, env_vars: [{key, prompt, url}]} برای قدرت دادن به ردیف‌های picker در hermes tools / hermes setup ‏(دستهٔ picker برای STT هنوز ارسال نشده — این متادیتا برای سازگاری رو-به-جلو در دسترس پلاگین‌هاست).</li>
+</ul>
+<p>ABC ی کامل همراه docstring ها را در ‏<code>agent/transcription_provider.py</code> ببینید.</p>
+</section>
+
+<div class="pager">
+  <a href="voice-mode.html"><span class="dir">→ قبلی</span><span class="ttl">حالت صوتی</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/tts" target="_blank" rel="noopener">Voice &amp; TTS</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

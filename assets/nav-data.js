@@ -87,7 +87,7 @@ window.HERMES_NAV = [
   { p:"user-guide/features/browser.html",         t:"مرورگر",                           d:0 },
   { p:"user-guide/features/vision.html",          t:"بینایی (تصاویر)",                  d:1 },
   { p:"user-guide/features/image-generation.html", t:"تولید تصویر",                     d:1 },
-  { p:"user-guide/features/tts.html",             t:"متن به گفتار (TTS)",               d:0 }
+  { p:"user-guide/features/tts.html",             t:"متن به گفتار (TTS)",               d:1 }
 ]},
 { id:"messaging", cat:"💬 پیام‌رسان‌ها", pages:[
   { p:"user-guide/messaging/index.html",           t:"نمای کلی گیت‌وی پیام‌رسان",        d:1 },
