@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nous Portal — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/integrations/nous-portal" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>یکپارچه‌سازی‌ها<span class="sep">/</span><strong>Nous Portal</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>Nous Portal</h1>
+<p><a href="https://portal.nousresearch.com" target="_blank" rel="noopener">Nous Portal</a> گیت‌وی اشتراکِ یکپارچهٔ Nous Research و <b>روش توصیه‌شدهٔ اجرای Hermes Agent</b> است. یک ورود OAuth جایگزین بازی پنج‌دستِ حساب‌های جدا، ‏کلیدهای API و روابط صورتحساب در هر آزمایشگاه مدل، ‏API جستجو، ‏تولیدکننده تصویر و ارائه‌دهنده مرورگری می‌شود که وگرنه باید دستی سیم‌کشی‌شان می‌کردید.</p>
+<p>فقط وقت راه‌اندازی یک چیز را دارید؟ همین را راه بیندازید. سریع‌ترین مسیر:</p>
+<pre dir="ltr"><code>hermes setup --portal</code></pre>
+<p>این تک‌فرمان OAuth ی Portal را اجرا، مدل Nous را برای انتخاب می‌گذارد، Nous را به‌عنوان ارائه‌دهندهٔ استنتاج در config.yaml ست و Tool Gateway را روشن می‌کند. بلافاصله بعدش آمادهٔ hermes chat هستید.</p>
+<p>هنوز اشتراک ندارید؟ ‏<a href="https://portal.nousresearch.com/manage-subscription" target="_blank" rel="noopener">portal.nousresearch.com/manage-subscription</a> — ثبت‌نام کنید و بعد برگردید فرمان بالا را اجرا کنید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> داخل اشتراک چه چیزی هست</h2>
+<h3>+۳۰۰ مدل frontier، یک قبض</h3>
+<p>‏Portal کاتالوگ منتخبی از مدل‌های agentic از سراسر اکوسیستم را proxy می‌کند — صورتحساب روی اشتراک Nous شما نه موجودی اعتباری جدا per آزمایشگاه.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>خانواده</th><th>مدل‌ها</th></tr></thead>
+<tbody>
+<tr><td><b>Anthropic Claude</b></td><td>Opus 4.7، ‏Opus 4.6، ‏Sonnet 4.6، ‏Haiku 4.5</td></tr>
+<tr><td><b>OpenAI</b></td><td>GPT-5.5، ‏GPT-5.5 Pro، ‏GPT-5.4 Mini، ‏GPT-5.4 Nano، ‏GPT-5.3 Codex</td></tr>
+<tr><td><b>Google Gemini</b></td><td>Gemini 3 Pro Preview، ‏Gemini 3 Flash Preview، ‏Gemini 3.1 Pro Preview، ‏Gemini 3.1 Flash Lite Preview</td></tr>
+<tr><td><b>DeepSeek</b></td><td>DeepSeek V4 Pro</td></tr>
+<tr><td><b>Qwen</b></td><td>Qwen3.7-Max، ‏Qwen3.6-35B-A3B</td></tr>
+<tr><td><b>Kimi / Moonshot</b></td><td>Kimi K2.6</td></tr>
+<tr><td><b>GLM / Zhipu</b></td><td>GLM-5.1</td></tr>
+<tr><td><b>MiniMax</b></td><td>MiniMax M2.7</td></tr>
+<tr><td><b>xAI</b></td><td>Grok 4.3</td></tr>
+<tr><td><b>NVIDIA</b></td><td>Nemotron-3 Super 120B-A12B</td></tr>
+<tr><td><b>Tencent</b></td><td>Hunyuan 3 Preview</td></tr>
+<tr><td><b>Xiaomi</b></td><td>MiMo V2.5 Pro</td></tr>
+<tr><td><b>StepFun</b></td><td>Step 3.5 Flash</td></tr>
+<tr><td><b>Hermes</b></td><td>Hermes-4-70B، ‏Hermes-4-405B ‏(چت؛ یادداشت پایین را ببینید)</td></tr>
+<tr><td><b>+ بقیهٔ همه</b></td><td>+۲۸۰ مدل اضافه — کل frontier ی agentic</td></tr>
+</tbody>
+</table>
+</div>
+<p>زیر کاپوت Portal هر مدل را به مناسب‌ترین backend مسیریابی می‌کند — بعضی مدل‌ها از OpenRouter می‌روند، بعضی از ارائه‌دهنده‌های اختصاصی یا ثانویه و مسیریابی یک مدل مشخص ممکن است به مرور تغییر کند. به هر حال صورتحساب روی اشتراک Nous شماست. وسط نشست با ‎/model‎ بین Claude Sonnet 4.6 برای کد و Gemini 3 Pro برای زمینه بلند سوئیچ کنید — بدون credential جدید، بدون شارژ، بدون خطای ناگهانی موجودی صفر.</p>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>چون مسیریابی per-model است و همیشه از OpenRouter نمی‌گذرد، افزونه‌های درخواست مخصوص-OpenRouter ‏(مثل ترجیحات مسیریابی provider، ‏sticky routing با session_id یا cache_control سطح-بالا) بخشی از قرارداد API ی Portal نیستند و بسته به اینکه کدام backend سرویس‌دهنده باشد ممکن است نادیده گرفته شوند.</p>
+</div>
+<h3>Nous Tool Gateway</h3>
+<p>همان اشتراک <a href="../user-guide/features/tool-gateway.html">Tool Gateway</a> را باز می‌کند که فراخوانی ابزارهای Hermes Agent را از طریق زیرساخت مدیریت‌شده توسط Nous عبور می‌دهد. پنج بک‌اند، یک ورود:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ابزار</th><th>شریک</th><th>کارش</th></tr></thead>
+<tbody>
+<tr><td><b>جستجو و استخراج وب</b></td><td>Firecrawl</td><td>جستجوی درجه-ایجنت و استخراج تمام‌صفحه. نه کلید Firecrawl، نه نگهبانی rate limit.</td></tr>
+<tr><td><b>تولید تصویر</b></td><td>FAL</td><td>نه مدل زیر یک نقطهٔ پایانی: FLUX 2 Klein 9B، ‏FLUX 2 Pro، ‏Z-Image Turbo، ‏Nano Banana Pro ‏(Gemini 3 Pro Image)، ‏GPT Image 1.5، ‏GPT Image 2، ‏Ideogram V3، ‏Recraft V4 Pro، ‏Qwen Image.</td></tr>
+<tr><td><b>متن-به-گفتار</b></td><td>OpenAI TTS</td><td>TTS باکیفیت بدون کلید جداگانهٔ OpenAI. <a href="../user-guide/features/voice-mode.html">حالت صوتی</a> را روی پلتفرم‌های پیام‌رسانی فعال می‌کند.</td></tr>
+<tr><td><b>اتوماسیون مرورگر ابری</b></td><td>Browser Use</td><td>نشست‌های Chromium بدون‌سر برای browser_navigate/click/type/vision. بدون نیاز به حساب Browserbase.</td></tr>
+<tr><td><b>سندباکس ترمینال ابری</b></td><td>Modal</td><td>سندباکس‌های ترمینال serverless برای اجرای کد ‏(افزونهٔ اختیاری).</td></tr>
+</tbody>
+</table>
+</div>
+<p>بدون گیت‌وی، وصله‌کردن هرکدام یعنی حساب Firecrawl، حساب FAL، حساب Browser Use، کلید OpenAI و حساب Modal — پنج ثبت‌نام جدا، پنج داشبورد جدا، پنج جریان شارژ جدا. با گیت‌وی همه از یک اشتراک عبور می‌کند.</p>
+<p>می‌توانید فقط ابزارهای گیت‌وی خاصی را هم روشن کنید ‏(مثلاً جستجوی وب بدون تولید تصویر) — بخش ترکیب گیت‌وی با بک‌اندهای خودتان پایین را ببینید.</p>
+<h3>بدون credential در dotfiles تان</h3>
+<p>چون همه‌چیز از طریق یک نشست Portal احراز‌شده-با-OAuth عبور می‌کند، فایل .env ی انباشته از دوجین کلید API بلندعمر جمع نمی‌کنید. refresh token در ~/.hermes/auth.json تنها credential روی دیسک است و هرمس از آن per-request مقدار JWT های کوتاه‌عمر ضرب می‌کند — بخش مدیریت توکن پایین.</p>
+<h3>برابری بین-پلتفرمی</h3>
+<p><a href="../user-guide/windows-native.html">ویندوز native</a> راه‌اندازی کلید API ی per-tool را خشن‌ترین لبه‌اش می‌داند — ساخت حساب Firecrawl، حساب FAL، حساب Browser Use و کلید OpenAI از ویندوز پراصطکاک‌ترین بخش رسیدن به ایجنتی کاراست. اشتراک Portal این را هموار می‌کند: یک OAuth مدل و همهٔ ابزارهای گیت‌وی را پوشش می‌دهد تا کاربران ویندوز همان تجربهٔ macOS/Linux را داشته باشند بدون پیکربندی دستی چهار بک‌اند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> یادداشتی دربارهٔ Hermes 4</h2>
+<p>خانوادهٔ خودِ Nous Research یعنی <b>Hermes 4</b> ‏(Hermes-4-70B، ‏Hermes-4-405B) از طریق Portal با نرخ‌های شدیداً تخفیف‌خورده در دسترس است. اینها <b>مدل‌های چت هیبریدی-استدلالی frontier</b> اند — قوی در ریاضی، علوم، پیروی از دستور، پایبندی به schema، نقش‌آفرینی و نوشتن بلند.</p>
+<p>اما <b>برای مصرف داخل Hermes Agent توصیه نمی‌شوند</b>. ‏Hermes 4 برای چت و استدلال تنظیم شده نه حلقهٔ تندِ فراخوانی-ابزاری که ایجنت به آن تکیه دارد. برای گردش‌کارهای پژوهشی یا از طریق <a href="../user-guide/features/subscription-proxy.html">پروکسی اشتراک</a> از سایر ابزارها استفاده‌شان کنید — ولی برای کار ایجنت، یک مدل agentic ی frontier از کاتالوگ بردارید:</p>
+<pre dir="ltr"><code>/model anthropic/claude-sonnet-4.6     # best general-purpose agentic model
+/model openai/gpt-5.5-pro              # strong reasoning + tool calling
+/model google/gemini-3-pro-preview     # huge context window
+/model deepseek/deepseek-v4-pro        # cost-effective coder</code></pre>
+<p><a href="https://portal.nousresearch.com/info" target="_blank" rel="noopener">صفحهٔ info ی مدل</a> خود Portal همین هشدار را حمل می‌کند؛ پس این نظر سمت-هرمس نیست — راهنمای رسمی Nous Research است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> راه‌اندازی</h2>
+<h3>نصب تازه — یک فرمان</h3>
+<pre dir="ltr"><code>hermes setup --portal</code></pre>
+<p>کل setup را یکجا اجرا می‌کند:</p>
+<ol>
+  <li>مرورگرتان را برای ورود OAuth به portal.nousresearch.com باز می‌کند</li>
+  <li>refresh token را در ~/.hermes/auth.json ذخیره می‌کند</li>
+  <li>یک مدل Nous از فهرست منتخب برای انتخاب می‌گذارد ‏(یا skip کنید تا فعلی بماند)</li>
+  <li>وقتی مدلی بردارید Nous را به‌عنوان ارائه‌دهندهٔ استنتاج در ~/.hermes/config.yaml ست می‌کند</li>
+  <li>Tool Gateway را روشن می‌کند ‏(مسیریابی وب، تصویر، TTS، مرورگر)</li>
+  <li>شما را آمادهٔ hermes chat به ترمینال برمی‌گرداند</li>
+</ol>
+<p>اشتراک ندارید؟ اول در ‏<a href="https://portal.nousresearch.com/manage-subscription" target="_blank" rel="noopener">manage-subscription</a> ثبت‌نام کنید.</p>
+<h3>نصب موجود — افزودن Portal کنار سایر ارائه‌دهنده‌ها</h3>
+<p>هرمس تان از قبل با OpenRouter یا Anthropic یا غیره پیکربندی شده و Portal را کنارشان می‌خواهید:</p>
+<pre dir="ltr"><code>hermes model
+# pick "Nous Portal" from the provider list
+# browser opens, sign in, done</code></pre>
+<p>ارائه‌دهنده‌های فعلی‌تان پیکربندی می‌مانند. وسط نشست با ‎/model‎ یا بین نشست‌ها با hermes model بین‌شان سوئیچ کنید — Portal یکی از ارائه‌دهنده‌های در دسترس‌تان می‌شود نه تنها گزینه.</p>
+<h3>راه‌اندازی headless / SSH / راه‌دور</h3>
+<p>‏OAuth مرورگر می‌خواهد ولی callback ی loopback روی ماشینی اجرا می‌شود که هرمس روی آن اجراست. برای host های راه‌دور بخش <a href="https://hermes-agent.nousresearch.com/docs/guides/oauth-over-ssh" target="_blank" rel="noopener">OAuth از طریق SSH / Host های راه‌دور</a> را ببینید — همان الگوها برای Portal هم مثل هر ارائه‌دهندهٔ OAuth ی دیگر کار می‌کند ‏(port forwarding با ssh -L).</p>
+<h3>setup ی پروفایل</h3>
+<p>اگر از <a href="../user-guide/profiles.html">پروفایل‌های</a> هرمس مصرف می‌کنید، refresh token ی Portal خودکار بین همهٔ پروفایل‌ها از طریق مخزن توکن مشترک share می‌شود. روی هر پروفیلی یک بار وارد شوید و بقیه خودکار می‌گیرندش — بدون تکرار جریان OAuth per-profil.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مصرف روزمرهٔ Portal</h2>
+<h3>بازرسی سیم‌کشی فعلی</h3>
+<pre dir="ltr"><code>hermes portal            # log in to Nous Portal + set it up (one-shot onboarding)
+hermes portal info       # login status, subscription info, model + gateway routing
+hermes portal status     # alias for `portal info`
+hermes portal tools      # detailed Tool Gateway catalog with per-tool routing
+hermes portal open       # open the subscription management page in your browser</code></pre>
+<p>‏hermes portal ‏(بدون زیرفرمان) نام مستعار خوانا-برای-انسانِ hermes auth add nous --type oauth است — واردتان می‌کند، مدل Nous برای انتخاب می‌گذارد، Nous را ارائه‌دهندهٔ استنتاج قرار و opt-in ی Tool Gateway را پیشنهاد می‌دهد ‏(همان hermes setup --portal).</p>
+<p>‏hermes portal info نمای کلی می‌دهد: وضعیت Auth، ‏Portal، مدل فعال و جدول Tool Gateway نشان‌دهندهٔ اینکه کدام ابزارها via Nous Portal مسیریابی می‌شوند و Cloud terminal هنوز پیکربندی نشده.</p>
+<h3>تعویض مدل</h3>
+<p>داخل نشست:</p>
+<pre dir="ltr"><code>/model anthropic/claude-sonnet-4.6
+/model openai/gpt-5.5-pro
+/model google/gemini-3-pro-preview</code></pre>
+<p>یا انتخاب‌گر را باز کنید ‏(hermes model بیرون نشست؛ فلش‌ها و Enter داخل ‎/model‎).</p>
+<h3>ترکیب گیت‌وی با بک‌اندهای خودتان</h3>
+<p>اگر مثلاً حساب Browserbase دارید و می‌خواهید آن را نگه دارید در حالی که جستجوی وب و تولید تصویر از Nous عبور کند، پشتیبانی می‌شود. با hermes tools بک‌اند هر ابزار را بردارید:</p>
+<pre dir="ltr"><code>hermes tools
+# → Web search       → "Nous Subscription"
+# → Image generation → "Nous Subscription"
+# → Browser          → "Browserbase"  (your existing key)
+# → TTS              → "Nous Subscription"</code></pre>
+<p>‏Tool Gateway per-ابزار opt-in است نه همه-یا-هیچ. بک‌اندهای مدیریت‌شده در hermes tools ظاهر می‌شوند چه وارد Nous Portal باشید چه نباشید — اگر قبل از احراز هویت Nous Subscription را بردارید هرمس ورود Portal را inline اجرا می‌کند ‏(ارائه‌دهندهٔ استنتاج‌تان را عوض نمی‌کند و به ابزارهای دیگرتان دست نمی‌زند). ماتریس کامل per-tool در <a href="../user-guide/features/tool-gateway.html">مستندات Tool Gateway</a>.</p>
+<h3>مدیریت اشتراک</h3>
+<ul>
+  <li><b>وب:</b> ‏<a href="https://portal.nousresearch.com/manage-subscription" target="_blank" rel="noopener">portal.nousresearch.com/manage-subscription</a></li>
+  <li><b>میان‌بر CLI:</b> ‏hermes portal open ‏(همان صفحه در مرورگر پیش‌فرض)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> مرجع پیکربندی و مدیریت توکن</h2>
+<p>بعد از hermes setup --portal مقدار ~/.hermes/config.yaml چنین می‌شود:</p>
+<pre dir="ltr"><code>model:
+  provider: nous
+  default: anthropic/claude-sonnet-4.6     # or whatever model you picked
+  base_url: https://inference-api.nousresearch.com/v1</code></pre>
+<p>تنظیمات Tool Gateway زیر بخش ابزار مربوطه زندگی می‌کنند — هر دسته یک کلید انتخاب دارد و برداشتن Nous Subscription در hermes tools مقدار nous را می‌نویسد: ‏web.backend، ‏image_gen.provider، ‏tts.provider و ‏browser.cloud_provider همگی nous.</p>
+<p>runtime همیشه از انتخاب ذخیره‌شده پیروی می‌کند — کلیدهای مستقیم API مانده در .env وقتی دسته nous است نادیده گرفته می‌شوند و برداشتن ارائه‌دهندهٔ مستقیم ‏(مثل image_gen.provider: fal) بدون کلیدش خطای شفاف می‌دهد نه reroute ی بی‌صدای گیت‌وی. ‏(config های قدیمی فلگ legacy ی use_gateway: true داشتند؛ معادل nous خوانده می‌شود ولی دیگر نوشته نمی‌شود.)</p>
+<p>توکن refresh ی OAuth جدا در ~/.hermes/auth.json ذخیره می‌شود ‏(نه در config.yaml — credential و config عمداً جدا نگه داشته می‌شوند).</p>
+<h3>مدیریت توکن</h3>
+<p>هرمس به‌ازای هر فراخوانی استنتاج از روی refresh token ی ذخیره‌شدهٔ Portal مقدار JWT ی کوتاه‌عمر ضرب می‌کند به‌جای مصرف کلید API ی بلندعمر. چرخهٔ حیات توکن کاملاً خودکار است — refresh، ‏mint، ‏retry روی 401 گذرا — و شما هرگز نمی‌بینیدش.</p>
+<p>اگر Portal توکن refresh را باطل کند ‏(تغییر رمز، ‏revoke دستی، ‏انقضای نشست)، توکن باطل <b>محلیاً قرنطینه</b> می‌شود تا هرمس تکرارش نکند و رشته‌ای از 401 های یکسان نبینید. فراخوانی بعدی پیام واضح «re-authentication required» surface می‌کند. ‏hermes auth add nous را اجرا کنید تا دوباره وارد شوید؛ قرنطینه در اولین ورود موفق پاک می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> عیب‌یابی</h2>
+<h3>‏hermes portal info می‌گوید «not logged in»</h3>
+<p>جریان OAuth را کامل نکرده‌اید یا refresh token تان پاک شده. ‏hermes portal را اجرا کنید یا با hermes model دوباره Nous Portal را بردارید.</p>
+<h3>وسط نشست پیام «re-authentication required» گرفتید</h3>
+<p>توکن refresh ی Portal باطل شده ‏(تغییر رمز، ‏revoke دستی یا انقضای نشست). ‏hermes auth add nous را اجرا کنید؛ درخواست بعدی credential های جدید را مصرف می‌کند و قرنطینهٔ توکن قدیمی روی ورود موفق خودکار پاک می‌شود.</p>
+<h3>مدل مشخصی از یک ارائه‌دهنده می‌خواهید که Portal expose نمی‌کند</h3>
+<p>‏Portal هر مدل را به backend مناسبی مسیریابی می‌کند، پس بیشتر مدل‌های پشتیبانی‌شدهٔ OpenRouter معمولاً موجوده. اگر مدلی در ‎/model‎ ظاهر نشد slug سبک-OpenRouter را مستقیم امتحان کنید ‏(/model anthropic/claude-opus-4.6). واقعاً غایب بود؟ <a href="https://github.com/NousResearch/hermes-agent/issues" target="_blank" rel="noopener">issue باز کنید</a> — کاتالوگ Portal را به هرمس surface می‌کنیم و شکاف‌ها معمولاً یعنی config ی مسیریابی قابل‌به‌روزرسانی.</p>
+<h3>صورتحساب‌ها روی حسابتان Portal ظاهر نمی‌شوند</h3>
+<p>اول hermes portal info را چک کنید — اگر ارائه‌دهندهٔ دیگری نشان داد ‏(Model: currently openrouter به‌جای using Nous as inference provider)، config محلی‌تان منحرف شده. ‏hermes model را اجرا، Nous Portal را بردارید و درخواست بعدی از اشتراک‌تان عبور خواهد کرد.</p>
+<h3>ببینید نیز</h3>
+<ul>
+  <li><b><a href="../user-guide/features/tool-gateway.html">Tool Gateway</a></b> — جزئیات کامل هر ابزار گیت‌وی، ‏config ی per-tool و قیمت‌گذاری</li>
+  <li><b><a href="../user-guide/features/subscription-proxy.html">پروکسی اشتراک</a></b> — مصرف اشتراک Portal از ابزارهای غیر-هرمس</li>
+  <li><b><a href="../user-guide/features/voice-mode.html">حالت صوتی</a></b> — گفتگوهای صوتی با OpenAI TTS ی Portal</li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/integrations/providers" target="_blank" rel="noopener">ارائه‌دهندگان AI</a></b> — کاتالوگ کامل برای مقایسهٔ جایگزین‌ها</li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/guides/oauth-over-ssh" target="_blank" rel="noopener">OAuth از طریق SSH</a></b> — ورود از host های راه‌دور یا محیط‌های فقط-مرورگر</li>
+  <li><b><a href="../user-guide/profiles.html">پروفایل‌ها</a></b> — چند پیکربندی هرمس با یک ورود Portal</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="../index.html"><span class="dir">→ قبلی</span><span class="ttl">نمای کلی یکپارچه‌سازی‌ها</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">ارائه‌دهندگان مدل (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/integrations/nous-portal" target="_blank" rel="noopener">Nous Portal</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

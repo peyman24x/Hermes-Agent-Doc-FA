@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [hermes-agent-farsi.pages.dev](https://hermes-agent-farsi.pages.dev) ‏(اصلی) · [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) ‏(پشتیبان ماهانه) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۱۴ از ۲۰۷ صفحه (۵۵٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۱۵ از ۲۰۷ صفحه (۵۶٪)** |
 
 ---
 
@@ -565,6 +565,12 @@ hermes-docs-fa/
 - زنجیرهٔ pager: buzz ‏(پیام‌رسانی) ← integrations/index ← nous-portal ‏(به‌زودی) و buzz-integration ← index
 - پیشرفت: **۱۱۴ از ۲۰۷ صفحه فعال (۵۵٪)**
 
+### نشست ۷۱ — 2026-08-27 — 🌐 Nous Portal — پرارجاع‌ترین لینک ترجمه بالاخره فارسی شد
+- ترجمه و انتشار «Nous Portal» (۶ بخش): hermes setup --portal ی یک‌فرمانی، جدول خانواده‌های مدل ‏(+۳۰۰ مدل frontier از Claude تا Hermes-4)، پنج ابزار Tool Gateway با شرکا، حذف credential از dotfiles، برابری بین-پلتفرمی برای ویندوز native، یادداشت هشدار عدم توصیهٔ Hermes 4 برای کار ایجنت با پیشنهاد چهار مدل جایگزین، راه‌اندازی تازه/موجود/headless/profil ی، فرمان‌های hermes portal و جدول ترکیب per-tool با بک‌اندهای خودتان، مرجع config، قرنطینهٔ refresh token و عیب‌یابی
+- لینک‌های داخلی به این صفحه در سراسر سایت حالا به نسخهٔ فارسی می‌رسند؛ ارجاع‌های قبلی index/integrations که موقتاً انگلیسی بودند بعد از ترجمه providers برگردانده می‌شوند
+- زنجیرهٔ pager: …integrations/index ← nous-portal ← (providers به‌زودی)
+- پیشرفت: **۱۱۵ از ۲۰۷ صفحه فعال (۵۶٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -685,6 +691,7 @@ hermes-docs-fa/
 | 112 | `user-guide/profile-distributions.html` | توزیع پروفایل (اشتراک ایجنت) |
 | 113 | `integrations/index.html` | نمای کلی یکپارچه‌سازی‌ها |
 | 114 | `integrations/buzz.html` | Buzz |
+| 115 | `integrations/nous-portal.html` | Nous Portal |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|
