@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حافظهٔ Honcho — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/honcho" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>حافظهٔ Honcho</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>حافظهٔ Honcho ‏(Honcho Memory)</h1>
+<p><a href="https://github.com/plastic-labs/honcho" target="_blank" rel="noopener">Honcho</a> یک بک‌اند حافظهٔ AI-native است که استدلال جدلی و مدل‌سازی عمیق کاربر را روی سیستم حافظهٔ داخلی هرمس اضافه می‌کند. به‌جای storage ی سادهٔ کلید-مقدار، ‏Honcho مدلی در حال اجرا از اینکه کاربر کیست — ترجیحات، سبک ارتباط، اهداف و الگوها — نگه می‌دارد با استدلال دربارهٔ گفتگوها بعد از وقوعشان.</p>
+<div class="callout info">
+  <div class="callout-title">ℹ️ Honcho یک پلاگین ارائه‌دهندهٔ حافظه است</div>
+  <p>‏Honcho در سیستم <a href="memory-providers.html">ارائه‌دهندگان حافظه</a> یکپارچه شده. همهٔ قابلیت‌های پایین از طریق رابط واحد ارائه‌دهندهٔ حافظه در دسترس‌اند.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چه چیزی Honcho اضافه می‌کند</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>قابلیت</th><th>حافظهٔ داخلی</th><th>Honcho</th></tr></thead>
+<tbody>
+<tr><td>ماندگاری بین-نشستی</td><td>✔ فایل‌محور MEMORY.md/USER.md</td><td>✔ سمت-سرور با API</td></tr>
+<tr><td>پروفایل کاربر</td><td>✔ curate ی دستی توسط ایجنت</td><td>✔ استدلال جدلی خودکار</td></tr>
+<tr><td>خلاصهٔ نشست</td><td>—</td><td>✔ تزریق زمینهٔ scope شده-به-نشست</td></tr>
+<tr><td>ایزوله‌سازی چندایجنتی</td><td>—</td><td>✔ جداسازی per-peer</td></tr>
+<tr><td>حالت‌های مشاهده</td><td>—</td><td>✔ مشاهدهٔ unified یا directional</td></tr>
+<tr><td>نتیجه‌گیری‌ها ‏(بینش‌های مشتق)</td><td>—</td><td>✔ استدلال سمت-سرور دربارهٔ الگوها</td></tr>
+<tr><td>جستجو در تاریخچه</td><td>✔ جستجوی نشست FTS5</td><td>✔ جستجوی معنایی روی نتیجه‌گیری‌ها</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>استدلال جدلی:</b> بعد از هر نوبت گفتگو ‏(گیت‌خورده با dialecticCadence)، ‏Honcho مبادله را تحلیل و بینش‌هایی دربارهٔ ترجیحات، عادات و اهداف کاربر مشتق می‌کند. این‌ها انباشته می‌شوند و به ایجنت درکی عمیق‌کننده می‌دهد که فراتر از گفته‌های صریح کاربر است. جدلی عمق چند-پاسی ‏(۱ تا ۳ پاس) با انتخاب خودکار پرامپت cold/warm دارد — کوئری‌های cold-start روی حقایق عمومی کاربر متمرکزند و کوئری‌های warm زمینهٔ scope‌شده-به-نشست را اولویت می‌دهند.</p>
+<p><b>زمینهٔ scope‌شده-به-نشست:</b> زمینهٔ پایه حالا خلاصهٔ نشست را کنار بازنمایی کاربر و کارت peer شامل می‌شود. این به ایجنت آگاهی از آنچه در نشست فعلی بحث شده می‌دهد؛ تکرار را کم و پیوستگی را ممکن می‌کند.</p>
+<p><b>پروفایل‌های چندایجنتی:</b> وقتی چند نمونهٔ هرمس با همان کاربر حرف می‌زنند ‏(مثلاً دستیار کدنویسی و دستیار شخصی)، ‏Honcho پروفایل‌های peer جدا نگه می‌دارد. هر peer فقط مشاهده‌ها و نتیجه‌گیری‌های خودش را می‌بیند تا زمینه‌ها به هم آلوده نشوند.</p>
+<h3>Setup</h3>
+<pre dir="ltr"><code>hermes memory setup    # select "honcho" from the provider list</code></pre>
+<p>یا دستی:</p>
+<pre dir="ltr"><code># ~/.hermes/config.yaml
+memory:
+  provider: honcho</code></pre>
+<pre dir="ltr"><code>echo 'HONCHO_API_KEY=***' &gt;&gt; ~/.hermes/.env</code></pre>
+<p>کلید API را از ‏<a href="https://honcho.dev" target="_blank" rel="noopener">honcho.dev</a> بگیرید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> معماری</h2>
+<h3>تزریق زمینهٔ دولایه</h3>
+<p>هر نوبت ‏(در حالت hybrid یا context)، ‏Honcho دو لایهٔ زمینه داخل پرامپت سیستمی می‌سازد:</p>
+<ol>
+  <li><b>زمینهٔ پایه</b> — خلاصهٔ نشست، بازنمایی کاربر، کارت peer کاربر، بازنمایی خودِ AI و کارت هویت AI. refresh روی contextCadence. لایهٔ «این کاربر کیست».</li>
+  <li><b>مکمل جدلی</b> — استدلال ترکیب‌شده-با-LLM دربارهٔ وضعیت و نیازهای فعلی کاربر. refresh روی dialecticCadence. لایهٔ «الان چه چیزی مهم است».</li>
+</ol>
+<p>هر دو لایه الحاق و به بودجهٔ contextTokens بریده می‌شوند ‏(اگر ست باشد).</p>
+<h3>انتخاب پرامپت Cold/Warm</h3>
+<ul>
+  <li><b>Cold start</b> ‏(هنوز زمینهٔ پایه نیست): کوئری عمومی — «این فرد کیست؟ ترجیحات، اهداف و سبک کاری‌اش چیست؟»</li>
+  <li><b>Warm session</b> ‏(زمینهٔ پایه هست): کوئری scope‌شده-به-نشست — «با توجه به آنچه تا الان در این نشست بحث شده، مرتبط‌ترین زمینه دربارهٔ این کاربر چیست؟»</li>
+</ul>
+<p>خودکار بر اساس پر شدن زمینهٔ پایه انتخاب می‌شود.</p>
+<h3>سه پیچ مستقل پیکربندی</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پیچ</th><th>کنترل می‌کند</th><th>پیش‌فرض</th></tr></thead>
+<tbody>
+<tr><td><code>contextCadence</code></td><td>نوبت‌های بین فراخوانی‌های API ی context() ‏(refresh لایهٔ پایه)</td><td>۱</td></tr>
+<tr><td><code>dialecticCadence</code></td><td>نوبت‌های بین فراخوانی‌های LLM ی peer.chat() ‏(refresh لایهٔ جدلی)</td><td>۲ ‏(توصیه ۱–۵)</td></tr>
+<tr><td><code>dialecticDepth</code></td><td>تعداد پاس‌های chat() به‌ازای هر invocation ی جدلی ‏(۱–۳)</td><td>۱</td></tr>
+</tbody>
+</table>
+</div>
+<p>اینها متعامدند: می‌توانید refresh ی مکرر زمینه با جدلی کم‌بسامد، یا جدلی چند-پاسیِ عمیق با بسامد کم داشته باشید. مثال: ‏contextCadence: 1، ‏dialecticCadence: 5، ‏dialecticDepth: 2 یعنی زمینهٔ پایه هر نوبت refresh، جدلی هر ۵ نوبت و هر اجرای جدلی ۲ پاس.</p>
+<h3>عمق جدلی ‏(چند-پاس)</h3>
+<p>وقتی dialecticDepth > 1، هر invocation ی جدلی چند پاس chat() اجرا می‌کند:</p>
+<ul>
+  <li><b>پاس ۰:</b> پرامپت cold یا warm ‏(بالا)</li>
+  <li><b>پاس ۱:</b> خود-ممیزی — شکاف‌های ارزیابی اولیه را شناسایی و شواهدی از نشست‌های اخیر ترکیب می‌کند</li>
+  <li><b>پاس ۲:</b> آشتی‌دهی — تناقض‌های بین پاس‌های قبلی را چک و ترکیب نهایی تولید می‌کند</li>
+</ul>
+<p>هر پاس سطح استدلال تناسبی مصرف می‌کند ‏(پاس‌های اولیه سبک‌تر، سطح پایه برای پاس اصلی). با dialecticDepthLevels per-pass override کنید — مثلاً ["minimal", "medium", "high"] برای اجرای depth-3. پاس‌ها اگر پاس قبلی سیگنال قوی برگردانده باشد ‏(خروجی بلند ساختاریافته) زود bail می‌کنند، پس depth 3 همیشه یعنی ۳ فراخوانی LLM نیست.</p>
+<h3>Prewarm ی شروع-نشست</h3>
+<p>موقع init ی نشست، ‏Honcho یک فراخوانی جدلی در پس‌زمینه با dialecticDepth کامل پیکربندی‌شده شلیک و نتیجه را مستقیم به assembly ی زمینهٔ نوبت ۱ می‌دهد. prewarm ی تک‌پاس روی peer سرد اغلب خروجی کم برمی‌گرداند — اجرای چند-پاسی چرخهٔ audit/reconcile را قبل از اولین حرف کاربر اجرا می‌کند. اگر prewarm تا نوبت ۱ نرسیده باشد، نوبت ۱ به فراخوانی همگام با timeout ی محدود fallback می‌کند.</p>
+<h3>سطح استدلال تطبیقی-با-کوئری</h3>
+<p>جدلیِ خود-تزریق‌شونده مقدار dialecticReasoningLevel را با طول کوئری مقیاس می‌دهد: ‎+۱‎ سطح در ≥۱۲۰ نویسه، ‎+۲‎ در ≥۴۰۰، سقف reasoningLevelCap ‏(پیش‌فرض high). با reasoningHeuristic: false خاموش کنید تا هر فراخوانی خودکار روی dialecticReasoningLevel پین شود. سطوح موجود: minimal، low، medium، high، max.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گزینه‌های پیکربندی</h2>
+<p>‏Honcho در ~/.honcho/config.json ‏(سراسری) یا $HERMES_HOME/honcho.json ‏(مخصوص-پروفایل) پیکربندی می‌شود. ویزارد setup این کار را برایتان می‌کند.</p>
+<h3>‏Honcho خودمیزبان با احراز هویت</h3>
+<p>وقتی هرمس را به سرور self-hosted ی Honcho اشاره می‌دهید، ‏hermes honcho setup ‏(و hermes memory setup) بعد از base URL یک <b>توکن محلی JWT / bearer</b> می‌پرسد. JWT ای امضاشده با AUTH_JWT_SECRET ی سرور ‏(متغیر env ی compose ی Honcho) paste کنید تا دسترسی احراز‌شده فعال شود؛ برای سرورهایی با AUTH_USE_AUTH=false خالی بگذارید. توکن محلی زیر بلوک host ذخیره می‌شود ‏(hosts.&lt;host&gt;.apiKey در honcho.json) جدا از apiKey ی ابری، پس بعداً می‌توانید پرامپت Cloud or local? را بدون از دست دادن هیچ‌کدام از credential ها به cloud برگردانید.</p>
+<h3>مرجع کامل config</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>کلید</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>contextTokens</code></td><td>null ‏(بدون سقف)</td><td>بودجه توکن زمینهٔ خود-تزریق per-turn. عدد بگذارید ‏(مثل ۱۲۰۰) تا سقف بخورد؛ برش روی مرز واژه‌ها</td></tr>
+<tr><td><code>contextCadence</code></td><td>۱</td><td>حداقل نوبت بین فراخوانی‌های API ی context() ‏(refresh لایهٔ پایه)</td></tr>
+<tr><td><code>dialecticCadence</code></td><td>۲</td><td>حداقل نوبت بین فراخوانی‌های LLM ی peer.chat() ‏(لایهٔ جدلی). توصیه ۱–۵. در حالت tools بی‌ربط — مدل صریحاً صدا می‌زند</td></tr>
+<tr><td><code>dialecticDepth</code></td><td>۱</td><td>تعداد پاس‌های .chat() per-invocation ی جدلی. محدود ۱–۳</td></tr>
+<tr><td><code>dialecticDepthLevels</code></td><td>null</td><td>آرایهٔ اختیاری سطح استدلال per-pass مثل ["minimal", "low", "medium"]. بر پیش‌فرض‌های تناسبی مقدم</td></tr>
+<tr><td><code>dialecticReasoningLevel</code></td><td>'low'</td><td>سطح پایهٔ استدلال: minimal، low، medium، high، max</td></tr>
+<tr><td><code>dialecticDynamic</code></td><td>true</td><td>true یعنی مدل می‌تواند سطح استدلال را per-call با پارامتر ابزار override کند</td></tr>
+<tr><td><code>dialecticMaxChars</code></td><td>۶۰۰</td><td>حداکثر نویسهٔ نتیجهٔ جدلی تزریق‌شده در پرامپت سیستمی</td></tr>
+<tr><td><code>recallMode</code></td><td>'hybrid'</td><td>hybrid ‏(خود-تزریق + ابزار)، context ‏(فقط تزریق)، tools ‏(فقط ابزار)</td></tr>
+<tr><td><code>writeFrequency</code></td><td>'async'</td><td>کی پیام‌ها flush شوند: async ‏(thread پس‌زمینه)، turn ‏(همگام)، session ‏(دسته‌ای آخر) یا عدد N</td></tr>
+<tr><td><code>saveMessages</code></td><td>true</td><td>پیام‌ها به API ی Honcho ماندگار شوند یا نه</td></tr>
+<tr><td><code>observationMode</code></td><td>'directional'</td><td>directional ‏(همه روشن) یا unified ‏(استخر مشترک). برای کنترل ریز با آبجکت observation بازنویسی شود</td></tr>
+<tr><td><code>messageMaxChars</code></td><td>۲۵۰۰۰</td><td>حداکثر نویسه per-message در add_messages(). در صورت عبور chunked می‌شود</td></tr>
+<tr><td><code>dialecticMaxInputChars</code></td><td>۱۰۰۰۰</td><td>حداکثر نویسه ورودی کوئری جدلی به peer.chat()</td></tr>
+<tr><td><code>sessionStrategy</code></td><td>'per-directory'</td><td>per-directory، per-repo، per-session یا global</td></tr>
+<tr><td><code>pinUserPeer</code></td><td>false</td><td>فقط گیت‌وی. true یعنی همهٔ کاربران پلتفرم به peerName جمع می‌شوند</td></tr>
+<tr><td><code>userPeerAliases</code></td><td>{}</td><td>فقط گیت‌وی. نگاشت runtime ID ها به peers ‏({"7654321": "alice"}). چند-به-یک</td></tr>
+<tr><td><code>runtimePeerPrefix</code></td><td>""</td><td>فقط گیت‌وی. namespace کردن runtime ID های ناشناخته ‏(telegram_7654321) وقتی alias نخورد</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>استراتژی نشست</b> تعیین می‌کند نشست‌های Honcho چطور به کار شما نگاشت شوند:</p>
+<ul>
+  <li><b>per-session</b> — هر اجرای herms نشست تازه. شروع تمیز، حافظه از طریق ابزار. برای کاربران جدید توصیه می‌شود.</li>
+  <li><b>per-directory</b> — یک نشست Honcho per دایرکتوری کاری. زمینه بین اجراها انباشته می‌شود.</li>
+  <li><b>per-repo</b> — یک نشست per مخزن git.</li>
+  <li><b>global</b> — یک نشست واحد بین همهٔ دایرکتوری‌ها.</li>
+</ul>
+<p><b>حالت recall</b> کنترل می‌کند حافظه چطور وارد گفتگو شود:</p>
+<ul>
+  <li><b>hybrid</b> — زمینه خود-تزریق به پرامپت سیستمی <b>و</b> ابزارها در دسترس ‏(مدل تصمیم می‌گیرد کی کوئری بزند).</li>
+  <li><b>context</b> — فقط خود-تزریق؛ ابزارها پنهان.</li>
+  <li><b>tools</b> — فقط ابزارها، بدون خود-تزریق. ایجنت باید صریحاً honcho_reasoning، ‏honcho_search و… را صدا بزند.</li>
+</ul>
+<p>تنظیمات per-recall-mode: در hybrid همه فعال‌اند؛ در context فقط writeFrequency/contextCadence/contextTokens مهم‌اند و cadence ی جدلی هنوز فراخوانی‌های خودکار را گیت می‌کند ولی ابزارها نیستند؛ در tools مدل کاملاً در کنترل است — هر وقت خواست با reasoning_level دلخواه honcho_reasoning صدا می‌زند و تنظیمات cadence/بودجه فقط به حالت‌های خود-تزریق ‏(hybrid و context) اعمال می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> نگاشت هویت گیت‌وی و Observation</h2>
+<p>این تنظیمات فقط وقتی مهم‌اند که <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/gateway-internals" target="_blank" rel="noopener">گیت‌وی هرمس</a> را اجرا کنید — تنها نقطهٔ ورودی‌ای که کاربران با runtime ID های بومی-پلتفرم وارد می‌شوند ‏(UID تلگرام، snowflake دیسکورد، کاربر اسلک). نشست‌های CLI/TUI/دسکتاپ runtime ID ندارند و همیشه به peerName حل می‌شوند، پس بیرون گیت‌وی این کلیدها بی‌اثرند.</p>
+<p>ویزارد setup تشخیص می‌دهد پلتفرم گیت‌وی وصل است یا نه و نبودش این گام را کامل skip می‌کند. موقع اجرا یک سؤال می‌پرسد — <i>چه کسی با این گیت‌وی حرف می‌زند؟</i> — و کلیدها را مشتق می‌کند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پاسخ</th><th>نتیجه</th></tr></thead>
+<tbody>
+<tr><td><b>فقط خودم</b></td><td>pinUserPeer: true — همهٔ کاربران غیر-ایجنتی به peer شما جمع می‌شوند. pin بر همهٔ alias ها مقدم است، پس فقط وقتی برداریدش که هیچ هویت سمت-کاربری peer ی خودش را لازم نداشته باشد. اگر ایجنت‌های جدا به گیت‌وی می‌رسند و هرکدام peer مجزا needs، pin <b>نکنید</b> — pinUserPeer را false بگذارید و با userPeerAliases ‏(ادیتور [e]) نگاشت کنید</td></tr>
+<tr><td><b>من + دیگران</b> ‏(pooled)</td><td>pinUserPeer: false + userPeerAliases که runtime ID های شما را به peerName نگاشت می‌کند — شما روی تاریخچهٔ مشترک می‌مانید و بقیه peer های خودشان را می‌گیرند</td></tr>
+<tr><td><b>فقط دیگران</b></td><td>pinUserPeer: false، ‏runtimePeerPrefix اختیاری — هر کاربر peer خودش را می‌گیرد</td></tr>
+</tbody>
+</table>
+</div>
+<p>روی پرامپت [e] را بردارید تا سه کلید را مستقیم ست کنید. resolver کلیدها را بالا-به-پایین امتحان می‌کند، اولین تطبیق برنده: pinUserPeer ← userPeerAliases[id] ← runtimePeerPrefix + id ← raw runtime ID ← peerName ← fallback ی session-key.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ un-pin کردن حافظهٔ pooled را یتیم می‌کند</div>
+  <p>فلپ کردن pinUserPeer از true به false داده را migrate نمی‌کند — حافظهٔ انباشته زیر peerName همانجا می‌ماند و کاربران پلتفرم به peer های تازه و خالی حل می‌شوند. برای حفظ پیوستگی خودتان مسیر pooled را بردارید تا runtime ID هایتان به peerName نام‌مستعار شوند. ویزارد موقع تشخیص این گذار خودش همین steer را پیشنهاد می‌دهد.</p>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 کلید deprecated</div>
+  <p>pinPeerName نام مستعار legacy ی pinUserPeer است — برای سازگاری خوانده می‌شود ‏(در صورت ست بودن هر دو، pinUserPeer برنده)، هرگز نوشته نمی‌شود. اجرای دوباره setup آن را روی کلید مرجع مهاجرت می‌دهد.</p>
+</div>
+<h3>Observation ‏(Directional در برابر Unified)</h3>
+<p>‏Honcho گفتگو را peers ی تبادل‌کنندهٔ پیام مدل می‌کند. هر peer دو toggle ی مشاهده دارد که ۱:۱ به SessionPeerConfig ی Honcho نگاشت می‌شود:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>toggle</th><th>اثر</th></tr></thead>
+<tbody>
+<tr><td><code>observeMe</code></td><td>Honcho از پیام‌های خودِ این peer بازنمایی‌اش را می‌سازد</td></tr>
+<tr><td><code>observeOthers</code></td><td>این peer پیام‌های peer دیگر را مشاهده می‌کند ‏(خوراک استدلال cross-peer)</td></tr>
+</tbody>
+</table>
+</div>
+<p>دو peer × دو toggle = چهار فلگ. observationMode پیش‌تنظیمِ خلاصار است:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پیش‌تنظیم</th><th>فلگ‌های کاربر</th><th>فلگ‌های AI</th><th>معنا</th></tr></thead>
+<tbody>
+<tr><td>"directional" ‏(پیش‌فرض)</td><td>me روشن، others روشن</td><td>me روشن، others روشن</td><td>مشاهدهٔ متقابل کامل. جدلی cross-peer را فعال می‌کند — «AI بر اساس گفتهٔ کاربر و reply ی خودش چه می‌داند»</td></tr>
+<tr><td>"unified"</td><td>me روشن، others خاموش</td><td>me خاموش، others روشن</td><td>معناشناسی استخر-مشترک — AI فقط پیام‌های کاربر را مشاهده می‌کند و peer ی کاربر فقط خودش را مدل می‌کند. استخر ناظر-واحد</td></tr>
+</tbody>
+</table>
+</div>
+<p>پیش‌تنظیم را با بلوک صریح observation برای کنترل per-peer بازنویسی کنید. الگوهای رایج: مشاهدهٔ کامل برای بیشتر کاربران با directional؛ جلوگیری از re-model کردن کاربر توسط AI با ai.observeMe: true + observeOthers: false؛ شخصیت قوی که AI نباید از مشاهدهٔ خودش به‌روزش کند با ai.observeMe: false + observeOthers: true. toggle های سمت-سرور ست‌شده از طریق <a href="https://app.honcho.dev" target="_blank" rel="noopener">داشبورد Honcho</a> بر پیش‌فرض‌های محلی می‌چربند — هرمس موقع init ی نشست sync‌شان برمی‌گرداند.</p>
+<h3>ابزارها</h3>
+<p>وقتی Honcho ارائه‌دهندهٔ فعال حافظه باشد پنج ابزار در دسترس می‌شود:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ابزار</th><th>هدف</th></tr></thead>
+<tbody>
+<tr><td>honcho_profile</td><td>خواندن/به‌روزرسانی کارت peer — برای update مقدار card (فهرست حقایق)، برای خواندن حذفش کنید</td></tr>
+<tr><td>honcho_search</td><td>جستجوی معنایی روی زمینه — excerpt های خام بدون ترکیب LLM</td></tr>
+<tr><td>honcho_context</td><td>زمینهٔ کامل نشست — خلاصه، بازنمایی، کارت، پیام‌های اخیر</td></tr>
+<tr><td>honcho_reasoning</td><td>پاسخ ترکیب‌شده از LLM ی Honcho — برای کنترل عمق reasoning_level ‏(minimal/low/medium/high/max) پاس دهید</td></tr>
+<tr><td>honcho_conclude</td><td>ساخت/حذف نتیجه‌گیری‌ها — conclusion برای ساخت، delete_id برای حذف ‏(فقط PII)</td></tr>
+</tbody>
+</table>
+</div>
+<h3>فرمان‌های CLI</h3>
+<p>زیرفرمان hermes honcho <b>فقط وقتی ثبت می‌شود که Honcho ارائه‌دهندهٔ فعال حافظه باشد</b> ‏(memory.provider: honcho در config.yaml). روی نصب تازه مستقیماً با hermes memory setup honcho پیکربندی‌اش کنید؛ زیرفرمان hermes honcho در invocation بعدی ظاهر می‌شود.</p>
+<div class="codebox"><pre><code>hermes memory setup honcho    # Configure Honcho directly (works before activation)
+hermes honcho status          # Connection status, config, and key settings
+hermes honcho strategy        # Show or set session strategy
+hermes honcho peer            # Show or update peer names + dialectic reasoning level
+hermes honcho mode            # Show or set recall mode (hybrid/context/tools)
+hermes honcho tokens          # Show or set token budget for context and dialectic
+hermes honcho identity        # Seed or show the AI peer's Honcho identity
+hermes honcho sync            # Sync Honcho config to all existing profiles
+hermes honcho peers           # Show peer identities across all profiles
+hermes honcho sessions        # List known Honcho session mappings
+hermes honcho map             # Map current directory to a Honcho session name
+hermes honcho enable          # Enable Honcho for the active profile
+hermes honcho disable         # Disable Honcho for the active profile
+hermes honcho migrate         # Step-by-step migration guide from openclaw-honcho</code></pre></div>
+<h3>مهاجرت از hermes honcho قدیمی</h3>
+<ol>
+  <li>config موجودتان ‏(honcho.json یا ~/.honcho/config.json) حفظ می‌شود</li>
+  <li>داده‌های سمت-سرور ‏(حافظه‌ها، نتیجه‌گیری‌ها، پروفایل‌های کاربر) سالم‌اند</li>
+  <li>memory.provider: honcho را در config.yaml ست کنید تا دوباره فعال شود</li>
+</ol>
+<p>بدون re-login یا re-setup. ‏hermes memory setup را اجرا و honcho را بردارید — ویزارد config موجودتان را تشخیص می‌دهد.</p>
+<h3>مستندات کامل</h3>
+<p>مرجع کامل را در بخش <a href="memory-providers.html">ارائه‌دهندگان حافظه ← Honcho</a> ببینید.</p>
+</section>
+
+<div class="pager">
+  <a href="acp.html"><span class="dir">→ قبلی</span><span class="ttl">یکپارچگی میزبان ACP</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/honcho" target="_blank" rel="noopener">Honcho Memory</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>
