@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۰۰ از ۲۰۷ صفحه (۴۸٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۰۲ از ۲۰۷ صفحه (۴۹٪)** |
 
 ---
 
@@ -518,6 +518,12 @@ hermes-docs-fa/
 - اصلاح: pager قبلی به termux اشاره کرد نه مسیر ناموجود
 - پیشرفت: **۱۰۰ از ۲۰۷ صفحه فعال (۴۸٪)**
 
+### نشست ۶۴ — 2026-08-26 — 📥 درون‌ریزی از ایجنت‌های دیگر + 🏢 دامنهٔ مدیریت‌شده
+- ترجمه و انتشار «درون‌ریزی از ایجنت‌های دیگر» (۴ بخش): فرمان‌های hermes import-agent با dry-run/overwrite، جدول‌های نگاشت Claude Code و Codex CLI به حافظه/config/mcp/skills، قواعد پیشوند Bash به glob، هرگز-درون‌ریزی‌نشدن credential ها با redaction ی نام‌های شبیه-secret و یادداشت‌های رفتاری ‏(پیش‌نمایش اول، ادغام نه جایگزینی، skip ی تداخل‌ها)
+- ترجمه و انتشار «دامنهٔ مدیریت‌شده» (۵ بخش): push ی خط پایهٔ پیکربندی/secrets توسط مدیر که کاربر نمی‌تواند override کند، محل /etc/hermes با مجوزها به‌عنوان سازوکار اعمال، جابه‌جایی با HERMES_MANAGED_DIR و هشدار عبور، جدول سه‌طبقهٔ اولویت و ادغام سطح-برگ، دیدن وضعیت با config/doctor، راه‌اندازی مدیر با tee/chmod و محدودیت‌های v1 شامل world-readable بودن .env ی مدیریت‌شده
+- زنجیرهٔ pager: …bot-mode ← desktop ← import-from-other-agents ← managed-scope ← (به‌زودی)
+- پیشرفت: **۱۰۲ از ۲۰۷ صفحه فعال (۴۹٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -624,6 +630,8 @@ hermes-docs-fa/
 | 98 | `user-guide/messaging/whatsapp-cloud.html` | واتساپ بیزینس (Cloud API) |
 | 99 | `user-guide/messaging/google_chat.html` | گوگل‌چت |
 | 100 | `getting-started/nix-setup.html` | نصب با Nix |
+| 101 | `user-guide/import-from-other-agents.html` | درون‌ریزی از ایجنت‌های دیگر |
+| 102 | `user-guide/managed-scope.html` | دامنهٔ مدیریت‌شده |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

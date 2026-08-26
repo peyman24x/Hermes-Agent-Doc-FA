@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دامنهٔ مدیریت‌شده — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/managed-scope" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>دامنهٔ مدیریت‌شده</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>دامنهٔ مدیریت‌شده ‏(Managed Scope)</h1>
+<p><b>دامنهٔ مدیریت‌شده</b> به یک مدیر اجازه می‌دهد خط پایه‌ای از پیکربندی و secrets را push کند که کاربر عادی ‏(غیر-root) <b>نمی‌تواند override کند</b>. برای استقرارهای fleet/سازمانی طراحی شده که IT لازم دارد مثلاً ارائه‌دهندهٔ مدل، URL پایهٔ API مشترک یا ‏<code>security.redact_secrets: true</code> را روی همهٔ کاربران یک ماشین پین کند.</p>
+<p>وقتی دامنهٔ مدیریت‌شده حاضر باشد، مقادیری که مشخص می‌کند دقیقاً برای همان کلیدهایی که پین کرده بر ‏~/.hermes/config.yaml و ~/.hermes/.env و حتی محیط شل کاربر می‌چربند. بقیهٔ چیزها کاملاً تحت کنترل کاربر می‌مانند.</p>
+<div class="callout note">
+  <div class="callout-title">📌 فرقش با نصب قفل‌شده توسط مدیر-پکیج</div>
+  <p>نصبِ مدیریت‌شده-توسط-مدیر-پکیج ‏(توزیع تعریفی / formula) <i>همهٔ</i> جهش‌های config را بلاک و به مدیر پکیج ارجاع می‌دهد. دامنهٔ مدیریت‌شده سازوکار جداگانه‌ای است: به‌جای قفل کردن کل config، <i>مقادیر تغییرناپذیر مشخص</i> را به تفکیک کلید تزریق می‌کند. این دو مستقل‌اند و می‌توانند همزیست باشند.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> کجا زندگی می‌کند</h2>
+<p>دامنهٔ مدیریت‌شده از یک دایرکتوری سطح-سیستم خوانده می‌شود، پیش‌فرض ‏<code>/etc/hermes</code>:</p>
+<pre dir="ltr"><code>/etc/hermes/
+├── config.yaml     # managed config layer (wins over ~/.hermes/config.yaml)
+└── .env            # managed env layer (wins over ~/.hermes/.env + shell)</code></pre>
+<p>دایرکتوری و فایل‌ها متعلق به root هستند ‏(حالت دایرکتوری ۰۷۵۵، فایل‌ها ۰۶۴۴): برای همه قابل‌خواندن، فقط برای مدیر قابل‌نوشتن. <b>همان مجوز فایل‌سیستم سازوکار اعمال است</b> — کاربر عادی فایل‌های مدیریت‌شده را می‌تواند بخواند ولی نمی‌تواند ویرایششان کند.</p>
+<p>هرکدام از دو فایل اختیاری است. نبود دایرکتوری یا فایل مدیریت‌شده صرفاً یعنی «بدون دامنهٔ مدیریت‌شده» و پیکربندی دقیقاً مثل بدون این قابلیت حل می‌شود.</p>
+<h3>جابه‌جا کردن دایرکتوری</h3>
+<p>مکان با متغیر محیطی ‏HERMES_MANAGED_DIR قابل‌جابه‌جایی است ‏(برای کانتینرها یا استقرارهای غیر-/etc). این یک پیچ مسیر استقرار/bootstrap است — مثل HERMES_HOME — که توسط همان مدیری که مالک فایل‌های مدیریت‌شده است ست می‌شود. هرمس هرگز آن را در هیچ .env ای ماندگار <b>نمی‌کند</b>.</p>
+<pre dir="ltr"><code># Point managed scope at a custom directory (set by IT / the deployment, not the user)
+export HERMES_MANAGED_DIR=/opt/org/hermes-policy</code></pre>
+<div class="callout warning">
+  <div class="callout-title">⚠️</div>
+  <p>کاربری که بتواند HERMES_MANAGED_DIR را ست کند می‌تواند دامنهٔ مدیریت‌شده را به دایرکتوری تحت کنترل خودش repoint و از آن عبور کند. در استقرار واقعی این متغیر باید توسط مدیر ثابت شود ‏(مثلاً داخل unit ی سرویس یا image ی کانتینر پخته شود) نه اینکه قابل-ست-توسط-کاربر بماند. hermes doctor دایرکتوری مدیریت‌شدهٔ <i>حل‌شده</i> را گزارش می‌کند تا redirect مرئی باشد.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> اولویت</h2>
+<p>برای کلیدهایی که لایهٔ مدیریت‌شده مشخص می‌کند ترتیب این است ‏(بالاترین برنده):</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>طبقه</th><th>config.yaml</th><th>.env</th></tr></thead>
+<tbody>
+<tr><td>۱</td><td>‏<code>/etc/hermes/config.yaml</code> ‏(مدیریت‌شده)</td><td>‏<code>/etc/hermes/.env</code> ‏(مدیریت‌شده)</td></tr>
+<tr><td>۲</td><td>‏<code>~/.hermes/config.yaml</code> ‏(کاربر)</td><td>‏<code>~/.hermes/.env</code> ‏(کاربر)</td></tr>
+<tr><td>۳</td><td>پیش‌فرض‌های داخلی</td><td>محیط شل از-قبل-موجود</td></tr>
+</tbody>
+</table>
+</div>
+<p>ادغام <b>سطح-برگ</b> است: پین کردن model.default بقیهٔ model.* را منجمد نمی‌کند. یک config.yaml ی مدیریت‌شدهٔ:</p>
+<pre dir="ltr"><code>model:
+  default: org/standard-model</code></pre>
+<p>مقدار model.default را برای همهٔ کاربران اجباری می‌کند در حالی که model.fallback ‏(و هر کلید دیگر) زیر کنترل کاربر می‌ماند.</p>
+<div class="callout note">
+  <div class="callout-title">📌 یادداشت اولویت</div>
+  <p>برای کلیدهایی که پین می‌کند دامنهٔ مدیریت‌شده عمداً بر محیط شل هم می‌چربد — وگرنه «مدیریت‌شده» نبود. این تنها جایی است که قاعدهٔ معمول «متغیر محیطی بر config.yaml می‌چربد» معکوس می‌شود و فقط به کلیدهای مشخصی که لایهٔ مدیریت‌شده اعلام می‌کند اعمال می‌شود.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> دیدن چه چیزهایی مدیریت‌شده است</h2>
+<pre dir="ltr"><code>hermes config        # shows a header naming the managed source + the pinned keys
+hermes doctor        # reports the resolved managed dir + pinned key counts</code></pre>
+<p>اگر بخواهید مقدار مدیریت‌شده‌ای را عوض کنید هرمس رد می‌کند و منبع را نام می‌برد:</p>
+<pre dir="ltr"><code>$ hermes config set model.default my/model
+Cannot set 'model.default': it is managed by your administrator
+(/etc/hermes/config.yaml) and cannot be changed.</code></pre>
+<p>همین برای secrets های مدیریت‌شده هم صادق است — hermes config set / setup مقدار کاربری برای کلید env ی پین‌شده توسط .env ی مدیریت‌شده نمی‌نویسد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> راه‌اندازی دامنهٔ مدیریت‌شده ‏(مدیرها)</h2>
+<pre dir="ltr"><code>sudo mkdir -p /etc/hermes
+
+# Pin some config values for every user on this machine
+sudo tee /etc/hermes/config.yaml &gt;/dev/null &lt;&lt;'YAML'
+model:
+  provider: nous
+security:
+  redact_secrets: true
+YAML
+
+# Optionally pin a shared, non-sensitive env value
+sudo tee /etc/hermes/.env &gt;/dev/null &lt;&lt;'ENV'
+OPENAI_API_BASE=https://inference.example.com/v1
+ENV
+
+sudo chmod 0755 /etc/hermes
+sudo chmod 0644 /etc/hermes/config.yaml /etc/hermes/.env</code></pre>
+<p>تغییرات از شروع بعدی هرمس مؤثر می‌شوند ‏(فایل مدیریت‌شدهٔ بدفرم بلند لاg و نادیده گرفته می‌شود — هرگز startup را بلاک نمی‌کند ولی مدیر باید hermes doctor را چک کند تا مطمئن شود سیاست اعمال می‌شود).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> مدل امنیتی و محدودیت‌ها ‏(v1)</h2>
+<ul>
+  <li><b>اعمال فقط با مجوزهای فایل‌سیستم است.</b> اگر کاربر دسترسی نوشتن به دایرکتوری مدیریت‌شده داشته باشد ‏(یا هرمس را به‌عنوان root اجرا کند) دامنهٔ مدیریت‌شده صرفاً توصیه‌ای است.</li>
+  <li><b>.env ی مدیریت‌شده world-readable است</b> ‏(۰۶۴۴)، پس هر کاربر محلی می‌تواند secrets ی push‌شده از طریق آن را بخواند. برای مقادیر مشترک غیر-حساس ‏(URL پایهٔ API سازمانی، پیش‌فرض‌های قابلیت‌ها) استفاده کنید نه secrets های بسیار حساس.</li>
+  <li><b>ابزارهای خود ایجنت از مقدار env ی مدیریت‌شده hard-block نیستند.</b> متغیر محیطی مدیریت‌شده هنگام startup اعمال می‌شود ولی هیچ‌چیز جلوی ایجنت را نمی‌گیرد که داخل شل زیرپروسهٔ خودش مقدار دیگری ست کند. v1 مرز راحتی-مدیریت در برابر یک کاربر عادی است نه sandbox ی غیرقابل‌فرار.</li>
+</ul>
+<p>موارد زیر عمداً <b>خارج از دامنهٔ v1</b> اند و ممکن است بعداً بیایند:</p>
+<ul>
+  <li>مرز سختی که خود ایجنت نتواند از آن عبور کند.</li>
+  <li>محل‌های مدیریت‌شدهٔ native روی macOS و ویندوز ‏(v1 اول-لینوکس/POSIX است).</li>
+  <li>دایرکتوری‌های قطعه drop-in ‏(managed.d/) برای سیاست لایه‌لایه.</li>
+  <li>فایل‌های مدیریت‌شدهٔ امضاشده / دارای بررسی یکپارچگی.</li>
+  <li>تحویل راه‌دور / مدیریت-دستگاه ‏(MDM).</li>
+  <li>مجوزهای محدودتر ‏(scope شده به گروه) برای secrets های مدیریت‌شده.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="import-from-other-agents.html"><span class="dir">→ قبلی</span><span class="ttl">درون‌ریزی از ایجنت‌های دیگر</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/managed-scope" target="_blank" rel="noopener">Managed Scope</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

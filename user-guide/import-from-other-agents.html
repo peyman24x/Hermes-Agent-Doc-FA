@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>درون‌ریزی از ایجنت‌های دیگر — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/import-from-other-agents" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>درون‌ریزی از ایجنت‌های دیگر</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>درون‌ریزی از ایجنت‌های دیگر ‏(Import from Other Agents)</h1>
+<p>‏<code>hermes import-agent</code> راه‌اندازی موجود ‏<b>Claude Code</b> یا ‏<b>OpenAI Codex CLI</b> شما را با یک فرمان به هرمس درون‌ریزی می‌کند. همان الگوی اول-پیش‌نمایشِ ‏<a href="https://hermes-agent.nousresearch.com/docs/guides/migrate-from-openclaw" target="_blank" rel="noopener">hermes claw migrate</a> را دنبال می‌کند: همیشه قبل از نوشتن هر چیزی برنامهٔ per-item می‌بینید و ‏--dry-run هرگز به دیسک دست نمی‌زند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> فرمان‌ها</h2>
+<pre dir="ltr"><code>hermes import-agent                    # auto-detect ~/.claude or ~/.codex
+hermes import-agent claude-code        # import from ~/.claude
+hermes import-agent codex              # import from ~/.codex
+hermes import-agent claude-code --dry-run          # preview only
+hermes import-agent codex --source /path/to/.codex # custom location
+hermes import-agent claude-code --overwrite --yes  # replace conflicts, skip prompts</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> چه چیزهایی درون‌ریزی می‌شود</h2>
+<h3>Claude Code ‏(‏~/.claude)</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Claude Code</th><th>Hermes</th></tr></thead>
+<tbody>
+<tr><td>‏<code>CLAUDE.md</code> ‏(دستورالعمل‌های سراسری)</td><td>ورودی‌های حافظه در ‏<code>~/.hermes/memories/MEMORY.md</code></td></tr>
+<tr><td>‏<code>settings.json</code> ← ‏<code>permissions.allow</code> ‏(قواعد Bash(...))</td><td>‏<code>command_allowlist</code> در config.yaml</td></tr>
+<tr><td>‏<code>settings.json</code> ← ‏<code>permissions.deny</code> ‏(قواعد Bash(...))</td><td>‏<code>approvals.deny</code> در config.yaml</td></tr>
+<tr><td>‏<code>mcpServers</code> ‏(از ~/.claude.json و settings.json)</td><td>‏<code>mcp_servers</code> در config.yaml</td></tr>
+<tr><td>‏<code>skills/&lt;name&gt;/</code> ‏(دایرکتوری‌های دارای SKILL.md)</td><td>‏<code>~/.hermes/skills/claude-code-imports/&lt;name&gt;/</code></td></tr>
+<tr><td>‏<code>commands/*.md</code> ‏(دستورات اسلش)</td><td>با یادداشت skip می‌شود — آنها را به مهارت تبدیل کنید</td></tr>
+</tbody>
+</table>
+</div>
+<p>قواعد پیشوندی ‏Bash(npm run test:*) ی کلاد به glob های ‏npm run test* تبدیل می‌شوند. قواعد مجوز غیر-Bash ‏(Read(...)، ‏WebFetch و…) ابزارهای مخصوص-Claude را گیت می‌کنند و به‌عنوان بدون-نگاشت گزارش می‌شوند نه اینکه درون‌ریزی شوند.</p>
+<h3>Codex CLI ‏(‏~/.codex)</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Codex CLI</th><th>Hermes</th></tr></thead>
+<tbody>
+<tr><td>‏<code>AGENTS.md</code> ‏(دستورالعمل‌های سراسری)</td><td>ورودی‌های حافظه در ‏<code>~/.hermes/memories/MEMORY.md</code></td></tr>
+<tr><td>‏<code>config.toml</code> ← ‏<code>[mcp_servers.*]</code></td><td>‏<code>mcp_servers</code> در config.yaml</td></tr>
+<tr><td>‏<code>memories/*.md</code></td><td>ورودی‌های حافظه در ‏<code>~/.hermes/memories/MEMORY.md</code></td></tr>
+<tr><td>‏<code>skills/&lt;name&gt;/</code> ‏(دایرکتوری‌های دارای SKILL.md)</td><td>‏<code>~/.hermes/skills/codex-imports/&lt;name&gt;/</code></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> چه چیزهایی هرگز درون‌ریزی نمی‌شود</h2>
+<p><b>کلیدهای API و credential ها.</b> فایل‌های credential ‏(~/.claude/.credentials.json، ‏~/.codex/auth.json) هرگز خوانده نمی‌شوند و متغیرهای محیطی یا هدرهای سرور MCP با نام‌های شبیه-secret ‏(*_TOKEN، ‏*_API_KEY، ‏Authorization و…) حذف و در گزارش فهرست می‌شوند تا عمداً دوباره اضافه‌شان کنید. برای پیکربندی ارائه‌دهنده‌ها hermes setup را اجرا یا secrets را به ‏~/.hermes/.env اضافه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> یادداشت‌های رفتاری</h2>
+<ul>
+  <li><b>همیشه اول پیش‌نمایش.</b> فرمان قبل از اعمال، برنامهٔ کامل را چاپ می‌کند؛ در نشست‌های غیرتعاملی روی پیش‌نمایش متوقف می‌شود مگر --yes پاس دهید.</li>
+  <li><b>ادغام می‌کند، جایگزین نمی‌کند.</b> ورودی‌های حافظه نسبت به MEMORY.md ی موجود dedup می‌شوند؛ الگوهای allowlist/denylist با آنچه از قبل در config.yaml هست ادغام می‌شوند.</li>
+  <li><b>تداخل‌ها به‌طور پیش‌فرض skip می‌شوند.</b> سرور MCP یا مهارتی که از قبل در هرمس وجود دارد تداخل گزارش می‌شود؛ --overlap را پاس دهید تا جایگزین شود ‏(<code>--overwrite</code>).</li>
+  <li><b>فایل‌های بدفرم اجرا را abort نمی‌کنند.</b> settings.json یا config.toml ی خراب یک خطای per-item در گزارش می‌شود در حالی که بقیه همچنان درون‌ریزی می‌شوند.</li>
+  <li>از OpenClaw می‌آیید؟ از ‏<a href="https://hermes-agent.nousresearch.com/docs/guides/migrate-from-openclaw" target="_blank" rel="noopener">hermes claw migrate</a> استفاده کنید.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="desktop.html"><span class="dir">→ قبلی</span><span class="ttl">اپ دسکتاپ</span></a>
+  <a class="next" href="managed-scope.html"><span class="dir">بعدی ←</span><span class="ttl">دامنهٔ مدیریت‌شده</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/import-from-other-agents" target="_blank" rel="noopener">Import from Other Agents</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
