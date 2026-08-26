@@ -597,6 +597,12 @@ hermes-docs-fa/
 - pager بعدی fallback-providers به این صفحه وصل شد ✓
 - پیشرفت: **۱۲۰ از ۲۰۷ صفحه فعال (۵۸٪)**
 
+### نشست ۷۸ — 2026-08-27 — 🧩 ارائه‌دهندگان مدل — گروه یکپارچه‌سازی‌ها کامل شد ‏(۴/۴)
+- ترجمه و انتشار «ارائه‌دهندگان مدل» ‏(بزرگ‌ترین صفحهٔ گروه، ۱۲ بخش): جدول ۴۲ ردیفی راه‌اندازی همهٔ ارائه‌دهندگان؛ Nous Portal با شناسهٔ سرویس‌گیرنده و JWT خودکار و یادداشت Codex ‏(قرنطینهٔ refresh token)؛ جدول پنج‌ستونی معناشازی صورتحساب طرح‌های اشتراک ‏(Claude Max فقط اعتبارهای اضافه، Claude Pro مسیر بسته، Codex فعلاً مستندنشده، SuperGrok خطای 403 رتبه‌ای، Gemini فقط-کلید-API)؛ Anthropic بومی با هشدار اعتبار مصرف اضافه؛ GitHub Copilot با جدول انواع توکن ‏(gho_/github_pat_/ghu_ پشتیبانی، ghp_ نه) و بازیابی یک‌بارهٔ credential روی 401؛ ارائه‌دهندگان درجه‌اول کلید-API با ۱۳ مثال؛ xAI با Responses API، کش پرامپت x-grok-conv-id و مهاجرت hermes migrate xai برای مدل‌های بازنشستهٔ مه ۲۰۲۶؛ دوازده ارائه‌دهندهٔ ابری ‏(NovitaAI، ‏Ollama Cloud، ‏AWS Bedrock با Converse API، ‏Vertex AI با OAuth2، ‏Qwen Portal، ‏Alibaba Coding Plan، ‏MiniMax OAuth، ‏NVIDIA NIM، ‏GMI، ‏Actual Computer، ‏StepFun، ‏Hugging Face با پسوندهای :fastest/:cheapest)؛ بخش بزرگ سفارشی/خودمیزبان: راه‌اندازی عمومی و نماد سه‌تایی ‎/model custom:name:model، ‏Ollama محلی با هشدار زمینهٔ ۴۰۹۶ توکنی و سه راه افزایش، ‏vLLM با فلگ‌های ابزار و پارسر reasoning ی Qwen، ‏SGLang، ‏llama.cpp با الزام ‎--jinja‎، ‏LM Studio با حالت jit، شبکهٔ WSL2 کامل ‏(mirrored، ‏NAT با IP ی host، bind سرورها، دیوارآتش)، عیب‌یابی چهارگانه، ‏LiteLLM Proxy، ‏ClawRouter با جدول پروفایل‌ها، تشخیص طول زمینه با زنجیرهٔ ۹ مرحله‌ای، ارائه‌دهندگان نام‌دار با key_cmd ی توکن کوتاه‌عمر و extra_body و supports_vision؛ کتاب آشپزی Together/Groq/Perplexity با ترکیب چندارائه‌دهنده‌ای؛ جدول «انتخاب راه‌اندازی درست»؛ کلیدهای API اختیاری و Firecrawl خودمیزبان؛ مسیریابی provider_routing ی OpenRouter با میانبرهای :nitro/:floor و Pareto Code Router و fallback_providers
+- 🎉 گروه «یکپارچه‌سازی‌ها» کامل شد: ۴ از ۴ صفحه
+- 🐞 اصلاح عقب‌ماندگی: مدخل ناوبری «ارائه‌دهندگان پشتیبان» در نشست ۷۷ به d:1 تبدیل نشده بود ‏(صفحه منتشر شده بود ولی از فهرست ناوبری مخفی مانده بود) — حالا فعال شد و شمارندهٔ واقعی دو واحد بالا آمد
+- زنجیرهٔ pager: index ← providers ← nous-portal؛ قبلیِ nous-portal به providers و بعدی‌اش به buzz وصل شد ✓
+- پیشرفت: **۱۲۲ از ۲۰۷ صفحه فعال (۵۹٪)**
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -722,7 +728,9 @@ hermes-docs-fa/
 | 117 | `user-guide/features/honcho.html` | حافظهٔ Honcho |
 | 118 | `user-guide/features/api-server.html` | سرور API سازگار با OpenAI |
 | 119 | `user-guide/features/provider-routing.html` | مسیریابی ارائه‌دهنده |
+| 120 | `user-guide/features/fallback-providers.html` | ارائه‌دهندگان پشتیبان (Fallback) |
 | 121 | `user-guide/features/credential-pools.html` | استخر اعتبارنامه‌ها |
+| 122 | `integrations/providers.html` | ارائه‌دهندگان مدل (AI Providers) |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

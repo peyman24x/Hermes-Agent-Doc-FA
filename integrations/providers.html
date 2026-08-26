@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ارائه‌دهندگان مدل — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/integrations/providers" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>یکپارچه‌سازی‌ها<span class="sep">/</span><strong>ارائه‌دهندگان مدل</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>ارائه‌دهندگان هوش مصنوعی ‏(AI Providers)</h1>
+<p>این صفحه راه‌اندازی ارائه‌دهندگان استنتاج ‏(inference) برای Hermes Agent را پوشش می‌دهد — از API‌های ابری مثل OpenRouter و Anthropic گرفته تا نقاط پایانی خودمیزبان مثل Ollama و vLLM و تا پیکربندی‌های پیشرفتهٔ مسیریابی و جایگزینی. برای استفاده از هرمس حداقل به یک ارائه‌دهندهٔ پیکربندی‌شده نیاز دارید.</p>
+
+<section class="doc-sec">
+<h2 id="inference-providers"><span class="secnum">۱</span> ارائه‌دهندگان استنتاج</h2>
+<p>برای اتصال به یک LLM حداقل به یک راه نیاز دارید. برای جابه‌جایی تعاملی بین ارائه‌دهنده‌ها و مدل‌ها از ‎hermes model‎ استفاده کنید یا مستقیم پیکربندی کنید:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>راه‌اندازی</th></tr></thead>
+<tbody>
+<tr><td><b>Nous Portal</b></td><td>‏hermes model ‏(OAuth، مبتنی بر اشتراک)</td></tr>
+<tr><td><b>OpenAI Codex</b></td><td>‏hermes model ← «اشتراک ChatGPT یا Codex» ‏(OAuth ی ChatGPT، از مدل‌های Codex استفاده می‌کند)</td></tr>
+<tr><td><b>GitHub Copilot</b></td><td>‏hermes model ‏(جریان کد دستگاه OAuth، ‏COPILOT_GITHUB_TOKEN، ‏GH_TOKEN یا gh auth token)</td></tr>
+<tr><td><b>GitHub Copilot ACP</b></td><td>‏hermes model ‏(اجرای محلی copilot --acp --stdio به‌صورت زیرفرایند)</td></tr>
+<tr><td><b>Anthropic</b></td><td>‏hermes model ‏(Claude Max + اعتبارهای مصرف اضافه از طریق OAuth؛ کلید API ی Anthropic یا setup-token دستی هم پشتیبانی می‌شود — یادداشت پایین را ببینید)</td></tr>
+<tr><td><b>OpenRouter</b></td><td>‏OPENROUTER_API_KEY در ~/.hermes/.env</td></tr>
+<tr><td><b>Fireworks AI</b></td><td>‏FIREWORKS_API_KEY در ~/.hermes/.env ‏(provider: fireworks؛ نام‌های مستعار: fireworks-ai، fw)</td></tr>
+<tr><td><b>NovitaAI</b></td><td>‏NOVITA_API_KEY در ~/.hermes/.env ‏(provider: novita، +۲۰۰ مدل، Model API، Agent Sandbox، GPU Cloud)</td></tr>
+<tr><td><b>AI Gateway</b></td><td>‏AI_GATEWAY_API_KEY در ~/.hermes/.env ‏(provider: ai-gateway)</td></tr>
+<tr><td><b>z.ai / GLM</b></td><td>‏GLM_API_KEY در ~/.hermes/.env ‏(provider: zai)</td></tr>
+<tr><td><b>Kimi / Moonshot</b></td><td>‏KIMI_API_KEY در ~/.hermes/.env ‏(provider: kimi-coding)</td></tr>
+<tr><td><b>Kimi / Moonshot (چین)</b></td><td>‏KIMI_CN_API_KEY در ~/.hermes/.env ‏(provider: kimi-coding-cn؛ نام‌های مستعار: kimi-cn، moonshot-cn)</td></tr>
+<tr><td><b>Arcee AI</b></td><td>‏ARCEEAI_API_KEY در ~/.hermes/.env ‏(provider: arcee؛ نام‌های مستعار: arcee-ai، arceeai)</td></tr>
+<tr><td><b>GMI Cloud</b></td><td>‏GMI_API_KEY در ~/.hermes/.env ‏(provider: gmi؛ نام‌های مستعار: gmi-cloud، gmicloud)</td></tr>
+<tr><td><b>Actual Computer</b></td><td>‏ACTUAL_API_KEY در ~/.hermes/.env برای رلهٔ میزبانی‌شده، یا ACTUAL_BASE_URL=http://127.0.0.1:8080 برای دیمن محلی — روی loopback کلید لازم نیست ‏(provider: actual؛ نام‌های مستعار: actual-computer، actualcomputer، aci)</td></tr>
+<tr><td><b>MiniMax</b></td><td>‏MINIMAX_API_KEY در ~/.hermes/.env ‏(provider: minimax)</td></tr>
+<tr><td><b>MiniMax چین</b></td><td>‏MINIMAX_CN_API_KEY در ~/.hermes/.env ‏(provider: minimax-cn)</td></tr>
+<tr><td><b>xAI (Grok) — Responses API</b></td><td>‏XAI_API_KEY در ~/.hermes/.env ‏(provider: xai)</td></tr>
+<tr><td><b>xAI Grok OAuth (SuperGrok)</b></td><td>‏hermes model ← گزینهٔ «xAI Grok OAuth (SuperGrok / Premium+)» — ورود مرورگری، بدون کلید API. <a href="https://hermes-agent.nousresearch.com/docs/guides/xai-grok-oauth" target="_blank" rel="noopener">راهنما را ببینید</a></td></tr>
+<tr><td><b>Qwen Cloud (Alibaba DashScope)</b></td><td>‏DASHSCOPE_API_KEY در ~/.hermes/.env ‏(provider: alibaba)</td></tr>
+<tr><td><b>Alibaba Cloud (Coding Plan)</b></td><td>‏DASHSCOPE_API_KEY ‏(provider: alibaba-coding-plan، نام مستعار: alibaba_coding) — SKU ی صورتحساب جداگانه با نقطهٔ پایانی متفاوت</td></tr>
+<tr><td><b>Kilo Code</b></td><td>‏KILOCODE_API_KEY در ~/.hermes/.env ‏(provider: kilocode)</td></tr>
+<tr><td><b>Xiaomi MiMo</b></td><td>‏XIAOMI_API_KEY در ~/.hermes/.env ‏(provider: xiaomi، نام‌های مستعار: mimo، xiaomi-mimo)</td></tr>
+<tr><td><b>Tencent TokenHub</b></td><td>‏TOKENHUB_API_KEY در ~/.hermes/.env ‏(provider: tencent-tokenhub، نام‌های مستعار: tencent، tokenhub، tencentmaas)</td></tr>
+<tr><td><b>OpenCode Zen</b></td><td>‏OPENCODE_ZEN_API_KEY در ~/.hermes/.env ‏(provider: opencode-zen)</td></tr>
+<tr><td><b>CommandCode</b></td><td>‏COMMANDCODE_API_KEY در ~/.hermes/.env ‏(provider: commandcode، نام مستعار: commandcode-chat؛ مدل‌های Claude از طریق commandcode-anthropic با نام مستعار commandcode-claude). با طرح‌های GOAT/Pro/Max/Provider کار می‌کند ‏(نه طرح ۱ دلاری Go — دسترسی API ندارد).</td></tr>
+<tr><td><b>OpenCode Go</b></td><td>‏OPENCODE_GO_API_KEY در ~/.hermes/.env ‏(provider: opencode-go)</td></tr>
+<tr><td><b>OpenCode Free</b></td><td>بی‌کلید — نه کلید API لازم است نه حساب ‏(provider: opencode-free، نام‌های مستعار: free، opencode_free). با hermes model یا ‎/model free‎ انتخاب می‌شود؛ درخواست‌ها ناشناس ارسال می‌شوند</td></tr>
+<tr><td><b>DeepSeek</b></td><td>‏DEEPSEEK_API_KEY در ~/.hermes/.env ‏(provider: deepseek)</td></tr>
+<tr><td><b>Hugging Face</b></td><td>‏HF_TOKEN در ~/.hermes/.env ‏(provider: huggingface، نام مستعار: hf)</td></tr>
+<tr><td><b>Google / Gemini</b></td><td>‏GOOGLE_API_KEY ‏(یا GEMINI_API_KEY) در ~/.hermes/.env ‏(provider: gemini)</td></tr>
+<tr><td><b>Google Vertex AI</b></td><td>‏hermes model ← «Google Vertex AI» ‏(provider: vertex؛ OAuth2 با JSON ی service-account یا ADC، صورتحساب GCP)</td></tr>
+<tr><td><b>OpenAI API (مستقیم)</b></td><td>‏OPENAI_API_KEY در ~/.hermes/.env ‏(provider: openai-api، اختیاری: OPENAI_BASE_URL)</td></tr>
+<tr><td><b>Azure AI Foundry</b></td><td>‏hermes model ← «Azure AI Foundry» ‏(provider: azure-foundry؛ از نقطهٔ پایانی و کلید Azure OpenAI / Foundry استفاده می‌کند)</td></tr>
+<tr><td><b>AWS Bedrock</b></td><td>‏hermes model ← «AWS Bedrock» ‏(provider: bedrock؛ زنجیرهٔ استاندارد credential های AWS از طریق boto3)</td></tr>
+<tr><td><b>NVIDIA Build</b></td><td>‏NVIDIA_API_KEY در ~/.hermes/.env ‏(provider: nvidia؛ مدل‌های NIM-میزبان روی build.nvidia.com)</td></tr>
+<tr><td><b>Ollama Cloud</b></td><td>‏hermes model ← «Ollama Cloud» ‏(provider: ollama-cloud؛ API ی ابری Ollama)</td></tr>
+<tr><td><b>Qwen OAuth</b></td><td>‏hermes model ← «Qwen OAuth» ‏(provider: qwen-oauth؛ ورود مرورگری PKCE)</td></tr>
+<tr><td><b>MiniMax OAuth</b></td><td>‏hermes model ← «MiniMax (OAuth)» ‏(provider: minimax-oauth؛ ورود مرورگری PKCE)</td></tr>
+<tr><td><b>StepFun</b></td><td>‏STEPFUN_API_KEY در ~/.hermes/.env ‏(provider: stepfun)</td></tr>
+<tr><td><b>LM Studio</b></td><td>‏hermes model ← «LM Studio» ‏(provider: lmstudio، اختیاری: LM_API_KEY)</td></tr>
+<tr><td><b>نقطهٔ پایانی سفارشی</b></td><td>‏hermes model ← انتخاب «Custom endpoint» ‏(در config.yaml ذخیره می‌شود)</td></tr>
+</tbody>
+</table>
+</div>
+<p>برای مسیر رسمیِ کلید-API، <a href="https://hermes-agent.nousresearch.com/docs/guides/google-gemini" target="_blank" rel="noopener">راهنمای اختصاصی Google Gemini</a> را ببینید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>نام مستعار کلید مدل:</b> در بخش model: پیکربندی، می‌توانید برای شناسهٔ مدل‌تان هم از default: استفاده کنید هم از model:. هر دو حالت model: { default: my-model } و model: { model: my-model } دقیقاً یکسان کار می‌کنند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2 id="nous-portal"><span class="secnum">۲</span> Nous Portal و مدیریت مدل</h2>
+<h3>Nous Portal</h3>
+<p><a href="https://portal.nousresearch.com" target="_blank" rel="noopener">Nous Portal</a> گیت‌وی اشتراکِ یکپارچهٔ Nous Research و <b>روش توصیه‌شدهٔ اجرای Hermes Agent</b> است. یک ورود OAuth بیش از ۳۰۰ مدل agentic ی frontier را پوشش می‌دهد ‏(Claude، ‏GPT، ‏Gemini، ‏DeepSeek، ‏Qwen، ‏Kimi، ‏GLM، ‏MiniMax، ‏Grok و...) به‌علاوهٔ <a href="../user-guide/features/tool-gateway.html">Tool Gateway</a> ‏(جستجوی وب، تولید تصویر، TTS، اتوماسیون مرورگر) — همه صورتحساب‌شده روی اشتراک Nous شما به‌جای حساب‌های جداگانه per-ارائه‌دهنده.</p>
+<pre dir="ltr"><code>hermes setup --portal     # fresh install — OAuth + provider + gateway in one command
+hermes model              # existing install — pick "Nous Portal" from the list
+hermes portal info        # inspect login + routing at any time</code></pre>
+<p>هنوز اشتراک ندارید؟ از <a href="https://portal.nousresearch.com/manage-subscription" target="_blank" rel="noopener">portal.nousresearch.com/manage-subscription</a> یکی بگیرید.</p>
+<p><b>جزئیات کامل:</b> <a href="nous-portal.html">صفحهٔ یکپارچه‌سازی Nous Portal</a> ‏(محتوای اشتراک، کاتالوگ مدل، عیب‌یابی) و <a href="https://hermes-agent.nousresearch.com/docs/guides/run-hermes-with-nous-portal" target="_blank" rel="noopener">راهنمای قدم‌به‌قدم اجرای Hermes Agent با Nous Portal</a> را ببینید.</p>
+<p><b>شناسایی سرویس‌گیرنده.</b> هر درخواست Portal از Hermes Agent برچسب client=hermes-client-v&lt;نسخه&gt; ‏(مثل client=hermes-client-v0.13.0) دارد که خودکار با نسخهٔ نصب‌شدهٔ شما هم‌تراز می‌شود. این برچسب روی همهٔ مسیرهای Portal فرستاده می‌شود — حلقهٔ اصلی چت، فراخوانی‌های کمکی، خلاصه‌ساز فشرده‌سازی، استخراج وب — و به تلمتری سمت Portal اجازه می‌دهد ترافیک Hermes را از سایر سرویس‌گیرنده‌ها تشخیص دهد. هیچ پیکربندی لازم نیست؛ برچسب هنگام hermes update خودکار به‌روز می‌شود.</p>
+<p><b>احراز هویت JWT ‏(خودکار).</b> هرمس برای درخواست‌های Portal ترجیحاً از توکن‌های JWT ی scoped با دامنهٔ inference:invoke استفاده می‌کند و مسیر قدیمی کلید نشستِ مات به‌عنوان جایگزین باقی است. هیچ پیکربندی لازم نیست — credential ها توسط جریان OAuth مدیریت و شفاف چرخش می‌شوند. refresh token های باطل‌شده برای جلوگیری از حلقه‌های تکرار قرنطینه می‌شوند.</p>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p><b>یادداشت Codex</b><br>ارائه‌دهندهٔ OpenAI Codex از طریق کد دستگاه احراز هویت می‌شود ‏(باز کردن یک URL و وارد کردن کد). هرمس credential های حاصل را در مخزن احراز هویت خودش زیر ~/.hermes/auth.json ذخیره می‌کند و در صورت وجود، credential های موجود Codex CLI را از ~/.codex/auth.json وارد می‌کند. نصب Codex CLI الزامی نیست.<br><br>اگر refresh توکن با خطای پایانی شکست بخورد ‏(HTTP 4xx، ‏invalid_grant، لغو اعتبار grant و...)، هرمس آن refresh token را مرده علامت می‌زند و تکرارش را متوقف می‌کند تا سیل یکسان خطاهای احراز هویت نبینید. درخواست بعدی به‌جایش پیام re-authentication نوع‌دار نشان می‌دهد. برای شروع ورود تازهٔ کد دستگاه hermes auth add openai-codex را اجرا کنید ‏(یا hermes model ← «اشتراک ChatGPT یا Codex»)؛ قرنطینه در اولین تبادل موفق پاک می‌شود.</p>
+</div>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p>حتی وقتی از Nous Portal یا Codex یا یک نقطهٔ پایانی سفارشی استفاده می‌کنید، بعضی ابزارها ‏(بینایی، خلاصه‌سازی وب، MoA) از یک مدل «کمکی» جدا استفاده می‌کنند. به‌طور پیش‌فرض ‏(auxiliary.*.provider: "auto") هرمس این کارها را به <b>مدل اصلی چت</b> شما مسیریابی می‌کند — همان مدلی که در hermes model برداشته‌اید. می‌توانید هر کار را جداگانه بازنویسی کنید تا به مدلی ارزان‌تر/سریع‌تر برود ‏(مثلاً Gemini Flash روی OpenRouter) — بخش <a href="../user-guide/configuration.html">مدل‌های کمکی</a> را ببینید.</p>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>‏Nous Tool Gateway</b><br>مشترکان پرداخت‌کنندهٔ Nous Portal به <a href="../user-guide/features/tool-gateway.html">Tool Gateway</a> هم دسترسی دارند — جستجوی وب، تولید تصویر، TTS و اتوماسیون مرورگر که از طریق اشتراک‌تان عبور می‌کنند. بدون کلیدهای API اضافه. در نصب تازه، hermes setup --portal یک‌جا ورودتان می‌کند، Nous را ارائه‌دهندهٔ شما می‌کند و گیت‌وی را روشن می‌کند. کاربران فعلی می‌توانند از hermes model یا per-tool از hermes tools فعالش کنند. وضعیت مسیریابی را هر وقت خواستید با hermes portal info ببینید.</p>
+</div>
+<h3>دو فرمان برای مدیریت مدل</h3>
+<p>هرمس <b>دو</b> فرمان مدل دارد که دو هدف متفاوت دارند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فرمان</th><th>کجا اجرا شود</th><th>چه می‌کند</th></tr></thead>
+<tbody>
+<tr><td><b>hermes model</b></td><td>ترمینال شما ‏(بیرون از هر نشستی)</td><td>ویزارد کامل راه‌اندازی — افزودن ارائه‌دهنده، اجرای OAuth، وارد کردن کلیدهای API، پیکربندی نقاط پایانی</td></tr>
+<tr><td><b>/model</b></td><td>داخل یک نشست چت Hermes</td><td>سوییچ سریع بین ارائه‌دهنده‌ها و مدل‌هایی که <b>قبلاً پیکربندی شده‌اند</b></td></tr>
+</tbody>
+</table>
+</div>
+<p>اگر می‌خواهید به ارائه‌دهنده‌ای سوئیچ کنید که هنوز راه‌اندازی‌اش نکرده‌اید ‏(مثلاً فقط OpenRouter دارید و Anthropic می‌خواهید)، به hermes model نیاز دارید نه ‎/model‎. اول از نشست خارج شوید ‏(Ctrl+C یا ‎/quit)، بعد hermes model را اجرا کنید، راه‌اندازی ارائه‌دهنده را کامل کنید و بعد نشست جدیدی باز کنید.</p>
+</section>
+<section class="doc-sec">
+<h2 id="subscription-plans"><span class="secnum">۳</span> طرح‌های اشتراک: اشتراک‌تان واقعاً چه چیزی را می‌پردازد؟</h2>
+<p>چند ارائه‌دهنده اجازه می‌دهند به‌جای کلید API با یک <b>اشتراک مصرف‌کننده</b> ‏(Claude Max، ‏ChatGPT، ‏SuperGrok / X Premium+ و...) وارد Hermes شوید. اینکه آن اشتراک واقعاً چه چیزی را می‌پردازد — و چه چیزی را نمی‌پردازد — برای هر ارائه‌دهنده فرق دارد و شایع‌ترین منبع سورپرایزهای صورتحساب همین است. جدول زیر نسخهٔ خلاصه است؛ جزئیات هر ارائه‌دهنده در بخش خودش آمده.</p>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p>سلول‌هایی که عبارت «فعلاً مستند نشده» دارند دقیقاً همان را می‌گویند: مستندات هرمس هنوز رفتار را مشخص نکرده. فرض نکنید — داشبورد صورتحساب ارائه‌دهندهٔ خودتان را چک کنید و این‌ها را سؤال‌باز در نظر بگیرید.</p>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>طرح / مسیر</th><th>هرمس می‌تواند استفاده کند؟</th><th>چه چیزی مصرف می‌شود</th><th>چه چیزی مصرف نمی‌شود</th><th>سورپرایز رایج</th></tr></thead>
+<tbody>
+<tr><td><b>Anthropic — Claude Max + OAuth</b></td><td>✅ بله — hermes model ← Anthropic OAuth. هم Max <b>و</b> هم خرید اعتبارهای مصرف اضافه لازم است</td><td><b>اعتبارهای اضافه/مازاد</b> که روی طرح Max افزوده‌اید</td><td><b>سهمیهٔ پایهٔ طرح Max</b> ‏(مصرفی که به‌طور پیش‌فرض در Claude Code شامل می‌شود)</td><td>تمام مصرف هرمس به‌عنوان «مصرف اضافه» صورتحساب می‌شود حتی وقتی سهمیهٔ شامل‌شدهٔ Max تان دست‌نخورده مانده</td></tr>
+<tr><td><b>Anthropic — Claude Pro</b></td><td>❌ نه — مشترکان Pro نمی‌توانند از مسیر OAuth استفاده کنند</td><td>هیچ‌چیز ‏(مسیر در دسترس نیست)</td><td>اشتراک Pro تان</td><td>Pro ظاهراً باید کار کند؛ نمی‌کند. به‌جایش از ANTHROPIC_API_KEY استفاده کنید ‏(پرداخت per-token، مستقل از هر اشتراک Claude)</td></tr>
+<tr><td><b>OpenAI Codex — OAuth ی طرح ChatGPT</b></td><td>✅ بله — hermes model ← «اشتراک ChatGPT یا Codex» ‏(ورود کد-دستگاه OAuth ی ChatGPT، از مدل‌های Codex استفاده می‌کند)</td><td><i>فعلاً مستند نشده</i></td><td><i>فعلاً مستند نشده</i></td><td>مستندات فقط احراز هویت و refresh توکن را پوشش می‌دهند؛ معناشازی سهمیهٔ طرح هنوز مستند نشده</td></tr>
+<tr><td><b>xAI — SuperGrok / X Premium+ OAuth</b></td><td>✅ بله — OAuth مرورگری، بدون نیاز به کلید API</td><td><b>سهمیهٔ اشتراک</b> شما ‏(برای X Search صریحاً مستند شده: OAuth ترجیح داده می‌شود به کلید API و «به‌جای هزینهٔ API از سهمیهٔ اشتراک استفاده می‌کند»). معناشازی سهمیهٔ استنتاج فراتر از آن: <i>فعلاً مستند نشده</i></td><td>XAI_API_KEY / هزینهٔ API ی per-token، وقتی credential های OAuth پیکربندی و ترجیح داده شده باشند</td><td>خطای HTTP 403 بعد از ورود موفق — xAI دسترسی API ی OAuth را با وجود اشتراک فعال درون‌برنامه‌ای، به رتبه‌های مشخصی از SuperGrok محدود کرده</td></tr>
+<tr><td><b>Google — طرح مصرف‌کنندهٔ Gemini ‏(AI Pro / Ultra)</b></td><td>❌ مسیر مستندی نیست — ارائه‌دهندهٔ gemini فقط-کلید-API است ‏(GOOGLE_API_KEY / GEMINI_API_KEY)؛ Vertex AI هم صورتحساب GCP دارد</td><td><b>سهمیهٔ کلید API</b> شما ‏(tier رایگان یا پروژهٔ Google Cloud با صورتحساب فعال) — <i>مصرفِ طرحِ مصرف‌کننده فعلاً مستند نشده</i></td><td><i>فعلاً مستند نشده</i></td><td>کلیدهای tier رایگان بعد از چند دور گفتگوی ایجنت تمام می‌شوند، چون هرمس ممکن است به‌ازای هر نوبت کاربر چندین فراخوانی مدل بزند</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>‏Anthropic.</b> مسیر OAuth مثل Claude Code روی حسابتان Anthropic عمل می‌کند و <b>فقط روی طرح Claude Max با اعتبارهای خریداری‌شدهٔ مصرف اضافه کار می‌کند</b> — سهمیهٔ پایهٔ Max هرگز توسط هرمس مصرف نمی‌شود، فقط اعتبارهای اضافه/مازاد روی آن. مشترکان Claude Pro نمی‌توانند از این مسیر استفاده کنند؛ جایگزین پشتیبانی‌شده ANTHROPIC_API_KEY است که per-token روی سازمان آن کلید با قیمت استاندارد API صورتحساب می‌شود. بخش <a href="#anthropic-native">‏Anthropic ‏(بومی)</a> پایین را ببینید.</p>
+<p><b>‏OpenAI Codex.</b> هرمس از طریق OAuth ی کد-دستگاه ChatGPT احراز هویت می‌شود، credential ها را در ~/.hermes/auth.json ذخیره می‌کند و می‌تواند credential های موجود Codex CLI را از ~/.codex/auth.json وارد کند. اینکه کدام رتبه‌های طرح ChatGPT واجد شرایط‌اند و مصرف هرمس چطور روی محدودیت‌های Codex طرح‌تان حساب می‌شود <b>فعلاً مستند نشده</b> — یادداشت Codex در بخش <a href="#nous-portal">Nous Portal</a> فقط رفتار احراز هویت و refresh توکن را پوشش می‌دهد.</p>
+<p><b>‏xAI ‏(SuperGrok / X Premium+).</b> OAuth مرورگری هم با اشتراک فعال SuperGrok کار می‌کند هم با اشتراک X Premium+ روی حساب X ی متصل، و همین bearer token توسط ابزارهای مستقیم-به-xAI هم دوباره استفاده می‌شود ‏(TTS، تولید تصویر، تولید ویدیو، پیاده‌سازی صدا، جستجوی X). اگر استنتاج بعد از ورود موفق HTTP 403 برگرداند، این محدودیت رتبه/صلاحیت از سمت xAI است نه توکن کهنه — راه‌حل، سوئیچ به XAI_API_KEY است. بخش <a href="#xai-grok">xAI ‏(Grok)</a> پایین و <a href="https://hermes-agent.nousresearch.com/docs/guides/xai-grok-oauth" target="_blank" rel="noopener">راهنمای xAI Grok OAuth</a> را ببینید.</p>
+<p><b>‏Google Gemini.</b> فعلاً هیچ راهی برای ورود به هرمس با اشتراک مصرف‌کنندهٔ Gemini وجود ندارد — ارائه‌دهندهٔ gemini کلید API می‌گیرد و <a href="https://hermes-agent.nousresearch.com/docs/guides/google-vertex" target="_blank" rel="noopener">Google Vertex AI</a> هم به پروژهٔ GCP تان صورتحساب می‌خورد. برای استفادهٔ ایجنت‌محور یک پروژهٔ Google Cloud با صورتحساب فعال توصیه می‌شود؛ سهمیه‌های tier رایگان برای نشست‌های طولانی ایجنتی خیلی کوچک‌اند. <a href="https://hermes-agent.nousresearch.com/docs/guides/google-gemini" target="_blank" rel="noopener">راهنمای Google Gemini</a> را ببینید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>یک اشتراک به‌جای پنج‌تا:</b> اگر دوست ندارید دنبال معناشازی طرح per-ارائه‌دهنده باشید، <a href="#nous-portal">Nous Portal</a> بیش از ۳۰۰ مدل را زیر یک اشتراک واحد با یک ورود OAuth پوشش می‌دهد.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2 id="anthropic-native"><span class="secnum">۴</span> ‏Anthropic ‏(بومی)</h2>
+<p>مدل‌های Claude را مستقیم از طریق API ی Anthropic استفاده کنید — بدون پروکسی OpenRouter. سه روش احراز هویت پشتیبانی می‌شود:</p>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p><b>اعتبارهای «مصرف اضافه» ی Claude Max لازم است</b><br>وقتی از طریق hermes model ← Anthropic OAuth احراز هویت می‌کنید ‏(یا با hermes auth add anthropic --type oauth)، هرمس مثل Claude Code روی حسابتان Anthropic عمل می‌کند. <b>فقط وقتی کار می‌کند که روی طرح Claude Max باشید و اعتبارهای مصرف اضافه خریده باشید.</b> سهمیهٔ پایهٔ طرح Max ‏(مصرف پیش‌فرض شامل‌شده در Claude Code) توسط هرمس مصرف نمی‌شود — فقط اعتبارهای اضافه/مازادی که روی آن افزوده‌اید. مشترکان Claude Pro نمی‌توانند از این مسیر استفاده کنند.<br><br>اگر Max + اعتبار اضافه ندارید، به‌جایش از ANTHROPIC_API_KEY استفاده کنید — درخواست‌ها per-token روی سازمان آن کلید صورتحساب می‌شوند ‏(قیمت استاندارد API، مستقل از هر اشتراک Claude).</p>
+</div>
+<pre dir="ltr"><code># With an API key (pay-per-token)
+export ANTHROPIC_API_KEY=***
+hermes chat --provider anthropic --model claude-sonnet-4-6
+
+# Preferred: authenticate through `hermes model`
+# Hermes will use Claude Code's credential store directly when available
+hermes model
+
+# Manual override with a setup-token (fallback / legacy)
+export ANTHROPIC_TOKEN=***  # setup-token or manual OAuth token
+hermes chat --provider anthropic
+
+# Auto-detect Claude Code credentials (if you already use Claude Code)
+hermes chat --provider anthropic  # reads Claude Code credential files automatically</code></pre>
+<p>وقتی از طریق hermes model گزینهٔ Anthropic OAuth را برمی‌گزینید، هرمس مخزن credential خود Claude Code را به کپی کردن توکن در ~/.hermes/.env ترجیح می‌دهد. این‌طوری credential های قابل-refresh ی Claude قابل-refresh می‌مانند.</p>
+<p>یا دائمی تنظیم کنید:</p>
+<pre dir="ltr"><code>model:
+  provider: "anthropic"
+  default: "claude-sonnet-4-6"</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>نام‌های مستعار:</b> ‎--provider claude‎ و ‎--provider claude-code‎ هم به‌عنوان شکل کوتاه ‎--provider anthropic‎ کار می‌کنند.</p>
+</div>
+<h3 id="github-copilot">GitHub Copilot</h3>
+<p>هرمس GitHub Copilot را به‌عنوان ارائه‌دهندهٔ درجه‌اول با دو حالت پشتیبانی می‌کند:</p>
+<p><b>copilot — API ی مستقیم Copilot</b> ‏(توصیه‌شده). از اشتراک GitHub Copilot تان برای دسترسی به GPT-5.x، ‏Claude، ‏Gemini و مدل‌های دیگر از طریق API ی Copilot استفاده می‌کند.</p>
+<pre dir="ltr"><code>hermes chat --provider copilot --model gpt-5.4</code></pre>
+<p><b>گزینه‌های احراز هویت</b> ‏(به این ترتیب چک می‌شوند):</p>
+<ol>
+  <li>متغیر محیطی COPILOT_GITHUB_TOKEN</li>
+  <li>متغیر محیطی GH_TOKEN</li>
+  <li>متغیر محیطی GITHUB_TOKEN</li>
+  <li>جایگزین CLI ی gh auth token</li>
+</ol>
+<p>اگر هیچ توکنی پیدا نشود، hermes model یک <b>ورود کد-دستگاه OAuth</b> پیشنهاد می‌کند — همان جریانی که Copilot CLI و opencode استفاده می‌کنند.</p>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p><b>انواع توکن</b><br>API ی Copilot از توکن‌های کلاسیک PAT ‏(Personal Access Token) با پیشوند ghp_* <b>پشتیبانی نمی‌کند</b>. انواع توکن پشتیبانی‌شده:</p>
+  <div class="table-wrap">
+  <table>
+  <thead><tr><th>نوع</th><th>پیشوند</th><th>روش دریافت</th></tr></thead>
+  <tbody>
+  <tr><td>توکن OAuth</td><td>gho_</td><td>‏hermes model ← GitHub Copilot ← Login with GitHub</td></tr>
+  <tr><td>PAT ریزدانه</td><td>github_pat_</td><td>تنظیمات GitHub ← Developer settings ← Fine-grained tokens ‏(نیازمند مجوز <b>Copilot Requests</b>)</td></tr>
+  <tr><td>توکن GitHub App</td><td>ghu_</td><td>از طریق نصب GitHub App</td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p>اگر gh auth token تان توکن ghp_* برگرداند، برای احراز هویت از طریق OAuth از hermes model استفاده کنید.</p>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p><b>رفتار احراز هویت Copilot در هرمس</b><br>هرمس یک توکن پشتیبانی‌شدهٔ GitHub ‏(gho_*، ‏github_pat_* یا ghu_*) را مستقیم به api.githubcopilot.com می‌فرستد و هدرهای مخصوص Copilot را ضمیمه می‌کند ‏(Editor-Version، ‏Copilot-Integration-Id، ‏Openai-Intent، ‏x-initiator).</p>
+  <p>روی خطای HTTP 401، هرمس قبل از fallback یک بازیابی credential یک‌باره انجام می‌دهد:</p>
+  <ol>
+    <li>بازمحاسبهٔ توکن از طریق زنجیرهٔ اولویت معمول ‏(COPILOT_GITHUB_TOKEN ← GH_TOKEN ← GITHUB_TOKEN ← gh auth token)</li>
+    <li>بازسازی سرویس‌گیرندهٔ مشترک OpenAI با هدرهای تازه‌شده</li>
+    <li>تکرار یک‌بارهٔ درخواست</li>
+  </ol>
+  <p>بعضی پروکسی‌های اجتماعی قدیمی‌تر از جریان تبادل api.github.com/copilot_internal/v2/token استفاده می‌کنند. آن نقطهٔ پایانی برای بعضی انواع حساب در دسترس نیست ‏(404 برمی‌گرداند). بنابراین هرمس احراز هویت مستقیم-با-توکن را مسیر اصلی نگه می‌دارد و برای مقاومت به refresh پویای credential و retry متکی است.</p>
+</div>
+<p><b>مسیریابی API:</b> مدل‌های GPT-5+ ‏(به‌جز gpt-5-mini) خودکار از Responses API استفاده می‌کنند. همهٔ مدل‌های دیگر ‏(GPT-4o، ‏Claude، ‏Gemini و...) از Chat Completions. مدل‌ها از کاتالوگ زندهٔ Copilot خودکار تشخیص داده می‌شوند.</p>
+<p><b>copilot-acp — بک‌اند عامل ACP ی Copilot.</b>Copilot CLI محلی را به‌صورت زیرفرایند اجرا می‌کند:</p>
+<pre dir="ltr"><code>hermes chat --provider copilot-acp --model copilot-acp
+# Requires the GitHub Copilot CLI in PATH and an existing `copilot login` session</code></pre>
+<p><b>پیکربندی دائمی:</b></p>
+<pre dir="ltr"><code>model:
+  provider: "copilot"
+  default: "gpt-5.4"</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>متغیر محیطی</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td>COPILOT_GITHUB_TOKEN</td><td>توکن GitHub برای API ی Copilot ‏(اولویت اول)</td></tr>
+<tr><td>HERMES_COPILOT_ACP_COMMAND</td><td>بازنویسی مسیر باینری Copilot CLI ‏(پیش‌فرض: copilot)</td></tr>
+<tr><td>HERMES_COPILOT_ACP_ARGS</td><td>بازنویسی آرگومان‌های ACP ‏(پیش‌فرض: --acp --stdio)</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2 id="first-class-api-key-providers"><span class="secnum">۵</span> ارائه‌دهندگان درجه‌اول با کلید API</h2>
+<p>این ارائه‌دهنده‌ها پشتیبانی داخلی با شناسهٔ provider اختصاصی دارند. کلید API را ست کنید و با ‎--provider‎ انتخاب‌شان کنید:</p>
+<pre dir="ltr"><code># Fireworks AI
+hermes chat --provider fireworks --model accounts/fireworks/models/kimi-k2p6
+# Requires: FIREWORKS_API_KEY in ~/.hermes/.env
+
+# NovitaAI Model API
+hermes chat --provider novita --model moonshotai/kimi-k2.5
+# Requires: NOVITA_API_KEY in ~/.hermes/.env
+
+# z.ai / ZhipuAI GLM
+hermes chat --provider zai --model glm-5
+# Requires: GLM_API_KEY in ~/.hermes/.env
+
+# Kimi / Moonshot AI (international: api.moonshot.ai)
+hermes chat --provider kimi-coding --model kimi-for-coding
+# Requires: KIMI_API_KEY in ~/.hermes/.env
+
+# Kimi / Moonshot AI (China: api.moonshot.cn)
+hermes chat --provider kimi-coding-cn --model kimi-k2.5
+# Requires: KIMI_CN_API_KEY in ~/.hermes/.env
+
+# MiniMax (global endpoint)
+hermes chat --provider minimax --model MiniMax-M2.7
+# Requires: MINIMAX_API_KEY in ~/.hermes/.env
+
+# MiniMax (China endpoint)
+hermes chat --provider minimax-cn --model MiniMax-M2.7
+# Requires: MINIMAX_CN_API_KEY in ~/.hermes/.env
+
+# Qwen Cloud / DashScope (Qwen models)
+hermes chat --provider alibaba --model qwen3.5-plus
+# Requires: DASHSCOPE_API_KEY in ~/.hermes/.env
+
+# Xiaomi MiMo
+hermes chat --provider xiaomi --model mimo-v2-pro
+# Requires: XIAOMI_API_KEY in ~/.hermes/.env
+
+# Tencent TokenHub (Hy3 Preview)
+hermes chat --provider tencent-tokenhub --model hy3-preview
+# Requires: TOKENHUB_API_KEY in ~/.hermes/.env
+
+# Arcee AI (Trinity models)
+hermes chat --provider arcee --model trinity-large-thinking
+# Requires: ARCEEAI_API_KEY in ~/.hermes/.env
+
+# Meta Model API (Muse Spark family)
+hermes chat --provider meta-ai --model muse-spark-1.2
+# Requires: MODEL_API_KEY in ~/.hermes/.env
+
+# GMI Cloud
+# Use the exact model ID returned by GMI's /v1/models endpoint.
+hermes chat --provider gmi --model zai-org/GLM-5.1-FP8
+# Requires: GMI_API_KEY in ~/.hermes/.env</code></pre>
+<p>Fireworks از شناسه‌های کاتالوگ اسلش‌دار بومی خودش استفاده می‌کند، مثل accounts/fireworks/models/kimi-k2p6. ‏hermes model را اجرا کنید، گزینهٔ Fireworks AI را بردارید و از کاتالوگ زنده انتخاب کنید یا شناسهٔ دیگری از مدل‌های Fireworks وارد کنید. نقطهٔ پایانی پیش‌فرض https://api.fireworks.ai/inference/v1 است؛ نقطهٔ پایانی متفاوت را از طریق model.base_url در config.yaml پیکربندی کنید نه .env.</p>
+<p>یا ارائه‌دهنده را دائمی در config.yaml ست کنید:</p>
+<pre dir="ltr"><code>model:
+  provider: "gmi"
+  default: "zai-org/GLM-5.1-FP8"</code></pre>
+<p>URL‌های پایه با متغیرهای محیطی NOVITA_BASE_URL، ‏GLM_BASE_URL، ‏KIMI_BASE_URL، ‏MINIMAX_BASE_URL، ‏MINIMAX_CN_BASE_URL، ‏DASHSCOPE_BASE_URL، ‏XIAOMI_BASE_URL، ‏GMI_BASE_URL، ‏META_BASE_URL یا TOKENHUB_BASE_URL قابل بازنویسی‌اند.</p>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p><b>tier مشارکت‌کنندهٔ Meta:</b> مدلی به نام muse-spark-1.2-contributor tier تخفیف‌دار Meta است — Meta ممکن است روی پرامپت‌ها و پاسخ‌هایتان آموزش بدهد، بنابراین انتخاب تعاملی مدل قبل از استفاده از آن <a href="../user-guide/configuring-models.html">درخواست تأیید می‌کند</a>. برای کارهای محرمانه از muse-spark-1.2 استفاده کنید ‏(قیمت استاندارد، بدون آموزش).</p>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p><b>تشخیص خودکار نقطهٔ پایانی Z.AI:</b> هنگام استفاده از ارائه‌دهندهٔ Z.AI / GLM، هرمس خودکار چند نقطهٔ پایانی را امتحان می‌کند ‏(global، ‏China، ‏گونه‌های coding) تا یکی را پیدا کند که کلید API تان را قبول کند. نیازی به ست کردن دستی GLM_BASE_URL نیست — نقطهٔ پایانی کارکردی خودکار تشخیص و کش می‌شود.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2 id="xai-grok"><span class="secnum">۶</span> ‏xAI ‏(Grok) — Responses API + کش پرامپت</h2>
+<p>‏xAI از طریق Responses API ‏(ترنسپورت codex_responses) سیم‌کشی شده تا پشتیبانی خودکار reasoning روی مدل‌های Grok 4 داشته باشد — بدون نیاز به پارامتر reasoning_effort، سرور به‌طور پیش‌فرض reasoning می‌کند. مقدار XAI_API_KEY را در ~/.hermes/.env ست کنید، در hermes model گزینهٔ xAI را بردارید، یا میان‌بر grok را در ‎/model grok-4-fast-reasoning‎ بیندازید.</p>
+<p>مشترکان SuperGrok و X Premium+ می‌توانند به‌جای کلید API با OAuth مرورگری وارد شوند — در hermes model گزینهٔ <b>xAI Grok OAuth (SuperGrok / Premium+)</b> را بردارید یا hermes auth add xai-oauth را اجرا کنید. همین bearer token ی OAuth خودکار توسط ابزارهای مستقیم-به-xAI هم دوباره استفاده می‌شود ‏(TTS، تولید تصویر، تولید ویدیو، پیاده‌سازی صدا). <a href="https://hermes-agent.nousresearch.com/docs/guides/xai-grok-oauth" target="_blank" rel="noopener">راهنمای xAI Grok OAuth</a> را برای جریان کامل ببینید — و اگر هرمس روی host راه‌دور اجرا می‌شود، <a href="https://hermes-agent.nousresearch.com/docs/guides/oauth-over-ssh" target="_blank" rel="noopener">OAuth از طریق SSH / Host های راه‌دور</a> را هم برای تونل لازم ssh -L ببینید.</p>
+<p>وقتی xAI به‌عنوان ارائه‌دهنده استفاده می‌شود ‏(هر URL پایه‌ای که x.ai داشته باشد)، هرمس کش پرامپت ‏(prompt caching) را خودکار فعال می‌کند و هدر x-grok-conv-id را با هر درخواست API می‌فرستد. این کار درخواست‌ها را در طول نشست گفتگو به همان سرور مسیریابی می‌کند تا زیرساخت xAI بتواند system prompt های کش‌شده و تاریخچهٔ گفتگو را دوباره استفاده کند.</p>
+<p>هیچ پیکربندی لازم نیست — کش وقتی نقطهٔ پایانی xAI تشخیص داده شود و شناسهٔ نشست موجود باشد خودکار فعال می‌شود. این کار تأخیر و هزینهٔ گفتگوهای چندنوبتی را کم می‌کند.</p>
+<p>‏xAI یک نقطهٔ پایانی اختصاصی TTS هم دارد ‏(/v1/tts). در hermes tools ← Voice &amp; TTS گزینهٔ <b>xAI TTS</b> را بردارید یا صفحهٔ <a href="../user-guide/features/tts.html">صدا و TTS</a> را برای پیکربندی ببینید.</p>
+<p><b>مهاجرت مدل‌های بازنشستهٔ xAI ‏(۱۵ مه ۲۰۲۶):</b> ‏xAI در تاریخ 2026-05-15 مدل‌های grok-4*، ‏grok-3، ‏grok-code-fast-1 و grok-imagine-image-pro را بازنشسته می‌کند. هم hermes doctor هم شروع hermes chat هر پیکربندی‌ای که هنوز به یک ارجاع بازنشسته اشاره کند را تشخیص و جایگزین پیشنهادی را چاپ می‌کنند. برای بازنویسی یک‌بارهٔ config از hermes migrate xai استفاده کنید — پیش‌فرض dry-run است؛ برای نوشتن تغییرات ‎--apply‎ اضافه کنید ‏(به‌طور خودکار یک پشتیبان زمان‌دار config.yaml.bak-pre-migrate-xai-* ساخته می‌شود).</p>
+<pre dir="ltr"><code>hermes migrate xai          # preview replacements
+hermes migrate xai --apply  # rewrite ~/.hermes/config.yaml in place</code></pre>
+<p><b>بک‌اند جستجوی وب xAI.</b> وقتی مجموعه‌ابزار <a href="../user-guide/features/web-search.html">جستجوی وب</a> فعال باشد، مقدار web.backend: xai جستجو را با همین credential های XAI_API_KEY / OAuth از طریق نقطهٔ پایانی جستجوی میزبانی‌شدهٔ xAI عبور می‌دهد. اگر xAI قبلاً به‌عنوان ارائه‌دهنده پیکربندی شده، راه‌اندازی اضافه لازم نیست.</p>
+</section>
+<section class="doc-sec">
+<h2 id="cloud-providers"><span class="secnum">۷</span> سایر ارائه‌دهندگان ابری</h2>
+
+<h3>NovitaAI</h3>
+<p><a href="https://novita.ai" target="_blank" rel="noopener">NovitaAI</a> ابرِ AI-بومی برای سازنده‌ها و عامل‌هاست. سه خط محصولش عبارت‌اند از Model API برای بیش از ۲۰۰ مدل، Agent Sandbox برای ساخت و اجرای عامل‌های AI، و GPU Cloud برای محاسبات مقیاس‌پذیر — همه از یک پلتفرم.</p>
+<pre dir="ltr"><code># Use any available model
+hermes chat --provider novita --model moonshotai/kimi-k2.5
+# Requires: NOVITA_API_KEY in ~/.hermes/.env
+
+# Short alias
+hermes chat --provider novita-ai --model deepseek/deepseek-v3-0324</code></pre>
+<p>یا دائمی در config.yaml:</p>
+<pre dir="ltr"><code>model:
+  provider: "novita"
+  default: "moonshotai/kimi-k2.5"
+  base_url: "https://api.novita.ai/openai/v1"</code></pre>
+<p>کلید API تان را در <a href="https://novita.ai/settings/key-management" target="_blank" rel="noopener">novita.ai/settings/key-management</a> بگیرید. URL پایه با NOVITA_BASE_URL قابل بازنویسی است.</p>
+
+<h3>Ollama Cloud — مدل‌های مدیریت‌شدهٔ Ollama با OAuth + کلید API</h3>
+<p><a href="https://ollama.com/cloud" target="_blank" rel="noopener">Ollama Cloud</a> همان کاتالوگ مدل‌های open-weight ی Ollama محلی را میزبانی می‌کند ولی بدون نیاز به GPU. در hermes model گزینهٔ <b>Ollama Cloud</b> را بردارید، کلید API تان را از <a href="https://ollama.com/settings/keys" target="_blank" rel="noopener">ollama.com/settings/keys</a> بچسبانید و هرمس مدل‌های موجود را خودکار کشف می‌کند.</p>
+<pre dir="ltr"><code>hermes model
+# → pick "Ollama Cloud"
+# → paste your OLLAMA_API_KEY
+# → select from discovered models (gpt-oss:120b, glm-4.6:cloud, qwen3-coder:480b-cloud, etc.)</code></pre>
+<p>یا مستقیم config.yaml:</p>
+<pre dir="ltr"><code>model:
+  provider: "ollama-cloud"
+  default: "gpt-oss:120b"</code></pre>
+<p>کاتالوگ مدل به‌صورت پویا از ollama.com/v1/models گرفته و یک ساعت کش می‌شود. نمادگذاری model:tag ‏(مثل qwen3-coder:480b-cloud) در نرمال‌سازی حفظ می‌شود — از خط تیره استفاده نکنید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>Ollama Cloud در مقابل Ollama محلی:</b> هردو همان API ی سازگار-OpenAI را حرف می‌زنند. نسخهٔ ابری ارائه‌دهندهٔ درجه‌اول است ‏(‎--provider ollama-cloud‎ با OLLAMA_API_KEY)؛ Ollama محلی از طریق مسیر Custom Endpoint در دسترس است ‏(URL پایه http://localhost:11434/v1 بدون کلید). برای مدل‌های بزرگ که محلی نمی‌توانید اجرا کنید از ابری؛ برای حریم خصوصی یا کار آفلاین از محلی.</p>
+</div>
+
+<h3>AWS Bedrock</h3>
+<p>مدل‌های Anthropic Claude، ‏Amazon Nova، ‏DeepSeek v3.2، ‏Meta Llama 4 و دیگر مدل‌ها از طریق AWS Bedrock. از زنجیرهٔ credential ی AWS SDK ‏(boto3) استفاده می‌کند — بدون کلید API، فقط احراز هویت استاندارد AWS.</p>
+<pre dir="ltr"><code># Simplest — named profile in ~/.aws/credentials
+hermes chat --provider bedrock --model us.anthropic.claude-sonnet-4-6
+
+# Or with explicit env vars
+AWS_PROFILE=myprofile AWS_REGION=us-east-1 hermes chat --provider bedrock --model us.anthropic.claude-sonnet-4-6</code></pre>
+<p>یا دائمی در config.yaml:</p>
+<pre dir="ltr"><code>model:
+  provider: "bedrock"
+  default: "us.anthropic.claude-sonnet-4-6"
+bedrock:
+  region: "us-east-1"          # or set AWS_REGION
+  # profile: "myprofile"       # or set AWS_PROFILE
+  # discovery: true            # auto-discover region from IAM
+  # guardrail:                 # optional Bedrock Guardrails
+  #   guardrail_identifier: "your-guardrail-id"
+  #   guardrail_version: "DRAFT"</code></pre>
+<p>احراز هویت از زنجیرهٔ استاندارد boto3 استفاده می‌کند: مقدار صریح AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY، یا AWS_PROFILE از ~/.aws/credentials، یا نقش IAM روی EC2/ECS/Lambda، یا IMDS، یا SSO. اگر قبلاً با AWS CLI وارد شده باشید هیچ متغیر محیطی لازم نیست.</p>
+<p>‏Bedrock زیر کاپوت از <b>Converse API</b> استفاده می‌کند — درخواست‌ها به شکل مستقل-از-مدل Bedrock ترجمه می‌شوند، پس همان پیکربندی برای مدل‌های Claude، ‏Nova، ‏DeepSeek و Llama کار می‌کند. BEDROCK_BASE_URL را فقط وقتی ست کنید که به نقطهٔ پایانی منطقه‌ای غیرپیش‌فرض زنگ می‌زنید.</p>
+<p><a href="https://hermes-agent.nousresearch.com/docs/guides/aws-bedrock" target="_blank" rel="noopener">راهنمای AWS Bedrock</a> را برای مرور راه‌اندازی IAM، انتخاب منطقه و استنتاج بین-منطقه‌ای ببینید.</p>
+
+<h3 id="google-vertex-ai">Google Vertex AI</h3>
+<p>مدل‌های Gemini روی Google Cloud Vertex AI از طریق نقطهٔ پایانی سازگار-OpenAI ی Vertex. احراز هویت <b>OAuth2</b> است — توکن دسترسی کوتاه‌عمر ‏(حدود ۱ ساعت) که از JSON ی service-account یا Application Default Credentials ‏(ADC) ضرب می‌شود. <b>کلید API ی ایستا وجود ندارد</b>؛ هرمس توکن را برای شما ضرب و خودکار refresh می‌کند، از جمله ضرب مجدد وسط نشست روی خطای 401.</p>
+<pre dir="ltr"><code># Service account JSON (recommended for servers / gateways)
+echo "VERTEX_CREDENTIALS_PATH=/path/to/service-account.json" >> ~/.hermes/.env
+# or Application Default Credentials
+gcloud auth application-default login
+
+hermes model   # → "Google Vertex AI" → project → region → model</code></pre>
+<p>یا در config.yaml ‏(project/region غیرمحرمانه‌اند و همین‌جا زندگی می‌کنند؛ مسیر credential در .env می‌ماند):</p>
+<pre dir="ltr"><code>model:
+  provider: "vertex"
+  default: "google/gemini-3-flash-preview"   # Vertex requires the google/ prefix
+vertex:
+  project_id: "my-gcp-project"   # blank → use the project embedded in the credentials
+  region: "global"               # required for the Gemini 3.x previews</code></pre>
+<p>متغیرهای محیطی VERTEX_PROJECT_ID / VERTEX_REGION مقادیر config.yaml را بازنویسی می‌کنند. هرمس google-auth را در اولین استفاده lazy نصب می‌کند؛ اگر نصب مدیریت‌شده نیاز به تعمیر داشت hermes setup را اجرا کنید. <a href="https://hermes-agent.nousresearch.com/docs/guides/google-vertex" target="_blank" rel="noopener">راهنمای Google Vertex AI</a> را برای مرور کامل ببینید و برای مسیر جایگزین کلید-API ی ثابت AI Studio، <a href="https://hermes-agent.nousresearch.com/docs/guides/google-gemini" target="_blank" rel="noopener">راهنمای Google Gemini</a>.</p>
+
+<h3>Qwen Portal ‏(OAuth)</h3>
+<p>‏Qwen Portal ی Alibaba با ورود OAuth مرورگری. در hermes model گزینهٔ <b>Qwen OAuth (Portal)</b> را بردارید، از طریق مرورگر وارد شوید و هرمس refresh token را ذخیره می‌کند.</p>
+<pre dir="ltr"><code>hermes model
+# → pick "Qwen OAuth (Portal)"
+# → browser opens; sign in with your Alibaba account
+# → confirm — credentials are saved to ~/.hermes/auth.json
+
+hermes chat   # uses portal.qwen.ai/v1 endpoint</code></pre>
+<p>یا پیکربندی config.yaml:</p>
+<pre dir="ltr"><code>model:
+  provider: "qwen-oauth"
+  default: "qwen3-coder-plus"</code></pre>
+<p>HERMES_QWEN_BASE_URL را فقط وقتی ست کنید که نقطهٔ پایانی portal جابه‌جا شده باشد ‏(پیش‌فرض: https://portal.qwen.ai/v1).</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>Qwen OAuth در مقابل Qwen Cloud ‏(Alibaba DashScope):</b> ‏qwen-oauth از Qwen Portal ی مصرف‌کننده با ورود OAuth استفاده می‌کند — ایده‌آل برای کاربران فردی. ارائه‌دهندهٔ alibaba از Qwen Cloud ‏(Alibaba DashScope) با DASHSCOPE_API_KEY استفاده می‌کند — ایده‌آل برای بارهای کاری برنامه‌نویسی‌شده/تولیدی. هردو به مدل‌های خانوادهٔ Qwen مسیریابی می‌شوند ولی در نقاط پایانی متفاوتی زندگی می‌کنند.</p>
+</div>
+
+<h3>Alibaba Cloud ‏(Coding Plan)</h3>
+<p>اگر مشترک <b>Coding Plan</b> ی Alibaba هستید ‏(یک SKU قیمت‌گذاری جداگانه نسبت به دسترسی استاندارد DashScope API)، هرمس آن را به‌عنوان ارائه‌دهندهٔ درجه‌اول مستقل خودش expose می‌کند: alibaba-coding-plan. نقطهٔ پایانی: https://coding-intl.dashscope.aliyuncs.com/v1. مثل ارائه‌دهندهٔ معمولی alibaba سازگار-OpenAI است ولی با URL پایه و سطح صورتحساب متفاوت.</p>
+<pre dir="ltr"><code>model:
+  provider: alibaba_coding     # alias for alibaba-coding-plan
+  model: qwen3-coder-plus</code></pre>
+<p>یا از CLI:</p>
+<pre dir="ltr"><code>hermes chat --provider alibaba_coding --model qwen3-coder-plus</code></pre>
+<p>‏alibaba_coding از همان DASHSCOPE_API_KEY ای استفاده می‌کند که مدخل alibaba تان از قبل استفاده می‌کند — کلید جدا لازم نیست، فقط مقصد مسیریابی متفاوت است. قبل از ثبت این ارائه‌دهنده، کاربرانی که در config.yaml مقدار provider: alibaba_coding ست می‌کردند بی‌سروصدا به مسیریابی OpenRouter می‌افتادند.</p>
+
+<h3>MiniMax ‏(OAuth)</h3>
+<p>مدل MiniMax-M2.7 از طریق ورود OAuth مرورگری — بدون نیاز به کلید API. در hermes model گزینهٔ <b>MiniMax (OAuth)</b> را بردارید، از مرورگر وارد شوید و هرمس توکن‌های access + refresh را ذخیره می‌کند. زیر کاپوت از نقطهٔ پایانی سازگار-با-Anthropic-Messages استفاده می‌کند ‏(/anthropic).</p>
+<pre dir="ltr"><code>hermes model
+# → pick "MiniMax (OAuth)"
+# → browser opens; sign in with your MiniMax account (global or CN region)
+# → confirm — credentials are saved to ~/.hermes/auth.json
+
+hermes chat   # uses api.minimax.io/anthropic endpoint</code></pre>
+<p>یا پیکربندی config.yaml:</p>
+<pre dir="ltr"><code>model:
+  provider: "minimax-oauth"
+  default: "MiniMax-M2.7"</code></pre>
+<p>مدل‌های پشتیبانی‌شده: MiniMax-M2.7 ‏(اصلی) و MiniMax-M2.7-highspeed ‏(سیم‌کشی‌شده به‌عنوان مدل کمکی پیش‌فرض). مسیر OAuth مقدار MINIMAX_API_KEY / MINIMAX_BASE_URL را نادیده می‌گیرد.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>MiniMax OAuth در مقابل کلید API:</b> ‏minimax-oauth از پرتال مصرف‌کنندهٔ MiniMax با ورود OAuth استفاده می‌کند — راه‌اندازی صورتحساب لازم نیست. ارائه‌دهنده‌های minimax و minimax-cn از MINIMAX_API_KEY / MINIMAX_CN_API_KEY استفاده می‌کنند — برای دسترسی برنامه‌نویسی‌شده. <a href="https://hermes-agent.nousresearch.com/docs/guides/minimax-oauth" target="_blank" rel="noopener">راهنمای MiniMax OAuth</a> را برای مرور کامل ببینید.</p>
+</div>
+
+<h3>NVIDIA NIM</h3>
+<p>مدل‌های Nemotron و دیگر مدل‌های متن‌باز از طریق <a href="https://build.nvidia.com" target="_blank" rel="noopener">build.nvidia.com</a> ‏(کلید API رایگان) یا یک نقطهٔ پایانی NIM محلی.</p>
+<pre dir="ltr"><code># Cloud (build.nvidia.com)
+hermes chat --provider nvidia --model nvidia/nemotron-3-super-120b-a12b
+# Requires: NVIDIA_API_KEY in ~/.hermes/.env
+
+# Local NIM endpoint — override base URL
+NVIDIA_BASE_URL=http://localhost:8000/v1 hermes chat --provider nvidia --model nvidia/nemotron-3-super-120b-a12b</code></pre>
+<p>یا دائمی در config.yaml:</p>
+<pre dir="ltr"><code>model:
+  provider: "nvidia"
+  default: "nvidia/nemotron-3-super-120b-a12b"</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>NIM محلی:</b> برای استقرار on-prem ‏(DGX Spark، ‏GPU محلی) مقدار NVIDIA_BASE_URL=http://localhost:8000/v1 را ست کنید. NIM همان API ی chat completions سازگار-OpenAI ی build.nvidia.com را expose می‌کند، پس سوئیچ بین ابر و محلی فقط تغییر یک متغیر محیطی است.</p>
+</div>
+<p>هرمس خودکار هدر مبدأ صورتحساب NIM را به هر درخواست به build.nvidia.com ضمیمه می‌کند — بدون پیکربندی. این کار مصرف را به مبدأ صحیح در داشبورد صورتحساب NVIDIA مسیریابی می‌کند.</p>
+
+<h3>GMI Cloud</h3>
+<p>مدل‌های open و reasoning از طریق <a href="https://www.gmicloud.ai/" target="_blank" rel="noopener">GMI Cloud</a> — API ی سازگار-OpenAI، احراز هویت با کلید API.</p>
+<pre dir="ltr"><code># GMI Cloud
+hermes chat --provider gmi --model deepseek-ai/DeepSeek-V3.2
+# Requires: GMI_API_KEY in ~/.hermes/.env</code></pre>
+<p>یا دائمی در config.yaml:</p>
+<pre dir="ltr"><code>model:
+  provider: "gmi"
+  default: "deepseek-ai/DeepSeek-V3.2"</code></pre>
+<p>URL پایه با GMI_BASE_URL قابل بازنویسی است ‏(پیش‌فرض: https://api.gmi-serving.com/v1).</p>
+
+<h3>Actual Computer</h3>
+<p>سخت‌افزار خودتان به‌عنوان خوشهٔ استنتاج خصوصی از طریق <a href="https://actual.inc" target="_blank" rel="noopener">Actual Computer</a>. دو حالت سرویس‌دهی، هردو سازگار-OpenAI ‏(هرمس از ترنسپورت Responses API استفاده می‌کند):</p>
+<ul>
+  <li><b>رلهٔ میزبانی‌شده</b> — ‏https://api.actual.inc، رمزنگاری سرتاسری، مسیریابی به خوشهٔ <i>خودتان</i>. احراز هویت با یک کلید استنتاج ac_ از <a href="https://actual.inc/user/keys" target="_blank" rel="noopener">actual.inc/user/keys</a>.</li>
+  <li><b>دیمن محلی</b> — روی دستگاه در http://127.0.0.1:8080، کاملاً آفلاین. کلید API لازم نیست: هرمس URL پایهٔ loopback را تشخیص و خودکار با یک placeholder داخلی احراز هویت می‌کند.</li>
+</ul>
+<pre dir="ltr"><code># Hosted relay (ACTUAL_API_KEY in ~/.hermes/.env)
+hermes chat --provider actual --model &lt;model-id-from-your-cluster&gt;
+
+# Local daemon (ACTUAL_BASE_URL=http://127.0.0.1:8080 in ~/.hermes/.env, no key)
+hermes chat --provider actual --model &lt;installed-model-name&gt;</code></pre>
+<p>یا دائمی در config.yaml:</p>
+<pre dir="ltr"><code>model:
+  provider: "actual"
+  default: "&lt;model-id&gt;"</code></pre>
+<p>نکته‌ها:</p>
+<ul>
+  <li>شناسه‌های مدل از GET /v1/models خوشهٔ شما می‌آیند — با hermes model یا ‎curl -s https://api.actual.inc/v1/models -H "Authorization: Bearer $ACTUAL_API_KEY"‎ کشفشان کنید.</li>
+  <li>Host های لخت نرمال می‌شوند: ACTUAL_BASE_URL=http://127.0.0.1:8080 خودکار به http://127.0.0.1:8080/v1 تبدیل می‌شود.</li>
+  <li>میزان تلاش reasoning به بازهٔ پشتیبانی‌شدهٔ Actual محدود می‌شود ‏(none/low/medium/high/max) — تنظیم global ی xhigh/ultra باعث خطای 400 در درخواست‌ها نمی‌شود.</li>
+  <li>مدل‌های محلی کوچک: مجموعه‌ابزار کامل پیش‌فرض هرمس به‌اضلاف system prompt می‌تواند از پنجرهٔ زمینهٔ 32k بزرگ‌تر شود و خطای empty-stream از سرورهای خانوادهٔ llama.cpp بدهد. مجموعه‌ابزار را محدود کنید ‏(‎-t file,web‎) یا مدل را با زمینهٔ بزرگ‌تر بار کنید. مهارت اختیاری actual-setup ‏(hermes skills install official/devops/actual-setup) راه‌اندازی و عیب‌یابی را با جزئیات پوشش می‌دهد.</li>
+  <li>نام‌های مستعار: actual-computer، ‏actualcomputer، ‏aci.</li>
+</ul>
+
+<h3>StepFun</h3>
+<p>مدل‌های سری Step از طریق <a href="https://platform.stepfun.com" target="_blank" rel="noopener">StepFun</a> — API ی سازگار-OpenAI، احراز هویت با کلید API.</p>
+<pre dir="ltr"><code># StepFun
+hermes chat --provider stepfun --model step-3.5-flash
+# Requires: STEPFUN_API_KEY in ~/.hermes/.env</code></pre>
+<p>یا دائمی در config.yaml:</p>
+<pre dir="ltr"><code>model:
+  provider: "stepfun"
+  default: "step-3.5-flash"</code></pre>
+<p>URL پایه با STEPFUN_BASE_URL قابل بازنویسی است ‏(پیش‌فرض: https://api.stepfun.com/v1).</p>
+
+<h3>Hugging Face Inference Providers</h3>
+<p><a href="https://huggingface.co/docs/inference-providers" target="_blank" rel="noopener">Hugging Face Inference Providers</a> به بیش از ۲۰ مدل open از طریق یک نقطهٔ پایانی واحد سازگار-OpenAI مسیریابی می‌کند ‏(router.huggingface.co/v1). درخواست‌ها خودکار به سریع‌ترین backend موجود مسیریابی می‌شوند ‏(Groq، ‏Together، ‏SambaNova و...) با failover خودکار.</p>
+<pre dir="ltr"><code># Use any available model
+hermes chat --provider huggingface --model Qwen/Qwen3.5-397B-A17B
+# Requires: HF_TOKEN in ~/.hermes/.env
+
+# Short alias
+hermes chat --provider hf --model deepseek-ai/DeepSeek-V3.2</code></pre>
+<p>یا دائمی در config.yaml:</p>
+<pre dir="ltr"><code>model:
+  provider: "huggingface"
+  default: "Qwen/Qwen3.5-397B-A17B"</code></pre>
+<p>توکن تان را در <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener">huggingface.co/settings/tokens</a> بگیرید — حتماً مجوز «Make calls to Inference Providers» را فعال کنید. tier رایگان هم شامل می‌شود ‏(اعتبار ۰٫۱۰ دلار در ماه، بدون markup روی نرخ‌های ارائه‌دهنده).</p>
+<p>می‌توانید پسوندهای مسیریابی به نام مدل‌ها بچسبانید: ‎:fastest‎ ‏(پیش‌فرض)، ‏‎:cheapest‎ یا ‎:provider_name‎ برای اجبار به backend مشخص.</p>
+<p>URL پایه با HF_BASE_URL قابل بازنویسی است.</p>
+</section>
+<section class="doc-sec">
+<h2 id="custom-self-hosted"><span class="secnum">۸</span> ارائه‌دهندگان LLM سفارشی و خودمیزبان</h2>
+<p>‏Hermes Agent با <b>هر نقطهٔ پایانی سازگار-OpenAI</b> کار می‌کند. اگر سروری ‎/v1/chat/completions‎ را پیاده‌سازی کرده باشد، می‌توانید هرمس را به آن اشاره دهید. یعنی می‌توانید از مدل‌های محلی، سرورهای استنتاج GPU، مسیریاب‌های چند-ارائه‌دهنده یا هر API ی شخص ثالث استفاده کنید.</p>
+
+<h3 id="general-setup">راه‌اندازی عمومی</h3>
+<p>سه راه برای پیکربندی یک نقطهٔ پایانی سفارشی:</p>
+<p><b>راه‌اندازی تعاملی ‏(توصیه‌شده):</b></p>
+<pre dir="ltr"><code>hermes model
+# Select "Custom endpoint (self-hosted / VLLM / etc.)"
+# Enter: API base URL, API key, Model name</code></pre>
+<p><b>پیکربندی دستی ‏(config.yaml):</b></p>
+<pre dir="ltr"><code># In ~/.hermes/config.yaml
+model:
+  default: your-model-name
+  provider: custom
+  base_url: http://localhost:8000/v1
+  api_key: your-key-or-leave-empty-for-local</code></pre>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p><b>متغیرهای محیطی قدیمی:</b> مقدار LLM_MODEL در .env <b>حذف شده</b> — config.yaml تنها منبع حقیقت برای پیکربندی مدل و نقطهٔ پایانی است. مقدار OPENAI_BASE_URL هنوز پذیرفته می‌شود ولی <b>فقط</b> برای ارائه‌دهندهٔ openai-api ‏(نقطهٔ پایانی OpenAI را برای دسترسی مستقیم با کلید API بازنویسی می‌کند). برای بقیهٔ ارائه‌دهنده‌ها و نقاط پایانی سفارشی از hermes model یا ست کردن مستقیم model.base_url در config.yaml استفاده کنید. اگر مدخل‌های کهنه در .env تان دارید، در hermes setup یا مهاجرت config بعدی خودکار پاک می‌شوند.</p>
+</div>
+<p>هردو روش در config.yaml ذخیره می‌شوند که منبع حقیقتِ مدل، ارائه‌دهنده و URL پایه است.</p>
+
+<h3 id="switching-with-model">سوییچ مدل با ‎/model‎</h3>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p><b>hermes model در مقابل ‎/model‎</b><br><b>hermes model</b> ‏(از ترمینال، بیرون نشست چت) ویزارد کامل راه‌اندازی ارائه‌دهنده است. برای افزودن ارائه‌دهندهٔ جدید، اجرای جریان‌های OAuth، وارد کردن کلیدهای API و پیکربندی نقاط پایانی سفارشی از آن استفاده کنید.<br><br><b>/model</b> ‏(داخل نشست فعال چت Hermes تایپ می‌شود) فقط می‌تواند <b>بین ارائه‌دهنده‌ها و مدل‌هایی که قبلاً راه‌اندازی کرده‌اید</b> سوئیچ کند. نمی‌تواند ارائه‌دهندهٔ جدید اضافه کند، OAuth اجرا کند یا کلید API بپرسد. اگر فقط یک ارائه‌دهنده پیکربندی کرده‌اید ‏(مثلاً OpenRouter)، ‏‎/model‎ فقط مدل‌های همان را نشان می‌دهد.<br><br><b>برای افزودن ارائه‌دهندهٔ جدید:</b> از نشست خارج شوید ‏(Ctrl+C یا ‎/quit)، ‏hermes model را اجرا کنید، ارائه‌دهندهٔ جدید را راه بیندازید و بعد نشست جدیدی شروع کنید.</p>
+</div>
+<p>وقتی حداقل یک نقطهٔ پایانی سفارشی پیکربندی کرده باشید، می‌توانید وسط نشست سوئیچ کنید:</p>
+<pre dir="ltr"><code>/model custom:qwen-2.5          # Switch to a model on your custom endpoint
+/model custom                    # Auto-detect the model from the endpoint
+/model openrouter:claude-sonnet-4 # Switch back to a cloud provider</code></pre>
+<p>اگر <b>ارائه‌دهندگان سفارشی نام‌دار</b> دارید ‏(پایین را ببینید)، از نماد سه‌تایی استفاده کنید:</p>
+<pre dir="ltr"><code>/model custom:local:qwen-2.5    # Use the "local" custom provider with model qwen-2.5
+/model custom:work:llama3       # Use the "work" custom provider with llama3</code></pre>
+<p>هنگام سوییچ ارائه‌دهنده، هرمس URL پایه و ارائه‌دهنده را در config ذخیره می‌کند تا تغییر بعد از restart هم بماند. هنگام سوییچ از یک نقطهٔ پایانی سفارشی به ارائه‌دهندهٔ داخلی، URL پایهٔ کهنه خودکار پاک می‌شود.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>‏‎/model custom‎ ‏(لخت، بدون نام مدل) API ی ‎/models‎ نقطهٔ پایانی شما را کوئری می‌کند و اگر دقیقاً یک مدل بار شده باشد آن را خودکار انتخاب می‌کند. برای سرورهای محلی که تک‌مدل اجرا می‌کنند کاربردی است.</p>
+</div>
+<p>همه‌چیز در ادامه همین الگو را دنبال می‌کند — فقط URL، کلید و نام مدل را عوض کنید.</p>
+
+<h3 id="ollama-local">Ollama — مدل‌های محلی، صفر پیکربندی</h3>
+<p><a href="https://ollama.com/" target="_blank" rel="noopener">Ollama</a> مدل‌های open-weight را با یک فرمان محلی اجرا می‌کند. بهترین گزینه برای: آزمایش سریع محلی، کارهای حساس به حریم خصوصی، استفادهٔ آفلاین. فراخوانی ابزار را از طریق API ی سازگار-OpenAI پشتیبانی می‌کند.</p>
+<pre dir="ltr"><code># Install and run a model
+ollama pull qwen2.5-coder:32b
+ollama serve   # Starts on port 11434</code></pre>
+<p>بعد هرمس را پیکربندی کنید:</p>
+<pre dir="ltr"><code>hermes model
+# Select "Custom endpoint (self-hosted / VLLM / etc.)"
+# Enter URL: http://localhost:11434/v1
+# Skip API key (Ollama doesn't need one)
+# Enter model name (e.g. qwen2.5-coder:32b)</code></pre>
+<p>یا مستقیم config.yaml را پیکربندی کنید:</p>
+<pre dir="ltr"><code>model:
+  default: qwen2.5-coder:32b
+  provider: custom
+  base_url: http://localhost:11434/v1
+  context_length: 64000   # See warning below</code></pre>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p><b>Ollama به‌طور پیش‌فرض طول زمینهٔ خیلی کمی دارد</b><br>Ollama به‌طور پیش‌فرض از تمام پنجرهٔ زمینهٔ مدل شما استفاده <b>نمی‌کند</b>. بسته به VRAM تان، پیش‌فرض این است:</p>
+  <div class="table-wrap">
+  <table>
+  <thead><tr><th>VRAM موجود</th><th>زمینهٔ پیش‌فرض</th></tr></thead>
+  <tbody>
+  <tr><td>کمتر از ۲۴ گیگابایت</td><td><b>۴٬۰۹۶ توکن</b></td></tr>
+  <tr><td>۲۴ تا ۴۸ گیگابایت</td><td>۳۲٬۷۶۸ توکن</td></tr>
+  <tr><td>بیش از ۴۸ گیگابایت</td><td>۲۵۶٬۰۰۰ توکن</td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p>‏Hermes Agent برای استفادهٔ ایجنتی با ابزارها حداقل به <b>۶۴٬۰۰۰ توکن</b> زمینه نیاز دارد. پنجره‌های کوچک‌تر در زمان شروع رد می‌شوند چون system prompt، اسکیماهای ابزار و وضعیت گفتگوی جاری برای گردش‌کارهای چندمرحله‌ای قابل‌اعتماد جای کافی لازم دارند.</p>
+  <p><b>چطور افزایشش دهید</b> ‏(یکی را انتخاب کنید):</p>
+  <pre dir="ltr"><code># Option 1: Set server-wide via environment variable (recommended)
+OLLAMA_CONTEXT_LENGTH=64000 ollama serve
+
+# Option 2: For systemd-managed Ollama
+sudo systemctl edit ollama.service
+# Add: Environment="OLLAMA_CONTEXT_LENGTH=64000"
+# Then: sudo systemctl daemon-reload && sudo systemctl restart ollama
+
+# Option 3: Bake it into a custom model (persistent per-model)
+echo -e "FROM qwen2.5-coder:32b\nPARAMETER num_ctx 64000" > Modelfile
+ollama create qwen2.5-coder-64k -f Modelfile</code></pre>
+  <p><b>طول زمینه را نمی‌توان از طریق API ی سازگار-OpenAI ست کرد</b> ‏(/v1/chat/completions). باید سمت سرور یا از طریق Modelfile پیکربندی شود. این شماره‌۱ منبع سردرگمی در اتصال Ollama به ابزارهایی مثل Hermes است.</p>
+</div>
+<p><b>درستیِ تنظیم زمینه را تأیید کنید:</b></p>
+<pre dir="ltr"><code>ollama ps
+# Look at the CONTEXT column — it should show your configured value</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>مدل‌های موجود را با ollama list فهرست کنید. هر مدلی را از <a href="https://ollama.com/library" target="_blank" rel="noopener">کتابخانهٔ Ollama</a> با ollama pull &lt;model&gt; بگیرید. Ollama انتقال به GPU را خودکار انجام می‌دهد — برای بیشتر راه‌اندازی‌ها نیازی به پیکربندی نیست.</p>
+</div>
+
+<h3>vLLM — استنتاج GPU ی پرقدرت</h3>
+<p><a href="https://docs.vllm.ai/" target="_blank" rel="noopener">vLLM</a> استاندارد سرویس‌دهی LLM در تولید است. بهترین گزینه برای: بیشترین توان عملیاتی روی سخت‌افزار GPU، سرویس‌دادن مدل‌های بزرگ، batching پیوسته.</p>
+<pre dir="ltr"><code>pip install vllm
+vllm serve meta-llama/Llama-3.1-70B-Instruct \
+  --port 8000 \
+  --max-model-len 65536 \
+  --tensor-parallel-size 2 \
+  --enable-auto-tool-choice \
+  --tool-call-parser hermes</code></pre>
+<p>بعد هرمس را پیکربندی کنید:</p>
+<pre dir="ltr"><code>hermes model
+# Select "Custom endpoint (self-hosted / VLLM / etc.)"
+# Enter URL: http://localhost:8000/v1
+# Skip API key (or enter one if you configured vLLM with --api-key)
+# Enter model name: meta-llama/Llama-3.1-70B-Instruct</code></pre>
+<p><b>طول زمینه:</b> ‏vLLM به‌طور پیش‌فرض max_position_embeddings مدل را می‌خواند. اگر این مقدار از حافظهٔ GPU تان بیشتر باشد خطا می‌دهد و می‌خواهد --max-model-len را پایین‌تر ست کنید. همچنین می‌توانید از --max-model-len auto استفاده کنید تا خودکار بیشینهٔ جا‌شده پیدا شود. مقدار --gpu-memory-utilization 0.95 ‏(پیش‌فرض ۰٫۹) را ست کنید تا زمینهٔ بیشتری در VRAM جا شود.</p>
+<p><b>فراخوانی ابزار فلگ‌های صریح لازم دارد:</b></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فلگ</th><th>هدف</th></tr></thead>
+<tbody>
+<tr><td>--enable-auto-tool-choice</td><td>برای tool_choice: "auto" لازم است ‏(پیش‌فرض در Hermes)</td></tr>
+<tr><td>--tool-call-parser &lt;name&gt;</td><td>پارسر برای قالب فراخوانی ابزارِ مدل</td></tr>
+</tbody>
+</table>
+</div>
+<p>پارسرهای پشتیبانی‌شده: hermes ‏(Qwen 2.5، ‏Hermes 2/3)، ‏llama3_json ‏(Llama 3.x)، ‏mistral، ‏deepseek_v3، ‏deepseek_v31، ‏xlam، ‏pythonic. بدون این فلگ‌ها فراخوانی ابزار کار نمی‌کند — مدل فراخوانی ابزار را به‌صورت متن خروجی می‌دهد.</p>
+<p><b>پارسرهای reasoning ی Qwen:</b> هرمس متادیتای ساختاریافتهٔ reasoning مثل reasoning، ‏reasoning_content و دلتاهای reasoning ی استریم‌شده را وقتی سرورهای سازگار-OpenAI برگردانند حفظ می‌کند. این متادیتا به‌عنوان دادهٔ ردیابی reasoning/تفکر برخورد می‌شود، نه جایگزین پاسخ مرئی دستیار. برای مدل‌های reasoning ی Qwen که vLLM سرویس می‌دهد مطمئن شوید پاسخ نهایی مرئی کاربر همچنان در content ظاهر می‌شود. اگر ‎--reasoning-parser qwen3‎ در استقرار شما content را خالی گذاشت، یا آن پارسر را غیرفعال کنید یا یک گزینهٔ درخواست پشتیبانی‌شدهٔ سرور مثل chat_template_kwargs.enable_thinking: false را از طریق extra_body بفرستید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>‏vLLM اندازه‌های خوانا پشتیبانی می‌کند: ‎--max-model-len 64k‎ ‏(k کوچک = ۱۰۰۰، ‏K بزرگ = ۱۰۲۴).</p>
+</div>
+
+<h3>SGLang — سرویس‌دهی سریع با RadixAttention</h3>
+<p><a href="https://github.com/sgl-project/sglang" target="_blank" rel="noopener">SGLang</a> جایگزینی برای vLLM است با RadixAttention برای استفادهٔ مجدد از KV cache. بهترین گزینه برای: گفتگوهای چندنوبتی ‏(کش پیشوند)، decoding مقیدشده، خروجی ساختاریافته.</p>
+<pre dir="ltr"><code>pip install "sglang[all]"
+python -m sglang.launch_server \
+  --model meta-llama/Llama-3.1-70B-Instruct \
+  --port 30000 \
+  --context-length 65536 \
+  --tp 2 \
+  --tool-call-parser qwen</code></pre>
+<p>بعد هرمس را پیکربندی کنید:</p>
+<pre dir="ltr"><code>hermes model
+# Select "Custom endpoint (self-hosted / VLLM / etc.)"
+# Enter URL: http://localhost:30000/v1
+# Enter model name: meta-llama/Llama-3.1-70B-Instruct</code></pre>
+<p><b>طول زمینه:</b> ‏SGLang به‌طور پیش‌فرض از config مدل می‌خواند. برای بازنویسی از ‎--context-length‎ استفاده کنید. اگر لازم است از بیشینهٔ اعلام‌شدهٔ مدل فراتر بروید، SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN=1 را ست کنید.</p>
+<p><b>فراخوانی ابزار:</b> از ‎--tool-call-parser‎ با پارسر مناسب خانوادهٔ مدل تان استفاده کنید: qwen ‏(Qwen 2.5)، ‏llama3، ‏llama4، ‏deepseekv3، ‏mistral، ‏glm. بدون این فلگ فراخوانی‌های ابزار به‌صورت متن ساده برمی‌گردند.</p>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p><b>SGLang به‌طور پیش‌فرض حداکثر ۱۲۸ توکن خروجی دارد</b><br>اگر پاسخ‌ها قطع‌به‌قطع به نظر رسیدند، max_tokens را به درخواست‌هایتان اضافه کنید یا ‎--default-max-tokens‎ را روی سرور ست کنید. پیش‌فرض SGLang فقط ۱۲۸ توکن per پاسخ است اگر در درخواست مشخص نشده باشد.</p>
+</div>
+
+<h3 id="llama-cpp">llama.cpp / llama-server — استنتاج CPU و Metal</h3>
+<p><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp</a> مدل‌های کوانتیزه‌شده را روی CPU، ‏Apple Silicon ‏(Metal) و GPU های مصرفی اجرا می‌کند. بهترین گزینه برای: اجرای مدل بدون GPU ی مرکز داده، کاربران Mac، استقرار edge.</p>
+<pre dir="ltr"><code># Build and start llama-server
+cmake -B build && cmake --build build --config Release
+./build/bin/llama-server \
+  --jinja -fa \
+  -c 64000 \
+  -ngl 99 \
+  -m models/qwen2.5-coder-32b-instruct-Q4_K_M.gguf \
+  --port 8080 --host 0.0.0.0</code></pre>
+<p><b>طول زمینه ‎(-c)‎:</b> نسخه‌های اخیر به‌طور پیش‌فرض 0 دارند که زمینهٔ آموزشی مدل را از متادیتای GGUF می‌خواند. برای مدل‌هایی با زمینهٔ آموزشی ۱۲۸k+ ممکن است تلاش برای تخصیص کامل KV cache باعث OOM شود. ‎-c‎ را صریحاً حداقل روی ۶۴٬۰۰۰ توکن برای Hermes ست کنید. اگر از اسلات‌های موازی ‏(‎-np‎) استفاده می‌کنید، کل زمینه بین اسلات‌ها تقسیم می‌شود — با ‎-c 64000 -np 4‎ هر اسلات فقط 16k می‌گیرد که زیر حداقل هرمس برای هر نشست فعال است.</p>
+<p>بعد هرمس را به آن اشاره دهید:</p>
+<pre dir="ltr"><code>hermes model
+# Select "Custom endpoint (self-hosted / VLLM / etc.)"
+# Enter URL: http://localhost:8080/v1
+# Skip API key (local servers don't need one)
+# Enter model name — or leave blank to auto-detect if only one model is loaded</code></pre>
+<p>این کار نقطهٔ پایانی را در config.yaml ذخیره می‌کند پس بین نشست‌ها می‌ماند.</p>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p><b>‎--jinja‎ برای فراخوانی ابزار الزامی است</b><br>بدون ‎--jinja‎، ‏llama-server پارامتر tools را کاملاً نادیده می‌گیرد. مدل سعی می‌کند ابزارها را با نوشتن JSON در متن پاسخ صدا بزند ولی هرمس آن را به‌عنوان فراخوانی ابزار تشخیص نمی‌دهد — JSON خامی مثل {"name": "web_search", ...} را به‌جای یک جستجوی واقعی چاپ‌شده می‌بینید.<br><br>پشتیبانی بومی فراخوانی ابزار ‏(بهترین کارایی): Llama 3.x، ‏Qwen 2.5 ‏(شامل Coder)، ‏Hermes 2/3، ‏Mistral، ‏DeepSeek، ‏Functionary. بقیهٔ مدل‌ها از یک handler عمومی استفاده می‌کنند که کار می‌کند ولی ممکن است کم‌بازده‌تر باشد. فهرست کامل را در <a href="https://github.com/ggml-org/llama.cpp/blob/master/docs/function-calling.md" target="_blank" rel="noopener">مستندات function calling ی llama.cpp</a> ببینید.<br><br>می‌توانید فعال بودن پشتیبانی ابزار را با چک کردن http://localhost:8080/props تأیید کنید — فیلد chat_template باید موجود باشد.</p>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>مدل‌های GGUF را از <a href="https://huggingface.co/models?library=gguf" target="_blank" rel="noopener">Hugging Face</a> دانلود کنید. کوانتیزه‌سازی Q4_K_M بهترین توازن کیفیت نسبت به مصرف حافظه را می‌دهد.</p>
+</div>
+
+<h3>LM Studio — برنامهٔ دسکتاپ با مدل‌های محلی</h3>
+<p><a href="https://lmstudio.ai/" target="_blank" rel="noopener">LM Studio</a> برنامهٔ دسکتاپی برای اجرای مدل‌های محلی با GUI است. بهترین گزینه برای: کاربرانی که رابط تصویری می‌پسندند، تست سریع مدل، توسعه‌دهندگان روی macOS/Windows/Linux.</p>
+<p>سرور را از برنامهٔ LM Studio اجرا کنید ‏(تب Developer ← Start Server) یا از CLI استفاده کنید:</p>
+<pre dir="ltr"><code>lms server start                        # Starts on port 1234
+lms load qwen2.5-coder --context-length 64000</code></pre>
+<p>بعد هرمس را پیکربندی کنید:</p>
+<pre dir="ltr"><code>hermes model
+# Select "LM Studio"
+# Press Enter to use http://localhost:1234/v1
+# Pick one of the discovered models
+# If LM Studio server auth is enabled, enter LM_API_KEY when prompted</code></pre>
+<p>هرمس زمینهٔ نمونهٔ از قبل بار‌شدهٔ LM Studio را حفظ می‌کند. برای مدلی که در حالت explicit پیش‌فرض بار نشده، هرمس context_length را حذف می‌کند مگر اینکه خودتان در Hermes ست کرده باشید تا LM Studio تنظیم مدل خودش را اعمال کند. بعد هرمس فقط از طول زمینه‌ای استفاده می‌کند که LM Studio بعد از بارگذاری گزارش می‌کند.</p>
+<p>برای تغییر طول زمینه در LM Studio:</p>
+<ol>
+  <li>روی آیکون چرخ‌دنده کنار انتخاب‌گر مدل کلیک کنید</li>
+  <li>«Context Length» را حداقل روی ۶۴۰۰۰ بگذارید تا تجربه روان باشد</li>
+  <li>مدل را دوباره بار کنید تا تغییر اعمال شود</li>
+  <li>اگر ماشینتان ۶۴۰۰۰ را جا نمی‌دهد، مدل کوچک‌تری با طول زمینهٔ بزرگ‌تر را در نظر بگیرید.</li>
+</ol>
+<p>یا از CLI: lms load model-name --context-length 64000</p>
+<p>با CLI می‌توانید تخمین بزنید مدل جا می‌شود یا نه: lms load model-name --context-length 64000 --estimate-only</p>
+<p>برای پیش‌فرض‌های دائمی per-model: تب My Models ← آیکون چرخ‌دنده روی مدل ← ست کردن اندازهٔ زمینه.</p>
+<p>اگر از قابلیت Just-In-Time loading / Auto-Evict ی LM Studio استفاده می‌کنید و می‌خواهید LM Studio بارگذاری و تخلیهٔ مدل را از روی درخواست‌های معمول چت مدیریت کند، مرحلهٔ preload صریح Hermes را رد کنید:</p>
+<pre dir="ltr"><code>hermes config set model.lmstudio_load_mode jit</code></pre>
+<p>برگشت به رفتار پیش‌فرض preload صریح:</p>
+<pre dir="ltr"><code>hermes config set model.lmstudio_load_mode explicit</code></pre>
+<p><b>فراخوانی ابزار:</b> از LM Studio 0.3.6 پشتیبانی می‌شود. مدل‌هایی با آموزش بومی فراخوانی ابزار ‏(Qwen 2.5، ‏Llama 3.x، ‏Mistral، ‏Hermes) خودکار تشخیص و با نشان ابزار نمایش داده می‌شوند. بقیهٔ مدل‌ها از fallback عمومی استفاده می‌کنند که ممکن است کمتر قابل‌اعتماد باشد.</p>
+<h3 id="wsl2-networking">شبکهٔ WSL2 ‏(کاربران ویندوز)</h3>
+<p>چون Hermes Agent به محیط یونیکس نیاز دارد، کاربران ویندوز آن را داخل WSL2 اجرا می‌کنند. اگر سرور مدل تان ‏(Ollama، ‏LM Studio و...) روی <b>host ویندوز</b> اجرا می‌شود، باید شکاف شبکه را پل بزنید — WSL2 از یک آداپتور شبکهٔ مجازی با ساب‌نت خودش استفاده می‌کند، پس localhost داخل WSL2 به ماشین مجازی لینوکس اشاره می‌کند <b>نه</b> host ویندوز.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>هردو داخل WSL2؟ مشکلی نیست.</b><br>اگر سرور مدل تان هم داخل WSL2 اجرا می‌شود ‏(برای vLLM، ‏SGLang و llama-server رایج است)، localhost همان‌طور که انتظار دارید کار می‌کند — فضای نام شبکه‌شان مشترک است. این بخش را رد کنید.</p>
+</div>
+<h4>گزینهٔ ۱: حالت شبکهٔ Mirrored ‏(توصیه‌شده)</h4>
+<p>روی <b>Windows 11 22H2+</b> در دسترس است؛ حالت mirrored کاری می‌کند localhost دوطرفه بین ویندوز و WSL2 کار کند — ساده‌ترین راه‌حل.</p>
+<ol>
+  <li>فایل %USERPROFILE%\.wslconfig را بسازید یا ویرایش کنید ‏(مثلاً C:\Users\YourName\.wslconfig):
+    <pre dir="ltr"><code>[wsl2]
+networkingMode=mirrored</code></pre>
+  </li>
+  <li>WSL را از PowerShell ری‌استارت کنید:
+    <pre dir="ltr"><code>wsl --shutdown</code></pre>
+  </li>
+  <li>ترمینال WSL2 تان را دوباره باز کنید. حالا localhost به سرویس‌های ویندوز می‌رسد:
+    <pre dir="ltr"><code>curl http://localhost:11434/v1/models   # Ollama on Windows — works</code></pre>
+  </li>
+</ol>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p><b>دیوارآتش Hyper-V:</b> روی بعضی نسخه‌های Windows 11 دیوارآتش Hyper-V به‌طور پیش‌فرض اتصالات mirrored را مسدود می‌کند. اگر بعد از فعال کردن حالت mirrored همچنان localhost کار نمی‌کند، این را در یک <b>PowerShell ادمین</b> اجرا کنید:</p>
+  <pre dir="ltr"><code>Set-NetFirewallHyperVVMSetting -Name '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' -DefaultInboundAction Allow</code></pre>
+</div>
+<h4>گزینهٔ ۲: استفاده از IP ی host ویندوز ‏(Windows 10 / نسخه‌های قدیمی‌تر)</h4>
+<p>اگر نمی‌توانید از حالت mirrored استفاده کنید، از داخل WSL2 آی‌پی host ویندوز را پیدا کنید و به‌جای localhost از آن استفاده کنید:</p>
+<pre dir="ltr"><code># Get the Windows host IP (the default gateway of WSL2's virtual network)
+ip route show | grep -i default | awk '{ print $3 }'
+# Example output: 172.29.192.1</code></pre>
+<p>آن IP را در پیکربندی Hermes استفاده کنید:</p>
+<pre dir="ltr"><code>model:
+  default: qwen2.5-coder:32b
+  provider: custom
+  base_url: http://172.29.192.1:11434/v1   # Windows host IP, not localhost</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>کمکی پویا:</b> IP ی host با هر ری‌استارت WSL2 ممکن است عوض شود. می‌توانید در شل به‌صورت پویا بگیریدش:</p>
+  <pre dir="ltr"><code>export WSL_HOST=$(ip route show | grep -i default | awk '{ print $3 }')
+echo "Windows host at: $WSL_HOST"
+curl http://$WSL_HOST:11434/v1/models   # Test Ollama</code></pre>
+  <p>یا از نام mDNS ماشینی‌تان استفاده کنید ‏(نیازمند libnss-mdns در WSL2):</p>
+  <pre dir="ltr"><code>sudo apt install libnss-mdns
+curl http://$(hostname).local:11434/v1/models</code></pre>
+</div>
+<h4>آدرس Bind سرور ‏(برای حالت NAT الزامی)</h4>
+<p>اگر از <b>گزینهٔ ۲</b> استفاده می‌کنید ‏(حالت NAT با IP ی host)، سرور مدل روی ویندوز باید اتصالات خارج از 127.0.0.1 را قبول کند. به‌طور پیش‌فرض بیشتر سرورها فقط روی localhost گوش می‌دهند — اتصالات WSL2 در حالت NAT از یک ساب‌نت مجازی متفاوت می‌آیند و رد می‌شوند. در حالت mirrored، localhost مستقیم نگاشت می‌شود پس bind پیش‌فرض 127.0.0.1 خوب کار می‌کند.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>سرور</th><th>bind پیش‌فرض</th><th>راه حل</th></tr></thead>
+<tbody>
+<tr><td><b>Ollama</b></td><td>127.0.0.1</td><td>متغیر محیطی OLLAMA_HOST=0.0.0.0 را قبل از اجرای Ollama ست کنید ‏(در ویندوز: System Settings ← Environment Variables، یا ویرایش سرویس Ollama)</td></tr>
+<tr><td><b>LM Studio</b></td><td>127.0.0.1</td><td>گزینهٔ <b>Serve on Network</b> را در تب Developer ← تنظیمات Server فعال کنید</td></tr>
+<tr><td><b>llama-server</b></td><td>127.0.0.1</td><td>‎--host 0.0.0.0‎ را به فرمان اجرا اضافه کنید</td></tr>
+<tr><td><b>vLLM</b></td><td>0.0.0.0</td><td>به‌طور پیش‌فرض به همهٔ اینترفیس‌ها bind می‌شود</td></tr>
+<tr><td><b>SGLang</b></td><td>127.0.0.1</td><td>‎--host 0.0.0.0‎ را به فرمان اجرا اضافه کنید</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>Ollama روی ویندوز ‏(با جزئیات):</b>Ollama به‌عنوان یک سرویس ویندوز اجرا می‌شود. برای ست کردن OLLAMA_HOST:</p>
+<ol>
+  <li>‏System Properties ← Environment Variables را باز کنید</li>
+  <li>یک <b>متغیر System</b> جدید اضافه کنید: OLLAMA_HOST = 0.0.0.0</li>
+  <li>سرویس Ollama را ری‌استارت کنید ‏(یا سیستم را ریبوت کنید)</li>
+</ol>
+<h4>دیوارآتش ویندوز</h4>
+<p>دیوارآتش ویندوز با WSL2 مثل یک شبکهٔ جدا رفتار می‌کند ‏(هم در NAT هم در mirrored). اگر بعد از مراحل بالا اتصال‌ها هنوز شکست می‌خورند، یک قانون دیوارآتش برای پورت سرور مدلتان اضافه کنید:</p>
+<pre dir="ltr"><code># Run in Admin PowerShell — replace PORT with your server's port
+New-NetFirewallRule -DisplayName "Allow WSL2 to Model Server" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 11434</code></pre>
+<p>پورت‌های رایج: Ollama ‏۱۱۴۳۴، ‏vLLM ‏۸۰۰۰، ‏SGLang ‏۳۰۰۰۰، ‏llama-server ‏۸۰۸۰، ‏LM Studio ‏۱۲۳۴.</p>
+<h4>تأیید سریع</h4>
+<p>از داخل WSL2 تست کنید که به سرور مدل تان می‌رسید:</p>
+<pre dir="ltr"><code># Replace URL with your server's address and port
+curl http://localhost:11434/v1/models          # Mirrored mode
+curl http://172.29.192.1:11434/v1/models       # NAT mode (use your actual host IP)</code></pre>
+<p>اگر پاسخی JSON حاوی فهرست مدل‌ها گرفتید، همه‌چیز آماده است. همان URL را به‌عنوان base_url در پیکربندی Hermes استفاده کنید.</p>
+
+<h3 id="troubleshooting-local">عیب‌یابی مدل‌های محلی</h3>
+<p>این مشکل‌ها روی <b>همهٔ</b> سرورهای استنتاج محلی وقتی با Hermes استفاده می‌شوند اثر می‌گذارند.</p>
+<h4>«Connection refused» از WSL2 به سرور مدل روی host ویندوز</h4>
+<p>اگر هرمس داخل WSL2 اجرا می‌شود و سرور مدل تان روی host ویندوز است، ‎http://localhost:&lt;port&gt;‎ در حالت شبکهٔ NAT ی پیش‌فرض WSL2 کار نمی‌کند. راه‌حل را در بخش <a href="#wsl2-networking">شبکهٔ WSL2</a> بالا ببینید.</p>
+<h4>فراخوانی‌های ابزار به‌جای اجرا شدن، متن می‌شوند</h4>
+<p>مدل چیزی مثل {"name": "web_search", "arguments": {...}} را به‌عنوان پیام خروجی می‌دهد به‌جای اینکه واقعاً ابزار را صدا بزند.</p>
+<p><b>علت:</b> سرور شما فراخوانی ابزار را فعال نکرده یا مدل از طریق پیاده‌سازی فراخوانی ابزارِ سرور از آن پشتیبانی نمی‌کند.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>سرور</th><th>راه حل</th></tr></thead>
+<tbody>
+<tr><td><b>llama.cpp</b></td><td>‎--jinja‎ را به فرمان اجرا اضافه کنید</td></tr>
+<tr><td><b>vLLM</b></td><td>‎--enable-auto-tool-choice --tool-call-parser hermes‎ را اضافه کنید</td></tr>
+<tr><td><b>SGLang</b></td><td>‎--tool-call-parser qwen‎ را اضافه کنید ‏(یا پارسر مناسب)</td></tr>
+<tr><td><b>Ollama</b></td><td>فراخوانی ابزار به‌طور پیش‌فرض فعاله — مطمئن شوید مدل تان پشتیبانی می‌کند ‏(چک با ollama show model-name)</td></tr>
+<tr><td><b>LM Studio</b></td><td>به 0.3.6+ به‌روزرسانی کنید و مدلی با پشتیبانی بومی ابزار استفاده کنید</td></tr>
+</tbody>
+</table>
+</div>
+<h4>مدل انگار زمینه را فراموش می‌کند یا پاسخ‌های نامنسجم می‌دهد</h4>
+<p><b>علت:</b> پنجرهٔ زمینه خیلی کوچک است. وقتی گفتگو از حد زمینه رد شود، بیشتر سرورها بی‌سروصدا پیام‌های قدیمی‌تر را حذف می‌کنند. system prompt + اسکیماهای ابزار هرمس به‌تنهایی می‌تواند ۴ تا ۸ هزار توکن مصرف کند.</p>
+<p><b>تشخیص:</b></p>
+<pre dir="ltr"><code># Check what Hermes thinks the context is
+# Look at startup line: "Context limit: X tokens"
+
+# Check your server's actual context
+# Ollama: ollama ps (CONTEXT column)
+# llama.cpp: curl http://localhost:8080/props | jq '.default_generation_settings.n_ctx'
+# vLLM: check --max-model-len in startup args</code></pre>
+<p><b>راه حل:</b> برای استفادهٔ ایجنتی زمینه را حداقل روی <b>۶۴٬۰۰۰ توکن</b> ست کنید. فلگ مخصوص هر سرور را در بخش خودش بالا ببینید.</p>
+<h4>پیام «Context limit: 2048 tokens» هنگام شروع</h4>
+<p>هرمس طول زمینه را از نقطهٔ پایانی ‎/v1/models‎ سرور شما تشخیص می‌دهد. اگر سرور مقدار کمی گزارش کند ‏(یا اصلاً گزارش نکند)، هرمس حد اعلام‌شدهٔ مدل را استفاده می‌کند که ممکن است غلط باشد.</p>
+<p><b>راه حل:</b> صریحاً در config.yaml ستش کنید:</p>
+<pre dir="ltr"><code>model:
+  default: your-model
+  provider: custom
+  base_url: http://localhost:11434/v1
+  context_length: 64000</code></pre>
+<h4>پاسخ‌ها وسط جمله قطع می‌شوند</h4>
+<p><b>علت‌های احتمالی:</b></p>
+<ol>
+  <li><b>سقف خروجی کم ‏(max_tokens) روی سرور</b> — SGLang به‌طور پیش‌فرض ۱۲۸ توکن per پاسخ دارد. ‎--default-max-tokens‎ را روی سرور ست کنید یا در config.yaml مقدار model.max_tokens را پیکربندی کنید. توجه: max_tokens فقط طول پاسخ را کنترل می‌کند — ربطی به اینکه تاریخچهٔ گفتگویتان چقدر بلند باشد ندارد ‏(آن مربوط به context_length است).</li>
+  <li><b>تمام شدن زمینه</b> — مدل پنجرهٔ زمینه‌اش را پر کرده. model.context_length را افزایش دهید یا <a href="../user-guide/configuration.html">فشرده‌سازی زمینه</a> را در هرمس فعال کنید.</li>
+</ol>
+
+<h3>LiteLLM Proxy — گیت‌وی چند-ارائه‌دهنده</h3>
+<p><a href="https://docs.litellm.ai/" target="_blank" rel="noopener">LiteLLM</a> پروکسی سازگار-OpenAI ای است که بیش از ۱۰۰ ارائه‌دهندهٔ LLM را پشت یک API واحد متحد می‌کند. بهترین گزینه برای: سوییچ بین ارائه‌دهنده‌ها بدون تغییر پیکربندی، load balancing، زنجیره‌های fallback، کنترل بودجه.</p>
+<pre dir="ltr"><code># Install and start
+pip install "litellm[proxy]"
+litellm --model anthropic/claude-sonnet-4 --port 4000
+
+# Or with a config file for multiple models:
+litellm --config litellm_config.yaml --port 4000</code></pre>
+<p>سپس هرمس را با hermes model ← Custom endpoint ← http://localhost:4000/v1 پیکربندی کنید.</p>
+<p>نمونهٔ litellm_config.yaml با fallback:</p>
+<pre dir="ltr"><code>model_list:
+  - model_name: "best"
+    litellm_params:
+      model: anthropic/claude-sonnet-4
+      api_key: sk-ant-...
+  - model_name: "best"
+    litellm_params:
+      model: openai/gpt-4o
+      api_key: sk-...
+router_settings:
+  routing_strategy: "latency-based-routing"</code></pre>
+
+<h3>ClawRouter — مسیریابی بهینه‌شده برای هزینه</h3>
+<p><a href="https://github.com/BlockRunAI/ClawRouter" target="_blank" rel="noopener">ClawRouter</a> ساختهٔ BlockRunAI یک پروکسی مسیریابی محلی است که بر اساس پیچیدگی کوئری خودکار مدل انتخاب می‌کند. درخواست‌ها را روی ۱۴ بُعد طبقه‌بندی می‌کند و به ارزان‌ترین مدلی مسیریابی می‌کند که توان انجام کار را دارد. پرداخت با رمزارز USDC است ‏(بدون کلید API).</p>
+<pre dir="ltr"><code># Install and start
+npx @blockrun/clawrouter    # Starts on port 8402</code></pre>
+<p>سپس هرمس را با hermes model ← Custom endpoint ← http://localhost:8402/v1 ← نام مدل blockrun/auto پیکربندی کنید.</p>
+<p>پروفایل‌های مسیریابی:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پروفایل</th><th>استراتژی</th><th>صرفه‌جویی</th></tr></thead>
+<tbody>
+<tr><td>blockrun/auto</td><td>توازن کیفیت/هزینه</td><td>۷۴ تا ۱۰۰٪</td></tr>
+<tr><td>blockrun/eco</td><td>ارزان‌ترین ممکن</td><td>۹۵ تا ۱۰۰٪</td></tr>
+<tr><td>blockrun/premium</td><td>بهترین مدل‌های کیفی</td><td>۰٪</td></tr>
+<tr><td>blockrun/free</td><td>فقط مدل‌های رایگان</td><td>۱۰۰٪</td></tr>
+<tr><td>blockrun/agentic</td><td>بهینه برای استفادهٔ ابزاری</td><td>متغیر</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>‏ClawRouter به کیف پول شارژ‌شده با USDC روی Base یا Solana نیاز دارد. همهٔ درخواست‌ها از API ی backend ی BlockRun عبور می‌کنند. برای چک وضعیت کیف پول npx @blockrun/clawrouter doctor را اجرا کنید.</p>
+</div>
+
+<h3 id="other-compatible-providers">سایر ارائه‌دهندگان سازگار</h3>
+<p>هر سرویسی با API ی سازگار-OpenAI کار می‌کند. چند گزینهٔ محبوب:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>URL پایه</th><th>نکته‌ها</th></tr></thead>
+<tbody>
+<tr><td><a href="https://together.ai" target="_blank" rel="noopener">Together AI</a></td><td>https://api.together.xyz/v1</td><td>مدل‌های open میزبانی‌شدهٔ ابری</td></tr>
+<tr><td><a href="https://groq.com" target="_blank" rel="noopener">Groq</a></td><td>https://api.groq.com/openai/v1</td><td>استنتاج فوق‌سریع</td></tr>
+<tr><td><a href="https://deepseek.com" target="_blank" rel="noopener">DeepSeek</a></td><td>https://api.deepseek.com/v1</td><td>مدل‌های DeepSeek</td></tr>
+<tr><td><a href="https://fireworks.ai" target="_blank" rel="noopener">Fireworks AI</a></td><td>https://api.fireworks.ai/inference/v1</td><td>میزبانی سریع مدل‌های open</td></tr>
+<tr><td><a href="https://www.gmicloud.ai/" target="_blank" rel="noopener">GMI Cloud</a></td><td>https://api.gmi-serving.com/v1</td><td>استنتاج مدیریت‌شدهٔ سازگار-OpenAI</td></tr>
+<tr><td><a href="https://actual.inc" target="_blank" rel="noopener">Actual Computer</a></td><td>https://api.actual.inc/v1</td><td>رلهٔ خصوصی به خوشهٔ خودتان؛ دیمن محلی روی http://127.0.0.1:8080/v1</td></tr>
+<tr><td><a href="https://cerebras.ai" target="_blank" rel="noopener">Cerebras</a></td><td>https://api.cerebras.ai/v1</td><td>استنتاج تراشهٔ wafer-scale</td></tr>
+<tr><td><a href="https://mistral.ai" target="_blank" rel="noopener">Mistral AI</a></td><td>https://api.mistral.ai/v1</td><td>مدل‌های Mistral</td></tr>
+<tr><td><a href="https://openai.com" target="_blank" rel="noopener">OpenAI</a></td><td>https://api.openai.com/v1</td><td>دسترسی مستقیم OpenAI</td></tr>
+<tr><td><a href="https://azure.microsoft.com" target="_blank" rel="noopener">Azure OpenAI</a></td><td>https://YOUR.openai.azure.com/</td><td>OpenAI سازمانی</td></tr>
+<tr><td><a href="https://localai.io" target="_blank" rel="noopener">LocalAI</a></td><td>http://localhost:8080/v1</td><td>خودمیزبان، چند-مدلی</td></tr>
+<tr><td><a href="https://jan.ai" target="_blank" rel="noopener">Jan</a></td><td>http://localhost:1337/v1</td><td>برنامهٔ دسکتاپ با مدل‌های محلی</td></tr>
+</tbody>
+</table>
+</div>
+<p>هرکدام را با hermes model ← Custom endpoint یا در config.yaml پیکربندی کنید:</p>
+<pre dir="ltr"><code>model:
+  default: meta-llama/Llama-3.1-70B-Instruct-Turbo
+  provider: custom
+  base_url: https://api.together.xyz/v1
+  api_key: your-together-key</code></pre>
+
+<h3>تشخیص طول زمینه</h3>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p><b>دو تنظیم که راحت قاطی می‌شوند</b><br><b>context_length</b> کل <b>پنجرهٔ زمینه</b> است — بودجهٔ ترکیبی توکن‌های ورودی <i>و</i> خروجی ‏(مثلاً ۲۰۰٬۰۰۰ برای Claude Opus 4.6). هرمس با این تصمیم می‌گیرد کی تاریخچه را فشرده کند و درخواست‌های API را اعتبارسنجی می‌کند.<br><br><b>model.max_tokens</b> <b>سقف خروجی</b> است — بیشینهٔ توکن‌هایی که مدل در <i>یک پاسخ</i> می‌تواند تولید کند. هیچ ربطی به بلندای تاریخچهٔ گفتگویتان ندارد. نام استاندارد صنعتی max_tokens منبع رایج سردرگمی است؛ API ی بومی Anthropic بعداً برای شفافیت اسمش را به max_output_tokens تغییر داده.<br><br>context_length را وقتی ست کنید که تشخیص خودکار اندازهٔ پنجره را اشتباه گرفته.<br>model.max_tokens را فقط وقتی ست کنید که بخواهید بلندای پاسخ‌های تکی را محدود کنید.</p>
+</div>
+<p>هرمس برای تشخیص پنجرهٔ زمینهٔ صحیح مدل و ارائه‌دهندهٔ شما از زنجیرهٔ چندمنبعی استفاده می‌کند:</p>
+<ol>
+  <li><b>بازنویسی پیکربندی</b> — ‏model.context_length در config.yaml ‏(بالاترین اولویت)</li>
+  <li><b>per-model ی ارائه‌دهندهٔ سفارشی</b> — ‏providers.&lt;name&gt;.models.&lt;id&gt;.context_length</li>
+  <li><b>کش دائمی</b> — مقادیر کشف‌شدهٔ قبلی ‏(بین restart ها می‌ماند)</li>
+  <li><b>نقطهٔ پایانی ‎/models‎</b> — کوئری API ی سرور شما ‏(نقاط پایانی محلی/سفارشی)</li>
+  <li><b>Anthropic ‎/v1/models‎</b> — کوئری max_input_tokens از API ی Anthropic ‏(فقط کاربران کلید-API)</li>
+  <li><b>API ی OpenRouter</b> — متادیتای زندهٔ مدل از OpenRouter</li>
+  <li><b>Nous Portal</b> — تطبیق پسوندی شناسه‌های مدل Nous با متادیتای OpenRouter</li>
+  <li><b><a href="https://models.dev" target="_blank" rel="noopener">models.dev</a></b> — رجیستری جامعه‌محور با طول زمینهٔ اختصاصی-ارائه‌دهنده برای بیش از ۳۸۰۰ مدل در بیش از ۱۰۰ ارائه‌دهنده</li>
+  <li><b>پیش‌فرض‌های fallback</b> — الگوهای گستردهٔ خانوادهٔ مدل ‏(پیش‌فرض 128K)</li>
+</ol>
+<p>برای بیشتر راه‌اندازی‌ها این بدون دستکاری کار می‌کند. سیستم ارائه‌دهنده-آگاه است — همین مدل می‌تواند بسته به سرویس‌دهنده حدود زمینهٔ متفاوتی داشته باشد ‏(مثلاً claude-opus-4.6 روی Anthropic مستقیم 1M است ولی روی GitHub Copilot برابر 128K).</p>
+<p>برای ست کردن صریح طول زمینه، context_length را به پیکربندی مدل اضافه کنید:</p>
+<pre dir="ltr"><code>model:
+  default: "qwen3.5:9b"
+  base_url: "http://localhost:8080/v1"
+  context_length: 131072  # tokens</code></pre>
+<p>برای نقاط پایانی سفارشی می‌توانید طول زمینه را per-model هم ست کنید:</p>
+<pre dir="ltr"><code>providers:
+  my-local-llm:
+    api: "http://localhost:11434/v1"
+    models:
+      qwen3.5:27b:
+        context_length: 64000
+      deepseek-r1:70b:
+        context_length: 65536</code></pre>
+<p>‏hermes model هنگام پیکربندی نقطهٔ پایانی سفارشی طول زمینه را می‌پرسد. برای تشخیص خودکار خالی بگذارید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>چه وقت دستی ست کنیم:</b></p>
+  <ul>
+    <li>از Ollama با num_ctx ی سفارشی کمتر از بیشینهٔ مدل استفاده می‌کنید</li>
+    <li>می‌خواهید زمینه را زیر بیشینهٔ مدل محدود کنید ‏(مثلاً 8k روی مدلی با 128k برای صرفه‌جویی VRAM)</li>
+    <li>پشت پروکسی‌ای هستید که ‎/v1/models‎ را expose نمی‌کند</li>
+  </ul>
+</div>
+<h3>ارائه‌دهندگان سفارشی نام‌دار</h3>
+<p>اگر با چند نقطهٔ پایانی سفارشی کار می‌کنید ‏(مثلاً یک سرور dev محلی و یک سرور GPU راه‌دور)، می‌توانید آن‌ها را به‌عنوان ارائه‌دهندگان سفارشی نام‌دار زیر دیکشنری providers: در config.yaml تعریف کنید، با کلیدِ نام ارائه‌دهنده:</p>
+<pre dir="ltr"><code>providers:
+  local:
+    api: http://localhost:8080/v1
+    # api_key omitted — Hermes uses "no-key-required" for keyless local servers
+  work:
+    api: https://gpu-server.internal.corp/v1
+    key_env: CORP_API_KEY
+    transport: chat_completions   # set explicitly by `hermes model` → Custom Endpoint wizard; auto-detection still happens as a fallback
+  anthropic-proxy:
+    api: https://proxy.example.com/anthropic
+    key_env: ANTHROPIC_PROXY_KEY
+    transport: anthropic_messages  # for Anthropic-compatible proxies</code></pre>
+<p>هر مدخل این‌ها را قبول می‌کند: api ‏(URL پایهٔ نقطهٔ پایانی — ‏base_url/url به‌عنوان نام مستعار پذیرفته می‌شوند)، ‏name ‏(نام نمایشی اختیاری؛ پیش‌فرض کلید دیکشنری)، ‏key_env یا inline ی api_key یا key_cmd ‏(پایین را ببینید)، ‏transport ‏(chat_completions / anthropic_messages / codex_responses)، ‏default_model، ‏models، ‏context_length، ‏discover_models، ‏extra_body، ‏extra_headers، ‏ssl_ca_cert / ssl_verify و enabled: false برای مخفی کردن مدخل بدون حذفش.</p>
+<h4>credential های ضرب‌شده با فرمان ‏(key_cmd)</h4>
+<p>گیت‌وی‌های سازمانی اغلب به‌جای کلیدهای API ایستا، توکن‌های bearer کوتاه‌عمر صادر می‌کنند ‏(بروکرهای SSO/OIDC، ‏IAM ابری، پروکسی‌های احراز هویت داخلی)؛ پس توکنی که در .env کپی شده وسط نشست کهنه می‌شود و درخواست‌ها شروع به برگرداندن 401 می‌کنند. مقدار key_cmd نام فرمانی است که توکن را <i>چاپ</i> می‌کند؛ هرمس اجرایش می‌کند و نتیجه را تا کمی قبل از انقضا کش می‌کند، پس نشست‌های طولانی بدون ری‌استارت سرِ جایشان می‌مانند:</p>
+<pre dir="ltr"><code>providers:
+  my-gateway:
+    base_url: "https://gateway.internal.example.com/v1"
+    api_mode: chat_completions
+    key_cmd: "my-auth-cli print-token --profile prod"</code></pre>
+<p>با هر کمکی که توکن چاپ کند کار می‌کند — ‏databricks auth token، ‏gcloud auth print-access-token، ‏az account get-access-token، ‏vault read یا اسکریپت‌های apiKeyHelper سبک Claude Code.</p>
+<p>فرمان باید <b>فقط</b> توکن را روی stdout چاپ کند: یا لخت، یا به‌صورت JSON با فیلد access_token ‏(expires_in هم پذیرفته می‌شود؛ مهر زمانی ISO ی مطلق expiry/expiresOn هم). خروجی چندخطی به‌جای حدس زدن رد می‌شود. اگر انقصایی اعلام نشده باشد، توکن در یک بازهٔ محدود دوباره ضرب می‌شود.</p>
+<p><b>اولویت:</b> فلگ صریح ‎--api-key‎ همچنان برنده است؛ وگرنه key_cmd از api_key/key_env ایستا روی همان مدخل جلوتر است. credential ضرب‌شده هم برای نوبت اصلی عامل اعمال می‌شود هم برای کارهای کمکی ‏(تولید عنوان، فشرده‌سازی، بینایی، embedding).</p>
+<p>با secrets.command اشتباه نشود، که یک کمکی را <b>فقط یک بار هنگام شروع</b> اجرا می‌کند تا متغیرهای محیطی فرایند را پر کند. از آن برای کمکی vault/keychain استفاده کنید که خیلی secret ها را برمی‌گرداند؛ از key_cmd وقتی credential یک ارائه‌دهنده باید <i>وسط</i> نشست دوباره ضرب شود.</p>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p><b>قالب قدیمی:</b> پیکربندی‌های قدیمی‌تر از فهرست top-level ی custom_providers: استفاده می‌کردند. هنوز کار می‌کند — هرمس هر دو را می‌خواند — و hermes update خودکار آن را به دیکشنری providers: مهاجرت می‌دهد ‏(config نسخهٔ ۱۲). نام فیلدها در قالب دیکشنری کمی فرق دارد: مدلِ قدیمی model می‌شود default_model و api_mode ی قدیمی می‌شود transport.</p>
+</div>
+<p>بعضی نقاط پایانی سازگار-OpenAI به فیلدهای بدنهٔ درخواست اختصاصی-ارائه‌دهنده نیاز دارند. یک نگاشت extra_body به ارائه‌دهندهٔ سفارشی مربوطه اضافه کنید و هرمس آن را در هر درخواست chat-completions به آن نقطهٔ پایانی ادغام خواهد کرد:</p>
+<pre dir="ltr"><code>providers:
+  gemma-local:
+    api: http://localhost:8080/v1
+    default_model: google/gemma-4-31b-it
+    extra_body:
+      enable_thinking: true
+      reasoning_effort: high</code></pre>
+<p>شکلی را استفاده کنید که سرورتان مستند کرده. مثلاً استقرارهای vLLM Gemma و بعضی نقاط پایانی NVIDIA NIM انتظار دارند enable_thinking زیر chat_template_kwargs بیاید نه به‌عنوان فیلد سطح-بالای extra_body:</p>
+<pre dir="ltr"><code>extra_body:
+  chat_template_kwargs:
+    enable_thinking: true</code></pre>
+<p>برای مدل‌های reasoning ی Qwen که vLLM سرویس می‌دهد، همین شکل می‌تواند برای غیرفعال کردن تفکر استفاده شود وقتی پارسری همهٔ متن تولیدی را به فیلدهای reasoning منتقل و content ی دستیار را خالی گذاشته:</p>
+<pre dir="ltr"><code>extra_body:
+  chat_template_kwargs:
+    enable_thinking: false</code></pre>
+<p>ویزارد hermes model ← Custom Endpoint حالا حالت API را صریحاً می‌پرسد و پاسخ شما را در config.yaml ذخیره می‌کند ‏(به‌صورت transport روی مدخل ارائه‌دهنده). تشخیص خودکار مبتنی بر URL ‏(مثلاً مسیرهای ‎/anthropic‎ ← anthropic_messages) وقتی فیلد خالی بماند همچنان به‌عنوان جایگزین اتفاق می‌افتد.</p>
+<p><b>بینایی بومی برای مدل‌های ارائه‌دهندهٔ سفارشی.</b> اگر نقطهٔ پایانی سفارشی تان مدلی با قابلیت بینایی سرویس می‌دهد که در models.dev نیست، model.supports_vision: true را ست کنید تا هرمس تصاویر پیوستی را به‌طور بومی مسیریابی کند ‏(به‌صورت بخش‌های image_url) به‌جای پیش‌پردازش از طریق vision_analyze. فقط همین یک کلید — نیازی به ست کردن agent.image_input_mode: native نیست.</p>
+<pre dir="ltr"><code>model:
+  provider: custom
+  base_url: http://localhost:8080/v1
+  default: qwen3.6-35b-a3b
+  supports_vision: true   # send images natively; otherwise vision_analyze pre-describes them</code></pre>
+<p>همین کلید روی مدل‌های per-named-provider هم پذیرفته می‌شود ‏(providers.&lt;name&gt;.models.&lt;id&gt;.supports_vision) و مقادیر بولی استاندارد YAML را قبول می‌کند ‏(true/false/yes/no/on/off/1/0).</p>
+<p>وسط نشست با نماد سه‌تایی بین‌شان سوئیچ کنید:</p>
+<pre dir="ltr"><code>/model custom:local:qwen-2.5       # Use the "local" endpoint with qwen-2.5
+/model custom:work:llama3-70b      # Use the "work" endpoint with llama3-70b
+/model custom:anthropic-proxy:claude-sonnet-4  # Use the proxy</code></pre>
+<p>می‌توانید ارائه‌دهندگان سفارشی نام‌دار را از منوی تعاملی hermes model هم انتخاب کنید.</p>
+
+<h3 id="cookbook">کتاب آشپزی: Together AI، ‏Groq، ‏Perplexity</h3>
+<p>ارائه‌دهندگان ابری فهرست‌شده در <a href="#other-compatible-providers">سایر ارائه‌دهندگان سازگار</a> همه گویش REST ی OpenAI را حرف می‌زنند، پس به همان شکل زیر دیکشنری providers: سیم‌کشی می‌شوند. سه دستور عملی در ادامه آمده. هر کدام داخل ~/.hermes/config.yaml می‌رود و کلید API ی مربوطه در ~/.hermes/.env.</p>
+<h4>Together AI</h4>
+<p>مدل‌های open-weight ‏(Llama، ‏MiniMax، ‏Gemma، ‏DeepSeek، ‏Qwen) را با قیمت‌هایی به‌طور چشمگیری زیر API‌های اول-طرف میزبانی می‌کند. پیش‌فرض خوب برای ناوگان‌های چند-مدلی.</p>
+<pre dir="ltr"><code># ~/.hermes/config.yaml
+providers:
+  together:
+    api: https://api.together.xyz/v1
+    key_env: TOGETHER_API_KEY
+    # transport: chat_completions  # default — no need to set
+
+model:
+  default: MiniMaxAI/MiniMax-M2.7   # or any model from together.ai/models
+  provider: custom:together</code></pre>
+<pre dir="ltr"><code># ~/.hermes/.env
+TOGETHER_API_KEY=your-together-key</code></pre>
+<p>سوییچ مدل وسط نشست:</p>
+<pre dir="ltr"><code>/model custom:together:meta-llama/Llama-3.3-70B-Instruct-Turbo
+/model custom:together:google/gemma-4-31b-it
+/model custom:together:deepseek-ai/DeepSeek-V3</code></pre>
+<p>نقطهٔ پایانی ‎/v1/models‎ ی Together کار می‌کند، پس hermes model می‌تواند مدل‌های موجود را خودکار کشف کند.</p>
+<h4>Groq</h4>
+<p>استنتاج فوق‌سریع ‏(حدود ۵۰۰ توکن/ثانیه روی Llama-3.3-70B). کاتالوگ کوچک ولی برای استفادهٔ تعاملی حساس به تأخیر عالی است.</p>
+<pre dir="ltr"><code># ~/.hermes/config.yaml
+providers:
+  groq:
+    api: https://api.groq.com/openai/v1
+    key_env: GROQ_API_KEY
+
+model:
+  default: llama-3.3-70b-versatile
+  provider: custom:groq</code></pre>
+<pre dir="ltr"><code># ~/.hermes/.env
+GROQ_API_KEY=your-groq-key</code></pre>
+<h4>Perplexity</h4>
+<p>وقتی مدلی می‌خواهید که خودکار جستجوی وب زنده و ارجاع‌دهی انجام دهد کاربردی است. دربارهٔ اینکه کدام مدل‌ها موجودند سخت‌گیر است — فهرست فعلی را در <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener">perplexity.ai/settings/api</a> چک کنید.</p>
+<pre dir="ltr"><code># ~/.hermes/config.yaml
+providers:
+  perplexity:
+    api: https://api.perplexity.ai
+    key_env: PERPLEXITY_API_KEY
+
+model:
+  default: sonar
+  provider: custom:perplexity</code></pre>
+<pre dir="ltr"><code># ~/.hermes/.env
+PERPLEXITY_API_KEY=your-perplexity-key</code></pre>
+<h4>چند ارائه‌دهنده در یک پیکربندی</h4>
+<p>سه دستور بالا ترکیب‌شدنی‌اند — همه را با هم استفاده کنید و per نوبت با ‎/model custom:&lt;name&gt;:&lt;model&gt; سوئیچ کنید:</p>
+<pre dir="ltr"><code>providers:
+  together:
+    api: https://api.together.xyz/v1
+    key_env: TOGETHER_API_KEY
+  groq:
+    api: https://api.groq.com/openai/v1
+    key_env: GROQ_API_KEY
+  perplexity:
+    api: https://api.perplexity.ai
+    key_env: PERPLEXITY_API_KEY
+
+model:
+  default: MiniMaxAI/MiniMax-M2.7
+  provider: custom:together      # boot to Together; switch freely after</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>عیب‌یابی:</b></p>
+  <ul>
+    <li>‏hermes doctor بعد از اصلاحات اعتبارسنج CLI در #15083 نباید برای هیچ‌کدام از این نام‌ها هشدار Unknown provider چاپ کند.</li>
+    <li>اگر نقطهٔ پایانی ‎/v1/models‎ ی ارائه‌دهنده‌ای در دسترس نباشد ‏(Perplexity رایج‌ترین است)، hermes model مدل را با یک هشدار ذخیره می‌کند نه رد قطعی — ببینید #15136.</li>
+    <li>برای رد شدن کامل از ارائه‌دهندگان نام‌دار و استفاده از provider: custom لخت با متغیر محیطی CUSTOM_BASE_URL ببینید #15103.</li>
+  </ul>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2 id="choosing-setup"><span class="secnum">۹</span> انتخاب راه‌اندازی درست</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>حالت استفاده</th><th>توصیه‌شده</th></tr></thead>
+<tbody>
+<tr><td><b>فقط می‌خواهم کار کند</b></td><td>OpenRouter ‏(پیش‌فرض) یا Nous Portal</td></tr>
+<tr><td><b>مدل‌های محلی، راه‌اندازی آسان</b></td><td>Ollama</td></tr>
+<tr><td><b>سرویس‌دهی GPU ی تولیدی</b></td><td>vLLM یا SGLang</td></tr>
+<tr><td><b>Mac / بدون GPU</b></td><td>Ollama یا llama.cpp</td></tr>
+<tr><td><b>مسیریابی چند-ارائه‌دهنده</b></td><td>LiteLLM Proxy یا OpenRouter</td></tr>
+<tr><td><b>بهینه‌سازی هزینه</b></td><td>ClawRouter یا OpenRouter با sort: "price"</td></tr>
+<tr><td><b>حداکثر حریم خصوصی</b></td><td>Ollama، ‏vLLM یا llama.cpp ‏(کاملاً محلی)</td></tr>
+<tr><td><b>سازمانی / Azure</b></td><td>Azure OpenAI با نقطهٔ پایانی سفارشی</td></tr>
+<tr><td><b>مدل‌های AI ی چینی</b></td><td>z.ai ‏(GLM)، ‏Kimi/Moonshot ‏(kimi-coding یا kimi-coding-cn)، ‏MiniMax، ‏Xiaomi MiMo یا Tencent TokenHub ‏(ارائه‌دهندگان درجه‌اول)</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>هر وقت بخواهید می‌توانید با hermes model بین ارائه‌دهنده‌ها سوئیچ کنید — بدون ری‌استارت. تاریخچهٔ گفتگو، حافظه و مهارت‌هایتان مستقل از اینکه کدام ارائه‌دهنده را استفاده کنید حفظ می‌شوند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2 id="optional-keys"><span class="secnum">۱۰</span> کلیدهای API اختیاری</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>قابلیت</th><th>ارائه‌دهنده</th><th>متغیر محیطی</th></tr></thead>
+<tbody>
+<tr><td>استخراج وب</td><td><a href="https://firecrawl.dev/" target="_blank" rel="noopener">Firecrawl</a></td><td>FIRECRAWL_API_KEY، ‏FIRECRAWL_API_URL</td></tr>
+<tr><td>اتوماسیون مرورگر</td><td><a href="https://browserbase.com/" target="_blank" rel="noopener">Browserbase</a></td><td>BROWSERBASE_API_KEY، ‏BROWSERBASE_PROJECT_ID</td></tr>
+<tr><td>تولید تصویر</td><td><a href="https://fal.ai/" target="_blank" rel="noopener">FAL</a></td><td>FAL_KEY</td></tr>
+<tr><td>صداهای TTS ی premium</td><td><a href="https://elevenlabs.io/" target="_blank" rel="noopener">ElevenLabs</a></td><td>ELEVENLABS_API_KEY</td></tr>
+<tr><td>TTS ی OpenAI + پیاده‌سازی صدا</td><td><a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">OpenAI</a></td><td>VOICE_TOOLS_OPENAI_KEY</td></tr>
+<tr><td>TTS ی Mistral + پیاده‌سازی صدا</td><td><a href="https://console.mistral.ai/" target="_blank" rel="noopener">Mistral</a></td><td>MISTRAL_API_KEY</td></tr>
+<tr><td>مدل‌سازی کاربر بین-نشستی</td><td><a href="https://honcho.dev/" target="_blank" rel="noopener">Honcho</a></td><td>HONCHO_API_KEY</td></tr>
+<tr><td>حافظهٔ بلندمدت معنایی</td><td><a href="https://supermemory.ai" target="_blank" rel="noopener">Supermemory</a></td><td>SUPERMEMORY_API_KEY</td></tr>
+</tbody>
+</table>
+</div>
+<h3>خودمیزبان کردن Firecrawl</h3>
+<p>به‌طور پیش‌فرض هرمس برای جستجو و استخراج وب از <a href="https://firecrawl.dev/" target="_blank" rel="noopener">API ابری Firecrawl</a> استفاده می‌کند. اگر ترجیح می‌دهید Firecrawl را محلی اجرا کنید، می‌توانید هرمس را به یک نمونهٔ خودمیزبان اشاره دهید. دستورالعمل کامل راه‌اندازی را در <a href="https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md" target="_blank" rel="noopener">SELF_HOST.md ی Firecrawl</a> ببینید.</p>
+<p><b>چه چیزی به دست می‌آورید:</b> بدون نیاز به کلید API، بدون محدودیت نرخ، بدون هزینهٔ per-page، حاکمیت کامل داده.</p>
+<p><b>چه چیزی از دست می‌دهید:</b> نسخهٔ ابری از موتور اختصاصی Fire-engine ی Firecrawl برای دور زدن پیشرفتهٔ ضدربات ‏(Cloudflare، ‏CAPTCHA، ‏چرخش IP) استفاده می‌کند. نسخهٔ خودمیزبان fetch ساده + Playwright دارد، پس بعضی سایت‌های محافظت‌شده ممکن است شکست بخورند. جستجو هم به‌جای Google از DuckDuckGo استفاده می‌کند.</p>
+<p><b>راه‌اندازی:</b></p>
+<ol>
+  <li>استک Docker ی Firecrawl را کلون و اجرا کنید ‏(۵ کانتینر: ‏API، ‏Playwright، ‏Redis، ‏RabbitMQ، ‏PostgreSQL — حدود ۴ تا ۸ گیگ رم لازم دارد):
+    <pre dir="ltr"><code>git clone https://github.com/firecrawl/firecrawl
+cd firecrawl
+# In .env, set: USE_DB_AUTHENTICATION=false, HOST=0.0.0.0, PORT=3002
+docker compose up -d</code></pre>
+  </li>
+  <li>هرمس را به نمونهٔ خودتان اشاره دهید ‏(بدون نیاز به کلید API):
+    <pre dir="ltr"><code>hermes config set FIRECRAWL_API_URL http://localhost:3002</code></pre>
+  </li>
+</ol>
+<p>اگر نمونهٔ خودمیزبان تان احراز هویت فعال داشته باشد، می‌توانید هم FIRECRAWL_API_KEY هم FIRECRAWL_API_URL را ست کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="openrouter-routing"><span class="secnum">۱۱</span> مسیریابی ارائه‌دهنده در OpenRouter و ارائه‌دهندگان جایگزین</h2>
+<h3>مسیریابی ارائه‌دهندهٔ OpenRouter</h3>
+<p>هنگام استفاده از OpenRouter می‌توانید کنترل کنید درخواست‌ها چطور بین ارائه‌دهندگان مسیریابی شوند. یک بخش provider_routing به ~/.hermes/config.yaml اضافه کنید:</p>
+<pre dir="ltr"><code>provider_routing:
+  sort: "throughput"          # "price" (default), "throughput", or "latency"
+  # only: ["anthropic"]      # Only use these providers
+  # ignore: ["deepinfra"]    # Skip these providers
+  # order: ["anthropic", "google"]  # Try providers in this order
+  # require_parameters: true  # Only use providers that support all request params
+  # data_collection: "deny"   # Exclude providers that may store/train on data</code></pre>
+<p><b>میان‌برها:</b> پسوند ‎:nitro‎ را به هر نام مدل بچسبانید برای مرتب‌سازی بر اساس throughput ‏(مثل anthropic/claude-sonnet-4:nitro) یا ‎:floor‎ برای مرتب‌سازی قیمتی.</p>
+<h3>OpenRouter Pareto Code Router</h3>
+<p>‏OpenRouter یک مسیریاب آزمایشی مدل‌های کدنویسی به نام openrouter/pareto-code دارد که درخواست‌ها را خودکار به ارزان‌ترین مدلی مسیریابی می‌کند که حد کیفیت کدنویسی را پاس کند ‏(رتبه‌بندی توسط <a href="https://artificialanalysis.ai/" target="_blank" rel="noopener">Artificial Analysis</a>). این مدل را بردارید و پیچ تنظیم min_coding_score را در ~/.hermes/config.yaml tune کنید:</p>
+<pre dir="ltr"><code>model:
+  provider: openrouter
+  model: openrouter/pareto-code
+
+openrouter:
+  min_coding_score: 0.65   # 0.0–1.0; higher = stronger (more expensive) coders. Default 0.65.</code></pre>
+<p>نکته‌ها:</p>
+<ul>
+  <li>‏min_coding_score <b>فقط</b> وقتی فرستاده می‌شود که model.model برابر openrouter/pareto-code باشد. روی هر مدل دیگر این مقدار no-op است.</li>
+  <li>آن را رشتهٔ خالی ست کنید ‏(یا خط را حذف کنید) تا OpenRouter قوی‌ترین کدر موجود را انتخاب کند — رفتار مستندشده وقتی بلوک plugins حذف شود همین است.</li>
+  <li>انتخاب در یک روز مشخص بر اساس امتیاز قطعی است، ولی مدل واقعی انتخاب‌شده می‌تواند با حرکت جبههٔ Pareto عوض شود ‏(مدل‌های جدید، به‌روزرسانی بنچمارک‌ها).</li>
+  <li>رفتار کامل مسیریاب را در <a href="https://openrouter.ai/docs/guides/routing/routers/pareto-router" target="_blank" rel="noopener">مستندات Pareto Router ی OpenRouter</a> ببینید.</li>
+  <li>برای استفاده از Pareto Code router برای یک <b>کار کمکی</b> مشخص ‏(فشرده‌سازی، بینایی و...) به‌جای عامل اصلی، مقدار extra_body.plugins را زیر همان کار ست کنید — بخش <a href="../user-guide/configuration.html">مسیریابی OpenRouter و Pareto Code برای کارهای کمکی</a> را ببینید.</li>
+</ul>
+<h3 id="fallback-providers">ارائه‌دهندگان جایگزین ‏(Fallback)</h3>
+<p>یک زنجیره از ارائه‌دهندگان پشتیبان پیکربندی کنید که هرمس به ترتیب امتحانشان می‌کند وقتی مدل اصلی شکست می‌خورد ‏(محدودیت نرخ، خطاهای سرور، شکست‌های احراز هویت). قالب متعارف فهرست top-level ی fallback_providers: است:</p>
+<pre dir="ltr"><code>fallback_providers:
+  - provider: openrouter
+    model: anthropic/claude-sonnet-4
+  - provider: anthropic
+    model: claude-sonnet-4
+    # base_url: http://localhost:8000/v1    # optional, for custom endpoints
+    # api_mode: chat_completions           # optional override</code></pre>
+<p>قالب قدیمی تک‌جفتی fallback_model: هم برای سازگاری به‌عقب پذیرفته می‌شود:</p>
+<pre dir="ltr"><code>fallback_model:
+  provider: openrouter
+  model: anthropic/claude-sonnet-4</code></pre>
+<p>وقتی فعال شود، fallback مدل و ارائه‌دهنده را وسط نشست عوض می‌کند بدون از دست رفتن گفتگوی شما. زنجیره مدخل‌به‌مدخل امتحان می‌شود؛ فعال‌سازی per نشست یک‌باره است.</p>
+<p>ارائه‌دهندگان پشتیبانی‌شده: openrouter، ‏nous، ‏novita، ‏openai-codex، ‏copilot، ‏copilot-acp، ‏anthropic، ‏gemini، ‏qwen-oauth، ‏huggingface، ‏zai، ‏kimi-coding، ‏kimi-coding-cn، ‏minimax، ‏minimax-cn، ‏minimax-oauth، ‏deepseek، ‏nvidia، ‏xai، ‏xai-oauth، ‏ollama-cloud، ‏bedrock، ‏ai-gateway، ‏azure-foundry، ‏opencode-zen، ‏opencode-go، ‏commandcode، ‏commandcode-anthropic، ‏kilocode، ‏xiaomi، ‏arcee، ‏gmi، ‏actual، ‏stepfun، ‏lmstudio، ‏alibaba، ‏alibaba-coding-plan، ‏tencent-tokenhub، ‏custom.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>fallback منحصراً از طریق config.yaml پیکربندی می‌شود — یا به‌صورت تعاملی با hermes fallback. جزئیات کامل دربارهٔ اینکه کی فعال می‌شود، زنجیره چطور جلو می‌رود و چطور با کارهای کمکی و واگذاری تعامل دارد را در صفحهٔ <a href="../user-guide/features/fallback-providers.html">ارائه‌دهندگان جایگزین</a> ببینید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> ببینید نیز</h2>
+<ul>
+  <li><b><a href="../user-guide/configuration.html">پیکربندی</a></b> — پیکربندی عمومی ‏(ساختار پوشه‌ها، اولویت config، بک‌اندهای ترمینال، حافظه، فشرده‌سازی و بیشتر)</li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/reference/environment-variables" target="_blank" rel="noopener">متغیرهای محیطی</a></b> — مرجع کامل همهٔ متغیرهای محیطی</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="index.html"><span class="dir">→ قبلی</span><span class="ttl">نمای کلی یکپارچه‌سازی‌ها</span></a>
+  <a class="next" href="nous-portal.html"><span class="dir">بعدی ←</span><span class="ttl">Nous Portal</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/integrations/providers" target="_blank" rel="noopener">AI Providers</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

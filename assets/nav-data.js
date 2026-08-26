@@ -128,7 +128,7 @@ window.HERMES_NAV = [
 ]},
 { id:"integrations", cat:"🔌 یکپارچه‌سازی‌ها", pages:[
   { p:"integrations/index.html",                        t:"نمای کلی یکپارچه‌سازی‌ها",       d:1 },
-  { p:"integrations/providers.html",                    t:"ارائه‌دهندگان مدل",               d:0 },
+  { p:"integrations/providers.html",                    t:"ارائه‌دهندگان مدل",               d:1 },
   { p:"integrations/nous-portal.html",                  t:"Nous Portal",                     d:1 },
   { p:"integrations/buzz.html",                         t:"Buzz",                            d:1 },
   { p:"user-guide/features/mcp.html",                   t:"پروتکل MCP",                      d:1 },
@@ -136,7 +136,7 @@ window.HERMES_NAV = [
   { p:"user-guide/features/api-server.html",            t:"سرور API سازگار با OpenAI",       d:1 },
   { p:"user-guide/features/honcho.html",                t:"حافظهٔ Honcho",                    d:1 },
   { p:"user-guide/features/provider-routing.html",      t:"مسیریابی ارائه‌دهنده",            d:1 },
-  { p:"user-guide/features/fallback-providers.html",    t:"ارائه‌دهندگان پشتیبان",           d:0 },
+  { p:"user-guide/features/fallback-providers.html",    t:"ارائه‌دهندگان پشتیبان",           d:1 },
   { p:"user-guide/features/credential-pools.html",      t:"استخر اعتبارنامه‌ها",             d:1 }
 ]},
 { id:"guides", cat:"📚 راهنماها و آموزش‌ها", pages:[
