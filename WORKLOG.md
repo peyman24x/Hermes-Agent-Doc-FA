@@ -10,7 +10,7 @@
 | **مسیر خروجی** | `hermes-docs-fa/` (سایت استاتیک تک‌پوشه، آفلاین + آمادهٔ GH Pages / Cloudflare Pages) |
 | **مالکیت و لایسنس** | طراحی و اجرا: [peyman24x.ir](https://peyman24x.ir) · تحت **MIT** (فایل `LICENSE`) |
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
-| **سایت آنلاین** | [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) |
+| **سایت آنلاین** | [hermes-agent-farsi.pages.dev](https://hermes-agent-farsi.pages.dev) ‏(اصلی) · [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) ‏(پشتیبان ماهانه) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
 | **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۰۲ از ۲۰۷ صفحه (۴۹٪)** |
 
@@ -523,6 +523,13 @@ hermes-docs-fa/
 - ترجمه و انتشار «دامنهٔ مدیریت‌شده» (۵ بخش): push ی خط پایهٔ پیکربندی/secrets توسط مدیر که کاربر نمی‌تواند override کند، محل /etc/hermes با مجوزها به‌عنوان سازوکار اعمال، جابه‌جایی با HERMES_MANAGED_DIR و هشدار عبور، جدول سه‌طبقهٔ اولویت و ادغام سطح-برگ، دیدن وضعیت با config/doctor، راه‌اندازی مدیر با tee/chmod و محدودیت‌های v1 شامل world-readable بودن .env ی مدیریت‌شده
 - زنجیرهٔ pager: …bot-mode ← desktop ← import-from-other-agents ← managed-scope ← (به‌زودی)
 - پیشرفت: **۱۰۲ از ۲۰۷ صفحه فعال (۴۹٪)**
+
+### نشست ۶۵ — 2026-08-26 — 🔗 تغییر آدرس اصلی سایت
+- آدرس اصلی سایت به **https://hermes-agent-farsi.pages.dev** تغییر کرد (انتشار روی Cloudflare Pages)
+- آدرس قبلی **doc.hermes.peyman24x.ir** به‌عنوان نسخهٔ پشتیبان با به‌روزرسانی ماهانه حفظ شد
+- README: هر ۴ ارجاع به آدرس جدید به‌روز و لینک «نسخهٔ پشتیبان (ماهانه)» کنار لینک سایت اضافه شد
+- WORKLOG: ردیف وضعیت «سایت آنلاین» به‌روز شد؛ ورودی‌های تاریخی نشست‌های قبل دست‌نخورده ماندند
+- DEPLOYMENT.md: بخش Cloudflare Pages حالا دامنهٔ رسمی را نام می‌برد
 
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
