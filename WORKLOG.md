@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [hermes-agent-farsi.pages.dev](https://hermes-agent-farsi.pages.dev) ‏(اصلی) · [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) ‏(پشتیبان ماهانه) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۱۸ از ۲۰۷ صفحه (۵۷٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۱۹ از ۲۰۷ صفحه (۵۷٪)** |
 
 ---
 
@@ -586,6 +586,12 @@ hermes-docs-fa/
 - ترمیم زنجیره: pager بعدی honcho به api-server وصل شد؛ بعدش provider-routing (به‌زودی)
 - پیشرفت: **۱۱۸ از ۲۰۷ صفحه فعال (۵۷٪)**
 
+### نشست ۷۵ — 2026-08-27 — 🧭 مسیریابی ارائه‌دهنده — قابلیت‌های اصلی دوباره کامل ‏(۳۵/۳۵)
+- ترجمه و انتشار «مسیریابی ارائه‌دهنده» (۴ بخش): کنترل ریزدانه بر زیرارائه‌دهندگان پشت OpenRouter/Nous Portal، جدول شش گزینه ‏(sort سه‌حالته price/throughput/latency، only/ignore، order، require_parameters، data_collection)، شش مثال عملی ‏(هزینه/سرعت/throughput/قفل روی ارائه‌دهنده/اجتناب با deny داده/ترتیب ترجیحی با fallback)، عبور از extra_body.provider به‌علاوهٔ تسک‌های کمکی مستقل زیر auxiliary.<task>.extra_body و رفتار پیش‌فرض aggregator
+- هر دو ارجاع به fallback-providers هنوز-ترجمه‌نشده موقتاً به نسخهٔ انگلیسی رسمی هدایت شد (بعداً برگردانده می‌شود)
+- 🎉 گروه «قابلیت‌های اصلی» دوباره کامل شد: ۳۵ از ۳۵ صفحه
+- پیشرفت: **۱۱۹ از ۲۰۷ صفحه فعال (۵۷٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -710,6 +716,7 @@ hermes-docs-fa/
 | 116 | `user-guide/features/acp.html` | پروتکل ACP |
 | 117 | `user-guide/features/honcho.html` | حافظهٔ Honcho |
 | 118 | `user-guide/features/api-server.html` | سرور API سازگار با OpenAI |
+| 119 | `user-guide/features/provider-routing.html` | مسیریابی ارائه‌دهنده |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

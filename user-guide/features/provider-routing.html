@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مسیریابی ارائه‌دهنده — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/provider-routing" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>مسیریابی ارائه‌دهنده</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>مسیریابی ارائه‌دهنده ‏(Provider Routing)</h1>
+<p>وقتی از <a href="https://openrouter.ai" target="_blank" rel="noopener">OpenRouter</a> یا <a href="../../integrations/nous-portal.html">Nous Portal</a> به‌عنوان ارائه‌دهندهٔ LLM تان استفاده می‌کنید، ‏Hermes Agent از <b>مسیریابی ارائه‌دهنده</b> پشتیبانی می‌کند — کنترل ریزدانه بر اینکه کدام ارائه‌دهندگان AI ی زیرین درخواست‌هایتان را هندل کنند و چطور اولویت بگیرند.</p>
+<p>‏OpenRouter درخواست‌ها را به ارائه‌دهندگان زیادی مسیریابی می‌کند ‏(مثل Anthropic، ‏Google، ‏AWS Bedrock، ‏Together AI). مسیریابی ارائه‌دهنده اجازه می‌دهد برای هزینه، سرعت، کیفیت بهینه کنید یا نیازمندی‌های مشخصی روی ارائه‌دهنده اجبار کنید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>ترافیکِ مسیریابی‌شده از طریق Nous Portal همان ترجیحات ارائه‌دهنده را محترم می‌شمارد — و مشترکان Portal روی ارائه‌دهندگان صورتحساب-توکنی ‎۱۰٪‎ تخفیف می‌گیرند.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیکربندی</h2>
+<p>بخش provider_routing را به ~/.hermes/config.yaml اضافه کنید:</p>
+<pre dir="ltr"><code>provider_routing:
+  sort: "price"           # How to rank providers
+  only: []                # Whitelist: only use these providers
+  ignore: []              # Blacklist: never use these providers
+  order: []               # Explicit provider priority order
+  require_parameters: false  # Only use providers that support all parameters
+  data_collection: null   # Control data collection ("allow" or "deny")</code></pre>
+<div class="callout info">
+  <div class="callout-title">ℹ️</div>
+  <p>مسیریابی ارائه‌دهنده فقط با OpenRouter یا Nous Portal اعمال می‌شود. با اتصالات مستقیم به ارائه‌دهنده ‏(مثل وصل شدن مستقیم به API ی Anthropic) اثری ندارد.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گزینه‌ها</h2>
+<h3><code>sort</code></h3>
+<p>کنترل می‌کند OpenRouter ارائه‌دهندگان موجود برای درخواست شما را چطور رتبه کند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مقدار</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td>"price"</td><td>ارزان‌ترین ارائه‌دهنده اول</td></tr>
+<tr><td>"throughput"</td><td>سریع‌ترین توکن-بر-ثانیه اول</td></tr>
+<tr><td>"latency"</td><td>کمترین زمان-تا-اولین-توکن اول</td></tr>
+</tbody>
+</table>
+</div>
+<h3><code>only</code></h3>
+<p>‏Whitelist ی slug های ارائه‌دهنده. ست شود، <b>فقط</b> این ارائه‌دهندگان مصرف می‌شوند و همهٔ بقیه حذف می‌شوند. از slug ی حروف-کوچکی که OpenRouter per-provider نشان می‌دهد استفاده کنید.</p>
+<pre dir="ltr"><code>provider_routing:
+  only:
+    - "anthropic"
+    - "google"</code></pre>
+<h3><code>ignore</code></h3>
+<p>‏Blacklist ی نام ارائه‌دهنده‌ها. اینها <b>هرگز</b> مصرف نمی‌شوند حتی اگر ارزان‌ترین یا سریع‌ترین گزینه باشند.</p>
+<pre dir="ltr"><code>provider_routing:
+  ignore:
+    - "together"
+    - "deepinfra"</code></pre>
+<h3><code>order</code></h3>
+<p>ترتیب اولویت صریح. ارائه‌دهندگان ابتدای فهرست ترجیح می‌گیرند؛ نام‌ذکرنشده‌ها fallback اند.</p>
+<pre dir="ltr"><code>provider_routing:
+  order:
+    - "anthropic"
+    - "google"
+    - "amazon-bedrock"</code></pre>
+<h3><code>require_parameters</code></h3>
+<p>وقتی true باشد OpenRouter فقط به ارائه‌دهندگانی مسیریابی می‌کند که <b>همهٔ</b> پارامترهای درخواست شما ‏(temperature، top_p، tools و…) را پشتیبانی کنند. جلوگیری از drop ی بی‌سروصدای پارامترها.</p>
+<h3><code>data_collection</code></h3>
+<p>کنترل می‌کند ارائه‌دهندگان مجاز باشند پرامپت‌هایتان را برای آموزش استفاده کنند: مقادیر allow یا deny.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> مثال‌های عملی</h2>
+<ul>
+  <li><b>بهینه برای هزینه</b> — مسیریابی به ارزان‌ترین ارائه‌دهنده؛ مناسب مصرف پرحجم و توسعه:<pre dir="ltr"><code>provider_routing:
+  sort: "price"</code></pre></li>
+  <li><b>بهینه برای سرعت</b> — اولویت ارائه‌دهنده‌های کم‌تأخیر برای مصرف تعاملی: ‏<code>sort: "latency"</code></li>
+  <li><b>بهینه برای throughput</b> — بهترین برای تولید بلند که توکن-بر-ثانیه مهم است: ‏<code>sort: "throughput"</code></li>
+  <li><b>قفل روی ارائه‌دهنده‌های خاص</b> — اطمینان عبور همهٔ درخواست‌ها از یک ارائه‌دهنده برای یکنواختی: ‏<code>only: ["anthropic"]</code></li>
+  <li><b>اجتناب از ارائه‌دهنده‌های مشخص</b> — حذف ارائه‌دهنده‌های ناخواسته مثلاً برای حریم خصوصی داده، همراه deny کردن data_collection</li>
+  <li><b>ترتیب ترجیحی با fallback ها</b> — امتحان ارائه‌دهنده‌های ترجیحی اول، سپس سایر:<pre dir="ltr"><code>provider_routing:
+  order:
+    - "anthropic"
+    - "google"
+  require_parameters: true</code></pre></li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> نحوهٔ کار و رفتار پیش‌فرض</h2>
+<p>ترجیحات مسیریابی ارائه‌دهنده روی درخواست‌های چت ایجنت و خلاصه‌های سقف-تکرار به OpenRouter یا Nous Portal از طریق فیلد extra_body.provider پاس داده می‌شوند ‏(extra_body آرگومان SDK ی Python ی OpenAI است؛ به آبجکت provider ی سطح-بالای درخواست JSON تبدیل می‌شود). تسک‌های کمکی مثل فشرده‌سازی و تولید عنوان مستقلاً زیر auxiliary.&lt;task&gt;.extra_body پیکربندی می‌شوند.</p>
+<ul>
+  <li><b>حالت CLI</b> — در ~/.hermes/config.yaml پیکربندی و موقع startup لود می‌شود</li>
+  <li><b>حالت گیت‌وی</b> — همان فایل config، موقع شروع گیت‌وی لود می‌شود</li>
+</ul>
+<p>پیکربندی مسیریابی از config.yaml خوانده و موقع ساخت AIAgent به‌صورت پارامتر پاس داده می‌شود: providers_allowed از only، ‏providers_ignored از ignore، ‏providers_order از order، ‏provider_sort از sort، ‏provider_require_parameters از require_parameters و provider_data_collection از data_collection.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 ترکیب چند گزینه</div>
+  <p>مثلاً مرتب‌سازی بر اساس قیمت + حذف ارائه‌دهنده‌های خاص + الزام پشتیبانی پارامترها + ممنوعیت جمع‌آوری داده همزمان ممکن است.</p>
+</div>
+<h3>رفتار پیش‌فرض</h3>
+<p>بدون بخش provider_routing ‏(پیش‌فرض)، aggregator منطق مسیریابی پیش‌فرض خودش را مصرف می‌کند که معمولاً به‌طور خودکار بین هزینه و دسترس‌پذیری تعادل برقرار می‌کند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 مسیریابی ارائه‌دهنده در برابر مدل‌های پشتیبان</div>
+  <p>مسیریابی ارائه‌دهنده کنترل می‌کند کدام <b>زیرارائه‌دهندگانِ پشت OpenRouter یا Nous Portal</b> درخواست‌هایتان را هندل کنند. برای failover ی خودکار به ارائه‌دهندهٔ کاملاً متفاوت وقتی مدل اصلی شکست می‌خورد، صفحهٔ <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/fallback-providers" target="_blank" rel="noopener">ارائه‌دهندگان پشتیبان</a> را ببینید.</p>
+</div>
+</section>
+
+<div class="pager">
+  <a href="api-server.html"><span class="dir">→ قبلی</span><span class="ttl">سرور API سازگار با OpenAI</span></a>
+  <a class="next" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/fallback-providers" target="_blank" rel="noopener"><span class="dir">بعدی ←</span><span class="ttl">ارائه‌دهندگان پشتیبان</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/provider-routing" target="_blank" rel="noopener">Provider Routing</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>
