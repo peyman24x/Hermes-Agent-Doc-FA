@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>کنترل کامپیوتر — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/computer-use" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>کنترل کامپیوتر</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>کنترل کامپیوتر ‏(Computer Use)</h1>
+<p>هرمس ایجنت می‌تواند دسکتاپ شما را براند — کلیک، تایپ، اسکرول، کشیدن — به‌صورت <b>پس‌زمینه‌ای</b> روی <b>macOS، ویندوز و لینوکس</b>. مکان‌نمای شما حرکت نمی‌کند، فوکوس کیبورد تغییر نمی‌کند و دسکتاپ‌های مجازی / Spaces هایتان جابه‌جا نمی‌شوند. شما و ایجنت روی همان ماشین همکاری می‌کنید.</p>
+<p>برخلاف بیشتر یکپارچه‌سازی‌های computer-use، این با <b>هر مدلِ دارای-ابزار</b> کار می‌کند — Claude، ‏GPT، ‏Gemini یا یک مدل باز روی نقطهٔ پایانی محلی سازگار-با-OpenAI. هیچ schema ی مخصوص-Anthropic در کار نیست.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نحوهٔ کار</h2>
+<p>تول‌ست داخلی <code>computer_use</code> یکپارچه‌سازی توصیه‌شدهٔ هرمس است. با <a href="https://github.com/trycua/cua" target="_blank" rel="noopener">cua-driver</a> — یک درایور متن‌باز computer-use پس‌زمینه‌ای — از طریق MCP روی stdio حرف می‌زند. هر پلتفرم از پشتهٔ مناسب دسترس‌پذیری + ورودی زیر کاپوت استفاده می‌کند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پلتفرم</th><th>درخت دسترس‌پذیری</th><th>dispatch ی ورودی</th></tr></thead>
+<tbody>
+<tr><td>macOS</td><td>AX ‏(SPI های خصوصی SkyLight)</td><td><code>SLPSPostEventRecordTo</code> — محدود-به-pid، بدون جابه‌جایی مکان‌نما</td></tr>
+<tr><td>ویندوز</td><td>UIAutomation</td><td><code>SendInput</code> + ‏<code>PostMessage</code> — بدون دزدیدن فوکوس</td></tr>
+<tr><td>لینوکس</td><td>AT-SPI ‏(X11 + Wayland)</td><td>XTest ‏(X11) / virtual-keyboard ‏(Wayland)</td></tr>
+</tbody>
+</table>
+</div>
+<p>نتیجه روی همهٔ پلتفرم‌ها یکی است: ایجنت می‌تواند درخت دسترس‌پذیری هر پنجرهٔ مرئی را بخواند <b>و</b> رویدادهای سنتزشده پست کند بدون آوردن آن به پیش، تعویض دسکتاپ مجازی یا حرکت دادن مکان‌نمای واقعی OS.</p>
+<p>برای قرارداد زیربنایی — <i>چرا</i> حالت پس‌زمینه اهمیت دارد، ناورداِ بدون-پیش-آمدن و جزئیات dispatch کلیک — بخش <a href="https://cua.ai/docs/explanation/the-no-foreground-contract" target="_blank" rel="noopener">the-no-foreground-contract</a> را ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> فعال‌سازی</h2>
+<p><b>نصب‌های تازه از قبل درایور را دارند.</b> نصب‌کنندهٔ هرمس ‏(<code>install.sh</code> / ‏<code>install.ps1</code>) مقداراً ‏cua-driver را پیش‌نصب می‌کند ‏(برای انصراف ‏<code>--skip-computer-use</code> / ‏<code>-SkipComputerUse</code>)، پس فعال کردن Computer Use فقط یک فلپ config است:</p>
+<ul>
+  <li><b>‏<code>hermes tools</code></b> ← انتخاب ‏<code>🖱️ Computer Use</code> — اگر هنوز غایب باشد درایور را خودکار نصب می‌کند.</li>
+  <li><b>داشبورد / اپ دسکتاپ</b> ← toggle کردن تول‌ست Computer Use — اگر درایور غایب باشد، toggle نصب را خودکار در پس‌زمینه راه می‌اندازد ‏(پیشرفت را در پنل تول‌ست ببینید).</li>
+</ul>
+<p><b>Fallback دستی ‏(نصب‌های قدیمی، رد شدن مرحلهٔ نصب‌کننده):</b></p>
+<div class="codebox"><pre><code>hermes computer-use install</code></pre></div>
+<p>این، نصب‌کنندهٔ بالادستی cua-driver را واکشی و اجرا می‌کند — ‏<code>install.sh</code> روی macOS/Linux و ‏<code>install.ps1</code> روی ویندوز. برای تأیید نصب از ‏<code>hermes computer-use status</code> استفاده کنید.</p>
+<p>‏cua-driver از قبل دارید؟ هرمس وقتی قرارداد runtime نسخهٔ ۰٫۲۰ را پشتیبانی کند از آن دوباره استفاده می‌کند. حین setup، فعال‌سازی تول‌ست، ‏<code>hermes update</code> و اولین فراخوانی <code>computer_use</code> نشست، هرمس نسخه و manifest محلی را بررسی می‌کند. نصب قدیمی یا ناقصِ استاندارد را از طریق نصب‌کنندهٔ بالادستی ترمیم می‌کند ‏(حداکثر یک بار به‌ازای هر نشست در runtime). باینری‌ای که با ‏<code>HERMES_CUA_DRIVER_CMD</code> انتخاب شده زیر کنترل شما می‌ماند؛ هرمس ناسازگاری را گزارش و دست به آن نمی‌زند.</p>
+<p>اگر اول Cua Driver را خودتان نصب کنید، ‏<code>cua-driver skills install</code> بستهٔ مهارت‌های Cua را زیر ‏<code>~/.cua-driver/skills/cua-driver</code> نصب می‌کند. آشکارسازی خودکار هرمس یک follow-up برنامه‌ریزی‌شدهٔ cua-driver است، پس فعلاً هرمس را به آن دایرکتوری اشاره دهید یا symlink اش را وارد فضای مهارت‌تان کنید. ثبت ابزارهای خام Cua به‌عنوان یک سرور MCP سفارشی هم ممکن است اما جایگزینی برای کاربرانی است که رابط سطح-پایین می‌خواهند. تول‌ست داخلی، اقدامات، پیکربندی، تأییدها و تشخیص‌های هرمس را فراهم می‌دهد.</p>
+<p>بعد از نصب — فارغ از مسیر — پیش‌نیازهای مخصوص پلتفرم را اعطا کنید:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پلتفرم</th><th>پیش‌نیازها</th></tr></thead>
+<tbody>
+<tr><td><b>macOS</b></td><td>System Settings ← Privacy &amp; Security ← ‏<b>Accessibility</b> + ‏<b>Screen Recording</b>. هویتی که <code>hermes computer-use doctor</code> نام می‌برد را grant کنید. حالت استاندارد از CuaDriver.app استفاده می‌کند؛ حالت‌های bounded و unrestricted از هویت میزبان هرمس.</td></tr>
+<tr><td><b>ویندوز</b></td><td>هنگام نصب هیچ. اگر از طریق SSH ‏(نه RDP/console) برانید الگوی autostart لازم است — برای proxy ی Session 0 ↔ Session 1+ بخش <a href="https://cua.ai/docs/how-to-guides/driver/windows-ssh" target="_blank" rel="noopener">windows-ssh</a> را ببینید.</td></tr>
+<tr><td><b>لینوکس</b></td><td>یک display server قابل‌رسید: ‏<code>DISPLAY</code> ست‌شده برای X11 یا ‏<code>XDG_SESSION_TYPE=wayland</code>. نشست‌های Wayland برای capture به پُل XWayland نیاز دارند. AT-SPI باید روشن باشد ‏(پیش‌فرض روی GNOME/KDE/Xfce).</td></tr>
+</tbody>
+</table>
+</div>
+<p>سپس نشستی با تول‌ست فعال شروع کنید:</p>
+<div class="codebox"><pre><code>hermes -t computer_use chat</code></pre></div>
+<p>یا <code>computer_use</code> را به تول‌ست‌های فعال در <code>~/.hermes/config.yaml</code> اضافه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> حالت‌های مجوز و پروفایل‌های مرورگر وارد-شده</h2>
+<a id="permission-anchor"></a>
+<p>هرمس UX تأیید موجودش را روی حالت‌های runtime تغییرناپذیرِ cua-driver نگاشت می‌کند. حالت مجوز، تأیید capability manifest و grant ی پروفایل-موجود تنظیمات launch هستند. بعد از شروع runtime نمی‌توانند عوض شوند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>نشست هرمس</th><th>حالت cua-driver</th><th>مداخلهٔ انسانی</th><th>‏<code>existing_profile</code></th></tr></thead>
+<tbody>
+<tr><td>تأییدهای Manual یا smart ‏(پیش‌فرض)</td><td><code>standard</code></td><td>تأییدهای عادی هرمس؛ Cua در مرز حفاظت‌شده‌اش می‌ایستد</td><td>رد می‌شود مگر ‏<code>computer_use.grant_existing_profile: true</code> ‏(انتخاب یک‌بارهٔ در config)</td></tr>
+<tr><td>‏<code>computer_use.permission_mode: bounded</code> + manifest بازبینی‌شده</td><td>دیمون خصوصی <code>bounded</code></td><td>یک بار موقع launch، capability manifest را بررسی و تأیید می‌کنید</td><td>فقط داخل profiles/origins/tools اعلام‌شده در manifest؛ هر چیز دیگر fail closed می‌شود</td></tr>
+<tr><td>‏<code>--yolo</code>، ‏<code>/yolo</code> یا ‏<code>approvals.mode: off</code></td><td>دیمون خصوصی <code>unrestricted</code></td><td>یک پذیرش ریسک صریح هرمس؛ بدون پرامپت runtime ی Cua</td><td>رد می‌شود مگر ‏<code>computer_use.grant_existing_profile: true</code>؛ YOLO جانشین این grant نمی‌شود</td></tr>
+</tbody>
+</table>
+</div>
+<h3>اتصال به مرورگر وارد-شدهٔ شما</h3>
+<p>ایجنت می‌تواند پنجره Chrome/Edge ی که از قبل باز دارید — شامل یک پروفایل وارد-شده — را براند <b>بدون ری‌استارت مرورگر، کپی کردن پروفایل یا دست زدن به تب‌هایتان</b>. چون دسترسی DevTools صفحات زنده، کوکی‌ها و storage ی آن پروفایل را افشا می‌کند، cua-driver یک grant ی صریح انسانی می‌طلبد که تأیید عادی ابزار جانشینش نمی‌شود. یک بار در config.yaml شرکت کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>computer_use:
+  grant_existing_profile: true</code></pre>
+</div>
+<p>هرمس سپس runtime ی cua-driver را با grant ی trusted-launcher ‏(<code>--grant existing-profile</code>) راه می‌اندازد و ‏<code>cua_browser_prepare</code> با پروفایل موجود روی دقیقاً همان ‏<code>(pid, window_id)</code> که ایجنت اثبات می‌کند موفق می‌شود. ‏<code>false</code> بگذارید ‏(پیش‌فرض) و اتصال پروفایل-موجود fail closed می‌شود؛ پروفایل‌های ایزولهٔ متعلق-به-درایور به هر دو صورت کار می‌کنند و ترجیح ایجنت همان‌ها هستند.</p>
+<h3>حالت bounded برای اتوماسیون تکرارشدنی</h3>
+<p>برای اتوماسیون مرورگری تکراری ‏(cron job ها، پژوهش زمان‌بندی‌شده روی یک اپ احراز-هویت‌شده)، حالت <code>bounded</code> از capability manifest ای استفاده می‌کند که یک بار بازبینی می‌کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># config.yaml
+computer_use:
+  permission_mode: bounded
+  capability_manifest: ~/.hermes/cua-manifest.yaml</code></pre>
+</div>
+<p>manifest نام اپ‌ها، انواع پروفایل مرورگر، origin های مجاز و ابزارهای typed ی مجاز برای نشست را اعلام می‌کند ‏(قالب را در <a href="https://cua.ai/docs/reference/cua-driver/permission-modes" target="_blank" rel="noopener">مرجع حالت‌های مجوز cua-driver</a> ببینید). هرمس runtime ی خصوصی را با ‏<code>--capability-manifest ... --approve-capability-manifest</code> راه می‌اندازد؛ هر چیز بیرون manifest داخل cua-driver fail closed می‌شود. manifest غایب یا غیرقابل‌خواندن در شروع نشست بلند شکست می‌خورد نه اینکه بی‌سروصدا تنزل یابد. YOLO ی نشست همچنان برای همان یک نشست bounded را override می‌کند.</p>
+<p>هر transport ی MCP یک نشست چرخه‌حیات خصوصی داخل runtime خودش دارد. نام نشست عمومی فقط برچسبی برای هویت مکان‌نما و وضعیت مخصوص-نشست است؛ runtime را انتخاب، شریک یا زنده نگه نمی‌دارد. خاموش کردن <code>/yolo</code>، ریست یا بستن نشست هرمس، پاکسازی لغو یا خروج پروسه، آن نشست transport را می‌بندد. هرمس همچنین runtime های خصوصی‌ای که خودش برای دسترسی bounded/unrestricted/existing-profile راه انداخته بود متوقف می‌کند. یک گفتگوی هرمس نمی‌تواند حالت یا grant های runtime دیگری را عوض کند. روی macOS، یک runtime استاندارد با grant ی existing-profile از یک دیمون CuaDriver.app تازه روی socket خصوصی استفاده می‌کند. حالت‌های bounded و unrestricted از یک سرویس embedded ی خصوصی زیر هویت میزبان هرمس بهره می‌برند.</p>
+<p>تأیید <code>smart</code> همچنان <code>standard</code> می‌ماند: طبقه‌بندی LLM نمی‌تواند جانشین manifest بازبینی‌شده یا grant ی launch شود.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️</div>
+  <p>حالت YOLO/unrestricted در برابر prompt injection یا ورودی ناخواسته محافظت نمی‌کند. فقط در یک VM دورریز یا با حساب‌ها و داده‌هایی استفاده کنید که به‌طور کامل به‌خطر افتادنشان را می‌پذیرید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> ‏<code>hermes computer-use doctor</code> — نخستین توقف عیب‌یابی</h2>
+<p>‏<code>hermes computer-use doctor</code> ابزار MCP ی ساختاریافتهٔ <code>health_report</code> ی cua-driver را اجرا و یک ماتریس per-check چاپ می‌کند. سریع‌ترین راه واحد برای فهمیدن اینکه <i>چرا</i> یک اقدام کار نمی‌کند.</p>
+<pre dir="ltr"><code>$ hermes computer-use doctor
+⚠️  cua-driver VERSION on darwin: degraded
+  ✅ binary_version: cua-driver VERSION
+  ✅ platform_supported: macOS 26.4.1 (arm64)
+  ✅ session_active: MCP session is active.
+  ❌ bundle_identity: Process has no CFBundleIdentifier.
+      → Run the binary inside CuaDriver.app so TCC grants attribute correctly.
+  ✅ tcc_accessibility: Accessibility is granted.
+  ✅ tcc_screen_recording: Screen Recording is granted.
+  ✅ ax_capability: AX is trusted and reachable.
+  ✅ screen_capture_capability: ScreenCaptureKit reachable; 1 display(s) shareable.</code></pre>
+<ul>
+  <li><b>کد خروج ۰</b> وقتی وضعیت کلی <code>ok</code> است — همه‌چیز سیم‌کشی شده.</li>
+  <li><b>کد خروج ۱</b> وقتی <code>degraded</code> یا ‏<code>failed</code> — دست‌کم یک بررسی شکست خورده؛ سرنخ روی هر شکست می‌گوید چه چیزی را درست کنید.</li>
+  <li><b>کد خروج ۲</b> وقتی خود باینری cua-driver قابل‌رسید نیست.</li>
+</ul>
+<p>فلگ‌های مفید:</p>
+<ul>
+  <li>‏<code>--include CHECK</code> — فقط بررسی‌های فهرست‌شده را اجرا کند ‏(برای چند مورد تکرار کنید)</li>
+  <li>‏<code>--skip CHECK</code> — رد شدن یک بررسی ‏(بر <code>--include</code> مقدم است)</li>
+  <li>‏<code>--json</code> — payload ی خام ساختاریافته با همان شکل پاسخ MCP ی ‏<code>tools/call health_report</code></li>
+</ul>
+<p>ماتریس بررسی پلتفرم-آگاه است: ‏<code>bundle_identity</code>/<code>tcc_*</code> روی ویندوز + لینوکس <code>skip</code> می‌شوند چون این مفاهیم آنجا معنا ندارند. ‏<code>ax_capability</code> روی macOS بررسی AX، روی ویندوز UIA و روی لینوکس AT-SPI است — هر کدام با سرنخ تشخیصی درست وقتی قابل‌رسید نباشد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> مکان‌نمای ایجنت و نشست‌ها</h2>
+<p>وقتی ایجنت عمل می‌کند، یک <b>مکان‌نمای overlay رنگ‌آمیزی</b> می‌بینید که تا محل فرود هر کلیک/تایپ/اسکرول سُر می‌خورد. مکان‌نمای واقعی OS هرگز حرکت نمی‌کند. overlay نشان می‌دهد ایجنت کجا عمل می‌کند. هر run ی هرمس یک <b>نام نشست</b> عمومی cua-driver اعلام می‌کند ‏(چیزی مثل <code>hermes-3a7b9c14d2e8</code>). این نام هویت مکان‌نما و وضعیت مرتبط را برچسب می‌زند تا run ها و زیرایجنت‌های همزمان مکان‌نمای متمایز بگیرند. transport ی MCP نشست چرخه‌حیات خصوصی داخل runtime را مالک است؛ نام عمومی نه.</p>
+<p>مکان‌نما را با فلگ‌های CLI ی cua-driver یا ابزار MCP ی runtime ی <code>set_agent_cursor_style</code> تنظیم کنید — منوی کامل ‏(silhouette داخلی <code>arrow</code> در برابر <code>teardrop</code>، ‏SVG/PNG/ICO سفارشی با <code>--cursor-icon</code>، رنگ‌های گرادیان runtime، هالهٔ bloom) در <a href="https://cua.ai/docs/how-to-guides/driver/personalize-cursor" target="_blank" rel="noopener">personalize-cursor</a>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> عمیق‌تر — بستهٔ مهارت cua-driver</h2>
+<p>هرمس مهارت wrapper خودش ‏(<code>skills/autonomous-ai-agents/computer-use/SKILL.md</code>) را روی گردش‌کار سمت-هرمسِ <code>computer_use</code> و واژگان اقدام متمرکز نگه می‌دارد. برای جزئیات پلتفرمی، معناشناسی ضبط، تعامل صفحهٔ مرورگر و سایر رفتارهای عمیق Cua، بستهٔ مهارتی که تیم cua-driver ارسال و نگهداری می‌کند را نصب کنید:</p>
+<div class="codebox"><pre><code>cua-driver skills install</code></pre></div>
+<p>این فرمان بسته را زیر ‏<code>~/.cua-driver/skills/cua-driver</code> نصب می‌کند. آشکارسازی خودکار هرمس یک follow-up برنامه‌ریزی‌شدهٔ cua-driver است، پس فعلاً هرمس را به آن دایرکتوری اشاره دهید یا symlink اش را وارد فضای مهارت‌تان کنید. wrapper سطح گردش‌کار می‌ماند و برای رفتار درایور به مهارت نصب‌شدهٔ Cua اشاره می‌کند. بسته شامل:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فایل</th><th>موضوع</th></tr></thead>
+<tbody>
+<tr><td><code>SKILL.md</code></td><td>هستهٔ بین-پلتفرمی ‏(ناوردای snapshot، قرارداد بدون-پیش-آمدن، dispatch کلیک، سازوکار درخت AX)</td></tr>
+<tr><td><code>MACOS.md</code></td><td>جزئیات macOS: قرارداد بدون-پیش-آمدن، ناوبری AXMenuBar، dispatch کلیک SkyLight، پُل Apple Events JS</td></tr>
+<tr><td><code>WINDOWS.md</code></td><td>جزئیات ویندوز: درخت UIA، میزبانی UWP / ‏<code>ApplicationFrameHost</code>، ایزوله‌سازی Session 0، الگوی autostart</td></tr>
+<tr><td><code>LINUX.md</code></td><td>جزئیات لینوکس: درخت AT-SPI، ‏X11/Wayland، آشکارسازی شبیه‌ساز ترمینال</td></tr>
+<tr><td><code>RECORDING.md</code></td><td>معناشناسی ضبط trajectory + ویدیو</td></tr>
+<tr><td><code>WEB_APPS.md</code></td><td>نکات تعامل با صفحهٔ مرورگر</td></tr>
+<tr><td><code>TESTS.md</code></td><td>گردش‌کار replay-by-trajectory</td></tr>
+</tbody>
+</table>
+</div>
+<p>اینها <b>عمق‌کاوی‌های پلتفرمی‌اند نه تکرار مهارت هرمس</b> — وقتی ایجنتی گزارش می‌دهد «روی ویندوز، کلیک من روی عنصر اشتباه فرود آمد»، ‏<code>WINDOWS.md</code> را می‌خواند تا زمینهٔ UIA/UWP ای که چرایی و راه متفاوت را توضیح می‌دهد پیدا کند.</p>
+<p>‏<code>cua-driver skills status</code> نشان می‌دهد چه چیزی نصب است و به کدام harness ها لینک شده. امروز فهرست آشکارسازی خودکار شامل Claude Code، ‏Codex، ‏OpenCode، ‏OpenClaw و Antigravity است؛ <b>آشکارسازی خودکار هرمس به‌عنوان follow-up در ‏trycua/cua برنامه‌ریزی شده</b> — تا آن‌وقت یک بار <code>cua-driver skills install</code> را اجرا و harness تان را به دایرکتوری حاصل <code>~/.cua-driver/skills/cua-driver</code> اشاره دهید ‏(یا symlink اش را وارد فضای مهارت معمولتان کنید).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> مثال سریع</h2>
+<p>پرامپت کاربر: <i>«آخرین ایمیل Stripe ام را پیدا کن و خلاصه کن چه کاری از من می‌خواهند.»</i></p>
+<p>برنامهٔ ایجنت ‏(روی macOS/ویندوز/لینوکس همین شکل است — مدل میان‌بر و نام اپ اصیل پلتفرم را جایگزین می‌کند):</p>
+<ol>
+  <li>‏<code>computer_use(action="capture", mode="som", app="Mail")</code> — اسکرین‌شاتی از اپ ایمیل می‌گیرد که هر آیتم sidebar، دکمهٔ toolbar و سطر پیام شماره‌گذاری شده.</li>
+  <li>‏<code>computer_use(action="click", element=14)</code> — روی فیلد جستجو کلیک می‌کند.</li>
+  <li>‏<code>computer_use(action="type", text="from:stripe")</code></li>
+  <li>‏<code>computer_use(action="key", keys="return", capture_after=True)</code> — ارسال و گرفتن اسکرین‌شات جدید.</li>
+  <li>کلیک روی نتیجهٔ اول، خواندن بدنه، خلاصه‌سازی.</li>
+</ol>
+<p>در تمام این مدت، مکان‌نمای شما همان‌جایی که گذاشته‌اید می‌ماند و اپ ایمیل هرگز به پیش نمی‌آید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> دریافت خودِ اسکرین‌شات</h2>
+<p>اسکرین‌شات‌های گرفته‌شده حین کنترل کامپیوتر معمولاً داخلی‌اند — وجودشان برای دیدن صفحه توسط مدل است و ایجنت متنی جواب می‌دهد. اما هر capture تصویر یک نسخهٔ محدود و قابل-اشتراک هم زیر کش image ی هرمس ذخیره و مسیرش را گزارش می‌کند، پس روی سطوح دارای-پیوست ‏(تلگرام، ‏دیسکورد، ‏دسکتاپ و سایر پلتفرم‌های گیت‌وی) کافی است بخواهید:</p>
+<blockquote dir="rtl"><p><i>«یه اسکرین‌شات از صفحه‌ام برام بفرست.»</i></p></blockquote>
+<p>و ایجنت تصویر واقعی را به‌عنوان پیوست native تحویل می‌دهد، نه فقط توضیحش. روی CLI کانال پیوستی وجود ندارد، پس ایجنت به‌جایش مسیر فایل ذخیره‌شده را می‌دهد.</p>
+<p>فقط ۲۰ فایل capture ی اخیر نگه داشته می‌شوند و اسکرین‌شات هرگز خودکار فرستاده نمی‌شود — فقط وقتی بخواهید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> سازگاری ارائه‌دهنده</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>بینایی؟</th><th>کار می‌کند؟</th><th>یادداشت‌ها</th></tr></thead>
+<tbody>
+<tr><td>Anthropic ‏(Claude Sonnet/Opus 3+)</td><td>✅</td><td>✅</td><td>بهترین در مجموع؛ SOM + مختصات خام.</td></tr>
+<tr><td>OpenRouter ‏(هر مدل بینایی)</td><td>✅</td><td>✅</td><td>پیام‌های ابزار چندبخشی پشتیبانی می‌شود.</td></tr>
+<tr><td>OpenAI ‏(GPT-4+، ‏GPT-5)</td><td>✅</td><td>✅</td><td>مثل بالا.</td></tr>
+<tr><td>Google ‏(Gemini 2+)</td><td>✅</td><td>✅</td><td>فراخوانی ابزار + بینایی هر دو پشتیبانی می‌شود.</td></tr>
+<tr><td>vLLM/LM Studio/Ollama محلی ‏(مدل بینایی)</td><td>✅</td><td>✅</td><td>اگر مدل محتوای چندبخشی ابزار را پشتیبانی کند.</td></tr>
+<tr><td>مدل‌های فقط-متنی</td><td>❌</td><td>✅ ‏(تنزل‌یافته)</td><td>برای کارکرد فقط-درخت-دسترس‌پذیری از ‏<code>mode="ax"</code> استفاده کنید.</td></tr>
+</tbody>
+</table>
+</div>
+<p>اسکرین‌شات‌ها همراه نتایج ابزار به‌صورت بخش‌های <code>image_url</code> به سبک OpenAI فرستاده می‌شوند. برای Anthropic، adapter آنها را به بلوک‌های تصویر native ی <code>tool_result</code> تبدیل می‌کند. MIME type تصویر از فیلد صریح <code>mimeType</code> ی cua-driver می‌آید ‏(<code>image/png</code> یا ‏<code>image/jpeg</code>) — بدون snuffing جادویی-بایت سمت کلاینت.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> ایمنی</h2>
+<p>هرمس گاردهای چندلایه اعمال می‌کند:</p>
+<ul>
+  <li>اقدامات مخرب ‏(click، ‏type، ‏drag، ‏scroll، ‏key، ‏focus_app) تأیید می‌خواهند — یا تعاملی از طریق دیالوگ CLI یا از طریق دکمه‌های تأیید پلتفرم پیام‌رسانی.</li>
+  <li>ترکیب‌کلیدهای hard-block در سطح ابزار: خالی کردن trash، ‏delete ی اجباری، قفل صفحه، ‏logout، ‏logout اجباری.</li>
+  <li>الگوهای type ی hard-block: ‏<code>curl | bash</code>، ‏<code>sudo rm -rf /</code>، بمب‌های fork و…</li>
+  <li>پرامپت سیستمی ایجنت صریحاً می‌گوید: کلیک روی دیالوگ‌های مجوز ممنوع، تایپ رمز عبور ممنوع، پیروی از دستورالعمل‌های تعبیه‌شده در اسکرین‌شات‌ها ممنوع.</li>
+</ul>
+<p>اگر می‌خواهید هر اقدام تأیید شود، ‏<code>approvals.mode: manual</code> را در ‏<code>~/.hermes/config.yaml</code> جفت کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> کارایی توکن</h2>
+<p>اسکرین‌شات‌ها گران‌اند. هرمس چهار لایه بهینه‌سازی اعمال می‌کند:</p>
+<ul>
+  <li><b>اخراج اسکرین‌شات</b> — adapter ی Anthropic فقط ۳ اسکرین‌شات اخیر را در زمینه نگه می‌دارد؛ قدیمی‌ترها placeholder ی ‏<code>[screenshot removed to save context]</code> می‌شوند.</li>
+  <li><b>هرس فشرده‌سازی سمت-کلاینت</b> — فشرده‌ساز زمینه نتایج ابزار چندوجهی را آشکار و بخش‌های تصویر موارد قدیمی را حذف می‌کند.</li>
+  <li><b>برآورد توکن تصویر-آگاه</b> — هر تصویر حدود ‎۱۵۰۰‎ توکن حساب می‌شود ‏(نرخ ثابت Anthropic) نه طول base64 اش.</li>
+  <li><b>ویرایش زمینه سمت-سرور ‏(فقط Anthropic)</b> — وقتی فعال باشد adapter از طریق <code>context_management</code> مقدار ‏<code>clear_tool_uses_20250919</code> را روشن می‌کند تا API ی Anthropic نتایج ابزار قدیمی را سمت سرور پاک کند.</li>
+</ul>
+<p>یک نشست ۲۰-اقدامی روی نمایشگر ‎۱۵۶۸×۹۰۰‎ معمولاً ~۳۰ هزار توکن زمینهٔ اسکرین‌شات خرج می‌کند نه ~۶۰۰ هزار.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> محدودیت‌ها</h2>
+<ul>
+  <li><b>کارایی.</b> حالت پس‌زمینه کندتر از foreground است — رویدادهای مسیر-دسترس‌پذیری روی macOS حدود ‎۵–۲۰‎ میلی‌ثانیه، روی UIA ویندوز ‎۳–۱۰‎ و روی AT-SPI لینوکس ‎۵–۱۵‎ طول می‌کشند در برابر پست مستقیم HID. برای کلیک با سرعت-ایجنت محسوس نیست؛ اگر بخواهید speed-run ضبط کنید محسوس است.</li>
+  <li><b>بدون تایپ رمز عبور با کیبورد.</b> ‏<code>type</code> روی payloadهای شل-فرمانی الگوهای hard-block دارد؛ برای رمزها از autofill سیستم استفاده کنید ‏(Keychain ی macOS / Credential Manager ویندوز / GNOME Keyring / KWallet).</li>
+  <li><b>بعضی اپ‌ها درخت دسترس‌پذیری expose نمی‌کنند.</b> اپ‌های UWP مدرن ویندوز، ‏Electron زیر ۲۸ روی لینوکس و چند اپ macOS با رسم سفارشی ‏(Logic، ‏Final Cut، بعضی بازی‌ها) درخت‌های AX خلوت یا خالی دارند. اگر درخت خالی بود به مختصات پیکسلی برگردید — یا تسک را کلاً رد کنید.</li>
+  <li><b>ویندوز: پنجره‌های elevated ‏(admin) از یک ایجنت عادی قابل‌رانندگی نیستند.</b> ‏UIPI ویندوز مرزهای سطح-یکپارچگی را اعمال می‌کند: یک پروسهٔ Medium-integrity ‏(پیش‌فرض ایجنت هرمس) نمی‌تواند درخت UIA پنجره‌ای متعلق به پروسهٔ High-integrity ‏(Administrator) را بشمارد یا ورودی ماوس به آن تزریق کند. علامت: ‏<code>capture(mode='som')</code> صفر عنصر برمی‌گرداند و ‏<code>click(...)</code> موفقیت گزارش می‌کند در حالی که کاری نمی‌کند، حتی با وجود رندر درست اسکرین‌شات ‏(capture ی GDI زیر بررسی integrity می‌نشیند). رویدادهای کیبورد UIPI را جزئاً دور می‌زنند، پس Tab/Enter همچنان می‌توانند در یک دیالوگ elevated حرکت کنند. این محدودیت OS است نه باگ cua-driver — همهٔ پشته‌های اتوماسیون ویندوز را درگیر می‌کند. برای راندن پنجره‌های elevated، خود ایجنت هرمس را در High integrity اجرا کنید ‏(launch از یک ترمینال elevated)؛ در غیر این صورت پنجره‌های non-elevated را هدف بگیرید.</li>
+  <li><b>گیراندازی‌های استقرار مخصوص-پلتفرم:</b>
+    <ul>
+      <li><b>macOS</b> از SPI های خصوصی SkyLight استفاده می‌کند. اپل می‌تواند در هر به‌روزرسانی OS عوضشان کند. هرمس وقتی cua-driver نصب‌شده قدیمی‌تر از نسخهٔ تست‌شده باشد هشدار می‌دهد.</li>
+      <li><b>ویندوز</b> نشست‌های SSH در <b>Session 0</b> اجرا می‌شوند که دسکتاپ تعاملی ندارد. هرمس را از داخل نشست RDP/console برانید یا Scheduled Task ی autostart ی cua-driver را راه بیندازید — دستورالعمل در <a href="https://cua.ai/docs/how-to-guides/driver/windows-ssh" target="_blank" rel="noopener">windows-ssh</a>.</li>
+      <li><b>لینوکس</b> display server قابل‌رسید می‌خواهد. سرورهای headless قبل از اینکه <code>computer_use</code> بتواند capture یا تزریق کند به Xvfb نیاز دارند ‏(<code>Xvfb :99 -screen 0 1920x1080x24</code>). نشست‌های خالص Wayland برای capture صفحه به پُل XWayland نیاز دارند ‏(مسیر تزریق Wayland ی cua-driver ورودی را مستقل هندل می‌کند).</li>
+    </ul>
+  </li>
+</ul>
+<p>برای اتوماسیون GUI بین-پلتفرمی بدون سربار دسکتاپ ‏(و بدون setup ی TCC / Session 0 / X11)، تول‌ست <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/browser" target="_blank" rel="noopener">browser</a> از یک Chromium واقعی headless استفاده می‌کند و پاسخ درست برای تسک‌های فقط-وب است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> پیکربندی</h2>
+<p>حالت مجوز و manifest ‏(بخش <a href="#permission-anchor">حالت‌های مجوز</a> بالا):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>computer_use:
+  permission_mode: standard        # standard (default) | bounded
+  capability_manifest: ""          # capability manifest path, required for bounded
+  grant_existing_profile: false    # opt-in: attach in standard or unrestricted mode</code></pre>
+</div>
+<p>بازنویسی مسیر باینری درایور ‏(تست‌ها / CI / buildهای محلی):</p>
+<pre dir="ltr"><code>HERMES_CUA_DRIVER_CMD=/path/to/your/cua-driver</code></pre>
+<p>تعویض کامل بک‌اند ‏(برای تست):</p>
+<pre dir="ltr"><code>HERMES_COMPUTER_USE_BACKEND=noop   # records calls, no side effects</code></pre>
+<h3>تلمتری</h3>
+<p>‏cua-driver بالادستی با تلمتری مصرف ناشناس ‏(PostHog) ارسال می‌شود. <b>هرمس آن را برایتان خاموش می‌کند</b> — در هر فراخوانی cua-driver ‏(بک‌اند MCP، ‏status، ‏doctor و install) هرمس ‏<code>CUA_DRIVER_RS_TELEMETRY_ENABLED=0</code> را در env درایور ست می‌کند.</p>
+<p>برای opt-in دوباره ‏(اجازه به cua-driver برای پیش‌فرض خودش و ارسال تلمتری) این را در config.yaml ست کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>computer_use:
+  cua_telemetry: true   # default: false (telemetry off)</code></pre>
+</div>
+<p>وقتی روشن باشد ‏<code>hermes computer-use doctor</code> گزارش می‌دهد ‏<code>telemetry: enabled</code>؛ وقتی خاموش باشد ‏(پیش‌فرض) گزارش می‌دهد ‏<code>telemetry: disabled via CUA_DRIVER_RS_TELEMETRY_ENABLED</code>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> تست روی یک build محلی cua-driver</h2>
+<p>وقتی خود cua-driver را توسعه می‌دهید — یا می‌خواهید یک fix منتشرنشده را تست کنید — هرمس را به باینری‌ای که از سورس ساخته‌اید اشاره دهید به‌جای release منتشرشده. هرمس درایور را با ‏<code>shutil.which("cua-driver")</code> resolve می‌کند و ‏<b>‏<code>HERMES_CUA_DRIVER_VERSION</code> را اعمال نمی‌کند</b>، پس یک build محلی ‏(گزارش‌شده به‌صورت <code>0.0.0-local-*</code>) همان‌طور که هست پذیرفته می‌شود. دو رویکرد:</p>
+<h3>گزینهٔ A — ‏<code>install-local</code> ‏(ساخت + قرار دادن روی PATH)</h3>
+<p>از checkout ی trycua/cua تان، نصب‌کنندهٔ محلی بالادستی را اجرا کنید. بک‌اند Rust را در حالت release می‌سازد و ‏cua-driver را در همان چیدمان نصبی که نصب‌کنندهٔ production استفاده می‌کند می‌گذارد و دایرکتوری bin اش را به PATH تان اضافه می‌کند:</p>
+<div class="codebox"><pre><code># Windows (PowerShell), from the cua repo root
+./libs/cua-driver/scripts/install-local.ps1 -NoAutoStart</code></pre></div>
+<div class="codebox"><pre><code># macOS / Linux, from the cua repo root  (defaults to a debug build without --release)
+./libs/cua-driver/scripts/install-local.sh --release</code></pre></div>
+<ul>
+  <li>ویندوز build را زیر ‏<code>%USERPROFILE%\.cua-driver\packages\…</code> آماده و ‏<code>%LOCALAPPDATA%\Programs\Cua\cua-driver\bin</code> ‏(به User PATH اضافه می‌شود) را junction می‌کند به آن. ‏macOS/Linux ی <code>cua-driver</code> را در ‏<code>~/.local/bin</code> symlink می‌کند ‏(با <code>--bin-dir &lt;path&gt;</code> بازنویسی شود).</li>
+  <li>‏<code>-NoAutoStart</code> ثبت دیمون logon ی ‏<code>cua-driver-serve</code> را رد می‌کند — برای تست هرمس لازمش ندارید ‏(یادداشت‌ها را ببینید).</li>
+</ul>
+<p>سپس یک شل تازه باز کنید ‏(تا تغییر PATH دیده شود) و تأیید کنید:</p>
+<div class="codebox"><pre><code>cua-driver --version                 # local builds report 0.0.0-local-release
+# Windows:      (Get-Command cua-driver).Source
+# macOS/Linux:  which cua-driver</code></pre></div>
+<h3>گزینهٔ B — اشاره مستقیم هرمس به باینری ساخته‌شده ‏(سریع‌ترین حلقه)</h3>
+<p>از مراسم نصب کلاً عبور کنید: ‏<code>cargo build</code> و <code>HERMES_CUA_DRIVER_CMD</code> را روی باینری حاصل بگذارید. بهترین گزینه برای edit/build/test سریع.</p>
+<div class="codebox"><pre><code>cargo build -p cua-driver            # add --release for a release build; run from libs/cua-driver/rust</code></pre></div>
+<pre dir="ltr"><code># Windows (.env)
+HERMES_CUA_DRIVER_CMD=C:\path\to\cua\libs\cua-driver\rust\target\debug\cua-driver.exe
+# macOS / Linux (.env)
+HERMES_CUA_DRIVER_CMD=/path/to/cua/libs/cua-driver/rust/target/debug/cua-driver</code></pre>
+<h3>تأیید اینکه هرمس از build شما استفاده می‌کند</h3>
+<ul>
+  <li>‏<code>hermes computer-use status</code> مسیر و نسخهٔ باینری حل‌شده را چاپ می‌کند.</li>
+  <li>‏<code>hermes computer-use doctor</code> تأیید می‌کند باینری قابل‌رسید است و کل مسیر MCP را سر-تا-سر ورزش می‌دهد.</li>
+  <li>در نشست، ‏<code>computer_use(action="capture")</code> زیرپروسهٔ فرزند ‏<code>cua-driver mcp</code> را ورزش می‌دهد.</li>
+</ul>
+<h3>یادداشت‌ها و گیراندازی‌ها</h3>
+<ul>
+  <li><b>هرمس یک proxy ی stdio ی ‏<code>cua-driver mcp</code> spawn می‌کند.</b> در نشست عادی proxy به دیمون استاندارد ماشین وصل می‌شود ‏(و ممکن است آن را شروع کند). در YOLO ی صریح هرمس، هرمس به‌جایش یک فرزند خصوصی ‏<code>cua-driver serve --embedded</code> را مالک می‌شود و proxy را به socket یا named pipe خصوصی‌اش اشاره می‌دهد. الگوی autostart/UIAccess ی ویندوز همچنان برای ورودی تعاملی Session 1+ از SSH مهم است — بخش محدودیت‌ها را ببینید.</li>
+  <li><b>باینری قفل‌شده روی ویندوز.</b> یک دیمون درحال‌اجرا ی ‏<code>cua-driver-serve</code> می‌تواند ‏<code>cua-driver.exe</code> را نگه دارد و overwrite در rebuild را بلاک کند. ‏<code>install-local.ps1</code> باینری قفل‌شده را خودکار rename می‌کند؛ اگر دستی ‏<code>cargo build</code> می‌کنید ‏(گزینهٔ B)، اول با ‏<code>cua-driver autostart disable</code> ‏(یا ‏<code>schtasks /End /TN cua-driver-serve</code>) متوقفش کنید.</li>
+  <li><b>حلقهٔ rebuild.</b> بعد از ویرایش سورس cua-driver، برای گزینهٔ A دوباره ‏<code>install-local</code> را اجرا کنید ‏(rebuild، restage، flip کردن junction ی current) یا برای گزینهٔ B فقط دوباره ‏<code>cargo build</code> — به هر حال تغییری در هرمس لازم نیست.</li>
+  <li><b>buildهای محلی از بررسی نسخه عبور می‌کنند.</b> هرمس وقتی cua-driver نصب‌شده قدیمی‌تر از خط پایهٔ تست‌شدهٔ هر-OS باشد هشدار می‌دهد ولی buildهای dev ی ‏<code>0.0.0-local-*</code> را مستثنا می‌کند — پس build محلی‌تان هرگز آن هشدار را نمی‌گیرد.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> عیب‌یابی</h2>
+<p><b>اولین اقدام وقتی چیزی خراب است: ‏<code>hermes computer-use doctor</code> را اجرا کنید.</b> ماتریس ساختاریافتهٔ per-check دقیقاً به شما ‏(و هر ایجنتی که دیباگ را کمک می‌کند) می‌گوید مشکل چیست.</p>
+<p>حالت‌های شکست مشخصی که doctor نمی‌گیرد:</p>
+<p><b>‏<code>computer_use backend unavailable: cua-driver is not installed</code></b> — ‏<code>hermes computer-use install</code> را برای واکشی باینری cua-driver اجرا کنید یا ‏<code>hermes tools</code> را بزنید و تول‌ست Computer Use را فعال کنید.</p>
+<p><b>کلیک‌ها ظاهراً بی‌اثرند</b> — Capture کنید و تأیید. ممکن است مودالی که ندیده‌اید ورودی را بلاک کرده. با <code>escape</code> یا دکمهٔ بستن برش دارید.</p>
+<p><b>اندیس‌های عنصر کهنه‌اند</b> — اندیس‌های SOM فقط تا capture بعدی معتبرند. بعد از هر اقدام تغییردهندهٔ وضعیت دوباره capture کنید. wrapper ی <code>element_token</code> ی مبهم برای آشکارسازی کهنگی حمل می‌کند — خطای صریح می‌بینید نه کلیکی اشتباه.</p>
+<p><b>«blocked pattern in type text»</b> — متنی که تلاش کردید <code>type</code> کنید با فهرست الگوهای خطرناک-شل تطبیق خورده. فرمان را بشکنید یا تجدیدنظر کنید.</p>
+<p><b>Capture های خالی روی لینوکس</b> — ‏<code>DISPLAY</code> ست نیست، یا روی Wayland خالص بدون پُل XWayland هستید. ‏<code>hermes computer-use doctor</code> این را با ‏<code>ax_capability: fail</code> و سرنخ ‏<code>Set DISPLAY (X11)…</code> پرچم می‌زند.</p>
+<p><b>Capture های خالی روی ویندوز از طریق SSH</b> — در Session 0 هستید ‏(نشست services). مستقیماً از RDP/console برانید یا الگوی autostart را راه بیندازید — بخش <a href="https://cua.ai/docs/how-to-guides/driver/windows-ssh" target="_blank" rel="noopener">windows-ssh</a>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> ببینید نیز</h2>
+<ul>
+  <li><b>مهارت سمت-هرمس</b> — ‏<code>skills/autonomous-ai-agents/computer-use/SKILL.md</code> — واژگان اقدام <code>computer_use</code> ی هرمس را یاد می‌دهد؛ همان چیزی که ایجنت بارگذاری می‌کند.</li>
+  <li><b>بستهٔ مهارت cua-driver</b> — برای عمق‌کاوی‌های پلتفرمی ‏(قرارداد بدون-پیش-آمدن macOS، ‏UIA + Session 0 ویندوز، ‏AT-SPI + X11/Wayland لینوکس، ‏recording، صفحات مرورگر) ‏<code>cua-driver skills install</code> را اجرا و ‏<code>MACOS.md</code>/<code>WINDOWS.md</code>/<code>LINUX.md</code>/<code>RECORDING.md</code>/<code>WEB_APPS.md</code> را بخوانید.</li>
+  <li><b>cua.ai/docs</b> — مستندات پروژهٔ cua-driver:
+    <ul>
+      <li><a href="https://cua.ai/docs/explanation/what-is-computer-use" target="_blank" rel="noopener">What is computer use?</a> — مقدمهٔ مفهومی</li>
+      <li><a href="https://cua.ai/docs/explanation/the-no-foreground-contract" target="_blank" rel="noopener">The no-foreground contract</a> — چرایی اهمیت حالت پس‌زمینه</li>
+      <li><a href="https://cua.ai/docs/how-to-guides/driver/install" target="_blank" rel="noopener">Install reference</a> — جزئیات نصب بین-پلتفرمی</li>
+      <li><a href="https://cua.ai/docs/how-to-guides/driver/personalize-cursor" target="_blank" rel="noopener">Personalize the agent cursor</a> — شکل‌های داخلی، assets سفارشی، بازنویسی‌های runtime</li>
+      <li><a href="https://cua.ai/docs/how-to-guides/driver/windows-ssh" target="_blank" rel="noopener">Drive Windows over SSH</a> — الگوی autostart ی Session 0 → Session 1+</li>
+      <li><a href="https://cua.ai/docs/how-to-guides/driver/keep-running" target="_blank" rel="noopener">Keep cua-driver running</a> — چرخه‌حیات autostart/دیمون</li>
+      <li><a href="https://cua.ai/docs/how-to-guides/driver/connect-your-agent" target="_blank" rel="noopener">Connect your agent</a> — ثبت cua-driver در harness های مختلف ‏(هرمس هم بین آنهاست)</li>
+    </ul>
+  </li>
+  <li><a href="https://github.com/trycua/cua" target="_blank" rel="noopener">سورس cua-driver ‏(trycua/cua)</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/browser" target="_blank" rel="noopener">اتوماسیون مرورگر</a> برای تسک‌های وبی بین-پلتفرمی که نیازی به راندن اپ‌های native ندارید.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="codex-app-server-runtime.html"><span class="dir">→ قبلی</span><span class="ttl">اجراگر Codex ‏(اختیاری)</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/computer-use" target="_blank" rel="noopener">Computer Use</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

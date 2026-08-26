@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۹۰ از ۲۰۷ صفحه (۴۳٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۹۱ از ۲۰۷ صفحه (۴۴٪)** |
 
 ---
 
@@ -465,6 +465,12 @@ hermes-docs-fa/
 - زنجیرهٔ pager: …pets ← spotify ← codex-app-server-runtime ← (به‌زودی)
 - پیشرفت: **۹۰ از ۲۰۷ صفحه فعال (۴۳٪)**
 
+### نشست ۵۵ — 2026-08-26 — 🖱️ کنترل کامپیوتر — قابلیت‌ها ۲۸/۳۱
+- ترجمه و انتشار «کنترل کامپیوتر» (۱۶ بخش): راندن دسکتاپ به‌صورت پس‌زمینه‌ای روی سه پلتفرم با جدول درخت دسترس‌پذیری/dispatch ‏(AX+SkyLight، UIA، AT-SPI)، فعال‌سازی با پیش‌نصب درایور و fallback دستی، جدول پیش‌نیازهای هر پلتفرم ‏(TCC/SSH Session 0/XWayland)، حالت‌های مجوز standard/bounded/unrestricted با grant صریح existing-profile و capability manifest، doctor با کدهای خروج و ماتریس per-check، مکان‌نمای overlay و نشست‌ها، بستهٔ مهارت cua-driver ‏(جدول ۷ فایل)، مثال گام‌به‌گام ایمیل Stripe، دریافت اسکرین‌شات به‌عنوان پیوست، سازگاری ارائه‌دهنده‌ها شامل فقط-متنی با mode=ax، گاردهای ایمنی چندلایه، چهار لایهٔ کارایی توکن ‏(~۳۰K به‌جای ~۶۰۰K)، محدودیت‌ها شامل UIPI ویندوز، پیکربندی و تلمتری خاموش‌شده، تست build محلی با دو گزینه، عیب‌یابی و ببینید نیز
+- زنجیرهٔ pager: …codex-app-server-runtime ← computer-use ← (به‌زودی)
+- اصلاحات: افزودن لنگر permission-anchor برای ارجاع داخلی بخش پیکربندی
+- پیشرفت: **۹۱ از ۲۰۷ صفحه فعال (۴۴٪)** — قابلیت‌های اصلی ۲۸/۳۱ (فقط memory-providers و extending-the-dashboard مانده)
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -561,6 +567,7 @@ hermes-docs-fa/
 | 88 | `user-guide/features/pets.html` | اسکات‌های خانگی (Pets) |
 | 89 | `user-guide/features/spotify.html` | اسپاتیفای |
 | 90 | `user-guide/features/codex-app-server-runtime.html` | اجراگر Codex (اختیاری) |
+| 91 | `user-guide/features/computer-use.html` | کنترل کامپیوتر |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

@@ -52,7 +52,7 @@ window.HERMES_NAV = [
   { p:"user-guide/features/plugins.html",              t:"پلاگین‌ها",                           d:1 },
   { p:"user-guide/features/built-in-plugins.html",     t:"پلاگین‌های داخلی",                    d:1 },
   { p:"user-guide/features/codex-app-server-runtime.html", t:"اجراگر Codex (اختیاری)",          d:1 },
-  { p:"user-guide/features/computer-use.html",         t:"کنترل کامپیوتر",                      d:0 },
+  { p:"user-guide/features/computer-use.html",         t:"کنترل کامپیوتر",                      d:1 },
   { p:"user-guide/features/deliverable-mode.html",     t:"حالت تحویل‌دادنی در چت",             d:1 },
   { p:"user-guide/features/document-extraction.html",  t:"استخراج متن اسناد",                   d:1 },
   { p:"user-guide/features/extending-the-dashboard.html", t:"گسترش داشبورد وب",                 d:0 },
