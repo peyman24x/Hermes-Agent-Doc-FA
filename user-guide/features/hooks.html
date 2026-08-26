@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>هوک‌های چرخهٔ حیات — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/hooks" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>هوک‌های چرخهٔ حیات</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>هوک‌های رویداد ‏(Event Hooks)</h1>
+<p>هرمس چهار سیستم هوک دارد که کد سفارشی را در نقاط کلیدی چرخهٔ حیات اجرا می‌کنند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>سیستم</th><th>ثبت از طریق</th><th>اجرا در</th><th>مورد استفاده</th></tr></thead>
+<tbody>
+<tr><td><b><a href="#gateway-event-hooks">هوک‌های گیت‌وی</a></b></td><td>‏<code>HOOK.yaml</code> + ‏<code>handler.py</code> در ‏<code>~/.hermes/hooks/</code></td><td>فقط گیت‌وی</td><td>لاگ‌گیری، هشدارها، وب‌هوک‌ها</td></tr>
+<tr><td><b><a href="#plugin-hooks">هوک‌های پلاگین</a></b></td><td>‏<code>ctx.register_hook()</code> در یک <a href="plugins.html">پلاگین</a></td><td>CLI + گیت‌وی</td><td>interception ی ابزار، متریک‌ها، گاردها</td></tr>
+<tr><td><b><a href="#shell-hooks">هوک‌های شل</a></b></td><td>بلوک ‏<code>hooks:</code> در ‏<code>~/.hermes/config.yaml</code> اشاره‌کننده به اسکریپت‌های شل</td><td>CLI + گیت‌وی</td><td>اسکریپت‌های drop-in برای بلاک کردن، فرمت خودکار، تزریق زمینه</td></tr>
+<tr><td><b><a href="#outbound-webhooks">وب‌هوک‌های خروجی</a></b></td><td>فهرست ‏<code>hooks.outbound:</code> در ‏<code>~/.hermes/config.yaml</code></td><td>CLI + گیت‌وی</td><td>push ی رویدادهای چرخهٔ حیاتِ امضاشده به نقطه‌پایان‌های HTTP بیرونی — CI، داشبوردها، ایجنت‌های دیگر</td></tr>
+</tbody>
+</table>
+</div>
+<p>خطاهای callback ی هوک ایزوله و لاگ می‌شوند نه اینکه ایجنت را کرش کنند. هوک‌ها همه منفعل نیستند: هوک‌های directive/control می‌توانند جریان را عوض کنند، transform ها می‌توانند محتوا را جایگزین کنند و یک هوک شل ی ‏pre_tool_call می‌تواند بلاک یا fail closed کند.</p>
+
+<section class="doc-sec" id="gateway-event-hooks">
+<h2><span class="secnum">۱</span> هوک‌های رویداد گیت‌وی</h2>
+<p>هوک‌های گیت‌وی حین عملکرد گیت‌وی ‏(تلگرام، ‏دیسکورد، ‏اسلک، ‏واتساپ، ‏Teams) خودکار شلیک می‌شوند بدون بلاک کردن خط‌لولهٔ اصلی ایجنت.</p>
+<h3>ساخت یک هوک</h3>
+<p>هر هوک دایرکتوری‌ای زیر ‏<code>~/.hermes/hooks/</code> است شامل دو فایل:</p>
+<pre dir="ltr"><code>~/.hermes/hooks/
+└── my-hook/
+    ├── HOOK.yaml      # Declares which events to listen for
+    └── handler.py     # Python handler function</code></pre>
+<h4>‏HOOK.yaml</h4>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>name: my-hook
+description: Log all agent activity to a file
+events:
+  - agent:start
+  - agent:end
+  - agent:step</code></pre>
+</div>
+<p>فهرست events تعیین می‌کند کدام رویدادها هندلرتان را شلیک کنند. می‌توانید به هر ترکیبی از رویدادها مشترک شوید شامل wildcard هایی مثل ‏<code>command:*</code>.</p>
+<h4>‏handler.py</h4>
+<pre dir="ltr"><code>import json
+from datetime import datetime
+from pathlib import Path
+
+LOG_FILE = Path.home() / ".hermes" / "hooks" / "my-hook" / "activity.log"
+
+async def handle(event_type: str, context: dict):
+    """Called for each subscribed event. Must be named 'handle'."""
+    entry = {
+        "timestamp": datetime.now().isoformat(),
+        "event": event_type,
+        **context,
+    }
+    with open(LOG_FILE, "a") as f:
+        f.write(json.dumps(entry) + "\n")</code></pre>
+<p><b>قواعد هندلر:</b></p>
+<ul>
+  <li>باید نامش handle باشد</li>
+  <li>‏event_type ‏(رشته) و context ‏(dict) دریافت می‌کند</li>
+  <li>می‌تواند ‏async def یا def ی معمولی باشد — هر دو کار می‌کنند</li>
+  <li>خطاها گرفته و لاگ می‌شوند؛ هرگز ایجنت را کرش نمی‌کنند</li>
+</ul>
+<h3>رویدادهای موجود</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>رویداد</th><th>کی شلیک می‌شود</th><th>کلیدهای context</th></tr></thead>
+<tbody>
+<tr><td><code>gateway:startup</code></td><td>پروسهٔ گیت‌وی شروع شود</td><td>‏<code>platforms</code> ‏(فهرست نام پلتفرم‌های فعال)</td></tr>
+<tr><td><code>session:start</code></td><td>نشست پیام‌رسانی جدید ساخته شود</td><td>‏<code>platform</code>، ‏<code>user_id</code>، ‏<code>session_id</code>، ‏<code>session_key</code></td></tr>
+<tr><td><code>session:end</code></td><td>نشست تمام شود ‏(قبل از reset)</td><td>‏<code>platform</code>، ‏<code>user_id</code>، ‏<code>session_key</code></td></tr>
+<tr><td><code>session:reset</code></td><td>کاربر ‏/new یا ‏/reset بزند</td><td>‏<code>platform</code>، ‏<code>user_id</code>، ‏<code>session_key</code></td></tr>
+<tr><td><code>session:compress</code></td><td>فشرده‌سازی زمینه برای نشستی کامل شود</td><td>‏<code>platform</code>، ‏<code>session_id</code>، ‏<code>old_session_id</code> ‏(خالی وقتی درجا compact شده)، ‏<code>in_place</code> ‏(بولی — true یعنی transcript روی همان id فشرده شده، false یعنی از old_session_id چرخیده)، ‏<code>compression_count</code></td></tr>
+<tr><td><code>agent:start</code></td><td>ایجنت پردازش یک پیام را شروع کند</td><td>‏<code>platform</code>، ‏<code>user_id</code>، ‏<code>chat_id</code>، ‏<code>thread_id</code> ‏(شناسهٔ ریشهٔ forum-topic/thread؛ خالی وقتی داخل thread نیست)، ‏<code>chat_type</code> ‏(dm | group | forum؛ خالی اگر نامعلوم)، ‏<code>session_id</code>، ‏<code>message</code> ‏(بریده تا ۵۰۰ نویسه)</td></tr>
+<tr><td><code>agent:step</code></td><td>هر تکرار حلقهٔ فراخوانی ابزار</td><td>‏<code>platform</code>، ‏<code>user_id</code>، ‏<code>session_id</code>، ‏<code>iteration</code>، ‏<code>tool_names</code></td></tr>
+<tr><td><code>agent:end</code></td><td>ایجنت پردازش را تمام کند</td><td>همان کلیدهای agent:start به‌علاوهٔ ‏response ‏(بریده تا ۵۰۰ نویسه)</td></tr>
+<tr><td><code>reaction:added</code></td><td>یک ری‌اکشن ایموجی به پیامی که ربات می‌بیند اضافه شود ‏(فعلاً adapter ی اسلک). نیازمند scope ی reactions:read + اشتراک رویداد باتی reaction_added؛ ربات باید عضو کانال باشد.</td><td>‏<code>platform</code>، ‏<code>reaction</code>، ‏<code>user_id</code>، ‏<code>item_user_id</code>، ‏<code>item_type</code>، ‏<code>channel_id</code>، ‏<code>message_ts</code>، ‏<code>team_id</code>، ‏<code>event_ts</code>، ‏<code>raw_event</code></td></tr>
+<tr><td><code>reaction:removed</code></td><td>یک ری‌اکشن ایموجی از پیامی که ربات می‌بیند حذف شود. نیازمند اشتراک رویداد باتی reaction_removed.</td><td>همان شکل reaction:added</td></tr>
+<tr><td><code>command:*</code></td><td>هر دستور اسلشی اجرا شود</td><td>‏<code>platform</code>، ‏<code>user_id</code>، ‏<code>command</code>، ‏<code>args</code></td></tr>
+</tbody>
+</table>
+</div>
+<h4>تطبیق wildcard</h4>
+<p>هندلرهای ثبت‌شده برای ‏<code>command:*</code> برای هر رویداد command: شلیک می‌شوند ‏(command:model، ‏command:reset و…). همهٔ دستورات اسلش را با یک اشتراک مانیتور کنید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 پاسخ‌های threaded</div>
+  <p>هندلری که پیام پیگیری داخل همان forum topic ی تلگرام پست می‌کند باید وقتی chat_type == «forum» و thread_id غیرخالی است ‏message_thread_id=int(thread_id) را هم بگنجاند.</p>
+</div>
+<h3>مثال‌ها</h3>
+<h4>هشدار تلگرام روی تسک‌های طولانی</h4>
+<p>وقتی ایجنت بیش از ۱۰ قدم برد به خودتان پیام بدهید:</p>
+<pre dir="ltr"><code># ~/.hermes/hooks/long-task-alert/HOOK.yaml
+name: long-task-alert
+description: Alert when agent is taking many steps
+events:
+  - agent:step</code></pre>
+<pre dir="ltr"><code># ~/.hermes/hooks/long-task-alert/handler.py
+import os
+import httpx
+
+THRESHOLD = 10
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_HOME_CHANNEL")
+
+async def handle(event_type: str, context: dict):
+    iteration = context.get("iteration", 0)
+    if iteration == THRESHOLD and BOT_TOKEN and CHAT_ID:
+        tools = ", ".join(context.get("tool_names", []))
+        text = f"⚠️ Agent has been running for {iteration} steps. Last tools: {tools}"
+        async with httpx.AsyncClient() as client:
+            await client.post(
+                f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+                json={"chat_id": CHAT_ID, "text": text},
+            )</code></pre>
+<h4>لاگر مصرف فرمان‌ها</h4>
+<p>ردیابی اینکه کدام دستورات اسلش استفاده می‌شوند:</p>
+<pre dir="ltr"><code># ~/.hermes/hooks/command-logger/HOOK.yaml
+name: command-logger
+description: Log slash command usage
+events:
+  - command:*</code></pre>
+<pre dir="ltr"><code># ~/.hermes/hooks/command-logger/handler.py
+import json
+from datetime import datetime
+from pathlib import Path
+
+LOG = Path.home() / ".hermes" / "logs" / "command_usage.jsonl"
+
+def handle(event_type: str, context: dict):
+    LOG.parent.mkdir(parents=True, exist_ok=True)
+    entry = {
+        "ts": datetime.now().isoformat(),
+        "command": context.get("command"),
+        "args": context.get("args"),
+        "platform": context.get("platform"),
+        "user": context.get("user_id"),
+    }
+    with open(LOG, "a") as f:
+        f.write(json.dumps(entry) + "\n")</code></pre>
+<h4>وب‌هوک شروع نشست</h4>
+<p>روی نشست‌های جدید به یک سرویس بیرونی POST بزنید:</p>
+<pre dir="ltr"><code># ~/.hermes/hooks/session-webhook/HOOK.yaml
+name: session-webhook
+description: Notify external service on new sessions
+events:
+  - session:start
+  - session:reset</code></pre>
+<pre dir="ltr"><code># ~/.hermes/hooks/session-webhook/handler.py
+import httpx
+
+WEBHOOK_URL = "https://your-service.example.com/hermes-events"
+
+async def handle(event_type: str, context: dict):
+    async with httpx.AsyncClient() as client:
+        await client.post(WEBHOOK_URL, json={
+            "event": event_type,
+            **context,
+        }, timeout=5)</code></pre>
+<h3>آموزش: BOOT.md — اجرای چک‌لیست راه‌اندازی در هر boot ی گیت‌وی</h3>
+<p>الگویی محبوب از جامعهٔ کاربری: یک چک‌لیست Markdown در ‏<code>~/.hermes/BOOT.md</code> بگذارید و بگذارید ایجنت هر بار که گیت‌وی شروع می‌شود یک بار اجرایش کند. مفید برای جملاتی مثل «در هر boot، شکست‌های cron ی شبانه را بررسی کن و اگر چیزی شکست خورد در دیسکورد خبرم کن» یا «۲۴ ساعت آخر deploy.log را خلاصه کن و در اسلک ‎#ops‎ بگذار.»</p>
+<p>این آموزش نشان می‌دهد چطور خودتان آن را به‌عنوان یک هوک تعریف‌شده-توسط-کاربر بسازید. هرمس هوک BOOT.md داخلی ندارد — دقیقاً رفتاری که می‌خواهید را سیم‌کشی می‌کنید.</p>
+<h4>چه چیزی می‌سازیم</h4>
+<ol>
+  <li>یک فایل در ‏<code>~/.hermes/BOOT.md</code> با دستورالعمل‌های راه‌اندازی زبان-طبیعی.</li>
+  <li>یک هوک گیت‌وی که روی gateway:startup شلیک می‌کند، یک ایجنت تک‌مصرفی با مدل/اعتبارنامه‌های حل‌شدهٔ گیت‌وی spawn و دستورالعمل‌های BOOT.md را اجرا می‌کند.</li>
+  <li>یک قرارداد [SILENT] تا ایجنت وقتی چیزی برای گزارش نیست از فرستادن پیام انصراف دهد.</li>
+</ol>
+<h4>گام ۱: چک‌لیست را بنویسید</h4>
+<p>‏<code>~/.hermes/BOOT.md</code> را بسازید. طوری بنویسیدش که انگار به یک دستیار انسانی دستور می‌دهید:</p>
+<pre dir="ltr"><code># Startup Checklist
+
+1. Run `hermes cron list` and check if any scheduled jobs failed overnight.
+2. If any failed, summarize them for Discord #ops (the hook delivers your final response to its configured target).
+3. Check if `/opt/app/deploy.log` has any ERROR lines from the last 24 hours. If yes, summarize them and include in the same report.
+4. If nothing went wrong, reply with only `[SILENT]` so no message is sent.</code></pre>
+<p>ایجنت این را بخشی از پرامپتش می‌بیند، پس هر چه در زبان ساده توصیف کنید کار می‌کند — فراخوانی ابزار، فرمان شل، فرستادن پیام، خلاصه‌سازی فایل.</p>
+<h4>گام ۲: هوک را بسازید</h4>
+<pre dir="ltr"><code>~/.hermes/hooks/boot-md/
+├── HOOK.yaml
+└── handler.py</code></pre>
+<p><b>‏~/.hermes/hooks/boot-md/HOOK.yaml</b></p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>name: boot-md
+description: Run ~/.hermes/BOOT.md on gateway startup
+events:
+  - gateway:startup</code></pre>
+</div>
+<p><b>‏~/.hermes/hooks/boot-md/handler.py</b></p>
+<pre dir="ltr"><code>"""Run ~/.hermes/BOOT.md on every gateway startup."""
+
+import logging
+import threading
+from pathlib import Path
+
+logger = logging.getLogger("hooks.boot-md")
+
+BOOT_FILE = Path.home() / ".hermes" / "BOOT.md"
+
+
+def _build_prompt(content: str) -&gt; str:
+    return (
+        "You are running a startup boot checklist. Follow the instructions "
+        "below exactly.\n\n"
+        "---\n"
+        f"{content}\n"
+        "---\n\n"
+        "Execute each instruction. Put any user-facing summary in your "
+        "final response — the hook delivers it to the configured channel "
+        "(e.g. Discord or Slack); you do not send messages yourself.\n"
+        "If nothing needs attention and there is nothing to report, reply "
+        "with ONLY: [SILENT]"
+    )
+
+
+def _run_boot_agent(content: str) -&gt; None:
+    """Spawn a one-shot agent and execute the checklist.
+
+    Uses the gateway's resolved model and runtime credentials so this works
+    against custom endpoints, aggregators, and OAuth-based providers alike.
+    """
+    try:
+        from gateway.run import _resolve_gateway_model, _resolve_runtime_agent_kwargs
+        from run_agent import AIAgent
+
+        agent = AIAgent(
+            model=_resolve_gateway_model(),
+            **_resolve_runtime_agent_kwargs(),
+            platform="gateway",
+            quiet_mode=True,
+            skip_context_files=True,
+            skip_memory=True,
+            max_iterations=20,
+        )
+        result = agent.run_conversation(_build_prompt(content))
+        response = (result.get("final_response", "") or "").strip()
+        if response.upper() not in {"[SILENT]", "SILENT", "NO_REPLY", "NO REPLY"}:
+            logger.info("boot-md completed: %s", response[:200])
+        else:
+            logger.info("boot-md completed (nothing to report)")
+    except Exception as e:
+        logger.error("boot-md agent failed: %s", e)
+
+
+async def handle(event_type: str, context: dict) -&gt; None:
+    if not BOOT_FILE.exists():
+        return
+    content = BOOT_FILE.read_text(encoding="utf-8").strip()
+    if not content:
+        return
+
+    logger.info("Running BOOT.md (%d chars)", len(content))
+
+    # Background thread so gateway startup isn't blocked on a full agent turn.
+    thread = threading.Thread(
+        target=_run_boot_agent,
+        args=(content,),
+        name="boot-md",
+        daemon=True,
+    )
+    thread.start()</code></pre>
+<p>دو خط کلیدی:</p>
+<ul>
+  <li>‏<code>_resolve_gateway_model()</code> مدل فعلاً-پیکربندی‌شدهٔ گیت‌وی را می‌خواند.</li>
+  <li>‏<code>_resolve_runtime_agent_kwargs()</code> اعتبارنامه‌های ارائه‌دهنده را مثل یک نوبت عادی گیت‌وی حل می‌کند — شامل کلیدهای API، ‏base URL ها، ‏توکن‌های OAuth و استخرهای اعتبارنامه.</li>
+</ul>
+<p>بدون اینها یک AIAgent() ی لخت به پیش‌فرض‌های داخلی برمی‌گردد و با هر نقطهٔ پایانی غیر-پیش‌فرض ۴۰۱ می‌گیرد.</p>
+<h4>گام ۳: تستش کنید</h4>
+<p>گیت‌وی را ری‌استارت کنید:</p>
+<div class="codebox"><pre><code>hermes gateway restart</code></pre></div>
+<p>لاگ‌ها را زیر نظر بگیرید:</p>
+<div class="codebox"><pre><code>hermes logs --follow --level INFO | grep boot-md</code></pre></div>
+<p>باید «Running BOOT.md (N chars)» را ببینید و بعدش یا «boot-md completed: ...» ‏(خلاصهٔ کار ایجنت) یا وقتی ایجنت دقیقاً با یک توکن سکوت مثل [SILENT] جواب داده باشد «boot-md completed (nothing to report)».</p>
+<p>برای غیرفعال کردن چک‌لیست ‏<code>~/.hermes/BOOT.md</code> را حذف کنید — هوک لود شده می‌ماند ولی وقتی فایل نباشد بی‌صدا skip می‌کند.</p>
+<h4>گسترش الگو</h4>
+<ul>
+  <li><b>چک‌لیست‌های آگاه-از-زمان‌بندی:</b> داخل دستورالعمل‌های BOOT.md به ‏datetime.now().weekday() اشاره کنید («اگر دوشنبه است، لاگ deploy هفتگی را هم چک کن»). دستورالعمل‌ها متن آزادند پس هر چیزی که ایجنت بتواند درباره‌اش استدلال کند مجاز است.</li>
+  <li><b>چک‌لیست‌های متعدد:</b> هوک را به فایل دیگری ‏(STARTUP.md، ‏MORNING.md و…) اشاره دهید و دایرکتوری هوک جداگانه برای هرکدام ثبت کنید.</li>
+  <li><b>نسخهٔ غیر-ایجنتی:</b> اگر حلقهٔ کامل ایجنت نمی‌خواهید کلاً از AIAgent عبور کنید و هندلر مستقیماً با httpx نوتیفیکیشن ثابت پست کند. ارزان‌تر، سریع‌تر و بدون وابستگی به ارائه‌دهنده.</li>
+</ul>
+<h4>چرا داخلی نشده</h4>
+<p>نسخهٔ قبلی هرمس این را به‌عنوان هوک داخلی ارسال می‌کرد و در هر boot ی گیت‌وی بی‌سروصدا ایجنتی با پیش‌فرض‌های لخت spawn می‌کرد. کاربرانِ دارای نقطه‌پایانی سفارشی را غافلگیر می‌کرد و قابلیت برای کاربرانی که نمی‌دانستند در حال اجراست نامرئی بود. نگه داشتنش به‌عنوان یک الگوی مستند — ساخته‌شده توسط شما، در دایرکتوری هوک‌هایتان — یعنی دقیقاً می‌بینید چه می‌کند و با نوشتن فایل‌ها انتخابش می‌کنید.</p>
+<h3>نحوهٔ کار</h3>
+<ol>
+  <li>هنگام startup ی گیت‌وی، ‏HookRegistry.discover_and_load() مقدار ‏~/.hermes/hooks/ را اسکن می‌کند</li>
+  <li>هر زیردایرکتوری با HOOK.yaml + handler.py به‌صورت داینامیک بارگذاری می‌شود</li>
+  <li>هندلرها برای رویدادهای اعلام‌شده‌شان ثبت می‌شوند</li>
+  <li>در هر نقطهٔ چرخهٔ حیات، ‏hooks.emit() همهٔ هندلرهای منطبق را شلیک می‌کند</li>
+  <li>خطاهای هر هندلر گرفته و لاگ می‌شوند — هوک خراب هرگز ایجنت را کرش نمی‌کند</li>
+</ol>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>هوک‌های گیت‌وی فقط در <b>گیت‌وی</b> شلیک می‌شوند ‏(تلگرام، ‏دیسکورد، ‏اسلک، ‏واتساپ، ‏Teams). CLI هوک‌های گیت‌وی را load نمی‌کند. برای هوک‌هایی که همه‌جا کار کنند از <a href="#plugin-hooks">هوک‌های پلاگین</a> استفاده کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec" id="plugin-hooks">
+<h2><span class="secnum">۲</span> هوک‌های پلاگین</h2>
+<p><a href="plugins.html">پلاگین‌ها</a> می‌توانند هوک‌هایی ثبت کنند که در نشست‌های <b>هم CLI و هم گیت‌وی</b> شلیک می‌شوند. اینها به‌صورت برنامه‌نویسی‌شده از طریق ‏<code>ctx.register_hook()</code> در تابع register() ی پلاگین‌تان ثبت می‌شوند.</p>
+<p>برای جزئیات بسته‌بندی و ثبت پلاگین، راهنمای پلاگین‌ها را ببینید.</p>
+<pre dir="ltr"><code>def register(ctx):
+    ctx.register_hook("pre_tool_call", my_tool_observer)
+    ctx.register_hook("post_tool_call", my_tool_logger)
+    ctx.register_hook("pre_llm_call", my_memory_callback)
+    ctx.register_hook("post_llm_call", my_sync_callback)
+    ctx.register_hook("on_session_start", my_init_callback)
+    ctx.register_hook("on_session_end", my_cleanup_callback)
+    # Kanban board lifecycle (dependency-wait blocking may fire inside its transaction):
+    ctx.register_hook("kanban_task_claimed", my_claim_callback)     # dispatcher process
+    ctx.register_hook("kanban_task_completed", my_done_callback)    # worker process
+    ctx.register_hook("kanban_task_blocked", my_blocked_callback)   # worker process</code></pre>
+<p><b>قواعد عمومی همهٔ هوک‌ها:</b></p>
+<ul>
+  <li>callback ها <b>آرگومان‌های کلیدواژه‌ای</b> می‌گیرند. برای سازگاری رو-به-جلو همیشه ‏**kwargs را بپذیرید.</li>
+  <li>exception های callback لاگ و skip می‌شوند؛ callback های بعدی ادامه می‌یابند.</li>
+  <li>کاتالوگ پایین توصیفی است: <b>observer</b> ها مقدار بازگشتی را نادیده می‌گیرند، <b>transform</b> ها اولین جایگزینی رشته‌ای معتبر را می‌پذیرند و هوک‌های <b>directive/control</b> شکل‌های بازگشتی مستند را مصرف می‌کنند. middleware ی پلاگین یک registry و سطح جداست نه دستهٔ دیگری از هوک‌ها.</li>
+  <li>فیلدهای correlation مثل turn_id، ‏api_request_id، ‏task_id، ‏session_id و api_call_count مخصوص-هوک‌اند و ممکن است غایب باشند. با IDها به‌مثابهٔ opaque رفتار کنید.</li>
+  <li>اعتبار نام رویداد در runtime از ‏hermes_cli.plugins.VALID_HOOKS می‌آید. ‏hermes hooks list هوک‌های شل/خروجی پیکربندی‌شده را فهرست می‌کند نه هر رویداد موجود را؛ ‏hermes hooks test &lt;event&gt; فقط وقتی رویداد نامعتبری داده شود مجموعهٔ معتبر را گزارش می‌دهد.</li>
+</ul>
+<h3>بخش‌های پرامپت سیستمی امن-از-نظر-کش</h3>
+<p>پلاگین‌هایی که راهنمای پایدار و همیشه-روشن لازم دارند به‌جای تزریق همان متن از طریق pre_llm_call در هر نوبت، می‌توانند یک بخش پرامپت سیستمی محدود ثبت کنند:</p>
+<pre dir="ltr"><code>def board_rules(session_info):
+    return f"Apply the worker rules for profile {session_info['profile_name']}."
+
+def register(ctx):
+    ctx.register_system_prompt_section(
+        "kanban-advanced.worker-rules",
+        board_rules,                       # a string is also accepted
+        position="after_memory",
+        max_chars=4000,
+    )</code></pre>
+<p>قرارداد عمداً باریک است:</p>
+<ul>
+  <li>IDها سراسری، پایدار، شناسه‌های ۱ تا ۱۲۸ نویسه‌ایِ حروف-کوچک با تنها حروف، اعداد، .، _ و - هستند. ID های تکراری رد می‌شوند.</li>
+  <li>after_memory تنها لنگر جایگذاری است. بخش‌ها بر اساس ID مرتب، بعد از زمینهٔ memory/profile و قبل از متادیتای نشست رندر می‌شوند؛ پلاگین‌ها نمی‌توانند محتوای هستهٔ پرامپت را جابه‌جا یا جایگزین کنند.</li>
+  <li>یک callable نگاشت فقط-خواندنی با session_id، ‏model، ‏provider، ‏platform، ‏profile_name و cwd دریافت می‌کند. <b>برای نشست جدید فقط یک بار</b> اجرا می‌شود. بایت‌های رندرشده‌اش هنگام فشرده‌سازی منجمد و بعد از ری‌استارت/resume ی پروسه از پرامپت سیستمی کاملِ از-قبل-ماندگار‌شده بازیابی می‌شود؛ وضعیت پلاگین برای نشست موجود دوباره خوانده نمی‌شود.</li>
+  <li>‏max_chars روی ‎۴٬۰۰۰‎ نویسه سقف می‌خورد. همهٔ بخش‌های پلاگین با هم — شامل سرصفحه‌های ممیزی‌شان — روی ‎۸٬۰۰۰‎ نویسه و ۳۲ بخش سقف دارند. بخش‌های خالی، غیر-رشته‌ای، بیش‌ازحد بزرگ، فراتر-از-بودجه-تجمعی یا خطادهنده با هشدار skip و ساخت پرامپت ادامه می‌یابد.</li>
+  <li>هر بخش پذیرفته‌شده در پرامپت نام‌گذاری و در شروع نشست با پلاگین، موقعیت و تعداد نویسه‌اش لاگ می‌شود.</li>
+</ul>
+<p>برای زمینهٔ واقعاً داینامیک per-turn از pre_llm_call استفاده کنید. عمداً هیچ هوک environment-hints ی پلاگین در این قرارداد نیست: تغییر cwd، ‏branch یا سایر داده‌های محیط نباید پرامپت کش‌شدهٔ نشست را بی‌سروصدا جهش دهد. چنین هوکی پیش از افزودن به مصرف‌کنندهٔ مشخص و همان معناشناسی frozen/resume-safe نیاز دارد.</p>
+<h3>کاتالوگ هوک‌های پلاگینی ارسال‌شده</h3>
+<p>فیلدهای payload زیر دقیقاً همان فیلدهای مخصوص-رویدادی هستند که هر محل فراخوانی تأمین می‌کند. برای سازگاری رو-به-عقب PluginManager همچنین ‏telemetry_schema_version="hermes.observer.v1" را به هر callback ی هوک پلاگین اضافه می‌کند. آن نشانگر envelope ی قدیمی به این معنا نیست که همهٔ payload های هوک یک schema ی معنایی مشترک دارند؛ قراردادهای نسخه‌دار جدید متعلق به رویداد یا خانوادهٔ قابلیت مشخص خودشان‌اند.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>هوک</th><th>دسته</th><th>زمان‌بندی دقیق و رفتار بازگشت</th><th>فیلدهای صریح payload</th><th>حریم خصوصی / حساسیت</th></tr></thead>
+<tbody>
+<tr><td><a href="#pre_tool_call"><code>pre_tool_call</code></a></td><td>Directive/control</td><td>یک بار قبل از اجرا؛ اولین directive ی معتبر block یا approve برنده است و بازگشت‌های modify به آرگومان‌های ابزار shallow-merge می‌شوند.</td><td>‏tool_name، args، task_id، session_id، tool_call_id، turn_id، api_request_id، middleware_trace</td><td>آرگومان‌های خام ممکن است محتوای کاربر، مسیرها، فرمان‌ها یا secrets داشته باشند.</td></tr>
+<tr><td><code>post_tool_call</code></td><td>Observer</td><td>بعد از نتیجهٔ بلاک‌شده، خطا یا موفق؛ بازگشت نادیده گرفته می‌شود.</td><td>‏tool_name، args، result، task_id، session_id، tool_call_id، turn_id، api_request_id، duration_ms، status، error_type، error_message، middleware_trace</td><td>متن نتیجه/خطا ممکن است محتوای دلخواه ابزار یا کاربر و secrets داشته باشد.</td></tr>
+<tr><td><code>transform_tool_result</code></td><td>Transform</td><td>بعد از post_tool_call، قبل از الحاق به گفتگو؛ اولین رشته نتیجه را جایگزین می‌کند.</td><td>‏tool_name، args، result، task_id، session_id، tool_call_id، turn_id، api_request_id، duration_ms، status، error_type، error_message</td><td>نتیجه و آرگومان‌های کامل مقید-به-مدل را افشا می‌کند.</td></tr>
+<tr><td><code>transform_terminal_output</code></td><td>Transform</td><td>بعد از capture ی محدود پروسهٔ foreground، قبل از محدودسازی نهایی خروجی؛ اولین رشته خروجی را جایگزین می‌کند.</td><td>‏command، output، returncode، task_id، env_type</td><td>فرمان/خروجی ممکن است اعتبارنامه داشته باشند.</td></tr>
+<tr><td><code>pre_transcription</code></td><td>Transform</td><td>توسط dispatcher ی STT بعد از حل ارائه‌دهنده و قبل از invoke شدن هر بک‌اند ‏(داخلی، نوع-فرمان یا ثبت‌شده توسط پلاگین) شلیک می‌شود؛ نتایج dict به ترتیب ثبت اعمال می‌شوند، آخرین-نویسنده-برنده-per-field ‏(prompt، language، model؛ file_path فقط-خواندنی است).</td><td>‏file_path، provider، model، language، prompt، source</td><td>پرامپت نهایی همراه صدا به ارائه‌دهندهٔ STT آپلود می‌شود — secrets را خارج از بازگشت‌های هوک نگه دارید.</td></tr>
+<tr><td><code>pre_llm_call</code></td><td>Directive/control</td><td>یک بار در هر نوبت قبل از حلقه؛ همهٔ بازگشت‌های معتبر رشته/{context} جمع و داخل پیام کاربر تزریق می‌شوند.</td><td>‏session_id، task_id، turn_id، user_message، conversation_history، is_first_turn، model، platform، parent_session_id، sender_id</td><td>پیام کامل کاربر و تاریخچهٔ گفتگو.</td></tr>
+<tr><td><code>post_llm_call</code></td><td>Observer</td><td>نهایی شدن نوبت موفق و غیرقطع‌شده؛ بازگشت نادیده.</td><td>‏session_id، task_id، turn_id، user_message، assistant_response، conversation_history، model، platform</td><td>پرامپت، پاسخ و تاریخچهٔ کامل.</td></tr>
+<tr><td><code>transform_llm_output</code></td><td>Transform</td><td>قبل از post_llm_call و تحویل نهایی؛ اولین رشتهٔ غیرخالی پاسخ را جایگزین می‌کند.</td><td>‏response_text، session_id، model، platform</td><td>متن نهایی کامل دستیار.</td></tr>
+<tr><td><code>pre_verify</code></td><td>Directive/control</td><td>در گیت verify ی کد-ویرایش‌شدهٔ محدود؛ اولین directive ی معتبر continue/block-stop نوبت را ادامه می‌دهد.</td><td>‏session_id، platform، model، coding، attempt، final_response، changed_paths</td><td>پاسخ draft و مسیرهای تغییریافته.</td></tr>
+<tr><td><code>pre_api_request</code></td><td>Observer</td><td>به‌ازای هر تلاش ارائه‌دهنده، بلافاصله قبل از درخواست؛ بازگشت نادیده.</td><td>‏task_id، turn_id، api_request_id، session_id، user_message، conversation_history، platform، model، provider، base_url، api_mode، api_call_count، retry_count، request_messages، message_count، tool_count، approx_input_tokens، request_char_count، max_tokens، started_at، middleware_trace، request</td><td>حساسیت بالا: user_message و conversation_history و request_messages ی قدیمی عمداً خام‌اند؛ request ی پاک‌سازی‌شده را ترجیح دهید.</td></tr>
+<tr><td><code>post_api_request</code></td><td>Observer</td><td>بعد از موفقیت نرمال‌شدهٔ ارائه‌دهنده؛ بازگشت نادیده.</td><td>‏task_id، turn_id، api_request_id، session_id، platform، model، provider، base_url، api_mode، api_call_count، api_duration، started_at، ended_at، finish_reason، message_count، response_model، response، usage، assistant_message، assistant_content_chars، assistant_tool_call_count</td><td>response ی پاک‌سازی‌شده موجوده ولی assistant_message ی خامِ نرمال‌شده ممکن است محتوای مدل/کاربر داشته باشد؛ usage دادهٔ حسابداری است.</td></tr>
+<tr><td><code>api_request_error</code></td><td>Observer</td><td>برای هر تلاش ناموفق ارائه‌دهنده؛ بازگشت نادیده.</td><td>‏task_id، turn_id، api_request_id، session_id، platform، model، provider، base_url، api_mode، api_call_count، api_duration، started_at، ended_at، status_code، retry_count، max_retries، retryable، reason، error، request</td><td>متن خطا ممکن است دادهٔ ارائه‌دهنده/کاربر داشته باشد؛ request قرار است پاک‌سازی‌شده باشد.</td></tr>
+<tr><td><code>on_stream_start</code></td><td>Observer</td><td>وقتی پاسخ LLM ی استریمی شروع شود dispatch می‌شود؛ بیرون مسیر توکن از طریق صف محدود متعلق-به-میزبان با یک worker per-callback تحویل می‌یابد؛ بازگشت نادیده.</td><td>‏turn_id، iteration، session_id، model، provider، surface</td><td>فقط شناسه‌ها و متادیتای مسیریابی.</td></tr>
+<tr><td><code>on_stream_delta</code></td><td>Observer</td><td>per-delta ی متن استریم نرمال‌شده از طریق صف محدود observer dispatch می‌شود؛ callback ی معلق فقط قدیمی‌ترین رویدادهای خودش را drop می‌کند؛ بازگشت نادیده.</td><td>‏delta، kind ‏(text یا reasoning)، turn_id، iteration، session_id، model، provider، surface</td><td>متن delta خروجی خام مدل است؛ delta های reasoning نیازمند opt-in ی plugins.stream_reasoning_deltas است.</td></tr>
+<tr><td><code>on_stream_end</code></td><td>Observer</td><td>وقتی پاسخ استریمی تمام یا خطا دهد بعد از بسته شدن stream dispatch می‌شود؛ بازگشت نادیده.</td><td>‏final_text، finished، error، turn_id، iteration، session_id، model، provider، surface</td><td>متن پاسخ اسمبل‌شدهٔ کامل؛ متن خطا ممکن است دادهٔ ارائه‌دهنده داشته باشد.</td></tr>
+<tr><td><code>on_interim_message</code></td><td>Observer</td><td>وقتی پیام میان-حلقهٔ دستیار قبل از پاسخ نهایی surface شود ‏(استریم یا غیراستریم)؛ بازگشت نادیده.</td><td>‏text، already_streamed، turn_id، iteration، session_id، model، provider، surface</td><td>متن میان‌راهی کامل دستیار.</td></tr>
+<tr><td><code>transform_api_error_classification</code></td><td>Transform</td><td>در هر تلاش ناموفق ارائه‌دهنده، بالای classifier ی داخلی؛ همهٔ callback ها اجرا و سپس اولین dict دارای reason ی معتبر برنده است ‏(اجرا-ی-همه-سپس-انتخاب-اولین) و نتایج معتبرِ بازنده هشدار runtime لاگ می‌کنند. فقط پلاگین‌های پایتونی.</td><td>‏provider، model، status_code، error_type، error_code， error_message، error_body، error، approx_tokens، context_length، num_messages</td><td>error_message و error_body ممکن است دادهٔ خام ارائه‌دهنده/کاربر داشته باشند.</td></tr>
+<tr><td><code>on_session_start</code></td><td>Observer</td><td>اولین نوبت یک نشست جدید؛ بازگشت نادیده.</td><td>‏session_id، model، platform</td><td>فقط شناسه‌ها و متادیتای مسیریابی.</td></tr>
+<tr><td><code>on_session_end</code></td><td>Observer</td><td>به‌طور مرجع در نهایی شدن هر نوبت؛ خروج‌های CLI/TUI شکل‌های قدیمی کاهش‌یافتهٔ اضافه دارند. بازگشت نادیده.</td><td>مرجع: session_id، task_id، turn_id، completed، failed، interrupted، turn_exit_reason، model، platform؛ مسیرهای exit ممکن است reason/api_request_id اضافه و فیلدهایی حذف کنند.</td><td>IDها، مدل/پلتفرم و نتیجه؛ payload ی مرجع بدنهٔ پیام ندارد.</td></tr>
+<tr><td><code>on_session_finalize</code></td><td>Observer</td><td>teardown ی CLI/TUI/گیت‌وی از طریق finalize_session؛ shutdown یا انقضای گیت‌وی ممکن است بدون reset نهایی کند. بازگشت نادیده.</td><td>وابسته-به-سطح: session_id، platform، اختیاری reason، old_session_id، new_session_id</td><td>شناسه‌های نشست و مسیریابی.</td></tr>
+<tr><td><code>on_session_reset</code></td><td>Observer</td><td>مرز نشست CLI/TUI و گیت‌وی بعد از وجود نشست جایگزین؛ بازگشت نادیده.</td><td>CLI: session_id، platform، reason؛ TUI: session_id، platform؛ گیت‌وی: آن‌ها به‌علاوهٔ reason، old_session_id، new_session_id</td><td>شناسه‌های نشست و مسیریابی.</td></tr>
+<tr><td><code>on_skill_lifecycle</code></td><td>Observer</td><td>بعد از تغییر وضعیت رسمی مصرف مهارت؛ بازگشت نادیده.</td><td>‏action، skill_name، provenance، task_id، session_id، use_count، reused، reuse_after_patch</td><td>نام محلی مهارت و provenance را افشا می‌کند.</td></tr>
+<tr><td><code>subagent_start</code></td><td>Observer</td><td>فرزند ساخته شده و در آستانهٔ اجراست؛ بازگشت نادیده.</td><td>‏parent_session_id، parent_turn_id، parent_subagent_id، child_session_id، child_subagent_id، child_role، child_goal</td><td>هدف فرزند ممکن است محتوای کاربر/پروژه داشته باشد.</td></tr>
+<tr><td><code>subagent_stop</code></td><td>Observer</td><td>خروج فرزند؛ بازگشت نادیده.</td><td>‏parent_session_id، parent_turn_id، child_session_id، child_role، child_summary، child_status، tool_call_history، duration_ms</td><td>خلاصه و متادیتای redact‌شدهٔ تاریخچهٔ ابزار ممکن است ساختار پروژه را لو دهند.</td></tr>
+<tr><td><code>pre_gateway_dispatch</code></td><td>Directive/control</td><td>پیام ورودی غیر-داخلی قبل از auth/pairing/dispatch؛ اولین skip/rewrite/allow ی معتبر جریان را کنترل می‌کند.</td><td>‏event، gateway، session_store</td><td>آبجکت‌های درون-پروسه‌ای فوق‌العاده ممتاز داده‌های ورودی کاربر/مسیریابی و handle های host را expose می‌کنند.</td></tr>
+<tr><td><code>gateway_platform_event</code></td><td>Observer</td><td>بعد از موفقیت احراز مخصوص-پروفایل گیت‌وی، وقتی رویداد بومی-پلتفرمی پشتیبانی‌شده در مرز گیت‌وی نرمال شود ‏(تلگرام: ری‌اکشن‌ها، ویرایش پیام؛ دیسکورد: ویرایش/حذف پیام، ساخته/تغییرنام thread)؛ بازگشت نادیده.</td><td>‏platform، event_type، payload ‏(dict ی مخصوص-نوع-رویداد — قراردادهای هر رویداد پایین)</td><td>فقط envelope ی dict سادهٔ نرمال‌شده؛ آبجکت‌های خام SDK، handle های adapter و کلاینت‌های بات هرگز expose نمی‌شوند.</td></tr>
+<tr><td><code>pre_command</code></td><td>Observer</td><td>دستور اسلش شناسایی‌شده در آستانهٔ dispatch، قبل از اجرای هندلر، در cold-path ی CLI و گیت‌وی؛ در v1 بازگشت نادیده است ‏(dict های directive-گونه در debug لاگ می‌شوند). فرمان‌های intercept ی ایجنت-درحال‌اجرا ی گیت‌وی ‏(/stop، /approve حین run فعال) عمداً مستثنی‌اند — دریچه‌های فرار control-plane باید بیرون دسترس پلاگین بمانند.</td><td>surface ‏(cli | gateway)، command ‏(نام مرجع)، alias_used، args_raw، session_key، platform</td><td>args_raw ممکن است محتوای کاربر یا secrets تایپ‌شده بعد از فرمان داشته باشد.</td></tr>
+<tr><td><code>pre_approval_request</code></td><td>Observer</td><td>قبل از درخواست تأیید prompted یا smart؛ بازگشت نادیده.</td><td>‏command، description، pattern_key، pattern_keys، session_key، surface، turn_id، tool_call_id</td><td>فرمان ممکن است secrets داشته باشد؛ آماده‌سازی observer ی smart force-redact می‌کند ولی همهٔ سطوح redaction یکسان ندارند.</td></tr>
+<tr><td><code>post_approval_response</code></td><td>Observer</td><td>بعد از تصمیم، timeout یا شکست نوتیفیکیشن گیت‌وی؛ بازگشت نادیده.</td><td>‏command، description، pattern_key، pattern_keys، session_key، surface، turn_id، tool_call_id، choice؛ مسیر smart ممکن است decided_by اضافه کند</td><td>همان حساسیت فرمان به‌علاوهٔ متادیتای تصمیم.</td></tr>
+<tr><td><code>kanban_task_claimed</code></td><td>Observer</td><td>بعد از commit ی claim در پروسهٔ dispatcher قبل از spawn ی worker؛ بازگشت نادیده.</td><td>‏task_id، profile_name، board، assignee، run_id</td><td>شناسه‌های برد/تسک/پروفایل/assignee.</td></tr>
+<tr><td><code>kanban_task_completed</code></td><td>Observer</td><td>بعد از تکمیل و cleanup معمولاً در پروسهٔ worker؛ بازگشت نادیده.</td><td>‏task_id، profile_name، board، assignee، run_id، summary</td><td>خلاصه ممکن است محتوای پروژه/کاربر داشته باشد.</td></tr>
+<tr><td><code>kanban_task_blocked</code></td><td>Observer</td><td>بعد از گذار بلاک‌شده؛ مسیر انتظار-وابستگی قبل از خروج تراکنشش شلیک می‌کند. بازگشت نادیده.</td><td>‏task_id، profile_name، board، assignee، run_id، reason</td><td>reason ممکن است محتوای پروژه/کاربر داشته باشد.</td></tr>
+<tr><td><code>on_kanban_worker_spawned</code></td><td>Observer</td><td>بعد از برگشتن spawn_fn و ماندگار شدن PID ی worker؛ داخل lock ی dispatch اجرا می‌شود، callback ها سریع باشند. بازگشت نادیده.</td><td>‏task_id، profile_name، board، assignee، run_id، worker_pid، workspace_path</td><td>workspace_path مسیر فایل‌سیستم است و ممکن است چیدمان پروژه یا نام کاربری را لو دهد.</td></tr>
+<tr><td><code>on_kanban_worker_exited</code></td><td>Observer</td><td>مشتق-از-tick: بعد از اینکه detect_crashed_workers تسک dead-PID را پس بگیرد و reclaim کامیت شود. بازگشت نادیده.</td><td>‏task_id، profile_name، board، assignee، run_id، worker_pid، exit_kind، exit_code، outcome، retry_status</td><td>فقط شناسه‌ها و متادیتای خروج.</td></tr>
+<tr><td><code>on_kanban_worker_stale_claim</code></td><td>Observer</td><td>بعد از reclaim ی claim ی منقضی-TTL؛ extension های live-PID شلیک نمی‌کنند. بازگشت نادیده.</td><td>‏task_id، profile_name، board، assignee، run_id، worker_pid، heartbeat_stale، retry_status</td><td>فقط شناسه‌ها و متادیتای claim.</td></tr>
+<tr><td><code>on_kanban_task_updated</code></td><td>Observer</td><td>بعد از نوشتن کامیت‌شدهٔ فیلد-تسک بیرون از چرخهٔ claim/complete/block ‏(assign، override ها، editorهای داشبورد). بازگشت نادیده.</td><td>‏task_id، profile_name، board، assignee، run_id، changed_fields</td><td>changed_fields فقط نام فیلدها را حمل می‌کند هرگز مقادیرشان را نه؛ مقادیر title/body نام‌برده در DB برد ممکن است محتوای کاربر/پروژه داشته باشند.</td></tr>
+<tr><td><code>on_kanban_dispatch_tick</code></td><td>Observer</td><td>یک بار به‌ازای هر tick ی dispatcher، اکیداً بعد از آزاد شدن lock ی dispatch؛ tick های idle و رقابت‌دار هم شلیک می‌کنند. بازگشت نادیده.</td><td>‏board، profile_name، dry_run، outcome، result</td><td>result همان DispatchResult ی tick است و id های تسک، assignee ها و مسیرهای workspace را حمل می‌کند.</td></tr>
+</tbody>
+</table>
+</div>
+<h3>هوک‌های خروجی استریم</h3>
+<p>این هوک‌های فقط-observer به پلاگین‌ها اجازه می‌دهد خروجی استریمی LLM را برای تلمتری، داشبوردهای زنده یا خط‌لوله‌های TTS مصرف کنند بدون تغییر دادن پاسخ. از طریق صف‌های محدود متعلق-به-میزبان با یک worker پس‌زمینه per-callback تحویل می‌یابند، پس callback های پلاگین هرگز inline روی مسیر توکن اجرا نمی‌شوند. اگر یک callback معلق شود فقط صف همان callback می‌تواند پر شده و قدیمی‌ترین رویداد observer ی در انتظارش را drop کند؛ سایر observer ها مستقل رویدادها را دریافت می‌کنند.</p>
+<p>مثل هر هوک پلاگین دیگری ثبت‌شان کنید:</p>
+<pre dir="ltr"><code>def on_delta(delta, kind, model, provider, **kwargs):
+    if kind == "text":
+        print(delta, end="", flush=True)
+
+def register(ctx):
+    ctx.register_hook("on_stream_delta", on_delta)</code></pre>
+<p>فیلدهای مشترک هر چهار هوک:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>turn_id</code></td><td><code>str</code></td><td>شناسهٔ opaque نوبت، وقتی موجود باشد</td></tr>
+<tr><td><code>iteration</code></td><td><code>int</code></td><td>تکرار فعلی حلقهٔ API-call/ابزار</td></tr>
+<tr><td><code>session_id</code></td><td><code>str</code></td><td>شناسهٔ نشست فعلی هرمس</td></tr>
+<tr><td><code>model</code></td><td><code>str</code></td><td>شناسهٔ مدل فعال</td></tr>
+<tr><td><code>provider</code></td><td><code>str</code></td><td>نام ارائه‌دهندهٔ فعال</td></tr>
+<tr><td><code>surface</code></td><td><code>str</code></td><td>سطح فراخواننده مثل cli، discord، telegram</td></tr>
+</tbody>
+</table>
+</div>
+<p>فیلدهای اضافی:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>هوک</th><th>فیلدهای اضافی</th></tr></thead>
+<tbody>
+<tr><td><code>on_stream_start</code></td><td>هیچ</td></tr>
+<tr><td><code>on_stream_delta</code></td><td>‏<code>delta: str</code>، ‏<code>kind: "text" | "reasoning"</code></td></tr>
+<tr><td><code>on_stream_end</code></td><td>‏<code>final_text: str</code>، ‏<code>finished: bool</code>، ‏<code>error: str | None</code></td></tr>
+<tr><td><code>on_interim_message</code></td><td>‏<code>text: str</code>، ‏<code>already_streamed: bool</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>‏on_interim_message می‌تواند بعد از پاسخ غیر-استریمی هم شلیک کند، پس ثبت کردن فقط همین هوک Provider را مجبور به transport ی استریم نمی‌کند.</p>
+<p>delta های reasoning به‌طور پیش‌فرض به پلاگین‌ها داده نمی‌شوند. صریحاً شرکت کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>plugins:
+  stream_reasoning_deltas: true</code></pre>
+</div>
+<p>مقادیر بازگشتی نادیده گرفته می‌شوند. برای سریع ماندن stream، callback ها کارشان را در صف خودشان بگذارند و سریع برگردند. exception ها لاg و stream را متوقف نمی‌کنند.</p>
+</section>
+
+<section class="doc-sec" id="pre_tool_call">
+<h2><span class="secnum">۳</span> ‏<code>pre_tool_call</code></h2>
+<p><b>بلافاصله قبل از</b> هر اجرای ابزار شلیک می‌شود — هم ابزارهای داخلی هم پلاگینی.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(tool_name: str, args: dict, task_id: str, **kwargs):</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>tool_name</code></td><td><code>str</code></td><td>نام ابزاری که در آستانهٔ اجراست ‏(مثل terminal، web_search، read_file)</td></tr>
+<tr><td><code>args</code></td><td><code>dict</code></td><td>آرگومان‌هایی که مدل به ابزار پاس داده</td></tr>
+<tr><td><code>task_id</code></td><td><code>str</code></td><td>شناسهٔ نشست/تسک. رشتهٔ خالی اگر ست نباشد.</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>شلیک:</b> در model_tools.py داخل handle_function_call() قبل از اجرای هندلر ابزار. یک بار per-call ی ابزار — اگر مدل ۳ ابزار را موازی صدا بزند این ۳ بار شلیک می‌شود.</p>
+<p><b>مقدار بازگشتی — بلاک یا الزام تأیید:</b></p>
+<pre dir="ltr"><code>return {"action": "block", "message": "Reason the tool call was blocked"}
+# or
+return {"action": "approve", "message": "Why approval is required", "rule_key": "optional:scope"}</code></pre>
+<p>اولین directive ی معتبر برنده است ‏(پلاگین‌های پایتونی اول ثبت‌شده، بعد هوک‌های شل). block یک message ی غیرخالی لازم دارد و ابزار را short-circuit می‌کند با همان متن به‌عنوان خطای برگردانده-به-مدل. approve فراخوانی را به گیت تأیید انسانی موجود ارتقا می‌دهد؛ message و rule_key اختیاری‌اند و رد شدن، timeout یا خطای گیت fail closed می‌شود. سایر مقادیر بازگشتی نادیده گرفته می‌شوند، پس callback های فعلیِ فقط-observer بدون تغییر کار می‌کنند.</p>
+<p><b>مقدار بازگشتی — بازنویسی آرگومان‌های ابزار:</b></p>
+<pre dir="ltr"><code>return {"action": "modify", "args": {"new_string": "fixed content"}}</code></pre>
+<p>dict ی args برگشتی قبل از اجرای ابزار روی آرگومان‌های اصلی shallow-merge می‌شود. چند هوک modify تجمعی عمل می‌کنند — کلیدهای هر هوک در یک dict ی تجمعی ساخته‌شده از args ی اصلی ادغام می‌شوند، پس هوک A که path را عوض کند و هوک B که content را عوض کند هر دو دوام می‌آورند. اگر دو هوک همان کلید را عوض کنند هوکِ بعدی برنده است.</p>
+<p>هوک‌های شل فرمت سازگار-با-Claude-Code را هم می‌پذیرند:</p>
+<pre dir="ltr"><code>{"decision": "modify", "tool_input": {"new_string": "fixed content"}}</code></pre>
+<p>هر دو فرمت داخلیاً به ‏{"action": "modify", "args": {...}} نرمال می‌شوند.</p>
+<p><b>موارد استفاده:</b> لاگ‌گیری، ردپای ممیزی، شمارنده‌های فراخوانی ابزار، بلاک کردن عملیات خطرناک، rate limiting، اعمال سیاست per-user، پاک‌سازی آرگومان، بازنویسی مسیر، تزریق پارامترهای پیش‌فرض.</p>
+<p><b>مثال — لاگ ممیزی فراخوانی ابزار:</b></p>
+<pre dir="ltr"><code>import json, logging
+from datetime import datetime
+
+logger = logging.getLogger(__name__)
+
+def audit_tool_call(tool_name, args, task_id, **kwargs):
+    logger.info("TOOL_CALL session=%s tool=%s args=%s",
+                task_id, tool_name, json.dumps(args)[:200])
+
+def register(ctx):
+    ctx.register_hook("pre_tool_call", audit_tool_call)</code></pre>
+<p><b>مثال — هشدار روی ابزارهای خطرناک:</b></p>
+<pre dir="ltr"><code>DANGEROUS = {"terminal", "write_file", "patch"}
+
+def warn_dangerous(tool_name, **kwargs):
+    if tool_name in DANGEROUS:
+        print(f"⚠ Executing potentially dangerous tool: {tool_name}")
+
+def register(ctx):
+    ctx.register_hook("pre_tool_call", warn_dangerous)</code></pre>
+<h3 id="post_tool_call">‏<code>post_tool_call</code></h3>
+<p><b>بلافاصله بعد از</b> برگرداندن نتیجهٔ هر اجرای ابزار شلیک می‌شود.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(tool_name: str, args: dict, result: str, task_id: str,
+                duration_ms: int, **kwargs):</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>tool_name</code></td><td><code>str</code></td><td>نام ابزاری که همین الان اجرا شد</td></tr>
+<tr><td><code>args</code></td><td><code>dict</code></td><td>آرگومان‌هایی که مدل به ابزار پاس داد</td></tr>
+<tr><td><code>result</code></td><td><code>str</code></td><td>مقدار بازگشتی ابزار ‏(همیشه یک رشتهٔ JSON)</td></tr>
+<tr><td><code>task_id</code></td><td><code>str</code></td><td>شناسهٔ نشست/تسک. خالی اگر ست نباشد.</td></tr>
+<tr><td><code>duration_ms</code></td><td><code>int</code></td><td>مدت dispatch ی ابزار به میلی‌ثانیه ‏(با time.monotonic() دور registry.dispatch()) اندازه‌گیری می‌شود.</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>شلیک:</b> در model_tools.py داخل handle_function_call() بعد از برگشتن هندلر ابزار. یک بار per-call ی ابزار. وقتی ابزار exception ی هندل‌نشده بدهد <b>شلیک نمی‌کند</b> ‏(خطا گرفته و به‌عنوان رشتهٔ JSON ی خطا برمی‌گردد و post_tool_call با آن رشتهٔ خطا به‌عنوان result شلیک می‌کند).</p>
+<p><b>مقدار بازگشتی:</b> نادیده گرفته می‌شود.</p>
+<p><b>موارد استفاده:</b> لاگ نتایج ابزار، جمع‌آوری متریک، ردیابی نرخ موفقیت/شکست ابزارها، داشبوردهای latency، هشدار بودجه per-tool، ارسال نوتیفیکیشن وقتی ابزارهای مشخص تمام شوند.</p>
+<p><b>مثال — ردیابی متریک مصرف ابزار:</b></p>
+<pre dir="ltr"><code>from collections import Counter, defaultdict
+import json
+
+_tool_counts = Counter()
+_error_counts = Counter()
+_latency_ms = defaultdict(list)
+
+def track_metrics(tool_name, result, duration_ms=0, **kwargs):
+    _tool_counts[tool_name] += 1
+    _latency_ms[tool_name].append(duration_ms)
+    try:
+        parsed = json.loads(result)
+        if "error" in parsed:
+            _error_counts[tool_name] += 1
+    except (json.JSONDecodeError, TypeError):
+        pass
+
+def register(ctx):
+    ctx.register_hook("post_tool_call", track_metrics)</code></pre>
+<h3 id="pre_llm_call">‏<code>pre_llm_call</code></h3>
+<p><b>یک بار در هر نوبت</b> قبل از شروع حلقهٔ فراخوانی ابزار شلیک می‌شود. همهٔ بازگشت‌های معتبر callback ها به ترتیب پلاگین جمع و داخل پیام کاربر نوبت فعلی تزریق می‌شوند.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(session_id: str, user_message: str, conversation_history: list,
+                is_first_turn: bool, model: str, platform: str, **kwargs):</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>session_id</code></td><td><code>str</code></td><td>شناسهٔ یکتای نشست فعلی</td></tr>
+<tr><td><code>user_message</code></td><td><code>str</code></td><td>پیام اصلی کاربر برای این نوبت ‏(قبل از هر تزریق مهارت)</td></tr>
+<tr><td><code>conversation_history</code></td><td><code>list</code></td><td>کپی کامل فهرست پیام‌ها ‏(فرمت OpenAI: [{"role": "user", "content": "..."}])</td></tr>
+<tr><td><code>is_first_turn</code></td><td><code>bool</code></td><td>True اگر اولین نوبت نشست جدید باشد، False در نوبت‌های بعدی</td></tr>
+<tr><td><code>model</code></td><td><code>str</code></td><td>شناسهٔ مدل ‏(مثل anthropic/claude-sonnet-4.6)</td></tr>
+<tr><td><code>platform</code></td><td><code>str</code></td><td>محل اجرای نشست: cli، telegram، discord و…</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>شلیک:</b> در run_agent.py داخل run_conversation() بعد از فشرده‌سازی زمینه ولی قبل از حلقهٔ while ی اصلی. یک بار per-call ی run_conversation() ‏(یعنی یک بار per-turn ی کاربر) نه یک بار per-API-call داخل حلقهٔ ابزار.</p>
+<p><b>مقدار بازگشتی:</b> اگر callback dict ای با کلید context یا یک رشتهٔ سادهٔ غیرخالی برگرداند، متن به پیام کاربر نوبت فعلی الحاق می‌شود. برای بدون-تزریق None برگردانید.</p>
+<pre dir="ltr"><code># Inject context
+return {"context": "Recalled memories:\n- User likes Python\n- Working on hermes-agent"}
+
+# Plain string (equivalent)
+return "Recalled memories:\n- User likes Python"
+
+# No injection
+return None</code></pre>
+<p><b>محل تزریق زمینه:</b> همیشه <b>پیام کاربر</b> است هرگز پرامپت سیستمی. این کش پرامپت را حفظ می‌کند — پرامپت سیستمی بین نوبت‌ها یکسان می‌ماند پس توکن‌های کش‌شده دوباره استفاده می‌شوند. پرامپت سیستمی قلمرو هرمس است ‏(راهنمای مدل، اجبار ابزار، شخصیت، مهارت‌ها). پلاگین‌ها زمینه را کنار ورودی کاربر اضافه می‌کنند.</p>
+<p>content ی تمیز پیام کاربر بدون تغییر می‌ماند. برای replay و پایداری کش پرامپت، هرمس ممکن است پیام دقیق مقید-به-API — شامل زمینهٔ تزریق‌شده توسط پلاگین — را در sidecar ی api_content ی سطر ماندگار کند.</p>
+<p>وقتی <b>چند پلاگین</b> زمینه برمی‌گردانند خروجی‌هایشان با دو newline به ترتیب کشف پلاگین ‏(الفبایی بر اساس نام دایرکتوری) join می‌شوند.</p>
+<p><b>موارد استفاده:</b> recall حافظه، تزریق زمینهٔ RAG، گاردها، تحلیل‌های per-turn.</p>
+<p><b>مثال — recall حافظه:</b></p>
+<pre dir="ltr"><code>import httpx
+
+MEMORY_API = "https://your-memory-api.example.com"
+
+def recall(session_id, user_message, is_first_turn, **kwargs):
+    try:
+        resp = httpx.post(f"{MEMORY_API}/recall", json={
+            "session_id": session_id,
+            "query": user_message,
+        }, timeout=3)
+        memories = resp.json().get("results", [])
+        if not memories:
+            return None
+        text = "Recalled context:\n" + "\n".join(f"- {m['text']}" for m in memories)
+        return {"context": text}
+    except Exception:
+        return None
+
+def register(ctx):
+    ctx.register_hook("pre_llm_call", recall)</code></pre>
+<p><b>مثال — گاردها:</b></p>
+<pre dir="ltr"><code>POLICY = "Never execute commands that delete files without explicit user confirmation."
+
+def guardrails(**kwargs):
+    return {"context": POLICY}
+
+def register(ctx):
+    ctx.register_hook("pre_llm_call", guardrails)</code></pre>
+<h3 id="post_llm_call">‏<code>post_llm_call</code></h3>
+<p><b>یک بار در هر نوبت</b> بعد از تکمیل حلقهٔ فراخوانی ابزار و تولید پاسخ نهایی توسط ایجنت شلیک می‌شود. فقط روی نوبت‌های <b>موفق</b> شلیک می‌شود — اگر نوبت قطع شده باشد شلیک نمی‌کند.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(session_id: str, user_message: str, assistant_response: str,
+                conversation_history: list, model: str, platform: str, **kwargs):</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>session_id</code></td><td><code>str</code></td><td>شناسهٔ یکتای نشست فعلی</td></tr>
+<tr><td><code>user_message</code></td><td><code>str</code></td><td>پیام اصلی کاربر برای این نوبت</td></tr>
+<tr><td><code>assistant_response</code></td><td><code>str</code></td><td>پاسخ متنی نهایی ایجنت برای این نوبت</td></tr>
+<tr><td><code>conversation_history</code></td><td><code>list</code></td><td>کپی کامل فهرست پیام‌ها بعد از تکمیل نوبت</td></tr>
+<tr><td><code>model</code></td><td><code>str</code></td><td>شناسهٔ مدل</td></tr>
+<tr><td><code>platform</code></td><td><code>str</code></td><td>محل اجرای نشست</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>شلیک:</b> در run_agent.py داخل run_conversation() بعد از خروج حلقهٔ ابزار با پاسخ نهایی. محافظ‌شده با «if final_response and not interrupted» — پس وقتی کاربر وسط نوبت قطع کند یا ایجنت به سقف تکرار برسد بدون تولید پاسخ شلیک <b>نمی‌کند</b>.</p>
+<p><b>مقدار بازگشتی:</b> نادیده گرفته می‌شود.</p>
+<p><b>موارد استفاده:</b> sync دادهٔ گفتگو به سیستم حافظهٔ بیرونی، محاسبهٔ متریک کیفیت پاسخ، لاگ خلاصه‌های نوبت، شلیک اقدامات پیگیری.</p>
+<p><b>مثال — sync به حافظهٔ بیرونی:</b></p>
+<pre dir="ltr"><code>import httpx
+
+MEMORY_API = "https://your-memory-api.example.com"
+
+def sync_memory(session_id, user_message, assistant_response, **kwargs):
+    try:
+        httpx.post(f"{MEMORY_API}/store", json={
+            "session_id": session_id,
+            "user": user_message,
+            "assistant": assistant_response,
+        }, timeout=5)
+    except Exception:
+        pass  # best-effort
+
+def register(ctx):
+    ctx.register_hook("post_llm_call", sync_memory)</code></pre>
+<p><b>مثال — ردیابی طول پاسخ‌ها:</b></p>
+<pre dir="ltr"><code>import logging
+logger = logging.getLogger(__name__)
+
+def log_response_length(session_id, assistant_response, model, **kwargs):
+    logger.info("RESPONSE session=%s model=%s chars=%d",
+                session_id, model, len(assistant_response or ""))
+
+def register(ctx):
+    ctx.register_hook("post_llm_call", log_response_length)</code></pre>
+<h3 id="pre_verify">‏<code>pre_verify</code></h3>
+<p><b>یک بار در هر نوبت وقتی ایجنت کد ویرایش کرده</b> درست قبل از پایان ‏(بعد از گارد verify-on-stop داخلی) شلیک می‌شود. این یک گیت سیاست کاربر/پلاگین است: callback می‌تواند ایجنت را ادامه دهد — چک اجرا کند، به تعویق بیندازد، diff را مرتب کند — به‌جای گذاشتنش برای توقف.</p>
+<p>راهنمای verification ی ارسالی هرمس یک هوک pre_verify ی پیش‌فرض نیست. وقتی کد ویرایش‌شده شواهد تازهٔ verification ندارد به nudge ی verify-on-stop مبتنی-بر-شواهد الحاق می‌شود تا مسیر ادامهٔ دوم پیش‌فرض نسازد. برای کوتاه ماندن آن nudge ی شواهد داخلی ‏agent.verify_guidance: false را ست کنید.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(session_id: str, platform: str, model: str, coding: bool,
+                attempt: int, final_response: str, changed_paths: list, **kwargs):</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>session_id</code></td><td><code>str</code></td><td>شناسهٔ یکتای نشست فعلی</td></tr>
+<tr><td><code>platform</code></td><td><code>str</code></td><td>محل اجرای نشست ‏(cli، telegram و…)</td></tr>
+<tr><td><code>model</code></td><td><code>str</code></td><td>شناسهٔ مدل</td></tr>
+<tr><td><code>coding</code></td><td><code>bool</code></td><td>آیا نوبت در وضعیت کدنویسی است ‏(در workspace ی کد) — هوکتان را روی همین scope کنید</td></tr>
+<tr><td><code>attempt</code></td><td><code>int</code></td><td>این نوبت چند بار تا حالا nudge شده ‏(اولین بار صفر) — روی همین self-throttle کنید</td></tr>
+<tr><td><code>final_response</code></td><td><code>str</code></td><td>پاسخی که ایجنت در آستانهٔ تحویل آن است</td></tr>
+<tr><td><code>changed_paths</code></td><td><code>list</code></td><td>فایل‌هایی که ایجنت این نوبت ویرایش کرده ‏(مرتب‌شده، همیشه غیرخالی اینجا)</td></tr>
+</tbody>
+</table>
+</div>
+<p>هوک را با بررسی coding به زمینهٔ کدنویسی scope و با attempt تک‌مصرفی کنید ‏(هوک‌های شل هر دو را از extra می‌خوانند)، همان‌طوری که هوک pre_tool_call روی tool_name scope می‌شود — پس می‌توانید چندین هوک pre_verify ثبت کنید که هر کدام فقط جایی که باید شلیک کنند.</p>
+<p><b>شلیک:</b> در agent/conversation_loop.py، در نقطه‌ای که ایجنت پاسخ نهایی را می‌پذیرد، بلافاصله بعد از بررسی verify-on-stop — اما فقط وقتی ایجنت این نوبت کد ویرایش کرده و دست‌کم یک هوک pre_verify ثبت شده باشد.</p>
+<p><b>مقدار بازگشتی — ادامه دادن ایجنت:</b></p>
+<pre dir="ltr"><code>return {"action": "continue", "message": "Run the formatter on your changes, then finish."}</code></pre>
+<p>message به‌عنوان یک نوبت کاربری مصنوعی الحاق و حلقه دوباره اجرا می‌شود. شکل Stop ی Claude-Code ‏({"decision": "block", "reason": "..."} که بلاک کردن stop یعنی <i>ادامه بده</i>) هم پذیرفته می‌شود. directive بدون message — یا هر بازگشت دیگری — اجازه می‌دهد نوبت تمام شود.</p>
+<p><b>محدود:</b> directive های continue ی متوالی در یک نوبت با ‏agent.max_verify_nudges سقف می‌خورند ‏(پیش‌فرض ۳)، پس هوکی که همیشه می‌گوید ادامه بده هرگز نمی‌تواند حلقه را به دام بیندازد. پاسخِ تلاش‌شده در تاریخچه نگه داشته می‌شود ولی وقتی ایجنت nudge می‌شود به کاربر surface نمی‌گردد.</p>
+<p><b>idempotent کنید:</b> هوک بعد از هر nudge دوباره شلیک می‌شود، پس روی attempt گیت بزنید ‏(<code>if attempt: return None</code>) — وگرنه فقط تا رسیدن به سقف nudge می‌کند.</p>
+<p><b>موارد استفاده:</b> به تعویق انداختن تست/lint حین تکرار خلاقانه، الزام چک سبز برای مسیرهای مشخص، بلاک کردن «done» تا وقتی changelog وجود نداشته باشد، اجرای چک‌لیست verification مخصوص پروژه.</p>
+<p><b>مثال — تعویق چک‌ها روی کار UI ی خلاقانه، scope شده + تک‌مصرفی:</b></p>
+<pre dir="ltr"><code>UI = (".tsx", ".jsx", ".css", ".scss")
+
+def defer_ui_checks(coding, attempt, changed_paths, **kwargs):
+    if attempt or not coding:
+        return None  # one-shot, coding only
+    if not all(p.endswith(UI) for p in changed_paths):
+        return None  # only pure-UI edits
+    return {
+        "action": "continue",
+        "message": "This is UI work — don't run tests/lints yet; ask the user to "
+                   "eyeball it first, and clean the diff before any commit.",
+    }
+
+def register(ctx):
+    ctx.register_hook("pre_verify", defer_ui_checks)</code></pre>
+<p>برای راهنمای دائمی که باید nudge ی داخلی missing-evidence را شکل دهد از agent.verify_guidance استفاده کنید. برای قواعد گسترده‌تر وضعیت کدنویسی که نیازی به <i>گیته</i> کردن verification ندارند مقدار ‏agent.coding_instructions را در config.yaml ترجیح دهید — همراه brief ی کدنویسی می‌رود و نوبت اضافه خرج نمی‌کند.</p>
+<h3 id="transform_api_error_classification">‏<code>transform_api_error_classification</code></h3>
+<p>یک بار per-call ی API ناموفق، بالای agent/error_classifier.classify_api_error() قبل از خط‌لوله داخلی شلیک می‌شود. پلاگین‌های ارائه‌دهنده از آن استفاده می‌کنند تا عجیب‌وغریبی‌های خطای ارائه‌دهنده‌شان را بدون وصله به هسته مالک شوند. تغییردهندهٔ رفتار است ‏(خانوادهٔ transform): classification ی برگشتی retry، فشرده‌سازی، چرخش credential و مسیریابی fallback را می‌رانَد.</p>
+<p>callback ها زمینهٔ خطای parse‌شده را به‌عنوان kwargs می‌گیرند — provider ‏(self-scope روی همین)، model، status_code، error_type، error_code، error_message، error_body، error، approx_tokens، context_length، num_messages. برای انصراف None یا برای تصاحب خطا dict برگردانید:</p>
+<pre dir="ltr"><code>return {"reason": "model_not_found",   # required: a FailoverReason name
+        "retryable": False, "should_fallback": True}  # optional recovery-hint overrides</code></pre>
+<p>dispatch به سبک اجرا-ی-همه-سپس-انتخاب-اولین است: هر callback اجرا، شکست‌ها ایزوله و اولین نتیجهٔ معتبر به ترتیب ثبت برنده است ‏(نتایج معتبرِ بازنده هشدار runtime لاg می‌کنند). dict های نامعتبر و reason های ناشناخته skip می‌شوند، پس پلاگین خراب هرگز classification را نمی‌شکند.</p>
+<p><b>حریم خصوصی:</b> error_message و error_body ممکن است دادهٔ redact‌نشدهٔ ارائه‌دهنده حمل کنند. <b>فقط پلاگین‌های پایتونی</b> — ثبت‌های شل هنگام parse ی config با هشدار رد می‌شوند.</p>
+<h3 id="on_session_start">‏<code>on_session_start</code></h3>
+<p><b>یک بار</b> وقتی نشست کاملاً جدیدی ساخته شود شلیک می‌کند. روی ادامهٔ نشست شلیک <b>نمی‌کند</b> ‏(وقتی کاربر پیام دوم را در نشست موجود بفرستد).</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(session_id: str, model: str, platform: str, **kwargs):</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>session_id</code></td><td><code>str</code></td><td>شناسهٔ یکتای نشست جدید</td></tr>
+<tr><td><code>model</code></td><td><code>str</code></td><td>شناسهٔ مدل</td></tr>
+<tr><td><code>platform</code></td><td><code>str</code></td><td>محل اجرای نشست</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>شلیک:</b> در run_agent.py داخل run_conversation() طی اولین نوبت نشست جدید — دقیقاً بعد از ساخته شدن پرامپت سیستمی ولی قبل از شروع حلقهٔ ابزار. شرط بررسی «if not conversation_history» است ‏(نبود پیام قبلی = نشست جدید).</p>
+<p><b>مقدار بازگشتی:</b> نادیده گرفته می‌شود.</p>
+<p><b>موارد استفاده:</b> مقداردهی وضعیت مخصوص-نشست، گرم کردن کش‌ها، ثبت نشست در سرویس بیرونی، لاگ شروع نشست‌ها.</p>
+<p><b>مثال — مقداردهی cache ی نشست:</b></p>
+<pre dir="ltr"><code>_session_caches = {}
+
+def init_session(session_id, model, platform, **kwargs):
+    _session_caches[session_id] = {
+        "model": model,
+        "platform": platform,
+        "tool_calls": 0,
+        "started": __import__("datetime").datetime.now().isoformat(),
+    }
+
+def register(ctx):
+    ctx.register_hook("on_session_start", init_session)</code></pre>
+<h3 id="on_session_end">‏<code>on_session_end</code></h3>
+<p>در <b>انتهای هر</b> فراخوانی run_conversation() فارغ از نتیجه شلیک می‌کند. اگر ایجنت موقع خروج کاربر وسط نوبت بوده باشد از هندلر exit ی CLI هم شلیک می‌شود.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(session_id: str, completed: bool, interrupted: bool,
+                model: str, platform: str, **kwargs):</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>session_id</code></td><td><code>str</code></td><td>شناسهٔ یکتای نشست</td></tr>
+<tr><td><code>completed</code></td><td><code>bool</code></td><td>True اگر ایجنت پاسخ نهایی تولید کرده باشد</td></tr>
+<tr><td><code>interrupted</code></td><td><code>bool</code></td><td>True اگر نوبت قطع شده باشد ‏(کاربر پیام جدید، /stop یا خروج)</td></tr>
+<tr><td><code>model</code></td><td><code>str</code></td><td>شناسهٔ مدل</td></tr>
+<tr><td><code>platform</code></td><td><code>str</code></td><td>محل اجرای نشست</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>شلیک:</b> در دو محل: ۱) run_agent.py — پایان هر run_conversation() بعد از همهٔ cleanup. همیشه شلیک می‌کند حتی اگر نوبت خطا داده باشد. ۲) cli.py — در هندلر atexit ی CLI اما <b>فقط</b> وقتی ایجنت موقع خروج وسط نوبت بوده (_agent_running=True). این Ctrl+C و /exit حین پردازش را می‌گیرد؛ در این حالت completed=False و interrupted=True.</p>
+<p><b>مقدار بازگشتی:</b> نادیده گرفته می‌شود.</p>
+<p><b>موارد استفاده:</b> flush کردن بافرها، بستن اتصالات، ماندگاری وضعیت نشست، لاگ مدت نشست، cleanup ی منابع مقداردهی‌شده در on_session_start.</p>
+<p><b>مثال — flush و cleanup:</b></p>
+<pre dir="ltr"><code>_session_caches = {}
+
+def cleanup_session(session_id, completed, interrupted, **kwargs):
+    cache = _session_caches.pop(session_id, None)
+    if cache:
+        # Flush accumulated data to disk or external service
+        status = "completed" if completed else ("interrupted" if interrupted else "failed")
+        print(f"Session {session_id} ended: {status}, {cache['tool_calls']} tool calls")
+
+def register(ctx):
+    ctx.register_hook("on_session_end", cleanup_session)</code></pre>
+<p><b>مثال — ردیابی مدت نشست:</b></p>
+<pre dir="ltr"><code>import time, logging
+logger = logging.getLogger(__name__)
+
+_start_times = {}
+
+def on_start(session_id, **kwargs):
+    _start_times[session_id] = time.time()
+
+def on_end(session_id, completed, interrupted, **kwargs):
+    start = _start_times.pop(session_id, None)
+    if start:
+        duration = time.time() - start
+        logger.info("SESSION_DURATION session=%s seconds=%.1f completed=%s interrupted=%s",
+                     session_id, duration, completed, interrupted)
+
+def register(ctx):
+    ctx.register_hook("on_session_start", on_start)
+    ctx.register_hook("on_session_end", on_end)</code></pre>
+<h3 id="on_session_finalize">‏<code>on_session_finalize</code></h3>
+<p>وقتی CLI یا گیت‌وی یک نشست فعال را <b>منحل</b> می‌کند شلیک می‌شود — مثلاً کاربر /new بزند، گیت‌وی نشست idle را GC کند یا CLI با ایجنت فعال quit کند. برای flush کردن وضعیت مقید-به-ID ی نشست خروجی استفاده‌اش کنید. در reset ی گیت‌وی نشست جایگزین قبل از اجرای این callback از قبل موجود است.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(session_id: str | None, platform: str, **kwargs):</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>session_id</code></td><td><code>str</code> یا ‏<code>None</code></td><td>ID نشست خروجی. اگر نشست فعالی نبوده None ممکن است.</td></tr>
+<tr><td><code>platform</code></td><td><code>str</code></td><td>cli یا نام پلتفرم پیام‌رسانی ‏(telegram، discord و…).</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>شلیک:</b> در teardown ی CLI/TUI و مسیرهای reset، shutdown یا انقضای-idle ی گیت‌وی. shutdown و انقضای گیت‌وی می‌توانند بدون on_session_reset ی متناظر نهایی کنند.</p>
+<p><b>مقدار بازگشتی:</b> نادیده گرفته می‌شود.</p>
+<p><b>موارد استفاده:</b> ماندگاری متریک‌های نهایی نشست قبل از دور انداختن ID، بستن منابع per-session، emit ی رویداد تلمتری نهایی، تخلیه نوشتن‌های صف‌شده.</p>
+<h3 id="on_session_reset">‏<code>on_session_reset</code></h3>
+<p>در مرز نشست CLI/TUI یا وقتی گیت‌وی برای یک گفتگوی فعال <b>کلید نشست جدیدی</b> جایگزین می‌کند شلیک می‌شود. به پلاگین‌ها اجازه می‌دهد به پاک شدن وضعیت گفتگو واکنش نشان دهند بدون انتظار برای on_session_start بعدی.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(session_id: str, platform: str, **kwargs):</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>session_id</code></td><td><code>str</code></td><td>ID نشست جدید ‏(قبلاً به مقدار تازه چرخیده).</td></tr>
+<tr><td><code>platform</code></td><td><code>str</code></td><td>cli، tui یا نام پلتفرم پیام‌رسانی.</td></tr>
+<tr><td><code>reason</code></td><td><code>str</code> اختیاری</td><td>در مسیرهای reset ی CLI و گیت‌وی حاضر است.</td></tr>
+<tr><td><code>old_session_id</code></td><td><code>str</code> اختیاری</td><td>ID نشست خروجی — فقط گیت‌وی.</td></tr>
+<tr><td><code>new_session_id</code></td><td><code>str</code> اختیاری</td><td>ID نشست جایگزین — فقط گیت‌وی.</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>شلیک:</b> CLI مقدار session_id، platform و reason می‌دهد؛ TUI مقدار session_id و platform؛ گیت‌وی بعد از اختصاص کلید جایگزین reason، old_session_id و new_session_id اضافه می‌کند. در reset ی گیت‌وی ترتیب این است: ساخت و ماندگاری جایگزین ← on_session_finalize(old_id) ← on_session_reset(new_id) ← on_session_start(new_id) روی اولین نوبت ورودی.</p>
+<p><b>مقدار بازگشتی:</b> نادیده گرفته می‌شود.</p>
+<p><b>موارد استفاده:</b> ریست cache های per-session کلیدخورده با session_id، emit ی تحلیل «نشست چرخید»، آماده‌سازی سطل وضعیت تازه.</p>
+<p>مرور کامل شامل schema های ابزار، هندلرها و الگوهای پیشرفتهٔ هوک را در <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">راهنمای ساخت پلاگین</a> ببینید.</p>
+<h3 id="subagent_start">‏<code>subagent_start</code></h3>
+<p><b>یک بار per-child ی ایجنت</b> بعد از اینکه delegate_task فرزند AIAgent را ساخت و قبل از اجرای آن فرزند شلیک می‌کند. چه یک تسک واگذار کنید چه دسته‌ای سه‌تایی، این هوک به‌ازای هر فرزند یک بار شلیک می‌شود.</p>
+<p>این هوک مخصوص چرخهٔ حیات delegation/subagent است. یک گیت سراسریِ «قبل از هر invoke ی ایجنت» برای اجرای ایجنت‌های مبدأ-گیت‌وی، ‏CLI، ‏cron، ‏batch، ‏MoA یا سایر runner ها نیست.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(parent_session_id: str | None,
+                parent_turn_id: str,
+                parent_subagent_id: str | None,
+                child_session_id: str | None,
+                child_subagent_id: str,
+                child_role: str,
+                child_goal: str,
+                **kwargs):</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>parent_session_id</code></td><td><code>str | None</code></td><td>ID نشست ایجنت والدِ واگذارکننده.</td></tr>
+<tr><td><code>parent_turn_id</code></td><td><code>str</code></td><td>ID نوبت والد که واگذاری را خواسته، اگر موجود باشد.</td></tr>
+<tr><td><code>parent_subagent_id</code></td><td><code>str | None</code></td><td>ID زیرایجنت والد وقتی این فرزند توسط زیرایجنت دیگری spawn شده؛ برای والدین سطح-بالا None.</td></tr>
+<tr><td><code>child_session_id</code></td><td><code>str | None</code></td><td>ID نشست اختصاص‌یافته به فرزند.</td></tr>
+<tr><td><code>child_subagent_id</code></td><td><code>str</code></td><td>ID زیرایجنت پایدار که observability و کنترل‌های delegation استفاده می‌کنند.</td></tr>
+<tr><td><code>child_role</code></td><td><code>str</code></td><td>نقش مؤثر فرزند بعد از اعمال سیاست delegation مثل leaf یا orchestrator.</td></tr>
+<tr><td><code>child_goal</code></td><td><code>str</code></td><td>هدف/پرامپت واگذارشده‌ای که فرزند اجرا خواهد کرد.</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>شلیک:</b> در tools/delegate_tool.py داخل _build_child_agent() بعد از ساخت فرزند AIAgent و annotation اش با متادیتای هویت زیرایجنت و قبل از اینکه _run_single_child() فرزند را اجرا کند.</p>
+<p><b>مقدار بازگشتی:</b> نادیده گرفته می‌شود. این یک هوک فقط-observer است؛ برگرداندن مقدار run ی فرزند را بلاک یا جهش نمی‌دهد.</p>
+<p><b>موارد استفاده:</b> لاگ ساخت زیرایجنت، نگاشت روابط والد/فرزند نشست، ردیابی درخت‌های تو-در-توی delegation، emit ی رکوردهای ممیزی پیش-از-run، پیش-تخصیص منابع observability per-child.</p>
+<p><b>مثال — لاگ ساخت زیرایجنت:</b></p>
+<pre dir="ltr"><code>import logging
+
+logger = logging.getLogger(__name__)
+
+def log_subagent_start(
+    parent_session_id,
+    parent_turn_id,
+    child_session_id,
+    child_subagent_id,
+    child_role,
+    child_goal,
+    **kwargs,
+):
+    logger.info(
+        "SUBAGENT_START parent=%s turn=%s child_session=%s child=%s role=%s goal=%r",
+        parent_session_id,
+        parent_turn_id,
+        child_session_id,
+        child_subagent_id,
+        child_role,
+        child_goal[:200],
+    )
+
+def register(ctx):
+    ctx.register_hook("subagent_start", log_subagent_start)</code></pre>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>‏subagent_start برای observability ی delegation مفید است ولی هوک سیاست بلاک‌کننده نیست. برای بلاک کردن delegation قبل از ساخته شدن فرزند از pre_tool_call برای بلاک کردن فراخوانی delegate_task استفاده کنید.</p>
+</div>
+<h3 id="subagent_stop">‏<code>subagent_stop</code></h3>
+<p><b>یک بار per-child ی ایجنت</b> بعد از اتمام delegate_task شلیک می‌کند. چه یک تسک واگذار کرده باشید چه دسته‌ای سه‌تایی، به‌ازای هر فرزند یک بار روی thread ی والد سریالایز شده شلیک می‌شود.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(parent_session_id: str, child_role: str | None,
+                child_summary: str | None, child_status: str,
+                tool_call_history: list[dict], duration_ms: int, **kwargs):</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>parent_session_id</code></td><td><code>str</code></td><td>ID نشست والد واگذارکننده</td></tr>
+<tr><td><code>child_role</code></td><td><code>str | None</code></td><td>تگ نقش orchestrator ست‌شده روی فرزند ‏(None اگر قابلیت فعال نباشد)</td></tr>
+<tr><td><code>child_summary</code></td><td><code>str | None</code></td><td>پاسخ نهایی‌ای که فرزند به والد برگردانده</td></tr>
+<tr><td><code>child_status</code></td><td><code>str</code></td><td>completed، failed، interrupted یا error</td></tr>
+<tr><td><code>tool_call_history</code></td><td><code>list[dict]</code></td><td>فراخوانی‌های ابزار فقط-متادیتا و مرتب: tool_name، tool_input ی محدود، input_bytes، output_bytes و status؛ ورودی/خروجی خام مستثنی‌اند</td></tr>
+<tr><td><code>duration_ms</code></td><td><code>int</code></td><td>زمان ساعت‌دیواری اجرای فرزند به میلی‌ثانیه</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>شلیک:</b> در tools/delegate_tool.py بعد از تخلیهٔ همهٔ future های فرزند توسط ThreadPoolExecutor.as_completed(). شلیک به thread ی والد marshal می‌شود تا نویسندگان هوک مجبور به استدلال دربارهٔ اجرای همزمان callback ها نباشند.</p>
+<p><b>مقدار بازگشتی:</b> نادیده گرفته می‌شود.</p>
+<p><b>موارد استفاده:</b> لاگ فعالیت ارکستراسیون، جمع زدن مدت فرزندان برای صورتحساب، نوشتن رکوردهای ممیزی بعد-از-delegation.</p>
+<p><b>مثال — لاگ فعالیت orchestrator:</b></p>
+<pre dir="ltr"><code>import logging
+logger = logging.getLogger(__name__)
+
+def log_subagent(parent_session_id, child_role, child_status, duration_ms, **kwargs):
+    logger.info(
+        "SUBAGENT parent=%s role=%s status=%s duration_ms=%d",
+        parent_session_id, child_role, child_status, duration_ms,
+    )
+
+def register(ctx):
+    ctx.register_hook("subagent_stop", log_subagent)</code></pre>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>با delegation سنگین ‏(مثلاً نقش‌های orchestrator × ۵ برگ × عمق تو-در-تو)، subagent_stop در هر نوبت چندین بار شلیک می‌کند. callback تان سریع باشد؛ کارهای گران را به صف پس‌زمینه push کنید.</p>
+</div>
+<h3 id="pre_gateway_dispatch">‏<code>pre_gateway_dispatch</code></h3>
+<p><b>یک بار per-MessageEvent ی ورودی</b> در گیت‌وی، بعد از گارد رویداد-داخلی ولی <b>قبل از</b> auth/pairing و dispatch ایجنت شلیک می‌شود. نقطهٔ interception برای سیاست‌های جریان-پیام سطح-گیت‌وی ‏(پنجره‌های فقط-گوش‌دادن، تحویل به انسان، مسیریابی per-chat و…) است که در هیچ adapter ی واحدی جا نمی‌شوند.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(event, gateway, session_store, **kwargs):</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>event</code></td><td><code>MessageEvent</code></td><td>پیام ورودی نرمال‌شده ‏(.text، .source، .message_id، .internal و… دارد).</td></tr>
+<tr><td><code>gateway</code></td><td><code>GatewayRunner</code></td><td>runner ی فعال گیت‌وی تا پلاگین برای پاسخ‌های کانال-کنار ‏(نوتیفیکیشن owner و…) مقدار gateway.adapters[platform].send(...) را صدا بزند.</td></tr>
+<tr><td><code>session_store</code></td><td><code>SessionStore</code></td><td>برای ingestion بی‌صدای transcript از طریق session_store.append_to_transcript(...).</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>شلیک:</b> در gateway/run.py داخل GatewayRunner._handle_message() بلافاصله بعد از محاسبه is_internal. <b>رویدادهای داخلی کلاً از هوک عبور نمی‌کنند</b> ‏(سیستم-تولیدند — تکمیل‌های پروسهٔ پس‌زمینه و… — و نباید توسط سیاست رو-به-کاربر گیته شوند).</p>
+<p><b>مقدار بازگشتی:</b> None یا dict. اولین action dict شناسایی‌شده برنده است؛ سایر نتایج پلاگین نادیده گرفته می‌شوند. exception های callback های پلاگین گرفته و لاگ می‌شوند؛ گیت‌وی روی خطا همیشه به dispatch عادی می‌افتد.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>بازگشت</th><th>اثر</th></tr></thead>
+<tbody>
+<tr><td><code>{"action": "skip", "reason": "..."}</code></td><td>پیام drop می‌شود — نه پاسخ ایجنت، نه جریان pairing، نه auth. فرض می‌شود پلاگین هندلش کرده ‏(مثلاً بی‌صدا داخل transcript ingest شده).</td></tr>
+<tr><td><code>{"action": "rewrite", "text": "new text"}</code></td><td>event.text جایگزین و dispatch عادی با رویداد اصلاح‌شده ادامه می‌یابد. برای جمع کردن پیام‌های محیطی بافر‌شده در یک پرامپت مفید.</td></tr>
+<tr><td><code>{"action": "allow"}</code> / ‏<code>None</code></td><td>dispatch عادی — کل زنجیره auth / pairing / agent-loop اجرا می‌شود.</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>موارد استفاده:</b> گروه‌چت‌های فقط-گوش‌دادن ‏(فقط وقتی tag شوید جواب بده؛ پیام‌های محیطی را در زمینه بافر کن)؛ تحویل به انسان ‏(پیام‌های مشتری را بی‌صدا ingest کن در حالی که owner دستی جواب می‌دهد)؛ rate limiting ی per-profil؛ مسیریابی سیاست‌محور.</p>
+<p><b>مثال — drop بی‌صدای DM های غیرمجاز بدون شلیک کد pairing:</b></p>
+<pre dir="ltr"><code>def deny_unauthorized_dms(event, **kwargs):
+    src = event.source
+    if src.chat_type == "dm" and not _is_approved_user(src.user_id):
+        return {"action": "skip", "reason": "unauthorized-dm"}
+    return None
+
+def register(ctx):
+    ctx.register_hook("pre_gateway_dispatch", deny_unauthorized_dms)</code></pre>
+<p><b>مثال — بازنویسی بافر پیام‌های محیطی به یک پرامپت هنگام mention:</b></p>
+<pre dir="ltr"><code>_buffers = {}
+
+def buffer_or_rewrite(event, **kwargs):
+    key = (event.source.platform, event.source.chat_id)
+    buf = _buffers.setdefault(key, [])
+    if _bot_mentioned(event.text):
+        combined = "\n".join(buf + [event.text])
+        buf.clear()
+        return {"action": "rewrite", "text": combined}
+    buf.append(event.text)
+    return {"action": "skip", "reason": "ambient-buffered"}
+
+def register(ctx):
+    ctx.register_hook("pre_gateway_dispatch", buffer_or_rewrite)</code></pre>
+<h3 id="gateway_platform_event">‏<code>gateway_platform_event</code></h3>
+<p>فقط برای رویدادهای بومی-پلتفرمی پشتیبانی‌شده و فقط <b>بعد از</b> موفقیت بررسی احراز عادیِ مخصوص-پروفایل گیت‌وی شلیک می‌شود. callback دیکشنری‌های ساده می‌گیرد؛ آبجکت‌های خام SDK، handle های adapter، کلاینت‌های بات و callback context ها هرگز بخش این قرارداد پایدار نیستند.</p>
+<p>ری‌اکشن‌های پیام تلگرام اولین رویداد پشتیبانی‌شده بودند؛ ویرایش/حذف پیام و رویدادهای چرخهٔ thread بعداً اضافه شدند:</p>
+<pre dir="ltr"><code>def on_platform_event(platform, event_type, payload, **kwargs):
+    if platform == "telegram" and event_type == "reaction":
+        print(payload["chat_id"], payload["message_id"], payload["emojis"])
+    elif event_type == "message_edited":
+        print(platform, payload["chat_id"], payload["message_id"], payload["text"])
+
+def register(ctx):
+    ctx.register_hook("gateway_platform_event", on_platform_event)</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>platform</code></td><td><code>str</code></td><td>id ی پایدار پلتفرم ‏(telegram، discord).</td></tr>
+<tr><td><code>event_type</code></td><td><code>str</code></td><td>id ی قرارداد مخصوص-رویداد ‏(جدول پایین).</td></tr>
+<tr><td><code>payload</code></td><td><code>dict</code></td><td>فیلدهای مخصوص-نوع-رویداد که پایین per-event مستند شده.</td></tr>
+</tbody>
+</table>
+</div>
+<p>هر payload افزایشی و مخصوص-رویداد است؛ هیچ نسخهٔ monolithic ی payload ی گیت‌وی وجود ندارد. همهٔ IDها رشته‌اند؛ فیلدهای غایب/غیرقابل‌دسترس None اند هرگز حدس زده نمی‌شوند. رویدادهای بدفرم و رویدادهایی که منبعشان قابل‌احراز نیست drop می‌شوند ‏(fail closed). rebuild ی گذرا ی Application ی تلگرام observer را همراه هندلرهای هسته دوباره ثبت می‌کند.</p>
+<p><b>قراردادهای payload ی per-event ‏(v1، افزایشی):</b></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>event_type</th><th>پلتفرم‌ها</th><th>فیلدهای payload</th></tr></thead>
+<tbody>
+<tr><td><code>reaction</code></td><td>telegram</td><td>‏<code>emojis: list[str]</code>، ‏<code>custom_emoji_ids: list[str]</code>، ‏<code>chat_id: str</code>، ‏<code>message_id: str</code>، ‏<code>thread_id: str | None</code> ‏(به‌روزرسانی‌های ری‌اکشن تلگرام topic id حمل نمی‌کنند پس فعلاً همیشه None).</td></tr>
+<tr><td><code>message_edited</code></td><td>telegram، discord</td><td>‏<code>chat_id: str</code>، ‏<code>message_id: str</code>، ‏<code>thread_id: str | None</code>، ‏<code>text: str | None</code> ‏(متن یا caption ی ویرایش‌شده، محدود؛ None برای ویرایش‌های فقط-رسانه یا وقتی کش نشده)، ‏<code>edited_at: str | None</code> ‏(ISO 8601).</td></tr>
+<tr><td><code>message_deleted</code></td><td>discord</td><td>‏<code>chat_id: str</code>، ‏<code>message_id: str</code>، ‏<code>thread_id: str | None</code>، ‏<code>author_id: str | None</code>. رویداد delete ی دیسکورد حذف‌کننده را شناسایی نمی‌کند؛ منبع مجاز نویسندهٔ پیام حذف‌شده است و حذف‌های کش‌نشده هرگز شلیک نمی‌کنند.</td></tr>
+<tr><td><code>thread_created</code></td><td>discord</td><td>‏<code>thread_id: str</code>، ‏<code>parent_chat_id: str | None</code>، ‏<code>name: str | None</code>، ‏<code>owner_id: str | None</code>.</td></tr>
+<tr><td><code>thread_renamed</code></td><td>discord</td><td>‏<code>thread_id: str</code>، ‏<code>parent_chat_id: str | None</code>، ‏<code>old_name: str | None</code>، ‏<code>new_name: str</code>. فقط وقتی نام واقعاً عوض شده شلیک می‌شود؛ سایر به‌روزرسانی‌های thread ‏(archive، slowmode، tags) drop می‌شوند. رویداد thread-update ی دیسکورد actor ندارد پس owner ی thread منبع مجاز است.</td></tr>
+</tbody>
+</table>
+</div>
+<p>ویرایش‌های تدریجی پیام خودِ بات ‏(استریم) هرگز روی دیسکورد message_edited شلیک نمی‌کنند — رویدادهای authored-توسط-بات در محل شلیک drop می‌شوند.</p>
+<p>این هوک فقط-observer است: دسترسی raw-event یا دسترسی adapter <b>اضافه نمی‌کند</b>. <b>دسترسی payload خام SDK عمداً ارسال نمی‌شود</b> — آبجکت‌های SDK ی adapter بدون اطلاع شکل عوض می‌کنند و سطح API ی غیرقابل-تکامل می‌شدند؛ جایی که واقعاً لازم باشد قابلیت صریح خودش را می‌طلبد ‏(gateway.raw_events) با برچسب «بدون تضمین پایداری». برای <i>اقدام</i> روی یک پلتفرم ‏(افزودن ری‌اکشن، rename ی thread) از facade ی gate‌شده با قابلیت ‏ctx.platform_actions مستند در راهنمای پلاگین‌ها استفاده کنید — پیش‌فرض پشت قابلیت gateway.platform_actions خاموش است. PluginContext.dispatch_tool() فقط ابزارهای registered در tool registry را صدا می‌زند؛ send_message عمداً آنجا ثبت نیست ‏(transport اش برای مسیرهای تحویل صریح CLI، cron، kanban و MCP رزرو شده). قرارداد آیندهٔ تحویل-خروجی باید اول تحویل پایدار محتوا/handle ها را بین همهٔ adapter ها تضمین کند؛ این برش هوک inert ی gateway_message_delivered را پیش‌ثبت نمی‌کند.</p>
+<h3 id="pre_approval_request">‏<code>pre_approval_request</code></h3>
+<p>قبل از درخواست تصمیم تأیید شلیک می‌شود. سطوح prompted — CLI ی تعاملی، ‏TUI ی Ink، پلتفرم‌های گیت‌وی و کلاینت‌های ACP — و تصمیم‌های ‏approvals.mode=smart که بدون پرامپت انسانی گرفته می‌شوند ‏(surface="smart") را پوشش می‌دهد. در حالت smart هوک قبل از صدا زدن LLM کمکی اجرا می‌شود.</p>
+<p>این جای درست سیم‌کشی notifier سفارشی است — مثلاً یک اپ menu-bar ی macOS که نوتیفیکیشن allow/deny می‌پراند یا یک لاگ ممیزی که هر درخواست تأیید را با زمینه ثبت می‌کند.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(
+    command: str,
+    description: str,
+    pattern_key: str,
+    pattern_keys: list[str],
+    session_key: str,
+    surface: str,
+    **kwargs,
+):</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>command</code></td><td><code>str</code></td><td>فرمان ترمینال یا اسکریپت execute_code ی در حال ارزیابی. payload های smart و گیت‌وی قبل از dispatch ی observer redact می‌شوند. redaction ی observer ی smart حتی وقتی security.redact_secrets خاموش است الزامی است؛ اگر redaction شکست بخورد هوک‌های smart skip می‌شوند.</td></tr>
+<tr><td><code>description</code></td><td><code>str</code></td><td>علت‌های خوانا-برای-انسان فلگ شدن فرمان ‏(وقتی چند الگو بخورد ترکیبی)</td></tr>
+<tr><td><code>pattern_key</code></td><td><code>str</code></td><td>کلید الگوی اصلی که تأیید را شلیک کرد ‏(مثل rm_rf، sudo)</td></tr>
+<tr><td><code>pattern_keys</code></td><td><code>list[str]</code></td><td>همهٔ کلیدهای الگویی که تطبیق خوردند</td></tr>
+<tr><td><code>session_key</code></td><td><code>str</code></td><td>شناسهٔ نشست؛ برای scope کردن نوتیفیکیشن per-chat مفید</td></tr>
+<tr><td><code>surface</code></td><td><code>str</code></td><td>cli برای پرامپت‌های تعاملی CLI/TUI، gateway برای تأییدهای async ی پلتفرم، یا smart برای تصمیم‌های خودکار approve/deny ی LLM کمکی</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>مقدار بازگشتی:</b> نادیده گرفته می‌شود. هوک‌های اینجا فقط-observer اند؛ نمی‌توانند تأیید را veto یا پیش-پاسخ دهند. برای بلاک کردن ابزار قبل از رسیدن به سیستم تأیید از pre_tool_call استفاده کنید.</p>
+<p><b>موارد استفاده:</b> نوتیفیکیشن‌های دسکتاپ، هشدارهای push، لاگ ممیزی، وب‌هوک‌های اسلک، مسیریابی escalation، متریک‌ها.</p>
+<p><b>مثال — نوتیفیکیشن دسکتاپ روی macOS:</b></p>
+<pre dir="ltr"><code>import subprocess
+
+def notify_approval(command, description, session_key, **kwargs):
+    title = "Hermes needs approval"
+    body = f"{description}: {command[:80]}"
+    subprocess.Popen([
+        "osascript", "-e",
+        f'display notification "{body}" with title "{title}"',
+    ])
+
+def register(ctx):
+    ctx.register_hook("pre_approval_request", notify_approval)</code></pre>
+<h3 id="post_approval_response">‏<code>post_approval_response</code></h3>
+<p>بعد از تصمیم تأیید prompted یا smart، بعد از timeout ی پرامپت یا وقتی گیت‌وی نمی‌تواند نوتیفیکیشن تأیید را تحویل دهد شلیک می‌شود. شکست نوتیفیکیشن choice="notify_failed" را قبل از وجود هر تصمیم تأیید emit می‌کند.</p>
+<p><b>امضای callback:</b> همان kwargs ی pre_approval_request به‌علاوهٔ:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>choice</code></td><td><code>str</code></td><td>سطوح prompted از once، session، always، deny، timeout یا notify_failed استفاده می‌کنند؛ تصمیم‌های smart از smart_approve یا smart_deny</td></tr>
+<tr><td><code>decided_by</code></td><td><code>str</code></td><td>aux_llm برای تصمیم‌های smart؛ در سطوح prompted غایب</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>مقدار بازگشتی:</b> نادیده گرفته می‌شود.</p>
+<p><b>موارد استفاده:</b> بستن نوتیفیکیشن دسکتاپ منطبق، ثبت تصمیم نهایی در لاگ ممیزی، به‌روزرسانی متریک‌ها، جلو بردن rate limiter.</p>
+<pre dir="ltr"><code>def log_decision(command, choice, session_key, **kwargs):
+    logger.info("approval %s: %s for session %s", choice, command[:60], session_key)
+
+def register(ctx):
+    ctx.register_hook("post_approval_response", log_decision)</code></pre>
+<h3 id="pre_transcription">‏<code>pre_transcription</code></h3>
+<p>داخل dispatcher ی STT ‏(tools.transcription_tools.transcribe_audio) <b>بعد از</b> حل ارائه‌دهنده و <b>قبل از</b> invoke شدن هر بک‌اند — چه داخلی باشد چه ارائه‌دهندهٔ type: command چه ثبت‌شده توسط پلاگین — شلیک می‌شود. به پلاگین اجازه می‌دهد خودِ درخواست رونویسی را هدایت کند نه فقط اینکه بعداً transcript را مشاهده کند.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(
+    file_path: str,
+    provider: str,
+    model: str | None,
+    language: str | None,
+    prompt: str | None,
+    source: str | None,
+    **kwargs,
+) -&gt; dict | None:</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>file_path</code></td><td><code>str</code></td><td>مسیر مطلق فایل صدایی که در آستانهٔ رونویسی است. فقط-خواندنی.</td></tr>
+<tr><td><code>provider</code></td><td><code>str</code></td><td>ارائه‌دهندهٔ STT حل‌شده ‏(local، groq، openai، mistral، xai، elevenlabs، deepinfra، local_command، نام ارائه‌دهندهٔ فرمان یا نام ارائه‌دهندهٔ پلاگین).</td></tr>
+<tr><td><code>model</code></td><td><code>str | None</code></td><td>مدل حل‌شده تا این لحظه، یا None وقتی پیش‌فرض بک‌اند اعمال شود.</td></tr>
+<tr><td><code>language</code></td><td><code>str | None</code></td><td>زبان از بخش config ی ارائه‌دهنده، یا None.</td></tr>
+<tr><td><code>prompt</code></td><td><code>str | None</code></td><td>مقدار ایستای stt.prompt، یا None.</td></tr>
+<tr><td><code>source</code></td><td><code>str | None</code></td><td>برچسب سطح فراخواننده ‏(gateway، voice_mode و…). فقط برای observability، برای dispatch استفاده نمی‌شود.</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>مقدار بازگشتی:</b> dict ای با هر یک از prompt/language/model مقید-به-رشته‌ها، یا None برای بدون-تغییر گذاشتن درخواست. مقادیر غیر-رشته‌ای، کلیدهای ناشناخته و file_path نادیده گرفته می‌شوند ‏(تلاش‌های file_path با هشدار لاگ می‌شوند). نتایج به <b>ترتیب ثبت، آخرین-نویسنده-برنده-per-field</b> روی مقدار config ی stt.prompt اعمال می‌شوند. برگرداندن "" برای prompt، پرامپت پیکربندی‌شده را برای آن درخواست پاک می‌کند.</p>
+<p><b>موارد استفاده:</b> تزریق فهرست واژگان per-user یا per-chat قبل از آپلود صدا، اجبار language از locale ی فراخواننده، تنزل model برای ضبط‌های بلند، مسیریابی منابع نویزی به مدل دیگر.</p>
+<pre dir="ltr"><code>VOCAB = "Hermes, Teknium, Nous Research, kanban"
+
+def add_vocab(provider, prompt, source, **kwargs):
+    if source != "gateway":
+        return None
+    return {"prompt": f"{prompt}. {VOCAB}" if prompt else VOCAB}
+
+def register(ctx):
+    ctx.register_hook("pre_transcription", add_vocab)</code></pre>
+<p>هر بک‌اندی prompt نمی‌پذیرد. local آن را به initial_prompt ی faster-whisper نگاشت می‌کند؛ ‏openai، ‏groq، ‏mistral و deepinfra به‌عنوان prompt می‌فرستند؛ ‏xai، ‏elevenlabs، ‏local_command و ارائه‌دهنده‌های type: command در DEBUG لاگ و بدون آن رونویسی می‌کنند. جدول کامل پشتیبانی و مرز حریم خصوصی را در بخش پیکربندی ببینید. خطاهای لوله‌کشی هوک fail-open اند: dispatch با درخواست دست‌نخورده ادامه می‌یابد.</p>
+<h3 id="transform_tool_result">‏<code>transform_tool_result</code></h3>
+<p><b>بعد از</b> برگشتن ابزار و <b>قبل از</b> الحاق نتیجه به گفتگو شلیک می‌شود. به پلاگین اجازه می‌دهد رشتهٔ نتیجهٔ <b>هر</b> ابزاری را — نه فقط خروجی ترمینال — قبل از دیدن توسط مدل بازنویسی کند.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(tool_name: str, args: dict, result: str, task_id: str, **kwargs) -&gt; str | None:</code></pre>
+<p>payload کامل همچنین session_id، ‏tool_call_id، ‏turn_id، ‏api_request_id، ‏duration_ms، ‏status، ‏error_type و error_message را شامل می‌شود. result نتیجهٔ نهایی dispatch ی ابزار است؛ آن و args می‌توانند محتوای دلخواه کاربر/ابزار و secrets داشته باشند.</p>
+<p><b>مقدار بازگشتی:</b> اولین str نتیجه را جایگزین می‌کند ‏(شامل رشتهٔ خالی)؛ None آن را بدون تغییر می‌گذارد.</p>
+<p><b>موارد استفاده:</b> redact کردن PII ی مخصوص-سازمان از خروجی web_extract، پیچیدن پاسخ‌های JSON بلند ابزار در سرصفحهٔ خلاصه، تزریق سرنخ‌های بازیابی‌افزوده به نتایج read_file، بازنویسی گزارش‌های زیرایجنت delegate_task به schema ی مخصوص-پروژه.</p>
+<pre dir="ltr"><code>import re
+SECRET = re.compile(r"sk-[A-Za-z0-9]{32,}")
+
+def redact_secrets(tool_name, result, **kwargs):
+    if SECRET.search(result):
+        return SECRET.sub("[REDACTED]", result)
+    return None
+
+def register(ctx):
+    ctx.register_hook("transform_tool_result", redact_secrets)</code></pre>
+<p>روی هر ابزاری اعمال می‌شود. برای بازنویسی فقط-ترمینال بخش transform_terminal_output پایین را ببینید — باریک‌تر است، قبل از transform_tool_result اجرا و جایگزینش همچنان مشروط به سقف نهایی خروجی ابزار ترمینال است.</p>
+<h3 id="transform_terminal_output">‏<code>transform_terminal_output</code></h3>
+<p>داخل ابزار terminal بعد از اینکه capture ی پروسهٔ foreground قبلاً توسط محیط محدود شده و قبل از سقف نهایی خروجی شلیک می‌شود. به پلاگین‌ها اجازه می‌دهد stdout/stderr ی captured را جایگزین کنند؛ جایگزین همچنان مشروط به سقف نهایی خروجی است.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(
+    command: str,
+    output: str,
+    returncode: int,
+    task_id: str,
+    env_type: str,
+    **kwargs,
+) -&gt; str | None:</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>command</code></td><td><code>str</code></td><td>فرمان شلی که خروجی را تولید کرده.</td></tr>
+<tr><td><code>output</code></td><td><code>str</code></td><td>stdout/stderr ی ترکیبی بعد از capture ی محدود پروسه.</td></tr>
+<tr><td><code>returncode</code></td><td><code>int</code></td><td>کد بازگشت پروسه.</td></tr>
+<tr><td><code>task_id</code></td><td><code>str</code></td><td>شناسهٔ مؤثر تسک، یا رشتهٔ خالی.</td></tr>
+<tr><td><code>env_type</code></td><td><code>str</code></td><td>نوع محیط اجرا.</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>مقدار بازگشتی:</b> اولین str خروجی را جایگزین می‌کند؛ None بدون تغییر می‌گذارد. فرمان و خروجی می‌توانند اعتبارنامه یا دادهٔ حساس دیگر داشته باشند.</p>
+<pre dir="ltr"><code>def summarize_find(command, output, **kwargs):
+    if command.startswith("find ") and len(output) &gt; 50_000:
+        lines = output.count("\n")
+        head = "\n".join(output.splitlines()[:40])
+        return f"{head}\n\n[summary: {lines} paths total, showing first 40]"
+    return None
+
+def register(ctx):
+    ctx.register_hook("transform_terminal_output", summarize_find)</code></pre>
+<p>با transform_tool_result جفت می‌شود که بعدش برای هر ابزاری از جمله terminal اجرا می‌شود.</p>
+<h3 id="transform_llm_output">‏<code>transform_llm_output</code></h3>
+<p><b>یک بار در هر نوبت</b> بعد از تکمیل حلقهٔ فراخوانی ابزار و تولید پاسخ نهایی توسط مدل، <b>قبل از</b> تحویل آن پاسخ به کاربر ‏(CLI، گیت‌وی یا فراخوانندهٔ برنامه‌نویسی‌شده) شلیک می‌شود. به پلاگین اجازه می‌دهد متن نهایی دستیار را با روش‌های کلاسیک برنامه‌نویسی بازنویسی کند — بدون سوزاندن توکن inference ی اضافه برای متن flavor ی SOUL یا transform ی رانده-با-مهارت.</p>
+<p><b>امضای callback:</b></p>
+<pre dir="ltr"><code>def my_callback(
+    response_text: str,
+    session_id: str,
+    model: str,
+    platform: str,
+    **kwargs,
+) -&gt; str | None:</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>response_text</code></td><td><code>str</code></td><td>متن پاسخ نهایی دستیار برای این نوبت.</td></tr>
+<tr><td><code>session_id</code></td><td><code>str</code></td><td>ID گفتگو ‏(برای run های تک‌مصرفی ممکن است خالی باشد).</td></tr>
+<tr><td><code>model</code></td><td><code>str</code></td><td>نام مدل تولیدکنندهٔ پاسخ ‏(مثل anthropic/claude-sonnet-4.6).</td></tr>
+<tr><td><code>platform</code></td><td><code>str</code></td><td>پلتفرم تحویل ‏(cli، telegram، discord و…؛ خالی وقتی ست نیست).</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>مقدار بازگشتی:</b> str ی غیرخالی برای جایگزینی متن پاسخ؛ None یا رشتهٔ خالی برای بدون-تغییر. وقتی چند پلاگین ثبت کرده باشند <b>اولین رشتهٔ غیرخالی برنده است</b>. برخلاف transform های ابزار و ترمینال، رشتهٔ خالی به‌عنوان جایگزین پذیرفته نمی‌شود.</p>
+<p><b>موارد استفاده:</b> اعمال transform ی شخصیت/واژگان ‏(لهجهٔ دزد دریایی و…)، redact کردن شناسه‌های مخصوص-کاربر از متن نهایی، الحاق پانویس امضای مخصوص-پروژه، اعمال راهنمای سبک سازمانی بدون خرج توکن روی دستورالعمل‌های SOUL.</p>
+<p>وقتی streaming ی CLI فعال باشد transform ی فقط-الحاقی بعد از بدنهٔ streamed چاپ می‌شود. transform ای که پاسخ را جایگزین کند بعد از بدنهٔ streamed به‌طور کامل با برچسب post-stream transformation چاپ می‌شود تا محتوای جایگزین هرگز بی‌سروصدا گم نشود.</p>
+<pre dir="ltr"><code>import os, re
+
+def spongebob(response_text, **kwargs):
+    if os.environ.get("SPONGEBOB_MODE") != "on":
+        return None  # pass through unchanged
+    return re.sub(r"!", "!! Tartar sauce!", response_text)
+
+def register(ctx):
+    ctx.register_hook("transform_llm_output", spongebob)</code></pre>
+<p>هوک روی پاسخ غیرخالی و غیرقطع‌شده گارد می‌خورد — روی interrupt های دکمهٔ stop یا نوبت‌های خالی شلیک نمی‌شود. exception ها با هشدار لاگ و اجرای ایجنت را نمی‌شکنند.</p>
+<h3>هوک‌های observer ی درخواست API</h3>
+<p><b>‏pre_api_request</b> — به‌ازای هر تلاش ارائه‌دهنده بلافاصله قبل از ارسالش شلیک می‌شود. فقط-observer است. فیلدهای قدیمی user_message، ‏conversation_history و request_messages خام و برای سازگاری عمداً پاک‌سازی‌نشده‌اند؛ مصرف‌کننده‌های جدید envelope ی پاک‌سازی‌شدهٔ request را ترجیح دهند.</p>
+<p><b>‏post_api_request</b> — بعد از نرمال‌سازی موفق پاسخ ارائه‌دهنده شلیک می‌شود. فقط-observer است. response ی پاک‌سازی‌شده را ترجیح دهید؛ assistant_message پیام خام نرمال‌شده است و usage دادهٔ حسابداری دارد.</p>
+<p><b>‏api_request_error</b> — برای تلاش ناموفق ارائه‌دهنده با زمان‌بندی status/retry، یک آبجکت error و request ی پاک‌سازی‌شده شلیک می‌شود. فقط-observer است. پیام‌های خطا همچنان ممکن است دادهٔ ارائه‌دهنده یا کاربر داشته باشند.</p>
+<h3 id="on_skill_lifecycle">‏<code>on_skill_lifecycle</code></h3>
+<p>بعد از تغییر وضعیت رسمی مصرف مهارت شلیک می‌شود. فقط-observer است و skill_name ی محلی، provenance، ID های correlation، تعداد مصرف و فلگ‌های reuse را expose می‌کند.</p>
+<h3>observer های چرخهٔ حیات کانبان</h3>
+<p><b>‏kanban_task_claimed</b> — بعد از commit ی claim در پروسهٔ dispatcher، بلافاصله قبل از spawn ی worker.</p>
+<p><b>‏kanban_task_completed</b> — بعد از تکمیل و cleanup معمولاً در پروسهٔ worker. summary اش ممکن است محتوای پروژه یا کاربر داشته باشد.</p>
+<p><b>‏kanban_task_blocked</b> — بعد از گذار عادی بلاک‌شده. مسیر انتظار-وابستگی قبل از خروج تراکنش نوشتن آن را invoke می‌کند. reason اش ممکن است محتوای پروژه یا کاربر داشته باشد.</p>
+<p>هر سه هوک کانبان فقط-observer اند و task_id، ‏profile_name، ‏board، ‏assignee و run_id حمل می‌کنند؛ completed مقدار summary و blocked مقدار reason اضافه می‌کند.</p>
+<h3>observer های worker-lifecycle، task-mutation و dispatch ی کانبان</h3>
+<p>پنج observer اضافی ‏(RFC ‎#۵۸۵۴۸‎) خانوادهٔ کانبان را گسترش می‌دهند. همه فقط-observer اند، بعد از commit شدن تراکنش مرتبط شلیک و روی has_hook short-circuit می‌کنند — بدون مشترک، رفتار dispatch تغییری نمی‌کند. هوک‌های مقید-به-تسک همان فیلدهای مشترک هوک‌های بالا را دارند.</p>
+<ul>
+  <li><b>‏on_kanban_worker_spawned</b> — بعد از برگشتن spawn_fn و ماندگار شدن PID ی worker. worker_pid ‏(ممکن است None باشد) و workspace_path اضافه می‌کند. داخل lock ی dispatch اجرا می‌شود؛ callback ها سریع باشند.</li>
+  <li><b>‏on_kanban_worker_exited</b> — مشتق-از-tick وقتی detect_crashed_workers تسک dead-PID را پس می‌گیرد. worker_pid، ‏exit_kind، ‏exit_code، ‏outcome و retry_status اضافه می‌کند.</li>
+  <li><b>‏on_kanban_worker_stale_claim</b> — وقتی claim ی منقضی-TTL پس گرفته شود؛ extension های live-PID شلیک نمی‌کنند. worker_pid، ‏heartbeat_stale و retry_status اضافه می‌کند.</li>
+  <li><b>‏on_kanban_task_updated</b> — بعد از نوشتن کامیت‌شدهٔ فیلد-تسک بیرون از چرخهٔ claim/complete/block ‏(assign_task، override های مدل/استدلال، editorهای داشبورد). changed_fields اضافه می‌کند — فقط نام فیلدها هرگز مقادیرشان نه.</li>
+  <li><b>‏on_kanban_dispatch_tick</b> — یک بار per-tick ی dispatcher، اکیداً بعد از آزاد شدن lock ی dispatch، شامل tick های idle و رقابت-دار-بر-lock. payload: ‏board، ‏profile_name، ‏dry_run، ‏outcome، ‏result.</li>
+</ul>
+</section>
+
+<section class="doc-sec" id="shell-hooks">
+<h2><span class="secnum">۴</span> هوک‌های شل ‏(Shell Hooks)</h2>
+<p>هوک‌های اسکریپت-شل را در ‏<code>~/.hermes/config.yaml</code> اعلام کنید و هرمس هر بار رویداد متناظرِ هوک-پلاگینی شلیک شود آنها را به‌صورت زیرپروسه اجرا می‌کند — هم در نشست‌های CLI هم گیت‌وی. بدون نیاز به نگارش پلاگین پایتونی.</p>
+<p>هوک شل وقتی استفاده کنید که یک اسکریپت تک‌فایلی drop-in می‌خواهید ‏(Bash، ‏Python، هر چیزی با shebang) تا:</p>
+<ul>
+  <li><b>فراخوانی ابزار را بلاک یا modify کند</b> — رد کردن فرمان‌های terminal خطرناک، اعمال سیاست per-directory، الزام تأیید برای عملیات write_file / patch ی مخرب یا بازنویسی آرگومان‌ها ‏(پاک‌سازی مسیر، تزریق پیش‌فرض‌ها) قبل از اجرای ابزار.</li>
+  <li><b>بعد از فراخوانی ابزار اجرا شود</b> — auto-format کردن فایل‌های Python/TypeScript ای که ایجنت همین الان نوشته، لاگ فراخوانی‌های API، شلیک workflow ی CI.</li>
+  <li><b>زمینه به نوبت LLM بعدی تزریق کند</b> — prepend کردن خروجی git status، روز هفتهٔ فعلی یا سندهای بازیابی‌شده به پیام کاربر ‏(بخش pre_llm_call را ببینید).</li>
+  <li><b>رویدادهای چرخهٔ حیات را مشاهده کند</b> — نوشتن یک خط لاگ وقتی زیرایجنتی تمام می‌شود ‏(subagent_stop) یا نشستی شروع می‌شود ‏(on_session_start).</li>
+</ul>
+<p>هوک‌های شل با صدا زدن ‏agent.shell_hooks.register_from_config(cfg) هم در startup ی CLI ‏(hermes_cli/main.py) هم در startup ی گیت‌وی ‏(gateway/run.py) ثبت می‌شوند. طبیعتاً با هوک‌های پلاگین پایتونی ترکیب می‌شوند — هر دو از همان dispatcher عبور می‌کنند.</p>
+<h3>مقایسه در یک نگاه</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>بُعد</th><th>هوک‌های شل</th><th><a href="#plugin-hooks">هوک‌های پلاگین</a></th><th><a href="#gateway-event-hooks">هوک‌های گیت‌وی</a></th></tr></thead>
+<tbody>
+<tr><td>اعلام در</td><td>بلوک ‏hooks: در config.yaml</td><td>register() در پلاگین plugin.yaml دار</td><td>دایرکتوری HOOK.yaml + handler.py</td></tr>
+<tr><td>زندگی زیر</td><td>‏~/.hermes/agent-hooks/ ‏(به‌عنوان قرارداد)</td><td>‏~/.hermes/plugins/&lt;name&gt;/</td><td>‏~/.hermes/hooks/&lt;name&gt;/</td></tr>
+<tr><td>زبان</td><td>هر زبانی ‏(Bash، ‏Python، ‏باینری Go و…)</td><td>فقط پایتون</td><td>فقط پایتون</td></tr>
+<tr><td>اجرا در</td><td>CLI + گیت‌وی</td><td>CLI + گیت‌وی</td><td>فقط گیت‌وی</td></tr>
+<tr><td>رویدادها</td><td>VALID_HOOKS ‏(شامل subagent_stop)</td><td>VALID_HOOKS</td><td>چرخهٔ حیات گیت‌وی ‏(gateway:startup، agent:*، command:*)</td></tr>
+<tr><td>می‌تواند ابزار را بلاک کند</td><td>بله ‏(pre_tool_call)</td><td>بله ‏(pre_tool_call)</td><td>نه</td></tr>
+<tr><td>می‌تواند زمینهٔ LLM تزریق کند</td><td>بله ‏(pre_llm_call)</td><td>بله ‏(pre_llm_call)</td><td>نه</td></tr>
+<tr><td>رضایت</td><td>پرامپت اولین-مصرف per جفت ‏(event, command)</td><td>ضمنی ‏(اعتماد به پلاگین پایتونی)</td><td>ضمنی ‏(اعتماد به دایرکتوری)</td></tr>
+<tr><td>ایزوله‌سازی بین-پروسه‌ای</td><td>بله ‏(زیرپروسه)</td><td>نه ‏(درون-پروسه)</td><td>نه ‏(درون-پروسه)</td></tr>
+</tbody>
+</table>
+</div>
+<h3>schema ی پیکربندی</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hooks:
+  &lt;event_name&gt;:                  # Must be in VALID_HOOKS
+    - matcher: "&lt;regex&gt;"         # Optional; used for pre/post_tool_call only
+      command: "&lt;shell command&gt;" # Required; runs via shlex.split, shell=False
+      timeout: &lt;seconds&gt;         # Optional; default 60, capped at 300
+      fail_closed: &lt;bool&gt;        # Optional; default false. pre_tool_call only.
+                                 # `failClosed` also accepted (Cursor/Claude Code compat)
+
+hooks_auto_accept: false         # See "Consent model" below</code></pre>
+</div>
+<p>نام رویداد باید یکی از رویدادهای هوک-پلاگینی باشد؛ غلط‌های املایی هشدار «Did you mean X?» می‌گیرند و skip می‌شوند. کلیدهای ناشناخته داخل یک ورودی نادیده گرفته می‌شوند؛ نبود command یعنی skip-با-هشدار. ‏timeout بالای ۳۰۰ با هشدار clamp می‌شود. fail_closed روی رویدادی غیر از pre_tool_call هشدار می‌دهد و نادیده گرفته می‌شود ‏(فقط رویدادهای دارای-قابلیت-بلاک می‌توانند fail closed کنند).</p>
+<h3>پروتکل سیمی JSON</h3>
+<p>هر بار رویداد شلیک شود هرمس برای هر هوک منطبق ‏(matcher اجازه دهد) یک زیرپروسه spawn، payload ی JSON را به <b>stdin</b> pipe و <b>stdout</b> را به‌عنوان JSON برمی‌خواند.</p>
+<p><b>stdin — payload ای که اسکریپت دریافت می‌کند:</b></p>
+<pre dir="ltr"><code>{
+  "hook_event_name": "pre_tool_call",
+  "tool_name":       "terminal",
+  "tool_input":      {"command": "rm -rf /"},
+  "session_id":      "sess_abc123",
+  "cwd":             "/home/user/project",
+  "extra":           {"task_id": "...", "tool_call_id": "..."}
+}</code></pre>
+<p>‏tool_name و tool_input برای رویدادهای غیر-ابزاری ‏(pre_llm_call، ‏subagent_stop، چرخهٔ نشست) مقدار null دارند. dict ی extra همهٔ kwargs های مخصوص-رویداد را حمل می‌کند ‏(user_message، ‏conversation_history، ‏child_role، ‏duration_ms و…). مقادیر غیرقابل‌سریالایزی به‌جای حذف، رشته‌ای می‌شوند.</p>
+<p><b>stdout — پاسخ اختیاری:</b></p>
+<pre dir="ltr"><code>// Block a pre_tool_call (both shapes accepted; normalised internally):
+{"decision": "block", "reason":  "Forbidden: rm -rf"}   // Claude-Code style
+{"action":   "block", "message": "Forbidden: rm -rf"}   // Hermes-canonical
+
+// Modify a pre_tool_call — rewrite tool args before dispatch:
+{"action": "modify", "args": {"new_string": "fixed content"}}         // Hermes-canonical
+{"decision": "modify", "tool_input": {"new_string": "fixed content"}} // Claude-Code style
+
+// Inject context for pre_llm_call:
+{"context": "Today is Friday, 2026-04-17"}
+
+// Keep the agent going at the verify gate (pre_verify); both shapes accepted:
+{"action": "continue", "message": "Run the formatter, then finish."}
+{"decision": "block",  "reason":  "Run the formatter, then finish."}
+
+// Silent no-op — any empty / non-matching output is fine:</code></pre>
+<p>JSON ی بدفرم، کدهای خروج غیرصفر و timeout ها هشدار لاگ می‌کنند ولی هرگز حلقهٔ ایجنت را abort نمی‌کنند.</p>
+<h3>کد خروج ۲ = بلاک ‏(سازگار با Claude Code / Cursor)</h3>
+<p>هوک pre_tool_call ای که با کد خروج <b>۲</b> خارج شود حتی وقتی stdout اش هیچ block JSON ی ندارد فراخوانی ابزار را بلاک می‌کند. پیام بلاک به ترتیب اولویت حل می‌شود:</p>
+<ol>
+  <li>block JSON ی stdout ‏(reason / message) وقتی حاضر است؛</li>
+  <li>۴۰۰ نویسهٔ اول stderr؛</li>
+  <li>پیش‌فرض عمومی «Blocked by shell hook.».</li>
+</ol>
+<p>پس ساده‌ترین هوک بلاک‌کنندهٔ ممکن:</p>
+<pre dir="ltr"><code>#!/usr/bin/env bash
+echo "policy violation: rm -rf is not permitted" &gt;&amp;2
+exit 2</code></pre>
+<p>برای رویدادهایی که directive ی بلاکشان محترم شمرده نمی‌شود ‏(همه جز pre_tool_call)، کد خروج ۲ مثل هر خروج غیرصفر دیگری رفتار می‌شود: هشداری لاg و stdout همچنان parse می‌شود.</p>
+<h3>fail-open در برابر fail-closed</h3>
+<p>به‌طور پیش‌فرض هوک‌های شل <b>fail-open</b> هستند: خطای spawn، ‏timeout یا stdout ی غیرقابل-parse هشداری لاگ و اقدام ادامه می‌یابد. این برای هوک‌های observability پیش‌فرض درست است — ولی برای گیت‌های امنیتی غلط. اسکنر-secrets کرش‌کرده نباید بی‌سروصدا فراخوانی ابزاری را که قرار بود بازرسی کند مجاز کند.</p>
+<p>مقدار ‏fail_closed: true ‏(یا failClosed: true، املای Cursor/Claude Code) را روی ورودی pre_tool_call ست کنید تا معکوس شود:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hooks:
+  pre_tool_call:
+    - matcher: "terminal|write_file|patch"
+      command: "~/.hermes/agent-hooks/secret-scan.sh"
+      timeout: 10
+      fail_closed: true</code></pre>
+</div>
+<p>با fail_closed: true هر کدام از اینها حالا فراخوانی ابزار را با پیام «hook &lt;command&gt; failed closed: &lt;reason&gt;» <b>بلاک می‌کند</b>:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>شکست</th><th>Fail-open ‏(پیش‌فرض)</th><th>‏fail_closed: true</th></tr></thead>
+<tbody>
+<tr><td>فرمان پیدا نشد / قابل‌اجرا نبود</td><td>هشدار، ادامه</td><td><b>بلاک</b></td></tr>
+<tr><td>Timeout</td><td>هشدار، ادامه</td><td><b>بلاک</b></td></tr>
+<tr><td>stdout ی غیر-JSON ‏(مثلاً stack trace)</td><td>هشدار، ادامه</td><td><b>بلاک</b></td></tr>
+<tr><td>خروج تمیز، JSON ی no-op ی معتبر ‏({})</td><td>ادامه</td><td>ادامه</td></tr>
+</tbody>
+</table>
+</div>
+<p>‏fail_closed فقط روی رویدادهای دارای-قابلیت-بلاک اعمال می‌شود ‏(امروز pre_tool_call)؛ ست کردنش روی هر رویداد دیگری هنگام parse ی config هشدار لاگ و نادیده گرفته می‌شود. hermes hooks test این معناشناسی را منعکس می‌کند — خط parsed دقیقاً شکل بلوکی را نشان می‌دهد که dispatcher دریافت می‌کرد.</p>
+<h3>مثال‌های کاربردی</h3>
+<h4>۱. Auto-format فایل‌های پایتون بعد از هر نوشتن</h4>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ~/.hermes/config.yaml
+hooks:
+  post_tool_call:
+    - matcher: "write_file|patch"
+      command: "~/.hermes/agent-hooks/auto-format.sh"</code></pre>
+</div>
+<pre dir="ltr"><code>#!/usr/bin/env bash
+# ~/.hermes/agent-hooks/auto-format.sh
+payload="$(cat -)"
+path=$(echo "$payload" | jq -r '.tool_input.path // empty')
+[[ "$path" == *.py ]] &amp;&amp; command -v black &gt;/dev/null &amp;&amp; black "$path" 2&gt;/dev/null
+printf '{}\n'</code></pre>
+<p>نمای در-زمینهٔ ایجنت از فایل <b>خودکار</b> دوباره خوانده نمی‌شود — reformat فقط فایل روی دیسک را تحت تأثیر می‌گذارد. فراخوانی‌های بعدی read_file نسخهٔ فرمت‌شده را می‌گیرند.</p>
+<h4>۲. بلاک کردن فرمان‌های terminal ی مخرب</h4>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hooks:
+  pre_tool_call:
+    - matcher: "terminal"
+      command: "~/.hermes/agent-hooks/block-rm-rf.sh"
+      timeout: 5</code></pre>
+</div>
+<pre dir="ltr"><code>#!/usr/bin/env bash
+# ~/.hermes/agent-hooks/block-rm-rf.sh
+payload="$(cat -)"
+cmd=$(echo "$payload" | jq -r '.tool_input.command // empty')
+if echo "$cmd" | grep -qE 'rm[[:space:]]+-rf?[[:space:]]+/'; then
+  printf '{"decision": "block", "reason": "blocked: rm -rf / is not permitted"}\n'
+else
+  printf '{}\n'
+fi</code></pre>
+<h4>۳. تزریق git status در هر نوبت ‏(معادل UserPromptSubmit ی Claude-Code)</h4>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hooks:
+  pre_llm_call:
+    - command: "~/.hermes/agent-hooks/inject-cwd-context.sh"</code></pre>
+</div>
+<pre dir="ltr"><code>#!/usr/bin/env bash
+# ~/.hermes/agent-hooks/inject-cwd-context.sh
+cat - &gt;/dev/null   # discard stdin payload
+if status=$(git status --porcelain 2&gt;/dev/null) &amp;&amp; [[ -n "$status" ]]; then
+  jq --null-input --arg s "$status" \
+     '{context: ("Uncommitted changes in cwd:\n" + $s)}'
+else
+  printf '{}\n'
+fi</code></pre>
+<p>رویداد UserPromptSubmit ی Claude Code عمداً رویداد جداگانه‌ای در هرمس نیست — pre_llm_call همان‌جا شلیک می‌شود و از قبل تزریق زمینه را پشتیبانی می‌کند. همینجا استفاده‌اش کنید.</p>
+<h4>۴. لاگ هر تکمیل زیرایجنت</h4>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hooks:
+  subagent_stop:
+    - command: "~/.hermes/agent-hooks/log-orchestration.sh"</code></pre>
+</div>
+<pre dir="ltr"><code>#!/usr/bin/env bash
+# ~/.hermes/agent-hooks/log-orchestration.sh
+log=~/.hermes/logs/orchestration.log
+jq -c '{ts: now, parent: .session_id, extra: .extra}' &lt; /dev/stdin &gt;&gt; "$log"
+printf '{}\n'</code></pre>
+<h3>مدل رضایت</h3>
+<p>هر جفت یکتای ‏(event, command) اولین باری که هرمس می‌بیند برای تأیید از کاربر پرامپت می‌گیرد و بعد تصمیم را در ‏<code>~/.hermes/shell-hooks-allowlist.json</code> ماندگار می‌کند. اجراهای بعدی ‏(CLI یا گیت‌وی) پرامپت را skip می‌کنند.</p>
+<p>سه دریچهٔ فرار پرامپت تعاملی را دور می‌زنند — هر یکی کافی است:</p>
+<ol>
+  <li>فلگ ‏--accept-hooks روی CLI ‏(مثلاً ‏hermes --accept-hooks chat)</li>
+  <li>متغیر محیطی ‏HERMES_ACCEPT_HOOKS=1</li>
+  <li>‏hooks_auto_accept: true در ‏~/.hermes/config.yaml</li>
+</ol>
+<p>اجراهای non-TTY ‏(گیت‌وی، ‏cron، ‏CI) یکی از این سه را لازم دارند — وگرنه هر هوک تازه‌اضافه‌شده بی‌صدا ثبت‌نشده می‌ماند و هشدار لاg می‌کند.</p>
+<p><b>ویرایش اسکریپت‌ها بی‌سروصدا مورد اعتماد است.</b> allowlist روی رشتهٔ دقیق فرمان کلید می‌خورد نه hash ی اسکریپت، پس ویرایش اسکریپت روی دیسک رضایت را باطل نمی‌کند. ‏hermes hooks doctor انحراف mtime را پرچم می‌زند تا ویرایش‌ها را ببینید و تصمیم بگیرید دوباره approve کنید یا نه.</p>
+<h4>allowlist دستی</h4>
+<p>allowlist دستی برای استقرارهای non-TTY یا حساب-سرویس مفید است که اپراتور نمی‌تواند پرامپت اولین-مصرف را تعاملی جواب دهد. فایل allowlist ‏~/.hermes/shell-hooks-allowlist.json است و قالب مورد انتظار آرایه‌ای approvals است. هر approval مقدار event ی هوک و رشتهٔ دقیق command را ثبت می‌کند:</p>
+<pre dir="ltr"><code>{
+  "approvals": [
+    {
+      "event": "post_llm_call",
+      "command": "/home/hermes/.hermes/hooks/my-hook.py"
+    }
+  ]
+}</code></pre>
+<p>رشتهٔ فرمان باید دقیقاً با فرمان هوک پیکربندی‌شده بخورد. آبجکت کلیدخورده-با-مسیر با فیلد sha256 قالب مورد انتظار نیست و هوک را approve نمی‌کند. ورودی‌های دستی را با ‏hermes hooks list تأیید کنید.</p>
+<h3>CLI ی ‏hermes hooks</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فرمان</th><th>چه می‌کند</th></tr></thead>
+<tbody>
+<tr><td><code>hermes hooks list</code></td><td>dump ی هوک‌های پیکربندی‌شده همراه matcher، timeout و وضعیت رضایت</td></tr>
+<tr><td><code>hermes hooks test &lt;event&gt; [--for-tool X] [--payload-file F]</code></td><td>شلیک هر هوک منطبق علیه payload ی مصنوعی و چاپ پاسخ parse‌شده</td></tr>
+<tr><td><code>hermes hooks revoke &lt;command&gt;</code></td><td>حذف هر ورودی allowlist ی مطابق &lt;command&gt; ‏(از ری‌استارت بعدی مؤثر)</td></tr>
+<tr><td><code>hermes hooks doctor</code></td><td>برای هر هوک پیکربندی‌شده: بررسی بیت exec، وضعیت allowlist، انحراف mtime، اعتبار خروجی JSON و زمان اجرای تقریبی</td></tr>
+</tbody>
+</table>
+</div>
+<h3>امنیت</h3>
+<p>هوک‌های شل با <b>کل اعتبارنامهٔ کاربری شما</b> اجرا می‌شوند — همان مرز اعتماد یک ورودی cron یا alias ی شل. بلوک hooks: در config.yaml را پیکربندی ممتاز تلقی کنید:</p>
+<ul>
+  <li>فقط به اسکریپت‌هایی ارجاع دهید که خودتان نوشته‌اید یا کامل بازبینی کرده‌اید.</li>
+  <li>اسکریپت‌ها را داخل ‏~/.hermes/agent-hooks/ نگه دارید تا مسیرشان آسان auditable باشد.</li>
+  <li>بعد از pull کردن config ی مشترک، hermes hooks doctor را دوباره اجرا کنید تا هوک‌های تازه‌اضافه را قبل از ثبت شدن ببینید.</li>
+  <li>اگر config.yaml تان بین تیم version-control می‌شود PR هایی که بخش hooks: را عوض می‌کنند را مثل config ی CI بازبینی کنید.</li>
+</ul>
+<h3>ترتیب و اولویت</h3>
+<p>هم هوک‌های پلاگین پایتونی هم هوک‌های شل از dispatcher ی واحد invoke_hook() عبور می‌کنند. پلاگین‌های پایتونی اول ثبت ‏(discover_and_load()) و هوک‌های شل دوم ‏(register_from_config()) می‌شوند، پس تصمیم‌های بلاکِ pre_tool_call ی پایتون در حالت تساوی مقدم‌اند. اولین بلاکِ معتبر برنده است — aggregator به‌محض تولید {"action": "block", "message": str} توسط هر callback ای با message غیرخالی برمی‌گردد.</p>
+</section>
+
+<section class="doc-sec" id="outbound-webhooks">
+<h2><span class="secnum">۵</span> وب‌هوک‌های خروجی</h2>
+<p>وب‌هوک‌های خروجی آینهٔ push-side ی <a href="../messaging/webhooks.html">پلتفرم وب‌هوک ورودی</a> هستند: وب‌هوک‌های ورودی هرمس را وقتی دنیا تغییر کند بیدار می‌کنند؛ وب‌هوک‌های خروجی به دنیا می‌گویند هرمس چه کرد. فهرستی از نقاط پایانی HTTP و رویدادهای چرخهٔ حیاتی موردعلاقه‌شان را پیکربندی می‌کنید و هرمس هر بار رویداد منطبق شلیک شود payload ی JSON ی امضاشده به هر نقطهٔ پایانی POST می‌کند — بدون polling در سمت گیرنده.</p>
+<p>کاربردهای معمول:</p>
+<ul>
+  <li>نوتیفیکیشن به سیستم CI یا داشبورد وقتی نوبت ایجنت تمام شود ‏(on_session_end)</li>
+  <li>ردیابی تکمیل‌های زیرایجنت در سراسر یک fleet ‏(subagent_stop)</li>
+  <li>تغذیهٔ فعالیت ابزار در مانیتورینگ بیرونی ‏(post_tool_call با matcher)</li>
+  <li>بیدار کردن نمونهٔ <i>دیگر</i> هرمس: URL را روی وب‌هوک ورودی آن نمونه اشاره دهید</li>
+</ul>
+<h3>پیکربندی</h3>
+<p>فهرست ‏<code>hooks.outbound:</code> را به ‏<code>~/.hermes/config.yaml</code> اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>hooks:
+  outbound:
+    - name: ci-notify                       # optional label for logs
+      url: https://ci.example.com/hermes-events
+      events: [on_session_end, subagent_stop]
+      secret_env: HERMES_OUTBOUND_WEBHOOK_SECRET   # env var holding the HMAC secret
+      timeout: 10                           # per-attempt seconds (1–60)
+
+    - name: tool-monitor
+      url: https://metrics.example.com/hooks/hermes
+      events: [post_tool_call]
+      matcher: "terminal|delegate_task"     # regex, tool-scoped events only</code></pre>
+</div>
+<p>هر رویدادی از مجموعهٔ هوک-پلاگینی معتبر است ‏(pre_tool_call، ‏post_tool_call، ‏pre_llm_call، ‏post_llm_call، ‏on_session_start، ‏on_session_end، ‏subagent_start، ‏subagent_stop و…). ورودی‌های بدفرم هشدار می‌دهند و skip می‌شوند — وب‌هوک خراب هرگز ایجنت را کرش نمی‌کند. تغییرات روی نشست CLI بعدی / ری‌استارت گیت‌وی مؤثر می‌شوند.</p>
+<p>Secrets: مقدار ‏secret_env ‏(نام متغیر محیطی، معمولاً ست‌شده در ‏~/.hermes/.env) را به literal ی inline ی secret ترجیح دهید تا فایل config عاری از اعتبارنامه بماند. ورودی‌های بدون secret unsigned تحویل می‌یابند ‏(توسط hermes hooks list با برچسب UNSIGNED فلگ می‌شوند).</p>
+<h3>قالب سیمی</h3>
+<p>هر شلیک body ی JSON ای با همان شکل سطح-بالای stdin ی هوک‌های شل به‌علاوهٔ متادیتای تحویل POST می‌کند:</p>
+<pre dir="ltr"><code>{
+  "hook_event_name": "on_session_end",
+  "tool_name": null,
+  "tool_input": null,
+  "session_id": "sess_abc123",
+  "cwd": "/home/user/project",
+  "extra": {"completed": true, "interrupted": false, "model": "...", "platform": "cli"},
+  "delivery_id": "3f2c9a...",
+  "timestamp": "2026-07-22T14:00:00Z"
+}</code></pre>
+<p>هدرها:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>هدر</th><th>مقدار</th></tr></thead>
+<tbody>
+<tr><td><code>Content-Type</code></td><td>application/json</td></tr>
+<tr><td><code>X-Hermes-Event</code></td><td>نام رویداد هوک</td></tr>
+<tr><td><code>X-Hermes-Delivery</code></td><td>ID یکتا per-delivery — همان مقدار delivery_id در body</td></tr>
+<tr><td><code>X-Hermes-Signature-256</code></td><td>sha256=&lt;hex&gt; — ‏HMAC-SHA256 ی body خام به سبک GitHub؛ فقط وقتی secret پیکربندی شده حاضر است</td></tr>
+</tbody>
+</table>
+</div>
+<p>امضا را دقیقاً مثل وب‌هوک GitHub تأیید کنید:</p>
+<pre dir="ltr"><code>import hashlib, hmac
+
+def verify(body: bytes, header: str, secret: str) -&gt; bool:
+    expected = "sha256=" + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, header)</code></pre>
+<p>چون delivery_id و timestamp <b>داخل body ی امضاشده</b> زندگی می‌کنند، گیرندهٔ verify‌شده حفاظت replay را هم مجاناً می‌گیرد:</p>
+<ul>
+  <li><b>Dedupe</b> روی delivery_id ‏(یا هدر X-Hermes-Delivery ی متناظر) — id های اخیراً دیده‌شده را به یاد داشته و تکراری‌ها را skip کنید. هرمس تحویل‌های ناموفق را یک بار retry می‌کند پس رسیدن دو بارهٔ همان id مشروع است.</li>
+  <li><b>رد کردن رویدادهای کهنه</b> با بررسی timestamp علیه ساعتتان با پنجرهٔ تحمل ‏(۵ دقیقه رایج است). مهاجمی که درخواست captured را replay می‌کند بدون secret نمی‌تواند timestamp تازه‌ای جعل کند.</li>
+</ul>
+<h3>معناشناسی تحویل</h3>
+<ul>
+  <li><b>Fire-and-forget، بیرون مسیر داغ.</b> رویدادها فوری سریالایز و صف می‌شوند؛ یک thread ی پس‌زمینه POST های HTTP را انجام می‌دهد. نقطهٔ پایانی کند یا مرده هرگز فراخوانی ابزار یا نوبت ایجنتی را معلق نمی‌کند.</li>
+  <li><b>فقط-نوتیفیکیشن.</b> برخلاف هوک‌های شل، وب‌هوک‌های خروجی نمی‌توانند ابزار بلاک یا زمینه تزریق کنند — body ی پاسخ نادیده گرفته می‌شود. آنها مشاهده می‌کنند هرگز هدایت نمی‌کنند.</li>
+  <li><b>retry های محدود.</b> خطاهای اتصال و پاسخ‌های ۵xx یک بار با backoff دوباره تلاش می‌شوند؛ پاسخ‌های ۴xx retry نمی‌شوند ‏(گیرنده گفت خود درخواست غلط است). شکست‌ها لاگ و drop می‌شوند — تحویل best-effort است نه تضمینی.</li>
+  <li><b>redirect ها هرگز دنبال نمی‌شوند.</b> پاسخ 3xx پیکربندی‌غلط تلقی و لاگ می‌شود — دنبال کردن POST ی redirect‌شده payload ی امضاشده را بی‌سروصدا drop می‌کرد. url را روی نقطهٔ پایانی نهایی اشاره دهید.</li>
+  <li><b>صف محدود.</b> اگر صف عقب بیفتد ‏(نقطهٔ پایانی مرده، طوفان رویداد)، رویدادهای جدید با هشدار drop می‌شوند نه مصرف حافظهٔ نامحدود.</li>
+  <li><b>بدون پرامپت رضایت.</b> اهداف خروجی هیچ کدی روی ماشین شما اجرا نمی‌کنند — داده را در URL ای که شما پیکربندی کرده‌اید دریافت می‌کنند. ‏HERMES_SAFE_MODE=1 همچنان مثل پلاگین‌ها و هوک‌های شل ثبت را skip می‌کند. توجه کنید payload ها ورودی‌های ابزار و متادیتای رویداد را شامل می‌شوند، پس اهداف را فقط به نقاط پایانی مورد اعتماد اشاره دهید و https را ترجیح دهید.</li>
+</ul>
+<p>‏hermes hooks list اهداف خروجی پیکربندی‌شده را کنار هوک‌های شل نشان می‌دهد شامل اینکه هر هدف امضاشده است یا نه.</p>
+</section>
+
+<div class="pager">
+  <a href="extending-the-dashboard.html"><span class="dir">→ قبلی</span><span class="ttl">گسترش داشبورد وب</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+
+
+
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/hooks" target="_blank" rel="noopener">Event Hooks</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۹۶ از ۲۰۷ صفحه (۴۶٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۹۷ از ۲۰۷ صفحه (۴۷٪)** |
 
 ---
 
@@ -498,6 +498,12 @@ hermes-docs-fa/
 - زنجیرهٔ pager: …tts ← browser ← (به‌زودی)
 - پیشرفت: **۹۶ از ۲۰۷ صفحه فعال (۴۶٪)**
 
+### نشست ۶۱ — 2026-08-26 — 🪝 هوک‌های چرخهٔ حیات — 🎉 اتوماسیون ۸/۸ کامل شد
+- ترجمه و انتشار «هوک‌های رویداد» (۵ بخش، بزرگ‌ترین صفحهٔ مستندات ~۱۹۰۰ خط، چهارمرحله‌ای): جدول چهار سیستم هوک، هوک‌های گیت‌وی با جدول رویدادها و wildcard و آموزش BOOT.md ‏([SILENT]، _resolve_gateway_model/_resolve_runtime_agent_kwargs)، هوک‌های پلاگین با قواعد عمومی و بخش‌های پرامپت سیستمی امن-از-نظر-کش، کاتالوگ کامل ~۴۰ هوک ارسال‌شده در جدول پنج‌ستونی ‏(دسته/زمان‌بندی/payload/حریم خصوصی)، هوک‌های استریم با صف محدود، مستندات تفصیلی هر هوک از pre/post_tool_call تا pre_llm_call/post_llm_call و pre_verify و subagent_start/stop و pre_gateway_dispatch و gateway_platform_event و تأییدها و pre_transcription و transform ها و observerهای کانبان، هوک‌های شل با مقایسهٔ سه‌گانه و پروتکل JSON و کد خروج ۲ و fail-closed و چهار مثال کاربردی و مدل رضایت و CLI و وب‌هوک‌های خروجی امضاشده با HMAC
+- 🎉 گروه «اتوماسیون» کاملاً ترجمه شد: ۸ از ۸ صفحه
+- زنجیرهٔ pager: …extending-the-dashboard ← hooks ← (به‌زودی)
+- پیشرفت: **۹۷ از ۲۰۷ صفحه فعال (۴۷٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -600,6 +606,7 @@ hermes-docs-fa/
 | 94 | `user-guide/features/voice-mode.html` | حالت صوتی |
 | 95 | `user-guide/features/tts.html` | متن به گفتار (TTS) |
 | 96 | `user-guide/features/browser.html` | مرورگر |
+| 97 | `user-guide/features/hooks.html` | هوک‌های چرخهٔ حیات |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|
