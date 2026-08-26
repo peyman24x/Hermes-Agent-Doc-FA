@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اتوماسیون مرورگر — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/browser" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>اتوماسیون مرورگر</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>اتوماسیون مرورگر ‏(Browser Automation)</h1>
+<p>هرمس ایجنت یک تول‌ست کامل اتوماسیون مرورگر با گزینه‌های بک‌اند متعدد دارد:</p>
+<ul>
+  <li><b>حالت ابری Browserbase</b> از طریق ‏<a href="https://browserbase.com" target="_blank" rel="noopener">Browserbase</a> برای مرورگرهای ابریِ مدیریت‌شده و ابزارهای ضد-بات</li>
+  <li><b>حالت ابری Browser Use</b> از طریق ‏<a href="https://browser-use.com" target="_blank" rel="noopener">Browser Use</a> به‌عنوان ارائه‌دهندهٔ جایگزین مرورگر ابری</li>
+  <li><b>حالت Browser Use</b> از طریق ‏<a href="https://github.com/browser-use/browser-use" target="_blank" rel="noopener">CLI ی ۳٫۰ ی Browser Use</a> — هارنس جدیدی که در تسک‌های وب SOTA است؛ Chrome محلی شما یا مرورگرهای ابری Browser Use را اتومات می‌کند</li>
+  <li><b>حالت ابری Firecrawl</b> از طریق ‏<a href="https://firecrawl.dev" target="_blank" rel="noopener">Firecrawl</a> برای مرورگرهای ابری با scraping داخلی</li>
+  <li><b>حالت محلی Camofox</b> از طریق ‏<a href="https://github.com/jo-inc/camofox-browser" target="_blank" rel="noopener">Camofox</a> برای مرور ضددیدگی محلی ‏(فریب اثر انگشت مبتنی بر Firefox)</li>
+  <li><b>موتور محلی Lightpanda</b> از طریق ‏<a href="https://lightpanda.io" target="_blank" rel="noopener">Lightpanda</a> — مرورگر headless ساخته‌شده از صفر در Zig برای ماشین‌ها؛ راه‌اندازی آنی، حافظهٔ ‎۱۶×‎ کمتر و سرعت ‎۹×‎ بیشتر از Chrome با fallback خودکار Chrome برای اقداماتی که هنوز پشتیبانی نمی‌کند</li>
+  <li><b>CDP خانوادهٔ Chromium محلی</b> — وصل کردن ابزارهای مرورگر به نمونهٔ خودتان از Chrome، ‏Brave، ‏Chromium یا Edge با ‏<code>/browser connect</code></li>
+  <li><b>حالت مرورگر محلی</b> از طریق CLI ی ‏agent-browser و یک نصب محلی Chromium</li>
+</ul>
+<p>در همهٔ حالت‌ها ایجنت می‌تواند به سایت‌ها برود، با عناصر صفحه تعامل کند، فرم پر کند و اطلاعات استخراج کند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نمای کلی</h2>
+<p>صفحات به‌صورت <b>درخت‌های دسترس‌پذیری</b> ‏(snapshot های متنی) نمایش داده می‌شوند که آنها را برای ایجنت‌های LLM ایده‌آل می‌کند. عناصر تعاملی ref ID می‌گیرند ‏(مثل ‏<code>@e1</code>، ‏<code>@e2</code>) که ایجنت برای کلیک و تایپ استفاده می‌کند.</p>
+<p>قابلیت‌های کلیدی:</p>
+<ul>
+  <li><b>اجرای ابری چند-ارائه‌دهنده‌ای</b> — Browserbase، ‏Browser Use یا Firecrawl — بدون نیاز به مرورگر محلی</li>
+  <li><b>یکپارچگی محلی خانوادهٔ Chromium</b> — اتصال به مرورگر درحال‌اجرا ی Chrome، ‏Brave، ‏Chromium یا Edge از طریق CDP برای مرور دستی</li>
+  <li><b>استلث داخلی</b> — اثر انگشت تصادفی، حل CAPTCHA، پروکسی‌های رزیدنشیال ‏(Browserbase)</li>
+  <li><b>ایزوله‌سازی نشست</b> — هر تسک نشست مرورگری خودش را می‌گیرد</li>
+  <li><b>پاکسازی خودکار</b> — نشست‌های بی‌کار بعد از timeout بسته می‌شوند</li>
+  <li><b>تحلیل بینایی</b> — اسکرین‌شات + تحلیل AI برای درک بصری</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> راه‌اندازی</h2>
+<div class="callout tip">
+  <div class="callout-title">💡 مشترکان Nous</div>
+  <p>اگر اشتراک پولی <a href="https://portal.nousresearch.com" target="_blank" rel="noopener">Nous Portal</a> دارید می‌توانید اتوماسیون مرورگر را از طریق <a href="tool-gateway.html">Tool Gateway</a> بدون هیچ کلید API جداگانه‌ای استفاده کنید. نصب‌های تازه می‌توانند ‏<code>hermes setup --portal</code> را اجرا کنند تا وارد شوند و همهٔ ابزارهای گیت‌وی را یکجا روشن کنند؛ نصب‌های موجود می‌توانند از طریق ‏<code>hermes model</code> یا ‏<code>hermes tools</code> مقدار <b>Nous Subscription</b> را به‌عنوان ارائه‌دهندهٔ مرورگر بردارند.</p>
+</div>
+<h3>حالت ابری Browserbase</h3>
+<p>برای استفاده از مرورگرهای ابری مدیریت‌شدهٔ Browserbase اضافه کنید:</p>
+<pre dir="ltr"><code># Add to ~/.hermes/.env
+BROWSERBASE_API_KEY=***
+BROWSERBASE_PROJECT_ID=your-project-id-here</code></pre>
+<p>اعتبارنامه‌هایتان را از ‏<a href="https://browserbase.com" target="_blank" rel="noopener">browserbase.com</a> بگیرید.</p>
+<h3>حالت ابری Browser Use</h3>
+<p>برای استفاده از Browser Use به‌عنوان ارائه‌دهندهٔ مرورگر ابری اضافه کنید:</p>
+<pre dir="ltr"><code># Add to ~/.hermes/.env
+BROWSER_USE_API_KEY=***</code></pre>
+<p>کلید API تان را از ‏<a href="https://browser-use.com" target="_blank" rel="noopener">browser-use.com</a> بگیرید.</p>
+<div class="callout note">
+  <div class="callout-title">📌 انتخاب ارائه‌دهنده</div>
+  <p>کلیدهای .env بالا فقط <b>اعتبارنامه</b> تأمین می‌کنند. مرورگر ابری فعال با انتخاب ‏browser.cloud_provider نوشته‌شده توسط ‏hermes tools ← Browser Automation برگزیده می‌شود ‏(browserbase، ‏browser-use، ‏camofox یا nous برای اشتراک Nous). به‌محض وجود یک انتخاب، افزودن یا حذف کلید ارائه‌دهنده را عوض نمی‌کند — و ارائه‌دهندهٔ انتخاب‌شده با کلید غایب خطایی همراه راهنمای اجرای hermes tools می‌دهد نه اینکه بی‌سروصدا تغییر مسیر دهد. راه‌اندازی‌های هرگز-پیکربندی‌نشده همچنان از اعتبارنامه‌های موجود خودآشکار می‌شوند.</p>
+</div>
+<h3>حالت Browser Use ‏(پیش‌فرض)</h3>
+<p>حالت Browser Use از ‏<a href="https://github.com/browser-use/browser-use" target="_blank" rel="noopener">CLI ی ۳٫۰ ی Browser Use</a> — هارنس جدیدی که در تسک‌های وب پیشرفته‌ترین حال را دارد — به‌جای ابزارهای مرورگر داخلی استفاده می‌کند. ایجنت داخل مرورگر پایتون می‌نویسد و اجرا می‌کند تا کلیک کند، تایپ کند، بکشد، scrape کند و با صفحات وب تعامل داشته باشد.</p>
+<p><b>این حالت پیش‌فرض مرورگر است</b>: وقتی ‏browser.backend ست نباشد و CLI ی browser-use قابل‌اجرا باشد ‏(نصب‌شده، یا در دسترس از طریق uvx)، ایجنت تک‌ابزار ‏browser_exec را می‌گیرد. اگر CLI نتواند اجرا شود هرمس خودکار به ابزارهای مرورگر داخلی برمی‌گردد.</p>
+<p>این حالت یک <b>درایور</b> است که با بک‌اند مرورگری پیکربندی‌شده‌تان ترکیب می‌شود: Chrome محلی‌تان، یک مرورگر ابری اشتراک-Nous، ‏Browserbase، ‏Firecrawl یا مرورگرهای ابری Browser Use را می‌رانَد — هر منبع مرورگری که در hermes tools ← Browser Automation انتخاب شده. تنها استثنا Camofox است که نقطهٔ پایانی CDP ای برای اتصال هارنس ندارد؛ setup های Camofox خودکار ابزارهای مرورگر داخلی را نگه می‌دارند.</p>
+<p><b>نشست‌های همزمان:</b> ‏browser_exec آرگومان ‏session=&lt;name&gt; می‌پذیرد که کارِ مرورگری را per-name روی همهٔ بک‌اندها ایزوله می‌کند. هر نام دیمون هارنس خودش را دارد ‏(socket IPC و log و وضعیت خودش) و روی بک‌اندهای ابری مرورگر خودش را — پس زیرایجنت‌های موازی یا گفتگوهای همزمان دیگر اتصال مشترک واحد را له نمی‌کنند. حذف session از دیمون پیش‌فرض مشترک استفاده می‌کند که برای مرور یکی-در-آن-واحد کافی است.</p>
+<p>برای انصراف و اجبار به ابزارهای مرورگر داخلی از ‏<code>/browser use off</code> استفاده کنید یا:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Add to ~/.hermes/config.yaml
+browser:
+  backend: "off"</code></pre>
+</div>
+<p>‏(<code>backend: "browser-use"</code> برای اجبار صریح به این حالت معتبر می‌ماند.)</p>
+<p>مرورگرهای ابری خودِ Browser Use به ‏<code>browser-use auth login</code> یا ‏BROWSER_USE_API_KEY نیاز دارند؛ سایر منابع مرورگر از اعتبارنامه‌های فعلی‌شان بدون تغییر استفاده می‌کنند.</p>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>چون حالت Browser Use پایتون نوشته-شده-توسط-مدل را روی ماشین شما اجرا می‌کند، ابزار browser_exec فقط به نشست‌هایی عرضه می‌شود که ترمینال هم دارند. پلتفرم‌هایی بدون تول‌ست ترمینال پیکربندی شده‌اند ‏(مثلاً یک سطح پیام‌رسانی قفل‌شده) به‌جایش ابزارهای مرورگر پیش‌فرض را نگه می‌دارند.</p>
+</div>
+<h3>حالت ابری Firecrawl</h3>
+<p>برای استفاده از Firecrawl به‌عنوان ارائه‌دهندهٔ مرورگر ابری اضافه کنید:</p>
+<pre dir="ltr"><code># Add to ~/.hermes/.env
+FIRECRAWL_API_KEY=fc-***</code></pre>
+<p>کلید API تان را از ‏<a href="https://firecrawl.dev" target="_blank" rel="noopener">firecrawl.dev</a> بگیرید. سپس Firecrawl را به‌عنوان ارائه‌دهندهٔ مرورگر انتخاب کنید:</p>
+<div class="codebox"><pre><code>hermes setup tools
+# → Browser Automation → Firecrawl</code></pre></div>
+<p>تنظیمات اختیاری:</p>
+<pre dir="ltr"><code># Self-hosted Firecrawl instance (default: https://api.firecrawl.dev)
+FIRECRAWL_API_URL=http://localhost:3002
+
+# Session TTL in seconds (default: 300)
+FIRECRAWL_BROWSER_TTL=600</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> مسیریابی هیبریدی: ابر برای URL های عمومی، محلی برای LAN/localhost</h2>
+<p>وقتی یک ارائه‌دهندهٔ ابری پیکربندی شده باشد، هرمس برای URL هایی که به آدرس خصوصی/loopback/LAN حل می‌شوند ‏(localhost، ‏127.0.0.1، ‏192.168.x.x، ‏10.x.x.x، ‏172.16-31.x.x، ‏*.local، ‏*.lan، ‏*.internal، loopback ی IPv6 ی ‏::1، link-local ی ‏169.254.x.x) خودکار یک <b>sidecar ی Chromium محلی</b> spawn می‌کند. URL های عمومی در همان گفتگو همچنان از ارائه‌دهندهٔ ابری استفاده می‌کنند.</p>
+<p>این گردش‌کار رایج «محلی توسعه می‌دهم ولی از Browserbase استفاده می‌کنم» را حل می‌کند — ایجنت می‌تواند از داشبوردتان در ‏http://localhost:3000 اسکرین‌شات بگیرد <b>و</b> github.com را scrape کند بدون اینکه ارائه‌دهنده عوض کنید یا گارد SSRF را خاموش کنید. ارائه‌دهندهٔ ابری هرگز URL خصوصی را نمی‌بیند.</p>
+<p>این قابلیت <b>به‌طور پیش‌فرض روشن است</b>. برای غیرفعال کردن ‏(همهٔ URL ها مثل قبل به ارائه‌دهندهٔ ابری پیکربندی‌شده بروند):</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ~/.hermes/config.yaml
+browser:
+  cloud_provider: browserbase
+  auto_local_for_private_urls: false</code></pre>
+</div>
+<p>با خاموش بودن مسیریابی خودکار، URL های خصوصی با پیام «Blocked: URL targets a private or internal address» رد می‌شوند مگر اینکه ‏<code>browser.allow_private_urls: true</code> را هم ست کنید ‏(که اجازه می‌دهد ارائه‌دهندهٔ ابری امتحانشان کند — معمولاً کار نمی‌کند چون Browserbase و… به LAN شما نمی‌رسند).</p>
+<p>نیازمندی‌ها: sidecar محلی همان CLI ی agent-browser حالت کاملاً محلی را استفاده می‌کند، پس باید نصب باشد ‏(‏hermes setup tools ← Browser Automation خودش نصبش می‌کند). redirect های بعد-از-ناوبری از URL عمومی به آدرس خصوصی همچنان بلاک‌اند ‏(میان‌برِ redirect-به-داخلی برای رسیدن به LAN از مسیر عمومی جواب نمی‌دهد).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> حالت محلی Camofox</h2>
+<p>‏<a href="https://github.com/jo-inc/camofox-browser" target="_blank" rel="noopener">Camofox</a> سرور Node.js ی خودمیزبانی است که دور Camoufox ‏(یک fork ی Firefox با فریب اثر انگشت C++) پیچیده شده. مرور ضددیدگی محلی بدون وابستگی ابری فراهم می‌کند.</p>
+<div class="codebox"><pre><code># Clone the Camofox browser server first
+git clone https://github.com/jo-inc/camofox-browser
+cd camofox-browser
+
+# Build and start with Docker using the default container settings
+# (auto-detects arch: aarch64 on M1/M2, x86_64 on Intel)
+make up
+
+# Stop and remove the default container
+make down
+
+# Force a clean rebuild (for example, after upgrading VERSION/RELEASE)
+make reset
+
+# Just download binaries without building
+make fetch
+
+# Override arch or version explicitly
+make up ARCH=x86_64
+make up VERSION=135.0.1 RELEASE=beta.24</code></pre></div>
+<p>‏make up کانتینر پیش‌فرض را فوراً شروع می‌کند. اگر تنظیمات runtime سفارشی مثل heap بزرگ‌تر Node، ‏VNC یا دایرکتوری پروفایل پایدار می‌خواهید اول image را build و خودتان اجرا کنید:</p>
+<div class="codebox"><pre><code># Build the image without starting the default container
+make build
+
+# Start with persistence, VNC live view, and a larger Node heap
+mkdir -p ~/.camofox-docker
+docker run -d \
+  --name camofox-browser \
+  --restart unless-stopped \
+  -p 9377:9377 \
+  -p 6080:6080 \
+  -p 5901:5900 \
+  -e CAMOFOX_PORT=9377 \
+  -e ENABLE_VNC=1 \
+  -e VNC_BIND=0.0.0.0 \
+  -e VNC_RESOLUTION=1920x1080 \
+  -e MAX_OLD_SPACE_SIZE=2048 \
+  -v ~/.camofox-docker:/root/.camofox \
+  camofox-browser:135.0.1-aarch64</code></pre></div>
+<p>با فعال بودن VNC مرورگر در حالت headed اجرا و می‌توانید زنده در مرورگرتان از ‏http://localhost:6080 ‏(noVNC) تماشایش کنید. کلاینت VNC ی native هم به ‏localhost:5901 می‌توانید وصل کنید.</p>
+<p>اگر قبلاً make up زده‌اید قبل از شروع کانتینر سفارشی، آن پیش‌فرض را متوقف و حذف کنید:</p>
+<div class="codebox"><pre><code>make down
+# then run the custom docker run command above</code></pre></div>
+<p>سپس در ‏~/.hermes/.env ست کنید:</p>
+<pre dir="ltr"><code>CAMOFOX_URL=http://localhost:9377</code></pre>
+<p>اگر Camofox در Docker اجراست و می‌خواهید اپ‌های وب سرویس‌شده از ماشین میزبان را باز کند، بازنویسی loopback را روشن کنید. CAMOFOX_URL باید همچنان به API ی کنترل منتشر-شده-به-میزبان اشاره کند ولی URL های صفحه مثل ‏http://127.0.0.1:3000 باید از داخل کانتینر به‌صورت ‏http://host.docker.internal:3000 باز شوند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># ~/.hermes/config.yaml
+browser:
+  camofox:
+    rewrite_loopback_urls: true
+    loopback_host_alias: host.docker.internal  # default; use a LAN IP if needed</code></pre>
+</div>
+<p>معادل env ی:</p>
+<pre dir="ltr"><code>CAMOFOX_REWRITE_LOOPBACK_URLS=true
+CAMOFOX_LOOPBACK_HOST_ALIAS=host.docker.internal</code></pre>
+<p>بازنویسی فقط روی URL های ناوبری صفحه با host های loopback ‏(localhost، ‏127.0.0.1، ‏::1) اعمال می‌شود و CAMOFOX_URL را عوض نمی‌کند. برای نصب‌های غیر-Docker ی Camofox که مرورگر از قبل روی host اجراست و loopback درست است، خاموش بگذاریدش.</p>
+<p>یا از طریق ‏hermes tools ← Browser Automation ← Camofox پیکربندی کنید.</p>
+<p>‏Camofox مثل هر بک‌اند مرورگری دیگری انتخاب می‌شود: در ‏hermes tools ← Browser Automation مقدار <b>Camofox</b> را بردارید که ‏browser.cloud_provider: camofox را در config.yaml می‌نویسد. ‏CAMOFOX_URL فقط آدرس سرور است — وقتی انتخاب مرورگری وجود دارد ست کردنش دیگر به‌تنهایی بک‌اند را انتخاب نمی‌کند ‏(setup های هرگز-پیکربندی‌نشده همچنان خودآشکارش می‌کنند).</p>
+<h3>نشست‌های مرورگری پایدار</h3>
+<p>به‌طور پیش‌فرض هر نشست Camofox هویت تصادفی می‌گیرد — کوکی‌ها و ورودها بین ری‌استارت‌های ایجنت دوام ندارند. برای فعال کردن نشست‌های مرورگری پایدار این را به config.yaml اضافه کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>browser:
+  camofox:
+    managed_persistence: true</code></pre>
+</div>
+<p>سپس هرمس را کامل ری‌استارت کنید تا config جدید خوانده شود.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ مسیر تو-در-تو مهم است</div>
+  <p>هرمس ‏browser.camofox.managed_persistence را می‌خواند، <b>نه</b> یک managed_persistence ی سطح-بالا. اشتباه رایج نوشتن این است:</p>
+  <pre dir="ltr"><code># ❌ Wrong — Hermes ignores this
+managed_persistence: true</code></pre>
+  <p>اگر فلگ در مسیر غلط باشد هرمس بی‌سروصدا به userId ی زودگذر تصادفی برمی‌گردد و وضعیت ورودتان هر نشست از دست می‌رود.</p>
+</div>
+<h4>چه کاری هرمس می‌کند</h4>
+<ul>
+  <li>یک userId ی قطعی مخصوص-پروفایل به Camofox می‌فرستد تا سرور بتواند همان پروفایل Firefox را بین نشست‌ها دوباره استفاده کند.</li>
+  <li>نابودی context سمت-سرور را موقع cleanup رد می‌کند تا کوکی‌ها و ورودها بین تسک‌های ایجنت دوام بیاورند.</li>
+  <li>userId را به پروفایل فعال هرمس scope می‌کند تا پروفایل‌های مختلف هرمس پروفایل‌های مرورگری متفاوت بگیرند ‏(ایزوله‌سازی پروفایل).</li>
+</ul>
+<h4>چه کاری هرمس نمی‌کند</h4>
+<ul>
+  <li>پایداری را روی سرور Camofox تحمیل نمی‌کند. هرمس فقط userId پایداری می‌فرستد؛ سرور باید با نگاشت آن userId به یک دایرکتوری پروفایل Firefox پایدار محترمش بشمارد.</li>
+  <li>اگر build ی سرور Camofox تان هر درخواستی را زودگذر تلقی کند ‏(مثلاً همیشه browser.newContext() صدا بزند بدون بارگذاری پروفایل ذخیره‌شده)، هرمس نمی‌تواند آن نشست‌ها را پایدار کند. مطمئن شوید build ی Camofox اجرا می‌کنید که پایداری per-user ی مبتنی-بر-userId را پیاده کرده است.</li>
+</ul>
+<h4>تأیید اینکه کار می‌کند</h4>
+<ol>
+  <li>هرمس و سرور Camofox تان را شروع کنید.</li>
+  <li>در یک تسک مرورگر Google ‏(یا هر سایت ورودی) را باز و دستی وارد شوید.</li>
+  <li>تسک مرورگر را عادی تمام کنید.</li>
+  <li>تسک مرورگر جدیدی شروع کنید.</li>
+  <li>همان سایت را دوباره باز کنید — هنوز باید وارد بوده باشید.</li>
+</ol>
+<p>اگر گام ۵ شما را خارج کرد یعنی سرور Camofox به userId پایدار احترام نمی‌گذارد. مسیر config را دوباره چک کنید، تأیید کنید بعد از ویرایش config.yaml هرمس را کامل ری‌استارت کرده‌اید و نسخهٔ سرور Camofox تان پروفایل‌های پایدار per-user را پشتیبانی می‌کند.</p>
+<h4>وضعیت کجا زندگی می‌کند</h4>
+<p>هرمس userId پایدار را از دایرکتوری مخصوص-پروفایل ‏<code>~/.hermes/browser_auth/camofox/</code> ‏(یا معادلش زیر HERMES_HOME برای پروفایل‌های غیرپیش‌فرض) مشتق می‌کند. دادهٔ واقعی پروفایل مرورگر سمت سرور Camofox زندگی می‌کند کلیدخورده با همان userId. برای ریست کامل یک پروفایل پایدار، آن را روی سرور Camofox پاک و دایرکتوری وضعیت پروفایل متناظر هرمس را حذف کنید.</p>
+<h3>نشست‌های Camofox ی مدیریت‌شده-از-بیرون</h3>
+<p>وقتی اپ دیگری مرورگر مرئی Camofox را می‌راند ‏(یک دستیار دسکتاپ، یک یکپارچه‌سازی سفارشی، ایجنت دیگری)، هرمس را طوری پیکربندی کنید که داخل همان هویت کار کند به‌جای spawn کردن پروفایل ایزولهٔ خودش.</p>
+<p>سه پیچ رفتار را کنترل می‌کنند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>تنظیم</th><th>متغیر محیطی</th><th>اثر</th></tr></thead>
+<tbody>
+<tr><td><code>browser.camofox.user_id</code></td><td><code>CAMOFOX_USER_ID</code></td><td>userId ی Camofox که هرمس موقع ساخت تب استفاده می‌کند. ست کردنش نشست را وارد حالت «مدیریت‌شده-از-بیرون» می‌کند.</td></tr>
+<tr><td><code>browser.camofox.session_key</code></td><td><code>CAMOFOX_SESSION_KEY</code></td><td>sessionKey ‏(همان listItemId) که موقع ساخت تب فرستاده می‌شود. برای تطبیق یک tab موجود حین adoption. پیش‌فرض مقداری per-task اگر unset باشد.</td></tr>
+<tr><td><code>browser.camofox.adopt_existing_tab</code></td><td><code>CAMOFOX_ADOPT_EXISTING_TAB</code></td><td>وقتی true، هرمس در اولین استفاده ‏GET /tabs?userId=&lt;user_id&gt; را صدا و قبل از ساخت تب جدید از تب موجود دوباره استفاده می‌کند.</td></tr>
+</tbody>
+</table>
+</div>
+<p>متغیرهای env بر config.yaml مقدم‌اند. هر فرم کار می‌کند:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>browser:
+  camofox:
+    user_id: shared-camofox
+    session_key: visible-tab
+    adopt_existing_tab: true</code></pre>
+</div>
+<pre dir="ltr"><code>CAMOFOX_USER_ID=shared-camofox
+CAMOFOX_SESSION_KEY=visible-tab
+CAMOFOX_ADOPT_EXISTING_TAB=true</code></pre>
+<p><b>وقتی user_id ست شود چه عوض می‌شود:</b></p>
+<ul>
+  <li>هرمس cleanup ی مخرب را در پایان تسک skip می‌کند ‏(مثل managed_persistence: true). تب/کوکی/پروفایل اپ دیگر سالم می‌ماند.</li>
+  <li>هرمس ‏DELETE /sessions/&lt;user_id&gt; را صدا <b>نمی‌زند</b> — آن نقطهٔ پایانی همهٔ داده‌های کاربر را پاک می‌کند و اگر شلیک شود نشست اپ بیرونی را نابود می‌کرد.</li>
+</ul>
+<p><b>adoption ی تب چطور کار می‌کند ‏(وقتی adopt_existing_tab: true):</b></p>
+<ol>
+  <li>در اولین فراخوانی ابزار مرورگر بعد از شروع پروسه، هرمس ‏GET /tabs?userId=&lt;user_id&gt; را صادر می‌کند ‏(timeout ی ۵ ثانیه).</li>
+  <li>اگر هر تبی در پاسخ listItemId == session_key داشته باشد، هرمس جدیدترین‌شان در آن گروه را adopt می‌کند.</li>
+  <li>در غیر این صورت هرمس جدیدترین تب کاربر را ‏(هر listItemId) adopt می‌کند.</li>
+  <li>اگر تبی وجود نداشته یا درخواست شکست بخورد، هرمس در عملیات بعدی به ساخت تب جدید fallback می‌کند.</li>
+</ol>
+<p>Adoption فقط تا وقتی tab_id برای نشست پر شود شلیک می‌کند. اگر اپ بیرونی تب adopt‌شده را وسط run ببندد، فراخوانی بعدی ابزار مرورگر خطای Camofox surface می‌کند — هرمس هر بار برای تب تازه دوباره poll نمی‌کند.</p>
+<p><b>انتخاب session_key:</b> اگر می‌خواهید هرمس قابل‌اعتماد به یک تب <i>مشخص</i> موجود بچسبد، session_key را روی listItemId ای که اپ بیرونی موقع ساختش استفاده کرده بگذارید. اگر session_key را unset بگذارید و فقط user_id ست کنید، هرماس session_key ی per-task تولید می‌کند ‏(task_&lt;id&gt;) — هرمس کوکی‌ها و پروفایل را با اپ بیرونی شریک می‌کند ولی تب خودش را کنارشان باز می‌کند به‌جای دوباره‌استفاده از یکی.</p>
+<p><b>یادداشت همزمانی:</b> اپ بیرونی و هرمس می‌توانند همزمان همان userId ی Camofox را برانند ولی Camofox فوکوس per-tab را بین کلاینت‌ها هماهنگ نمی‌کند. مالکیت را در لایهٔ اپ هماهنگ کنید ‏(مثلاً اپ بیرونی حین اجرای هرمس pause کند).</p>
+<h3>نمای زنده VNC</h3>
+<p>وقتی Camofox در حالت headed اجرا شود ‏(با پنجرهٔ مرورگر مرئی)، یک پورت VNC را در پاسخ health check اش expose می‌کند. هرمس خودکار آن را کشف و URL ی VNC را در پاسخ‌های ناوبری می‌گنجاند تا ایجنت بتواند لینکی برای تماشای زندهٔ مرورگر با شما به اشتراک بگذارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> موتور Lightpanda و اتصال CDP محلی</h2>
+<h3>موتور محلی Lightpanda</h3>
+<p>‏<a href="https://lightpanda.io" target="_blank" rel="noopener">Lightpanda</a> مرورگری headless متن‌باز و ساخته‌شده از صفر است. فوری شروع می‌شود ‎۹×‎ سریع‌تر اجرا و ‎۱۶×‎ حافظهٔ کمتر از Chrome مصرف می‌کند که برای ایجنت‌هایی که طولانی روی VM های کوچک زندگی می‌کنند مهم است.</p>
+<p>‏Lightpanda یک <b>موتور محلی</b> است که زیر مسیر محلی agent-browser انتخاب می‌شود ‏(نه یک ارائه‌دهندهٔ ابری). باینری را نصب و روی PATH تان بگذارید ‏(راهنمای <a href="https://lightpanda.io/docs" target="_blank" rel="noopener">نصب Lightpanda</a>)، سپس:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Add to ~/.hermes/config.yaml
+browser:
+  engine: lightpanda</code></pre>
+</div>
+<p>یا از طریق متغیر محیطی:</p>
+<pre dir="ltr"><code>AGENT_BROWSER_ENGINE=lightpanda</code></pre>
+<p>هرمس Lightpanda را از طریق agent-browser و با CDP می‌راند، همان‌طور که Chrome ی محلی را می‌راند.</p>
+<p><b>Fallback ی خودکار Chrome.</b> ‏Lightpanda هنوز همهٔ کارهای Chrome را پوشش نمی‌دهد، پس یکپارچه‌سازی غیرمزاحم است: Lightpanda اقداماتی را که پشتیبانی می‌کند هندل و هرمس برای هر چه نمی‌کند شفاف روی Chrome دوباره تلاش می‌کند. مجموعهٔ پشتیبانی‌شده هستهٔ گردش‌کار ایجنت را پوشش می‌دهد — navigate، snapshot، click، type، scroll، back، press و eval. اسکرین‌شات‌ها هم به Chrome برمی‌گردند چون Lightpanda رندرکنندهٔ گرافیکی ندارد؛ browser_vision هم به همین دلیل از قبل مستقیم به Chrome مسیریابی می‌شود.</p>
+<h3>مرورگر محلی خانوادهٔ Chromium از طریق CDP ‏(‏<code>/browser connect</code>)</h3>
+<p>به‌جای ارائه‌دهندهٔ ابری می‌توانید ابزارهای مرورگر هرمس را از طریق Chrome DevTools Protocol ‏(CDP) به نمونهٔ درحال‌اجرا ی خودتان از Chrome، ‏Brave، ‏Chromium یا Edge بچسبانید. وقتی مفید است که بخواهید بلادرنگ ببینید ایجنت چه می‌کند، با صفحاتی تعامل کنید که کوکی/نشست خودتان را می‌خواهند یا از هزینه‌های مرورگر ابری اجتناب کنید.</p>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>‏/browser connect یک <b>دستور اسلش مخصوص-CLI ی تعاملی</b> است — توسط گیت‌وی dispatch نمی‌شود. اگر داخل WebUI، ‏تلگرام، ‏دیسکورد یا چت گیت‌وی دیگری اجرایش کنید پیام به‌عنوان متن عادی به ایجنت فرستاده و فرمان اجرا نمی‌شود. هرمس را از ترمینال ‏(‏hermes یا hermes chat) شروع و آنجا /browser connect را صادر کنید.</p>
+</div>
+<p>در CLI استفاده کنید:</p>
+<pre dir="ltr"><code>/browser connect                 # Auto-launch/connect to a local Chromium-family browser at http://127.0.0.1:9222
+/browser connect ws://host:port  # Connect to a specific CDP endpoint
+/browser status                  # Check current connection
+/browser disconnect              # Detach and return to cloud/local mode</code></pre>
+<p>اگر مرورگری از قبل با remote debugging در حال اجرا نباشد، هرمس تلاش می‌کند یک مرورگر خانوادهٔ Chromium ی پشتیبانی‌شده را با ‏--remote-debugging-port=9222 خودکار launch کند. آشکارسازی شامل Brave، ‏Google Chrome، ‏Chromium و Microsoft Edge با مسیرهای نصب رایج لینوکسی مثل ‏/opt/brave-bin/brave و ‏/snap/bin/brave است.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>برای شروع دستی مرورگر خانوادهٔ Chromium با CDP فعال از یک user-data-dir ی اختصاصی استفاده کنید تا پورت دیباگ واقعاً بالا بیاید حتی وقتی مرورگر از قبل با پروفایل عادی‌تان در حال اجراست:</p>
+  <pre dir="ltr"><code># Linux — Brave
+brave-browser \
+  --remote-debugging-port=9222 \
+  --user-data-dir=$HOME/.hermes/chrome-debug \
+  --no-first-run \
+  --no-default-browser-check &amp;
+
+# Linux — Google Chrome
+google-chrome \
+  --remote-debugging-port=9222 \
+  --user-data-dir=$HOME/.hermes/chrome-debug \
+  --no-first-run \
+  --no-default-browser-check &amp;
+
+# macOS — Brave
+"/Applications/Brave Browser.app/Contents/MacOS/Brave Browser" \
+  --remote-debugging-port=9222 \
+  --user-data-dir="$HOME/.hermes/chrome-debug" \
+  --no-first-run \
+  --no-default-browser-check &amp;
+
+# macOS — Google Chrome
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  --remote-debugging-port=9222 \
+  --user-data-dir="$HOME/.hermes/chrome-debug" \
+  --no-first-run \
+  --no-default-browser-check &amp;</code></pre>
+  <p>سپس CLI ی هرمس را launch و /browser connect را اجرا کنید.</p>
+  <p><b>چرا user-data-dir؟</b> بدون آن، launch کردن مرورگر خانوادهٔ Chromium وقتی نمونهٔ عادی در حال اجراست معمولاً پنجره جدیدی روی پروسهٔ موجود باز می‌کند — و آن پروسهٔ موجود بدون remote-debugging-port شروع شده پس پورت ۹۲۲۲ هیچ‌وقت بالا نمی‌آید. user-data-dir ی اختصاصی پروسهٔ مرورگر تازه‌ای اجبار می‌کند که پورت دیباگ واقعاً گوش دهد. ‏no-first-run و no-default-browser-check هم ویزارد اولین-اجرا را برای پروفایل تازه skip می‌کنند.</p>
+  <p><b>Chrome ی ۱۳۶ به بالا پروفایل اختصاصی را الزامی می‌کند.</b> به‌عنوان سخت‌سازی امنیتی، ‏Chrome ۱۳۶ به بعد وقتی remote-debugging-port با user-data-dir ی <i>پیش‌فرض</i> ترکیب شود پورت دیبگ راه‌دور را بی‌سروصدا باز کردن رد می‌کند — حتی از cold start بدون هیچ Chrome ی دیگر. مرورگر عادی launch می‌شود ولی هیچ‌وقت چیزی روی ۹۲۲۲ گوش نمی‌دهد، پس browser connect ‏(و هر curl دستی به ‏http://127.0.0.1:9222/json/version) با connection refused شکست می‌خورد. هیچ پیام خطایی نیست. اصلاح دقیقاً همان فرمان‌های بالاست: همیشه user-data-dir ای غیر از دایرکتوری پروفایل پیش‌فرض پاس دهید ‏(مثلاً ‏$HOME/.hermes/chrome-debug). این روی buildهای Chrome، ‏Chromium، ‏Edge و Brave ای که تغییر را گرفته‌اند صدق می‌کند.</p>
+</div>
+<p>وقتی از طریق CDP وصل باشید همهٔ ابزارهای مرورگر ‏(browser_navigate، ‏browser_click و…) روی نمونهٔ زندهٔ مرورگر شما عمل می‌کنند به‌جای بالا آوردن نشست ابری.</p>
+<h3>WSL2 + Chrome ی ویندوز: MCP را به /browser connect ترجیح دهید</h3>
+<p>اگر هرمس داخل WSL2 اجرا شود ولی پنجرهٔ Chrome ای که می‌خواهید کنترل کنید روی host ی ویندوز باشد، ‏/browser connect اغلب بهترین مسیر نیست.</p>
+<p>چرا:</p>
+<ul>
+  <li>‏/browser connect انتظار دارد خودِ هرمس به یک نقطهٔ پایانی CDP قابل‌استفاده برسد</li>
+  <li>نشست‌های live-debugging مدرن Chrome اغلب نقطهٔ پایانی host-محلی expose می‌کنند که از WSL مثل پورت کلاسیک ۹۲۲۲ مستقیماً قابل‌رسید نیست</li>
+  <li>حتی وقتی Chrome ی ویندوز قابل‌دیباگ است تمیزترین یکپارچگی این است که سرور MCP مرورگر سمت-ویندوز به Chrome بچسبد و هرمس با آن سرور MCP حرف بزند</li>
+</ul>
+<p>برای آن setup مقدار chrome-devtools-mcp را از طریق پشتیبانی MCP ی هرمس ترجیح دهید.</p>
+<p>راه‌اندازی عملی را در راهنمای MCP ببینید:</p>
+<ul>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/guides/use-mcp-with-hermes#wsl2-bridge-hermes-in-wsl-to-windows-chrome" target="_blank" rel="noopener">Use MCP with Hermes</a></li>
+</ul>
+<h3>حالت مرورگر محلی</h3>
+<p>اگر <b>هیچ</b> اعتبارنامهٔ ابری ست نکنید و از ‏/browser connect استفاده نکنید، هرمس همچنان می‌تواند ابزارهای مرورگر را از طریق نصب محلی Chromium ی رانده توسط agent-browser به کار ببرد.</p>
+<h3>متغیرهای محیطی اختیاری</h3>
+<pre dir="ltr"><code># Residential proxies for better CAPTCHA solving (default: "true")
+BROWSERBASE_PROXIES=true
+
+# Advanced stealth with custom Chromium — requires Scale Plan (default: "false")
+BROWSERBASE_ADVANCED_STEALTH=false
+
+# Session reconnection after disconnects — requires paid plan (default: "true")
+BROWSERBASE_KEEP_ALIVE=true
+
+# Custom session timeout in seconds (max 21600 = 6 hours) (default: project default)
+# Examples: 600 (10min), 1800 (30min), 21600 (6h max)
+BROWSERBASE_SESSION_TIMEOUT=1800
+
+# Inactivity timeout before auto-cleanup in seconds (default: 120)
+BROWSER_INACTIVITY_TIMEOUT=120
+
+# Local browser engine. Applies to the built-in browser tools
+# (agent-browser path). Equivalent to browser.engine in config.yaml.
+#   auto       — agent-browser's default (currently Chrome)
+#   lightpanda — Lightpanda
+#   chrome     — force Chrome explicitly
+AGENT_BROWSER_ENGINE=auto
+
+# Extra Chromium launch flags (comma- or newline-separated). Hermes auto-injects
+# `--no-sandbox,--disable-dev-shm-usage` when it detects root or AppArmor-restricted
+# unprivileged user namespaces (Ubuntu 23.10+, DGX Spark, many container images),
+# so most users don't need to set this. Set it manually only if you need a flag
+# Hermes doesn't add automatically; setting it disables the auto-injection.
+AGENT_BROWSER_ARGS=--no-sandbox</code></pre>
+<h3>نصب CLI ی agent-browser</h3>
+<p>لازم نیست چیزی نصب کنید — ‏agent-browser در اولین استفاده از ابزار مرورگر خودکار از طریق ‏npx agent-browser حل می‌شود. برای جلوگیری از واکشی یک‌بارهٔ npx می‌توانید از قبل سراسری نصبش کنید ‏(اختیاری):</p>
+<div class="codebox"><pre><code>npm install -g agent-browser</code></pre></div>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>تول‌ست browser باید در فهرست toolsets ی config تان باشد یا با ‏<code>hermes config set toolsets '["hermes-cli", "browser"]'</code> فعال شود.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> ابزارهای موجود</h2>
+<h3>‏<code>browser_navigate</code></h3>
+<p>ناوبری به یک URL. قبل از هر ابزار مرورگر دیگری باید صدا زده شود. نشست Browserbase را مقداردهی می‌کند.</p>
+<pre dir="ltr"><code>Navigate to https://github.com/NousResearch</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>برای بازیابی سادهٔ اطلاعات web_search یا web_extract را ترجیح دهید — سریع‌تر و ارزان‌ترند. ابزارهای مرورگر را وقتی به کار ببرید که لازم است با صفحه <b>تعامل</b> کنید ‏(کلیک دکمه، پر کردن فرم، محتوای داینامیک).</p>
+</div>
+<h3>‏<code>browser_snapshot</code></h3>
+<p>snapshot متنی از درخت دسترس‌پذیری صفحهٔ فعلی می‌گیرد. عناصر تعاملی را با ref ID هایی مثل ‏@e1 و @e2 برمی‌گرداند برای مصرف browser_click و browser_type.</p>
+<ul>
+  <li><b>‏full=false</b> ‏(پیش‌فرض): نمای فشرده فقط عناصر تعاملی</li>
+  <li><b>‏full=true</b>: محتوای کامل صفحه</li>
+</ul>
+<p>snapshot های بالای ‎۱۵٬۰۰۰ نویسه خودکار بریده یا توسط LLM خلاصه می‌شوند ‏(همان بودجه per-page ی web_extract). وقتی این رخ دهد snapshot کامل در ‏~/.hermes/cache/web/ ذخیره و خروجی ابزار مسیر فایل + یک فراخوانی آمادهٔ read_file را شامل می‌شود تا ایجنت بتواند کل درخت دسترس‌پذیری — شامل ref های عنصر فراتر از برش — را بدون snapshot مجدد ورق بزند.</p>
+<h3>‏<code>browser_click</code></h3>
+<p>روی عنصری شناسایی‌شده با ref ID اش از snapshot کلیک می‌کند.</p>
+<pre dir="ltr"><code>Click @e5 to press the "Sign In" button</code></pre>
+<h3>‏<code>browser_type</code></h3>
+<p>متن را داخل یک فیلد ورودی تایپ می‌کند. اول فیلد را خالی بعد متن جدید را تایپ می‌کند.</p>
+<pre dir="ltr"><code>Type "hermes agent" into the search field @e3</code></pre>
+<h3>‏<code>browser_scroll</code></h3>
+<p>صفحه را بالا/پایین می‌کند تا محتوای بیشتری پیدا شود.</p>
+<pre dir="ltr"><code>Scroll down to see more results</code></pre>
+<h3>‏<code>browser_press</code></h3>
+<p>یک کلید کیبورد فشار می‌دهد. برای submit کردن فرم‌ها یا ناوبری مفید.</p>
+<pre dir="ltr"><code>Press Enter to submit the form</code></pre>
+<p>کلیدهای پشتیبانی‌شده: ‏Enter، ‏Tab، ‏Escape، ‏ArrowDown، ‏ArrowUp و بیشتر.</p>
+<h3>‏<code>browser_back</code></h3>
+<p>به صفحهٔ قبلی در تاریخچهٔ مرورگر برمی‌گردد.</p>
+<h3>‏<code>browser_get_images</code></h3>
+<p>همهٔ تصاویر صفحهٔ فعلی را با URL و alt text شان فهرست می‌کند. برای یافتن تصاویر جهت تحلیل مفید.</p>
+<h3>‏<code>browser_vision</code></h3>
+<p>اسکرین‌شات می‌گیرد و با vision AI تحلیلش می‌کند. وقتی استفاده کنید که snapshot های متنی اطلاعات بصری مهم را نمی‌گیرند — مخصوصاً برای CAPTCHA ها، چیدمان‌های پیچیده یا چالش‌های تأیید بصری.</p>
+<p>اسکرین‌شات به‌طور پایدار ذخیره و مسیر فایل کنار تحلیل AI برگردانده می‌شود. روی پلتفرم‌های پیام‌رسانی ‏(تلگرام، ‏دیسکورد، ‏اسلک، ‏واتساپ) می‌توانید از ایجنت بخواهید اسکرین‌شات را به اشتراک بگذارد — به‌صورت پیوست عکس native از طریق سازوکار MEDIA: فرستاده می‌شود.</p>
+<pre dir="ltr"><code>What does the chart on this page show?</code></pre>
+<p>اسکرین‌شات‌ها در ‏~/.hermes/cache/screenshots/ ذخیره و بعد از ۲۴ ساعت خودکار پاک می‌شوند.</p>
+<h3>‏<code>browser_console</code></h3>
+<p>خروجی console ی مرورگر ‏(پیام‌های log/warn/error) و exception های JS ی شکار-نشده را از صفحهٔ فعلی می‌گیرد. برای کشف خطاهای JS ی بی‌صدایی که در درخت دسترس‌پذیری ظاهر نمی‌شوند ضروری است.</p>
+<pre dir="ltr"><code>Check the browser console for any JavaScript errors</code></pre>
+<p>با ‏clear=True بعد از خواندن console پاک می‌شود تا فراخوانی‌های بعدی فقط پیام‌های جدید را نشان دهند.</p>
+<p>‏browser_console با آرگومان expression همچنین جاوااسکریپت eval می‌کند — هم‌شکل console ی DevTools؛ نتیجه parse شده برمی‌گردد ‏(آبجکت‌های JSON-سریالایز شده dict می‌شوند؛ مقادیر primitive همان‌طور می‌مانند).</p>
+<pre dir="ltr"><code>browser_console(expression="document.querySelector('h1').textContent")
+browser_console(expression="JSON.stringify(performance.timing)")</code></pre>
+<p>وقتی supervisor ی CDP برای نشست فعلی فعال باشد ‏(معمول برای هر نشستی که browser_navigate روی بک‌اند CDP-capable زده) ارزیابی روی WebSocket ی پایدار supervisor اجرا می‌شود — بدون هزینهٔ راه‌اندازی زیرپروسه. در غیر این صورت به مسیر عادی CLI ی agent-browser می‌رسد. رفتار هر دو یکسان است؛ فقط تأخیر فرق می‌کند.</p>
+<p>ارزیابی به‌طور پیش‌فرض نامحدود است — ایجنت می‌تواند fetch بزند، storage بخواند، مقادیر فرم را query و هر استخراج DOM ای انجام دهد. درخواست‌های رو-به-آدرس‌های خصوصی/داخلی روی بک‌اندهای غیرمحلی همچنان بلاک‌اند ‏(گارد SSRF مستقل از این تنظیم است). اگر با پروفایل وارد‌شده صفحات متخاصم مرور می‌کنید و denylist ی سخت‌گیری روی primitive های حساس JS ‏(cookies، ‏storage، ‏clipboard، ‏network calls، ‏form values) می‌خواهید با ‏<code>browser.restrict_evaluate: true</code> در config.yaml شرکت کنید. توجه کنید denylist نام primitive ها را تطبیق می‌دهد پس عبارات مشروعی که صرفاً واژه‌هایی مثل fetch یا cookie دارند را هم بلاک می‌کند.</p>
+<h3>‏<code>browser_cdp</code></h3>
+<p>passthrough خام Chrome DevTools Protocol — دریچهٔ فرار برای عملیات مرورگری که سایر ابزارها پوشش نمی‌دهند. برای هندل دیالوگ‌های native، ارزیابی scoped در iframe، کنترل کوکی/شبکه یا هر فعل CDP ای که ایجنت لازم دارد.</p>
+<p><b>فقط وقتی در شروع نشست نقطهٔ پایانی CDP قابل‌رسید باشد موجود است</b> — یعنی /browser connect به یک Chrome/Brave/Chromium/Edge ی در حال اجرا چسبیده باشد یا browser.cdp_url در config.yaml ست شده باشد. حالت پیش‌فرض local agent-browser و Camofox و ارائه‌دهنده‌های ابری ‏(Browserbase، ‏Browser Use، ‏Firecrawl) فعلاً CDP را به این ابزار نمی‌دهند — ارائه‌دهنده‌های ابری URL های CDP ی per-session دارند ولی مسیریابی live-session یک follow-up است.</p>
+<p><b>مرجع متد CDP:</b> ‏<a href="https://chromedevtools.github.io/devtools-protocol/" target="_blank" rel="noopener">chromedevtools.github.io/devtools-protocol</a> — ایجنت می‌تواند صفحهٔ یک متد مشخص را web_extract کند تا پارامترها و شکل بازگشت را پیدا کند.</p>
+<p>الگوهای رایج:</p>
+<pre dir="ltr"><code># List tabs (browser-level, no target_id)
+browser_cdp(method="Target.getTargets")
+
+# Handle a native JS dialog on a tab
+browser_cdp(method="Page.handleJavaScriptDialog",
+            params={"accept": true, "promptText": ""},
+            target_id="&lt;tabId&gt;")
+
+# Evaluate JS in a specific tab
+browser_cdp(method="Runtime.evaluate",
+            params={"expression": "document.title", "returnByValue": true},
+            target_id="&lt;tabId&gt;")
+
+# Get all cookies
+browser_cdp(method="Network.getAllCookies")</code></pre>
+<p>متدهای سطح-مرورگر ‏(Target.*، ‏Browser.*، ‏Storage.*) بدون target_id هستند. متدهای سطح-صفحه ‏(Page.*، ‏Runtime.*، ‏DOM.*، ‏Emulation.*) به target_id ای از Target.getTargets نیاز دارند. هر فراخوانی stateless مستقل است — نشست‌ها بین فراخوانی‌ها پایدار نمی‌مانند.</p>
+<p><b>iframe های cross-origin:</b> مقدار frame_id ‏(از ‏browser_snapshot.frame_tree.children[] جایی که is_oopif=true) را پاس دهید تا فراخوانی CDP از طریق نشست زندهٔ supervisor برای آن iframe مسیریابی شود. این همان روشی است که Runtime.evaluate داخل iframe ی cross-origin روی Browserbase کار می‌کند، جایی که اتصالات stateless ی CDP به انقضای signed-URL می‌خورند. مثال:</p>
+<pre dir="ltr"><code>browser_cdp(
+  method="Runtime.evaluate",
+  params={"expression": "document.title", "returnByValue": True},
+  frame_id="&lt;frame_id from browser_snapshot&gt;",
+)</code></pre>
+<p>iframe های same-origin به frame_id نیاز ندارند — به‌جایش document.querySelector('iframe').contentDocument را از یک Runtime.evaluate ی سطح-بالا استفاده کنید.</p>
+<h3>‏<code>browser_dialog</code></h3>
+<p>به دیالوگ native ی JS ‏(alert / confirm / prompt / beforeunload) پاسخ می‌دهد. قبل از وجود این ابزار دیالوگ‌ها thread ی JS ی صفحه را بی‌سروصدا بلاک و فراخوانی‌های بعدی browser_* معلق یا exception می‌دادند؛ حالا ایجنت دیالوگ‌های معلق را در خروجی browser_snapshot می‌بیند و صریح پاسخ می‌دهد.</p>
+<p><b>گردش‌کار:</b></p>
+<ol>
+  <li>browser_snapshot را صدا بزنید. اگر دیالوگی صفحه را بلاک کرده به‌صورت ‏pending_dialogs: [{"id": "d-1", "type": "alert", "message": "..."}] ظاهر می‌شود.</li>
+  <li>‏browser_dialog(action="accept") یا ‏browser_dialog(action="dismiss") را صدا بزنید. برای دیالوگ‌های prompt() مقدار prompt_text="..." را پاس دهید.</li>
+  <li>دوباره snapshot بگیرید — pending_dialogs خالی است؛ thread ی JS ی صفحه ادامه یافته.</li>
+</ol>
+<p><b>آشکارسازی خودکار</b> از طریق یک supervisor ی پایدار CDP رخ می‌دهد — یک WebSocket per-task که به رویدادهای Page/Runtime/Target مشترک می‌شود. supervisor همچنین فیلد frame_tree ی snapshot را پر می‌کند تا ایجنت ساختار iframe ی صفحهٔ فعلی را ببیند شامل iframe های cross-origin ‏(OOPIF).</p>
+<p><b>ماتریس در دسترس بودن:</b></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>بک‌اند</th><th>آشکارسازی با pending_dialogs</th><th>پاسخ ‏(ابزار browser_dialog)</th></tr></thead>
+<tbody>
+<tr><td>Chrome ی محلی با /browser connect یا browser.cdp_url</td><td>✓</td><td>✓ گردش‌کار کامل</td></tr>
+<tr><td>Browserbase</td><td>✓</td><td>✓ گردش‌کار کامل ‏(via پُل XHR ی تزریق‌شده)</td></tr>
+<tr><td>Camofox / local agent-browser پیش‌فرض</td><td>✗</td><td>✗ ‏(نقطهٔ پایانی CDP ندارد)</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>روی Browserbase چطور کار می‌کند.</b> proxy ی CDP ی Browserbase دیالوگ‌های native واقعی را سمت سرور ظرف ~۱۰ میلی‌ثانیه auto-dismiss می‌کند، پس نمی‌توانیم از Page.handleJavaScriptDialog استفاده کنیم. supervisor اسکریپت کوچکی از طریق Page.addScriptToEvaluateOnNewDocument تزریق می‌کند که window.alert/confirm/prompt را با یک XHR ی همگام override می‌کند. ما آن XHR ها را با Fetch.enable intercept می‌کنیم — thread ی JS ی صفحه تا وقتی Fetch.fulfillRequest را با پاسخ ایجنت صدا بزنیم روی XHR بلاک می‌ماند. مقادیر بازگشتی prompt() بدون تغییر به JS ی صفحه round-trip می‌شوند.</p>
+<p><b>سیاست دیالوگ</b> در config.yaml زیر ‏browser.dialog_policy پیکربندی می‌شود:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>سیاست</th><th>رفتار</th></tr></thead>
+<tbody>
+<tr><td><code>must_respond</code> ‏(پیش‌فرض)</td><td>capture، نمایش در snapshot، انتظار برای فراخوانی صریح browser_dialog(). ‏auto-dismiss ایمنی بعد از ‏browser.dialog_timeout_s ‏(پیش‌فرض ۳۰۰ ثانیه) تا ایجنت خراب تا ابد گیر نیندازد.</td></tr>
+<tr><td><code>auto_dismiss</code></td><td>capture، dismiss فوری. ایجنت همچنان دیالوگ را در تاریخچهٔ browser_state می‌بیند ولی مجبور به اقدام نیست.</td></tr>
+<tr><td><code>auto_accept</code></td><td>capture، accept فوری. برای ناوبری صفحات دارای پرامپت‌های beforeunload ی تهاجمی مفید.</td></tr>
+</tbody>
+</table>
+</div>
+<p>درخت frame داخل ‏browser_snapshot.frame_tree روی ۳۰ فریم و عمق OOPIF ی ۲ سقف می‌خورد تا payload ها روی صفحات پر-تبلیغ محدود بمانند. فلگ truncated: true وقتی به سقف‌ها خورده شد surface می‌شود؛ ایجنت‌هایی که درخت کامل می‌خواهند می‌توانند از browser_cdp با Page.getFrameTree استفاده کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> مثال‌های عملی</h2>
+<h3>پر کردن یک فرم وب</h3>
+<pre dir="ltr"><code>User: Sign up for an account on example.com with my email john@example.com
+
+Agent workflow:
+1. browser_navigate("https://example.com/signup")
+2. browser_snapshot()  → sees form fields with refs
+3. browser_type(ref="@e3", text="john@example.com")
+4. browser_type(ref="@e5", text="SecurePass123")
+5. browser_click(ref="@e8")  → clicks "Create Account"
+6. browser_snapshot()  → confirms success</code></pre>
+<h3>پژوهش محتوای داینامیک</h3>
+<pre dir="ltr"><code>User: What are the top trending repos on GitHub right now?
+
+Agent workflow:
+1. browser_navigate("https://github.com/trending")
+2. browser_snapshot(full=true)  → reads trending repo list
+3. Returns formatted results</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> ضبط نشست، حالت headed و استلث</h2>
+<h3>ضبط نشست</h3>
+<p>ضبط خودکار نشست‌های مرورگر به‌صورت فایل‌های ویدیویی WebM:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>browser:
+  record_sessions: true  # default: false</code></pre>
+</div>
+<p>وقتی فعال باشد ضبط روی اولین browser_navigate خودکار شروع و هنگام بسته شدن نشست در ‏~/.hermes/browser_recordings/ ذخیره می‌شود. هم در حالت محلی هم ابری ‏(Browserbase) کار می‌کند. ضبط‌های قدیمی‌تر از ۷۲ ساعت خودکار پاک می‌شوند.</p>
+<h3>حالت headed ‏(پنجرهٔ مرورگر مرئی)</h3>
+<p>به‌طور پیش‌فرض مرورگر محلی headless اجرا می‌شود. حالت headed را روشن کنید تا پنجرهٔ Chromium ی مرئی بگیرید که می‌توانید تماشا و دستکاری‌اش کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>browser:
+  headed: true  # default: false</code></pre>
+</div>
+<p>یا از طریق متغیر محیطی: ‏<code>AGENT_BROWSER_HEADED=1</code>.</p>
+<p>حالت headed دو کار می‌کند:</p>
+<ol>
+  <li><b>Chromium را با پنجرهٔ مرئی launch می‌کند</b> ‏(در حالت محلی --headed را به agent-browser پاس می‌دهد).</li>
+  <li><b>پنجره بین نوبت‌ها باز می‌مانَد.</b> عادی این است که نشست مرورگر بعد از هر پاس ایجنت پاکسازی شود؛ در حالت headed پاکسازی per-turn رد می‌شود تا کار ایجنت را تماشا، مداخله دستی ‏(چالش‌های ورود، ‏CAPTCHA) و وضعیت ورود را در طول گفتگو گرم نگه دارید.</li>
+</ol>
+<p>نشست‌های بی‌کار همچنان بعد از browser.inactivity_timeout جمع می‌شوند ‏(پیش‌فرض ۱۲۰ ثانیه بدون فعالیت مرورگر) و همهٔ نشست‌ها هنگام shutdown بسته می‌شوند. حالت headed فقط مرورگر محلی را تحت تأثیر می‌گذارد — نشست‌های ابری ‏(Browserbase) مصون‌اند.</p>
+<h3>قابلیت‌های استلث</h3>
+<p>‏Browserbase قابلیت‌های استلث خودکار فراهم می‌کند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>قابلیت</th><th>پیش‌فرض</th><th>یادداشت‌ها</th></tr></thead>
+<tbody>
+<tr><td>Basic Stealth</td><td>همیشه روشن</td><td>اثرانگشت تصادفی، تصادفی‌سازی viewport، حل CAPTCHA</td></tr>
+<tr><td>Residential Proxies</td><td>روشن</td><td>مسیریابی از IP های رزیدنشیال برای دسترسی بهتر</td></tr>
+<tr><td>Advanced Stealth</td><td>خاموش</td><td>build ی سفارشی Chromium، نیازمند Scale Plan</td></tr>
+<tr><td>Keep Alive</td><td>روشن</td><td>اتصال دوبارهٔ نشست بعد از لرزش‌های شبکه</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>اگر قابلیت‌های پولی روی پلن شما موجود نباشند هرمس خودکار fallback می‌کند — اول غیرفعال کردن keepAlive بعد proxies — تا مرور روی پلن‌های رایگان هم کار کند.</p>
+</div>
+<h3>مدیریت نشست</h3>
+<ul>
+  <li>هر تسک نشست مرورگری ایزوله از طریق Browserbase می‌گیرد</li>
+  <li>نشست‌ها بعد از بی‌کاری خودکار پاک می‌شوند ‏(پیش‌فرض ۲ دقیقه)</li>
+  <li>یک thread ی پس‌زمینه هر ۳۰ ثانیه نشست‌های کهنه را بررسی می‌کند</li>
+  <li>پاکسازی اضطراری موقع خروج پروسه اجرا می‌شود تا نشست‌های یتیم پیش نیایند</li>
+  <li>نشست‌ها از طریق API ی Browserbase آزاد می‌شوند ‏(وضعیت REQUEST_RELEASE)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> محدودیت‌ها</h2>
+<ul>
+  <li><b>تعامل متنی</b> — به درخت دسترس‌پذیری تکیه دارد نه مختصات پیکسلی</li>
+  <li><b>اندازهٔ snapshot</b> — صفحات بزرگ ممکن است در ‎۱۵٬۰۰۰ نویسه بریده یا LLM-خلاصه شوند ‏(مطابق web_extract)؛ snapshot کامل در ‏~/.hermes/cache/web/ ذخیره و خروجی به آن اشاره می‌کند برای paging با read_file</li>
+  <li><b>timeout ی نشست</b> — نشست‌های ابری طبق تنظیمات پلن ارائه‌دهنده‌تان منقضی می‌شوند</li>
+  <li><b>هزینه</b> — نشست‌های ابری credit ی ارائه‌دهنده مصرف می‌کنند؛ نشست‌ها هنگام پایان گفتگو یا بعد از بی‌کاری خودکار پاک می‌شوند. برای مرور محلی رایگان از ‏/browser connect استفاده کنید.</li>
+  <li><b>بدون دانلود فایل</b> — نمی‌تواند از مرورگر فایل دانلود کند</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="tts.html"><span class="dir">→ قبلی</span><span class="ttl">صدا و TTS</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/browser" target="_blank" rel="noopener">Browser Automation</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

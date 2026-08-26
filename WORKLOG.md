@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۹۵ از ۲۰۷ صفحه (۴۶٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۹۶ از ۲۰۷ صفحه (۴۶٪)** |
 
 ---
 
@@ -492,6 +492,12 @@ hermes-docs-fa/
 - زنجیرهٔ pager: …voice-mode ← tts ← (به‌زودی)
 - پیشرفت: **۹۵ از ۲۰۷ صفحه فعال (۴۶٪)**
 
+### نشست ۶۰ — 2026-08-26 — 🌐 اتوماسیون مرورگر — 🎉 رسانه و وب ۵/۵ کامل شد
+- ترجمه و انتشار «اتوماسیون مرورگر» (۹ بخش، دومرحله‌ای): هشت بک‌اند ‏(Browserbase/Browser Use ابری، Browser Use CLI 3.0 پیش‌فرض با browser_exec و session های همزمان، Firecrawl، Camofox، Lightpanda، CDP محلی، agent-browser)، نمای کلی درخت دسترس‌پذیری، مسیریابی هیبریدی ابر/محلی برای URL های خصوصی با گارد SSRF، Camofox کامل ‏(Docker/VNC، نشست‌های پایدار با هشدار مسیر تو-در-تو، مدیریت‌شده-از-بیرون با سه پیچ و adoption ی تب)، Lightpanda با fallback خودکار Chrome، /browser connect با الزام user-data-dir در Chrome ۱۳۶+ و پل WSL2، مرجع کامل ۱۰ ابزار مرورگر شامل browser_cdp و browser_dialog با ماتریس در دسترس بودن، مثال‌های عملی، ضبط WebM، حالت headed، استلث و محدودیت‌ها
+- 🎉 گروه «رسانه و وب» کاملاً ترجمه شد: ۵ از ۵ صفحه
+- زنجیرهٔ pager: …tts ← browser ← (به‌زودی)
+- پیشرفت: **۹۶ از ۲۰۷ صفحه فعال (۴۶٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -593,6 +599,7 @@ hermes-docs-fa/
 | 93 | `user-guide/features/extending-the-dashboard.html` | گسترش داشبورد وب |
 | 94 | `user-guide/features/voice-mode.html` | حالت صوتی |
 | 95 | `user-guide/features/tts.html` | متن به گفتار (TTS) |
+| 96 | `user-guide/features/browser.html` | مرورگر |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

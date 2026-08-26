@@ -84,7 +84,7 @@ window.HERMES_NAV = [
 ]},
 { id:"media", cat:"🎬 رسانه و وب", pages:[
   { p:"user-guide/features/voice-mode.html",      t:"حالت صوتی",                       d:1 },
-  { p:"user-guide/features/browser.html",         t:"مرورگر",                           d:0 },
+  { p:"user-guide/features/browser.html",         t:"مرورگر",                           d:1 },
   { p:"user-guide/features/vision.html",          t:"بینایی (تصاویر)",                  d:1 },
   { p:"user-guide/features/image-generation.html", t:"تولید تصویر",                     d:1 },
   { p:"user-guide/features/tts.html",             t:"متن به گفتار (TTS)",               d:1 }
