@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۹۷ از ۲۰۷ صفحه (۴۷٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۹۹ از ۲۰۷ صفحه (۴۸٪)** |
 
 ---
 
@@ -504,6 +504,14 @@ hermes-docs-fa/
 - زنجیرهٔ pager: …extending-the-dashboard ← hooks ← (به‌زودی)
 - پیشرفت: **۹۷ از ۲۰۷ صفحه فعال (۴۷٪)**
 
+### نشست ۶۲ — 2026-08-26 — 💬 واتساپ بیزینس Cloud API + گوگل‌چت — 🎉 پیام‌رسان‌ها ۳۵/۳۵ کامل شد
+- ترجمه و انتشار «واتساپ بیزینس (Cloud API)» (۱۴ بخش): مسیر رسمی متا بدون ریسک بن، شروع سریع با ویزارد اعتبارسنج‌دار، ساخت اپ متا با جدول مقادیر ‏(هشدار Phone Number ID ≠ شماره تلفن)، توکن دائمی System User، expose با Cloudflare Tunnel/ngrok/دامنه، پیکربندی وب‌هوک و verify دستی، whitelist متا + allowlist هرمس، پراکندن پروفایل، مرجع کامل env، قابلیت‌های ورودی/خروجی/UX تعاملی ‏(clarify و تأییدها به‌صورت دکمه native)، رسید خواندن و typing، پنجرهٔ ۲۴ ساعته و گروه‌ها و rate limit در محدودیت‌ها، عیب‌یابی خطاهای Graph، نکات امنیتی و جدول مقایسهٔ کامل با Baileys
+- ترجمه و انتشار «گوگل‌چت» (۶ بخش): معماری Pub/Sub pull بدون URL عمومی، ۱۰ گام راه‌اندازی GCP ‏(سرویس‌اکانت، topic/subscription، دو binding حیاتی IAM شامل هشدار نبود نقش Chat Bot Caller)، پیکربندی اپ چت، نشانگر وضعیت قابل‌سفارشی با edit-in-place، زیرمجموعهٔ markdown و Card v2 برای clarify، تحویل پیوست native با OAuth ی per-user ‏(/setup-files چهارگامی، scope حداقلی chat.messages.create، رفتار چند-کاربره)، عیب‌یابی و نکات امنیتی شامل allowlist دامنه‌های گوگل علیه SSRF
+- 🎉 گروه «پیام‌رسان‌ها» کاملاً ترجمه شد: ۳۵ از ۳۵ صفحه
+- اصلاحات: کاراکتر > سرخط یتیم و واژهٔ نویسه‌آمیخته در گوگل‌چت
+- زنجیرهٔ pager: …teams-meetings ← whatsapp-cloud ← google_chat ← (به‌زودی)
+- پیشرفت: **۹۹ از ۲۰۷ صفحه فعال (۴۸٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -607,6 +615,8 @@ hermes-docs-fa/
 | 95 | `user-guide/features/tts.html` | متن به گفتار (TTS) |
 | 96 | `user-guide/features/browser.html` | مرورگر |
 | 97 | `user-guide/features/hooks.html` | هوک‌های چرخهٔ حیات |
+| 98 | `user-guide/messaging/whatsapp-cloud.html` | واتساپ بیزینس (Cloud API) |
+| 99 | `user-guide/messaging/google_chat.html` | گوگل‌چت |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

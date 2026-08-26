@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>واتساپ بیزینس ‏(Cloud API) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/whatsapp-cloud" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>واتساپ بیزینس ‏(Cloud API)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی WhatsApp Business Cloud API</h1>
+<p>هرمس می‌تواند از طریق <b>رسمی‌ترین</b> مسیر یعنی Cloud API ی WhatsApp Business متا به واتساپ وصل شود. این مسیر درجه-production است: بدون زیرپروسهٔ پُل Node.js، بدون QR کد، بدون ریسک بن شدن حساب.</p>
+<p>در عوض:</p>
+<ul>
+  <li>به یک <b>حساب Meta Business</b> نیاز دارید ‏(نه واتساپ شخصی).</li>
+  <li>بات روی یک شماره تلفن بیزینسی اختصاصی کار می‌کند نه شمارهٔ شخصی شما.</li>
+  <li>گیت‌وی هرمس به یک <b>URL ی HTTPS عمومی</b> نیاز دارد تا متا بتواند پیام‌های ورودی را با وب‌هوک تحویل دهد.</li>
+  <li>پاسخ‌های بیش از ۲۴ ساعت بعد از آخرین پیام کاربر به یک <b>قالب</b> پیش-تأییدشده نیاز دارند ‏(این قاعدهٔ «پنجرهٔ خدمات مشتری» متاست نه محدودیت هرمس).</li>
+</ul>
+<p>اگر این محدودیت‌ها برای مورد استفاده‌تان جواب نمی‌دهد، <a href="whatsapp.html">یکپارچه‌سازی پل Baileys</a> جایگزین است — حساب شخصی، بدون URL عمومی، ولی غیررسمی و مستعد-بن.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 کدام را استفاده کنم؟</div>
+  <ul>
+    <li><b>Cloud API ‏(این راهنما)</b> — یک ربات بیزینسی واقعی اجرا می‌کنید، پایداری می‌خواهید، با کاغذبازی تأیید متا + قالب مشکلی ندارید</li>
+    <li><a href="whatsapp.html"><b>پل Baileys</b></a> — پروژه‌های شخصی، دموهای سریع، setup های تک‌کاربره، حاضرید ریسک حسابِ شمارهٔ ربات را بکنید</li>
+  </ul>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> شروع سریع</h2>
+<div class="codebox"><pre><code>hermes whatsapp-cloud</code></pre></div>
+<p>ویزارد شما را از میان هر اعتبارنامه می‌برد، هرکدام را همزمان با paste کردن اعتبارسنجی می‌کند ‏(دام شماره-۱ ی راه‌اندازی را می‌گیرد — چسباندن شماره تلفن در فیلد Phone Number ID) و دستورالعمل دقیق ادامه را برای بخش‌هایی که باید بیرون ویزارد انجام شوند چاپ می‌کند ‏(اجرای cloudflared، پیکربندی داشبورد وب‌هوک متا).</p>
+<p>بقیهٔ این صفحه مرجع دستی است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پیش‌نیازها</h2>
+<ol>
+  <li><b>حساب Meta Business</b>. در ‏<a href="https://business.facebook.com/" target="_blank" rel="noopener">business.facebook.com</a> بسازید.</li>
+  <li><b>یک اپ متا با واتساپ فعال</b>. بخش «ساخت اپ متا» پایین را ببینید.</li>
+  <li><b>راهی برای expose کردن یک پورت محلی به اینترنت عمومی</b> با HTTPS. ‏Cloudflare Tunnel ‏(cloudflared) توصیه می‌شود — رایگان، بدون port forwarding، بدون نیاز به دامنه. ‏ngrok، دامنهٔ خودتان با reverse proxy + TLS یا VPS ای که گیت‌وی مستقیم روی IP عمومی bind شده همه کار می‌کنند.</li>
+  <li><b>اختیاری ولی توصیه‌شده:</b> ffmpeg روی PATH تا پیام‌های صوتی خروجی به‌صورت حباب native ویس‌نوت واتساپ ‏(موج سبز) رندر شوند نه پیوست MP3. هرمس در نبودش با لطف تنزل می‌کند.</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> ساخت اپ متا</h2>
+<ol>
+  <li>به ‏<a href="https://developers.facebook.com/apps" target="_blank" rel="noopener">developers.facebook.com/apps</a> بروید ← <b>Create App</b>.</li>
+  <li>مورد استفاده را انتخاب کنید: ‏<b>«Connect with customers through WhatsApp»</b> ← <b>Next</b>.</li>
+  <li>یک business portfolio بردارید یا بسازید. نیازمندی‌های انتشار را مرور کنید. تأیید ← <b>Create app</b>.</li>
+  <li>بعد از ساخت به ‏<b>Customize use case ← Connect on WhatsApp ← Quickstart</b> می‌رسید. روی ‏<b>Start using the API</b> کلیک کنید ← الان در صفحهٔ ‏<b>API Setup</b> هستید.</li>
+  <li>مطمئن شوید یک WhatsApp Business Account ‏(WABA) لینک شده. اگر در گام ۳ portfolio جدید ساختید یکی خودکار ساخته شده. در صفحهٔ API Setup تأیید کنید.</li>
+</ol>
+<p>این مقادیر را از داشبورد لازم دارید — ویزارد به همین ترتیب می‌پرسد:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مقدار</th><th>کجای داشبورد</th><th>شکل فیلد</th><th>یادداشت‌ها</th></tr></thead>
+<tbody>
+<tr><td><b>Phone Number ID</b></td><td>App Dashboard ← WhatsApp ← API Setup ← زیر dropdown ی From</td><td>عددی، ۱۵–۱۷ رقم</td><td><b>نه</b> خود شماره تلفن. اشتباه شماره-۱ ی راه‌اندازی چسباندن خود شماره تلفن اینجاست.</td></tr>
+<tr><td><b>Access Token</b></td><td>App Dashboard ← WhatsApp ← API Setup ← «Generate access token»</td><td>شروع با EAA، بیش از ۱۰۰ نویسه</td><td>توکن‌های موقت ۲۴ ساعت دوام دارند — برای production بخش «توکن دائمی» را ببینید.</td></tr>
+<tr><td><b>App Secret</b></td><td>App Dashboard ← Settings ← Basic ← کلیک «Show» کنار App secret</td><td>hex ی کوچک ۳۲ نویسه‌ای</td><td>برای verify کردن امضای وب‌هوک‌های ورودی. بدون آن تحویل ورودی با ۵۰۳ رد می‌شود.</td></tr>
+<tr><td><b>App ID</b> ‏(اختیاری)</td><td>App Dashboard ← Settings ← Basic</td><td>عددی، ۱۵–۱۶ رقم</td><td>برای پیام‌رسانی لازم نیست؛ برای تحلیل‌ها مفید.</td></tr>
+<tr><td><b>WABA ID</b> ‏(اختیاری)</td><td>App Dashboard ← WhatsApp ← API Setup ← نزدیک بالا</td><td>عددی، ۱۵+ رقم</td><td>برای پیام‌رسانی لازم نیست؛ برای تحلیل‌ها مفید.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> توکن دائمی ‏(production)</h2>
+<p>توکن‌های دسترسی موقت بعد از <b>۲۴ ساعت</b> منقضی می‌شوند، یعنی توکنی که امروز ساخته شده فردا از کار می‌افتد. برای استقرار production از <b>توکن دائمی System User</b> استفاده کنید:</p>
+<ol>
+  <li>به ‏<a href="https://business.facebook.com/latest/settings" target="_blank" rel="noopener">business.facebook.com/latest/settings</a> بروید ← <b>System users</b> ‏(sidebar چپ).</li>
+  <li><b>Add</b> ← نام ‏(مثلاً hermes-bot) ← نقش: ‏<b>Admin</b>.</li>
+  <li>کاربر جدید را انتخاب ← <b>Assign Assets</b>:
+    <ul>
+      <li>اپ‌تان را انتخاب ← toggle ی <b>Manage app</b> زیر Full control.</li>
+      <li>حساب واتساپ‌تان را انتخاب ← toggle ی <b>Manage WhatsApp Business Accounts</b> زیر Full control.</li>
+      <li><b>Assign assets</b> را کلیک کنید.</li>
+    </ul>
+  </li>
+  <li><b>Generate token</b> با این مجوزها:
+    <ul>
+      <li>‏<code>business_management</code></li>
+      <li>‏<code>whatsapp_business_messaging</code></li>
+      <li>‏<code>whatsapp_business_management</code></li>
+    </ul>
+  </li>
+  <li><b>token expiration: Never</b> را ست کنید.</li>
+  <li>توکن را کپی ← ‏WHATSAPP_CLOUD_ACCESS_TOKEN را در ‏~/.hermes/.env به‌روز کنید ← گیت‌وی را ری‌استارت کنید.</li>
+</ol>
+<p>توکن‌های System User مگر اینکه صریحاً revoke شوند منقضی نمی‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> expose کردن هرمس به اینترنت</h2>
+<p>Cloud API پیام‌های ورودی را با POST ی HTTPS به URL ی وب‌هوکتان تحویل می‌دهد — یعنی گیت‌وی هرمس باید از سرورهای متا قابل‌رسید باشد. سه راه رایج:</p>
+<h3>Cloudflare Tunnel ‏(توصیه‌شده)</h3>
+<p>رایگان، بدون port forwarding، روی Windows / macOS / Linux کار می‌کند. به‌عنوان پروسهٔ جدا کنار گیت‌وی اجرا می‌شود.</p>
+<p><b>نصب:</b></p>
+<pre dir="ltr"><code># Windows
+winget install Cloudflare.cloudflared
+
+# macOS
+brew install cloudflared
+
+# Linux
+# Download the binary from https://github.com/cloudflare/cloudflared/releases</code></pre>
+<p><b>اجرای quick tunnel</b> ‏(بدون نیاز به حساب Cloudflare — یک URL ی ‏https://&lt;random&gt;.trycloudflare.com می‌دهد):</p>
+<div class="codebox"><pre><code>cloudflared tunnel --url http://localhost:8090</code></pre></div>
+<p>URL چاپ‌شده را یادداشت کنید — همان چیزی است که به متا می‌دهید.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ quick tunnel ها می‌چرخند</div>
+  <p>URL ی quick-tunnel رایگان هر بار ری‌استارت cloudflared عوض می‌شود. برای URL پایدار با ‏cloudflared tunnel login وارد شوید و tunnel ی نام‌دار بسازید. حساب‌های رایگان Cloudflare tunnel نام‌دار نامحدود می‌گیرند — گردش‌کار named-tunnel را در <a href="https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/" target="_blank" rel="noopener">مستندات Cloudflare</a> ببینید.</p>
+</div>
+<h3>ngrok</h3>
+<div class="codebox"><pre><code>ngrok http 8090</code></pre></div>
+<p>تیر رایگان در هر ری‌استارت URL متفاوتی نشان می‌دهد. تیر پولی subdomain پایدار می‌دهد.</p>
+<h3>دامنهٔ خودتان + reverse proxy</h3>
+<p>اگر از قبل سروری با گواهی TLS دارید ‏(Caddy، ‏nginx و…) یک route را به ‏localhost:8090 اشاره دهید. پایدارترین گزینه برای production است ولی زیرساخت موجود می‌خواهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> پیکربندی وب‌هوک سمت متا</h2>
+<p>وقتی tunnel تان اجراست:</p>
+<ol>
+  <li>URL عمومی چاپ‌شده توسط tunnel را یادداشت کنید — مثلاً ‏<code>https://abc123.trycloudflare.com</code>.</li>
+  <li>یک <b>Verify Token</b> بسازید — ویزارد این کار را با ‏secrets.token_urlsafe(32) برایتان می‌کند؛ اگر دستی پیکربندی می‌کنید اجرا کنید:
+    <div class="codebox"><pre><code>python -c "import secrets; print(secrets.token_urlsafe(32))"</code></pre></div>
+    آن را به‌عنوان WHATSAPP_CLOUD_VERIFY_TOKEN در ~/.hermes/.env ذخیره کنید.</li>
+  <li>گیت‌وی هرمس را شروع کنید: ‏<code>hermes gateway</code>.</li>
+  <li>در Meta App Dashboard ← <b>WhatsApp ← Configuration</b> ‏(یا Use cases ← Customize ← Configuration بسته به نسخهٔ UI) ← روی <b>Edit</b> بخش Webhook کلیک کنید.</li>
+  <li>پر کنید:
+    <ul>
+      <li><b>Callback URL</b>: ‏<code>https://abc123.trycloudflare.com/whatsapp/webhook</code></li>
+      <li><b>Verify Token</b>: رشتهٔ گام ۲ ‏(باید دقیقاً بخورد)</li>
+    </ul>
+  </li>
+  <li><b>Verify and save</b> را کلیک کنید. متا با GET به URL تان می‌زند، گیت‌وی challenge را echo می‌کند و متا وب‌هوک را verified علامت می‌زند.</li>
+  <li>زیر <b>Webhook fields</b> روی <b>Manage</b> کلیک ← به فیلد <b>messages</b> مشترک شوید. همین به متا می‌گوید پیام‌های ورودی را واقعاً به وب‌هوکتان تحویل دهد.</li>
+</ol>
+<p><b>تأیید دستی حلقه</b> ‏(از ترمینال سوم):</p>
+<pre dir="ltr"><code>TUNNEL="https://abc123.trycloudflare.com"
+VERIFY="&lt;your verify token&gt;"
+
+# Should print HTTP 200 with body "hello"
+curl -i "$TUNNEL/whatsapp/webhook?hub.mode=subscribe&amp;hub.verify_token=$VERIFY&amp;hub.challenge=hello"
+
+# Health endpoint — should show verify_token_configured: true and app_secret_configured: true
+curl "$TUNNEL/health"</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> whitelist گیرنده ‏(سمت متا) و allowlist ‏(سمت هرمس)</h2>
+<h3>whitelist گیرنده سمت متا</h3>
+<p>در حالت توسعه ‏(قبل از عبور اپ از App Review)، متا محدود می‌کند ربات به کدام شماره‌ها پیام بدهد:</p>
+<ol>
+  <li>App Dashboard ← WhatsApp ← API Setup ← dropdown ی To.</li>
+  <li>روی <b>Manage phone number list</b> کلیک کنید.</li>
+  <li>شماره‌هایی را که می‌خواهید پیام بدهند اضافه کنید ‏(شما، تیم‌تان، تسترهای دوست). متا به هرکدام یک کد تأیید ۶رقمی با SMS یا واتساپ می‌فرستد.</li>
+</ol>
+<p>در حالت dev تا ۵ شماره. رفتن به App Review این محدودیت را برمی‌دارد.</p>
+<h3>allowlist سمت هرمس</h3>
+<p>علاوه بر whitelist گیرندهٔ متا، هرمس allowlist ی per-platform ی خودش دارد که کنترل می‌کند <b>کدام پیام‌های ورودی توسط ایجنت پردازش شوند</b>. به ‏~/.hermes/.env اضافه کنید:</p>
+<pre dir="ltr"><code># Comma-separated phone numbers, country code, no '+' / spaces / dashes
+WHATSAPP_CLOUD_ALLOWED_USERS=15551234567,15557654321
+
+# Or allow everyone (only safe in combination with Meta's recipient whitelist)
+# WHATSAPP_CLOUD_ALLOW_ALL_USERS=true</code></pre>
+<p>ویزارد این را در گام ۶ ست می‌کند. بدون allowlist <b>هر پیام ورودی رد می‌شود</b> — عمدی است تا ربات اگر روزی whitelist گیرنده شل شود توسط شماره‌های تصادفی invoke نشود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> پراکندن پروفایل واتساپی ربات</h2>
+<p>‏WhatsApp یک <b>نام و تصویر پروفایل</b> برای رباتتان در header گفتگو و فهرست مخاطبین نمایش می‌دهد. اینها از طریق Cloud API قابل‌تنظیم نیستند — در Business Manager ی متا زندگی می‌کنند.</p>
+<p>وقتی رباتتان کار کرد به ‏<a href="https://business.facebook.com/wa/manage/phone-numbers/" target="_blank" rel="noopener">business.facebook.com/wa/manage/phone-numbers</a> بروید، روی شماره‌تان کلیک کنید و اینها را پیدا می‌کنید:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>چه چیزی</th><th>کجا</th><th>یادداشت‌ها</th></tr></thead>
+<tbody>
+<tr><td><b>Display name</b></td><td>بالای صفحهٔ شماره تلفن</td><td>تغییرات از فرایند name-review ی متا می‌گذرند ‏(~۲۴–۴۸ ساعت).</td></tr>
+<tr><td><b>Profile picture</b></td><td>بالای صفحهٔ شماره تلفن</td><td>تصویر مربعی، ≥۶۴۰×۶۴۰px توصیه می‌شود. فوراً به‌روز می‌شود.</td></tr>
+<tr><td><b>About / description / website / email / hours / category</b></td><td>دکمهٔ «Edit profile»</td><td>وقتی کاربر روی نام ربات tap کند در pane ی اطلاعات ظاهر می‌شوند. صرفاً ظاهری.</td></tr>
+<tr><td><b>Verified badge</b> ‏(تیک سبز)</td><td>Business Manager ← Security Center ← Start Verification</td><td>نیازمند فرایند جداگانهٔ تأیید بیزینسی متا.</td></tr>
+</tbody>
+</table>
+</div>
+<p>ویزارد ‏hermes whatsapp-cloud این لینک‌ها را انتهای setup چاپ می‌کند. هیچ‌کدام برای کار کردن ربات لازم نیست — صرفاً جلا دادن به نحوهٔ دیده‌شدن ربات نزد کاربران است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> مرجع پیکربندی</h2>
+<p>همهٔ تنظیمات در ‏<code>~/.hermes/.env</code> هستند. مقادیر الزامی <b>bold</b> اند.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>متغیر</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><b>‏<code>WHATSAPP_CLOUD_PHONE_NUMBER_ID</code></b></td><td>—</td><td>ID ی ۱۵–۱۷ رقمی از API Setup. <b>نه</b> خود شماره تلفن.</td></tr>
+<tr><td><b>‏<code>WHATSAPP_CLOUD_ACCESS_TOKEN</code></b></td><td>—</td><td>توکن دسترسی متا ‏(شروع با EAA). موقت ۲۴ ساعته یا دائمی System User.</td></tr>
+<tr><td><b>‏<code>WHATSAPP_CLOUD_APP_SECRET</code></b></td><td>—</td><td>hex ی ۳۲ نویسه‌ای از Settings ← Basic. بدون آن ورودی با ۵۰۳ رد می‌شود.</td></tr>
+<tr><td><b>‏<code>WHATSAPP_CLOUD_VERIFY_TOKEN</code></b></td><td>—</td><td>secret مشترک handshake ی GET. توسط ویزارد خودکار ساخته می‌شود.</td></tr>
+<tr><td><b>‏<code>WHATSAPP_CLOUD_ALLOWED_USERS</code></b></td><td>—</td><td>wa_id های جداشده-با-کاما مجاز به پیام دادن به ربات.</td></tr>
+<tr><td><code>WHATSAPP_CLOUD_ALLOW_ALL_USERS</code></td><td><code>false</code></td><td>برای دور زدن allowlist روی true بگذارید.</td></tr>
+<tr><td><code>WHATSAPP_CLOUD_APP_ID</code></td><td>—</td><td>اختیاری، برای یکپارچه‌سازی تحلیل‌های آینده.</td></tr>
+<tr><td><code>WHATSAPP_CLOUD_WABA_ID</code></td><td>—</td><td>اختیاری، برای یکپارچه‌سازی تحلیل‌های آینده.</td></tr>
+<tr><td><code>WHATSAPP_CLOUD_WEBHOOK_HOST</code></td><td>unset ‏(dual-stack: همهٔ interface ها، IPv4+IPv6)</td><td>interface ای که سرور وب‌هوک به آن bind می‌شود.</td></tr>
+<tr><td><code>WHATSAPP_CLOUD_WEBHOOK_PORT</code></td><td><code>8090</code></td><td>پورت bind ی سرور وب‌هوک. باید با پورتی که tunnel تان forward می‌کند بخورد.</td></tr>
+<tr><td><code>WHATSAPP_CLOUD_WEBHOOK_PATH</code></td><td><code>/whatsapp/webhook</code></td><td>مسیر URL ای که متا به آن POST می‌کند.</td></tr>
+<tr><td><code>WHATSAPP_CLOUD_API_VERSION</code></td><td><code>v20.0</code></td><td>نسخهٔ Graph API ی متا. فقط اگر مستندات متا نسخهٔ جدیدتری توصیه کرد override کنید.</td></tr>
+<tr><td><code>WHATSAPP_CLOUD_HOME_CHANNEL</code></td><td>—</td><td>wa_id ی استفاده‌شده به‌عنوان کانال خانهٔ ربات ‏(برای cron job ها و…).</td></tr>
+</tbody>
+</table>
+</div>
+<p>می‌توانید adapter های Baileys ‏(whatsapp) و Cloud ‏(whatsapp_cloud) را <b>همزمان</b> فعال داشته باشید با نشانه‌گیری به شماره تلفن‌های مختلف.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> قابلیت‌ها</h2>
+<h3>ورودی</h3>
+<ul>
+  <li><b>پیام‌های متنی</b> — مستقیم به ایجنت پاس داده می‌شوند.</li>
+  <li><b>تصاویر</b> — خوددانلود و الصاقی به ورودی ایجنت. مدل‌های دارای بینایی native ‏(Claude، ‏GPT-4o، ‏Gemini و…) تصویر را مستقیم می‌خوانند؛ مدل‌های غیر-بینایی توضیح متنی خودتولید دریافت می‌کنند.</li>
+  <li><b>ویس‌نوت‌ها</b> — به‌صورت .ogg خوددانلود، با ارائه‌دهندهٔ STT پیکربندی‌شده‌تان ‏(faster-whisper محلی، ‏OpenAI/Nous، ‏Groq و…) رونویسی و سپس به‌عنوان متن به ایجنت داده می‌شوند.</li>
+  <li><b>اسناد</b> — خوددانلود. فایل‌های کوچک قابل-خواندن-متنی ‏(.txt، .md، .json، .py، .csv و…) تا ‎۱۰۰KB‎ داخل ورودی ایجنت inline می‌شوند تا بدون فراخوانی ابزار بخواندشان. فایل‌های بزرگتر محلی کش می‌شوند برای دسترسی سایر ابزارهای ایجنت.</li>
+  <li><b>tap ی دکمه‌ها</b> — وقتی کاربر روی دکمه‌ای که ربات قبلاً فرستاده tap کند ‏(انتخاب clarify، ‏تأیید فرمان، تأیید دستور اسلش)، tap مستقیم به هندلر درست مسیریابی می‌شود. tap های قدیمی به‌عنوان ورودی متن عادی fallback می‌شوند.</li>
+  <li><b>زمینهٔ reply</b> — وقتی کاربر به پیام قبلی ربات reply کند، ایجنت پیام اصلی را به‌عنوان زمینه می‌بیند.</li>
+</ul>
+<h3>خروجی</h3>
+<ul>
+  <li><b>متن</b> — markdown خودکار به نحو flavored ی واتساپ تبدیل می‌شود ‏(<code>**bold**</code> ← ‏<code>*bold*</code>، ‏<code>~~strike~~</code> ← ‏<code>~strike~</code>، ‏headers ← bold، ‏<code>[link](url)</code> ← link (url)). پیام‌های بلند در chunk های ۴۰۹۶ نویسه‌ای شکسته می‌شوند.</li>
+  <li><b>تصاویر</b> — تصاویر تولید-ایجنت و فایل‌های تصویری محلی هر دو پشتیبانی و به‌عنوان پیوست عکس native تحویل می‌شوند.</li>
+  <li><b>پیام‌های صوتی</b> — خروجی TTS با ffmpeg به حباب native ویس‌نوت واتساپ ‏(موج سبز) تبدیل می‌شود. بدون ffmpeg به پیوست MP3 برمی‌گردد. بخش «پیام‌های صوتی» پایین را ببینید.</li>
+  <li><b>ویدیو / اسناد</b> — هر دو پشتیبانی و به‌عنوان پیوست native ارسال می‌شوند.</li>
+</ul>
+<h3>UX تعاملی</h3>
+<p>وقتی ایجنت هرکدام از این جریان‌ها را invoke کند هرماس از پیام‌های تعاملی native ی واتساپ استفاده می‌کند — دکمه‌های tap-کن-جواب به‌جای پرامپت‌های «با شماره جواب بده»:</p>
+<ul>
+  <li><b>ابزار clarify</b> — سؤالات چندگزینه‌ای به‌صورت دکمه‌های quick-reply ‏(۱–۳ گزینه) یا برگهٔ لیست tap-کن-باز ‏(۴+ گزینه) رندر می‌شوند. انتخاب «✏️ Other» اجازه می‌دهد کاربر پاسخ آزاد تایپ کند که ایجنت به‌عنوان نتیجه دریافت می‌کند.</li>
+  <li><b>تأیید فرمان‌های خطرناک</b> — وقتی اجرای terminal/code ی ایجنت به فرمان gated بخورد، کاربر دکمه‌های ‏✅ Approve / ❌ Deny را می‌بیند به‌جای تایپ /approve یا /deny.</li>
+  <li><b>تأییدهای دستور اسلش</b> — فرمان‌های ممتاز مثل /reload-mcp دکمه‌های ✅ Approve Once / 🔒 Always / ❌ Cancel نشان می‌دهند.</li>
+</ul>
+<p>همهٔ پرامپت‌های تعاملی اگر دکمه‌ها رندر نشوند ‏(مثلاً روی کلاینت‌های قدیمی واتساپ) با لطف به متن ساده تنزل می‌یابند.</p>
+<h3>رسید خواندن و نشانگر تایپ</h3>
+<p>هرمس پیام‌های ورودی را فوراً acknowledge می‌کند:</p>
+<ul>
+  <li>پیامتان به‌محض دریافت توسط گیت‌وی <b>دوتیک آبی</b> نشان می‌دهد.</li>
+  <li>نام ربات در چت واتساپ‌تان حین آماده‌سازی پاسخ «typing…» نشان می‌دهد.</li>
+  <li>نشانگر typing وقتی اولین پیام پاسخ ربات برسد خودکار dismiss می‌شود.</li>
+</ul>
+<p>این باعث می‌شود دیدنِ پیامتان توسط ربات در مقابل هنوز-درحال-کاربودنش واضح باشد.</p>
+<h3>پیام‌های صوتی</h3>
+<p>‏واتساپ بین «ویس‌نوت» ‏(حباب موج سبز) و پیوست فایل صوتی عمومی تفکیک قائل است. تفاوت صرفاً codec است: ویس‌نوت‌ها audio/ogg با کدگذاری opus می‌خواهند.</p>
+<p>‏TTS ی هرمس MP3 تولید می‌کند. دو مسیر:</p>
+<ul>
+  <li><b>با ffmpeg روی PATH</b> ‏(توصیه‌شده) — TTS ی خروجی تبدیل و به‌عنوان ویس‌نوت واقعی می‌رسد. نصب: ‏Windows: ‏winget install Gyan.FFmpeg · ‏macOS: ‏brew install ffmpeg · ‏Linux: مدیر پکیج</li>
+  <li><b>بدون ffmpeg</b> — TTS ی خروجی به‌عنوان پیوست MP3 می‌رسد. خوب پخش می‌شود فقط شبیه ویس‌نوت نیست. یک هشدار یک‌باره در لاگ گیت‌وی شلیک می‌شود تا بدانید.</li>
+</ul>
+<p>پیدا شدن ffmpeg توسط گیت‌وی را از طریق نقطهٔ پایانی health چک کنید:</p>
+<div class="codebox"><pre><code>curl http://localhost:8090/health
+# look for "ffmpeg_present": true</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> محدودیت‌های شناخته‌شده</h2>
+<h3>پنجرهٔ گفتگوی ۲۴ ساعته</h3>
+<p>متا فقط <b>پیام‌های آزاد</b> را داخل پنجرهٔ ۲۴ ساعته بعد از آخرین پیام ورودی کاربر اجازه می‌دهد. بیرون آن پنجره تنها چیزی که API ی متا می‌پذیرد یک <b>قالب پیام</b> پیش-تأییدشده است.</p>
+<p><b>در عمل یعنی:</b></p>
+<ul>
+  <li>چت واکنشی ‏(DM کاربر ← پاسخ ربات زیر ۲۴h ← reply کاربر ← ...) برای همیشه کار می‌کند. بیش از ۹۵٪ مصرف عادی ربات را پوشش می‌دهد.</li>
+  <li><b>cron job هایی که به واتساپ تحویل می‌دهند</b> بعد از فاصلهٔ بالای ۲۴h با خطای Graph ی ‏131047 شکست می‌خورند ‏(«Re-engagement message»).</li>
+  <li><b>نتایج async ی delegate_task های بلندمدت</b> که بیشتر از ۲۴h طول بکشند همین‌طور شکست می‌خورند.</li>
+  <li><b>مشترکان وب‌هوک</b> که رویدادهای بیرونی را به واتساپ مسیریابی می‌کنند وقتی کاربر اخیراً DM نداده شکست می‌خورند.</li>
+</ul>
+<p>هرمس در پرامپت سیستمی ایجنت دربارهٔ این پنجره هشدار می‌دهد تا مدل موقع زمان‌بندی پیام‌های تأخیری بداند به آن اشاره کند.</p>
+<p>پشتیبانی قالب-پیام ‏(راه‌حل ارسال خارج-از-پنجره) فعلاً در هرمس پیاده نشده. اگر لازمش دارید لطفاً <a href="https://github.com/NousResearch/hermes-agent/issues" target="_blank" rel="noopener">issue باز کنید</a> — برنامه‌ریزی شده ولی منتظر سیگنال تقاضای روشن است.</p>
+<h3>گفتگوهای گروهی</h3>
+<p>Cloud API پشتیبانی گروهی محدودی دارد ‏(gate شده با سطح-قابلیت متا). adapter ی whatsapp_cloud ی هرمس فعلاً در v1 فقط <b>پیام‌های مستقیم</b> را هندل می‌کند. اگر گروه‌چت لازم دارید از پل Baileys استفاده کنید.</p>
+<h3>rate limit خروجی</h3>
+<p>توان پیش‌فرض متا <b>۸۰ پیام/ثانیه per شماره تلفن بیزینسی</b> است با امکان ارتقا. هرمس فعلاً سمت-کلاینت این را اعمال نمی‌کند — ارسال‌های حجم-بسیار-بالا ممکن است به سقف متا بخورند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> عیب‌یابی</h2>
+<h3>تأیید setup شکست می‌خورد ‏(«URL couldn't be validated») در داشبورد متا</h3>
+<p>تقریباً همیشه یکی از اینها:</p>
+<ul>
+  <li><b>URL ی tunnel غلط یا کهنه است</b> — quick tunnel های cloudflared می‌چرخند. URL تازه بگیرید و هم .env هم داشبورد متا را به‌روز کنید.</li>
+  <li><b>عدم تطبیق Verify token</b> — توکن در WHATSAPP_CLOUD_VERIFY_TOKEN ی ~/.hermes/.env باید دقیقاً با آنچه در داشبورد متا تایپ کردید بخورد. اول probe ی curl بالا را اجرا کنید تا handshake ی verify ی گیت‌وی محلیاً کار کند.</li>
+  <li><b>گیت‌وی اجرا نیست</b> — بررسی کنید hermes gateway بالا باشد.</li>
+  <li><b>App Secret ست نیست</b> — بدون آن هرمس POST های ورودی را با ۵۰۳ رد می‌کند. متا آن را «قابل‌اعتبارسنجی نیست» تفسیر می‌کند.</li>
+</ul>
+<h3>‏<code>graph error 100</code>: Object with ID '...' does not exist</h3>
+<p>شماره تلفن‌تان ‏(۱۰–۱۱ رقم) را به‌جای Phone Number ID ‏(ID داخلی ۱۵–۱۷ رقمی متا) داخل WHATSAPP_CLOUD_PHONE_NUMBER_ID چسبانده‌اید. صفحهٔ API Setup را دوباره چک کنید — Phone Number ID <i>زیر</i> dropdown ی From نشان داده می‌شود.</p>
+<p>ویزارد حالا با validator این را می‌گیرد ولی اگر دستی پیکربندی می‌کنید دانستنش بد نیست.</p>
+<h3>‏<code>graph error 190</code>: Authentication Error</h3>
+<p>توکن دسترسی‌تان نامعتبر است. زیرکدها:</p>
+<ul>
+  <li>‏<code>subcode 463</code> — توکن منقضی شده. توکن‌های موقت ۲۴ ساعت دوام دارند. دوباره بسازید یا به توکن دائمی System User سوئیچ کنید.</li>
+  <li>‏<code>subcode 467</code> — توکن بی‌اعتبار شده ‏(revoke یا تغییر رمز).</li>
+  <li>سایر ۱۹۰ — توکن هنگام ساخت مجوزهای لازم را نداشته. مطمئن شوید هر سه انتخاب شده بودند.</li>
+</ul>
+<h3>‏<code>graph error 131047</code>: Re-engagement message</h3>
+<p>پنجرهٔ گفتگوی ۲۴ ساعته منقضی شده ‏(محدودیت‌های شناخته‌شده را ببینید). یا:</p>
+<ul>
+  <li>از کاربر بخواهید اول به ربات DM بدهد تا پنجره دوباره باز شود.</li>
+  <li>منتظر رسیدن پشتیبانی قالب به هرمس بمانید.</li>
+</ul>
+<h3>پیام ورودی: ‏<code>media metadata fetch failed (status=401)</code></h3>
+<p>همان ریشه‌های ۴۰۱ ی خروجی ‏(graph error 190) — توکن دسترسی نامعتبر یا منقضی است. توکن را درست کنید.</p>
+<h3>پاسخ‌های ربات به‌صورت JSON خام / نشت tool-call ظاهر می‌شوند</h3>
+<p>علت رایج: تول‌ست پیکربندی‌شده برای whatsapp_cloud ابزارهایی را که ایجنت می‌خواهد صدا بزند ندارد. ‏hermes tools list را چک و تأیید کنید پلتفرم از hermes-whatsapp استفاده می‌کند ‏(تول‌ست پیش‌فرض adapter ی Cloud، مثل Baileys).</p>
+<p>اگر مدل به‌جای فراخوانی ساختاریافته متنِ شبیه-tool-call منتشر کند معمولاً یعنی تول‌ست عملاً خالی بوده. نگاشت platform ← default-toolset را در hermes_cli/platforms.py ببینید.</p>
+<h3>‏STT ‏(رونویسی ویس‌نوت) خالی برمی‌گرداند / «could not transcribe»</h3>
+<p>پیش‌فرض ‏stt.provider: local به ‏pip install faster-whisper نیاز دارد. اگر مشترک Nous هستید می‌توانید STT را از طریق گیت‌وی مدیریت‌شده مسیریابی کنید — در hermes tools برای speech-to-text مقدار <b>Nous Subscription</b> را بردارید یا مستقیم ست کنید:</p>
+<div class="codebox"><pre><code>hermes config set stt.provider nous
+hermes gateway restart</code></pre></div>
+<p>این به‌جای کلید جداگانهٔ OpenAI از توکن دسترسی Nous Portal شما استفاده می‌کند. ‏(مستندات قدیمی ‏stt.use_gateway true را پیشنهاد می‌دادند — آن فلگ legacy است؛ الان فقط انتخاب provider مسیریابی را کنترل می‌کند.)</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> نکات امنیتی</h2>
+<ul>
+  <li><b>App Secret را مثل رمز عبور تلقی کنید</b> — هرکس آن را داشته باشد می‌تواند payload های وب‌هوکی جعل کند که هرمس اصیل می‌پذیرد.</li>
+  <li><b>Verify token یک secret مشترک است</b> — نشتش کم‌خطرتر است ‏(بدترین حالت کسی می‌تواند وب‌هوک متا را به URL دیگری از خودش re-subscribe کند) ولی باز هم commit اش نکنید.</li>
+  <li><b>توکن دسترسی هویت ربات شماست</b> — توکن‌های System User معادل کلیدهای API ی بلندمدت‌اند. در صورت به‌خطر افتادن استقرار فوراً rotate کنید.</li>
+  <li><b>نقطهٔ پایانی webhook فقط وقتی WHATSAPP_CLOUD_APP_SECRET ست باشد درخواست‌های امضاشده می‌پذیرد</b> — حتی در توسعه ست نگهش دارید. بدون آن گیت‌وی تحویل ورودی را با HTTP 503 رد می‌کند.</li>
+  <li><b>نقطهٔ پایانی /health احراز-هویت‌نشده است</b> — امن است چون فقط بولین‌های حضور-config را گزارش می‌کند نه مقادیرشان. ولی اگر نمی‌خواهیدش surface کنید دسترسی را در لایهٔ reverse proxy / tunnel محدود کنید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> مقایسه با پل Baileys</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>Baileys ‏(‏hermes whatsapp)</th><th>Cloud API ‏(‏hermes whatsapp-cloud)</th></tr></thead>
+<tbody>
+<tr><td>نوع حساب</td><td>شخصی</td><td>بیزینسی</td></tr>
+<tr><td>راه‌اندازی</td><td>اسکن QR کد</td><td>اپ متا + WABA + توکن</td></tr>
+<tr><td>وابستگی‌ها</td><td>Node.js + npm</td><td>پایتون خالص ‏(httpx + aiohttp)</td></tr>
+<tr><td>پروسه</td><td>زیرپروسهٔ مدیریت‌شدهٔ Node</td><td>سرور وب‌هوک aiohttp</td></tr>
+<tr><td>URL عمومی لازم؟</td><td>نه</td><td>بله</td></tr>
+<tr><td>ریسک بن حساب</td><td>بله ‏(API غیررسمی)</td><td>نه ‏(رسمی پشتیبانی می‌شود)</td></tr>
+<tr><td>ورودی</td><td>Polling ی پل Node</td><td>وب‌هوک POST از متا</td></tr>
+<tr><td>خروجی</td><td>پل محلی ← Baileys</td><td>HTTPS به graph.facebook.com</td></tr>
+<tr><td>گروه‌ها</td><td>پشتیبانی کامل</td><td>فقط DM ‏(v1)</td></tr>
+<tr><td>پنجرهٔ ۲۴ ساعته</td><td>بدون محدودیت</td><td>قاعدهٔ سخت — بعدش قالب لازم است</td></tr>
+<tr><td>ویس‌نوت ‏(خروجی)</td><td>Native</td><td>Native با ffmpeg، وگرنه fallback به MP3</td></tr>
+<tr><td>رسید خواندن</td><td>نه</td><td>بله ‏(دوتیک آبی)</td></tr>
+<tr><td>نشانگر تایپ</td><td>نه</td><td>بله ‏(با پاسخ auto-dismiss می‌شود)</td></tr>
+<tr><td>دکمه‌های تعاملی</td><td>فقط fallback متنی</td><td>Native ‏(clarify، ‏تأیید، ‏slash-confirm)</td></tr>
+<tr><td>استفادهٔ production</td><td>پرخطر ‏(متا می‌تواند بن کند)</td><td>طراحی‌شده برای آن</td></tr>
+</tbody>
+</table>
+</div>
+<p>بیشتر کاربرانی که هرمس را برای پروژه‌های شخصی اجرا می‌کنند Baileys را ترجیح می‌دهند. بیشتر کاربرانی که ربات رو-به-مشتری اجرا می‌کنند Cloud API را.</p>
+<h3>ببینید نیز</h3>
+<ul>
+  <li><a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/" target="_blank" rel="noopener">مستندات رسمی WhatsApp Business Cloud API ی متا</a> — مرجع معتبر پلتفرم زیرین، قیمت‌گذاری، App Review و rate limit های سمت-متا.</li>
+  <li><a href="whatsapp.html">راه‌اندازی واتساپ ‏(پل Baileys)</a> — یکپارچه‌سازی جایگزین برای پروژه‌های شخصی.</li>
+  <li><a href="index.html">نگاه کلی پلتفرم‌های پیام‌رسانی</a> — همهٔ یکپارچه‌سازی‌های پیام‌رسانی در یک نگاه.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="teams-meetings.html"><span class="dir">→ قبلی</span><span class="ttl">جلسات Microsoft Teams</span></a>
+  <a class="next" href="google_chat.html"><span class="dir">بعدی ←</span><span class="ttl">گوگل‌چت</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/whatsapp-cloud" target="_blank" rel="noopener">WhatsApp Business (Cloud API)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

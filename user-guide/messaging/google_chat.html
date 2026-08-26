@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>گوگل‌چت — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/google_chat" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>پیام‌رسان‌ها<span class="sep">/</span><strong>گوگل‌چت</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی Google Chat</h1>
+<p>‏Hermes Agent را به‌عنوان یک بات به Google Chat وصل کنید. این یکپارچه‌سازی برای رویدادهای ورودی از اشتراک pull ی Cloud Pub/Sub و برای پیام‌های خروجی از Chat REST API استفاده می‌کند. ارگونومی معادل Slack Socket Mode یا long-polling ی تلگرام: پروسهٔ هرمس شما به URL عمومی، ‏tunnel یا گواهی TLS نیاز ندارد. وصل می‌شود، احراز هویت و روی یک subscription گوش می‌دهد — همان‌طور که یک بات تلگرامی روی توکن گوش می‌دهد.</p>
+<p><b>برای مرور راهنمایی دستوری، ‏hermes gateway setup را اجرا و Google Chat را انتخاب کنید.</b></p>
+<div class="callout note">
+  <div class="callout-title">📌 نسخهٔ Workspace</div>
+  <p>‏Google Chat بخشی از Google Workspace است. با یک Workspace شخصی ‏(@yourdomain.com ثبت‌شده نزد گوگل) یا Workspace کاری که حق Admin برای انتشار اپ دارید می‌توانید از این یکپارچه‌سازی استفاده کنید. حساب‌های فقط-Gmail نمی‌توانند اپ چت میزبانی کنند.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نمای کلی</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>جزء</th><th>مقدار</th></tr></thead>
+<tbody>
+<tr><td><b>کتابخانه‌ها</b></td><td>‏<code>google-cloud-pubsub</code>، ‏<code>google-api-python-client</code>، ‏<code>google-auth</code></td></tr>
+<tr><td><b>transport ی ورودی</b></td><td>اشتراک pull ی Cloud Pub/Sub ‏(بدون نقطهٔ پایانی عمومی)</td></tr>
+<tr><td><b>transport ی خروجی</b></td><td>Chat REST API ‏(chat.googleapis.com)</td></tr>
+<tr><td><b>احراز هویت</b></td><td>JSON ی Service Account با ‏roles/pubsub.subscriber روی subscription</td></tr>
+<tr><td><b>شناسایی کاربر</b></td><td>resource name های چت ‏(users/{id}) + ایمیل</td></tr>
+</tbody>
+</table>
+</div>
+<h3>گام ۱: ساخت یا انتخاب پروژهٔ GCP</h3>
+<p>برای میزبانی topic ی Pub/Sub به پروژهٔ Google Cloud نیاز دارید. ندارید؟ در ‏<a href="https://console.cloud.google.com" target="_blank" rel="noopener">console.cloud.google.com</a> بسازید — حساب‌های شخصی تیر رایگان می‌گیرند که ترافیک بات را راحت پوشش می‌دهد.</p>
+<p>ID پروژه را یادداشت کنید ‏(مثلاً my-chat-bot-123). در همهٔ گام‌های بعدی از آن استفاده می‌کنید.</p>
+<h3>گام ۲: فعال کردن دو API</h3>
+<p>در کنسول به ‏APIs &amp; Services ← Library بروید و فعال کنید:</p>
+<ul>
+  <li><b>Google Chat API</b></li>
+  <li><b>Cloud Pub/Sub API</b></li>
+</ul>
+<p>هر دو برای حجمی که یک بات شخصی تولید می‌کند رایگان‌اند.</p>
+<h3>گام ۳: ساخت Service Account</h3>
+<p>‏IAM &amp; Admin ← Service Accounts ← Create Service Account.</p>
+<ul>
+  <li>نام: ‏hermes-chat-bot</li>
+  <li>گام «Grant this service account access to project» را skip کنید. IAM روی subscription مشخص همهٔ چیزی است که لازم دارید — نقش‌های Pub/Sub سطح-پروژه <b>ندهید</b>.</li>
+</ul>
+<p>بعد از ساخت SA را باز، به Keys ← Add Key ← Create new key ← JSON بروید و فایل را دانلود کنید. جایی ذخیره‌اش کنید که فقط هرمس بخواند ‏(مثلاً ‏~/.hermes/google-chat-sa.json با chmod 600).</p>
+<div class="callout caution">
+  <div class="callout-title">⚠️ هیچ نقش «Chat Bot Caller» وجود ندارد</div>
+  <p>اشتباه رایج: جستجو برای نقش IAM مخصوص-چت و اعطای آن در سطح پروژه. چنین نقشی وجود ندارد. اختیار بات چت از نصب شدن در یک space می‌آید نه از IAM. تنها چیزی که SA تان لازم دارد Pub/Sub Subscriber روی subscription ای است که در گام بعد می‌سازید.</p>
+</div>
+<h3>گام ۴: ساخت topic و subscription ی Pub/Sub</h3>
+<p>‏Pub/Sub ← Topics ← Create topic.</p>
+<ul>
+  <li>Topic ID: ‏hermes-chat-events</li>
+  <li>برای بقیه پیش‌فرض‌ها را رها کنید.</li>
+</ul>
+<p>بعد از ساخت، صفحهٔ جزئیات topic تب Subscriptions دارد. یکی بسازید:</p>
+<ul>
+  <li>Subscription ID: ‏hermes-chat-events-sub</li>
+  <li>Delivery type: ‏<b>Pull</b></li>
+  <li>Message retention: ‏<b>۷ روز</b> ‏(تا backlog از ری‌استارت هرمس جان سالم به در برد)</li>
+  <li>بقیه را پیش‌فرض رها کنید.</li>
+</ul>
+<h3>گام ۵: binding ی IAM روی topic ‏(حیاتی)</h3>
+<p>روی <b>topic</b> ‏(نه subscription) یک principal ی IAM اضافه کنید:</p>
+<ul>
+  <li>Principal: ‏chat-api-push@system.gserviceaccount.com</li>
+  <li>Role: ‏Pub/Sub Publisher</li>
+</ul>
+<p>بدون این، Google Chat نمی‌تواند رویدادها را به topic تان منتشر کند و رباتتان هرگز هیچ چیزی دریافت نخواهد کرد.</p>
+<h3>گام ۶: binding ی IAM روی subscription</h3>
+<p>روی <b>subscription</b> مقدار Service Account خودتان را به‌عنوان principal اضافه کنید:</p>
+<ul>
+  <li>Principal: ‏hermes-chat-bot@&lt;your-project&gt;.iam.gserviceaccount.com</li>
+  <li>Role: ‏Pub/Sub Subscriber</li>
+</ul>
+<p>همچنین ‏Pub/Sub Viewer را روی همان subscription اعطا کنید — هرمس موقع شروع برای بررسی قابلیت‌رسیدی ‏subscription.get() را صدا می‌زند.</p>
+<h3>گام ۷: پیکربندی اپ چت</h3>
+<p>به APIs &amp; Services ← Google Chat API ← Configuration بروید.</p>
+<ul>
+  <li><b>App name</b>: هر چه می‌خواهید کاربران ببینند ‏(«Hermes» منطقی است).</li>
+  <li><b>Avatar URL</b>: هر PNG عمومی ‏(گوگل چند پیش‌فرض دارد).</li>
+  <li><b>Description</b>: جملهٔ کوتاهی که در دایرکتوری اپ نمایش داده می‌شود.</li>
+  <li><b>Functionality</b>: ‏Receive 1:1 messages و Join spaces and group conversations را فعال کنید.</li>
+  <li><b>Connection settings</b>: مقدار Cloud Pub/Sub را بردارید و نام topic را وارد کنید: ‏projects/&lt;your-project&gt;/topics/hermes-chat-events.</li>
+  <li><b>Visibility</b>: محدود به workspace خودتان ‏(یا کاربران مشخص) — حین تست به همه منتشر نکنید.</li>
+</ul>
+<p>ذخیره کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> نصب بات در فضای تست و پیکربندی هرمس</h2>
+<h3>گام ۸: نصب بات در یک space ی آزمایشی</h3>
+<p>Google Chat را در مرورگر باز کنید. با جستجوی نام اپ در منوی <b>+ New Chat</b> یک DM با آن شروع کنید. اولین باری که پیام بدهید گوگل رویداد ADDED_TO_SPACE می‌فرستد که هرمس برای کش کردن users/{id} ی خودِ بات جهت فیلتر self-message استفاده می‌کند.</p>
+<h3>گام ۹: پیکربندی هرمس</h3>
+<p>بخش Google Chat را به ‏~/.hermes/.env اضافه کنید:</p>
+<pre dir="ltr"><code># Required
+GOOGLE_CHAT_PROJECT_ID=my-chat-bot-123
+GOOGLE_CHAT_SUBSCRIPTION_NAME=projects/my-chat-bot-123/subscriptions/hermes-chat-events-sub
+GOOGLE_CHAT_SERVICE_ACCOUNT_JSON=/home/you/.hermes/google-chat-sa.json
+
+# Authorization — paste the emails of people allowed to talk to the bot
+GOOGLE_CHAT_ALLOWED_USERS=you@yourdomain.com,coworker@yourdomain.com
+
+# Optional
+GOOGLE_CHAT_HOME_CHANNEL=spaces/AAAA...         # default delivery destination for cron jobs
+GOOGLE_CHAT_MAX_MESSAGES=1                      # Pub/Sub FlowControl; 1 serializes commands per session
+GOOGLE_CHAT_MAX_BYTES=16777216                  # 16 MiB — cap on in-flight message bytes</code></pre>
+<p>ID پروژه به GOOGLE_CLOUD_PROJECT و مسیر SA به GOOGLE_APPLICATION_CREDENTIALS هم fallback می‌کنند — هر قراردادی که ترجیح می‌دهید.</p>
+<p>وابستگی‌های adapter ی Google Chat را از طریق نصب‌کنندهٔ نگهداری‌شده‌اش نصب کنید. همان کف‌های امنیتی pin‌شده‌ای را اعمال می‌کند که بررسی‌های runtime استفاده می‌کنند:</p>
+<div class="codebox"><pre><code>python -m plugins.platforms.google_chat.oauth --install-deps</code></pre></div>
+<p>گیت‌وی را شروع کنید:</p>
+<div class="codebox"><pre><code>hermes gateway</code></pre></div>
+<p>لاگی شبیه این باید ببینید:</p>
+<pre dir="ltr"><code>[GoogleChat] Connected; project=my-chat-bot-123, subscription=&lt;redacted&gt;,
+             bot_user_id=users/XXXX, flow_control(msgs=1, bytes=16777216)</code></pre>
+<p>در DM ی آزمایشی «hola» بفرستید. ربات نشانگر «Hermes is thinking…» پست می‌کند و بعد همان پیام را درجا با پاسخ واقعی edit می‌کند — بدون سنگ‌قبرهای «message deleted».</p>
+<h3>سفارشی کردن نشانگر وضعیت-کار</h3>
+<p>متن نشانگر از طریق typing_status_text در ~/.hermes/config.yaml قابل‌پیکربندی است — مثلاً دستیار بچه‌گربه‌ای به نام Ada:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>platforms:
+  google_chat:
+    # Custom working-state marker text (default: "Hermes is thinking…").
+    typing_status_text: "is pouncing… 🐾"</code></pre>
+</div>
+<p>برخلاف خط status زودگذر اسلک، این یک <b>پیام واقعی پست‌شده</b> است که درجا با پاسخ edit می‌شود — پس هرچه اینجا ست کنید موقتاً به‌عنوان پیام عادی در چت ظاهر می‌شود. برای غیرفعال کردن کامل نشانگر ‏typing_indicator: false را ست کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> فرمت و قابلیت‌ها</h2>
+<p>‏Google Chat زیرمجموعهٔ محدودی از markdown را رندر می‌کند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پشتیبانی‌شده</th><th>پشتیبانی‌نشده</th></tr></thead>
+<tbody>
+<tr><td>‏<code>*bold*</code>، ‏<code>_italic_</code>، ‏<code>~strike~</code>، ‏<code>`code`</code></td><td>سرصفحه‌ها، فهرست‌ها</td></tr>
+<tr><td>تصاویر inline از طریق URL</td><td>دکمه‌های Interactive Card v2 ‏(v1 این گیت‌وی)</td></tr>
+<tr><td>پیوست‌های native ی فایل ‏(بعد از /setup-files — گام ۴ را ببینید)</td><td>ویس‌نوت native / ویدیوی دایره‌ای</td></tr>
+</tbody>
+</table>
+</div>
+<p>پرامپت سیستمی ایجنت سرنخ مخصوص-Google-Chat دارد تا این محدودیت‌ها را بداند و از فرمت‌هایی که رندر نمی‌شوند اجتناب کند.</p>
+<p>سقف اندازهٔ پیام: ۴۰۰۰ نویسه per-message. پاسخ‌های بلندتر ایجنت خودکار بین چند پیام شکسته می‌شوند.</p>
+<p>پشتیبانی thread: وقتی کاربر داخل thread reply کند هرمس thread.name را آشکار و پاسخش را در همان thread پست می‌کند، پس هر thread نشست جداگانهٔ هرمس می‌گیرد.</p>
+<h3>سؤالات clarify به‌صورت کارت‌های تعاملی</h3>
+<p>وقتی ایجنت سؤال چندگزینه‌ای clarify بپرسد، adapter آن را به‌صورت <b>Card v2</b> ی native با یک دکمه per-gزینه به‌علاوهٔ دکمهٔ «Other / type answer» رندر می‌کند به‌جای فهرست متنی شماره‌دار. کلیک روی دکمه مستقیماً به سؤال جواب می‌دهد ‏(رویدادهای CARD_CLICKED گزینه را به نشست منتظر برمی‌گردانند). اگر ارسال کارت شکست بخورد یا سؤال گزینه‌های ثابت نداشته باشد adapter به clarify متنی استاندارد برمی‌گردد. بدون هیچ پیکربندی.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> تحویل پیوست native ‏(اختیاری)</h2>
+<p>همان اول ربات می‌تواند متن بفرستد، تصویر inline از طریق URL و دانلود-کارت برای صدا/ویدیو/اسناد. برای تحویل پیوست‌های <b>native</b> چت — همون widget ی فایل که وقتی انسان drag-and-drop می‌کند می‌بینید — هر کاربر یک بار از طریق جریان OAuth ی per-user به ربات مجوز می‌دهد.</p>
+<h3>چرا جریان جداگانه</h3>
+<p>نقطهٔ پایانی media.upload ی Google Chat احراز هویت service-account را hard-reject می‌کند:</p>
+<blockquote dir="ltr"><p>This method doesn't support app authentication with a service account. Authenticate with a user account.</p></blockquote>
+<p>هیچ نقش یا scope ی IAM این را درست نمی‌کند. نقطهٔ پایانی فقط credential های کاربر می‌پذیرد. پس ربات هر وقت فایل آپلود کند باید <i>به‌عنوان کاربر</i> عمل کند — دقیقاً به‌عنوان کاربری که فایل را خواسته.</p>
+<h3>راه‌اندازی یک‌باره ‏(per profile)</h3>
+<ol>
+  <li>در همان پروژهٔ GCP به APIs &amp; Services ← Credentials بروید.</li>
+  <li>Create credentials ← OAuth client ID ← Desktop app.</li>
+  <li>JSON را دانلود و روی ماشینی که هرمس اجراست منتقل کنید.</li>
+  <li>کلاینت را با هرمس ثبت کنید ‏(زیر پروفایلی که می‌خواهید scope شود اجرا کنید):</li>
+</ol>
+<div class="codebox"><pre><code># Default profile:
+python -m plugins.platforms.google_chat.oauth \
+    --client-secret /path/to/client_secret.json
+
+# A named profile gets its own separate registration:
+hermes -p &lt;profile&gt; python -m plugins.platforms.google_chat.oauth \
+    --client-secret /path/to/client_secret.json</code></pre></div>
+<p>این client secret را در خانهٔ هرمس پروفایل فعال می‌نویسد ‏(مثلاً ‏~/.hermes/google_chat_user_client_secret.json برای پروفایل پیش‌فرض). client secret <b>مخصوص-پروفایل است نه مشترک بین پروفایل‌ها</b> — هر پروفایل خودش را ثبت می‌کند. عمدی است: پروفایل‌ها مرزهای auth ایزوله‌اند، پس دو پروفایل می‌توانند به اپ‌ها/حساب‌های OAuth ی گوگل متفاوت اشاره کنند. یک بار per-profil ی نیازمند تحویل پیوست ثبتش کنید.</p>
+<h3>مجوزدهی per-user ‏(داخل چت)</h3>
+<p>هر کاربر جریان را یک بار در DM خودش با ربات اجرا می‌کند:</p>
+<ol>
+  <li>/setup-files را به ربات می‌فرستد. ربات وضعیت و گام بعد را جواب می‌دهد.</li>
+  <li>‏/setup-files start می‌فرستد. ربات URL ی OAuth جواب می‌دهد.</li>
+  <li>URL را باز می‌کند، Allow را می‌زند و می‌بیند مرورگر در بارگیری ‏http://localhost:1/?...&amp;code=... شکست می‌خورد. این شکست مورد انتظار است — کد auth در نوار URL است.</li>
+  <li>URL ی شکست‌خورده ‏(یا فقط مقدار code=...) را کپی و به‌صورت ‏/setup-files &lt;PASTED_URL&gt; به چت paste می‌کند. ربات آن را با refresh token مبادله می‌کند.</li>
+</ol>
+<p>توکن در ‏~/.hermes/google_chat_user_tokens/&lt;sanitized_email&gt;.json فرود می‌آید. درخواست‌های فایل بعدی در DM ی آن کاربر از توکن <i>خودش</i> استفاده می‌کنند، پس ربات به‌عنوان او آپلود و پیام در space اش فرود می‌آید.</p>
+<p>برای revoke ی بعدی: ‏/setup-files revoke فقط توکن همان کاربر را حذف می‌کند. توکن سایرین دست‌نخورده می‌ماند.</p>
+<h3>Scope</h3>
+<p>جریان دقیقاً یک scope می‌خواهد: ‏chat.messages.create. هم media.upload و هم messages.create ی ارجاع‌کننده به attachmentDataRef ی آپلود‌شده را پوشش می‌دهد. نه Drive، نه scope های گسترده‌تر چت — کمترین-امتیاز، عمداً.</p>
+<h3>رفتار چند-کاربره</h3>
+<p>وقتی درخواست‌کننده هنوز توکن per-user نداشته باشد ربات به توکن legacy تک‌کاربره در ‏~/.hermes/google_chat_user_token.json برمی‌گردد ‏(اگر از نصب pre-multi-user مانده). وقتی هیچ‌کدام موجود نباشد ربات اعلان متنی واضحی پست می‌کند که از درخواست‌کننده می‌خواهد /setup-files را اجرا کند.</p>
+<p>revoke کردن توسط کاربر فقط slot خودش را پاک می‌کند. خطای 401/403 از توکن یک کاربر فقط cache ی همان کاربر را اخراج می‌کند. کاربران همدیگر را به هم نمی‌ریزند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> عیب‌یابی</h2>
+<p><b>ربات بعد از فرستادن «hola» ساکت می‌ماند.</b></p>
+<ol>
+  <li>در کنسول بررسی کنید subscription ی Pub/Sub پیام‌های تحویل‌نشده دارد. اگر دارد یعنی هرمس احراز هویت نشده — GOOGLE_CHAT_SERVICE_ACCOUNT_JSON را تأیید و اینکه SA به‌عنوان Pub/Sub Subscriber روی subscription فهرست شده.</li>
+  <li>اگر subscription صفر پیام دارد یعنی Google Chat منتشر نمی‌کند. binding ی IAM روی <b>topic</b> را دوباره چک کنید: chat-api-push@system.gserviceaccount.com باید Pub/Sub Publisher داشته باشد.</li>
+  <li>لاگ‌های hermes gateway را برای [GoogleChat] Connected چک کنید. اگر [GoogleChat] Config validation failed دیدید پیام خطا می‌گوید کدام env var را درست کنید.</li>
+</ol>
+<p><b>ربات reply می‌کند ولی به‌جای پاسخ ایجنت پیام خطا می‌آید.</b></p>
+<p>لاگ‌ها را برای [GoogleChat] Pub/Sub stream died ببینید — اگر تکرار شد شاید credential های SA تان rotate شده یا subscription حذف شده باشد. بعد از ۱۰ تلاش adapter خودش را fatal علامت می‌زند.</p>
+<p><b>«403 Forbidden» روی هر پیام خروجی.</b></p>
+<p>ربات از space حذف شده یا در کنسول Chat API revoke شده. دوباره در space نصبش کنید ‏(رویداد ADDED_TO_SPACE بعدی پیام‌رسانی را خودکار دوباره فعال می‌کند).</p>
+<p><b>هشدارهای «Rate limit hit» زیادی.</b></p>
+<p>سهمیه‌های پیش‌فرض Chat API اجازهٔ ۶۰ پیام per-space-per-minute می‌دهند. اگر ایجنت‌تان پاسخ‌های استریم بلندی تولید می‌کند که از آن عبور می‌کند adapter با backoff نمایی retry می‌کند — ولی همچنان latency ی قابل‌دید برای کاربر می‌بینید. پاسخ‌های مختصر یا بالا بردن سهمیه در کنسول GCP را در نظر بگیرید.</p>
+<p><b>ربات مدام اعلان «/setup-files» را پست می‌کند به‌جای فایل‌ها.</b></p>
+<p>درخواست‌کننده توکن OAuth ی per-user ندارد و fallback ی legacy هم نیست. در DM اش /setup-files را اجرا و گام ۴ را دنبال کنید. بعد از تکمیل مبادله، درخواست فایل بعدی بدون ری‌استارت گیت‌وی natively آپلود می‌شود.</p>
+<p><b>‏/setup-files start می‌گوید «No client credentials stored.»</b></p>
+<p>راه‌اندازی یک‌باره <i>برای این پروفایل</i> انجام نشده (client secret مخصوص-پروفایل است، پس ثبت زیر یک پروفایل توسط پروفایل دیگر دیده نمی‌شود). از ترمینال زیر پروفیلی که گیت‌وی استفاده می‌کند اجرایش کنید:</p>
+<div class="codebox"><pre><code># Default profile:
+python -m plugins.platforms.google_chat.oauth \
+    --client-secret /path/to/client_secret.json
+
+# Named profile:
+hermes -p &lt;profile&gt; python -m plugins.platforms.google_chat.oauth \
+    --client-secret /path/to/client_secret.json</code></pre></div>
+<p>سپس دوباره /setup-files start را بفرستید.</p>
+<p><b>‏/setup-files &lt;PASTED_URL&gt; می‌گوید «Token exchange failed.»</b></p>
+<p>کد auth تک‌مصرفی و کوتاه‌عمر است ‏(معمولاً چند دقیقه). /setup-files start را بفرستید تا URL تازه بگیرید و دوباره تلاش کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> نکات امنیتی</h2>
+<ul>
+  <li><b>Scope ی Service Account:</b> adapter مقادیر chat.bot و pubsub را می‌خواهد. اعمال واقعی باید IAM باشد — به SA حداقل را بدهید ‏(roles/pubsub.subscriber + roles/pubsub.viewer روی subscription) نه نقش‌های Pub/Sub ی سطح-پروژه یا سطح-سازمان.</li>
+  <li><b>محافظت دانلود پیوست:</b> هرمس فقط به URL هایی توکن bearer ی SA را الصاق می‌کند که host شان با allowlist ی کوتاهی از دامنه‌های متعلق-به-گوگل بخورد ‏(googleapis.com، ‏drive.google.com، ‏lh[3-6].googleusercontent.com و چند مورد دیگر). هر host دیگری قبل از درخواست HTTP reject می‌شود تا سناریوهای SSRF ای که رویداد دستکاری‌شده می‌تواند توکن bearer را به سرویس metadata ی GCE redirect کند مهار شوند.</li>
+  <li><b>Redaction:</b> ایمیل‌های Service Account، مسیرهای subscription و topic توسط agent/redact.py از خروجی لاg حذف می‌شوند. dump ی envelope ی دیباگ ‏(GOOGLE_CHAT_DEBUG_RAW=1) از همان فیلتر redaction عبور و در DEBUG لاگ می‌شود.</li>
+  <li><b>سازگاری:</b> اگر قصد دارید این ربات را به workspace ی مقررات‌مند ‏(هر چیزی با سیاست data-residency یا AI-governance) وصل کنید قبل از اولین نصب آن تأیید را بگیرید.</li>
+  <li><b>Scope ی OAuth ی کاربر:</b> جریان پیوست per-user فقط chat.messages.create را می‌خواهد — حداقلی که media.upload و messages.create ی پیگیری را پوشش می‌دهد. توکن‌ها به‌صورت JSON خام در ~/.hermes/google_chat_user_tokens/&lt;sanitized_email&gt;.json ماندگار می‌شوند ‏(محافظ، مجوزهای فایل‌سیستم است — همان مدل فایل کلید SA). هر توکن دقیقاً متعلق به یک کاربر است؛ revoke به همان کاربر scope می‌شود.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="whatsapp-cloud.html"><span class="dir">→ قبلی</span><span class="ttl">واتساپ بیزینس ‏(Cloud API)</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/google_chat" target="_blank" rel="noopener">Google Chat</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>
