@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>کار با مهارت‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/work-with-skills" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>کار با مهارت‌ها</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>کار با مهارت‌ها</h1>
+<p>مهارت‌ها سندهای دانشی درخواستی‌اند که به هرمس یاد می‌دهند چطور کارهای مشخص را هندل کند — از تولید ASCII art تا مدیریت PR های گیت‌هاب. این راهنما استفادهٔ روزمره از آن‌ها را قدم‌به‌قدم نشان می‌دهد.</p>
+<p>مرجع فنی کامل در <a href="../user-guide/features/skills.html">سیستم مهارت‌ها</a> است.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیدا کردن مهارت‌ها</h2>
+<p>هر نصب هرمس با مهارت‌های همراه عرضه می‌شود. ببینید چه چیزهایی موجود است:</p>
+<pre dir="ltr"><code># In any chat session:
+/skills
+
+# Or from the CLI:
+hermes skills list</code></pre>
+<p>فهرستی فشرده با نام‌ها و توضیحات نشان می‌دهد:</p>
+<pre dir="ltr"><code>ascii-art         Generate ASCII art using pyfiglet, cowsay, boxes...
+arxiv             Search and retrieve academic papers from arXiv...
+github-pr-workflow Full PR lifecycle — create branches, commit...
+plan              Plan mode — inspect context, write a markdown...
+excalidraw        Create hand-drawn style diagrams using Excalidraw...</code></pre>
+<h3>جستجوی یک مهارت</h3>
+<pre dir="ltr"><code># Search by keyword
+/skills search docker
+/skills search music</code></pre>
+<h3>هاب مهارت‌ها</h3>
+<p>مهارت‌های اختیاری رسمی ‏(مهارت‌های سنگین‌تر یا خاص که به‌طور پیش‌فرض فعال نیستند) از طریق Hub در دسترس‌اند:</p>
+<pre dir="ltr"><code># Browse official optional skills
+/skills browse
+
+# Search the hub
+/skills search blockchain</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> استفاده از یک مهارت</h2>
+<p>هر مهارت نصب‌شده خودبه‌خود یک فرمان اسلش است. فقط نامش را تایپ کنید:</p>
+<pre dir="ltr"><code># Load a skill and give it a task
+/ascii-art Make a banner that says "HELLO WORLD"
+/plan Design a REST API for a todo app
+/github-pr-workflow Create a PR for the auth refactor
+
+# Just the skill name (no task) loads it and lets you describe what you need
+/excalidraw</code></pre>
+<p>از طریق مکالمهٔ طبیعی هم می‌توانید مهارت‌ها را فعال کنید — از هرمس بخواهید از مهارت مشخصی استفاده کند و آن را با ابزار skill_view بارگذاری می‌کند.</p>
+<h3>افشای تدریجی</h3>
+<p>مهارت‌ها از الگوی بارگذاری کم‌مصرف-توکن استفاده می‌کنند. ایجنت همه‌چیز را یک‌جا نمی‌کارد:</p>
+<ol>
+  <li><b>skills_list()</b> — فهرست فشردهٔ همهٔ مهارت‌ها ‏(حدود ۳ هزار توکن). هنگام شروع نشست بار می‌شود.</li>
+  <li><b>skill_view(name)</b> — محتوای کامل SKILL.md برای یک مهارت. وقتی ایجنت تصمیم گرفت نیاز دارد بار می‌شود.</li>
+  <li><b>skill_view(name, file_path)</b> — یک فایل مرجع مشخص داخل مهارت. فقط اگر لازم باشد.</li>
+</ol>
+<p>یعنی مهارت‌ها تا واقعاً استفاده نشوند هیچ توکنی نمی‌خورند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> نصب از هاب</h2>
+<p>مهارت‌های اختیاری رسمی همراه هرمس می‌آیند ولی پیش‌فرض فعال نیستند. صریح نصبشان کنید:</p>
+<pre dir="ltr"><code># Install an official optional skill
+hermes skills install official/research/arxiv
+
+# Install from the hub in a chat session
+/skills install official/creative/songwriting-and-ai-music
+
+# Install SKILL.md and its referenced support files from an HTTP(S) URL
+hermes skills install https://sharethis.chat/SKILL.md
+/skills install https://example.com/SKILL.md --name my-skill</code></pre>
+<p>چه اتفاقی می‌افتد:</p>
+<ol>
+  <li>پوشهٔ مهارت در ~/.hermes/skills/ کپی می‌شود</li>
+  <li>در خروجی skills_list تان ظاهر می‌شود</li>
+  <li>به‌عنوان فرمان اسلش در دسترس می‌شود</li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>مهارت‌های نصب‌شده در نشست‌های جدید اثر می‌کنند. اگر همین نشست لازمش دارید ‎/reset‎ بزنید تا تازه شروع شود یا ‎--now‎ اضافه کنید تا کش پرامپت بلافاصله باطل شود ‏(نوبت بعد گران‌تر است).</p>
+</div>
+<h3>تأیید نصب</h3>
+<pre dir="ltr"><code># Check it's there
+hermes skills list | grep arxiv
+
+# Or in chat
+/skills search arxiv</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مهارت‌های ارائه‌شده توسط افزونه‌ها</h2>
+<p>افزونه‌ها می‌توانند مهارت‌های خودشان را با نام‌های فضادار ‏(plugin:skill) بسته‌بندی کنند. این جلوی برخورد نام با مهارت‌های داخلی را می‌گیرد.</p>
+<pre dir="ltr"><code># Load a plugin skill by its qualified name
+skill_view("superpowers:writing-plans")
+
+# Built-in skill with the same base name is unaffected
+skill_view("writing-plans")</code></pre>
+<p>مهارت‌های افزونه‌ای در system prompt فهرست <b>نمی‌شوند</b> و در skills_list ظاهر نمی‌شوند. opt-in هستند — وقتی دانستید افزونه‌ای مهارتی دارد صریح بارگذاری‌اش کنید. موقع بارگذاری، ایجنت بنری می‌بیند که مهارت‌های خواهر همان افزونه را فهرست می‌کند.</p>
+<p>برای بسته‌بندی مهارت داخل افزونهٔ خودتان بخش «Bundle skills» در <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت پلاگین هرمس</a> را ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> پیکربندی تنظیمات مهارت‌ها</h2>
+<p>بعضی مهارت‌ها در frontmatter خود پیکربندی موردنیازشان را اعلام می‌کنند:</p>
+<pre dir="ltr"><code>metadata:
+  hermes:
+    config:
+      - key: tenor.api_key
+        description: "Tenor API key for GIF search"
+        prompt: "Enter your Tenor API key"
+        url: "https://developers.google.com/tenor/guides/quickstart"</code></pre>
+<p>وقتی مهارتی با config برای اولین بار بار شود، هرمس مقادیر را از شما می‌پرسد. در config.yaml زیر skills.config.* ذخیره می‌شوند.</p>
+<p>مدیریت config ی مهارت از CLI:</p>
+<pre dir="ltr"><code># Interactive config for a specific skill
+hermes skills config gif-search
+
+# View all skill config
+hermes config get skills.config --json</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> ساخت مهارت خودتان</h2>
+<p>مهارت‌ها فقط فایل‌های markdown با frontmatter ی YAML اند. ساختنش زیر پنج دقیقه طول می‌کشد.</p>
+<h3>۱. ساخت پوشه</h3>
+<pre dir="ltr"><code>mkdir -p ~/.hermes/skills/my-category/my-skill</code></pre>
+<h3>۲. نوشتن SKILL.md</h3>
+<pre dir="ltr"><code>name: my-skill
+description: Brief description of what this skill does
+version: 1.0.0
+metadata:
+  hermes:
+    tags: [my-tag, automation]
+    category: my-category
+
+# My Skill
+
+## When to Use
+Use this skill when the user asks about [specific topic] or needs to [specific task].
+
+## Procedure
+1. First, check if [prerequisite] is available
+2. Run `command --with-flags`
+3. Parse the output and present results
+
+## Pitfalls
+- Common failure: [description]. Fix: [solution]
+- Watch out for [edge case]
+
+## Verification
+Run `check-command` to confirm the result is correct.</code></pre>
+<h3>۳. افزودن فایل‌های مرجع ‏(اختیاری)</h3>
+<p>مهارت‌ها می‌توانند فایل‌های پشتیبان داشته باشند که ایجنت به‌صورت درخواستی بار می‌کند:</p>
+<pre dir="ltr"><code>my-skill/
+├── SKILL.md                    # Main skill document
+├── references/
+│   ├── api-docs.md             # API reference the agent can consult
+│   └── examples.md             # Example inputs/outputs
+├── templates/
+│   └── config.yaml             # Template files the agent can use
+└── scripts/
+    └── setup.sh                # Scripts the agent can execute</code></pre>
+<p>در SKILL.md ارجاعشان دهید:</p>
+<pre dir="ltr"><code>For API details, load the reference: `skill_view("my-skill", "references/api-docs.md")`</code></pre>
+<h3>۴. تستش کنید</h3>
+<p>نشست جدیدی شروع و مهارت را امتحان کنید:</p>
+<pre dir="ltr"><code>hermes chat -q "/my-skill help me with the thing"</code></pre>
+<p>مهارت خودکار ظاهر می‌شود — ثبت‌نامی لازم نیست. بیندازیدش در ~/.hermes/skills/ و زنده است.</p>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>ایجنت خودش هم می‌تواند با skill_manage مهارت بسازد و به‌روزرسانی کند. بعد از حل یک مسئلهٔ پیچیده، هرمس ممکن است پیشنهاد دهد رویکرد را برای دفعهٔ بعد به‌عنوان مهارت ذخیره کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> مدیریت مهارت per-پلتفرم</h2>
+<p>کنترل کنید کدام مهارت روی کدام پلتفرم موجوده:</p>
+<pre dir="ltr"><code>hermes skills</code></pre>
+<p>یک TUI تعاملی باز می‌شود که می‌توانید مهارت‌ها را per پلتفرم ‏(CLI، ‏Telegram، ‏Discord و...) فعال یا غیرفعال کنید. کاربردی وقتی می‌خواهید بعضی مهارت‌ها فقط در زمینه‌های خاص باشند — مثلاً مهارت‌های توسعه روشن تلگرام نباشند.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="skills-vs-memory"><span class="secnum">۸</span> مهارت‌ها در برابر حافظه</h2>
+<p>هر دو بین نشست‌ها می‌مانند ولی هدف متفاوتی دارند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>مهارت‌ها</th><th>حافظه</th></tr></thead>
+<tbody>
+<tr><td><b>چه</b></td><td>دانش رویه‌ای — چطور کارها انجام می‌شود</td><td>دانش واقعیتی — چیزها چیستند</td></tr>
+<tr><td><b>کی</b></td><td>به‌صورت درخواستی، فقط وقتی مربوط است</td><td>خودکار در هر نشست تزریق می‌شود</td></tr>
+<tr><td><b>اندازه</b></td><td>می‌تواند بزرگ باشد ‏(صدها خط)</td><td>باید فشرده باشد ‏(فقط واقعیت‌های کلیدی)</td></tr>
+<tr><td><b>هزینه</b></td><td>تا بار نشود صفر توکن</td><td>کوچک ولی هزینهٔ توکن ثابت</td></tr>
+<tr><td><b>مثال</b></td><td>«چطور روی Kubernetes مستقر کنیم»</td><td>«کاربر حالت شب ترجیح می‌دهد، ساکن PST است»</td></tr>
+<tr><td><b>کی می‌سازد</b></td><td>شما، ایجنت یا نصب از Hub</td><td>ایجنت، بر اساس گفتگوها</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>قاعدهٔ سرانگشتی:</b>اگر جای‌اش در یک سند مرجع است، مهارت است. اگر جای‌اش روی یک برگهٔ یادداشت چسبان است، حافظه است.</p>
+<h3>نکته‌ها</h3>
+<ul>
+  <li><b>مهارت‌ها را متمرکز نگه دارید.</b>مهارتی که بخواهد «همهٔ DevOps» را پوشش دهد هم خیلی بلند هم خیلی مبهم می‌شود. مهارتی که «استقرار برنامهٔ پایتونی روی Fly.io» را پوشش دهد به‌قدر کافی خاص و واقعاً مفید است.</li>
+  <li><b>بگذارید ایجنت مهارت بسازد.</b>بعد از یک کار پیچیدهٔ چندمرحله‌ای هرمس اغلب پیشنهاد می‌دهد رویکرد را به‌عنوان مهارت ذخیره کند. بله بگویید — این مهارت‌های authored-by-agent دقیقاً همان گردش‌کار را با دام‌های کشف‌شده در مسیر ثبت می‌کنند.</li>
+  <li><b>از دسته‌ها استفاده کنید.</b>مهارت‌ها را در زیرپوشه‌ها سازماندهی کنید ‏(~/.hermes/skills/devops/، ‏~/.hermes/skills/research/ و...). فهرست قابل مدیریت می‌ماند و ایجنت سریع‌تر مهارت مرتبط را پیدا می‌کند.</li>
+  <li><b>مهارت‌های کهنه را به‌روز کنید.</b>اگر از مهارتی استفاده کردید و به مشکلاتی خوردید که پوشش نمی‌داد، به هرمس بگویید مهارت را با آموخته‌هایتان به‌روز کند. مهارت‌های نگهداری‌نشده بدهکار می‌شوند.</li>
+</ul>
+<p><i>برای مرجع کامل مهارت‌ها — فیلدهای frontmatter، فعال‌سازی شرطی، پوشه‌های خارجی و بیشتر — بخش <a href="../user-guide/features/skills.html">سیستم مهارت‌ها</a> را ببینید.</i></p>
+</section>
+
+<div class="pager">
+  <a href="automate-with-cron.html"><span class="dir">→ قبلی</span><span class="ttl">اتوماسیون هر چیزی با Cron</span></a>
+  <a class="next" href="delegation-patterns.html"><span class="dir">بعدی ←</span><span class="ttl">الگوهای واگذاری</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/work-with-skills" target="_blank" rel="noopener">Working with Skills</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

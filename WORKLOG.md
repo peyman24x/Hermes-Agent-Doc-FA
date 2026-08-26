@@ -616,6 +616,11 @@ hermes-docs-fa/
 - زنجیرهٔ pager: tips ← local-llm-on-mac ← daily-briefing-bot و graph-app-registration ← migrate-from-openclaw ← minimax-oauth ← oauth-over-ssh کامل شد ✓
 - لینک‌های موقت انگلیسی oauth-over-ssh و minimax-oauth در nous-portal/providers/mcp/spotify به نسخهٔ فارسی برگردانده شد ✓
 - پیشرفت: **۱۳۷ از ۲۰۷ صفحه فعال (۶۶٪)**
+### نشست ۸۲ — 2026-08-27 — 📚 راهنماها ۳ — SOUL.md، اتوماسیون Cron، مهارت‌ها و الگوهای واگذاری
+- ترجمه و انتشار «استفاده از SOUL.md» ‏(هویت اصلی نمونه، مرز SOUL/AGENTS، کاشت خودکار فایل آغازین، اسکن تزریق پرامپت و جایگزینی کامل هویت داخلی، چهار سبک نمونه، ساختار پیشنهادی چهارسربرگی، مکمل بودن با ‎/personality‎، سه عیب‌یابی)؛ «اتوماسیون هر چیزی با Cron» ‏(پنج الگو: پایش تغییر وب‌سایت با پارامتر script و ترفند [SILENT]، گزارش هفتگی، ناظر مخزن گیت‌هاب با فرمان‌های gh، خط لولهٔ جمع‌آوری داده با تاریخچهٔ jsonl و تحلیل روند، گردش‌کار چندمهارتی ‎--skill‎؛ جدول کامل مقاصد تحویل شامل bot-chat و bot-chat:name با نکته‌های هزینهٔ نوبت بات)؛ «کار با مهارت‌ها» ‏(/skills و جستجو و Hub، مهارت=فرمان اسلش، افشای تدریجی سه‌سطحی skills_list/skill_view، نصب از Hub و URL، مهارت‌های فضادار افزونه‌ای، config ی frontmatter، ساخت مهارت در چهار قدم، مدیریت per-پلتفرم TUI، جدول مهارت در برابر حافظه)؛ «الگوهای واگذاری» ‏(پنج الگوی عملی: تحقیق موازی، بازبینی امنیتی زمینه‌تازه، مقایسهٔ گزینه‌ها، بازآرایی چندفایلی، جمع-بعد-تحلیل؛ مسئلهٔ زمینه، دسترسی ابزار ارثی، محدودیت‌ها با جدول تنظیم هم‌زمانی/عمق و ارکستراتور opt-in)
+- زنجیرهٔ pager: use-voice-mode(off) ← use-soul ← automate-with-cron ← work-with-skills ← delegation-patterns ← github-pr-review(off) ✓
+- لینک‌های موقت انگلیسی use-soul-with-hermes و automate-with-cron در سراسر سایت به نسخهٔ فارسی برگردانده شد ✓
+- پیشرفت: **۱۴۱ از ۲۰۷ صفحه فعال (۶۸٪)** — راهنماها از مرز ۴۰٪ گذشت
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -759,6 +764,10 @@ hermes-docs-fa/
 | 135 | `guides/cron-script-only.html` | کارهای Cron فقط-اسکریپتی (بدون LLM) |
 | 136 | `guides/minimax-oauth.html` | MiniMax OAuth |
 | 137 | `guides/migrate-from-openclaw.html` | مهاجرت از OpenClaw |
+| 138 | `guides/use-soul-with-hermes.html` | استفاده از SOUL.md با هرمس |
+| 139 | `guides/automate-with-cron.html` | اتوماسیون هر چیزی با Cron |
+| 140 | `guides/work-with-skills.html` | کار با مهارت‌ها |
+| 141 | `guides/delegation-patterns.html` | واگذاری و کار موازی ‏(الگوها) |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

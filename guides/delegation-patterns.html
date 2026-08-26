@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الگوهای واگذاری — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/delegation-patterns" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>الگوهای واگذاری</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>واگذاری و کار موازی</h1>
+<p>هرمس می‌تواند ایجنت‌های فرزندِ ایزوله بیندازد تا موازی روی وظایف کار کنند. هر زیرایجنت گفتگو، نشست ترمینال و تول‌ست خودش را دارد. فقط خلاصهٔ نهایی برمی‌گردد — فراخوانی‌های ابزار میانی هرگز وارد پنجرهٔ زمینهٔ شما نمی‌شوند.</p>
+<p>مرجع کامل قابلیت در <a href="../user-guide/features/delegation.html">واگذاری به زیرایجنت</a> است.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> کی واگذار کنیم</h2>
+<p><b>نامزدهای خوب برای واگذاری:</b></p>
+<ul>
+  <li>زیروظایف سنگین-استدلالی ‏(عیب‌یابی، بازبینی کد، سنتز تحقیق)</li>
+  <li>کارهایی که دادهٔ میانی را می‌ریزند داخل زمینهٔ شما</li>
+  <li>مسیرهای کاری مستقل موازی ‏(تحقیق A و B هم‌زمان)</li>
+  <li>وظایف زمینه‌تازه که می‌خواهید ایجنت بدون پیش‌فرض به آن نزدیک شود</li>
+</ul>
+<p><b>چیز دیگری استفاده کنید:</b></p>
+<ul>
+  <li>یک فراخوانی ابزار ← مستقیم از ابزار استفاده کنید</li>
+  <li>کار مکانیکی چندمرحله‌ای با منطق بین مراحل ← execute_code</li>
+  <li>کارهای نیازمند تعامل با کاربر ← زیرایجنت‌ها نمی‌توانند clarify استفاده کنند</li>
+  <li>ویرایش سریع فایل ← مستقیم انجامش دهید</li>
+  <li>کار ماندگار بلندمدت که باید از بسته شدن نشست یا ری‌استارت فرایند جان سالم ببرد ← cronjob یا terminal(background=True, notify_on_complete=True). واگذاری سطح‌بالا ناهمگام است ولی همچنان محدود به همین فرایند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> الگو: تحقیق موازی</h2>
+<p>سه موضوع را هم‌زمان بررسی کنید و خلاصه‌های ساختاریافته برگردانید:</p>
+<pre dir="ltr"><code>Research these three topics in parallel:
+1. Current state of WebAssembly outside the browser
+2. RISC-V server chip adoption in 2025
+3. Practical quantum computing applications
+
+Focus on recent developments and key players.</code></pre>
+<p>پشت صحنه هرمس این را استفاده می‌کند:</p>
+<pre dir="ltr"><code>delegate_task(tasks=[
+    {
+        "goal": "Research WebAssembly outside the browser in 2025",
+        "context": "Focus on: runtimes (Wasmtime, Wasmer), cloud/edge use cases, WASI progress"
+    },
+    {
+        "goal": "Research RISC-V server chip adoption",
+        "context": "Focus on: server chips shipping, cloud providers adopting, software ecosystem"
+    },
+    {
+        "goal": "Research practical quantum computing applications",
+        "context": "Focus on: error correction breakthroughs, real-world use cases, key companies"
+    }
+])</code></pre>
+<p>هر سه هم‌زمان اجرا می‌شوند. هر زیرایجنت مستقل وب را جستجو و خلاصه‌ای برمی‌گرداند. بعد ایجنت والد آن‌ها را در یک خلاصهٔ منسجم سنتز می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> الگو: بازبینی کد</h2>
+<p>یک بازبینی امنیتی را به زیرایجنتی با زمینه‌تازه بسپارید که بدون پیش‌فرض به کد نزدیک شود:</p>
+<pre dir="ltr"><code>Review the authentication module at src/auth/ for security issues.
+Check for SQL injection, JWT validation problems, password handling,
+and session management. Fix anything you find and run the tests.</code></pre>
+<p>کلید ماجرا فیلد context است — باید همهٔ آنچه زیرایجنت لازم دارد را داشته باشد:</p>
+<pre dir="ltr"><code>delegate_task(
+    goal="Review src/auth/ for security issues and fix any found",
+    context="""Project at /home/user/webapp. Python 3.11, Flask, PyJWT, bcrypt.
+    Auth files: src/auth/login.py, src/auth/jwt.py, src/auth/middleware.py
+    Test command: pytest tests/auth/ -v
+    Focus on: SQL injection, JWT validation, password hashing, session management.
+    Fix issues found and verify tests pass."""
+)</code></pre>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p><b>مسئلهٔ زمینه</b><br>زیرایجنت دربارهٔ گفتگوی شما <b>به‌طور مطلق هیچ چیزی</b> نمی‌دانند. کاملاً تازه شروع می‌کنند. اگر واگذار کنید «باگی که داشتیم روش بحث می‌کردیم رو درست کن»، زیرایجنت هیچ ایده‌ای ندارد منظورتان کدام باگ است. همیشه مسیر فایل‌ها، پیام خطاها، ساختار پروژه و محدودیت‌ها را صریح پاس بدهید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> الگو: مقایسه گزینه‌ها</h2>
+<p>چند رویکرد به یک مسئله را موازی ارزیابی و بهترین را بردارید:</p>
+<pre dir="ltr"><code>I need to add full-text search to our Django app. Evaluate three approaches
+in parallel:
+1. PostgreSQL tsvector (built-in)
+2. Elasticsearch via django-elasticsearch-dsl
+3. Meilisearch via meilisearch-python
+
+For each: setup complexity, query capabilities, resource requirements,
+and maintenance overhead. Compare them and recommend one.</code></pre>
+<p>هر زیرایجنت یک گزینه را مستقل بررسی می‌کند. چون ایزوله‌اند آلودگی متقاطع نیست — هر ارزیابی روی شایستگی خودش می‌ایستد. ایجنت والد هر سه خلاصه را می‌گیرد و مقایسه را انجام می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> الگو: بازآرایی چندفایلی</h2>
+<p>یک بازآرایی بزرگ را بین زیرایجنت‌های موازی تقسیم کنید، هر کدام بخشی از کدبیس:</p>
+<pre dir="ltr"><code>delegate_task(tasks=[
+    {
+        "goal": "Refactor all API endpoint handlers to use the new response format",
+        "context": """Project at /home/user/api-server.
+        Files: src/handlers/users.py, src/handlers/auth.py, src/handlers/billing.py
+        Old format: return {"data": result, "status": "ok"}
+        New format: return APIResponse(data=result, status=200).to_dict()
+        Import: from src.responses import APIResponse
+        Run tests after: pytest tests/handlers/ -v"""
+    },
+    {
+        "goal": "Update all client SDK methods to handle the new response format",
+        "context": """Project at /home/user/api-server.
+        Files: sdk/python/client.py, sdk/python/models.py
+        Old parsing: result = response.json()["data"]
+        New parsing: result = response.json()["data"] (same key, but add status code checking)
+        Also update sdk/python/tests/test_client.py"""
+    },
+    {
+        "goal": "Update API documentation to reflect the new response format",
+        "context": """Project at /home/user/api-server.
+        Docs at: docs/api/. Format: Markdown with code examples.
+        Update all response examples from old format to new format.
+        Add a 'Response Format' section to docs/api/overview.md explaining the schema."""
+    }
+])</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>هر زیرایجنت نشست ترمینال خودش را دارد. می‌توانند بدون له‌هم‌زدن هم روی یک پوشهٔ پروژه کار کنند — تا وقتی فایل‌های متفاوتی را ویرایش می‌کنند. اگر دو زیرایجنت ممکن است به همان فایل دست بزنند، آن فایل را بعد از پایان کار موازی خودتان هندل کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> الگو: اول جمع کن بعد تحلیل کن</h2>
+<p>از execute_code برای جمع‌آوری مکانیکی داده استفاده کنید و بعد تحلیل سنگین-استدلالی را واگذار کنید:</p>
+<pre dir="ltr"><code># Step 1: Mechanical gathering (execute_code is better here — no reasoning needed)
+execute_code("""
+from hermes_tools import web_search, web_extract
+
+results = []
+for query in ["AI funding Q1 2026", "AI startup acquisitions 2026", "AI IPOs 2026"]:
+    r = web_search(query, limit=5)
+    for item in r["data"]["web"]:
+        results.append({"title": item["title"], "url": item["url"], "desc": item["description"]})
+
+# Extract full content from top 5 most relevant
+urls = [r["url"] for r in results[:5]]
+content = web_extract(urls)
+
+# Save for the analysis step
+import json
+with open("/tmp/ai-funding-data.json", "w") as f:
+    json.dump({"search_results": results, "extracted": content["results"]}, f)
+print(f"Collected {len(results)} results, extracted {len(content['results'])} pages")
+""")
+
+# Step 2: Reasoning-heavy analysis (delegation is better here)
+delegate_task(
+    goal="Analyze AI funding data and write a market report",
+    context="""Raw data at /tmp/ai-funding-data.json contains search results and
+    extracted web pages about AI funding, acquisitions, and IPOs in Q1 2026.
+    Write a structured market report: key deals, trends, notable players,
+    and outlook. Focus on deals over $100M."""
+)</code></pre>
+<p>این اغلب کارآمدترین الگو است: execute_code ده‌ها فراخوانی ابزار ترتیبی را ارزان هندل می‌کند و بعد یک زیرایجنت تک‌وظیفهٔ گران استدلالی را با زمینهٔ تمیز انجام می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> دسترسی ابزار ارثی</h2>
+<p>زیرایجنت‌ها تول‌ست‌های فعال والد را به ارث می‌برند. ‏delegate_task پارامتر toolsets ی رو-به-مدل نمی‌پذیرد، پس کارِ واگذاری نمی‌تواند به خودش قابلیت‌هایی بدهد که والد ندارد. وقتی وظیفهٔ واگذاری‌شده به وب، ترمینال، فایل یا دسترسی دیگر نیاز دارد، ابزارهای والد را قبل از شروع گفتگو پیکربندی کنید. هرمس همچنان ابزارهای مسدود-فرزند مثل clarify، ‏memory و send_message را حذف می‌کند؛ فرزندان execute_code را برای فراخوانی برنامه‌پذیر ابزار نگه می‌دارند.</p>
+<h3 id="constraints">محدودیت‌ها</h3>
+<ul>
+  <li><b>پیش‌فرض ۳ وظیفهٔ موازی:</b>دسته‌ها پیش‌فرض ۳ زیرایجنت هم‌زمان دارند ‏(قابل تنظیم با delegation.max_concurrent_children در config.yaml؛ سقف سختی ندارد، فقط کف ۱).</li>
+  <li><b>واگذاری تودرتو opt-in است:</b>زیرایجنت‌های برگ ‏(پیش‌فرض) نمی‌توانند delegate_task، ‏clarify، ‏memory یا execute_code صدا بزنند. زیرایجنت‌های ارکستراتور ‏(role="orchestrator") برای واگذاری بیشتر delegate_task نگه می‌دارند ولی فقط وقتی delegation.max_spawn_depth بالاتر از پیش‌فرض ۱ باشد ‏(کف ۱، بی‌سقف)؛ سه تای دیگر همچنان مسدودند. خاموشی global با delegation.orchestrator_enabled: false.</li>
+</ul>
+<h3>تنظیم هم‌زمانی و عمق</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پیکربندی</th><th>پیش‌فرض</th><th>بازه</th><th>اثر</th></tr></thead>
+<tbody>
+<tr><td>max_concurrent_children</td><td>۳</td><td>≥۱</td><td>اندازهٔ دستهٔ موازی per فراخوانی delegate_task</td></tr>
+<tr><td>max_spawn_depth</td><td>۱</td><td>≥۱</td><td>چند سطح واگذاری می‌تواند بیشتر بیندازد</td></tr>
+</tbody>
+</table>
+</div>
+<p>مثال: اجرای ۳۰ کارگر موازی با زیرایجنت‌های تودرتو:</p>
+<pre dir="ltr"><code>delegation:
+  max_concurrent_children: 30
+  max_spawn_depth: 2</code></pre>
+<ul>
+  <li><b>ترمینال‌های جدا</b> — هر زیرایجنت نشست ترمینال خودش را با پوشهٔ کاری و وضعیت جدا دارد</li>
+  <li><b>بدون تاریخچهٔ گفتگو</b> — زیرایجنت‌ها فقط goal و context ای را می‌بینند که والد هنگام صدازدن delegate_task می‌گذارد</li>
+  <li><b>پیش‌فرض ۵۰ تکرار</b> — برای کارهای ساده max_iterations را پایین‌تر بیاورید تا هزینه کم شود</li>
+  <li><b>ماندگار نیست</b> — واگذاری سطح‌بالا پس‌زمینه اجرا و نتیجه‌اش را بعداً برمی‌گرداند ولی همچنان به نشست و فرایند هرمسِ مالک گره خورده. بستن نشست، ‎/stop‎، ‎/new‎ یا ری‌استارت فرایند می‌تواند کارِ در جریان را لغو یا سرگردان کند. برای کاری که باید از این مرزها جان سالم ببرد از cronjob یا terminal(background=True, notify_on_complete=True) استفاده کنید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> نکته‌ها</h2>
+<ul>
+  <li><b>در هدف‌ها دقیق باشید.</b>«باگ رو درست کن» خیلی مبهم است. «TypeError ی api/handlers.py خط ۴۷ رو درست کن که process_request() از parse_body() مقدار None می‌گیره» به زیرایجنت به‌قدر کافی برای کار می‌دهد.</li>
+  <li><b>مسیر فایل‌ها را بدهید.</b>زیرایجنت ساختار پروژه‌تان را نمی‌دانند. همیشه مسیر مطلق فایل‌های مرتبط، ریشهٔ پروژه و فرمان تست را بدهید.</li>
+  <li><b>برای ایزوله کردن زمینه از واگذاری استفاده کنید.</b>گاهی یک دید تازه می‌خواهید. واگذاری مجبورتان می‌کند مسئله را شفاف صورت‌بندی کنید و زیرایجنت بدون پیش‌فرض‌هایی که در گفتگویتان انباشته شده به آن نزدیک می‌شود.</li>
+  <li><b>نتایج را چک کنید.</b>خلاصه‌های زیرایجنت فقط خلاصه‌اند. اگر زیرایجنتی گفت «باگ رو درست کردم و تست‌ها پاس شد» خودتان تست‌ها را اجرا یا diff را بخوانید.</li>
+</ul>
+<p><i>برای مرجع کامل واگذاری — همهٔ پارامترها، یکپارچگی ACP و پیکربندی پیشرفته — بخش <a href="../user-guide/features/delegation.html">واگذاری به زیرایجنت</a> را ببینید.</i></p>
+</section>
+
+<div class="pager">
+  <a href="work-with-skills.html"><span class="dir">→ قبلی</span><span class="ttl">کار با مهارت‌ها</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">ایجنت بازبینی PR گیت‌هاب (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/delegation-patterns" target="_blank" rel="noopener">Delegation &amp; Parallel Work</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

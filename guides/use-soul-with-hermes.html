@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استفاده از SOUL.md — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="../guides/use-soul-with-hermes.html" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>استفاده از SOUL.md با هرمس</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>استفاده از SOUL.md با هرمس</h1>
+<p>فایل SOUL.md <b>هویت اصلی</b> نمونهٔ هرمس شماست. اولین چیز در system prompt است — تعریف می‌کند ایجنت کیست، چطور حرف می‌زند و از چه چیزی پرهیز می‌کند.</p>
+<p>اگر می‌خواهید هرمس هر بار که باهاش حرف می‌زنید همان دستیار آشنا به نظر برسد — یا اگر می‌خواهید شخصیت هرمس را کاملاً با شخصیت خودتان عوض کنید — این فایلی است که باید استفاده کنید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> ‏SOUL.md برای چه چیزی است</h2>
+<p>از SOUL.md برای:</p>
+<ul>
+  <li>لحن</li>
+  <li>شخصیت</li>
+  <li>سبک ارتباط</li>
+  <li>اینکه هرمس چقدر مستقیم یا گرم باشد</li>
+  <li>اینکه هرمس از چه چیزی از نظر سبکی باید پرهیز کند</li>
+  <li>اینکه هرمس با ابهام، مخالفت و عدم‌قطعیت چه رابطه‌ای داشته باشد</li>
+</ul>
+<p>خلاصه:</p>
+<ul>
+  <li>‏SOUL.md دربارهٔ «هرمس کیست و چطور صحبت می‌کند» است</li>
+</ul>
+<h3>‏SOUL.md برای چه چیزی نیست</h3>
+<p>برای این‌ها استفاده‌اش نکنید:</p>
+<ul>
+  <li>قراردادهای کدنویسی مخصوص یک مخزن</li>
+  <li>مسیر فایل‌ها</li>
+  <li>فرمان‌ها</li>
+  <li>پورت‌های سرویس</li>
+  <li>یادداشت‌های معماری</li>
+  <li>دستورالعمل‌های گردش‌کار پروژه</li>
+</ul>
+<p>آن‌ها جایشان در AGENTS.md است.</p>
+<p>یک قاعدهٔ خوب:</p>
+<ul>
+  <li>اگر باید همه‌جا اعمال شود در SOUL.md بگذارید</li>
+  <li>اگر فقط به یک پروژه تعلق دارد در AGENTS.md بگذارید</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> کجا زندگی می‌کند</h2>
+<p>هرمس حالا فقط از فایل SOUL ی global برای نمونهٔ فعلی استفاده می‌کند:</p>
+<pre dir="ltr"><code>~/.hermes/SOUL.md</code></pre>
+<p>اگر هرمس را با پوشهٔ خانهٔ سفارشی اجرا کنید، می‌شود:</p>
+<pre dir="ltr"><code>$HERMES_HOME/SOUL.md</code></pre>
+<h3>رفتار اولین اجرا</h3>
+<p>هرمس اگر SOUL.md ی از قبل موجود نباشد خودکار یک فایل آغازین می‌کارد.</p>
+<p>یعنی بیشتر کاربران حالا با یک فایل واقعی شروع می‌کنند که بلافاصله می‌شود خواند و ویرایش کرد.</p>
+<p>نکته‌های مهم:</p>
+<ul>
+  <li>اگر از قبل SOUL.md دارید هرمس بازنویسی‌اش نمی‌کند</li>
+  <li>اگر فایل موجود ولی خالی باشد، هیچ چیزی از آن وارد پرامپت نمی‌شود</li>
+</ul>
+<h3>هرمس چطور استفاده‌اش می‌کند</h3>
+<p>وقتی هرمس نشستی شروع می‌کند، SOUL.md را از HERMES_HOME می‌خواند، برای الگوهای تزریق پرامپت اسکنش می‌کند، در صورت نیاز قطعش می‌کند و به‌عنوان <b>هویت ایجنت</b> استفاده می‌کند — اسلات شمارهٔ ۱ در system prompt. یعنی SOUL.md متن هویت پیش‌فرض داخلی را کامل جایگزین می‌کند.</p>
+<p>اگر SOUL.md غایب، خالی یا غیرقابل بارگذاری باشد، هرمس به هویت پیش‌فرض داخلی برمی‌گردد.</p>
+<p>هیچ زبانِ قاب دور فایل اضافه نمی‌شود. خود محتواست که مهم است — همان‌طور بنویسید که می‌خواهید ایجنت فکر و صحبت کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> یک ویرایش اول خوب</h2>
+<p>اگر کار دیگری هم نکردید، فایل را باز کنید و فقط چند خط عوض کنید تا حس «خودِ شما» بدهد.</p>
+<p>مثلاً:</p>
+<pre dir="ltr"><code>You are direct, calm, and technically precise.
+Prefer substance over politeness theater.
+Push back clearly when an idea is weak.
+Keep answers compact unless deeper detail is useful.</code></pre>
+<p>همین به‌تنهایی می‌تواند به‌طور محسوسی حس هرمس را عوض کند.</p>
+<h3>سبک‌های نمونه</h3>
+<h4>۱. مهندس عمل‌گرا</h4>
+<pre dir="ltr"><code>You are a pragmatic senior engineer.
+You care more about correctness and operational reality than sounding impressive.
+
+## Style
+- Be direct
+- Be concise unless complexity requires depth
+- Say when something is a bad idea
+- Prefer practical tradeoffs over idealized abstractions
+
+## Avoid
+- Sycophancy
+- Hype language
+- Overexplaining obvious things</code></pre>
+<h4>۲. همکار پژوهش</h4>
+<pre dir="ltr"><code>You are a thoughtful research collaborator.
+You are curious, honest about uncertainty, and excited by unusual ideas.
+
+## Style
+- Explore possibilities without pretending certainty
+- Distinguish speculation from evidence
+- Ask clarifying questions when the idea space is underspecified
+- Prefer conceptual depth over shallow completeness</code></pre>
+<h4>۳. معلم / توضیح‌دهنده</h4>
+<pre dir="ltr"><code>You are a patient technical teacher.
+You care about understanding, not performance.
+
+## Style
+- Explain clearly
+- Use examples when they help
+- Do not assume prior knowledge unless the user signals it
+- Build from intuition to details</code></pre>
+<h4>۴. داور سخت‌گیر</h4>
+<pre dir="ltr"><code>You are a rigorous reviewer.
+You are fair, but you do not soften important criticism.
+
+## Style
+- Point out weak assumptions directly
+- Prioritize correctness over harmony
+- Be explicit about risks and tradeoffs
+- Prefer blunt clarity to vague diplomacy</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> چه چیزی یک SOUL.md قوی می‌سازد؟</h2>
+<p>یک SOUL.md قوی:</p>
+<ul>
+  <li>پایدار است</li>
+  <li>به‌طور گسترده قابل‌اعمال است</li>
+  <li>در لحن خاص است</li>
+  <li>با دستورالعمل‌های موقتی شلوغ نشده است</li>
+</ul>
+<p>یک SOUL.md ضعیف:</p>
+<ul>
+  <li>پر از جزئیات پروژه است</li>
+  <li>متناقض است</li>
+  <li>می‌خواهد شکل تک‌تک پاسخ‌ها را ریزمدیریت کند</li>
+  <li>عمدتاً پرکنندهٔ کلی مثل «مفید باش» و «شفاف باش» است</li>
+</ul>
+<p>هرمس از قبل تلاش می‌کند مفید و شفاف باشد. ‏SOUL.md باید شخصیت و سبک واقعی اضافه کند نه تکرار پیش‌فرض‌های بدیهی.</p>
+<h3>ساختار پیشنهادی</h3>
+<p>سرتیتر لازم نیست ولی کمک می‌کند. ساختار ساده‌ای که خوب جواب می‌دهد:</p>
+<pre dir="ltr"><code># Identity
+Who Hermes is.
+
+# Style
+How Hermes should sound.
+
+# Avoid
+What Hermes should not do.
+
+# Defaults
+How Hermes should behave when ambiguity appears.</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> ‏SOUL.md در برابر ‎/personality‎</h2>
+<p>این دو مکمل‌اند.</p>
+<ul>
+  <li>از SOUL.md برای خط پایهٔ ماندگارتان استفاده کنید.</li>
+  <li>از ‎/personality‎ برای سوئیچ‌های حالت موقتی.</li>
+</ul>
+<p>مثال‌ها:</p>
+<ul>
+  <li>SOUL پیش‌فرض شما عمل‌گرا و مستقیم است</li>
+  <li>بعد برای یک نشست از ‎/personality teacher‎ استفاده می‌کنید</li>
+  <li>بعداً بدون تغییر فایل صدای پایه‌تان برمی‌گردید</li>
+</ul>
+<h3>‏SOUL.md در برابر AGENTS.md</h3>
+<p>رایج‌ترین اشتباه همین‌جاست.</p>
+<h4>این را در SOUL.md بگذارید</h4>
+<ul>
+  <li>«مستقیم باش.»</li>
+  <li>«از زبان تبلیغاتی بپرهیز.»</li>
+  <li>«مگر اینکه عمق کمک کند، پاسخ کوتاه بده.»</li>
+  <li>«وقتی کاربر اشتباه می‌کند صریح مقاومت کن.»</li>
+</ul>
+<h4>این را در AGENTS.md بگذارید</h4>
+<ul>
+  <li>«pytest استفاده کن نه unittest.»</li>
+  <li>«فرانت‌اند در frontend/ است.»</li>
+  <li>«هرگز مستقیم migration ها را ویرایش نکن.»</li>
+  <li>«API روی پورت ۸۰۰۰ اجرا می‌شود.»</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> چطور ویرایشش کنیم</h2>
+<pre dir="ltr"><code>nano ~/.hermes/SOUL.md</code></pre>
+<p>یا</p>
+<pre dir="ltr"><code>vim ~/.hermes/SOUL.md</code></pre>
+<p>بعد هرمس را ری‌استارت کنید یا نشست جدیدی باز کنید.</p>
+<h3>یک گردش‌کار عملی</h3>
+<ol>
+  <li>با فایل پیش‌فرض کاشته‌شده شروع کنید</li>
+  <li>هر چیزی که شبیه صدای دلخواه‌تان نیست را حذف کنید</li>
+  <li>۴ تا ۸ خط اضافه کنید که لحن و پیش‌فرض‌ها را روشن تعریف کند</li>
+  <li>مدتی با هرمس حرف بزنید</li>
+  <li>بر اساس چیزی که هنوز درست حس نمی‌شود تنظیمش کنید</li>
+</ol>
+<p>این رویکرد تکراری بهتر از طراحی شخصیت کامل در یک شات است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> عیب‌یابی</h2>
+<h3>‏SOUL.md را ویرایش کردم ولی هرمس هنوز همان قبلی است</h3>
+<p>چک کنید:</p>
+<ul>
+  <li>‏~/.hermes/SOUL.md یا $HERMES_HOME/SOUL.md را ویرایش کرده باشید</li>
+  <li>نه یک SOUL.md ی محلی داخل یک مخزن</li>
+  <li>فایل خالی نباشد</li>
+  <li>بعد از ویرایش نشست را ری‌استارت کرده باشید</li>
+  <li>روکشی از ‎/personality‎ نتیجه را تسلط نداده باشد</li>
+</ul>
+<h3>هرمس بخش‌هایی از SOUL.md ام را نادیده می‌گیرد</h3>
+<p>علت‌های ممکن:</p>
+<ul>
+  <li>دستورالعمل‌های بااولویت‌تر آن را بازنویسی می‌کنند</li>
+  <li>فایل راهنمای متضاد دارد</li>
+  <li>فایل خیلی بلند است و قطع شده</li>
+  <li>بعضی متن‌ها شبیه محتوای تزریق پرامپت‌اند و ممکن است توسط اسکنر مسدود یا تغییر کنند</li>
+</ul>
+<h3>‏SOUL.md ام خیلی مخصوص-پروژه شد</h3>
+<p>دستورالعمل‌های پروژه را به AGENTS.md منتقل کنید و SOUL.md را روی هویت و سبک متمرکز نگه دارید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> مستندات مرتبط</h2>
+<ul>
+  <li><b><a href="../user-guide/features/personality.html">شخصیت و SOUL.md</a></b></li>
+  <li><b><a href="../user-guide/features/context-files.html">فایل‌های زمینه</a></b></li>
+  <li><b><a href="../user-guide/configuration.html">پیکربندی</a></b></li>
+  <li><b><a href="tips.html">نکات و بهترین شیوه‌ها</a></b></li>
+</ul>
+</section>
+
+<div class="pager">
+  <span class="off prev"><span class="dir">→ قبلی</span><span class="ttl">استفاده از حالت صوتی (به‌زودی)</span></span>
+  <a class="next" href="automate-with-cron.html"><span class="dir">بعدی ←</span><span class="ttl">اتوماسیون هر چیزی با Cron</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="../guides/use-soul-with-hermes.html" target="_blank" rel="noopener">Use SOUL.md with Hermes</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
