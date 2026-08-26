@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [hermes-agent-farsi.pages.dev](https://hermes-agent-farsi.pages.dev) ‏(اصلی) · [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) ‏(پشتیبان ماهانه) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۱۰ از ۲۰۷ صفحه (۵۳٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۱۲ از ۲۰۷ صفحه (۵۴٪)** |
 
 ---
 
@@ -552,6 +552,13 @@ hermes-docs-fa/
 - زنجیرهٔ pager: …multi-connection-desktop ← windows-native ← windows-wsl-quickstart ← (به‌زودی)
 - پیشرفت: **۱۱۰ از ۲۰۷ صفحه فعال (۵۳٪)**
 
+### نشست ۶۹ — 2026-08-27 — 🔀 چند گیت‌وی هم‌زمان + 📦 توزیع پروفایل — 🎉 کار با Hermes ۲۷/۲۷ کامل شد
+- ترجمه و انتشار «اجرای چند گیت‌وی هم‌زمان» (۵ بخش): شروع سریع سه‌پروفایلی، multiplexing با gateway.multiplex_profiles و پنج تغییر رفتاری ‏(بلاک start ی ثانویه، پیشوند ‎/p/<profile>/‎، توکن per-profil، namespace ی نشست، PID/status واحد)، allowlist ی پروفایل‌های سروشده، مسیریابی guild/channel با profile_routes، wrapper ی hermes-gateways، مدیریت تک‌پروفایل، فایل‌های سرویس، لاگ‌ها، caffeinate/systemd-inhibit و ایمنی تعارض توکن
+- ترجمه و انتشار «توزیع پروفایل» (۷ بخش): دو راه اشتراک ‏(جدول توزیع در برابر export)، ساختار مخزن و distribution.yaml، گام‌های نویسنده شامل .gitignore ی کامل قبل از commit و مالکیت توزیع/کاربر، نصب با انواع منبع و --name/--alias، update با حفظ config و حذف با پرامپت تأیید، چهار الگو ‏(شخصی/تیم/جامعه/محصول/Zودگذر)، export/import فایل با desktop.json و allow-list ی پروفایل پیش‌فرض، مسیرهای hard-excluded همیشگی، امنیت unsigned و زیر کاپوت
+- 🎉 گروه «کار با Hermes» کاملاً ترجمه شد: ۲۷ از ۲۷ صفحه — ششمین گروه کامل پروژه
+- زنجیرهٔ pager: …multi-connection-desktop ← windows-native ← wsl-quickstart و …multi-connection-desktop ← multi-profile-gateways ← profile-distributions ← windows-native
+- پیشرفت: **۱۱۲ از ۲۰۷ صفحه فعال (۵۴٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -668,6 +675,8 @@ hermes-docs-fa/
 | 108 | `user-guide/multi-connection-desktop.html` | اتصال دسکتاپ به چند نمونه |
 | 109 | `user-guide/windows-native.html` | راهنمای ویندوز (بومی) |
 | 110 | `user-guide/windows-wsl-quickstart.html` | راهنمای ویندوز (WSL2) |
+| 111 | `user-guide/multi-profile-gateways.html` | اجرای چند گیت‌وی هم‌زمان |
+| 112 | `user-guide/profile-distributions.html` | توزیع پروفایل (اشتراک ایجنت) |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

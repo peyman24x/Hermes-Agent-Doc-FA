@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اجرای چند گیت‌وی هم‌زمان — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/multi-profile-gateways" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>اجرای چند گیت‌وی هم‌زمان</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>اجرای چند گیت‌وی هم‌زمان ‏(Running Many Gateways at Once)</h1>
+<p>چند <a href="profiles.html">پروفایل</a> را — هرکدام با توکن‌های بات، نشست‌ها و حافظهٔ خودش — به‌عنوان سرویس‌های مدیریت‌شده روی یک ماشین اداره کنید. این صفحه نگرانی‌های عملیاتی را پوشش می‌دهد: روشن کردن همه با هم، دیدن لاگ‌ها بین پروفایل‌ها، جلوگیری از خواب رفتن host و ریکاوری از عیب‌های رایج launchd/systemd.</p>
+<p>فقط یک ایجنت هرمس اجرا می‌کنید؟ این صفحه لازم نیست — اصول در بخش <a href="profiles.html">پروفایل‌ها</a>. نمونه‌هایتان روی ماشین‌های <i>متفاوت</i>اند که یک اپ دسکتاپ باید هم‌زمان به آنها برسد؟ بخش <a href="multi-connection-desktop.html">اتصال دسکتاپ به چند نمونه</a> را ببینید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چه وقت استفاده کنیم</h2>
+<p>این setup را وقتی می‌خواهید که دو ایجنت هرمس یا بیشتر دارید که همه باید هم‌زمان آنلاین باشند. دلایل رایج:</p>
+<ul>
+  <li>دستیار شخصی روی یک بات تلگرامی و یک ایجنت کدنویس روی بات دیگر</li>
+  <li>یک ایجنت per عضو خانواده یا یکی per فضای کاری اسلک</li>
+  <li>نمونه‌های sandbox + production از یک پیکربندی واحد</li>
+  <li>ایجنت پژوهش + ایجنت نگارش + بات cron-رانده — هرکدام با حافظه و مهارت‌های ایزوله</li>
+</ul>
+<p>هر پروفایل از قبل LaunchAgent ی per-platform خودش ‏(ai.hermes.gateway-&lt;name&gt;.plist) یا سرویس کاربری systemd ی ‏(hermes-gateway-&lt;name&gt;.service) را دارد. این guide الگوهای مدیریت جمعی‌شان را اضافه می‌کند.</p>
+<h3>شروع سریع</h3>
+<pre dir="ltr"><code># Create profiles (once)
+hermes profile create coder
+hermes profile create personal-bot
+hermes profile create research
+
+# Configure each
+coder setup
+personal-bot setup
+research setup
+
+# Install each gateway as a managed service
+coder gateway install
+personal-bot gateway install
+research gateway install
+
+# Start them all
+coder gateway start
+personal-bot gateway start
+research gateway start</code></pre>
+<p>همین — سه ایجنت مستقل، هرکدام روی پروسهٔ خودش، ری‌استارت خودکار روی کرش و ورود کاربر.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> جایگزین: یک گیت‌وی برای همهٔ پروفایل‌ها ‏(multiplexing)</h2>
+<p>الگوی بالا <b>یک پروسه per-profil</b> اجرا می‌کند. آن پیش‌فرض است و انتخاب درست برای بیشتر setup ها. ولی روی host ای با پروفایل‌های زیاد — یا استقراری کانتینری که یک پروسه per-profil از نظر عملیاتی سنگین است — می‌توانید به‌جایش یک <b>گیت‌وی multiplexing ی واحد</b> اجرا کنید: گیت‌وی پروفایل پیش‌فرض تنها پروسهٔ inbound می‌شود و پیام‌های <i>هر</i> پروفایل روی جعبه را سرو می‌کند.</p>
+<p>این <b>opt-in</b> و <b>به‌طور پیش‌فرض خاموش</b> است. خاموش باشد هیچ چیز این صفحه تغییر نمی‌کند — همهٔ رفتارهای پایین بی‌اثرند.</p>
+<h3>کی multiplexing ترجیح دارد</h3>
+<ul>
+  <li>استقرار کانتینر/VPS ای که N تا unit ی supervisor، ‏N پورت و N فایل PID بار سنگینی است.</li>
+  <li>پروفایل‌های کم-ترافیک زیاد که هرکدام توجیه یک پروسه کامل ندارند.</li>
+  <li>می‌خواهید فقط یک چیز را شروع، مانیتور و ری‌استارت کنید.</li>
+</ul>
+<p>وقتی ایزوله‌سازی سخت سطح-پروسه بین پروفایل‌ها می‌خواهید ‏(حافظه جدا، دامنه‌های کرش مستقل، توان ری‌استارت یک پروفایل بدون دست زدن به بقیه) روی one-process-per-profile بمانید.</p>
+<h3>نحوهٔ opt-in</h3>
+<p>فلگ را روی <b>پروفایل پیش‌فرض</b> ست کنید ‏(مالک multiplexer است) و گیت‌وی‌اش را ری‌استارت کنید:</p>
+<div class="codebox"><pre><code>hermes config set gateway.multiplex_profiles true
+hermes gateway restart</code></pre></div>
+<p>معادلاً در config.yaml ی پروفایل پیش‌فرض:</p>
+<pre dir="ltr"><code>gateway:
+  multiplex_profiles: true</code></pre>
+<p>(فلگ به‌صورت top-level ی multiplex_profiles: true هم برای راحتی پذیرفته می‌شود.) در شروع بعدی گیت‌وی پیش‌فرض هر پروفایل را فهرست، پلتفرم‌های فعال هر پروفایل را زیر credential های همان پروفایل بالا می‌آورد و هر پیام ورودی را به پروفایل متعلقش مسیریابی می‌کند. هر نوبت config، مهارت‌ها، حافظه، SOUL و کلیدهای ارائه‌دهندهٔ پروفایلِ مسیریابی‌شده را حل می‌کند — credential ها هرگز بین پروفایل‌ها شریک نمی‌شوند.</p>
+<p>برای پروفایل‌های ثانویه hermes gateway start اجرا <b>نمی‌کنید</b> — گیت‌وی پیش‌فرض آنها را سرو می‌کند. تغییرات قرارداد را پایین ببینید.</p>
+<h3>با روشن بودن multiplexing چه چیزهایی عوض می‌شود</h3>
+<h4>۱. پروفایل‌های ثانویه نباید گیت‌وی خودشان را شروع کنند</h4>
+<p>با multiplexer ی در حال اجرا، ‏hermes gateway start / run ی پروفایل نام‌دار یک <b>خطای سخت</b> است که شما را به multiplexer ارجاع می‌دهد:</p>
+<pre dir="ltr"><code>The default gateway is running as a profile multiplexer and already serves
+profile 'coder'. ...</code></pre>
+<p>multiplexer تنها پروسهٔ inbound است؛ گیت‌وی دومِ یک پروفایل پلتفرم‌های آن پروفایل را double-bind می‌کرد. --force را فقط اگر عمداً برای آن پروفایل پروسهٔ جدایی می‌خواهید پاس دهید ‏(حین اجرای multiplexer توصیه نمی‌شود). پس wrapper ی چرخه‌حیات cross-profil ابتدای این صفحه در حالت multiplex استفاده <b>نمی‌شود</b> — فقط گیت‌وی پیش‌فرض را مدیریت می‌کنید.</p>
+<h4>۲. پلتفرم‌های HTTP-inbound با پیشوند URL ی ‎/p/&lt;profile&gt;/‎ رسیده می‌شوند</h4>
+<p>ترافیک وب‌هوک ‏(و سایر HTTP-inbound) ی پروفایل ثانویه روی شنوندهٔ پیش‌فرض زیر یک پیشوند پروفایل می‌آید <b>نه</b> پورت دوم:</p>
+<pre dir="ltr"><code># default profile
+POST http://host:8644/webhooks/&lt;route&gt;
+# the "coder" profile, same listener
+POST http://host:8644/p/coder/webhooks/&lt;route&gt;</code></pre>
+<p>پروفایل نامعلوم یا پیکربندی‌نشده در پیشوند ۴۰۴ می‌دهد. چون شنوندهٔ مشترکِ واحد همین‌طوری هر پروفایل را سرو می‌کند، <b>پروفایل ثانویه نباید خودش پلتفرم port-binding را فعال کند</b> — انجامش خطای config است که کل پروفایل ثانویه را skip می‌کند در حالی که پیش‌فرض و سایر پروفایل‌های سالم ادامه می‌یابند. هشدار نام پروفایل skip شده و همهٔ پلتفرم‌های متعارض را نام می‌برد:</p>
+<pre dir="ltr"><code>Skipping secondary profile 'coder' due to port-binding config error: Profile
+'coder' enables port-binding platform(s) webhook, but gateway.multiplex_profiles
+is on. ... Remove these platform entries from profile 'coder's config.yaml or
+configure them only on the default profile.</code></pre>
+<p>پلتفرم‌های port-binding مشمول این قاعده: ‏webhook، ‏api_server، ‏msgraph_webhook، ‏feishu، ‏wecom_callback، ‏bluebubbles، ‏sms، ‏whatsapp_cloud، ‏line. اینها را <b>فقط روی پروفایل پیش‌فرض</b> پیکربندی کنید؛ هر پروفایل از طریق پیشوند /p/&lt;profile&gt;/ اش reachable است.</p>
+<p>احراز هویت از پروفایلی که در URL نام برده شده پیروی می‌کند. نقاط پایانی بدون پیشوند همچنان از credential های موجود شنوندهٔ پیش‌فرض استفاده می‌کنند:</p>
+<ul>
+  <li>درخواست‌های API-server ی ‎/p/coder/... باید از API_SERVER_KEY ی ~/.hermes/profiles/coder/.env استفاده کنند؛ کلید شنوندهٔ پیش‌فرض رد می‌شود.</li>
+  <li>مسیر وب‌هوکی که هدفش coder است باید کنار secret ی مخصوص-مسیر موجودش مقدار profile: coder را در config.yaml ی پروفایل پیش‌فرض اعلام کند. آن secret سپس فقط در /p/coder/webhooks/&lt;route&gt; پذیرفته و روی هر پیشوند پروفایل دیگری رد می‌شود.</li>
+  <li>مسیرهای وب‌هوک بدون profile مسیرهای پروفایل-پیش‌فرض می‌مانند و از طریق پیشوند پروفایل نام‌دار reachable نیستند.</li>
+</ul>
+<p>پلتفرم‌های port-binding را در config های پروفایل ثانویه غیرفعال نگه دارید. شنوندهٔ مشترک و تعاریف route هایش روی پروفایل پیش‌فرض می‌مانند؛ binding ی پروفایل تعیین می‌کند هر route ی وب‌هوک احراز‌شده مجاز به اجرای کدام پروفایل باشد. درخواست‌های API ی نام‌دار وقتی پروفایل هدف API_SERVER_KEY ندارد fail closed می‌شوند.</p>
+<p>فقط همین تداخل شنونده-مشترک به skip شدن پروفایل تنزل می‌یابد. خطاهای پیکربندی امنیتی fatal می‌مانند: مثلاً پلتفرم own-policy ی open بدون GATEWAY_ALLOW_ALL_USERS یا opt-in ی allow-all ی مخصوص همان پلتفرم همچنان startup ی گیت‌وی را abort می‌کند نه اینکه بی‌سروصدا پروفایل ناامن را بیندازد.</p>
+<h4>۳. پلتفرم‌های دارای-credential هنوز توکن خودشان را per-profil می‌خواهند</h4>
+<p>پلتفرم‌های polling/اتصالی ‏(تلگرام، دیسکورد، اسلک، ماتریکس، سیگنال و…) multiplexed خوب کار می‌کنند ولی هر پروفیلی که یکی را فعال کند باید <b>توکن بات خودش</b> را بدهد — همان توکن نمی‌تواند همزمان توسط دو پروفایل poll شود. اگر دو پروفایل همان جفت (platform, token) را پیکربندی کنند startup سریع شکست می‌خورد و هر دو پروفایل را نام می‌برد ‏(بخش ایمنی تعارض توکن — قاعده تغییر نکرده فقط الان داخل همان یک پروسه اجبار می‌شود).</p>
+<h4>۴. کلیدهای نشست per-profil namespace می‌شوند</h4>
+<p>نشست‌های هر پروفایل زیر namespace ی agent:&lt;profile&gt;:… زندگی می‌کنند تا دو پروفایل روی همان پلتفرم/چت هرگز در store ی نشست مشترک تصادم نکنند. پروفایل <b>پیش‌فرض</b> namespace ی تاریخی agent:main:… را بایت‌به-بایت نگه می‌دارد، پس نشست‌های فعلی پروفایل پیش‌فرض بی‌تأثیرند — نه مهاجرت، نه تاریخچهٔ یتیم.</p>
+<h4>۵. یک PID/lock و یک سطح status</h4>
+<p>یک PID و lock ی سطح-پروسه وجود دارد ‏(multiplexer، زیر خانهٔ پیش‌فرض). hermes وضعیت multiplexer و پروفایل‌هایی که سرو می‌کند را گزارش؛ ‏hermes status -p &lt;name&gt; به یک پروفایل می‌بُرد. هر پروفایل همچنان runtime_status.json خودش را زیر خانهٔ خودش می‌نویسد پس reader های per-profil ی موجود سر کار می‌مانند.</p>
+<h4>چه چیزی تغییر <b>نمی‌کند</b></h4>
+<p>ایزوله‌سازی credential ی .env ی per-profil حفظ و حتی سخت‌گیرانه‌تر است: کلیدهای پروفایل از scope ی خودش حل می‌شوند و هرگز داخل محیط مشترک union نمی‌شوند ‏(یعنی زیرپروسه‌هایی مثل سرورهای MCP و worker های کانبان فقط secrets ی پروفایل خودشان را می‌بینند). کانبان، مهارت‌ها/حافظه/SOUL ی scope‌شده-به-پروفایل و مسیریابی مدل همگی دقیقاً مثل گیت‌وی‌های جدا per-profil رفتار می‌کنند.</p>
+<h3>سرو کردن پروفایل‌های منتخب</h3>
+<p>پیش‌فرض این است که ‏gateway.multiplex_profiles: true هر پروفایل نام‌دار معتبر روی host را سرو کند. برای نگه داشتن پروفایل‌های بی‌ربط بدون راه افتادن adapter ها یا cron job هایشان مقدار gateway.multiplex_profile_allowlist را ست کنید:</p>
+<pre dir="ltr"><code>gateway:
+  multiplex_profiles: true
+  multiplex_profile_allowlist:
+    - worker
+    - guest</code></pre>
+<p>پروفایل پیش‌فرض همیشه سرو می‌شود و نیازی به فهرست شدن ندارد. allowlist ی unset رفتار تاریخی serve-all را نگه می‌دارد؛ فهرست خالی فقط پروفایل پیش‌فرض را سرو می‌کند. نام‌ها نرمال و dedup می‌شوند. ورودی‌های نامعتبر یا نام‌های نصب‌نشده با هشدار skip می‌شوند. مقدار غیر-فهرستیِ بدفرم امنانه به فقط-پیش‌فرض fail می‌کند.</p>
+<p>مجموعهٔ سروشده همچنین پیشوندهای API/وب‌هوک ی /p/&lt;profile>/، ‏وضعیت runtime، ‏واجد بودن profile-route و اینکه scheduler ی cron ی درون-پروسه کدام پروفایل‌ها را tick کند را کنترل می‌کند. پروفایل نام‌دار بیرون allowlist همچنان می‌تواند گیت‌وی مستقل خودش را اجرا کند.</p>
+<h3>مسیریابی گفتگوهای بات-مشترک به پروفایل‌ها ‏(profile_routes)</h3>
+<p>‏Multiplexing پروفایل را per-credential ‏(توکن بات خود هر پروفایل) یا per-پیشوند-URL انتخاب می‌کند. وقتی چند جامعه <b>یک</b> توکن بات را شریک‌اند — مثلاً یک بات دیسکوردی سرویس‌دهندهٔ چند guild — می‌توانید guild/channel/thread های مشخص را با gateway.profile_routes به پروفایل‌های متفاوت مسیریابی کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  multiplex_profiles: true
+  profile_routes:
+    # An entire Discord server → one profile
+    - name: acme-server
+      platform: discord
+      guild_id: "1234567890"
+      profile: acme
+
+    # One channel in that server → a different profile
+    - name: acme-support
+      platform: discord
+      guild_id: "1234567890"
+      chat_id: "9876543210"
+      profile: acme-support
+
+    # A Telegram group (no guild concept — chat_id only)
+    - name: tg-group
+      platform: telegram
+      chat_id: "-1001234567890"
+      profile: tg-profile</code></pre>
+</div>
+<p>مسیرها specific-ترین-اول تطبیق می‌یابند ‏(thread_id > chat_id > guild_id)، همهٔ فیلدهای اعلام‌شده باید برقرار باشند ‏(AND) و مسیری کلیدخورده-با-کانال thread ها/forum post هایی که والدشان همان کانال است را هم تطبیق می‌دهد. پیام‌هایی که هیچ مسیری نمی‌خورند روی پروفایل پیش‌فرض/فعال می‌مانند. پروفایل مسیریابی‌شده ایزوله‌سازی کامل per-profil ی توضیح داده‌شده بالا را می‌گیرد ‏(config، مهارت‌ها، حافظه، credential ها، namespace ی نشست). مسیریابی روی همهٔ adapter های پلتفرم کار می‌کند نه فقط دیسکورد.</p>
+<p>‏profile_routes به gateway.multiplex_profiles: true نیاز دارد؛ با خاموش بودن multiplexing مسیرها نادیده گرفته می‌شوند. اگر مسیر صریحی تطبیق کند ولی پروفایل هدفش نصب نباشد یا خارج multiplex_profile_allowlist باشد، گیت‌وی آن ingress را رد و مسیر و هدف را لاg می‌کند. پروفایل پیش‌فرض را اجرا نمی‌کند. ترافیکی که هیچ مسیری نمی‌خورد رفتار تاریخی پروفایل-پیش‌فرض را نگه می‌دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> شروع، توقف یا ری‌استارت همهٔ گیت‌وی‌ها یکجا</h2>
+<p>CLI فرمان‌های چرخه‌حیات تک-پروفایلی دارد. برای اقدام بین همهٔ پروفایل‌ها آنها را در یک حلقهٔ شل بپیچید. قطعهٔ زیر را در ‏~/.local/bin/hermes-gateways بگذارید و chmod +x کنید:</p>
+<pre dir="ltr"><code>#!/bin/sh
+set -eu
+
+# Add or remove profile names here as you create / delete profiles.
+profiles="default coder personal-bot research"
+
+usage() {
+  echo "Usage: hermes-gateways {start|stop|restart|status|list}"
+}
+
+run_for_profile() {
+  profile="$1"
+  action="$2"
+  if [ "$profile" = "default" ]; then
+    hermes gateway "$action"
+  else
+    hermes -p "$profile" gateway "$action"
+  fi
+}
+
+action="${1:-}"
+case "$action" in
+  start|stop|restart|status)
+    for profile in $profiles; do
+      echo "==> $action $profile"
+      run_for_profile "$profile" "$action"
+    done
+    ;;
+  list)
+    hermes gateway list
+    ;;
+  *)
+    usage
+    exit 2
+    ;;
+esac</code></pre>
+<p>سپس:</p>
+<pre dir="ltr"><code>hermes-gateways start      # start every configured profile
+hermes-gateways stop       # stop every configured profile
+hermes-gateways restart    # restart all
+hermes-gateways status     # status across all
+hermes-gateways list       # delegates to `hermes gateway list`</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>پروفایل default با ‏hermes gateway &lt;action&gt; ‏(بدون -p) هدف می‌گیرد نه با hermes -p default gateway &lt;action&gt;. wrapper بالا هر دو فرم را هندل می‌کند.</p>
+</div>
+<h3>مدیریت یک پروفایل</h3>
+<p>فرمان‌های میانبری که هر پروفایل نصب می‌کند:</p>
+<pre dir="ltr"><code>coder gateway run        # foreground (Ctrl-C to stop)
+coder gateway start      # start the managed service
+coder gateway stop       # stop the managed service
+coder gateway restart    # restart
+coder gateway status     # status
+coder gateway install    # create the LaunchAgent / systemd unit
+coder gateway uninstall  # remove the service file</code></pre>
+<p>معادل ‏hermes -p coder gateway &lt;action&gt; هستند — مفید وقتی alias ی پروفایل روی PATH نیست یا از داخل اسکریپت به‌صورت داینامیک پروفایل هدف می‌گیرید.</p>
+<h3>فایل‌های سرویس</h3>
+<p>هر پروفایل سرویس خودش را با نام یکتا نصب می‌کند پس نصب‌ها هرگز تصادم نمی‌کنند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پلتفرم</th><th>مسیر</th></tr></thead>
+<tbody>
+<tr><td>macOS</td><td>‏<code>~/Library/LaunchAgents/ai.hermes.gateway-&lt;profile&gt;.plist</code></td></tr>
+<tr><td>لینوکس</td><td>‏<code>~/.config/systemd/user/hermes-gateway-&lt;profile&gt;.service</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>پروفایل پیش‌فرض نام‌های تاریخی را نگه می‌دارد: ai.hermes.gateway.plist / hermes-gateway.service.</p>
+<h3>دیدن لاگ‌ها</h3>
+<pre dir="ltr"><code># Default profile
+tail -f ~/.hermes/logs/gateway.log
+tail -f ~/.hermes/logs/gateway.error.log
+
+# Named profile
+tail -f ~/.hermes/profiles/&lt;name&gt;/logs/gateway.log
+tail -f ~/.hermes/profiles/&lt;name&gt;/logs/gateway.error.log</code></pre>
+<p>استریم همزمان لاگ همهٔ پروفایل‌ها:</p>
+<pre dir="ltr"><code>tail -f ~/.hermes/logs/gateway.log ~/.hermes/profiles/*/logs/gateway.log</code></pre>
+<p>CLI نمایشگر لاg ساختاریافته هم دارد:</p>
+<pre dir="ltr"><code>hermes logs -f                  # follow default profile
+hermes -p coder logs -f         # follow one profile
+hermes logs --help              # filters, levels, JSON output</code></pre>
+<h3>شناسایی چیزی که واقعاً در حال اجراست</h3>
+<pre dir="ltr"><code>hermes profile list             # profiles + model + gateway state
+hermes-gateways status          # full status across every profile
+launchctl list | grep hermes    # macOS — PIDs and labels
+systemctl --user list-units 'hermes-gateway-*'   # Linux — units</code></pre>
+<h3>ویرایش پیکربندی</h3>
+<p>هر پروفایل config اش را داخل دایرکتوری خودش نگه می‌دارد:</p>
+<pre dir="ltr"><code>~/.hermes/profiles/&lt;name&gt;/
+├── .env              # API keys, bot tokens (chmod 600)
+├── config.yaml       # model, provider, toolsets, gateway settings
+└── SOUL.md           # personality / system prompt</code></pre>
+<p>پروفایل پیش‌فرض ~/.hermes/ را مستقیم با همین سه فایل استفاده می‌کند.</p>
+<p>با هر ویرایشگری یا از طریق CLI:</p>
+<pre dir="ltr"><code>hermes config set model.model anthropic/claude-sonnet-4    # default profile
+coder config set model.model openai/gpt-5                  # named profile</code></pre>
+<p>بعد از ویرایش .env یا config.yaml گیت‌وی مربوطه را ری‌استارت کنید:</p>
+<pre dir="ltr"><code>coder gateway restart
+# or, for everything:
+hermes-gateways restart</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> بیدار نگه داشتن host</h2>
+<p>پروسهٔ گیت‌وی تمام روز می‌تواند اجرا شود ولی سیستم‌عامل هنوز موقع idle تلاش به خواب رفتن می‌کند. دو الگو:</p>
+<h3>macOS — caffeinate</h3>
+<p>‏caffeinate داخل macOS ساخته شده و تا وقتی اجراست جلوی خواب را می‌گیرد. بدون نصب.</p>
+<pre dir="ltr"><code>caffeinate -dis                    # block display, idle, and system sleep
+caffeinate -dis -t 28800           # same, auto-exit after 8 hours
+caffeinate -i -w $(cat ~/.hermes/gateway.pid) &amp;   # awake while default gateway runs
+
+# Persistent: run in background and forget
+nohup caffeinate -dis &gt;/dev/null 2&gt;&amp;1 &amp;
+disown
+
+# Inspect / stop
+pmset -g assertions | grep -iE 'caffeinate|prevent|user is active'
+pkill caffeinate</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فلگ</th><th>اثر</th></tr></thead>
+<tbody>
+<tr><td><code>-d</code></td><td>بلاک خواب display</td></tr>
+<tr><td><code>-i</code></td><td>بلاک خواب سیستم روی idle ‏(پیش‌فرض)</td></tr>
+<tr><td><code>-m</code></td><td>بلاک خواب دیسک</td></tr>
+<tr><td><code>-s</code></td><td>بلاک خواب سیستم ‏(فقط Mac های AC-powered)</td></tr>
+<tr><td><code>-u</code></td><td>شبیه‌سازی فعالیت کاربر ‏(جلوی قفل صفحه)</td></tr>
+<tr><td><code>-t N</code></td><td>خروج خودکار بعد از N ثانیه</td></tr>
+<tr><td><code>-w P</code></td><td>خروج وقتی PID ی P خارج شد</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ بستن لید هنوز مک را می‌خواباند</div>
+  <p>‏caffeinate نمی‌تواند خوابِ سخت‌افزاریِ بستن لید را روی MacBook ها override کند. برای عملکرد با لید بسته تنظیمات Energy Saver / Battery را عوض کنید یا ابزار ثالث به کار ببرید.</p>
+</div>
+<h3>لینوکس — systemd-inhibit یا loginctl</h3>
+<pre dir="ltr"><code># Inhibit suspend while a command runs
+systemd-inhibit --what=idle:sleep --who=hermes --why="gateways running" \
+  sleep infinity &amp;
+
+# Allow user services to keep running after logout (recommended)
+sudo loginctl enable-linger "$USER"</code></pre>
+<p>بعد از فعال کردن lingering یونیت‌های کاربری systemd تان ‏(شامل hermes-gateway-&lt;profile&gt;.service) قطع شدن SSH و ری‌بوت‌ها را عبور می‌کنند.</p>
+<h3>ایمنی تعارض توکن</h3>
+<p>هر پروفایل باید توکن‌های بات یکتا برای هر پلتفرم مصرف کند. اگر دو پروفایل یک توکن تلگرام، دیسکورد، اسلک، واتساپ یا سیگنال را شریک شوند گیت‌وی دوم با خطایی نام‌برندهٔ پروفایل متعارض امتناع از شروع می‌کند.</p>
+<p>بررسی:</p>
+<pre dir="ltr"><code>grep -H 'TELEGRAM_BOT_TOKEN\|DISCORD_BOT_TOKEN' \
+     ~/.hermes/.env ~/.hermes/profiles/*/.env</code></pre>
+<h3>به‌روزرسانی کد</h3>
+<p>‏hermes update آخرین کد را یک بار pull و مهارت‌های bundled جدید را به هر پروفایل sync می‌کند:</p>
+<pre dir="ltr"><code>hermes update
+hermes-gateways restart</code></pre>
+<p>مهارت‌های ویرایش‌شده-توسط-کاربر هرگز بازنویسی نمی‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> عیب‌یابی</h2>
+<h3>«Could not find service in domain for user gui: 501»</h3>
+<p>‏hermes gateway start را بعد از hermes gateway stop قبلی اجرا کرده‌اید. stop ی CLI یک launchctl unload کامل انجام می‌دهد که سرویس را از registry ی launchd حذف می‌کند. CLI همین خطای خاص را روی start می‌گیرد و plist را خودکار دوباره load می‌کند ‏(↻ launchd job was unloaded; reloading service definition). سرویس عادی شروع می‌شود. چیزی برای درست کردن نیست.</p>
+<h3>PID ی کهنه بعد از کرش</h3>
+<p>اگر گیت‌وی پروفایلی not running نشان دهد ولی پروسه‌ای زنده باشد:</p>
+<pre dir="ltr"><code>ps -ef | grep "hermes_cli.*-p &lt;profile&gt;"
+cat ~/.hermes/profiles/&lt;profile&gt;/gateway.pid
+kill -TERM &lt;pid&gt;          # graceful
+kill -KILL &lt;pid&gt;          # if that fails after a few seconds
+&lt;profile&gt; gateway start</code></pre>
+<h3>ریست سخت یک سرویس</h3>
+<pre dir="ltr"><code># macOS
+launchctl unload ~/Library/LaunchAgents/ai.hermes.gateway-&lt;profile&gt;.plist
+launchctl load   ~/Library/LaunchAgents/ai.hermes.gateway-&lt;profile&gt;.plist
+
+# Linux
+systemctl --user restart hermes-gateway-&lt;profile&gt;.service</code></pre>
+<h3>بررسی سلامت</h3>
+<pre dir="ltr"><code>hermes doctor                  # default profile
+hermes -p &lt;profile&gt; doctor     # one profile</code></pre>
+</section>
+
+<div class="pager">
+  <a href="multi-connection-desktop.html"><span class="dir">→ قبلی</span><span class="ttl">اتصال دسکتاپ به چند نمونه</span></a>
+  <a class="next" href="profile-distributions.html"><span class="dir">بعدی ←</span><span class="ttl">توزیع پروفایل ‏(اشتراک ایجنت)</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/multi-profile-gateways" target="_blank" rel="noopener">Running Many Gateways at Once</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
