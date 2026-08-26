@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۹۱ از ۲۰۷ صفحه (۴۴٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۹۲ از ۲۰۷ صفحه (۴۴٪)** |
 
 ---
 
@@ -471,6 +471,11 @@ hermes-docs-fa/
 - اصلاحات: افزودن لنگر permission-anchor برای ارجاع داخلی بخش پیکربندی
 - پیشرفت: **۹۱ از ۲۰۷ صفحه فعال (۴۴٪)** — قابلیت‌های اصلی ۲۸/۳۱ (فقط memory-providers و extending-the-dashboard مانده)
 
+### نشست ۵۶ — 2026-08-26 — 🧠 ارائه‌دهندگان حافظهٔ خارجی — قابلیت‌ها ۲۹/۳۱
+- ترجمه و انتشار «ارائه‌دهندگان حافظهٔ خارجی» (۱۲ بخش، دومرحله‌ای): شروع سریع، چرخهٔ ۶گامی خودکار، Honcho کامل ‏(ابزارهای پنجگانه، معماری دولایهٔ جدلی، سه پیچ مستقل، ویزارد با auth دستگاه برای headless، مرجع کامل config در details، راه‌اندازی چند-peer با clone/sync، observation ی directional/unified، نگاشت هویت گیت‌وی سه‌کلیدی)، OpenViking ‏(لایه‌های L0-L2، طرح viking://)، Mem0 در سه حالت platform/selfhosted/OSS، Hindsight با گراف دانش و reflect، Holographic با جبر HRR و امتیاز اعتماد، RetainDB ده‌ابزاره، ByteRover با استخراج پیش-از-فشرده‌سازی، Supermemory با fencing و چند-کانتینری + Memori، جدول مقایسهٔ ۹ ارائه‌دهنده و ایزوله‌سازی پروفایل
+- زنجیرهٔ pager: …computer-use ← memory-providers ← (به‌زودی)
+- پیشرفت: **۹۲ از ۲۰۷ صفحه فعال (۴۴٪)** — قابلیت‌های اصلی ۲۹/۳۱ (فقط extending-the-dashboard مانده)
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -568,6 +573,7 @@ hermes-docs-fa/
 | 89 | `user-guide/features/spotify.html` | اسپاتیفای |
 | 90 | `user-guide/features/codex-app-server-runtime.html` | اجراگر Codex (اختیاری) |
 | 91 | `user-guide/features/computer-use.html` | کنترل کامپیوتر |
+| 92 | `user-guide/features/memory-providers.html` | ارائه‌دهندگان حافظهٔ خارجی |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

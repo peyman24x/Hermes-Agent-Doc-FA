@@ -45,7 +45,7 @@ window.HERMES_NAV = [
   { p:"user-guide/features/skills.html",               t:"سیستم مهارت‌ها (Skills)",            d:1 },
   { p:"user-guide/features/curator.html",              t:"نگهدارندهٔ مهارت‌ها (Curator)",       d:1 },
   { p:"user-guide/features/memory.html",               t:"حافظه",                               d:1 },
-  { p:"user-guide/features/memory-providers.html",     t:"ارائه‌دهندگان حافظهٔ خارجی",          d:0 },
+  { p:"user-guide/features/memory-providers.html",     t:"ارائه‌دهندگان حافظهٔ خارجی",          d:1 },
   { p:"user-guide/features/context-files.html",        t:"فایل‌های زمینه (Context Files)",     d:1 },
   { p:"user-guide/features/context-references.html",   t:"ارجاع‌های درون‌خطی (@)",              d:1 },
   { p:"user-guide/features/personality.html",          t:"شخصیت و SOUL.md",                     d:1 },

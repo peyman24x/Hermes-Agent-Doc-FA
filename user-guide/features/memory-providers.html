@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ارائه‌دهندگان حافظهٔ خارجی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory-providers" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>ارائه‌دهندگان حافظهٔ خارجی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>ارائه‌دهندگان حافظهٔ خارجی ‏(Memory Providers)</h1>
+<p>هرمس ایجنت با ۸ پلاگین ارائه‌دهندهٔ حافظهٔ خارجی ارسال می‌شود که به ایجنت دانشِ پایدار و بین-نشستی فراتر از MEMORY.md و USER.md داخلی می‌دهد. در هر لحظه فقط <b>یک</b> ارائه‌دهندهٔ خارجی می‌تواند فعال باشد — حافظهٔ داخلی همیشه کنارش فعال است.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> شروع سریع</h2>
+<div class="codebox"><pre><code>hermes memory setup      # interactive picker + configuration
+hermes memory status     # check what's active
+hermes memory off        # disable external provider</code></pre></div>
+<p>می‌توانید ارائه‌دهندهٔ فعال حافظه را از مسیر ‏<code>hermes plugins</code> ← Provider Plugins ← Memory Provider هم انتخاب کنید.</p>
+<p>یا دستی در <code>~/.hermes/config.yaml</code>:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>memory:
+  provider: openviking   # or honcho, mem0, hindsight, holographic, retaindb, byterover, supermemory</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> نحوهٔ کار</h2>
+<p>وقتی یک ارائه‌دهندهٔ حافظه فعال باشد، هرمس خودکار:</p>
+<ol>
+  <li><b>زمینهٔ ارائه‌دهنده را تزریق می‌کند</b> به پرامپت سیستمی ‏(آنچه ارائه‌دهنده می‌داند)</li>
+  <li><b>حافظه‌های مرتبط را پیش‌واکشی می‌کند</b> قبل از هر نوبت ‏(پس‌زمینه، غیربلاک‌کننده)</li>
+  <li><b>نوبت‌های گفتگو را sync می‌کند</b> به ارائه‌دهنده بعد از هر پاسخ</li>
+  <li><b>در پایان نشست حافظه استخراج می‌کند</b> ‏(برای ارائه‌دهنده‌هایی که پشتیبانی می‌کنند)</li>
+  <li><b>نوشتن‌های حافظهٔ داخلی را آینه می‌کند</b> به ارائه‌دهندهٔ خارجی</li>
+  <li><b>ابزارهای مخصوص ارائه‌دهنده اضافه می‌کند</b> تا ایجنت بتواند حافظه‌ها را جستجو، ذخیره و مدیریت کند</li>
+</ol>
+<p>حافظهٔ داخلی ‏(MEMORY.md / USER.md) دقیقاً مثل قبل ادامه می‌دهد. ارائه‌دهندهٔ خارجی افزودنی است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> Honcho</h2>
+<p>مدل‌سازی کاربر بین-نشستیِ AI-native با استدلال جدلی ‏(dialectic)، تزریق زمینهٔ مخصوص-نشست، جستجوی معنایی و نتیجه‌گیری‌های پایدار. زمینهٔ پایه حالا خلاصهٔ نشست را کنار بازنمایی کاربر و کارت‌های peer شامل می‌شود تا ایجنت بداند چه چیزهایی قبلاً بحث شده.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th></th></tr></thead>
+<tbody>
+<tr><td><b>بهترین برای</b></td><td>سیستم‌های چندایجنت با زمینهٔ بین-نشستی، همسویی کاربر-ایجنت</td></tr>
+<tr><td><b>نیازمندی‌ها</b></td><td>‏<code>pip install honcho-ai</code> + ‏<a href="https://app.honcho.dev" target="_blank" rel="noopener">کلید API</a> یا نمونهٔ خودمیزبان</td></tr>
+<tr><td><b>ذخیره‌سازی داده</b></td><td>Honcho Cloud یا خودمیزبان</td></tr>
+<tr><td><b>هزینه</b></td><td>قیمت‌گذاری Honcho ‏(کلود) / رایگان ‏(خودمیزبان)</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>ابزارها ‏(۵):</b> ‏<code>honcho_profile</code> ‏(خواندن/به‌روزرسانی کارت peer)، ‏<code>honcho_search</code> ‏(جستجوی معنایی)، ‏<code>honcho_context</code> ‏(زمینهٔ نشست — خلاصه، بازنمایی، کارت، پیام‌ها)، ‏<code>honcho_reasoning</code> ‏(ترکیب LLM)، ‏<code>honcho_conclude</code> ‏(ساخت/حذف نتیجه‌گیری‌ها)</p>
+<p><b>معماری:</b> تزریق زمینهٔ دولایه — یک لایهٔ پایه ‏(خلاصهٔ نشست + بازنمایی + کارت peer؛ refresh روی ‏contextCadence) به‌علاوهٔ مکمل جدلی ‏(استدلال LLM؛ refresh روی dialecticCadence). جدلی خودکار بر اساس وجود زمینهٔ پایه بین پرامپت‌های cold-start ‏(حقایق عمومی کاربر) و پرامپت‌های warm ‏(زمینهٔ مخصوص-نشست) انتخاب می‌کند.</p>
+<p><b>سه پیچ مستقل پیکربندی</b> هزینه و عمق را جداگانه کنترل می‌کنند:</p>
+<ul>
+  <li>‏<code>contextCadence</code> — چند وقت یک بار لایهٔ پایه refresh شود ‏(فرکانس فراخوانی API)</li>
+  <li>‏<code>dialecticCadence</code> — چند وقت یک بار LLM ی جدلی شلیک شود ‏(فرکانس فراخوانی LLM)</li>
+  <li>‏<code>dialecticDepth</code> — چند پاس ‏<code>.chat()</code> به‌ازای هر فراخوانی جدلی ‏(۱–۳، عمق استدلال)</li>
+</ul>
+<p>جدلیِ خود-تزریق‌شونده سطح استدلالش را هم با طول کوئری مقیاس می‌دهد ‏(کوئری طولانی‌تر ← استدلال عمیق‌تر، سقف ‏reasoningLevelCap)؛ بخش <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/honcho#query-adaptive-reasoning-level" target="_blank" rel="noopener">Query-Adaptive Reasoning Level</a> را ببینید.</p>
+<p><b>ویزارد راه‌اندازی:</b></p>
+<div class="codebox"><pre><code>hermes memory setup        # select "honcho" — runs the Honcho-specific post-setup</code></pre></div>
+<p>فرمان قدیمی ‏<code>hermes honcho setup</code> همچنان کار می‌کند ‏(الان به ‏<code>hermes memory setup</code> ریدایرکت می‌شود) ولی فقط بعد از انتخاب Honcho به‌عنوان ارائه‌دهندهٔ فعال ثبت می‌شود.</p>
+<p><b>ماشین‌های headless / راه‌دور:</b> برای auth ی کلود روی سیستمی بدون مرورگر ‏(SSH، ‏VM راه‌دور)، در پرامپت روش-auth ویزارد گزینهٔ <b>device</b> را بردارید. CLI یک کد کوتاه و لینک تأیید چاپ می‌کند؛ لینک را در مرورگر روی هر ماشین دیگری باز، تأیید کنید و setup تمام می‌شود — بدون کپی-پیست کلید API. ویزارد وقتی مرورگر محلی قابل‌استفاده تشخیص ندهد خودکار همین گزینه را پیشنهاد می‌دهد.</p>
+<p><b>Config:</b> ‏<code>$HERMES_HOME/honcho.json</code> ‏(مخصوص-پروفایل) یا ‏<code>~/.honcho/config.json</code> ‏(سراسری). ترتیب حل: ‏<code>$HERMES_HOME/honcho.json</code> &gt; ‏<code>~/.hermes/honcho.json</code> &gt; ‏<code>~/.honcho/config.json</code>. بخش <a href="https://github.com/NousResearch/hermes-agent/blob/main/plugins/memory/honcho/README.md" target="_blank" rel="noopener">مرجع config</a> و ‏<a href="https://docs.honcho.dev/v3/guides/integrations/hermes" target="_blank" rel="noopener">راهنمای یکپارچه‌سازی Honcho</a> را ببینید.</p>
+<details>
+<summary>مرجع کامل config</summary>
+<div class="table-wrap">
+<table>
+<thead><tr><th>کلید</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>apiKey</code></td><td>—</td><td>کلید API از ‏<a href="https://app.honcho.dev" target="_blank" rel="noopener">app.honcho.dev</a></td></tr>
+<tr><td><code>baseUrl</code></td><td>—</td><td>URL پایه برای Honcho خودمیزبان</td></tr>
+<tr><td><code>peerName</code></td><td>—</td><td>هویت peer ی کاربر</td></tr>
+<tr><td><code>aiPeer</code></td><td>کلید host</td><td>هویت peer ی AI ‏(یکی به‌ازای هر پروفایل)</td></tr>
+<tr><td><code>workspace</code></td><td>کلید host</td><td>شناسهٔ فضای‌کاری مشترک</td></tr>
+<tr><td><code>contextTokens</code></td><td><code>null</code> ‏(بدون سقف)</td><td>بودجهٔ توکن برای زمینهٔ خود-تزریق per-turn. برش روی مرز واژه‌ها</td></tr>
+<tr><td><code>contextCadence</code></td><td><code>1</code></td><td>حداقل تعداد نوبت بین فراخوانی‌های API ی ‏<code>context()</code> ‏(refresh لایهٔ پایه)</td></tr>
+<tr><td><code>dialecticCadence</code></td><td><code>2</code></td><td>حداقل تعداد نوبت بین فراخوانی‌های LLM ی ‏<code>peer.chat()</code>. توصیه ۱–۵. فقط در حالت‌های <code>hybrid</code>/<code>context</code></td></tr>
+<tr><td><code>dialecticDepth</code></td><td><code>1</code></td><td>تعداد پاس‌های ‏<code>.chat()</code> به‌ازای هر فراخوانی جدلی. محدود ۱–۳. پاس ۰: پرامپت cold/warm، پاس ۱: خود-ممیزی، پاس ۲: آشتی‌دهی</td></tr>
+<tr><td><code>dialecticDepthLevels</code></td><td><code>null</code></td><td>آرایهٔ اختیاری سطح استدلال per-pass مثل ‏<code>["minimal", "low", "medium"]</code>. بر پیش‌فرض‌های تناسبی مقدم است</td></tr>
+<tr><td><code>dialecticReasoningLevel</code></td><td><code>'low'</code></td><td>سطح پایهٔ استدلال: ‏<code>minimal</code>، ‏<code>low</code>، ‏<code>medium</code>، ‏<code>high</code>، ‏<code>max</code></td></tr>
+<tr><td><code>dialecticDynamic</code></td><td><code>true</code></td><td>وقتی true باشد مدل می‌تواند سطح استدلال را per-call از طریق پارامتر ابزار override کند</td></tr>
+<tr><td><code>dialecticMaxChars</code></td><td><code>600</code></td><td>حداکثر نویسهٔ نتیجهٔ جدلی تزریق‌شده در پرامپت سیستمی</td></tr>
+<tr><td><code>recallMode</code></td><td><code>'hybrid'</code></td><td>‏<code>hybrid</code> ‏(خود-تزریق + ابزارها)، ‏<code>context</code> ‏(فقط تزریق)، ‏<code>tools</code> ‏(فقط ابزارها)</td></tr>
+<tr><td><code>writeFrequency</code></td><td><code>'async'</code></td><td>کی پیام‌ها flush شوند: ‏<code>async</code> ‏(thread پس‌زمینه)، ‏<code>turn</code> ‏(همگام)، ‏<code>session</code> ‏(دسته‌ای در پایان) یا عدد صحیح N</td></tr>
+<tr><td><code>saveMessages</code></td><td><code>true</code></td><td>آیا پیام‌ها به API ی Honcho ماندگار شوند</td></tr>
+<tr><td><code>observationMode</code></td><td><code>'directional'</code></td><td>‏<code>directional</code> ‏(همه روشن) یا ‏<code>unified</code> ‏(استخر ناظر واحد). با آبجکت <code>observation</code> بازنویسی می‌شود</td></tr>
+<tr><td><code>messageMaxChars</code></td><td><code>25000</code></td><td>حداکثر نویسه به‌ازای هر پیام ‏(در صورت عبور chunked می‌شود)</td></tr>
+<tr><td><code>dialecticMaxInputChars</code></td><td><code>10000</code></td><td>حداکثر نویسه ورودی کوئری جدلی به ‏<code>peer.chat()</code></td></tr>
+<tr><td><code>sessionStrategy</code></td><td><code>'per-directory'</code></td><td>‏<code>per-directory</code>، ‏<code>per-repo</code>، ‏<code>per-session</code>، ‏<code>global</code></td></tr>
+<tr><td><code>pinUserPeer</code></td><td><code>false</code></td><td>فقط گیت‌وی. وقتی true باشد همهٔ کاربران غیر-ایجنتِ گیت‌وی به <code>peerName</code> جمع می‌شوند؛ pin بر همهٔ alias ها مقدم است</td></tr>
+<tr><td><code>userPeerAliases</code></td><td><code>{}</code></td><td>فقط گیت‌وی. نگاشت شناسه‌های runtime به peers ‏(<code>{"7654321": "alice"</code>}). چند-به-یک</td></tr>
+<tr><td><code>runtimePeerPrefix</code></td><td><code>""</code></td><td>فقط گیت‌وی. namespace کردن شناسه‌های runtime ناشناخته ‏(<code>telegram_7654321</code>) وقتی هیچ alias ای نخورد</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<details>
+<summary>حداقل honcho.json ‏(کلود)</summary>
+<pre dir="ltr"><code>{
+  "apiKey": "your-key-from-app.honcho.dev",
+  "hosts": {
+    "hermes": {
+      "enabled": true,
+      "aiPeer": "hermes",
+      "peerName": "your-name",
+      "workspace": "hermes"
+    }
+  }
+}</code></pre>
+</details>
+<details>
+<summary>حداقل honcho.json ‏(خودمیزبان)</summary>
+<pre dir="ltr"><code>{
+  "baseUrl": "http://localhost:8000",
+  "hosts": {
+    "hermes": {
+      "enabled": true,
+      "aiPeer": "hermes",
+      "peerName": "your-name",
+      "workspace": "hermes"
+    }
+  }
+}</code></pre>
+</details>
+<div class="callout tip">
+  <div class="callout-title">💡 مهاجرت از ‏<code>hermes honcho</code></div>
+  <p>اگر قبلاً از ‏<code>hermes honcho setup</code> استفاده کرده‌اید، config و تمام داده‌های سمت-سرور شما سالم‌اند. کافی است دوباره از طریق ویزارد راه‌اندازی فعالش کنید یا دستی <code>memory.provider: honcho</code> را ست کنید تا از طریق سیستم جدید reactivate شود.</p>
+</div>
+<p><b>راه‌اندازی چند-peer:</b></p>
+<p>‏Honcho گفتگوها را به‌صورت peers مبادله‌کنندهٔ پیام مدل می‌کند — یک peer ی کاربر به‌علاوهٔ یک peer ی AI به‌ازای هر پروفایل هرمس، همگی در یک فضای‌کاری مشترک. فضای‌کاری محیط مشترک است: peer ی کاربر سراسری بین پروفایل‌هاست و هر peer ی AI هویت مستقل خودش را دارد. هر peer ی AI بازنمایی/کارت مستقل از مشاهده‌های خودش می‌سازد، پس یک پروفایل <code>coder</code> کد-محور می‌ماند و یک پروفایل <code>writer</code> تحریریه‌محور، در برابر همان کاربر.</p>
+<p>نگاشت:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مفهوم</th><th>چه چیزی است</th></tr></thead>
+<tbody>
+<tr><td><b>Workspace</b></td><td>محیط مشترک. همهٔ پروفایل‌های هرمس زیر یک workspace همان هویت کاربر را می‌بینند.</td></tr>
+<tr><td><b>User peer</b> ‏(<code>peerName</code>)</td><td>انسان. بین پروفایل‌های فضای‌کاری مشترک.</td></tr>
+<tr><td><b>AI peer</b> ‏(<code>aiPeer</code>)</td><td>یکی به‌ازای هر پروفایل هرمس. کلید host ی ‏<code>hermes</code> ← پیش‌فرض؛ برای بقیه ‏<code>hermes.&lt;profile&gt;</code>.</td></tr>
+<tr><td><b>Observation</b></td><td>toggle های per-peer که کنترل می‌کنند Honcho از پیام‌های چه کسی چه چیزی مدل کند. ‏<code>directional</code> ‏(پیش‌فرض، هر چهار مورد روشن) یا ‏<code>unified</code> ‏(استخر ناظر-واحد).</td></tr>
+</tbody>
+</table>
+</div>
+<h4>پروفایل جدید، peer ی Honcho تازه</h4>
+<div class="codebox"><pre><code>hermes profile create coder --clone</code></pre></div>
+<p>‏<code>--clone</code> یک بلوک host ی ‏<code>hermes.coder</code> در ‏honcho.json می‌سازد با ‏<code>aiPeer: "coder"</code>، ‏workspace مشترک، ‏peerName به‌ارث‌رسیده، ‏recallMode، ‏writeFrequency، ‏observation و… . peer ی AI پیشاپیش در Honcho ساخته می‌شود تا قبل از اولین پیام موجود باشد.</p>
+<h4>پروفایل‌های موجود، backfill ی peers ی Honcho</h4>
+<div class="codebox"><pre><code>hermes honcho sync</code></pre></div>
+<p>هر پروفایل هرمس را اسکن، برای هر پروفایل بدون بلوک host یکی می‌سازد، تنظیمات را از بلوک پیش‌فرض ‏<code>hermes</code> به ارث می‌برد و peer های AI جدید را پیشاپیش می‌سازد. idempotent است — پروفایل‌هایی که بلوک host دارند رد می‌شوند.</p>
+<h4>Observation ی per-profil</h4>
+<p>هر بلوک host می‌تواند config ی observation را مستقل override کند. مثال: پروفایل کد-محوری که peer ی AI اش کاربر را مشاهده می‌کند ولی خودش را مدل نمی‌کند:</p>
+<pre dir="ltr"><code>"hermes.coder": {
+  "aiPeer": "coder",
+  "observation": {
+    "user": { "observeMe": true, "observeOthers": true },
+    "ai":   { "observeMe": false, "observeOthers": true }
+  }
+}</code></pre>
+<p><b>toggle های Observation ‏(یک مجموعه به‌ازای هر peer):</b></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>toggle</th><th>اثر</th></tr></thead>
+<tbody>
+<tr><td><code>observeMe</code></td><td>Honcho از پیام‌های خودِ این peer بازنمایی‌اش را می‌سازد</td></tr>
+<tr><td><code>observeOthers</code></td><td>این peer پیام‌های peer دیگر را مشاهده می‌کند ‏(خوراک استدلال بین-peer)</td></tr>
+</tbody>
+</table>
+</div>
+<p>پیش‌تنظیم‌ها با ‏<code>observationMode</code>:</p>
+<ul>
+  <li><b>‏<code>"directional"</code></b> ‏(پیش‌فرض) — هر چهار فلگ روشن. مشاهدهٔ دوطرفهٔ کامل؛ جدلی بین-peer را ممکن می‌کند.</li>
+  <li><b>‏<code>"unified"</code></b> — کاربر ‏<code>observeMe: true</code>، ‏AI ‏<code>observeOthers: true</code>، بقیه خاموش. استخر ناظر-واحد؛ AI کاربر را مدل می‌کند نه خودش را، و peer ی کاربر فقط خودش را مدل می‌کند.</li>
+</ul>
+<p>toggle های سمت-سرور که از طریق <a href="https://app.honcho.dev" target="_blank" rel="noopener">داشبورد Honcho</a> ست شده‌اند بر پیش‌فرض‌های محلی مقدم‌اند — در init ی نشست برگشت sync می‌شوند.</p>
+<p>مرجع کامل observation را در <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/honcho#observation-directional-vs-unified" target="_blank" rel="noopener">صفحهٔ Honcho</a> ببینید.</p>
+<h4>نگاشت هویت گیت‌وی</h4>
+<p>مدل peer بالا نشست‌های CLI، ‏TUI و دسکتاپ را پوشش می‌دهد که در آنها هر گفتگو به ‏peerName حل می‌شود. <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/gateway-internals" target="_blank" rel="noopener">گیت‌وی</a> محور دومی اضافه می‌کند: کاربرها با شناسه‌های runtime ی بومی-پلتفرم می‌آیند ‏(UID تلگرام، snowflake دیسکورد، کاربر اسلک) و سه کلید تعیین می‌کنند هر شناسه به کدام peer حل شود.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>کلید</th><th>اثر</th></tr></thead>
+<tbody>
+<tr><td><code>pinUserPeer: true</code></td><td>همهٔ کاربران غیر-ایجنت گیت‌وی به <code>peerName</code> جمع می‌شوند. pin اول بررسی می‌شود پس بر همهٔ alias ها مقدم است — فقط وقتی برداریدش که هیچ هویت سمت-کاربری peer ی خودش را لازم ندارد</td></tr>
+<tr><td><code>userPeerAliases</code></td><td>شناسه‌های runtime مشخص را به peers نگاشت می‌کند ‏(<code>{"7654321": "alice"</code>}). خانهٔ مسیریابی هویت‌های متمایز — شامل ایجنت‌هایی که هرکدام peer ی خودشان را حمل می‌کنند</td></tr>
+<tr><td><code>runtimePeerPrefix</code></td><td>هر شناسهٔ runtime نگاشت‌نشده را namespace می‌کند ‏(<code>telegram_7654321</code>) تا پلتفرم‌هایی با ID های هم‌شکل تصادم نکنند</td></tr>
+</tbody>
+</table>
+</div>
+<p>بیرون گیت‌وی این کلیدها کاری نمی‌کنند. ‏<code>hermes memory setup</code> فقط وقتی برایشان پرامپت می‌دهد که پلتفرم گیت‌وی متصلی آشکار کند. نردبان resolver و جریان setup را در <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/honcho#gateway-identity-mapping" target="_blank" rel="noopener">صفحهٔ Honcho</a> ببینید.</p>
+<details>
+<summary>نمونهٔ کامل honcho.json ‏(چند-پروفایل)</summary>
+<pre dir="ltr"><code>{
+  "apiKey": "your-key",
+  "workspace": "hermes",
+  "peerName": "eri",
+  "hosts": {
+    "hermes": {
+      "enabled": true,
+      "aiPeer": "hermes",
+      "workspace": "hermes",
+      "peerName": "eri",
+      "recallMode": "tools",
+      "observation": {
+        "user": { "observeMe": true, "observeOthers": false },
+        "ai": { "observeMe": true, "observeOthers": true }
+      }
+    },
+    "hermes.writer": {
+      "enabled": true,
+      "aiPeer": "writer",
+      "workspace": "hermes",
+      "peerName": "eri"
+    }
+  },
+  "sessions": {
+    "/home/user/myproject": "myproject-main"
+  }
+}</code></pre>
+</details>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> OpenViking</h2>
+<p>پایگاه‌دادهٔ زمینهٔ شرکت Volcengine ‏(ByteDance) با سلسله‌مراتب دانش به سبک فایل‌سیستم، بازیابی طبقه‌بندی‌شده و استخراج خودکار حافظه در ۶ دسته.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th></th></tr></thead>
+<tbody>
+<tr><td><b>بهترین برای</b></td><td>مدیریت دانش خودمیزبان با مرور ساختاریافته</td></tr>
+<tr><td><b>نیازمندی‌ها</b></td><td>OpenViking مقداردهی اولیه، اعتبارسنجی‌شده و درحال‌اجرا</td></tr>
+<tr><td><b>ذخیره‌سازی داده</b></td><td>خودمیزبان ‏(محلی یا کلود)</td></tr>
+<tr><td><b>هزینه</b></td><td>رایگان ‏(متن‌باز، ‏AGPL-3.0)</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>ابزارها ‏(۶):</b> ‏<code>viking_search</code> ‏(جستجوی معنایی)، ‏<code>viking_read</code> ‏(طبقه‌بندی: abstract/overview/full)، ‏<code>viking_browse</code> ‏(ناوبری فایل‌سیستمی)، ‏<code>viking_remember</code> ‏(ذخیرهٔ حقایق)، ‏<code>viking_forget</code> ‏(حذف فایل حافظه با URI دقیق ‏viking://)، ‏<code>viking_add_resource</code> ‏(ورودی‌گیری URL/اسناد)</p>
+<p><b>راه‌اندازی:</b></p>
+<div class="codebox"><pre><code># Prepare OpenViking first
+openviking-server init
+openviking-server doctor
+openviking-server
+
+# Then configure Hermes
+hermes memory setup    # select "openviking"
+# Or manually:
+hermes config set memory.provider openviking</code></pre></div>
+<p>‏<code>hermes memory setup</code> می‌تواند مقادیر اتصال را از ‏<code>~/.openviking/ovcli.conf</code> دوباره استفاده یا کپی کند. راه‌اندازی دستی از فایل <code>.env</code> پروفایل فعال استفاده می‌کند؛ برای پروفایل پیش‌فرض همان ‏<code>~/.hermes/.env</code> است و برای پروفایل‌های نام‌دار ‏<code>~/.hermes/profiles/&lt;profile&gt;/.env</code>.</p>
+<pre dir="ltr"><code>OPENVIKING_ENDPOINT=http://127.0.0.1:1933
+# OPENVIKING_API_KEY=...
+# OPENVIKING_ACCOUNT=default
+# OPENVIKING_USER=default
+# OPENVIKING_AGENT=hermes</code></pre>
+<p>تنظیمات سرور OpenViking در ‏ov.conf زندگی می‌کنند ‏(<code>--config</code>، ‏<code>OPENVIKING_CONFIG_FILE</code> یا ‏<code>~/.openviking/ov.conf</code>). مقادیر اتصال کلاینت در ‏ovcli.conf است ‏(<code>OPENVIKING_CLI_CONFIG_FILE</code> یا ‏<code>~/.openviking/ovcli.conf</code>).</p>
+<p><b>قابلیت‌های کلیدی:</b></p>
+<ul>
+  <li>بارگذاری زمینهٔ طبقه‌بندی‌شده: ‏L0 ‏(~۱۰۰ توکن) ← L1 ‏(~۲ هزار) ← L2 ‏(کامل)</li>
+  <li>استخراج خودکار حافظه هنگام commit ی نشست ‏(پروفایل، ترجیحات، موجودیت‌ها، رویدادها، موارد، الگوها)</li>
+  <li>طرح URI ی ‏<code>viking://</code> برای مرور سلسله‌مراتبی دانش</li>
+</ul>
+<p>‏<code>OPENVIKING_ACCOUNT</code> و ‏<code>OPENVIKING_USER</code> برای حالت محلی/مورد-اعتماد به کار می‌روند. ‏<code>OPENVIKING_AGENT</code> شناسهٔ peer ی هرمس در OpenViking برای حافظه‌های مخصوص-peer است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> Mem0</h2>
+<p>استخراج واقعیت با LLM سمت-سرور همراه جستجوی معنایی، reranking و حذف تکرار خودکار. سه حالت اتصال: <b>Platform</b> ‏(Mem0 Cloud)، <b>داشبورد خودمیزبان</b> ‏(سرور Mem0 که با Docker اجرا می‌کنید) و <b>OSS</b> ‏(Mem0 درون-پروسه‌ای با LLM و vector store خودتان).</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th></th></tr></thead>
+<tbody>
+<tr><td><b>بهترین برای</b></td><td>مدیریت حافظه بدون-دست‌کاری — Mem0 استخراج را خودکار انجام می‌دهد</td></tr>
+<tr><td><b>نیازمندی‌ها</b></td><td>‏<code>pip install mem0ai</code> + کلید API ‏(platform)، یک سرور Mem0 درحال‌اجرا ‏(خودمیزبان) یا LLM + vector store ‏(OSS)</td></tr>
+<tr><td><b>ذخیره‌سازی داده</b></td><td>Mem0 Cloud ‏(platform)، سرور Mem0 خودتان ‏(خودمیزبان) یا درون-پروسه‌ای ‏(OSS)</td></tr>
+<tr><td><b>هزینه</b></td><td>قیمت‌گذاری Mem0 ‏(platform) / رایگان ‏(خودمیزبان یا OSS)</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>ابزارها ‏(۴):</b> ‏<code>mem0_search</code> ‏(جستجوی معنایی؛ reranking اختیاری فقط در حالت platform، پیش‌فرض خاموش)، ‏<code>mem0_add</code> ‏(ذخیرهٔ واقعیت‌ها verbatim)، ‏<code>mem0_update</code> ‏(به‌روزرسانی با ID)، ‏<code>mem0_delete</code> ‏(حذف با ID)</p>
+<p><b>راه‌اندازی ‏(Platform):</b></p>
+<div class="codebox"><pre><code>hermes memory setup    # select "mem0" → "Platform"
+# Or manually:
+hermes config set memory.provider mem0
+echo "MEM0_API_KEY=your-key" >> ~/.hermes/.env</code></pre></div>
+<p><b>راه‌اندازی ‏(OSS):</b></p>
+<div class="codebox"><pre><code>hermes memory setup    # select "mem0" → "Open Source (self-hosted)"
+# Or via flags:
+hermes memory setup mem0 --mode oss --oss-llm openai --oss-llm-key sk-... --oss-vector qdrant</code></pre></div>
+<p>پیش‌نمایش بدون نوشتن فایل:</p>
+<div class="codebox"><pre><code>hermes memory setup mem0 --mode oss --oss-llm-key sk-... --dry-run</code></pre></div>
+<p><b>راه‌اندازی ‏(داشبورد خودمیزبان):</b> اتصال به سرور Mem0 ای که با Docker اجرا می‌کنید ‏(REST API ی داشبورد):</p>
+<div class="codebox"><pre><code>hermes memory setup    # select "mem0" → "Self-hosted server"
+# Or via flags:
+hermes memory setup mem0 --mode selfhosted --host http://localhost:8888 --api-key your-admin-api-key</code></pre></div>
+<p>یا دستی پیکربندی کنید — یا به‌صورت متغیر محیطی:</p>
+<div class="codebox"><pre><code>echo "MEM0_HOST=http://localhost:8888" >> ~/.hermes/.env
+echo "MEM0_API_KEY=your-admin-api-key" >> ~/.hermes/.env</code></pre></div>
+<p>یا در ‏mem0.json:</p>
+<pre dir="ltr"><code>{ "host": "http://localhost:8888", "api_key": "your-admin-api-key" }</code></pre>
+<p>پلاگین با ‏<code>X-API-Key</code> احراز هویت و از مسیرهای ‏<code>/search</code>/<code>/memories</code> سرور استفاده می‌کند. ‏<code>api_key</code> اختیاری است ‏(فقط برای سرورهای ‏AUTH_DISABLED حذفش کنید). ‏<code>mode: oss</code> ست نکنید — بر host مقدم می‌شود.</p>
+<p><b>Config:</b> ‏<code>$HERMES_HOME/mem0.json</code> ‏(تنظیمات رفتاری). فقط secret ی ‏<code>MEM0_API_KEY</code> جای آن در ‏<code>~/.hermes/.env</code> است.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>کلید</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>mode</code></td><td><code>platform</code></td><td>‏<code>platform</code> ‏(Mem0 Cloud) یا ‏<code>oss</code> ‏(خود-مدیریت، درون-پروسه‌ای)</td></tr>
+<tr><td><code>host</code></td><td>—</td><td>URL سرور Mem0 خودمیزبان ‏(داشبورد Docker). مسیریابی HTTP با ‏X-API-Key؛ با ‏<code>mode: oss</code> ترکیب نکنید</td></tr>
+<tr><td><code>user_id</code></td><td><code>hermes-user</code></td><td>شناسهٔ کاربر</td></tr>
+<tr><td><code>agent_id</code></td><td><code>hermes</code></td><td>شناسهٔ ایجنت</td></tr>
+<tr><td><code>rerank</code></td><td><code>false</code></td><td>Rerank کردن نتایج جستجو بر اساس مرتبط بودن ‏(فقط حالت platform)</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>ارائه‌دهندگان پشتیبانی‌شدهٔ OSS:</b></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>جزء</th><th>ارائه‌دهنده‌ها</th></tr></thead>
+<tbody>
+<tr><td>LLM</td><td>openai، ‏ollama</td></tr>
+<tr><td>Embedder</td><td>openai، ‏ollama</td></tr>
+<tr><td>Vector Store</td><td>qdrant ‏(محلی/سرور)، ‏pgvector</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>تعویض حالت:</b> ‏<code>hermes memory setup mem0 --mode &lt;platform|selfhosted|oss&gt;</code> را دوباره اجرا کنید یا مستقیماً mem0.json را ویرایش کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> Hindsight</h2>
+<p>حافظهٔ بلندمدت با گراف دانش، حل موجودیت و بازیابی چند-استراتژی. ابزار <code>hindsight_reflect</code> ترکیب بین-حافظه‌ای را فراهم می‌کند که هیچ ارائه‌دهندهٔ دیگری ندارد. نوبت‌های کامل گفتگو ‏(شامل فراخوانی ابزارها) را با ردیابی سندِ سطح-نشست خودکار نگه می‌دارد.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th></th></tr></thead>
+<tbody>
+<tr><td><b>بهترین برای</b></td><td>فراخوانی مبتنی-بر-گراف-دانش با روابط موجودیت‌ها</td></tr>
+<tr><td><b>نیازمندی‌ها</b></td><td>کلود: کلید API از ‏<a href="https://ui.hindsight.vectorize.io" target="_blank" rel="noopener">ui.hindsight.vectorize.io</a>. محلی: کلید API ی LLM ‏(OpenAI، ‏Groq، ‏OpenRouter و…)</td></tr>
+<tr><td><b>ذخیره‌سازی داده</b></td><td>Hindsight Cloud یا PostgreSQL ی embedded محلی</td></tr>
+<tr><td><b>هزینه</b></td><td>قیمت‌گذاری Hindsight ‏(کلود) یا رایگان ‏(محلی)</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>ابزارها:</b> ‏<code>hindsight_retain</code> ‏(ذخیره با استخراج موجودیت)، ‏<code>hindsight_recall</code> ‏(جستجوی چند-استراتژی)، ‏<code>hindsight_reflect</code> ‏(ترکیب بین-حافظه‌ای)</p>
+<p><b>راه‌اندازی:</b></p>
+<div class="codebox"><pre><code>hermes memory setup    # select "hindsight"
+# Or manually:
+hermes config set memory.provider hindsight
+echo "HINDSIGHT_API_KEY=your-key" >> ~/.hermes/.env</code></pre></div>
+<p>ویزارد راه‌اندازی وابستگی‌ها را خودکار نصب و فقط چیزهای لازم حالت انتخابی را نصب می‌کند ‏(<code>hindsight-client</code> برای کلود، ‏<code>hindsight-all</code> برای محلی). نیازمند ‏<code>hindsight-client ≥ 0.4.22</code> است ‏(اگر قدیمی باشد موقع شروع نشست خودکار ارتقا می‌یابد).</p>
+<p><b>UI حالت محلی:</b> ‏<code>hindsight-embed -p hermes ui start</code></p>
+<p><b>Config:</b> ‏<code>$HERMES_HOME/hindsight/config.json</code></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>کلید</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>mode</code></td><td><code>cloud</code></td><td>‏<code>cloud</code> یا ‏<code>local</code></td></tr>
+<tr><td><code>bank_id</code></td><td><code>hermes</code></td><td>شناسهٔ بانک حافظه</td></tr>
+<tr><td><code>recall_budget</code></td><td><code>mid</code></td><td>عمق فراخوانی: ‏<code>low</code>/<code>mid</code>/<code>high</code></td></tr>
+<tr><td><code>memory_mode</code></td><td><code>hybrid</code></td><td>‏<code>hybrid</code> ‏(زمینه + ابزارها)، ‏<code>context</code> ‏(فقط خود-تزریق)، ‏<code>tools</code> ‏(فقط ابزارها)</td></tr>
+<tr><td><code>auto_retain</code></td><td><code>true</code></td><td>ماندگاری خودکار نوبت‌های گفتگو</td></tr>
+<tr><td><code>auto_recall</code></td><td><code>true</code></td><td>فراخوانی خودکار حافظه‌ها قبل از هر نوبت</td></tr>
+<tr><td><code>retain_async</code></td><td><code>true</code></td><td>پردازش async ی retain روی سرور</td></tr>
+<tr><td><code>retain_context</code></td><td><code>conversation between Hermes Agent and the User</code></td><td>برچسب زمینه برای حافظه‌های retained</td></tr>
+<tr><td><code>retain_tags</code></td><td>—</td><td>تگ‌های پیش‌فرض روی حافظه‌های retained؛ با تگ‌های per-call ابزار ادغام می‌شود</td></tr>
+<tr><td><code>retain_source</code></td><td>—</td><td>‏<code>metadata.source</code> اختیاری الصاقی به حافظه‌های retained</td></tr>
+<tr><td><code>retain_user_prefix</code></td><td><code>User</code></td><td>برچسب قبل از نوبت‌های کاربر در transcript های auto-retained</td></tr>
+<tr><td><code>retain_assistant_prefix</code></td><td><code>Assistant</code></td><td>برچسب قبل از نوبت‌های دستیار در transcript های auto-retained</td></tr>
+<tr><td><code>recall_tags</code></td><td>—</td><td>تگ‌هایی که فراخوانی رویشان فیلتر کند</td></tr>
+</tbody>
+</table>
+</div>
+<p>مرجع کامل پیکربندی را در <a href="https://github.com/NousResearch/hermes-agent/blob/main/plugins/memory/hindsight/README.md" target="_blank" rel="noopener">README ی پلاگین</a> ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> Holographic</h2>
+<p>انبار واقعیت SQLite محلی با جستجوی تمام‌متن FTS5، امتیازدهی اعتماد و ‏HRR ‏(بازنمایی‌های کاهش‌یافتهٔ هولوگرافیک) برای کوئری‌های جبری ترکیب‌شدنی.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th></th></tr></thead>
+<tbody>
+<tr><td><b>بهترین برای</b></td><td>حافظه فقط-محلی با بازیابی پیشرفته، بدون وابستگی خارجی</td></tr>
+<tr><td><b>نیازمندی‌ها</b></td><td>هیچ ‏(SQLite همیشه موجوده). NumPy اختیاری برای جبر HRR.</td></tr>
+<tr><td><b>ذخیره‌سازی داده</b></td><td>SQLite محلی</td></tr>
+<tr><td><b>هزینه</b></td><td>رایگان</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>ابزارها:</b> ‏<code>fact_store</code> ‏(۹ اقدام: add، ‏search، ‏probe، ‏related، ‏reason، ‏contradict، ‏update، ‏remove، ‏list)، ‏<code>fact_feedback</code> ‏(امتیاز مفید/غیرمفید که امتیازهای اعتماد را آموزش می‌دهد)</p>
+<p><b>راه‌اندازی:</b></p>
+<div class="codebox"><pre><code>hermes memory setup    # select "holographic"
+# Or manually:
+hermes config set memory.provider holographic</code></pre></div>
+<p><b>Config:</b> ‏config.yaml زیر ‏<code>plugins.hermes-memory-store</code></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>کلید</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>db_path</code></td><td><code>$HERMES_HOME/memory_store.db</code></td><td>مسیر پایگاه‌دادهٔ SQLite</td></tr>
+<tr><td><code>auto_extract</code></td><td><code>false</code></td><td>استخراج خودکار واقعیت‌ها در پایان نشست</td></tr>
+<tr><td><code>default_trust</code></td><td><code>0.5</code></td><td>امتیاز اعتماد پیش‌فرض ‏(۰٫۰–۱٫۰)</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>قابلیت‌های منحصربه‌فرد:</b></p>
+<ul>
+  <li>‏<code>probe</code> — فراخوانی جبری مخصوص-موجودیت ‏(همهٔ حقایق دربارهٔ یک شخص/چیز)</li>
+  <li>‏<code>reason</code> — کوئری‌های AND ترکیب‌شدنی بین چند موجودیت</li>
+  <li>‏<code>contradict</code> — آشکارسازی خودکار حقایق متعارض</li>
+  <li>امتیازدهی اعتماد با بازخورد نامتقارن ‏(‏+۰٫۰۵ مفید / −۰٫۱۰ غیرمفید)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> RetainDB</h2>
+<p>API ی حافظهٔ ابری با جستجوی هیبریدی ‏(Vector + BM25 + Reranking)، ۷ نوع حافظه و فشرده‌سازی دلتا.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th></th></tr></thead>
+<tbody>
+<tr><td><b>بهترین برای</b></td><td>تیم‌هایی که از قبل از زیرساخت RetainDB استفاده می‌کنند</td></tr>
+<tr><td><b>نیازمندی‌ها</b></td><td>حساب RetainDB + کلید API</td></tr>
+<tr><td><b>ذخیره‌سازی داده</b></td><td>RetainDB Cloud</td></tr>
+<tr><td><b>هزینه</b></td><td>‏۲۰ دلار در ماه</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>ابزارها ‏(۱۰):</b> ‏<code>retaindb_profile</code> ‏(پروفایل کاربر)، ‏<code>retaindb_search</code> ‏(جستجوی معنایی)، ‏<code>retaindb_context</code> ‏(زمینهٔ مرتبط-با-تسک)، ‏<code>retaindb_remember</code> ‏(ذخیره با نوع + اهمیت)، ‏<code>retaindb_forget</code> ‏(حذف حافظه‌ها)؛ به‌علاوهٔ ابزارهای فایل: ‏<code>retaindb_upload_file</code>، ‏<code>retaindb_list_files</code>، ‏<code>retaindb_read_file</code>، ‏<code>retaindb_ingest_file</code>، ‏<code>retaindb_delete_file</code></p>
+<p><b>راه‌اندازی:</b></p>
+<div class="codebox"><pre><code>hermes memory setup    # select "retaindb"
+# Or manually:
+hermes config set memory.provider retaindb
+echo "RETAINDB_API_KEY=your-key" >> ~/.hermes/.env</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> ByteRover</h2>
+<p>حافظهٔ پایدار از طریق CLI ی ‏<code>brv</code> — درخت دانش سلسله‌مراتبی با بازیابی طبقه‌بندی‌شده ‏(متن فازی ← جستجوی رانده-با-LLM). محلی-اول با sync ی ابری اختیاری.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th></th></tr></thead>
+<tbody>
+<tr><td><b>بهترین برای</b></td><td>توسعه‌دهنده‌هایی که حافظهٔ قابل‌حمل و محلی-اول با CLI می‌خواهند</td></tr>
+<tr><td><b>نیازمندی‌ها</b></td><td>CLI ی ByteRover ‏(<code>npm install -g byterover-cli</code> یا <a href="https://byterover.dev" target="_blank" rel="noopener">اسکریپت نصب</a>)</td></tr>
+<tr><td><b>ذخیره‌سازی داده</b></td><td>محلی ‏(پیش‌فرض) یا ByteRover Cloud ‏(sync اختیاری)</td></tr>
+<tr><td><b>هزینه</b></td><td>رایگان ‏(محلی) یا قیمت‌گذاری ByteRover ‏(کلود)</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>ابزارها:</b> ‏<code>brv_query</code> ‏(جستجوی درخت دانش)، ‏<code>brv_curate</code> ‏(ذخیرهٔ حقایق/تصمیمات/الگوها)، ‏<code>brv_status</code> ‏(نسخهٔ CLI + آمار درخت)</p>
+<p><b>راه‌اندازی:</b></p>
+<div class="codebox"><pre><code># Install the CLI first
+curl -fsSL https://byterover.dev/install.sh | sh
+
+# Then configure Hermes
+hermes memory setup    # select "byterover"
+# Or manually:
+hermes config set memory.provider byterover</code></pre></div>
+<p><b>قابلیت‌های کلیدی:</b></p>
+<ul>
+  <li>استخراج خودکار پیش-از-فشرده‌سازی ‏(بینش‌ها را قبل از دور انداختن توسط فشرده‌سازی زمینه ذخیره می‌کند)</li>
+  <li>درخت دانش ذخیره‌شده در ‏<code>$HERMES_HOME/byterover/</code> ‏(مخصوص-پروفایل)</li>
+  <li>sync ابری گواهی SOC2 Type II ‏(اختیاری)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> Supermemory</h2>
+<p>حافظهٔ بلندمدت معنایی با فراخوانی پروفایل، جستجوی معنایی، ابزارهای حافظهٔ صریح و ingest گفتگو در پایان نشست از طریق graph API ی Supermemory.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th></th></tr></thead>
+<tbody>
+<tr><td><b>بهترین برای</b></td><td>فراخوانی معنایی با پروفایل‌سازی کاربر و ساخت گراف سطح-نشست</td></tr>
+<tr><td><b>نیازمندی‌ها</b></td><td>‏<code>pip install supermemory</code> + ‏<a href="http://app.supermemory.ai/integrations?connect=hermes" target="_blank" rel="noopener">کلید API ی کلود</a> یا یک <a href="https://supermemory.ai/docs/self-hosting/overview" target="_blank" rel="noopener">سرور خودمیزبان</a></td></tr>
+<tr><td><b>ذخیره‌سازی داده</b></td><td>Supermemory Cloud یا خودمیزبان</td></tr>
+<tr><td><b>هزینه</b></td><td>قیمت‌گذاری Supermemory ‏(کلود) / رایگان ‏(خودمیزبان)</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>ابزارها:</b> ‏<code>supermemory_store</code> ‏(ذخیرهٔ حافظه‌های صریح)، ‏<code>supermemory_search</code> ‏(جستجوی شباهت معنایی)، ‏<code>supermemory_forget</code> ‏(فراموشی با ID یا کوئری بهترین-تطبیق)، ‏<code>supermemory_profile</code> ‏(پروفایل پایدار + زمینهٔ اخیر)</p>
+<p><b>راه‌اندازی:</b></p>
+<div class="codebox"><pre><code>hermes memory setup    # select "supermemory"
+# Or manually:
+hermes config set memory.provider supermemory
+echo 'SUPERMEMORY_API_KEY=***' >> ~/.hermes/.env</code></pre></div>
+<p>راه‌اندازی خودمیزبان:</p>
+<div class="codebox"><pre><code>npx supermemory local</code></pre></div>
+<p>قبل از اجرای ‏<code>hermes memory setup</code> مقدار ‏<code>base_url</code> را در ‏<code>$HERMES_HOME/supermemory.json</code> ست کنید:</p>
+<pre dir="ltr"><code>{
+  "base_url": "http://localhost:6767"
+}</code></pre>
+<p>سپس ‏<code>hermes memory setup</code> را اجرا و کلید API ی چاپ‌شده توسط سرور محلی را وارد کنید. پیکربندی زودهنگام نقطهٔ پایانی تضمین می‌کند probe ی اتصالِ setup هم محلی بماند.</p>
+<p><b>Config:</b> ‏<code>$HERMES_HOME/supermemory.json</code></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>کلید</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>base_url</code></td><td><code>https://api.supermemory.ai</code></td><td>نقطهٔ پایانی API برای Supermemory میزبانی‌شده یا خودمیزبان. بر ‏<code>SUPERMEMORY_BASE_URL</code> مقدم است.</td></tr>
+<tr><td><code>container_tag</code></td><td><code>hermes</code></td><td>تگ کانتینر برای جستجو و نوشتن‌ها. قالب ‏<code>{identity}</code> برای تگ‌های مخصوص-پروفایل پشتیبانی می‌شود.</td></tr>
+<tr><td><code>auto_recall</code></td><td><code>true</code></td><td>تزریق زمینهٔ حافظهٔ مرتبط قبل از نوبت‌ها</td></tr>
+<tr><td><code>auto_capture</code></td><td><code>true</code></td><td>ذخیرهٔ نوبت‌های پاک‌سازی‌شدهٔ کاربر-دستیار بعد از هر پاسخ</td></tr>
+<tr><td><code>max_recall_results</code></td><td><code>10</code></td><td>حداکثر آیتم‌های recalled برای فرمت شدن در زمینه</td></tr>
+<tr><td><code>profile_frequency</code></td><td><code>50</code></td><td>حقایق پروفایل روی نوبت اول و هر N نوبت لحاظ شود</td></tr>
+<tr><td><code>capture_mode</code></td><td><code>all</code></td><td>رد شدن نوبت‌های خرد یا بی‌اهمیت به‌طور پیش‌فرض</td></tr>
+<tr><td><code>search_mode</code></td><td><code>hybrid</code></td><td>حالت جستجو: ‏<code>hybrid</code>، ‏<code>memories</code> یا ‏<code>documents</code></td></tr>
+<tr><td><code>api_timeout</code></td><td><code>5.0</code></td><td>timeout درخواست‌های SDK و ingest</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>متغیرهای محیطی:</b> ‏<code>SUPERMEMORY_API_KEY</code> ‏(الزامی)، ‏<code>SUPERMEMORY_BASE_URL</code> ‏(fallback سازگاری وقتی base_url پیکربندی نیست)، ‏<code>SUPERMEMORY_CONTAINER_TAG</code> ‏(بازنویسی config).</p>
+<p>اولویت base URL: ‏<code>supermemory.json</code> ← ‏<code>SUPERMEMORY_BASE_URL</code> ← ‏<code>https://api.supermemory.ai</code>. عملیات SDK، ‏probe های setup/status و ingest گفتگو همه از نقطهٔ پایانی حل‌شده استفاده می‌کنند.</p>
+<p><b>قابلیت‌های کلیدی:</b></p>
+<ul>
+  <li>fencing خودکار زمینه — حافظه‌های recalled را از نوبت‌های captured جدا می‌کند تا آلودگی بازگشتی حافظه پیش نیاید</li>
+  <li>ingest کل-نشست — کل گفتگو یک بار در مرزهای نشست فرستاده می‌شود</li>
+  <li>ingest گفتگو در پایان نشست ‏(به ‏<code>/v4/conversations</code>) برای پروفایل غنی‌تر + ساخت گراف در Supermemory</li>
+  <li>مسیریابی سر-تا-سر خودمیزبان — درخواست‌های SDK، ‏probe و ingest گفتگو از همان نقطهٔ پایانی پیکربندی‌شده استفاده می‌کنند</li>
+  <li>حقایق پروفایل روی نوبت اول و فواصل قابل‌پیکربندی تزریق می‌شود</li>
+  <li><b>کانتینرهای مخصوص-پروفایل</b> — از ‏<code>{identity}</code> در ‏container_tag استفاده کنید ‏(مثلاً <code>hermes-{identity}</code> ← ‏<code>hermes-coder</code>) تا حافظه‌ها per-profil هرمس ایزوله شوند</li>
+  <li><b>حالت چند-کانتینری</b> — با فهرست ‏<code>custom_containers</code> مقدار ‏<code>enable_custom_container_tags</code> را روشن کنید تا ایجنت بتواند بین کانتینرهای نام‌دار بخواند/بنویسد. عملیات خودکار روی کانتینر اصلی می‌مانند.</li>
+</ul>
+<details>
+<summary>نمونهٔ چند-کانتینری</summary>
+<pre dir="ltr"><code>{
+  "container_tag": "hermes",
+  "enable_custom_container_tags": true,
+  "custom_containers": ["project-alpha", "shared-knowledge"],
+  "custom_container_instructions": "Use project-alpha for coding context."
+}</code></pre>
+</details>
+<p><b>پشتیبانی:</b> ‏<a href="https://supermemory.link/discord" target="_blank" rel="noopener">Discord</a> · ‏<a href="mailto:support@supermemory.com">support@supermemory.com</a></p>
+<h3>Memori</h3>
+<p>حافظهٔ بلندمدت ساختاریافته با استفاده از Memori Cloud، capture پس‌زمینه‌ای نوبت‌های تکمیل‌شده، زمینهٔ نوبت آگاه-از-ابزار و ابزارهای recall صریح برای حقایق، خلاصه‌ها، سهمیه، ثبت‌نام و بازخورد.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th></th></tr></thead>
+<tbody>
+<tr><td><b>بهترین برای</b></td><td>recall تحت-کنترل-ایجنت با انتساب ساختاریافتهٔ پروژه و نشست</td></tr>
+<tr><td><b>نیازمندی‌ها</b></td><td>‏<code>pip install hermes-memori</code> + ‏<code>hermes-memori install</code> + ‏<a href="https://app.memorilabs.ai/signup" target="_blank" rel="noopener">کلید API ی Memori</a></td></tr>
+<tr><td><b>ذخیره‌سازی داده</b></td><td>Memori Cloud</td></tr>
+<tr><td><b>هزینه</b></td><td>قیمت‌گذاری Memori</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>ابزارها:</b> ‏<code>memori_recall</code> ‏(جستجوی حافظهٔ بلندمدت)، ‏<code>memori_recall_summary</code> ‏(زمینهٔ خلاصه‌شده)، ‏<code>memori_quota</code> ‏(مصرف/سهمیه)، ‏<code>memori_signup</code> ‏(درخواست ایمیل ثبت‌نام)، ‏<code>memori_feedback</code> ‏(ارسال بازخورد یکپارچه‌سازی)</p>
+<p><b>راه‌اندازی:</b></p>
+<div class="codebox"><pre><code>pip install hermes-memori
+hermes-memori install
+hermes config set memory.provider memori
+hermes memory setup</code></pre></div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> مقایسهٔ ارائه‌دهنده‌ها</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>ذخیره‌سازی</th><th>هزینه</th><th>ابزارها</th><th>وابستگی‌ها</th><th>قابلیت منحصربه‌فرد</th></tr></thead>
+<tbody>
+<tr><td><b>Honcho</b></td><td>Cloud</td><td>پولی</td><td>۵</td><td><code>honcho-ai</code></td><td>مدل‌سازی جدلی کاربر + زمینهٔ مخصوص-نشست</td></tr>
+<tr><td><b>OpenViking</b></td><td>خودمیزبان</td><td>رایگان</td><td>۶</td><td><code>openviking</code> + سرور</td><td>سلسله‌مراتب فایل‌سیستمی + بارگذاری طبقه‌بندی‌شده</td></tr>
+<tr><td><b>Mem0</b></td><td>Cloud/خودمیزبان</td><td>رایگان/پولی</td><td>۴</td><td><code>mem0ai</code></td><td>استخراج LLM سمت-سرور + حالت‌های خودمیزبان/OSS</td></tr>
+<tr><td><b>Hindsight</b></td><td>Cloud/محلی</td><td>رایگان/پولی</td><td>۳</td><td><code>hindsight-client</code></td><td>گراف دانش + ترکیب reflect</td></tr>
+<tr><td><b>Holographic</b></td><td>محلی</td><td>رایگان</td><td>۲</td><td>هیچ</td><td>جبر HRR + امتیاز اعتماد</td></tr>
+<tr><td><b>RetainDB</b></td><td>Cloud</td><td>۲۰$/ماه</td><td>۱۰</td><td><code>requests</code></td><td>فشرده‌سازی دلتا</td></tr>
+<tr><td><b>ByteRover</b></td><td>محلی/Cloud</td><td>رایگان/پولی</td><td>۳</td><td>CLI ی ‏<code>brv</code></td><td>استخراج پیش-از-فشرده‌سازی</td></tr>
+<tr><td><b>Supermemory</b></td><td>Cloud/خودمیزبان</td><td>رایگان/پولی</td><td>۴</td><td><code>supermemory</code></td><td>fencing ی زمینه + ingest گراف نشست + چند-کانتینری</td></tr>
+<tr><td><b>Memori</b></td><td>Cloud</td><td>رایگان/پولی</td><td>۵</td><td><code>hermes-memori</code></td><td>حافظهٔ آگاه-از-ابزار + recall ساختاریافته</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> ایزوله‌سازی پروفایل و ساخت ارائه‌دهندهٔ جدید</h2>
+<p>دادهٔ هر ارائه‌دهنده per-<a href="../profiles.html">پروفایل</a> ایزوله است:</p>
+<ul>
+  <li><b>ارائه‌دهنده‌های ذخیره‌سازی محلی</b> ‏(Holographic، ‏ByteRover) از مسیرهای ‏<code>$HERMES_HOME/</code> استفاده می‌کنند که per-profil متفاوت‌اند</li>
+  <li><b>ارائه‌دهنده‌های فایل-config</b> ‏(Honcho، ‏Mem0، ‏Hindsight، ‏Supermemory) config را در ‏<code>$HERMES_HOME/</code> نگه می‌دارند تا هر پروفایل اعتبارنامهٔ خودش را داشته باشد</li>
+  <li><b>ارائه‌دهنده‌های ابری</b> ‏(RetainDB) نام پروژهٔ مخصوص-پروفایل را خودکار مشتق می‌کنند</li>
+  <li><b>ارائه‌دهنده‌های متغیر-محیطی</b> ‏(OpenViking) از فایل ‏.env هر پروفایل پیکربندی می‌شوند</li>
+</ul>
+<p>برای ساختن ارائه‌دهندهٔ اختصاصی خودتان بخش <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/memory-provider-plugin" target="_blank" rel="noopener">راهنمای توسعه‌دهنده: پلاگین‌های ارائه‌دهندهٔ حافظه</a> را ببینید.</p>
+</section>
+
+<div class="pager">
+  <a href="computer-use.html"><span class="dir">→ قبلی</span><span class="ttl">کنترل کامپیوتر</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory-providers" target="_blank" rel="noopener">Memory Providers</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>
