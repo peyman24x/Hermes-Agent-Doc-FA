@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نمای کلی یکپارچه‌سازی‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/integrations" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>یکپارچه‌سازی‌ها<span class="sep">/</span><strong>نمای کلی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>یکپارچه‌سازی‌ها ‏(Integrations)</h1>
+<p>‏هرمس Agent برای استنتاج AI، سرورهای ابزار، گردش‌کارهای IDE، دسترسی برنامه‌نویسی‌شده و بیشتر به سیستم‌های بیرونی وصل می‌شود. این یکپارچه‌سازی‌ها گسترش می‌دهند که هرمس چه کارهایی بکند و کجا اجرا شود.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> ارائه‌دهندگان AI و مسیریابی</h2>
+<p>هرمس چندین ارائه‌دهندهٔ استنتاج AI را از جعبه پشتیبانی می‌کند. با hermes model تعاملی تنظیم کنید یا مستقیم در config.yaml بگذارید.</p>
+<ul>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/integrations/providers" target="_blank" rel="noopener">ارائه‌دهندگان AI</a></b> — OpenRouter، Anthropic، OpenAI، Google و هر نقطهٔ پایانی سازگار-با-OpenAI. هرمس قابلیت‌هایی مثل بینایی، streaming و مصرف ابزار را per-provider خودآشکار می‌کند.</li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/provider-routing" target="_blank" rel="noopener">مسیریابی ارائه‌دهنده</a></b> — کنترل ریزدانه بر اینکه کدام ارائه‌دهندگان زیرین درخواست‌های OpenRouter تان را هندل کنند. بهینه‌سازی برای هزینه، سرعت یا کیفیت با sorting، ‏whitelist، ‏blacklist و ترتیب اولویت صریح.</li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/fallback-providers" target="_blank" rel="noopener">ارائه‌دهندگان پشتیبان</a></b> — failover ی خودکار به ارائه‌دهندگان LLM ی پشتیبان وقتی مدل اصلی خطا می‌دهد؛ شامل fallback مدل اصلی و fallback مستقل تسک‌های کمکی برای بینایی، فشرده‌سازی و استخراج وب.</li>
+</ul>
+<div class="callout tip">
+  <div class="callout-title">💡 از همین‌جا شروع کنید</div>
+  <p>اگر فقط وقت راه‌اندازی یک یکپارچه‌سازی را دارید، <a href="https://hermes-agent.nousresearch.com/docs/integrations/nous-portal" target="_blank" rel="noopener">Nous Portal</a> را راه بیندازید — یک ورود OAuth بیش از ۳۰۰ مدل به‌علاوهٔ چهار ابزار Tool Gateway ‏(جستجوی وب، تولید تصویر، TTS و اتوماسیون مرورگر) را پوشش می‌دهد.</p>
+</div>
+<h3>سرورهای ابزار ‏(MCP)</h3>
+<ul>
+  <li><b><a href="../user-guide/features/mcp.html">سرورهای MCP</a></b> — هرمس را به سرورهای ابزار بیرونی از طریق Model Context Protocol وصل کنید. ابزارهای GitHub، پایگاه‌های داده، فایل‌سیستم‌ها، browser stack ها، API های داخلی و بیشتر را بدون نوشتن ابزار native ی هرمس داشته باشید. هر دو transport ی stdio و SSE، فیلترکردن per-server و ثبت resource/prompt آگاه-از-قابلیت پشتیبانی می‌شود.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> بک‌اندهای جستجوی وب</h2>
+<p>ابزارهای web_search و web_extract از هشت ارائه‌دهندهٔ بک‌اند پشتیبانی می‌کنند که با config.yaml یا hermes tools پیکربندی می‌شوند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>بک‌اند</th><th>متغیر محیطی</th><th>جستجو</th><th>استخراج</th><th>Crawl</th></tr></thead>
+<tbody>
+<tr><td><b>Firecrawl</b> ‏(پیش‌فرض)</td><td>FIRECRAWL_API_KEY</td><td>✔</td><td>✔</td><td>✔</td></tr>
+<tr><td><b>SearXNG</b></td><td>SEARXNG_URL</td><td>✔</td><td>—</td><td>—</td></tr>
+<tr><td><b>Brave</b> ‏(تیر رایگان)</td><td>BRAVE_SEARCH_API_KEY</td><td>✔</td><td>—</td><td>—</td></tr>
+<tr><td><b>DuckDuckGo</b> ‏(ddgs)</td><td>—</td><td>✔</td><td>—</td><td>—</td></tr>
+<tr><td><b>Tavily</b></td><td>TAVILY_API_KEY ‏(اختیاری)</td><td>✔</td><td>✔</td><td>—</td></tr>
+<tr><td><b>Exa</b></td><td>EXA_API_KEY</td><td>✔</td><td>✔</td><td>—</td></tr>
+<tr><td><b>Parallel</b></td><td>PARALLEL_API_KEY</td><td>✔</td><td>✔</td><td>—</td></tr>
+<tr><td><b>xAI</b></td><td>XAI_API_KEY</td><td>✔</td><td>—</td><td>—</td></tr>
+</tbody>
+</table>
+</div>
+<pre dir="ltr"><code>web:
+  backend: firecrawl    # firecrawl | searxng | brave-free | ddgs | tavily | exa | parallel | xai</code></pre>
+<p>اگر web.backend ست نباشد بک‌اند از هر کلید API موجود خودآشکار می‌شود. Firecrawl خودمیزبان هم با FIRECRAWL_API_URL پشتیبانی می‌شود. انتخاب Tavily در hermes tools بدون کلید کار می‌کند. جزئیات کامل: صفحهٔ <a href="../user-guide/features/web-search.html">جستجو و استخراج وب</a>.</p>
+<h3>اتوماسیون مرورگر</h3>
+<ul>
+  <li><b>Browserbase</b> — مرورگرهای ابری مدیریت‌شده با ابزارهای ضد-بات، حل CAPTCHA و پروکسی رزیدنشیال</li>
+  <li><b>Browser Use</b> — ارائه‌دهندهٔ جایگزین مرورگر ابری</li>
+  <li><b>CDP خانوادهٔ Chromium محلی</b> — اتصال به Chrome/Brave/Chromium/Edge ی در حال اجرا با ‎/browser connect‎</li>
+  <li><b>Chromium محلی</b> — مرورگر headless محلی از طریق CLI ی agent-browser</li>
+</ul>
+<p>راه‌اندازی و مصرف در صفحهٔ <a href="../user-guide/features/browser.html">اتوماسیون مرورگر</a>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> صدا و TTS</h2>
+<p>تبدیل متن-به-گفتار و گفتار-به-متن روی همهٔ پلتفرم‌های پیام‌رسانی:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>کیفیت</th><th>هزینه</th><th>کلید API</th></tr></thead>
+<tbody>
+<tr><td><b>Edge TTS</b> ‏(پیش‌فرض)</td><td>خوب</td><td>رایگان</td><td>لازم نیست</td></tr>
+<tr><td><b>ElevenLabs</b></td><td>عالی</td><td>پولی</td><td>ELEVENLABS_API_KEY</td></tr>
+<tr><td><b>OpenAI TTS</b></td><td>خوب</td><td>پولی</td><td>VOICE_TOOLS_OPENAI_KEY</td></tr>
+<tr><td><b>MiniMax</b></td><td>خوب</td><td>پولی</td><td>MINIMAX_API_KEY</td></tr>
+<tr><td><b>xAI TTS</b></td><td>خوب</td><td>پولی</td><td>XAI_API_KEY</td></tr>
+<tr><td><b>NeuTTS</b></td><td>خوب</td><td>رایگان</td><td>لازم نیست</td></tr>
+</tbody>
+</table>
+</div>
+<p>گفتار-به-متن از هشت ارائه‌دهنده پشتیبانی می‌کند: faster-whisper محلی ‏(رایگان، روی دستگاه)، wrapper فرمان محلی، ‏Groq، ‏OpenAI Whisper API، ‏Mistral، ‏xAI، ‏ElevenLabs Scribe و DeepInfra. رونویسی پیام صوتی روی تلگرام، دیسکورد، واتساپ و سایر پلتفرم‌ها کار می‌کند. جزئیات در صفحات <a href="../user-guide/features/tts.html">صدا و TTS</a> و ‏<a href="../user-guide/features/voice-mode.html">حالت صوتی</a>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> IDE، دسترسی برنامه‌نویسی‌شده، حافظه و پیام‌رسانی</h2>
+<ul>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/acp" target="_blank" rel="noopener">یکپارچگی IDE ‏(ACP)</a></b> — هرمس Agent داخل ویرایشگرهای سازگار-با-ACP مثل VS Code، ‏Zed و JetBrains. هرمس به‌عنوان سرور ACP اجرا و پیام‌های چت، فعالیت ابزار، diff های فایل و فرمان‌های ترمینال داخل ویرایشگرتان رندر می‌کند.</li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server" target="_blank" rel="noopener">سرور API</a></b> — هرمس را به‌عنوان نقطهٔ پایانی HTTP سازگار-با-OpenAI expose کنید. هر frontend ی حرف‌زنندهٔ قالب OpenAI — ‏Open WebUI، ‏LobeChat، ‏LibreChat، ‏NextChat، ‏ChatBox — وصل می‌شود و هرمس را با تول‌ست کاملش به‌عنوان backend مصرف می‌کند.</li>
+  <li><b><a href="../user-guide/features/memory.html">حافظهٔ داخلی</a></b> — حافظهٔ پایدار منتخب از طریق فایل‌های MEMORY.md و USER.md.</li>
+  <li><b><a href="../user-guide/features/memory-providers.html">ارائه‌دهندگان حافظه</a></b> — بک‌اندهای حافظهٔ بیرونی برای شخصی‌سازی عمیق‌تر: هشت ارائه‌دهنده پشتیبانی می‌شود.</li>
+</ul>
+<h4>پلتفرم‌های پیام‌رسانی</h4>
+<p>هرمس به‌عنوان بات گیت‌وی روی +۲۷ پلتفرم پیام‌رسانی اجرا می‌شود، همه از طریق همان زیرسیستم gateway:</p>
+<p style="line-height:2.1"><b><a href="../user-guide/messaging/telegram.html">تلگرام</a></b> · <b><a href="../user-guide/messaging/discord.html">دیسکورد</a></b> · <b><a href="../user-guide/messaging/slack.html">اسلک</a></b> · <b><a href="../user-guide/messaging/whatsapp.html">واتساپ</a></b> · <b><a href="../user-guide/messaging/signal.html">سیگنال</a></b> · <b><a href="../user-guide/messaging/matrix.html">ماتریکس</a></b> · <b><a href="../user-guide/messaging/mattermost.html">ماترموست</a></b> · <b><a href="../user-guide/messaging/email.html">ایمیل</a></b> · <b><a href="../user-guide/messaging/sms.html">SMS</a></b> · <b><a href="../user-guide/messaging/dingtalk.html">DingTalk</a></b> · <b><a href="../user-guide/messaging/feishu.html">Feishu/Lark</a></b> · <b><a href="../user-guide/messaging/wecom.html">WeCom</a></b> · <b><a href="../user-guide/messaging/wecom-callback.html">WeCom Callback</a></b> · <b><a href="../user-guide/messaging/weixin.html">Weixin</a></b> · <b><a href="../user-guide/messaging/bluebubbles.html">BlueBubbles</a></b> · <b><a href="../user-guide/messaging/buzz.html">Buzz</a></b> · <b><a href="../user-guide/messaging/qqbot.html">QQ Bot</a></b> · <b><a href="../user-guide/messaging/yuanbao.html">Yuanbao</a></b> · <b><a href="../user-guide/messaging/homeassistant.html">Home Assistant</a></b> · <b><a href="../user-guide/messaging/teams.html">Microsoft Teams</a></b> · <b><a href="../user-guide/messaging/teams-meetings.html">Teams Meetings</a></b> · <b><a href="../user-guide/messaging/msgraph-webhook.html">Microsoft Graph Webhook</a></b> · <b><a href="../user-guide/messaging/google_chat.html">گوگل‌چت</a></b> · <b><a href="../user-guide/messaging/line.html">LINE</a></b> · <b><a href="../user-guide/messaging/ntfy.html">ntfy</a></b> · <b><a href="../user-guide/messaging/simplex.html">SimpleX</a></b> · <b><a href="../user-guide/messaging/open-webui.html">Open WebUI</a></b> · <b><a href="../user-guide/messaging/webhooks.html">Webhooks</a></b></p>
+<p>جدول مقایسهٔ پلتفرم‌ها و راهنمای setup در <a href="../user-guide/messaging/index.html">نگاه کلی گیت‌وی پیام‌رسانی</a>.</p>
+<h4>لینک‌های اتصال سریع</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پلتفرم</th><th>لینک مستقیم</th><th>چه باز می‌کند</th></tr></thead>
+<tbody>
+<tr><td><b>تلگرام</b></td><td><a href="https://t.me/BotFather" target="_blank" rel="noopener">t.me/BotFather</a></td><td>گفتگو با BotFather — ‎/newbot بفرستید تا توکن بات ضرب شود</td></tr>
+<tr><td><b>دیسکورد</b></td><td><a href="https://discord.com/developers/applications?new_application=true" target="_blank" rel="noopener">developers.applications?new_application=true</a></td><td>Developer Portal با دیالوگ New Application از-قبل-باز</td></tr>
+<tr><td><b>اسلک</b></td><td><a href="https://api.slack.com/apps?new_app=1" target="_blank" rel="noopener">api.slack.com/apps?new_app=1</a></td><td>دیالوگ Create New App — From an app manifest را بردارید و manifest تولیدشده توسط hermes slack manifest --agent-view را paste کنید</td></tr>
+<tr><td><b>LINE</b></td><td><a href="https://developers.line.biz/console/" target="_blank" rel="noopener">developers.line.biz/console</a></td><td>کنسول توسعه‌دهندگان LINE برای ساخت کانال Messaging API</td></tr>
+<tr><td><b>Feishu/Lark</b></td><td><a href="https://open.feishu.cn/app" target="_blank" rel="noopener">open.feishu.cn/app</a></td><td>کنسول پلتفرم باز Feishu برای ساخت اپ سفارشی</td></tr>
+</tbody>
+</table>
+</div>
+<p>صفحهٔ setup هر پلتفرم توضیح می‌دهد بعد از رسیدن چه کنید.</p>
+<h4>فضاهای کاری مشارکتی و خانهٔ هوشمند</h4>
+<ul>
+  <li><b><a href="buzz.html">Buzz</a></b> — فضای کاری مبتنی-بر-Nostr شرکت Block برای انسان+ایجنت با سه مسیر یکپارچگی؛ صفحهٔ نمای کلی هر سه را مقایسه می‌کند.</li>
+  <li><b><a href="../user-guide/messaging/homeassistant.html">Home Assistant</a></b> — کنترل دستگاه‌های خانهٔ هوشمند با چهار ابزار اختصاصی؛ تول‌ست HA با ست شدن HASS_TOKEN خودکار فعال می‌شود.</li>
+</ul>
+<h4>پلاگین‌ها و آموزش</h4>
+<ul>
+  <li><b><a href="../user-guide/features/plugins.html">سیستم پلاگین</a></b> — گسترش هرمس با ابزارها، هوک‌های چرخهٔ حیات و فرمان‌های CLI بدون دست زدن به هسته.</li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت پلاگین</a></b> — راهنمای گام‌به‌گام ساخت پلاگین‌های هرمس.</li>
+  <li><b><a href="../user-guide/features/batch-processing.html">پردازش گروهی</a></b> — اجرای ایجنت روی صدها پرامپت موازی با خروجی trajectory ی ساختاریافتهٔ ShareGPT برای تولید دادهٔ آموزشی یا ارزیابی.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="buzz.html"><span class="dir">→ قبلی</span><span class="ttl">Buzz</span></a>
+  <a class="next" href="https://hermes-agent.nousresearch.com/docs/integrations/nous-portal" target="_blank" rel="noopener"><span class="dir">بعدی ←</span><span class="ttl">Nous Portal</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/integrations" target="_blank" rel="noopener">Integrations</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

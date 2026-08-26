@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buzz — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/integrations/buzz" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>یکپارچه‌سازی‌ها<span class="sep">/</span><strong>Buzz</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>یکپارچه‌سازی Buzz</h1>
+<p><a href="https://github.com/block/buzz" target="_blank" rel="noopener">Buzz</a> فضای کاری متن‌باز و قابل-میزبانیِ خود شرکت Block است که در آن انسان‌ها و ایجنت‌های AI کانال‌های یکسان را share می‌کنند. روی Nostr ساخته شده: هر پیام یک رویداد امضاشده روی relay ی است که شما مالکش هستید و هر شرکت‌کننده — انسان یا ایجنت — یک keypair است.</p>
+<p>هرمس به سه روش با Buzz یکپارچه می‌شود. بر اساس محل اجرای هرمس و کاری که از او می‌خواهید انتخاب کنید:</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> مقایسهٔ سه مسیر</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>① runtime دسکتاپ</th><th>② پل Relay ‏(ACP)</th><th>③ پلتفرم gateway ی native</th></tr></thead>
+<tbody>
+<tr><td><b>چه چیزی است</b></td><td>‏Buzz Desktop مقدار hermes را محلیاً به‌عنوان harness ی مدیریت‌شده spawn می‌کند</td><td>‏buzz-acp ی Buzz کانالی را با ACP روی stdio به hermes پل می‌زند</td><td>گیت‌وی هرمس به‌عنوان پلتفرم پیام‌رسانی درجه‌یک به Buzz می‌پیوندد</td></tr>
+<tr><td><b>هرمس کجا اجرا شود</b></td><td>روی دسکتاپ شما، launch شده توسط Buzz</td><td>روی سرور، launch شده توسط buzz-acp</td><td>در گیت‌وی خودتان کنار تلگرام/دیسکورد/…</td></tr>
+<tr><td><b>بهترین برای</b></td><td>امتحان هرمس داخل Buzz Desktop با صفر config</td><td>هویت ایجنتیِ میزبانی‌شده وقتی transport مال Buzz است</td><td>هرمس کامل: حافظه، مهارت‌ها، تأییدها، cron، نشست‌ها</td></tr>
+<tr><td><b>ورودی</b></td><td>ACP stdio</td><td>ACP stdio ‏(از طریق WebSocket ی relay)</td><td>Nostr WebSocket احراز‌شده-با-NIP-42 ‏(fallback ی poll)</td></tr>
+<tr><td><b>راه‌اندازی</b></td><td>کشف خودکار</td><td>متغیرهای env ی buzz-acp</td><td>‏hermes gateway setup ← Buzz</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> runtime ی مدیریت‌شدهٔ Buzz Desktop ‏(①)</h2>
+<p>‏Buzz Desktop مقدار هرمس را به‌عنوان runtime ی preset ارسال می‌کند. هرمس را راه عادی نصب کرده باشید، Settings ← Runtimes را باز کنید و هرمس خودکار ظاهر می‌شود — کشف، launcher ی hermes-acp را روی PATH ی login-shell تان حل می‌کند که نصب‌کننده در ~/.local/bin می‌نویسد ‏(و hermes update روی نصب‌های قدیمی self-heal می‌کند).</p>
+<p>setup کامل، عیب‌یابی و وضعیت امنیتی ‏(Buzz مجوزهای ابزار را auto-approve می‌کند — ایجنت‌ها را owner-only نگه دارید): بخش <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/acp#buzz-desktop" target="_blank" rel="noopener">ACP Host Integration ← Buzz Desktop</a>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پل Relay ‏(buzz-acp + ACP) ‏(②)</h2>
+<p>برای هویت هرمسِ میزبانی‌شده‌ای که به <i>کانال‌های</i> Buzz می‌پیوندد در حالی که harness ی خود Buzz مالک transport است:</p>
+<pre dir="ltr"><code>Buzz relay &lt;-- WebSocket --&gt; buzz-acp &lt;-- ACP over stdio --&gt; Hermes Agent</code></pre>
+<p>هرمسِ spawn‌شده همان config، credential ها، حافظه و مهارت‌های hermes ی همان host را مصرف می‌کند. ضرب کلید، کشف کانال، تلمتری فقط-owner ‏(BUZZ_ACP_RELAY_OBSERVER) و راهنمای مجوز headless: بخش <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/acp#buzz-channels-relay-bridge" target="_blank" rel="noopener">ACP Host Integration ← کانال‌های Buzz ‏(relay bridge)</a>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پلتفرم gateway ی native ‏(توصیه‌شده برای هرمس کامل) ‏(③)</h2>
+<p>پلاگین پلتفرمی bundled ی buzz مقدار Buzz را یک پلتفرم پیام‌رسانی عادی هرمس می‌کند — کانال‌ها، DM ها، gating ی mention، پاسخ‌های threaded، ری‌اکشن‌ها، تصاویر و تحویل cron ‏(deliver=buzz) — با تأییدها، حافظه و مدیریت نشست خودِ هرمس دست‌نخورده. ورودی از طریق WebSocket ی Nostr ی پایدارِ احراز‌شده-با-NIP-42 ‏(امضای BIP-340 بدون وابستگی) با fallback ی خودکار به polling ی CLI می‌آید؛ خروجی از طریق CLI ی buzz.</p>
+<pre dir="ltr"><code>hermes gateway setup   # pick Buzz</code></pre>
+<p>مرجع کامل پیکربندی ‏(env vars، config.yaml، حالت‌های transport، کنترل دسترسی): بخش <a href="../user-guide/messaging/buzz.html">پیام‌رسانی ← Buzz</a>.</p>
+<h3>کدام را استفاده کنم؟</h3>
+<ul>
+  <li><b>فقط دارید کاوش می‌کنید، کاربر Buzz Desktop</b> ← ① همان اول کار می‌کند.</li>
+  <li><b>relay ی اجتماعی اجرا می‌کنید و هویت ایجنتیِ مدیریت‌شده-توسط-Buzz می‌خواهید</b> ← ②.</li>
+  <li><b>از قبل هرمس ایجنت شماست و Buzz را کانال دیگری می‌خواهید</b> ← ③. عمیق‌ترین یکپارچگی است و همهٔ قابلیت‌های هرمس را نگه می‌دارد.</li>
+</ul>
+<p>①/② و ③ هویت‌ها و transport های متفاوتی دارند؛ ③ را با جفت‌کلید Nostr اختصاصی خودش اجرا کنید. adapter قفل scoped روی زوج relay+pubkey می‌گیرد تا دو پروفایل هرمس تصادفی یک هویت Buzz را نرانند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> سپاسگزاری</h2>
+<p>یکپارچه‌سازی Buzz با جامعه ساخته شد: ‏@SHL0MS ‏(PATH launcher + audit امنیتی Desktop)، ‏@NYTEMODEONLY ‏(مستندات relay-bridge)، ‏@rob-coco ‏(adapter ی پلتفرم)، ‏@ScaleLeanChris ‏(transport ی Nostr WebSocket + امضای NIP-42/BIP-340) و ‏@jethac ‏(تأیید چندایجنتی).</p>
+</section>
+
+<div class="pager">
+  <a href="../user-guide/messaging/buzz.html"><span class="dir">→ قبلی</span><span class="ttl">Buzz ‏(پیام‌رسانی)</span></a>
+  <a class="next" href="../index.html"><span class="dir">بعدی ←</span><span class="ttl">نمای کلی یکپارچه‌سازی‌ها</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/integrations/buzz" target="_blank" rel="noopener">Buzz Integration</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

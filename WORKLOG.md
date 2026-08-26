@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [hermes-agent-farsi.pages.dev](https://hermes-agent-farsi.pages.dev) ‏(اصلی) · [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) ‏(پشتیبان ماهانه) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۱۲ از ۲۰۷ صفحه (۵۴٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۱۴ از ۲۰۷ صفحه (۵۵٪)** |
 
 ---
 
@@ -559,6 +559,12 @@ hermes-docs-fa/
 - زنجیرهٔ pager: …multi-connection-desktop ← windows-native ← wsl-quickstart و …multi-connection-desktop ← multi-profile-gateways ← profile-distributions ← windows-native
 - پیشرفت: **۱۱۲ از ۲۰۷ صفحه فعال (۵۴٪)**
 
+### نشست ۷۰ — 2026-08-27 — 🔗 هاب یکپارچه‌سازی‌ها + Buzz ‏(یکپارچه‌سازی) — شروع گروه پنجم
+- ترجمه و انتشار «نمای کلی یکپارچه‌سازی‌ها» (۴ بخش): ارائه‌دهندگان AI و مسیریابی با tip ی Nous Portal، جدول ۸ بک‌اند جستجوی وب، اتوماسیون مرورگر، صدا و TTS، ACP و سرور API، حافظه و ارائه‌دهندگان، فهرست کامل ۲۸+ پلتفرم پیام‌رسانی به‌صورت لینک‌های فارسی به صفحات ترجمه‌شده، جدول لینک‌های اتصال سریع ‏(BotFather، دیسکورد new_application، اسلک manifest و…) و Buzz/HA/پلاگین‌ها/batch
+- ترجمه و انتشار «Buzz» (۵ بخش): مقایسهٔ سه مسیر یکپارچگی ‏(runtime دسکتاپ / relay bridge ی ACP / پلتفرم gateway ی native)، هر سه مسیر با ارجاع به صفحات ACP و messaging ی Buzz، راهنمای انتخاب و سپاسگزاری جامعه
+- زنجیرهٔ pager: buzz ‏(پیام‌رسانی) ← integrations/index ← nous-portal ‏(به‌زودی) و buzz-integration ← index
+- پیشرفت: **۱۱۴ از ۲۰۷ صفحه فعال (۵۵٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -677,6 +683,8 @@ hermes-docs-fa/
 | 110 | `user-guide/windows-wsl-quickstart.html` | راهنمای ویندوز (WSL2) |
 | 111 | `user-guide/multi-profile-gateways.html` | اجرای چند گیت‌وی هم‌زمان |
 | 112 | `user-guide/profile-distributions.html` | توزیع پروفایل (اشتراک ایجنت) |
+| 113 | `integrations/index.html` | نمای کلی یکپارچه‌سازی‌ها |
+| 114 | `integrations/buzz.html` | Buzz |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|
