@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ارائه‌دهندگان پشتیبان — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/fallback-providers" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>ارائه‌دهندگان پشتیبان</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>ارائه‌دهندگان پشتیبان ‏(Fallback Providers)</h1>
+<p>‏Hermes Agent سه لایهٔ تاب‌آوری دارد که نشست‌هایتان را وقتی ارائه‌دهنده‌ها مشکل پیدا می‌کنند سرپا نگه می‌دارد:</p>
+<ol>
+  <li><b><a href="credential-pools.html">استخرهای credential</a></b> — چرخش بین چند کلید API برای <i>همان</i> ارائه‌دهنده ‏(اول امتحان می‌شود)</li>
+  <li><b>Fallback ی مدل اصلی</b> — سوئیچ خودکار به جفت provider:model متفاوت وقتی مدل اصلی شکست می‌خورد</li>
+  <li><b>Fallback تسک‌های کمکی</b> — حل مستقل ارائه‌دهنده برای کارهای جانبی مثل بینایی، فشرده‌سازی و استخراج وب</li>
+</ol>
+<p>استخرهای credential همان-ارائه‌دهنده rotation را هندل می‌کنند ‏(مثلاً چند کلید OpenRouter). این صفحه fallback ی بین-ارائه‌دهنده‌ای را پوشش می‌دهد. هر دو اختیاری و مستقل‌اند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> Fallback مدل اصلی</h2>
+<p>وقتی ارائه‌دهندهٔ LLM اصلی‌تان به خطا بخورد — rate limit، ‏overload سرور، شکست auth، قطع اتصال — هرمس می‌تواند وسط نشست خودکار به یک زوج provider:model پشتیبان سوئیچ کند بدون از دست دادن گفتگو.</p>
+<h3>پیکربندی</h3>
+<p>ساده‌ترین مسیر مدیر تعاملی است:</p>
+<pre dir="ltr"><code>hermes fallback</code></pre>
+<p>‏hermes fallback همان انتخاب‌گر ارائه‌دهندهٔ hermes model را دوباره مصرف می‌کند — همان فهرست، همان پرامپت‌های credential، همان اعتبارسنجی. زیرفرمان‌های add، ‏list (مستعار ls)، ‏remove (مستعار rm) و clear را برای مدیریت زنجیره دارید. تغییرات زیر فهرست top-level ی fallback_providers در config.yaml ماندگار می‌شوند.</p>
+<p>اگر ترجیح می‌دهید YAML را دستی ویرایش کنید، فهرست top-level ی fallback_providers را به ~/.hermes/config.yaml اضافه کنید:</p>
+<pre dir="ltr"><code>fallback_providers:
+  - provider: openrouter
+    model: anthropic/claude-sonnet-4</code></pre>
+<p>هر ورودی هم provider هم model می‌خواهد؛ ورودی‌های فاقد هر کدام نادیده گرفته می‌شوند.</p>
+<div class="callout note">
+  <div class="callout-title">📌 fallback_model در برابر fallback_providers</div>
+  <p>‏fallback_providers ‏(جمع، لیستی) شکل فعلی config است و چند fallback را به‌ترتیب امتحان می‌کند. ‏fallback_model (مفرد) کلید legacy تک-fallback است — هرمس هنوز برای سازگاری محترمش می‌شمارد ولی hermes fallback کلید فعلی fallback_providers را می‌نویسد و config ی legacy را موقع نوشتن migrate می‌کند. ست بودن هر دو: fallback_providers اولویت دارد.</p>
+</div>
+<h3>ارائه‌دهندگان پشتیبانی‌شده</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>مقدار</th><th>نیازمندی‌ها</th></tr></thead>
+<tbody>
+<tr><td>AI Gateway</td><td><code>ai-gateway</code></td><td>AI_GATEWAY_API_KEY</td></tr>
+<tr><td>OpenRouter</td><td><code>openrouter</code></td><td>OPENROUTER_API_KEY</td></tr>
+<tr><td>Nous Portal</td><td><code>nous</code></td><td>hermes setup --portal ‏(تازه) یا hermes auth add nous ‏(OAuth)</td></tr>
+<tr><td>OpenAI Codex</td><td><code>openai-codex</code></td><td>hermes model ← اشتراک ChatGPT یا Codex ‏(OAuth)</td></tr>
+<tr><td>GitHub Copilot</td><td><code>copilot</code></td><td>COPILOT_GITHUB_TOKEN یا GH_TOKEN یا GITHUB_TOKEN</td></tr>
+<tr><td>GitHub Copilot ACP</td><td><code>copilot-acp</code></td><td>پروسهٔ بیرونی ‏(یکپارچگی ویرایشگر)</td></tr>
+<tr><td>Anthropic</td><td><code>anthropic</code></td><td>ANTHROPIC_API_KEY یا credential های Claude Code</td></tr>
+<tr><td>z.ai / GLM</td><td><code>zai</code></td><td>GLM_API_KEY</td></tr>
+<tr><td>Kimi / Moonshot</td><td><code>kimi-coding</code></td><td>KIMI_API_KEY</td></tr>
+<tr><td>MiniMax</td><td><code>minimax</code></td><td>MINIMAX_API_KEY</td></tr>
+<tr><td>MiniMax ‏(چین)</td><td><code>minimax-cn</code></td><td>MINIMAX_CN_API_KEY</td></tr>
+<tr><td>DeepSeek</td><td><code>deepseek</code></td><td>DEEPSEEK_API_KEY</td></tr>
+<tr><td>NVIDIA NIM</td><td><code>nvidia</code></td><td>NVIDIA_API_KEY ‏(اختیاری NVIDIA_BASE_URL)</td></tr>
+<tr><td>GMI Cloud</td><td><code>gmi</code></td><td>GMI_API_KEY ‏(اختیاری GMI_BASE_URL)</td></tr>
+<tr><td>Upstage Solar</td><td><code>upstage</code> ‏(مستعار solar)</td><td>UPSTAGE_API_KEY ‏(اختیاری UPSTAGE_BASE_URL)</td></tr>
+<tr><td>StepFun</td><td><code>stepfun</code></td><td>STEPFUN_API_KEY ‏(اختیاری STEPFUN_BASE_URL)</td></tr>
+<tr><td>Ollama Cloud</td><td><code>ollama-cloud</code></td><td>OLLAMA_API_KEY</td></tr>
+<tr><td>Google AI Studio</td><td><code>gemini</code></td><td>GOOGLE_API_KEY ‏(مستعار GEMINI_API_KEY)</td></tr>
+<tr><td>xAI ‏(Grok)</td><td><code>xai</code> ‏(مستعار grok)</td><td>XAI_API_KEY ‏(اختیاری XAI_BASE_URL)</td></tr>
+<tr><td>xAI Grok OAuth ‏(SuperGrok)</td><td><code>xai-oauth</code> ‏(مستعار grok-oauth)</td><td>ورود مرورگری با اشتراک SuperGrok</td></tr>
+<tr><td>AWS Bedrock</td><td><code>bedrock</code></td><td>auth ی استاندارد boto3 ‏(AWS_REGION + AWS_PROFILE یا AWS_ACCESS_KEY_ID)</td></tr>
+<tr><td>Qwen Portal ‏(OAuth)</td><td><code>qwen-oauth</code></td><td>OAuth ی Qwen Portal از طریق hermes model</td></tr>
+<tr><td>MiniMax ‏(OAuth)</td><td><code>minimax-oauth</code></td><td>OAuth ی MiniMax portal</td></tr>
+<tr><td>OpenCode Zen</td><td><code>opencode-zen</code></td><td>OPENCODE_ZEN_API_KEY</td></tr>
+<tr><td>CommandCode</td><td><code>commandcode</code></td><td>COMMANDCODE_API_KEY</td></tr>
+<tr><td>OpenCode Go</td><td><code>opencode-go</code></td><td>OPENCODE_GO_API_KEY</td></tr>
+<tr><td>OpenCode Free</td><td><code>opencode-free</code></td><td>— ‏(بدون کلید)</td></tr>
+<tr><td>Kilo Code</td><td><code>kilocode</code></td><td>KILOCODE_API_KEY</td></tr>
+<tr><td>Xiaomi MiMo</td><td><code>xiaomi</code></td><td>XIAOMI_API_KEY</td></tr>
+<tr><td>Arcee AI</td><td><code>arcee</code></td><td>ARCEEAI_API_KEY</td></tr>
+<tr><td>Alibaba / DashScope</td><td><code>alibaba</code></td><td>DASHSCOPE_API_KEY</td></tr>
+<tr><td>Alibaba Coding Plan</td><td><code>alibaba-coding-plan</code></td><td>ALIBABA_CODING_PLAN_API_KEY ‏(به DASHSCOPE_API_KEY برمی‌گردد)</td></tr>
+<tr><td>Kimi / Moonshot ‏(چین)</td><td><code>kimi-coding-cn</code></td><td>KIMI_CN_API_KEY</td></tr>
+<tr><td>Tencent TokenHub</td><td><code>tencent-tokenhub</code></td><td>TOKENHUB_API_KEY</td></tr>
+<tr><td>Microsoft Foundry</td><td><code>azure-foundry</code></td><td>AZURE_FOUNDRY_API_KEY + AZURE_FOUNDRY_BASE_URL</td></tr>
+<tr><td>LM Studio ‏(محلی)</td><td><code>lmstudio</code></td><td>LM_API_KEY ‏(یا هیچ برای محلی) + LM_BASE_URL</td></tr>
+<tr><td>Hugging Face</td><td><code>huggingface</code></td><td>HF_TOKEN</td></tr>
+<tr><td>نقطهٔ پایانی سفارشی</td><td><code>custom</code></td><td>base_url + key_env ‏(پایین را ببینید)</td></tr>
+</tbody>
+</table>
+</div>
+<h3>Fallback ی نقطهٔ پایانی سفارشی</h3>
+<pre dir="ltr"><code>fallback_providers:
+  - provider: custom
+    model: my-local-model
+    base_url: http://localhost:8000/v1
+    key_env: MY_LOCAL_KEY            # env var name containing the API key</code></pre>
+<h3>کی fallback فعال می‌شود</h3>
+<p>fallback خودکار وقتی فعال می‌شود که مدل اصلی با این‌ها شکست بخورد:</p>
+<ul>
+  <li><b>Rate limit ها</b> ‏(HTTP ۴۲۹) — بعد از اتمام تلاش‌های retry</li>
+  <li><b>خطاهای سرور</b> ‏(HTTP ۵۰۰، ۵۰۲، ۵۰۳) — بعد از اتمام retry ها</li>
+  <li><b>شکست‌های auth</b> ‏(HTTP ۴۰۱، ۴۰۳) — فوری ‏(retry کردن بی‌فایده است)</li>
+  <li><b>Not found</b> ‏(HTTP ۴۰۴) — فوری</li>
+  <li><b>پاسخ‌های نامعتبر</b> — وقتی API مرتباً پاسخ بدفرم یا خالی برگرداند</li>
+</ul>
+<p>وقتی فعال شود هرمس: credential های ارائه‌دهندهٔ fallback را حل، کلاینت API جدید می‌سازد، مدل/ارائه‌دهنده/کلاینت را in-place عوض، شمارندهٔ retry را reset و گفتگو را ادامه می‌دهد. سوئیچ یکپارچه است — تاریخچهٔ گفتگو، فراخوانی ابزار و زمینه حفظ می‌شود؛ ایجنت دقیقاً از همان‌جا ادامه می‌دهد فقط با مدلی متفاوت.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ fallback کش پرامپت را ریست می‌کند</div>
+  <p>کش‌های پرامپت به مدل ‏(و روی اکثر ارائه‌دهنده‌ها حساب) سرویس‌کنندهٔ درخواست کلید می‌خورند. وقتی fallback شلیک کند provider:model جدید هیچ پیشوند کش‌شده‌ای برای گفتگوی شما ندارد، پس درخواست بعدی کل تاریخچه را با قیمت کامل توکن ورودی بازمی‌خواند نه نرخ تخفیفی ‎۷۵–۹۰٪‎ کش. همین‌طور وقتی نوبت تمام و primary بازیابی شود — اولین درخواست روی primary هم re-read کامل است ‏(مگر TTL کش primary منقضی نشده باشد). اجتناب‌ناپذیر است — هزینهٔ زنده ماندن حین outage — ولی دلیل اینکه نشست بلندی که بین ارائه‌دهنده‌ها بالا-پایین می‌رود محسوساً گران‌تر از نشست ثابت است.</p>
+</div>
+<div class="callout info">
+  <div class="callout-title">ℹ️ Per-Turn نه Per-Session</div>
+  <p>fallback ‏<b>scope شده-به-نوبت</b> است: هر پیام جدید کاربر با primary بازیابی‌شده شروع می‌شود. اگر primary وسط نوبت شکست بخورد fallback فقط برای آن نوبت فعال می‌شود. در پیام بعدی هرمس دوباره primary را امتحان می‌کند. داخل یک نوبت حداکثر یک بار فعال می‌شود — شکست fallback هم یعنی هندل خطای عادی ‏(retry ها سپس پیام خطا). این از حلقه‌های failover آبشاری داخل نوبت جلوگیری و به primary هر نوبت شانس تازه می‌دهد.</p>
+  <p>retry ی per-turn ‏<b>reset-aware</b> است: وقتی credential های primary زمان ریست rate-limit گزارش کنند که هنوز نرسیده ‏(پنجره‌های اشتراکی مثل بلوک‌های ۵ ساعته Claude Pro/Max یا سقف‌های هفتگی Codex اینها را ساعت/روز گزارش می‌کنند)، هرمس retry ی محکوم‌به-شکست را skip و تا عبور ریست روی fallback می‌ماند — جلوگیری از دو سوئیچ بی‌فایده ‏(و دو invalidation کش) per-turn. لحظهٔ عبور ریست، نوبت بعد خودکار به primary برمی‌گردد. ‏429 های گذری بدون زمان ریست رفتار قبلی را دارند: cooldown کوتاه سپس retry هر نوبت.</p>
+</div>
+<h3>مثال‌ها</h3>
+<pre dir="ltr"><code># OpenRouter as fallback for Anthropic native:
+model:
+  provider: anthropic
+  default: claude-sonnet-4-6
+
+fallback_providers:
+  - provider: openrouter
+    model: anthropic/claude-sonnet-4
+
+# Nous Portal as fallback for OpenRouter:
+model:
+  provider: openrouter
+  default: anthropic/claude-opus-4
+
+fallback_providers:
+  - provider: nous
+    model: nous-hermes-3
+
+# Local model as fallback for cloud:
+fallback_providers:
+  - provider: custom
+    model: llama-3.1-70b
+    base_url: http://localhost:8000/v1
+    key_env: LOCAL_API_KEY
+
+# Codex OAuth as fallback:
+fallback_providers:
+  - provider: openai-codex
+    model: gpt-5.3-codex</code></pre>
+<h3>fallback کجا کار می‌کند</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>زمینه</th><th>fallback پشتیبانی می‌شود؟</th></tr></thead>
+<tbody>
+<tr><td>نشست‌های CLI</td><td>✔</td></tr>
+<tr><td>گیت‌وی پیام‌رسانی ‏(تلگرام، دیسکورد و…)</td><td>✔</td></tr>
+<tr><td>delegation ی زیرایجنت</td><td>✔ ‏(زیرایجنت‌ها زنجیرهٔ fallback والد را به ارث می‌برند)</td></tr>
+<tr><td>cron job ها</td><td>✔ ‏(ایجنت‌های cron fallback های پیکربندی‌شده را به ارث می‌برند)</td></tr>
+<tr><td>تسک‌های کمکی روی provider: auto</td><td>✔ ‏(fallback per-task سپس زنجیرهٔ اصلی قبل از کشف داخلی aux)</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>برای زنجیرهٔ fallback اصلی هیچ متغیر محیطی وجود ندارد — انحصاراً از طریق config.yaml یا hermes fallback پیکربندی کنید. عمدی است: پیکربندی fallback انتخابی آگاهانه است نه چیزی که export ی کهنه شل override کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> Fallback تسک‌های کمکی</h2>
+<p>هرمس برای کارهای جانبی مدل‌های سبک جدا مصرف می‌کند. هر تسک زنجیرهٔ حل ارائه‌دهندهٔ خودش را دارد که به‌عنوان سیستم fallback داخلی عمل می‌کند.</p>
+<h3>تسک‌های دارای حل مستقل ارائه‌دهنده</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>تسک</th><th>کارش</th><th>کلید config</th></tr></thead>
+<tbody>
+<tr><td>Vision</td><td>تحلیل تصویر، اسکرین‌شات مرورگر</td><td><code>auxiliary.vision</code></td></tr>
+<tr><td>Web Extract</td><td>خلاصه‌سازی صفحهٔ وب</td><td><code>auxiliary.web_extract</code></td></tr>
+<tr><td>Compression</td><td>خلاصه‌سازی فشرده‌سازی زمینه</td><td><code>auxiliary.compression</code></td></tr>
+<tr><td>Skills Hub</td><td>جستجو و کشف مهارت</td><td><code>auxiliary.skills_hub</code></td></tr>
+<tr><td>MCP</td><td>عملیات helper ی MCP</td><td><code>auxiliary.mcp</code></td></tr>
+<tr><td>Approval</td><td>طبقه‌بندی هوشمند تأیید فرمان</td><td><code>auxiliary.approval</code></td></tr>
+<tr><td>Title Generation</td><td>خلاصه‌های عنوان نشست</td><td><code>auxiliary.title_generation</code></td></tr>
+<tr><td>Triage Specifier</td><td>تبدیل تسک triage ی یک‌خطی به spec واقعی</td><td><code>auxiliary.triage_specifier</code></td></tr>
+</tbody>
+</table>
+</div>
+<h3>زنجیرهٔ خودآشکاری</h3>
+<p>وقتی provider ی تسک auto ‏(پیش‌فرض) باشد، هرمس اول main provider + main model را برای آن تسک کمکی امتحان می‌کند. غیرقابل‌رسید یا بعداً با خطای ظرفیت‌گونه شکست بخورد، قبل از زنجیرهٔ کشف داخلی به سیاست fallback ی پیکربندی‌شده-توسط-کاربر احترام می‌گذارد:</p>
+<pre dir="ltr"><code>Main provider + main model → auxiliary.&lt;task&gt;.fallback_chain →
+fallback_providers / fallback_model → built-in auxiliary discovery chain</code></pre>
+<p><b>زنجیرهٔ کشف متن داخلی:</b> ‏OpenRouter ← Nous Portal ← Custom endpoint ← Codex OAuth ← API-key providers ‏(z.ai، Kimi، MiniMax، Xiaomi MiMo، Hugging Face، Anthropic) ← تسلیم.<br><b>زنجیرهٔ بینایی داخلی:</b> ‏Main provider (اگر vision-capable) ← OpenRouter ← Nous Portal ← Codex OAuth ← Anthropic ← Custom endpoint ← تسلیم.</p>
+<h3>پیکربندی ارائه‌دهنده‌های کمکی</h3>
+<p>هر تسک مستقلاً در config.yaml پیکربندی می‌شود — الگوی یکسان provider/model/base_url برای همه؛ هر تسک می‌تواند fallback_chain اختصاصی اعلام کند و در نبودش provider: auto از زنجیرهٔ top-level استفاده می‌کند. فشرده‌سازی زیر auxiliary.compression است.</p>
+<h3>گزینه‌های ارائه‌دهنده برای تسک‌های کمکی</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>توضیح</th><th>نیازمندی‌ها</th></tr></thead>
+<tbody>
+<tr><td>"auto"</td><td>امتحان ارائه‌دهنده‌ها به ترتیب تا یکی کار کند ‏(پیش‌فرض)</td><td>حداقل یک ارائه‌دهندهٔ پیکربندی‌شده</td></tr>
+<tr><td>"openrouter"</td><td>اجبار OpenRouter</td><td>OPENROUTER_API_KEY</td></tr>
+<tr><td>"nous"</td><td>اجبار Nous Portal</td><td>hermes auth</td></tr>
+<tr><td>"codex"</td><td>اجبار Codex OAuth</td><td>اشتراک ChatGPT/Codex</td></tr>
+<tr><td>"main"</td><td>همان ارائه‌دهندهٔ ایجنت اصلی ‏(فقط تسک‌های کمکی)</td><td>ارائه‌دهندهٔ اصلی فعال</td></tr>
+<tr><td>"anthropic"</td><td>اجبار Anthropic native</td><td>ANTHROPIC_API_KEY یا Claude Code credentials</td></tr>
+</tbody>
+</table>
+</div>
+<p>این گزینه‌ها فقط برای auxiliary/compression/fallback_providers اند — مقدار "main" برای model.provider ی سطح-بالای شما معتبر نیست. برای نقاط پایانی سفارشی در بخش model از provider: custom استفاده کنید.</p>
+<h3>Override ی مستقیم نقطهٔ پایانی</h3>
+<p>برای هر تسک کمکی، ست کردن base_url حل ارائه‌دهنده را کلاً bypass و درخواست‌ها را مستقیم به آن endpoint می‌فرستد؛ api_key پیکربندی‌شده برای auth مصرف و در نبودش به OPENAI_API_KEY برمی‌گردد. برای endpoint های سفارشی OPENROUTER_API_KEY دوباره‌مصرف <b>نمی‌شود</b>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> Fallback ظرفیت، فشرده‌سازی، delegation و cron</h2>
+<h3>Fallback ظرفیت-خطای تسک‌های کمکی</h3>
+<p>با ست کردن ارائه‌دهندهٔ صریح کمکی ‏(مثل auxiliary.vision.provider: glm)، هرمس آن را انتخاب ترجیحی شما می‌داند — ولی اگر ارائه‌دهنده واقعاً نتواند درخواست را سرو کند به‌خاطر <b>خطای ظرفیت</b> ‏(۴02 payment required، ‏اتلاف سهمیه روزانه ۴۲۹، شکست اتصال)، هرمس از یک زنجیره لایه‌ای عبور می‌کند نه شکست بی‌صدا:</p>
+<ol>
+  <li><b>ارائه‌دهندهٔ aux ی اصلی</b> — پیکربندی‌شدهٔ شما ‏(اول، همیشه)</li>
+  <li><b>‏auxiliary.&lt;task&gt;.fallback_chain</b> — فهرست override ی per-task شما اگر نوشته باشید</li>
+  <li><b>Main agent provider + model</b> — تور ایمنی آخر ‏(همیشه امتحان می‌شود حتی بدون chain)</li>
+  <li><b>هشدار + re-raise</b> — شکست همهٔ لایه‌ها یعنی لاگ WARNING ی «all fallbacks exhausted» و پرتاب مجدد خطای اصلی</li>
+</ol>
+<p>‏429 های گذری با Retry-After قیدِ-درخواست تلقی می‌شوند نه مشکل ظرفیت — به انتخاب صریح شما احترام می‌گذارند و نردبان fallback را trigger نمی‌کنند. فقط اتلاف سهمیه روزانه/ماهانه، خطاهای پرداخت و شکست اتصال از گیت ارائه‌دهنده-صریح عبور می‌کنند. برای کاربران provider: auto زنجیرهٔ خودآشکاری جای گام‌های ۲–۳ اجرا می‌شود و گام اولش همین main agent model است.</p>
+<p>اگر fallback_chain متفاوتی از «اول مدل ایجنت اصلی» می‌خواهید صریحاً پیکربندی‌اش کنید — هر ورودی حداقل provider لازم دارد و model/base_url/api_key اختیاری‌اند. هر ورودی می‌تواند timeout ی خودش را هم declare کند تا fallback ی کندتر-ولی-قابل‌اعتماد بودجه واقعی بگیرد.</p>
+<p>خطاهای سهمیه‌ای که هرماس capacity-equivalent ی ۴۰۲ می‌شناسد: Bedrock/LiteLLM «Too many tokens per day»، Vertex AI/GCP «quota exceeded / resource exhausted / RESOURCE_EXHAUSTED» و عمومی «daily quota / quota_exceeded». عبارت متفاوت ارائه‌دهنده‌تان trigger نشد؟ bug است — با رشتهٔ دقیق خطا issue بزنید.</p>
+<h3>Fallback ی فشرده‌سازی زمینه</h3>
+<p>فشرده‌سازی زمینه از بلوک auxiliary.compression برای کنترل مدل/ارائه‌دهندهٔ خلاصه‌سازی استفاده می‌کند. ‏config های قدیمی با compression.summary_model/summary_provider/summary_base_url خودکار به auxiliary.compression.* migrate می‌شوند ‏(نسخهٔ config ۱۷). اگر هیچ ارائه‌دهنده‌ای برای فشرده‌سازی موجود نباشد هرمس نوبت‌های میانی گفتگو را بدون تولید خلاصه drop می‌کند نه اینکه نشست را بیندازد.</p>
+<h3>Override ی ارائه‌دهندهٔ delegation</h3>
+<p>زیرایجنت‌های spawn‌شده توسط delegate_task زنجیرهٔ fallback اصلی والد را به ارث می‌برند. برای مسیریابی زیرایجنت‌ها به زوج primary متفاوت جهت بهینه‌سازی هزینه delegation.provider و delegation.model را ست کنید.</p>
+<h3>ارائه‌دهندگان cron job ها</h3>
+<p>cron job ها موقع ساخت ایجنت زنجیرهٔ fallback_providers پیکربندی‌شده‌تان را به ارث می‌برند. برای primary ی متفاوت per-job، provider و model را روی خود job تنظیم کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> خلاصه</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>قابلیت</th><th>سازوکار fallback</th><th>محل config</th></tr></thead>
+<tbody>
+<tr><td>مدل اصلی ایجنت</td><td>‏fallback_providers در config.yaml — failover ی per-turn روی خطاها ‏(بازیابی primary هر نوبت)</td><td>fallback_providers ‏(فهرست top-level)</td></tr>
+<tr><td>تسک‌های کمکی — کاربران auto</td><td>زنجیرهٔ کامل خودآشکاری ‏(مدل ایجنت اصلی اول سپس زنجیرهٔ ارائه‌دهنده) روی خطاهای ظرفیت</td><td>‏auxiliary.&lt;task&gt;.provider: auto</td></tr>
+<tr><td>تسک‌های کمکی — ارائه‌دهندهٔ صریح</td><td>‏fallback_chain ‏(اگر ست باشد) ← مدل ایجنت اصلی ← هشدار + raise، فقط روی خطاهای ظرفیت</td><td>‏auxiliary.&lt;task&gt;.fallback_chain</td></tr>
+<tr><td>بینایی</td><td>لایه‌ای + retry داخلی OpenRouter</td><td>auxiliary.vision</td></tr>
+<tr><td>استخراج وب</td><td>لایه‌ای + retry داخلی OpenRouter</td><td>auxiliary.web_extract</td></tr>
+<tr><td>فشرده‌سازی زمینه</td><td>لایه‌ای؛ در نبود همهٔ لایه‌ها تنزل به no-summary</td><td>auxiliary.compression</td></tr>
+<tr><td>Skills hub / MCP helpers / Approval / Title generation / Triage specifier</td><td>لایه‌ای</td><td>auxiliary.skills_hub / .mcp / .approval / .title_generation / .triage_specifier</td></tr>
+<tr><td>Delegation</td><td>به ارث بردن زنجیرهٔ fallback_providers والد؛ override اختیاری provider/model</td><td>delegation.provider / delegation.model</td></tr>
+<tr><td>Cron job ها</td><td>به ارث بردن زنجیرهٔ پیکربندی‌شده؛ override اختیاری per-job</td><td>provider / model ی per-job</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<div class="pager">
+  <a href="provider-routing.html"><span class="dir">→ قبلی</span><span class="ttl">مسیریابی ارائه‌دهنده</span></a>
+  <a class="next" href="credential-pools.html"><span class="dir">بعدی ←</span><span class="ttl">استخر اعتبارنامه‌ها</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/fallback-providers" target="_blank" rel="noopener">Fallback Providers</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

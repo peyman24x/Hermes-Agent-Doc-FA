@@ -137,7 +137,7 @@ window.HERMES_NAV = [
   { p:"user-guide/features/honcho.html",                t:"حافظهٔ Honcho",                    d:1 },
   { p:"user-guide/features/provider-routing.html",      t:"مسیریابی ارائه‌دهنده",            d:1 },
   { p:"user-guide/features/fallback-providers.html",    t:"ارائه‌دهندگان پشتیبان",           d:0 },
-  { p:"user-guide/features/credential-pools.html",      t:"استخر اعتبارنامه‌ها",             d:0 }
+  { p:"user-guide/features/credential-pools.html",      t:"استخر اعتبارنامه‌ها",             d:1 }
 ]},
 { id:"guides", cat:"📚 راهنماها و آموزش‌ها", pages:[
   { p:"guides/tips.html",                          t:"نکات و بهترین شیوه‌ها",              d:0 },

@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [hermes-agent-farsi.pages.dev](https://hermes-agent-farsi.pages.dev) ‏(اصلی) · [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) ‏(پشتیبان ماهانه) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۱۹ از ۲۰۷ صفحه (۵۷٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۲۰ از ۲۰۷ صفحه (۵۸٪)** |
 
 ---
 
@@ -592,6 +592,11 @@ hermes-docs-fa/
 - 🎉 گروه «قابلیت‌های اصلی» دوباره کامل شد: ۳۵ از ۳۵ صفحه
 - پیشرفت: **۱۱۹ از ۲۰۷ صفحه فعال (۵۷٪)**
 
+### نشست ۷۷ — 2026-08-27 — 🔑 استخرهای اعتبارنامه
+- ترجمه و انتشار «استخر اعتبارنامه‌ها» (۳ بخش): تفاوت با fallback providers ‏(چرخش همان-ارائه‌دهنده در برابر failover بین-ارائه‌دهنده‌ای)، هشدار ریست کش پرامپت روی چرخش کلید، فلوچارت تصمیم ۴۲۹/۴۰۲/۴۰۱، شروع سریع با hermes auth add و خروجی auth list، ویزارد تعاملی، جدول کامل CLI؛ چهار استراتژی چرخش ‏(fill_first/round_robin/least_used/random)، جدول بازیابی خطا با cooldown ها و reset_at، استخرهای endpoint سفارشی با پیشوند custom:، خودآشکاری از شش منبع و قرضی بودن فقط-ارجاعی secrets؛ اشتراک استخر با زیرایجنت‌ها از طریق delegate_task، ایمنی thread و معماری چهارجزئی و ساختار storage ی auth.json
+- pager بعدی fallback-providers به این صفحه وصل شد ✓
+- پیشرفت: **۱۲۰ از ۲۰۷ صفحه فعال (۵۸٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -717,6 +722,7 @@ hermes-docs-fa/
 | 117 | `user-guide/features/honcho.html` | حافظهٔ Honcho |
 | 118 | `user-guide/features/api-server.html` | سرور API سازگار با OpenAI |
 | 119 | `user-guide/features/provider-routing.html` | مسیریابی ارائه‌دهنده |
+| 121 | `user-guide/features/credential-pools.html` | استخر اعتبارنامه‌ها |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|
