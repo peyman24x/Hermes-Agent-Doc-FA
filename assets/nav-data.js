@@ -36,8 +36,8 @@ window.HERMES_NAV = [
   { p:"user-guide/secrets/onepassword.html",        t:"1Password",                        d:1 },
   { p:"user-guide/skills/google-workspace.html",    t:"گوگل‌ورک‌اسپیس (جیمیل، تقویم…)",    d:0 },
   { p:"user-guide/which-file-does-what.html",       t:"هر فایل چه‌کاری می‌کند؟",           d:1 },
-  { p:"user-guide/windows-native.html",             t:"راهنمای ویندوز (بومی)",            d:0 },
-  { p:"user-guide/windows-wsl-quickstart.html",     t:"راهنمای ویندوز (WSL2)",            d:0 }
+  { p:"user-guide/windows-native.html",             t:"راهنمای ویندوز (بومی)",            d:1 },
+  { p:"user-guide/windows-wsl-quickstart.html",     t:"راهنمای ویندوز (WSL2)",            d:1 }
 ]},
 { id:"features", cat:"🧠 قابلیت‌های اصلی", pages:[
   { p:"user-guide/features/overview.html",             t:"نگاه کلی قابلیت‌ها",                 d:1 },

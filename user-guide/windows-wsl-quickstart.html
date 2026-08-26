@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>راهنمای ویندوز ‏(WSL2) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/windows-wsl-quickstart" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>راهنمای ویندوز ‏(WSL2)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راهنمای ویندوز ‏(WSL2)</h1>
+<p>‏هرمس Agent حالا <b>هم</b> ویندوز native <b>هم</b> WSL2 را پشتیبانی می‌کند. این صفحه مسیر WSL2 را پوشش می‌دهد؛ برای نصب PowerShell ی native بخش اختصاصی <a href="windows-native.html">راهنمای ویندوز ‏(Native)</a> را ببینید.</p>
+<p><b>کی WSL2 به‌جای native:</b></p>
+<ul>
+  <li>ترمینال تعبیه‌شدهٔ داشبورد ‏(تب /chat) را می‌خواهید — آن pane به PTY ی POSIX نیاز دارد و فقط-WSL2 است.</li>
+  <li>کار توسعهٔ سنگین-POSIX می‌کنید و می‌خواهید نشست‌های هرمس همان فایل‌سیستم / مسیرهای ابزارهای dev تان را شریک شوند.</li>
+  <li>از قبل محیط WSL2 دارید و نمی‌خواهید نصب دومی نگه دارید.</li>
+</ul>
+<p><b>کی native کافی ‏(یا بهتر) است:</b></p>
+<ul>
+  <li>چت تعاملی، گیت‌وی ‏(تلگرام/دیسکورد/…)، زمان‌بند cron، ابزار مرورگر، سرورهای MCP و بیشتر قابلیت‌های هرمس natively روی ویندوز اجرا می‌شوند.</li>
+  <li>نمی‌خواهید هربار ارجاع به فایل یا باز کردن URL فکر کنید که کدام سمت مرز WSL↔ویندوز هستید.</li>
+</ul>
+<p>در WSL2 عملاً دو کامپیوتر در بازی است: host ی ویندوز شما و یک VM لینوکسی مدیریت‌شده توسط WSL. بیشتر سردرگمی‌ها از این است که مطمئن نیستید در هر لحظه روی کدام هستید. این guide بخش‌هایی از همین دوگانگی را پوشش می‌دهد که مخصوصاً هرمس را درگیر می‌کند: نصب WSL2، رفت‌وآمد فایل‌ها بین ویندوز و لینوکس، شبکه در هر دو جهت و دام‌هایی که مردم واقعاً می‌خورند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چرا WSL2 ‏(در برابر ویندوز native)</h2>
+<p>نصب native ی ویندوز مستقیم در ویندوز اجرا می‌شود: ترمینال ویندوزی‌تان ‏(PowerShell، ‏Windows Terminal و…)، مسیرهای فایل‌سیستم ویندوزی ‏(C:\Users\…) و پروسه‌های ویندوزی. هرمس فرمان‌های شل را با Git Bash اجرا می‌کند — روشی که Claude Code و سایر ایجنت‌ها امروز برای ویندوز دارند — شکاف POSIX-vs-Windows را بدون بازنویسی کامل دور می‌زند.</p>
+<p>‏WSL2 یک کرنل لینوکس واقعی داخل VM سبک اجرا می‌کند، پس هرمس داخلش عملاً با اجرا روی Ubuntu یکی است. وقتی محیط POSIX واقعی می‌خواهید ارزشمند است: fork، ‏/tmp، ‏UNIX socket ها، معناشناسی سیگنال‌ها، ترمینال‌های PTY-dar، شل‌هایی مثل bash/zsh و ابزارهایی مثل rg/git/ffmpeg که مثل لینوکس رفتار می‌کنند.</p>
+<p>پیامدهای عملی WSL2:</p>
+<ul>
+  <li>CLI ی هرمس، گیت‌وی، نشست‌ها، حافظه، مهارت‌ها و runtime های ابزار همگی داخل VM لینوکسی زندگی می‌کنند.</li>
+  <li>برنامه‌های ویندوزی ‏(مرورگرها، اپ‌های native، Chrome با پروفایل وارد‌شده‌تان) بیرون آن هستند.</li>
+  <li>هر بار بخواهید این دو با هم حرف بزنند — شریک کردن فایل، باز کردن URL، کنترل Chrome، زدن به سرور مدل محلی، expose کردن گیت‌وی هرمس به گوشی — از مرزی عبور می‌کنید. همین مرزها موضوع این guide اند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> نصب WSL2 و هرمس</h2>
+<p>از یک <b>PowerShell ی Admin</b> یا Windows Terminal:</p>
+<pre dir="ltr"><code>wsl --install</code></pre>
+<p>روی ویندوز ۱۰ نسخهٔ ۲۲H2+ تازه یا ویندوز ۱۱ این، کرنل WSL2، قابلیت Virtual Machine Platform و یک توزیع پیش‌فرض Ubuntu را نصب می‌کند. موقع درخواست ری‌بوت کنید. بعد از ری‌بوت Ubuntu باز می‌شود و نام کاربری + رمز لینوکسی می‌پرسد — این یک <b>کاربر لینوکسی جدید</b> است و ربطی به حسابتان ویندوزی ندارد.</p>
+<p>تأیید کنید واقعاً روی WSL2 هستید نه WSL1 ی قدیمی:</p>
+<pre dir="ltr"><code>wsl --list --verbose
+# VERSION 2 باید ببینید؛ اگر 1 بود:
+wsl --set-version Ubuntu 2
+wsl --set-default-version 2</code></pre>
+<p>هرمس روی WSL1 قابل‌اعتماد نیست — WSL1 syscall های لینوکس را on-the-fly ترجمه می‌کند و بعضی رفتارها ‏(procfs، سیگنال‌ها، شبکه) از لینوکس واقعی فاصله دارند.</p>
+<h3>انتخاب توزیع</h3>
+<p>Ubuntu ‏(LTS) همان است که علیه‌اش تست می‌کنیم. Debian کار می‌کند. Arch و NixOS برای کسانی که می‌خواهندشان کار می‌کنند ولی نصب‌کنندهٔ یک‌خطی سیستم apt ی مشتق-از-Debian فرض می‌کند — آن مسیر را در <a href="../getting-started/nix-setup.html">راهنمای setup ی Nix</a> ببینید.</p>
+<h3>فعال کردن systemd ‏(توصیه‌شده)</h3>
+<p>گیت‌وی هرمس ‏(و هر چیز دیگری که می‌خواهید بالا بماند) با systemd راحت‌تر مدیریت می‌شود. روی WSL مدرن یک بار داخل توزیع‌تان فعالش کنید:</p>
+<pre dir="ltr"><code>sudo tee /etc/wsl.conf &gt;/dev/null &lt;&lt;'EOF'
+[boot]
+systemd=true
+
+[interop]
+enabled=true
+appendWindowsPath=true
+
+[automount]
+options = "metadata,umask=22,fmask=11"
+EOF</code></pre>
+<p>سپس از PowerShell:</p>
+<pre dir="ltr"><code>wsl --shutdown</code></pre>
+<p>ترمینال WSL را دوباره باز کنید. ‏ps -p 1 -o comm= باید systemd چاپ کند. گزینهٔ mount ی metadata بالا مهم است — بدون آن فایل‌های /mnt/c/... نمی‌توانند بیت‌های مجوز لینوکسی واقعی ذخیره کنند که چیزهایی مثل chmod +x روی اسکریپت‌های زیر مسیرهای ویندوزی را می‌شکند.</p>
+<h3>نصب هرمس داخل WSL</h3>
+<p>وقتی شل WSL2 داشتید:</p>
+<pre dir="ltr"><code>curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+source ~/.bashrc
+hermes</code></pre>
+<p>نصب‌کننده WSL2 را لینوکس ساده تلقی می‌کند — هیچ چیز WSL-خاصی لازم نیست. چیدمان کامل را در بخش <a href="../getting-started/installation.html">نصب</a> ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> فایل‌سیستم: عبور از مرز ویندوز ↔ WSL2</h2>
+<p>این همان بخشی است که بیشترین‌ها را می‌اندازد. <b>دو فایل‌سیستم</b> وجود دارد و اینکه فایل‌ها را کجا می‌گذارید مهم است — برای کارایی، صحت و دید ابزارها.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>جهت</th><th>مسیر داخل</th><th>مسیری که استفاده می‌کنید</th></tr></thead>
+<tbody>
+<tr><td>دیسک ویندوز از دید WSL</td><td>C:\Users\you\Documents</td><td>/mnt/c/Users/you/Documents</td></tr>
+<tr><td>دیسک WSL از دید ویندوز</td><td>/home/you/code</td><td>\\wsl$\Ubuntu\home\you\code ‏(یا \\wsl.localhost\Ubuntu\... روی بیلدهای جدید)</td></tr>
+</tbody>
+</table>
+</div>
+<p>هر دو واقعی و کارا هستند ولی <b>یک فایل‌سیستم نیستند</b> — زیر کاپوت با پروتکل شبکهٔ ۹P پل شده‌اند و پیامدهای کارایی و معنایی واقعی دارد.</p>
+<h3>هرمس و پروژه‌ها را کجا بگذاریم</h3>
+<p><b>قاعدهٔ سرانگشتی: همه‌چیزِ لینوکی‌وار داخل فایل‌سیستم لینوکس بماند.</b></p>
+<ul>
+  <li>نصب هرمس ‏(~/.hermes/) — سمت لینوکس. نصب‌کننده همین کار را می‌کند.</li>
+  <li>مخازن git ای که از WSL رویشان کار می‌کنید — سمت لینوکس ‏(~/code/...، ~/projects/...).</li>
+  <li>مدل‌ها، dataset ها، venv ها — سمت لینوکس.</li>
+</ul>
+<p>با رعایت این قاعده می‌گیرید:</p>
+<ul>
+  <li><b>I/O سریع.</b> عملیات روی /mnt/c/... از ۹P می‌گذرند و ۱۰ تا ۱۰۰ برابر کندتر از ext4 ی native‌اند. ‏git status روی مخزن ۱۰هزارفایلی که زیر ~/code لحظه‌ای حس می‌شود زیر /mnt/c ممکن است +۱۵ ثانیه طول بکشد.</li>
+  <li><b>مجوزهای درست.</b> بیت‌های مجوز لینوکس روی /mnt/c شبیه‌سازیِ حداقلی‌اند. ssh ی امتناع‌کننده از کلید با «bad permissions» یا chmod +x ی بی‌سروصدا بی‌اثر رایج است.</li>
+  <li><b>file watcher های قابل‌اعتماد.</b> inotify روی ۹P ناپایدار است — watcher ها ‏(dev server ها، test runner ها) مرتباً تغییرات /mnt/c را از دست می‌دهند.</li>
+  <li><b>بدون غافلگیری case-sensitivity.</b> مسیرهای ویندوز پیش‌فرض case-insensitive اند؛ لینوکس حساس. پروژه‌هایی که هم Readme.md دارند هم README.md بسته به سمت متفاوت رفتار می‌کنند.</li>
+</ul>
+<p>فقط وقتی چیزی را روی /mnt/c بگذارید که واقعاً لازم است سمت ویندوز زندگی کند — مثلاً می‌خواهید از یک اپ GUI ی ویندوزی بازش کنید یا DevTools ی Chrome ی ویندوز cwd ی قابل‌رسید-از-ویندوز می‌خواهد.</p>
+<h3>رفت‌وآمد فایل‌ها</h3>
+<ul>
+  <li><b>ویندوز ← WSL:</b> راحت‌ترین: Explorer را باز و \\wsl.localhost\Ubuntu را در نوار آدرس بنویسید؛ بعد drag-drop به \home\&lt;you&gt;\... . یا از PowerShell:<br><code>wsl cp /mnt/c/Users/you/Downloads/file.pdf ~/incoming/</code></li>
+  <li><b>WSL ← ویندوز:</b> به /mnt/c/Users/&lt;you&gt;/... کپی کنید و فوراً در Explorer ظاهر می‌شود:<br><code>cp ~/reports/output.pdf /mnt/c/Users/you/Desktop/</code></li>
+  <li><b>باز کردن فایل WSL در اپ ویندوزی:</b> از explorer.exe یا wslview:<br><code>sudo apt install wslu</code> ‏(یک بار) سپس ‏<code>wslview ~/reports/output.pdf</code> یا ‏<code>explorer.exe .</code></li>
+  <li><b>تبدیل مسیر بین دو جهان:</b><br><code>wslpath -w ~/code/project</code> ← ‏\\wsl.localhost\Ubuntu\home\you\code\project<br><code>wslpath -u 'C:\Users\you'</code> ← ‏/mnt/c/Users/you</li>
+</ul>
+<h3>Line endings، BOM ها و git</h3>
+<p>اگر فایل‌ها را سمت ویندوز با ویرایشگر ویندوزی ویرایش کنید ممکن است line ending ی CRLF بگیرند. وقتی bash یا پایتون سمت لینوکس بخواندشان اسکریپت‌ها با bad interpreter: /bin/bash^M می‌شکنند و پایتون ممکن است روی فایل‌های .env ی BOM-dar fail شود. اصلاح، config ی منطقی git داخل WSL است ‏(نه روی ویندوز):</p>
+<div class="codebox"><pre><code>git config --global core.autocrlf input
+git config --global core.eol lf</code></pre></div>
+<p>برای فایل‌هایی که قبلاً CRLF دارند:</p>
+<pre dir="ltr"><code>sudo apt install dos2unix
+dos2unix path/to/script.sh</code></pre>
+<h3>«clone داخل WSL یا روی /mnt/c؟»</h3>
+<p>داخل WSL. همیشه، مگر دلیل مشخصی داشته باشید. گردش‌کار معمول هرمس ‏(hermes chat، ‏فراخوانی‌های rg روی مخزن، ‏file watcher ها، گیت‌وی پس‌زمینه) روی ~/code/myrepo به‌طور چشمگیر سریع‌تر و قابل‌اعتمادتر از /mnt/c/Users/you/myrepo است.</p>
+<p>یک استثنا: <b>پل‌های MCP که باینری‌های ویندوزی launch می‌کنند.</b> اگر chrome-devtools-mcp را از طریق cmd.exe مصرف می‌کنید، ویندوز ممکن است اگر cwd ی هرمس ~ باشد هشدار UNC بدهد. در آن صورت هرمس را از جایی زیر /mnt/c/ شروع کنید تا پروسهٔ ویندوزی cwd ی درایو-دار بگیرد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> شبکه: WSL ↔ ویندوز</h2>
+<p>‏WSL2 داخل VM سبکی با stack ی شبکه خودش اجرا می‌شود. یعنی localhost داخل WSL <b>همان</b> localhost روی ویندوز <b>نیست</b> — از دید شبکه دو host جدایند. برای هر سرویس باید تصمیم بگیرید ترافیک چه جهتی دارد و پل درست را بردارید. دو مورد مدام تکرار می‌شود:</p>
+<h3>حالت ۱ — هرمس در WSL با سرویسی روی ویندوز حرف می‌زند</h3>
+<p>رایج‌ترین: ‏Ollama، ‏LM Studio یا llama-server را روی ویندوز اجرا دارید و هرمس ‏(داخل WSL) باید به آن بخورد. راهنمای مرجع در راهنمای ارائه‌دهنده‌ها: <a href="https://hermes-agent.nousresearch.com/docs/integrations/providers#wsl2-networking-windows-users" target="_blank" rel="noopener">WSL2 Networking for Local Models ←</a>. خلاصه:</p>
+<ul>
+  <li><b>ویندوز ۱۱ ۲۲H2+:</b> حالت mirrored networking را روشن کنید ‏(networkingMode=mirrored در %USERPROFILE%\.wslconfig سپس wsl --shutdown). localhost بعداً در هر دو جهت کار می‌کند.</li>
+  <li><b>ویندوز ۱۰ یا بیلدهای قدیمی‌تر:</b> IP ی host ی ویندوز ‏(default gateway ی شبکهٔ مجازی WSL) را به کار ببرید و مطمئن شوید سرور روی ویندوز به 0.0.0.0 bind شده نه فقط 127.0.0.1. ‏Windows Firewall هم معمولاً قانونی برای پورت می‌خواهد.</li>
+</ul>
+<h3>حالت ۲ — چیزی روی ویندوز ‏(یا LAN) با هرمس در WSL حرف می‌زند</h3>
+<p>جهت معکوس، کمتر مستند، اما برای اینها لازم است:</p>
+<ul>
+  <li>استفاده از <b>داشبورد وب</b> هرمس از مرورگر ویندوزی.</li>
+  <li>استفاده از <b>سرور API سازگار-با-OpenAI</b> ‏(expose‌شده توسط hermes gateway وقتی API_SERVER_ENABLED=true) از ابزاری سمت-ویندوز. صفحهٔ <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server" target="_blank" rel="noopener">سرور API</a> را ببینید.</li>
+  <li>تست <b>گیت‌وی پیام‌رسانی</b> که پلتفرم به URL ی وب‌هوک محلی ping بزند — معمولاً cloudflared/ngrok بهتر از port forwarding خام است.</li>
+</ul>
+<p><b>ذیل ۲a — از خود host ی ویندوز:</b> روی ویندوز ۱۱ ۲۲H2+ با mirrored mode هیچ کاری لازم نیست؛ پروسه‌ای در WSL که به 0.0.0.0:8080 ‏(یا حتی 127.0.0.1:8080) bind شده از مرورگر ویندوزی در http://localhost:8080 reachable است. روی NAT mode، localhost forwarding پیش‌فرض WSL2 معمولاً bind های 127.0.0.1 سمت-لینوکس را به localhost ی ویندوز forward می‌کند. اگر نشد: صریحاً داخل WSL به 0.0.0.0 bind کنید یا با ip -4 addr show eth0 | grep inet مقدار IP ی VM را پیدا و از ویندوز به همان بزنید.</p>
+<p><b>ذیل ۲b — از دستگاه دیگری روی LAN ‏(گوشی، تبلت، PC دیگر):</b> درد اصلی اینجاست. ترافیک جریان دارد LAN ← host ی ویندوز ← VM ی WSL و هر دو hop را باید ست کنید:</p>
+<ol>
+  <li><b>داخل WSL روی همهٔ interface ها bind کنید.</b> شنوندهٔ 127.0.0.1 هرگز از بیرون VM قابل‌رسید نیست. 0.0.0.0 را به کار ببرید.</li>
+  <li><b>Port-forward از ویندوز به VM:</b> در mirrored خودکار است؛ در NAT دستی per-port در PowerShell ی Admin:
+<pre dir="ltr"><code># Grab the WSL VM's current IP (it changes on every WSL restart under NAT)
+$wslIp = (wsl hostname -I).Trim().Split(' ')[0]
+
+# Forward Windows port 8080 → WSL:8080
+netsh interface portproxy add v4tov4 `
+  listenaddress=0.0.0.0 listenport=8080 `
+  connectaddress=$wslIp connectport=8080
+
+# Allow it through Windows Firewall
+New-NetFirewallRule -DisplayName "Hermes WSL 8080" `
+  -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow</code></pre>
+حذف بعدی با netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=8080.</li>
+  <li><b>دستگاه LAN را به http://&lt;windows-lan-ip&gt;:8080 اشاره دهید.</b></li>
+</ol>
+<p>چون IP ی VM ی WSL در NAT mode با هر ری‌استارت جابه‌جا می‌شود قانون یک‌باره فقط تا wsl --shutdown بعدی دوام دارد. برای چیز پایدار یا mirrored mode را به کار ببرید یا مرحلهٔ port-proxy را در اسکریپتی که موقع ورود ویندوز اجرا می‌شود بگذارید. برای وب‌هوک‌های ارائه‌دهندگان پیام‌رسانی ابری ‏(setWebhook تلگرام و…) با port-forwarding نجنگید — tunnel های cloudflared را به کار ببرید؛ بخش <a href="messaging/webhooks.html">وب‌هوک‌ها</a> را ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> اجرای بلندمدت سرویس‌های هرمس روی ویندوز</h2>
+<h3>Shortcut ی دسکتاپ برای باز کردن سریع هرمس</h3>
+<ol>
+  <li>روی دسکتاپ ویندوز راست‌کلیک ← New ← Shortcut.</li>
+  <li>برای Target ‏(نام توزیع را در صورت نیاز عوض کنید):<br><code>wt.exe -w 0 -p "Ubuntu" wsl.exe -d Ubuntu --cd ~ -- bash -ic "hermes"</code></li>
+  <li>نامی واضح مثل Hermes بگذارید.</li>
+</ol>
+<p>این Windows Terminal را باز، توزیع WSL را شروع، شما را به خانهٔ لینوکسی‌تان می‌برد و هرمس را launch می‌کند. اگر hermes هنوز روی PATH نیست یک بار دستی WSL را باز و source ~/.bashrc را بزنید یا فرمان را به uv run hermes داخل checkout ی پروژه تغییر دهید. جلا دادن اختیاری: آیکن سفارشی از Properties ← Change Icon، و pin کردن به Start یا Taskbar.</p>
+<h3>داخل WSL با systemd ‏(توصیه‌شده)</h3>
+<p>اگر systemd را طبق بخش راه‌اندازی بالا فعال کرده باشید hermes gateway و سرور API مثل هر ماشین لینوکسی کار می‌کنند. ویزارد:</p>
+<div class="codebox"><pre><code>hermes gateway setup</code></pre></div>
+<p>پیشنهاد نصب unit ی کاربری systemd را می‌دهد تا گیت‌وی موقع شروع WSL خودکار بالا بیاید.</p>
+<h3>شروع شدن خود WSL موقع ورود به ویندوز</h3>
+<p>VM ی WSL فقط تا وقتی کسی استفاده‌اش کند زنده می‌ماند. برای اینکه گیت‌وی بدون ترمینال باز قابل‌رسید بماند، موقع ورود ویندوز یک پروسهٔ WSL را با Task Scheduler boot کنید:</p>
+<ul>
+  <li><b>Trigger:</b> At log on ‏(کاربر شما).</li>
+  <li><b>Action:</b> Start a program — Program: ‏C:\Windows\System32\wsl.exe · Arguments: ‏-d Ubuntu --exec /bin/sh -c "sleep infinity"</li>
+</ul>
+<p>این VM را زنده نگه می‌دارد تا گیت‌وی مدیریت‌شده-توسط-systemd در حال اجرا بماند. روی ویندوز ۱۱ جریان‌های جدیدتر wsl --install --no-launch + auto-start هم کار می‌کنند؛ ترفند sleep infinity نسخهٔ قابل‌حمل است.</p>
+<h3>Passthrough ی GPU ‏(مدل‌های محلی)</h3>
+<p>‏WSL2 از کرنل ۵٫۱۰٫۴۳+ به بالا GPU های NVIDIA را natively پشتیبانی می‌کند — درایور استاندارد NVIDIA را روی ویندوز نصب کنید ‏(<b>نه</b> درایور NVIDIA ی لینوکسی داخل WSL) و nvidia-smi داخل WSL GPU را می‌بیند. از آنجا CUDA toolkit ها، ‏torch، ‏vllm، ‏sglang و llama-server مثل همیشه علیه GPU ی واقعی build می‌شوند. پشتیبانی AMD ROCm و Intel Arc داخل WSL2 هنوز در حال تحول و خارج ماتریس تست هرمس است.</p>
+<p>اگر سرور مدل محلی <b>ویندوز-native</b> اجرا می‌کنید ‏(Ollama for Windows، ‏LM Studio) که از قبل از طریق درایورهای ویندوز GPU تان را مصرف می‌کند اصلاً به passthrough نیازی ندارید — حالت ۱ بالا را دنبال و از WSL از طریق شبکه به آن بزنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> دام‌های رایج</h2>
+<ul>
+  <li><b>«Connection refused» به Ollama / LM Studio ی میزبانی-ویندوز.</b> بخش شبکهٔ WSL2 را ببینید. نود درصد مواقع سرور روی 127.0.0.1 bind است و 0.0.0.0 می‌خواهد ‏(Ollama: ‏OLLAMA_HOST=0.0.0.0) یا قانون فایروال جامانده.</li>
+  <li><b>کندی شدید git status / hermes chat روی یک مخزن.</b> احتمالاً زیر /mnt/c/... کار می‌کنید. مخزن را به ~/code/... ‏(سمت لینوکس) منتقل کنید. مرتبه بزرگی سریع‌تر.</li>
+  <li><b>bad interpreter: /bin/bash^M روی اسکریپت‌ها.</b> ‏line ending ی CRLF از ویرایشگر ویندوزی. dos2unix script.sh و core.autocrlf input در git config ی WSL.</li>
+  <li><b>هشدار «UNC paths are not supported» از باینری‌های ویندوزی launch‌شده توسط MCP.</b> cwd ی هرمس داخل فایل‌سیستم لینوکس است و cmd.exe ی ویندوز نمی‌داند با آن چه کند. برای آن نشست هرمس را از /mnt/c/... شروع کنید یا wrapper ای به کار ببرید که قبل از invoke کردن executable ی ویندوزی cd به مسیر قابل‌رسید-از-ویندوز کند.</li>
+  <li><b>انحراف ساعت بعد از sleep/hibernate.</b> ساعت WSL2 بعد از resume میزبان می‌تواند چند دقیقه عقب بماند و هر چیز گواهی-محوری ‏(OAuth، ‏API های HTTPS) را بشکند. اصلاح on-demand:<br><code>sudo hwclock -s</code><br>یا ntpdate نصب و در ورود اجرایش کنید.</li>
+  <li><b>DNS بعد از فعال کردن mirrored mode یا اتصال VPN از کار می‌افتد.</b> mirrored تنظیمات شبکهٔ host را به WSL proxy می‌کند — اگر DNS ی ویندوز عجیب باشد ‏(VPN split-tunnel، ‏resolver سازمانی) WSL همان را به ارث می‌برد. دور زدن: resolv.conf را دستی override کنید ‏(generateResolvConf=false در /etc/wsl.conf سپس /etc/resolv.conf ی خودتان با 1.1.1.1 یا DNS ی VPN).</li>
+  <li><b>hermes بعد از نصب‌کننده پیدا نمی‌شود.</b> نصب‌کننده ~/.local/bin را از طریق ~/.bashrc به PATH شل اضافه کرده. برای نشست فعلی source ~/.bashrc لازم است ‏(یا ترمینال جدید).</li>
+  <li><b>Windows Defender روی فایل‌های WSL کند است.</b> Defender فایل‌ها را از طریق پل ۹P اسکن می‌کند وقتی از ویندوز access شوند که کندی دسترسی‌های cross-boundary از نوع /mnt/c را بزرگنمایی می‌کند. اگر فقط از داخل WSL فایل‌های WSL را لمس می‌کنید بی‌اهمیت است. اگر ابزارهای ویندوزی مدام به \\wsl$\... می‌زنند مسیر توزیع WSL را از اسکن real-time مستثنا کنید.</li>
+  <li><b>کم آوردن دیسک.</b> ‏WSL2 دیسک VM اش را به‌صورت VHDX ی sparse زیر %LOCALAPPDATA%\Packages\... نگه می‌دارد؛ با delete کردن فایل‌ها auto-shrink نمی‌شود. بازپس‌گیری: ‏wsl --shutdown سپس از PowerShell ی Admin ‏Optimize-VHD -Path &lt;path-to-ext4.vhdx&gt; -Mode Full ‏(نیازمند ابزارهای Hyper-V) — یا مسیر ساده‌تر diskpart ی مستند در docs ی WSL.</li>
+</ul>
+<h3>قدم بعدی</h3>
+<ul>
+  <li><a href="../getting-started/installation.html">نصب</a> — مراحل واقعی نصب ‏(Linux/WSL2/Termux همه از یک نصب‌کننده).</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/integrations/providers#wsl2-networking-windows-users" target="_blank" rel="noopener">یکپارچه‌سازی‌ها ← ارائه‌دهنده‌ها ← شبکهٔ WSL2</a> — عمق‌کاوی مرجعِ شبکه برای سرورهای مدل محلی.</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/guides/use-mcp-with-hermes#wsl2-bridge-hermes-in-wsl-to-windows-chrome" target="_blank" rel="noopener">راهنمای MCP ← WSL ← Chrome ی ویندوز</a> — کنترل Chrome ی وارد‌شدهٔ ویندوزی‌تان از هرمس در WSL.</li>
+  <li><a href="features/tool-gateway.html">Tool Gateway</a> و ‏<a href="features/web-dashboard.html">داشبورد وب</a> — سرویس‌های بلندمدتی که بیشترین تمایل را دارید از WSL به بقیهٔ شبکه expose کنید.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="windows-native.html"><span class="dir">→ قبلی</span><span class="ttl">راهنمای ویندوز ‏(بومی)</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/windows-wsl-quickstart" target="_blank" rel="noopener">Windows (WSL2) Guide</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

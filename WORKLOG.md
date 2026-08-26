@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [hermes-agent-farsi.pages.dev](https://hermes-agent-farsi.pages.dev) ‏(اصلی) · [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) ‏(پشتیبان ماهانه) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۰۸ از ۲۰۷ صفحه (۵۲٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۱۰ از ۲۰۷ صفحه (۵۳٪)** |
 
 ---
 
@@ -546,6 +546,12 @@ hermes-docs-fa/
 - زنجیرهٔ pager: …bitwarden ← command ← onepassword و …onepassword ← multi-connection-desktop
 - پیشرفت: **۱۰۸ از ۲۰۷ صفحه فعال (۵۲٪)**
 
+### نشست ۶۸ — 2026-08-27 — 🪟 راهنماهای ویندوز (بومی + WSL2)
+- ترجمه و انتشار «راهنمای ویندوز (بومی)» (۹ بخش): نصب یک‌خطی PowerShell با جدول ۷ پارامتر، نصب‌کنندهٔ GUI دسکتاپ، dep_ensure و جدول وابستگی‌ها، ده گام واقعی نصب‌کننده، ماتریس قابلیت native/WSL2، اجرای فرمان‌ها با Git Bash و ترتیب پنج‌مرحله‌ای حل bash.exe، کنسول UTF-8، ویرایشگر EDITOR=notepad و جدول override ها، Ctrl+Enter، گیت‌وی با schtasks و pythonw.exe، چیدمان داده با هشدار ریشهٔ مشترک، ابزار مرورگر، uninstall، internals ی os.kill(pid,0) و bpo-14484 و دام‌های رایج
+- ترجمه و انتشار «راهنمای ویندوز (WSL2)» (۶ بخش): کی WSL2/native، نصب wsl --install و فعال‌سازی systemd با metadata mount، دو فایل‌سیستم و قاعدهٔ «همه‌چیز لینوکیوار داخل لینوکس» با چهار پیامد، رفت‌وآمد فایل و wslpath، line endings و CRLF، شبکهٔ دوحرفه شامل portproxy و فایروال برای LAN، اجرای بلندمدت با sleep infinity در Task Scheduler، GPU passthrough و نُه دام رایج؛ فراخوانی 简体中文 به‌صورت عین متن اصلی نگه داشته و whitelist شد
+- زنجیرهٔ pager: …multi-connection-desktop ← windows-native ← windows-wsl-quickstart ← (به‌زودی)
+- پیشرفت: **۱۱۰ از ۲۰۷ صفحه فعال (۵۳٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -660,6 +666,8 @@ hermes-docs-fa/
 | 106 | `user-guide/secrets/command.html` | منبع رمز Command Helper |
 | 107 | `user-guide/secrets/onepassword.html` | 1Password |
 | 108 | `user-guide/multi-connection-desktop.html` | اتصال دسکتاپ به چند نمونه |
+| 109 | `user-guide/windows-native.html` | راهنمای ویندوز (بومی) |
+| 110 | `user-guide/windows-wsl-quickstart.html` | راهنمای ویندوز (WSL2) |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|
