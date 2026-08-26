@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [hermes-agent-farsi.pages.dev](https://hermes-agent-farsi.pages.dev) ‏(اصلی) · [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) ‏(پشتیبان ماهانه) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۰۲ از ۲۰۷ صفحه (۴۹٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۰۶ از ۲۰۷ صفحه (۵۱٪)** |
 
 ---
 
@@ -531,6 +531,15 @@ hermes-docs-fa/
 - WORKLOG: ردیف وضعیت «سایت آنلاین» به‌روز شد؛ ورودی‌های تاریخی نشست‌های قبل دست‌نخورده ماندند
 - DEPLOYMENT.md: بخش Cloudflare Pages حالا دامنهٔ رسمی را نام می‌برد
 
+### نشست ۶۶ — 2026-08-26 — 🔐 رمزها ‏(هاب + Bitwarden + Command Helper) و هاب Egress
+- ترجمه و انتشار «رمزها (Secrets)» صفحهٔ مادر (۴ بخش): سه منبع پشتیبانی‌شده، نردبان اولویت قطعی چندمنبعی ‏(.env برنده پیش‌فرض، نگاشتی بر انبوه، اولین ادعا)، برچسب provenance، دو پیچ سطح-orchestrator برای گاوصندوق مشترک پروفایلی ‏(preserve_existing و نام‌مستعار پروفایل FOO_<PROFILE>) و راهنمای افزودن بک‌اند پلاگینی
+- ترجمه و انتشار «Bitwarden Secrets Manager» (۶ بخش): حساب-ماشین و توکن دسترسی بدون 2FA، ویزارد hermes secrets bitwarden setup با انتخاب ناحیه، جدول کامل ۷ فرمان CLI، چرخاندن توکن بدون ویزارد، مرجع کامل config شامل کش رمز AES-GCM، جدول حالت‌های شکست با سرنخ ← و نکات امنیتی و چه وقت استفاده نکنیم
+- ترجمه و انتشار «منبع رمز Command Helper» (۴ بخش): هر گاوصندوق CLI ی KEY=VALUE چاپ‌کن، timeout سخت ۳ ثانیه، دور ریختن stderr برای عدم نشت secret، فقط-POSIX و جدول شکست‌ها
+- ترجمه و انتشار هاب «پروکسی خروجی (Egress)»: فایروال تزریق-credential ی خروجی برای sandbox های راه‌دور؛ iron-proxy هنوز ترجمه‌نشده و به نسخهٔ انگلیسی لینک است
+- QA این دسته بررسی data-root per-file گرفت؛ هر دو فایل عمق-۲ صحیح ساخته شدند
+- زنجیرهٔ pager: …managed-scope ← secrets ← bitwarden ← command و …secrets ← egress
+- پیشرفت: **۱۰۶ از ۲۰۷ صفحه فعال (۵۱٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -639,6 +648,10 @@ hermes-docs-fa/
 | 100 | `getting-started/nix-setup.html` | نصب با Nix |
 | 101 | `user-guide/import-from-other-agents.html` | درون‌ریزی از ایجنت‌های دیگر |
 | 102 | `user-guide/managed-scope.html` | دامنهٔ مدیریت‌شده |
+| 103 | `user-guide/secrets.html` | رمزها (Secrets) |
+| 104 | `user-guide/egress.html` | پروکسی خروجی (Egress) |
+| 105 | `user-guide/secrets/bitwarden.html` | Bitwarden Secrets Manager |
+| 106 | `user-guide/secrets/command.html` | منبع رمز Command Helper |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

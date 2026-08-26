@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پروکسی خروجی ‏(Egress) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/egress" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>پروکسی خروجی ‏(Egress)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>پروکسی خروجی ‏(Egress proxy)</h1>
+<p>فایروال اختیاریِ تزریق-credential ی خروجی برای sandbox های ترمینال راه‌دور. sandbox فقط توکن‌های پروکسی opaque را می‌بیند؛ کلیدهای API ی واقعی هرگز host را ترک نمی‌کنند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> اجزا</h2>
+<ul>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/egress/iron-proxy" target="_blank" rel="noopener">iron-proxy</a> — پراکسی تک-باینریِ رهگیری-TLS از ‏<a href="https://github.com/ironsh/iron-proxy" target="_blank" rel="noopener">ironsh/iron-proxy</a>، lazy-install و مدیریت‌شده توسط ‏<code>hermes egress</code>.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="secrets.html"><span class="dir">→ قبلی</span><span class="ttl">رمزها ‏(Secrets)</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/egress" target="_blank" rel="noopener">Egress proxy</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
