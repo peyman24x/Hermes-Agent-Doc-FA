@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بات خلاصهٔ روزانه — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/daily-briefing-bot" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>بات خلاصهٔ روزانه</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>آموزش: ساخت بات خلاصهٔ روزانه</h1>
+<p>در این آموزش باتی شخصی می‌سازید که هر صبح بیدار می‌شود، موضوع‌های موردعلاقه‌تان را تحقیق می‌کند، یافته‌ها را خلاصه می‌کند و یک خلاصهٔ موجز مستقیم به تلگرام یا دیسکورد شما می‌فرستد.</p>
+<p>آخر کار، یک گردش‌کار تمام‌خودکار خواهید داشت که <b>جستجوی وب</b>، ‏<b>زمان‌بندی Cron</b>، ‏<b>واگذاری</b> و <b>تحویل پیام‌رسانی</b> را ترکیب می‌کند — بدون حتی یک خط کد.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>این دستورالعمل جستجوی وب، خلاصه‌سازی و TTS اختیاری را می‌خواهد — همه در یک اشتراک Portal سرویس می‌شوند. سریع‌ترین راه‌اندازی hermes setup --portal است. بخش <a href="../integrations/nous-portal.html">Nous Portal</a> را ببینید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چه چیزی می‌سازیم</h2>
+<p>این جریان است:</p>
+<ol>
+  <li><b>ساعت ۸ صبح</b> — زمان‌بند Cron کار تان را فعال می‌کند</li>
+  <li><b>هرمس بالا می‌آید</b> — یک نشست ایجنت تازه با پرامپت شما</li>
+  <li><b>جستجوی وب</b> — آخرین اخبار موضوع‌هایتان را می‌کشد بیرون</li>
+  <li><b>خلاصه‌سازی</b> — آن‌ها را در قالب خلاصهٔ تمیز تقطیر می‌کند</li>
+  <li><b>تحویل</b> — خلاصه به تلگرام یا دیسکورد شما ارسال می‌شود</li>
+</ol>
+<p>همه‌اش بدون دست اجرا می‌شود. شما فقط با قهوهٔ صبحانه خلاصه‌تان را می‌خوانید.</p>
+<h3>پیش‌نیازها</h3>
+<p>قبل از شروع مطمئن شوید:</p>
+<ul>
+  <li><b>Hermes Agent نصب شده</b> — راهنمای <a href="../getting-started/installation.html">نصب</a> را ببینید</li>
+  <li><b>گیت‌وی در حال اجرا</b> — دیمن گیت‌وی اجرای cron را بر عهده دارد:
+  <pre dir="ltr"><code>hermes gateway install   # Install as a user service
+sudo hermes gateway install --system   # Linux servers: boot-time system service
+# or
+hermes gateway           # Run in foreground</code></pre>
+  </li>
+  <li><b>کلید API ی Firecrawl</b> — برای جستجوی وب FIRECRAWL_API_KEY را در محیط ست کنید</li>
+  <li><b>پیام‌رسانی پیکربندی‌شده</b> ‏(اختیاری ولی توصیه‌شده) — <a href="../user-guide/messaging/telegram.html">تلگرام</a> یا دیسکورد با کانال خانگی</li>
+</ul>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>پیام‌رسانی ندارید؟ مشکلی نیست.</b>می‌توانید این آموزش را با deliver: "local" ادامه دهید. خلاصه‌ها در ~/.hermes/cron/output/ ذخیره می‌شوند و هر وقت خواستید می‌خوانیدشان.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: تست دستی گردش‌کار</h2>
+<p>قبل از اتوماسیون هر چیزی، مطمئن شویم خلاصه کار می‌کند. یک نشست چت باز کنید:</p>
+<pre dir="ltr"><code>hermes</code></pre>
+<p>بعد این پرامپت را وارد کنید:</p>
+<pre dir="ltr"><code>Search for the latest news about AI agents and open source LLMs.
+Summarize the top 3 stories in a concise briefing format with links.</code></pre>
+<p>هرمس وب را جستجو، نتایج را مرور و چیزی شبیه این تولید می‌کند:</p>
+<pre dir="ltr"><code>☀️ Your AI Briefing — March 8, 2026
+
+1. Qwen 3 Released with 235B Parameters
+   Alibaba's latest open-weight model matches GPT-4.5 on several
+   benchmarks while remaining fully open source.
+   → https://qwenlm.github.io/blog/qwen3/
+
+2. LangChain Launches Agent Protocol Standard
+   A new open standard for agent-to-agent communication gains
+   adoption from 15 major frameworks in its first week.
+   → https://blog.langchain.dev/agent-protocol/
+
+3. EU AI Act Enforcement Begins for General-Purpose Models
+   The first compliance deadlines hit, with open source models
+   receiving exemptions under the 10M parameter threshold.
+   → https://artificialintelligenceact.eu/updates/
+
+3 stories • Sources searched: 8 • Generated by Hermes Agent</code></pre>
+<p>اگر کار کرد، آماده اتوماسیونش هستید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>روی فرمت تکرار کنید:</b>پرامپت‌های مختلفی امتحان کنید تا خروجی‌ای که عاشقش می‌شوید برسد. دستورهایی مثل «از سرتیتر ایموجی استفاده کن» یا «هر خلاصه زیر ۲ جمله باشد» اضافه کنید. هرچه نهایی شد داخل کار Cron می‌رود.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: ساخت کار Cron</h2>
+<p>حالا زمان‌بندی‌اش کنیم تا خودکار هر صبح اجرا شود. دو راه دارید.</p>
+<p>قبل از ساختن کارهای cron مطمئن شوید هرمس مدل و ارائه‌دهندهٔ پیش‌فرض global دارد. اگر می‌خواهید کار مشخصی مقادیر متفاوت داشته باشد، هنگام ساختش بازنویسی صریح per-job ی مدل/ارائه‌دهنده ست کنید.</p>
+<h3>گزینهٔ A: زبان طبیعی ‏(داخل چت)</h3>
+<p>فقط به هرمس بگویید چه می‌خواهید:</p>
+<pre dir="ltr"><code>Every morning at 8am, search the web for the latest news about AI agents
+and open source LLMs. Summarize the top 3 stories in a concise briefing
+with links. Use a friendly, professional tone. Deliver to telegram.</code></pre>
+<p>هرمس با ابزار یکپارچهٔ cronjob کار cron را برایتان می‌سازد.</p>
+<h3>گزینهٔ B: فرمان اسلش CLI</h3>
+<p>برای کنترل بیشتر از ‎/cron‎ استفاده کنید:</p>
+<pre dir="ltr"><code>/cron add "0 8 * * *" "Search the web for the latest news about AI agents and open source LLMs. Find at least 5 recent articles from the past 24 hours. Summarize the top 3 most important stories in a concise daily briefing format. For each story include: a clear headline, a 2-sentence summary, and the source URL. Use a friendly, professional tone. Format with emoji bullet points and end with a total story count."</code></pre>
+<h3>قاعدهٔ طلایی: پرامپت‌های خودبسنده</h3>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p><b>مفهوم حیاتی</b><br>کارهای cron در یک <b>نشست کاملاً تازه</b> اجرا می‌شوند — نه حافظه‌ای از گفتگوهای قبلی دارید نه اطلاعی از اینکه «قبلاً چه چیزی تنظیم کرده بودی». پرامپت باید <b>همهٔ</b> آنچه ایجنت برای انجام کار لازم دارد را داشته باشد.</p>
+</div>
+<p><b>پرامپت بد:</b></p>
+<pre dir="ltr"><code>Do my usual morning briefing.</code></pre>
+<p><b>پرامپت خوب:</b></p>
+<pre dir="ltr"><code>Search the web for the latest news about AI agents and open source LLMs.
+Find at least 5 recent articles from the past 24 hours. Summarize the
+top 3 most important stories in a concise daily briefing format. For each
+story include: a clear headline, a 2-sentence summary, and the source URL.
+Use a friendly, professional tone. Format with emoji bullet points.</code></pre>
+<p>پرامپت خوب دربارهٔ <b>چه چیزی جستجو شود</b>، ‏<b>چند مقاله</b>، ‏<b>چه فرمتی</b> و <b>چه لحنی</b> دقیق است. همان یک شات، همهٔ نیازهای ایجنت.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۳: شخصی‌سازی خلاصه</h2>
+<p>وقتی خلاصهٔ پایه کار کرد، می‌توانید خلاق شوید.</p>
+<h3>خلاصه‌های چندموضوعی</h3>
+<p>چند حوزه را در یک خلاصه پوشش دهید:</p>
+<pre dir="ltr"><code>/cron add "0 8 * * *" "Create a morning briefing covering three topics. For each topic, search the web for recent news from the past 24 hours and summarize the top 2 stories with links.
+
+Topics:
+1. AI and machine learning — focus on open source models and agent frameworks
+2. Cryptocurrency — focus on Bitcoin, Ethereum, and regulatory news
+3. Space exploration — focus on SpaceX, NASA, and commercial space
+
+Format as a clean briefing with section headers and emoji. End with today's date and a motivational quote."</code></pre>
+<h3>واگذاری برای تحقیق موازی</h3>
+<p>برای خلاصه‌های سریع‌تر به هرمس بگویید هر موضوع را به یک زیرایجنت واگذار کند:</p>
+<pre dir="ltr"><code>/cron add "0 8 * * *" "Create a morning briefing by delegating research to sub-agents. Delegate three parallel tasks:
+
+1. Delegate: Search for the top 2 AI/ML news stories from the past 24 hours with links
+2. Delegate: Search for the top 2 cryptocurrency news stories from the past 24 hours with links
+3. Delegate: Search for the top 2 space exploration news stories from the past 24 hours with links
+
+Collect all results and combine them into a single clean briefing with section headers, emoji formatting, and source links. Add today's date as a header."</code></pre>
+<p>هر زیرایجنت مستقل و موازی جستجو می‌کند و بعد ایجنت اصلی همه را در یک خلاصهٔ صیقلی ترکیب می‌کند. جزئیات بیشتر در <a href="../user-guide/features/delegation.html">مستندات واگذاری</a>.</p>
+<h3>زمان‌بندی فقط-روزهای-هفته</h3>
+<p>خلاصهٔ آخر هفته نمی‌خواهید؟ عبارت cron ای بنویسید که دوشنبه تا جمعه را هدف بگیرد:</p>
+<pre dir="ltr"><code>/cron add "0 8 * * 1-5" "Search for the latest AI and tech news..."</code></pre>
+<h3>خلاصه‌های دوبار-در-روز</h3>
+<p>یک نمای صبح و یک جمع‌بندی شب:</p>
+<pre dir="ltr"><code>/cron add "0 8 * * *" "Morning briefing: search for AI news from the past 12 hours..."
+/cron add "0 18 * * *" "Evening recap: search for AI news from the past 12 hours..."</code></pre>
+<h3>افزودن زمینهٔ شخصی با حافظه</h3>
+<p>اگر <a href="../user-guide/features/memory.html">حافظه</a> فعال دارید می‌توانید ترجیحاتی ذخیره کنید که بین نشست‌ها می‌مانند. ولی یادتان باشد — کارهای cron در نشست‌های تازه بدون حافظهٔ مکالمه‌ای اجرا می‌شوند. برای افزودن زمینهٔ شخصی، مستقیم داخل پرامپت بپزیدش:</p>
+<pre dir="ltr"><code>/cron add "0 8 * * *" "You are creating a briefing for a senior ML engineer who cares about: PyTorch ecosystem, transformer architectures, open-weight models, and AI regulation in the EU. Skip stories about product launches or funding rounds unless they involve open source.
+
+Search for the latest news on these topics. Summarize the top 3 stories with links. Be concise and technical — this reader doesn't need basic explanations."</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>شخصیت را متناسب کنید:</b>ذکر جزئیات اینکه خلاصه <i>برای کیست</i> ارتباط‌پذیری را به‌طور چشمگیری بالا می‌برد. نقش، علایق و موارد ردشدنی را به ایجنت بگویید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۴: مدیریت کارها</h2>
+<h3>فهرست همهٔ کارهای زمان‌بندی‌شده</h3>
+<p>در چت:</p>
+<pre dir="ltr"><code>/cron list</code></pre>
+<p>یا از ترمینال:</p>
+<pre dir="ltr"><code>hermes cron list</code></pre>
+<p>خروجی چنین چیزی می‌بینید:</p>
+<pre dir="ltr"><code>ID          | Name              | Schedule    | Next Run           | Deliver
+------------|-------------------|-------------|--------------------|--------
+a1b2c3d4    | Morning Briefing  | 0 8 * * *   | 2026-03-09 08:00   | telegram
+e5f6g7h8    | Evening Recap     | 0 18 * * *  | 2026-03-08 18:00   | telegram</code></pre>
+<h3>حذف یک کار</h3>
+<p>در چت:</p>
+<pre dir="ltr"><code>/cron remove a1b2c3d4</code></pre>
+<p>یا محاوره‌ای بخواهید:</p>
+<pre dir="ltr"><code>Remove my morning briefing cron job.</code></pre>
+<p>هرمس از cronjob(action="list") برای پیدا کردن و از cronjob(action="remove") برای حذف استفاده می‌کند.</p>
+<h3>چک وضعیت گیت‌وی</h3>
+<p>مطمئن شوید زمان‌بند واقعاً در حال اجراست:</p>
+<pre dir="ltr"><code>hermes cron status</code></pre>
+<p>اگر گیت‌وی بالا نباشد کارها اجرا نمی‌شوند. برای اطمینان به‌عنوان سرویس پس‌زمینه نصبش کنید:</p>
+<pre dir="ltr"><code>hermes gateway install
+# or on Linux servers
+sudo hermes gateway install --system</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> قدم‌های بعدی</h2>
+<p>یک بات خلاصهٔ روزانهٔ کارا ساختید. مسیرهای پیشنهادی بعدی:</p>
+<ul>
+  <li><b><a href="../user-guide/features/cron.html">وظایف زمان‌بندی‌شده ‏(Cron)</a></b> — مرجع کامل قالب‌های زمان‌بندی، محدودیت تکرار و گزینه‌های تحویل</li>
+  <li><b><a href="../user-guide/features/delegation.html">واگذاری</a></b> — عمیق‌تر در گردش‌کارهای موازی زیرایجنت</li>
+  <li><b><a href="../user-guide/messaging/index.html">پلتفرم‌های پیام‌رسانی</a></b> — راه‌اندازی تلگرام، دیسکورد یا مقاصد دیگر تحویل</li>
+  <li><b><a href="../user-guide/features/memory.html">حافظه</a></b> — زمینهٔ پایدار بین نشست‌ها</li>
+  <li><b><a href="tips.html">نکات و بهترین شیوه‌ها</a></b> — توصیه‌های بیشتر مهندسی پرامپت</li>
+</ul>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>چه چیزهای دیگری می‌شود زمان‌بندی کرد؟</b>الگوی بات خلاصه برای هر چیزی جواب می‌دهد: پایش رقبا، خلاصهٔ مخازن GitHub، پیش‌بینی هوا، پیگیری سبد سرمایه، چک سلامت سرور یا حتی جوک روزانه. اگر بتوانید در یک پرامپت توصیفش کنید، می‌شود زمان‌بندی‌اش کرد.</p>
+</div>
+</section>
+
+<div class="pager">
+  <a href="local-llm-on-mac.html"><span class="dir">→ قبلی</span><span class="ttl">LLM محلی روی مک</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">دستیار تیمی تلگرام (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/daily-briefing-bot" target="_blank" rel="noopener">Build a Daily Briefing Bot</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

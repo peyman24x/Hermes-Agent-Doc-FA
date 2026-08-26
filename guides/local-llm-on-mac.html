@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM محلی روی مک — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/local-llm-on-mac" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>LLM محلی روی مک</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>اجرای LLM های محلی روی مک</h1>
+<p>این راهنما اجرای یک سرور LLM محلی روی macOS با API ی سازگار-OpenAI را قدم‌به‌قدم نشان می‌دهد. حریم خصوصی کامل، هزینهٔ API صفر و کارایی به‌طرز شگفت‌آوری خوب روی Apple Silicon می‌گیرید.</p>
+<p>دو backend را پوشش می‌دهیم:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>بک‌اند</th><th>نصب</th><th>بهترین در</th><th>قالب</th></tr></thead>
+<tbody>
+<tr><td><b>llama.cpp</b></td><td>brew install llama.cpp</td><td>سریع‌ترین زمان-تا-اولین-توکن، کش KV ی کوانتیزه برای حافظهٔ کم</td><td>GGUF</td></tr>
+<tr><td><b>omlx</b></td><td><a href="https://omlx.ai" target="_blank" rel="noopener">omlx.ai</a></td><td>سریع‌ترین تولید توکن، بهینه‌سازی native ی Metal</td><td>MLX ‏(safetensors)</td></tr>
+</tbody>
+</table>
+</div>
+<p>هر دو نقطهٔ پایانی سازگار-OpenAI ی ‎/v1/chat/completions‎ را expose می‌کنند. هرمس با هر کدام کار می‌کند — فقط به http://localhost:8080 یا http://localhost:8000 اشاره‌اش دهید.</p>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p><b>فقط Apple Silicon</b><br>این راهنما برای مک‌های Apple Silicon ‏(M1 به بعد) است. مک‌های Intel با llama.cpp کار می‌کنند ولی بدون شتاب‌دهی GPU — کارایی به‌طور قابل توجهی کندتر خواهد بود.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> انتخاب مدل</h2>
+<p>برای شروع، ‏<b>Qwen3.5-9B</b> را توصیه می‌کنیم — مدلی قدرتمند در reasoning که با کوانتیزه‌سازی راحت در ۸ گیگ حافظهٔ یکپارچه یا بیشتر جا می‌شود.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>گونه</th><th>حجم روی دیسک</th><th>رم لازم ‏(زمینهٔ 128K)</th><th>بک‌اند</th></tr></thead>
+<tbody>
+<tr><td>Qwen3.5-9B-Q4_K_M ‏(GGUF)</td><td>۵٫۳ گیگابایت</td><td>حدود ۱۰ گیگ با کش KV ی کوانتیزه</td><td>llama.cpp</td></tr>
+<tr><td>Qwen3.5-9B-mlx-lm-mxfp4 ‏(MLX)</td><td>حدود ۵ گیگابایت</td><td>حدود ۱۲ گیگ</td><td>omlx</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>قاعده سرانگشتی حافظه:</b>اندازهٔ مدل + کش KV. مدل 9B با Q4 حدود ۵ گیگ است. کش KV در زمینهٔ 128K با کوانتیزه‌سازی Q4 حدود ۴ تا ۵ گیگ اضافه می‌کند. با کش KV پیش‌فرض ‏(f16) این عدد به حدود ۱۶ گیگ می‌رسد. فلگ‌های کش KV ی کوانتیزه در llama.cpp ترفند کلیدی سیستم‌های کم‌حافظه‌اند.</p>
+<p>برای مدل‌های بزرگ‌تر ‏(27B، ‏35B) به ۳۲ گیگ حافظهٔ یکپارچه یا بیشتر نیاز دارید. مدل 9B نقطهٔ طلایی ماشین‌های ۸ تا ۱۶ گیگی است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گزینهٔ A: llama.cpp</h2>
+<p>‏llama.cpp پرتابل‌ترین زمان اجرای LLM محلی است. روی macOS از ابتدا از Metal برای شتاب‌دهی GPU استفاده می‌کند.</p>
+<h3>نصب</h3>
+<pre dir="ltr"><code>brew install llama.cpp</code></pre>
+<p>این فرمان llama-server را global می‌دهد.</p>
+<h3>دانلود مدل</h3>
+<p>مدلی با قالب GGUF لازم دارید. راحت‌ترین منبع Hugging Face از طریق huggingface-cli است:</p>
+<pre dir="ltr"><code>brew install huggingface-cli</code></pre>
+<p>بعد دانلود کنید:</p>
+<pre dir="ltr"><code>huggingface-cli download unsloth/Qwen3.5-9B-GGUF Qwen3.5-9B-Q4_K_M.gguf --local-dir ~/models</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>مدل‌های گیت‌دار:</b>بعضی مدل‌های Hugging Face احراز هویت می‌خواهند. اگر خطای 401 یا 404 گرفتید اول huggingface-cli login را اجرا کنید.</p>
+</div>
+<h3>اجرای سرور</h3>
+<pre dir="ltr"><code>llama-server -m ~/models/Qwen3.5-9B-Q4_K_M.gguf \
+  -ngl 99 \
+  -c 131072 \
+  -np 1 \
+  -fa on \
+  --cache-type-k q4_0 \
+  --cache-type-v q4_0 \
+  --host 0.0.0.0</code></pre>
+<p>کار هر فلگ:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فلگ</th><th>هدف</th></tr></thead>
+<tbody>
+<tr><td>-ngl 99</td><td>انتقال همهٔ لایه‌ها به GPU ‏(Metal). عدد بالا بدهید تا چیزی روی CPU نماند.</td></tr>
+<tr><td>-c 131072</td><td>اندازهٔ پنجرهٔ زمینه ‏(۱۲۸ هزار توکن). اگر حافظه کم است کمش کنید.</td></tr>
+<tr><td>-np 1</td><td>تعداد اسلات‌های موازی. برای تک‌کاربر روی ۱ نگه دارید — اسلات بیشتر بودجهٔ حافظه را تقسیم می‌کند.</td></tr>
+<tr><td>-fa on</td><td>Flash attention. مصرف حافظه را کم و استنتاج زمینهٔ بلند را سریع می‌کند.</td></tr>
+<tr><td>--cache-type-k q4_0</td><td>کوانتیزه کردن کلید-کش به ۴ بیتی. <b>این بزرگ‌ترین صرفه‌جوی حافظه است.</b></td></tr>
+<tr><td>--cache-type-v q4_0</td><td>کوانتیزه کردن مقدار-کش به ۴ بیتی. همراه مورد بالا، حافظهٔ KV cache را نسبت به f16 حدود ۷۵٪ کم می‌کند.</td></tr>
+<tr><td>--host 0.0.0.0</td><td>گوش دادن روی همهٔ اینترفیس‌ها. اگر دسترسی شبکه نمی‌خواهید 127.0.0.1 بگذارید.</td></tr>
+</tbody>
+</table>
+</div>
+<p>سرور وقتی آماده است که این را ببینید:</p>
+<pre dir="ltr"><code>main: server is listening on http://0.0.0.0:8080
+srv  update_slots: all slots are idle</code></pre>
+<h3>بهینه‌سازی حافظه برای سیستم‌های محدود</h3>
+<p>فلگ‌های ‎--cache-type-k q4_0 --cache-type-v q4_0‎ مهم‌ترین بهینه‌سازی برای سیستم‌های کم‌حافظه‌اند. اثرشان در زمینهٔ 128K:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>نوع کش KV</th><th>حافظهٔ کش KV ‏(زمینهٔ 128K، مدل 9B)</th></tr></thead>
+<tbody>
+<tr><td>f16 ‏(پیش‌فرض)</td><td>حدود ۱۶ گیگابایت</td></tr>
+<tr><td>q8_0</td><td>حدود ۸ گیگابایت</td></tr>
+<tr><td><b>q4_0</b></td><td><b>حدود ۴ گیگابایت</b></td></tr>
+</tbody>
+</table>
+</div>
+<p>روی مک ۸ گیگی از کش KV ی q4_0 استفاده کنید و مدلی کوچک‌تر بردارید که حداقل زمینهٔ 64K ی هرمس را هنوز جا دهد. روی ۱۶ گیگ راحت می‌توانید زمینهٔ 128K داشته باشید. روی ۳۲ گیگ به بالا می‌توانید مدل بزرگ‌تر یا چند اسلات موازی اجرا کنید.</p>
+<p>اگر باز هم حافظه کم آمد، زمینه را فقط تا حداقلِ ۶۴ هزارِ هرمس کم کنید؛ وگرنه به مدل کوچک‌تر یا کوانتیزه‌سازی کوچک‌تر سوئیچ کنید ‏(Q3_K_M به‌جای Q4_K_M).</p>
+<h3>تستش کنید</h3>
+<pre dir="ltr"><code>curl -s http://localhost:8080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen3.5-9B-Q4_K_M.gguf",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "max_tokens": 50
+  }' | jq .choices[0].message.content</code></pre>
+<h3>گرفتن نام مدل</h3>
+<p>اگر نام مدل یادتان رفت، نقطهٔ پایانی models را کوئری بزنید:</p>
+<pre dir="ltr"><code>curl -s http://localhost:8080/v1/models | jq '.data[].id'</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گزینهٔ B: MLX از طریق omlx</h2>
+<p><a href="https://omlx.ai" target="_blank" rel="noopener">omlx</a> برنامه‌ای بومی-macOS است که مدل‌های MLX را مدیریت و سرویس می‌کند. ‏MLX فریم‌ورک یادگیری ماشین خودِ اپل است که مخصوصاً برای معماری حافظهٔ یکپارچهٔ Apple Silicon بهینه شده.</p>
+<h3>نصب</h3>
+<p>از <a href="https://omlx.ai" target="_blank" rel="noopener">omlx.ai</a> دانلود و نصب کنید. GUI ی مدیریت مدل و یک سرور داخلی دارد.</p>
+<h3>دانلود مدل</h3>
+<p>با برنامهٔ omlx مدل‌ها را مرور و دانلود کنید. عبارت Qwen3.5-9B-mlx-lm-mxfp4 را جستجو و دانلودش کنید. مدل‌ها محلی ذخیره می‌شوند ‏(معمولاً در ~/.omlx/models/).</p>
+<h3>اجرای سرور</h3>
+<p>‏omlx به‌طور پیش‌فرض روی http://127.0.0.1:8000 سرویس می‌دهد. از UI برنامه شروعش کنید یا در صورت موجود بودن از CLI.</p>
+<h3>تستش کنید</h3>
+<pre dir="ltr"><code>curl -s http://127.0.0.1:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen3.5-9B-mlx-lm-mxfp4",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "max_tokens": 50
+  }' | jq .choices[0].message.content</code></pre>
+<h3>فهرست مدل‌های موجود</h3>
+<p>‏omlx می‌تواند هم‌زمان چند مدل سرویس کند:</p>
+<pre dir="ltr"><code>curl -s http://127.0.0.1:8000/v1/models | jq '.data[].id'</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> بنچمارک: llama.cpp در برابر MLX</h2>
+<p>هر دو بک‌اند روی یک ماشین ‏(Apple M5 Max با ۱۲۸ گیگ حافظهٔ یکپارچه) با همان مدل ‏(Qwen3.5-9B) در سطح کوانتیزه‌سازی مشابه ‏(Q4_K_M برای GGUF و mxfp4 برای MLX) تست شدند. پنج پرامپت متنوع، سه بار اجرای هرکدام، بک‌اندها پشت سر هم تست شدند تا رقابت منابع پیش نیاید.</p>
+<h3>نتایج</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>سنجه</th><th>llama.cpp ‏(Q4_K_M)</th><th>MLX ‏(mxfp4)</th><th>برنده</th></tr></thead>
+<tbody>
+<tr><td><b>TTFT ‏(میانگین)</b></td><td><b>۶۷ میلی‌ثانیه</b></td><td>۲۸۹ میلی‌ثانیه</td><td>llama.cpp ‏(۴٫۳ برابر سریع‌تر)</td></tr>
+<tr><td><b>TTFT ‏(p50)</b></td><td><b>۶۶ میلی‌ثانیه</b></td><td>۲۸۶ میلی‌ثانیه</td><td>llama.cpp ‏(۴٫۳ برابر سریع‌تر)</td></tr>
+<tr><td><b>تولید ‏(میانگین)</b></td><td>۷۰ توکن/ثانیه</td><td><b>۹۶ توکن/ثانیه</b></td><td>MLX ‏(۳۷٪ سریع‌تر)</td></tr>
+<tr><td><b>تولید ‏(p50)</b></td><td>۷۰ توکن/ثانیه</td><td><b>۹۶ توکن/ثانیه</b></td><td>MLX ‏(۳۷٪ سریع‌تر)</td></tr>
+<tr><td><b>زمان کل ‏(۵۱۲ توکن)</b></td><td>۷٫۳ ثانیه</td><td><b>۵٫۵ ثانیه</b></td><td>MLX ‏(۲۵٪ سریع‌تر)</td></tr>
+</tbody>
+</table>
+</div>
+<h3>یعنی چه؟</h3>
+<ul>
+  <li><b>llama.cpp</b> در پردازش پرامپت می‌درخشد — خط لوله flash attention + کش KV ی کوانتیزه اولین توکن را در حدود ۶۶ میلی‌ثانیه می‌دهد. اگر برنامه تعاملی می‌سازید که پاسخ‌دهی حس‌شده مهم است ‏(چت‌بات، autocomplete) این مزیت معناداری است.</li>
+  <li><b>MLX</b> بعد از راه افتادن حدود ۳۷٪ سریع‌تر توکن تولید می‌کند. برای بارهای دسته‌ای، تولید متن بلند یا هر کاری که زمان کل تکمیل مهم‌تر از تأخیر اولیه است، MLX زودتر تمام می‌کند.</li>
+  <li>هر دو بک‌اند <b>فوق‌العاده یکدست‌اند</b> — پراکندگی بین اجراها ناچیز بود. به این اعداد می‌توانید اعتماد کنید.</li>
+</ul>
+<h3>کدام را بردارم؟</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>حالت استفاده</th><th>توصیه</th></tr></thead>
+<tbody>
+<tr><td>چت تعاملی، ابزارهای کم‌تأخیر</td><td>llama.cpp</td></tr>
+<tr><td>تولید متن بلند، پردازش انبوه</td><td>MLX ‏(omlx)</td></tr>
+<tr><td>محدودیت حافظه ‏(۸ تا ۱۶ گیگ)</td><td>llama.cpp ‏(کش KV ی کوانتیزه بی‌رقیب است)</td></tr>
+<tr><td>سرویس هم‌زمان چند مدل</td><td>omlx ‏(پشتیبانی داخلی چندمدلی)</td></tr>
+<tr><td>بیشترین سازگاری ‏(لینوکس هم)</td><td>llama.cpp</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> اتصال به Hermes</h2>
+<p>وقتی سرور محلی‌تان بالا بود:</p>
+<pre dir="ltr"><code>hermes model</code></pre>
+<p>گزینهٔ <b>Custom endpoint</b> را انتخاب و مراحل را دنبال کنید. URL پایه و نام مدل را می‌پرسد — مقادیر همان بک‌اندی که بالا راه انداختید را بدهید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> تایم‌اوت‌ها</h2>
+<p>هرمس نقاط پایانی محلی ‏(localhost، ‏IP های LAN) را خودکار تشخیص می‌دهد و تایم‌اوت‌های استریمش را آزادتر می‌کند. برای بیشتر راه‌اندازی‌ها پیکربندی لازم نیست.</p>
+<p>اگر باز هم خطای تایم‌اوت گرفتید ‏(مثلاً زمینه‌های خیلی بزرگ روی سخت‌افزار کند)، تایم‌اوت خواندن استریم را بازنویسی کنید:</p>
+<pre dir="ltr"><code># In your .env — raise from the 120s default to 30 minutes
+HERMES_STREAM_READ_TIMEOUT=1800</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>تایم‌اوت</th><th>پیش‌فرض</th><th>تنظیم خودکار محلی</th><th>بازنویسی با متغیر محیطی</th></tr></thead>
+<tbody>
+<tr><td>خواندن استریم ‏(سطح سوکت)</td><td>۱۲۰ ثانیه</td><td>به ۱۸۰۰ ثانیه بالا می‌رود</td><td>HERMES_STREAM_READ_TIMEOUT</td></tr>
+<tr><td>تشخیص استریم راکد</td><td>۱۸۰ ثانیه</td><td>کاملاً غیرفعال می‌شود</td><td>HERMES_STREAM_STALE_TIMEOUT</td></tr>
+<tr><td>فراخوانی API ‏(غیراستریمی)</td><td>۱۸۰۰ ثانیه</td><td>تغییری لازم نیست</td><td>HERMES_API_TIMEOUT</td></tr>
+</tbody>
+</table>
+</div>
+<p>تایم‌اوت خواندن استریم محتمل‌ترین منبع مشکل است — مهلت سطح سوکت برای دریافت chunk بعدی داده است. هنگام prefill روی زمینه‌های بزرگ، مدل‌های محلی ممکن است چند دقیقه هیچ خروجی‌ای نداشته باشند در حالی که پرامپت را پردازش می‌کنند. تشخیص خودکار این را شفاف مدیریت می‌کند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>نوبت اولِ خاموش معمولاً prefill است نه hang:</b>هرمس system prompt و اسکیماهای ابزار را با هر فراخوانی می‌فرستد، پس روی سخت‌افزار کندتر نوبت اول می‌تواند دقیقه‌ها سکوت داشته باشد در حالی که مدل پرامپت را پردازش می‌کند قبل از تولید هر چیز. این کارِ prefill است نه نشست گیرکرده. راه‌حل‌هایی مثل نگه داشتن مدل بار‌شده و کوتاه کردن پرامپت ثابت با hermes prompt-size را در بخش «پاسخ اول کند» راهنمای <a href="https://hermes-agent.nousresearch.com/docs/guides/local-ollama-setup" target="_blank" rel="noopener">Ollama محلی</a> ببینید.</p>
+</div>
+</section>
+
+<div class="pager">
+  <a href="tips.html"><span class="dir">→ قبلی</span><span class="ttl">نکات و بهترین شیوه‌ها</span></a>
+  <a class="next" href="daily-briefing-bot.html"><span class="dir">بعدی ←</span><span class="ttl">بات خلاصهٔ روزانه</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/local-llm-on-mac" target="_blank" rel="noopener">Run Local LLMs on Mac</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

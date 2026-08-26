@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ارسال خروجی اسکریپت به پیام‌رسان‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/pipe-script-output" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>ارسال خروجی اسکریپت به پیام‌رسان‌ها</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>پایپ کردن خروجی اسکریپت به پلتفرم‌های پیام‌رسانی</h1>
+<p>‏hermes send یک CLI ی کوچک و اسکریپت‌پذیر است که پیامی را به هر پلتفرم پیام‌رسانیِ از قبل پیکربندی‌شده در هرمس می‌فشارد. مثل یک curl چندپلتفرمی برای اعلان‌هاست — نه گیت‌وی در حال اجرا می‌خواهد، نه LLM، و لازم نیست توکن بات را در تک‌تک اسکریپت‌هایتان دوباره بچسبانید.</p>
+<p>برای این‌ها استفاده‌اش کنید:</p>
+<ul>
+  <li>پایش سیستم ‏(رم، ‏دیسک، دمای GPU، تمام شدن کار طولانی)</li>
+  <li>اعلان‌های CI/CD ‏(استقرار انجام شد، شکست تست)</li>
+  <li>اسکریپت‌های Cron که باید نتیجه را بهتان خبر دهند</li>
+  <li>پیام‌های تک‌ضرب سریع از ترمینال</li>
+  <li>پایپ کردن خروجی هر ابزاری به هر جا ‏(make | hermes send --to slack:#builds)</li>
+</ul>
+<p>این فرمان همان credential ها و آداپتورهای پلتفرمی که hermes gateway از قبل استفاده می‌کند را بازمصرف می‌کند، پس سطح پیکربندی دوم برای نگهداری نیست.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> شروع سریع</h2>
+<pre dir="ltr"><code># Plain text to the home channel for a platform
+hermes send --to telegram "deploy finished"
+
+# Pipe in stdout from anything
+echo "RAM 92%" | hermes send --to telegram:-1001234567890
+
+# Send a file
+hermes send --to discord:#ops --file /tmp/report.md
+
+# Attach a subject/header line
+hermes send --to slack:#eng --subject "[CI] build.log" --file build.log
+
+# Thread target (Telegram topic, Discord thread)
+hermes send --to telegram:-1001234567890:17585 "threaded reply"
+
+# List every configured target
+hermes send --list
+
+# Filter by platform
+hermes send --list telegram</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> مرجع آرگومان‌ها</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فلگ</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td>-t, --to TARGET</td><td>مقصد. قالب‌های هدف را ببینید.</td></tr>
+<tr><td>message ‏(موقعیتی)</td><td>متن پیام. برای خواندن از ‎--file‎ یا stdin حذفش کنید.</td></tr>
+<tr><td>-f, --file PATH</td><td>بدنه را از فایل بخوان. ‎--file -‎ استریم stdin را اجباری می‌کند.</td></tr>
+<tr><td>-s, --subject LINE</td><td>یک خط سربرگ/موضوع قبل از بدنه اضافه می‌کند.</td></tr>
+<tr><td>-l, --list</td><td>فهرست مقاصد موجود. فیلتر موقعیتی پلتفرم هم اختیاری است.</td></tr>
+<tr><td>-q, --quiet</td><td>در موفقیت هیچ stdout ای ندارد ‏(فقط کد خروج — ایده‌آل برای اسکریپت).</td></tr>
+<tr><td>--json</td><td>نتیجهٔ JSON خام ارسال را چاپ می‌کند.</td></tr>
+<tr><td>-h, --help</td><td>متن راهنمای داخلی.</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="target-formats">قالب‌های هدف</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>قالب</th><th>نمونه</th><th>معنا</th></tr></thead>
+<tbody>
+<tr><td>platform</td><td>telegram</td><td>ارسال به کانال خانگی پیکربندی‌شدهٔ پلتفرم</td></tr>
+<tr><td>platform:chat_id</td><td>telegram:-1001234567890</td><td>گفتگو / گروه / کاربر عددی مشخص</td></tr>
+<tr><td>platform:chat_id:thread_id</td><td>telegram:-1001234567890:17585</td><td>رشتهٔ مشخص یا تاپیک فروم تلگرام</td></tr>
+<tr><td>platform:#channel</td><td>discord:#ops</td><td>نام کانال دوستانه ‏(با فهرست کانال‌ها حل می‌شود)</td></tr>
+<tr><td>platform:+E164</td><td>signal:+15551234567</td><td>پلتفرم‌های آدرس-شماره‌ای: Signal، ‏SMS، ‏WhatsApp</td></tr>
+</tbody>
+</table>
+</div>
+<p>هر پلتفرمی که هرمس آداپتور دارد به‌عنوان هدف کار می‌کند: telegram، ‏discord، ‏slack، ‏signal، ‏sms، ‏whatsapp، ‏matrix، ‏mattermost، ‏feishu، ‏dingtalk، ‏wecom، ‏weixin، ‏email و دیگران.</p>
+<h3>کدهای خروج</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>کد</th><th>معنا</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>ارسال ‏(یا فهرست) موفق بود</td></tr>
+<tr><td>1</td><td>تحویل در سطح پلتفرم شکست خورد ‏(احراز، مجوز، شبکه)</td></tr>
+<tr><td>2</td><td>خطای استفاده / آرگومان / پیکربندی</td></tr>
+</tbody>
+</table>
+</div>
+<p>کدهای خروج قرارداد استاندارد یونیکس را دنبال می‌کنند تا اسکریپت‌هایتان رویشان شاخه بزنند همان‌طور که روی curl یا grep شاخه می‌زنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> حل کردن بدنهٔ پیام</h2>
+<p>‏hermes send بدنهٔ پیام را با این ترتیب حل می‌کند:</p>
+<ol>
+  <li><b>آرگومان موقعیتی</b> — hermes send --to telegram "hi"</li>
+  <li><b>‎--file PATH‎</b> — hermes send --to telegram --file msg.txt</li>
+  <li><b>stdin پایپ‌شده</b> — echo hi | hermes send --to telegram</li>
+</ol>
+<p>وقتی stdin یک TTY است ‏(بدون پایپ) هرمس منتظر ورود <b>نمی‌ماند</b> — به‌جایش خطای استفادهٔ روشنی می‌گیرید. این جلوگیر می‌شود اسکریپت‌ها اگر تصادفی بدنه را جا بیندازند معلق بمانند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> نمونه‌های دنیای واقعی</h2>
+<h3>پایش: هشدار رم / دیسک</h3>
+<p>فراخوانی‌های ad-hoc ی curl https://api.telegram.org/... در نگهبان‌های تان را با یک خط قابل‌حمل عوض کنید:</p>
+<pre dir="ltr"><code>#!/usr/bin/env bash
+ram_pct=$(free | awk '/^Mem:/ {printf "%d", $3 * 100 / $2}')
+if [ "$ram_pct" -ge 85 ]; then
+  hermes send --to telegram --subject "⚠ MEMORY WARNING" \
+    "RAM ${ram_pct}% on $(hostname)"
+fi</code></pre>
+<p>چون hermes send پیکربندی هرمس شما را بازمصرف می‌کند، همان اسکریپت روی هر host ای که هرمس نصب است کار می‌کند — لازم نیست توکن بات را دستی در محیط هر ماشین export کنید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>به گیت‌وی دربارهٔ خودش هشدار ندهید:</b>برای نگهبان‌هایی که ممکن است وقتی خود گیت‌وی در سختی است فعال شوند ‏(هشدار OOM، هشدار پرشدن دیسک)، همچنان از فراخوانی مینیمال curl استفاده کنید نه hermes send. اگر مفسر پایتون نتواند بار شود چون ماشین در حال تقلاست، هنوز می‌خواهید آن هشدار برسد.</p>
+</div>
+<h3>CI / CD: نتیجهٔ ساخت و تست</h3>
+<pre dir="ltr"><code># In .github/workflows/deploy.yml or any CI script
+if ./scripts/deploy.sh; then
+  hermes send --to slack:#deploys "✅ ${CI_COMMIT_SHA:0:7} deployed"
+else
+  tail -n 100 deploy.log | hermes send \
+    --to slack:#deploys --subject "❌ deploy failed"
+  exit 1
+fi</code></pre>
+<h3>Cron: گزارش روزانه</h3>
+<pre dir="ltr"><code># Crontab entry
+0 9 * * * /usr/local/bin/generate-metrics.sh \
+  | /home/me/.hermes/bin/hermes send \
+      --to telegram --subject "Daily metrics $(date +%Y-%m-%d)"</code></pre>
+<h3>کارهای طولانی: خبر دادن موقع پایان</h3>
+<pre dir="ltr"><code>./train.py --epochs 200 &amp;&amp; \
+  hermes send --to telegram "training done" || \
+  hermes send --to telegram "training failed (exit $?)"</code></pre>
+<h3>اسکریپت‌نویسی با ‎--json‎ و ‎--quiet‎</h3>
+<pre dir="ltr"><code># Hard-fail a script if delivery fails; don't clutter logs on success
+hermes send --to telegram --quiet "keepalive" || {
+  echo "Telegram delivery failed" &gt;&amp;2
+  exit 1
+}
+
+# Capture the message ID for later editing / threading
+msg_id=$(hermes send --to discord:#ops --json "build started" \
+  | jq -r .message_id)</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> آیا hermes send به گیت‌وی نیاز دارد؟</h2>
+<p><b>معمولاً نه.</b>برای هر پلتفرم توکن-بات — ‏Telegram، ‏Discord، ‏Slack، ‏Signal، ‏SMS، ‏WhatsApp Cloud API و بیشتر بقیه — ‏hermes send مستقیماً نقطهٔ پایانی REST پلتفرم را با credential های ~/.hermes/.env و ~/.hermes/config.yaml صدا می‌زند. یک زیرفرایند مستقل است که همین که پیام تحویل شد خارج می‌شود.</p>
+<p>گیت‌وی زنده فقط برای <b>پلتفرم‌های افزونه‌ای</b> لازم است که به اتصال دائمی آداپتور تکیه دارند ‏(مثلاً افزونهٔ سفارشی که WebSocket ی بلندعمر باز نگه می‌دارد). در آن صورت خطای روشنی به سمت گیت‌وی اشاره می‌کند؛ با hermes gateway start بالا بیاورید و دوباره امتحان کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> فهرست و کشف مقاصد</h2>
+<p>قبل از ارسال به کانال مشخص، می‌توانید ببینید چه چیزی موجوده:</p>
+<pre dir="ltr"><code># Every target across every configured platform
+hermes send --list
+
+# Just Telegram targets
+hermes send --list telegram
+
+# Machine-readable
+hermes send --list --json</code></pre>
+<p>فهرست از ~/.hermes/channel_directory.json ساخته می‌شود که گیت‌وی در حال اجرا هر چند دقیقه refresh می‌کند. اگر «no channels discovered yet» دیدید، یک بار گیت‌وی را اجرا کنید ‏(hermes gateway start) تا کش پر شود.</p>
+<p>نام‌های دوستانه ‏(discord:#ops، ‏slack:#engineering) هنگام ارسال با این کش حل می‌شوند، پس لازم نیست شناسه‌های عددی را حفظ باشید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> مقایسه با رویکردهای دیگر</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>رویکرد</th><th>چندپلتفرمی</th><th>بازمصرف credential هرمس</th><th>گیت‌وی لازم؟</th><th>بهترین برای</th></tr></thead>
+<tbody>
+<tr><td>hermes send</td><td>✅</td><td>✅</td><td>نه ‏(توکن-بات)</td><td>همهٔ کاربردهای این صفحه</td></tr>
+<tr><td>curl خام به هر پلتفرم</td><td>هرکدام جدا اسکریپت می‌شود</td><td>دستی</td><td>نه</td><td>نگهبان‌های حیاتی</td></tr>
+<tr><td>کار cron با ‎--deliver‎</td><td>✅</td><td>✅</td><td>نه</td><td>وظایف ایجنتی زمان‌بندی‌شده</td></tr>
+</tbody>
+</table>
+</div>
+<p>‏hermes send عمداً ساده‌ترین سطح ممکن است. اگر می‌خواهید یک ایجنت تصمیم بگیرد چه بگوید، کار cron زمان‌بندی کنید — پاسخ نهایی ایجنت خودکار به مقصد deliver: ی پیکربندی‌شده تحویل داده می‌شود ‏(ایجنت دیگر خودش پیام نمی‌فرستد). اگر اجرای زمان‌بندی‌شده با محتوای تولید-LLM می‌خواهید از cronjob(action='create', prompt=...) با deliver='telegram:...' استفاده کنید. اگر فقط پایپ کردن یک رشتهٔ خام لازم دارید، سراغ hermes send بروید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> مرتبط</h2>
+<ul>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/guides/automate-with-cron" target="_blank" rel="noopener">اتوماسیون هر چیزی با Cron</a></b> — کارهای زمان‌بندی‌شده‌ای که خروجی‌شان خودکار به هر پلتفرمی تحویل می‌شود.</li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/gateway-internals" target="_blank" rel="noopener">درون‌مایهٔ گیت‌وی</a></b> — مسیریاب تحویلی که hermes send با تحویل cron شریک است.</li>
+  <li><b><a href="../user-guide/messaging/index.html">راه‌اندازی پلتفرم‌های پیام‌رسانی</a></b> — پیکربندی یک‌بارهٔ هر پلتفرم.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <span class="off prev"><span class="dir">→ قبلی</span><span class="ttl">راهبری خط لولهٔ جلسات تیمز (به‌زودی)</span></span>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">اجرا با Nous Portal (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/pipe-script-output" target="_blank" rel="noopener">Pipe Script Output to Messaging Platforms</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

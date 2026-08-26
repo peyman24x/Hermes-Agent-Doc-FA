@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cron فقط با اسکریپت ‏(بدون LLM) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/cron-script-only" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>Cron فقط با اسکریپت ‏(بدون LLM)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>کارهای Cron فقط-اسکریپتی ‏(بدون LLM)</h1>
+<p>گاهی از قبل دقیقاً می‌دانید چه پیامی می‌خواهید بفرستید. به استدلال ایجنت نیازی ندارید — فقط می‌خواهید یک اسکریپت با تایمر اجرا شود و خروجی‌اش ‏(اگر باشد) در تلگرام / دیسکورد / اسلک / Signal بنشیند.</p>
+<p>هرمس به این <b>حالت بدون-ایجنت</b> می‌گوید. یعنی سیستم cron منهای LLM.</p>
+<pre dir="ltr"><code>   ┌──────────────────┐          ┌──────────────────┐
+   │ scheduler tick   │  every   │ run script       │
+   │ (every N minutes)│ ──────▶ │ (bash or python) │
+   └──────────────────┘          └──────────────────┘
+                                          │
+                                          │ stdout
+                                          ▼
+                                 ┌──────────────────┐
+                                 │ delivery router  │
+                                 │ (telegram/disc…) │
+                                 └──────────────────┘</code></pre>
+<ul>
+  <li><b>بدون فراخوانی LLM.</b>صفر توکن، صفر حلقهٔ ایجنت، صفر هزینهٔ مدل.</li>
+  <li><b>اسکریپت خودِ کار است.</b>اسکریپت تصمیم می‌گیرد هشدار بدهد یا نه. خروجی بدهد ← پیام فرستاده می‌شود. چیزی ندهد ← تیک بی‌صدا.</li>
+  <li><b>Bash یا Python.</b>فایل‌های ‎.sh‎ / ‎.bash‎ زیر bash از PATH اجرا می‌شوند ‏(در دسترس نبود، ‎/bin/bash‎)؛ هر پسوند دیگری زیر مفسر پایتون فعلی اجرا می‌شود. مسیرها باید داخل ~/.hermes/scripts/ حل شوند ‏(شکل نسبی، مطلق یا ~ اشکالی ندارد اگر در همان پوشه بمانند). اسکریپت‌های cron از محیط فرایند هرمس credential های ارائه‌دهنده <b>به ارث نمی‌برند</b>.</li>
+  <li><b>همان زمان‌بند.</b>کنار کارهای LLM در cronjob زندگی می‌کند — توقف، ادامه، فهرست، لاگ‌ها و هدف‌گیری تحویل همه همان‌طور کار می‌کنند.</li>
+</ul>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> کی استفاده کنیم</h2>
+<p>حالت بدون-ایجنت برای:</p>
+<ul>
+  <li><b>نگهبان‌های رم / دیسک / GPU.</b>هر ۵ دقیقه اجرا شود، فقط وقتی آستانه شکست هشدار بدهد.</li>
+  <li><b>قلاب‌های CI.</b>استقرار تمام شد ← SHA ی کامیت را پست کن. ساخت شکست خورد ← ۱۰۰ خط آخر لاگ را بفرست.</li>
+  <li><b>سنجه‌های دوره‌ای.</b>«درآمد روزانه Stripe ساعت ۹ صبح» به‌صورت یک فراخوانی ساده API + چاپ مرتب.</li>
+  <li><b>poller های رویداد خارجی.</b>یک API را چک کن، روی تغییر وضعیت هشدار بده.</li>
+  <li><b>ضربان‌ها.</b>هر N دقیقه به یک داشبورد ping بده تا ثابت شود host زنده است.</li>
+</ul>
+<p>وقتی لازم است ایجنت <b>تصمیم بگیرد</b> چه بگوید — خلاصهٔ یک سند بلند، انتخاب موارد جالب از یک فید، پیش‌نویس پیام دوستانه — از کار cron معمولی ‏(LLM-محور) استفاده کنید. مسیر بدون-ایجنت برای حالت‌هایی است که stdout ی اسکریپت همین حالا <i>خودِ</i> پیام است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> ساختن از داخل چت</h2>
+<p>برد واقعی حالت بدون-ایجنت این است که خود ایجنت می‌تواند نگهبان را برایتان راه بیندازد — بدون ویرایشگر، بدون شل، بدون حفظ فلگ‌های CLI. توصیف می‌کنید چه می‌خواهید، هرمس اسکریپت را می‌نویسد، زمان‌بندی می‌کند و می‌گوید کی فعال می‌شود.</p>
+<h3>نمونه گفتگو</h3>
+<blockquote>
+  <p><b>شما:</b> اگه رم بالای ۸۵٪ بود هر ۵ دقیقه تو تلگرام بهم خبر بده</p>
+  <p><b>هرمس:</b> ‏<i>(می‌نویسد ~/.hermes/scripts/memory-watchdog.sh و بعد cronjob(...) را با no_agent=true صدا می‌زند)</i></p>
+  <p>راه افتاد. هر ۵ دقیقه اجرا می‌شه و فقط وقتی رم بالای ۸۵٪ باشه تلگرام خبر می‌ده. اسکریپت: memory-watchdog.sh. شناسهٔ کار: abc123.</p>
+</blockquote>
+<p>زیر کاپوت ایجنت دو فراخوانی ابزار می‌زند:</p>
+<pre dir="ltr"><code># 1. Write the check script
+write_file(
+    path="~/.hermes/scripts/memory-watchdog.sh",
+    content='''#!/usr/bin/env bash
+ram_pct=$(free | awk '/^Mem:/ {printf "%d", $3 * 100 / $2}')
+if [ "$ram_pct" -ge 85 ]; then
+  echo "RAM ${ram_pct}% on $(hostname)"
+fi
+# Empty stdout = silent tick; no message sent.
+''',
+)
+
+# 2. Schedule it — no_agent=True skips the LLM on every tick
+cronjob(
+    action="create",
+    schedule="every 5m",
+    script="memory-watchdog.sh",
+    no_agent=True,
+    deliver="telegram",
+    name="memory-watchdog",
+)</code></pre>
+<p>از آن به بعد هر تیک رایگان است: زمان‌بند اسکریپت را اجرا می‌کند، stdout اش را اگر غیرخالی به تلگرام پایپ می‌کند و هرگز به مدلی دست نمی‌زند.</p>
+<h3>ایجنت برای شما چه تصمیم‌هایی می‌گیرد</h3>
+<p>وقتی درخواستی مثل «به من خبر بده وقتی X» یا «هر N دقیقه Y رو چک کن و اگه Z بود بگو» بیان کنید، توضیح ابزار cronjob ی هرمس بهش می‌گوید هر وقت محتوای پیام کامل توسط اسکریپت تعیین می‌شود سراغ no_agent=True برود. وقتی درخواست به استدلال نیاز دارد ‏(<i>«issue های جدید رو خلاصه کن»</i>، ‏<i>«تیترهای جالب‌تر رو بردار»</i>، ‏<i>«یه یادآوری دوستانه بنویس»</i>) به مسیر عادی LLM-محور برمی‌گردد.</p>
+<p>لازم نیست خودتان ‎--no-agent‎ مشخص کنید. فقط رفتار را توصیف کنید.</p>
+<h3>مدیریت نگهبان‌ها از داخل چت</h3>
+<p>ایجنت همان‌طور که کار می‌سازد می‌تواند متوقف، ادامه، ویرایش و حذف هم بکند:</p>
+<blockquote>
+  <p><b>شما:</b> نگهبان رم رو امشب خاموش کن</p>
+  <p><b>هرمس:</b> ‏<i>(cronjob(action='pause', job_id='abc123') را صدا می‌زند)</i></p>
+  <p>مکث شد. با «دوباره روشنش کن» یا hermes cron resume abc123 ادامه می‌دی.</p>
+</blockquote>
+<blockquote>
+  <p><b>شما:</b> تغییرش بده به هر ۱۵ دقیقه</p>
+  <p><b>هرمس:</b> ‏<i>(cronjob(action='update', job_id='abc123', schedule='every 15m') را صدا می‌زند)</i></p>
+</blockquote>
+<p>کل چرخهٔ حیات ‏(create / list / update / pause / resume / run-now / remove) در دسترس ایجنت است بدون اینکه شما هیچ فرمان CLI ای یاد بگیرید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> ساختن از CLI</h2>
+<p>شل را ترجیح می‌دهید؟ مسیر CLI همان نتیجه را با سه فرمان می‌دهد:</p>
+<pre dir="ltr"><code># 1. Write your script
+cat &gt; ~/.hermes/scripts/memory-watchdog.sh &lt;&lt;'EOF'
+#!/usr/bin/env bash
+# Alert when RAM usage is over 85%. Silent otherwise.
+RAM_PCT=$(free | awk '/^Mem:/ {printf "%d", $3 * 100 / $2}')
+if [ "$RAM_PCT" -ge 85 ]; then
+  echo "⚠ RAM ${RAM_PCT}% on $(hostname)"
+fi
+# Empty stdout = silent run; no message sent.
+EOF
+chmod +x ~/.hermes/scripts/memory-watchdog.sh
+
+# 2. Schedule it
+hermes cron create "every 5m" \
+  --no-agent \
+  --script memory-watchdog.sh \
+  --deliver telegram \
+  --name "memory-watchdog"
+
+# 3. Verify
+hermes cron list
+hermes cron run &lt;job_id&gt;    # fire it once to test</code></pre>
+<p>همین. بدون پرامپت، بدون مهارت، بدون مدل.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> نگاشت خروجی اسکریپت به تحویل</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>رفتار اسکریپت</th><th>نتیجه</th></tr></thead>
+<tbody>
+<tr><td>Exit 0 با stdout غیرخالی</td><td>stdout عیناً تحویل داده می‌شود</td></tr>
+<tr><td>Exit 0 با stdout خالی</td><td>تیک بی‌صدا — بدون تحویل</td></tr>
+<tr><td>Exit 0 با {"wakeAgent": false} در خط آخرِ stdout</td><td>تیک بی‌صدا ‏(دروازهٔ مشترک با کارهای LLM)</td></tr>
+<tr><td>کد خروج غیرصفر</td><td>هشدار خطا تحویل داده می‌شود ‏(تا نگهبان خراب بی‌سروصدا شکست نخورد)</td></tr>
+<tr><td>تایم‌اوت اسکریپت</td><td>هشدار خطا تحویل داده می‌شود</td></tr>
+</tbody>
+</table>
+</div>
+<p>رفتار «خالی = بی‌صدا» کلید الگوی کلاسیک نگهبان است: اسکریپت آزاد است هر دقیقه اجرا شود ولی کانال فقط وقتی پیامی می‌بیند که واقعاً چیزی نیاز به توجه داشته باشد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> قوانین اسکریپت</h2>
+<p>اسکریپت‌ها باید در ~/.hermes/scripts/ باشند. این هم هنگام ساخت کار اعمال می‌شود هم هنگام اجرا — مسیرهای مطلق، باز شدن ~/ و الگوهای پیمایش مسیر ‏(../) رد می‌شوند. همین پوشه با دروازهٔ اسکریپت pre-check که کارهای LLM استفاده می‌کنند مشترک است.</p>
+<p>انتخاب مفسر با پسوند فایل است:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پسوند</th><th>مفسر</th></tr></thead>
+<tbody>
+<tr><td>.sh، .bash</td><td>bash از PATH ‏(fallback: ‎/bin/bash‎)</td></tr>
+<tr><td>هر چیز دیگر</td><td>sys.executable ‏(پایتون فعلی)</td></tr>
+</tbody>
+</table>
+</div>
+<p>عمداً shebang های ‎#!/...‎ را محترم <b>نمی‌شماریم</b> — صریح و کوچک نگه داشتن مجموعهٔ مفسرها سطحی که زمان‌بند بهش اعتماد می‌کند را کم می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> نحو زمان‌بندی</h2>
+<p>مثل همهٔ کارهای cron دیگر:</p>
+<pre dir="ltr"><code>hermes cron create "every 5m"        # interval
+hermes cron create "every 2h"
+hermes cron create "0 9 * * *"       # standard cron: 9am daily
+hermes cron create "30m"             # one-shot: run once in 30 minutes</code></pre>
+<p>نحو کامل را در <a href="../user-guide/features/cron.html">مرجع قابلیت cron</a> ببینید.</p>
+<h3>مقاصد تحویل</h3>
+<p>‏‎--deliver‎ همهٔ چیزهایی را قبول می‌کند که گیت‌وی می‌شناسد. چند شکل رایج:</p>
+<pre dir="ltr"><code>--deliver telegram                       # platform home channel
+--deliver telegram:-1001234567890        # specific chat
+--deliver telegram:-1001234567890:17585  # specific Telegram forum topic
+--deliver discord:#ops
+--deliver slack:#engineering
+--deliver signal:+15551234567
+--deliver local                          # just save to ~/.hermes/cron/output/</code></pre>
+<p>برای پلتفرم‌های توکن-بات ‏(Telegram، ‏Discord، ‏Slack، ‏Signal، ‏SMS، ‏WhatsApp) در زمان اجرای اسکریپت گیت‌وی در حال اجرا لازم نیست — ابزار مستقیماً نقطهٔ پایانی REST هر پلتفرم را با credential های موجود در ~/.hermes/.env / ~/.hermes/config.yaml صدا می‌زند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> ویرایش و چرخهٔ حیات</h2>
+<pre dir="ltr"><code>hermes cron list                                    # see all jobs
+hermes cron pause &lt;job_id&gt;                          # stop firing, keep definition
+hermes cron resume &lt;job_id&gt;
+hermes cron edit &lt;job_id&gt; --schedule "every 10m"    # adjust cadence
+hermes cron edit &lt;job_id&gt; --agent                   # flip to LLM mode
+hermes cron edit &lt;job_id&gt; --no-agent --script …     # flip back
+hermes cron remove &lt;job_id&gt;                         # delete it</code></pre>
+<p>هرچه روی کارهای LLM کار می‌کند ‏(pause، ‏resume، ‏trigger دستی، تغییر مقصد تحویل) روی کارهای بدون-ایجنت هم کار می‌کند.</p>
+<h3>مثال کامل: هشدار فضای دیسک</h3>
+<pre dir="ltr"><code>cat &gt; ~/.hermes/scripts/disk-alert.sh &lt;&lt;'EOF'
+#!/usr/bin/env bash
+# Alert when / or /home is over 90% full.
+THRESHOLD=90
+df -h / /home 2&gt;/dev/null | awk -v t="$THRESHOLD" '
+  NR &gt; 1 &amp;&amp; $5+0 &gt;= t {
+    printf "⚠ Disk %s full on %s\n", $5, $6
+  }
+'
+EOF
+chmod +x ~/.hermes/scripts/disk-alert.sh
+
+hermes cron create "*/15 * * * *" \
+  --no-agent \
+  --script disk-alert.sh \
+  --deliver telegram \
+  --name "disk-alert"</code></pre>
+<p>وقتی هر دو فایل‌سیستم زیر ۹۰٪ هستند بی‌صداست؛ وقتی یکی پر می‌شود دقیقاً یک خط per فایل‌سیستمِ بالای آستانه فعال می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> مقایسه با الگوهای دیگر</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>رویکرد</th><th>چه چیزی اجرا می‌شود</th><th>کی استفاده کنیم</th></tr></thead>
+<tbody>
+<tr><td>cronjob --no-agent ‏(این صفحه)</td><td>اسکریپت شما روی زمان‌بند هرمس</td><td>نگهبان‌ها / هشدارها / سنجه‌های تکراری که به استدلال نیاز ندارند</td></tr>
+<tr><td>cronjob ‏(پیش‌فرض، LLM)</td><td>ایجنت با اسکریپت pre-check اختیاری</td><td>وقتی محتوای پیام به استدلال روی داده نیاز دارد</td></tr>
+<tr><td>cron سیستم‌عامل + curl به <a href="../user-guide/messaging/webhooks.html">اشتراک وب‌هوک</a></td><td>اسکریپت شما روی زمان‌بند سیستم‌عامل</td><td>وقتی ممکن است خود هرمس ناسالم باشد ‏(چیزی که پایش می‌کنید)</td></tr>
+</tbody>
+</table>
+</div>
+<p>برای نگهبان‌های حیاتی سلامت سیستم که باید حتی وقتی گیت‌وی پایین است هم فعال شوند، از cron سطح سیستم‌عامل با یک curl ساده به اشتراک وب‌هوک هرمس ‏(یا هر نقطهٔ پایانی هشدار خارجی) استفاده کنید — آن‌ها به‌عنوان فرایندهای مستقل سیستم‌عامل اجرا می‌شوند و به بالا بودن هرمس وابسته نیستند. زمان‌بند داخل-گیت‌وی انتخاب درست است وقتی چیزِ تحت پایش بیرونی است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> مرتبط</h2>
+<ul>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/guides/automate-with-cron" target="_blank" rel="noopener">اتوماسیون هر چیزی با Cron</a></b> — الگوهای cron ی LLM-محور.</li>
+  <li><b><a href="../user-guide/features/cron.html">مرجع وظایف زمان‌بندی‌شده ‏(Cron)</a></b> — نحو کامل زمان‌بندی، چرخهٔ حیات، مسیریابی تحویل.</li>
+  <li><b><a href="../user-guide/messaging/webhooks.html">اشتراک‌های وب‌هوک</a></b> — نقاط ورود HTTP ی fire-and-forget برای زمان‌بندهای خارجی.</li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/gateway-internals" target="_blank" rel="noopener">درون‌مایهٔ گیت‌وی</a></b> — جزئیات مسیریاب تحویل.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <span class="off prev"><span class="dir">→ قبلی</span><span class="ttl">Microsoft Foundry (به‌زودی)</span></span>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">عیب‌یابی Cron (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/cron-script-only" target="_blank" rel="noopener">Script-Only Cron Jobs (No LLM)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -82,7 +82,7 @@
 <h3>اجرا از طریق SSH / محیط headless</h3>
 <p>اگر <code>SSH_CLIENT</code> یا <code>SSH_TTY</code> ست باشد، هرمس هم در ویزارد هم در مرحلهٔ OAuth از باز شدن خودکار مرورگر صرف‌نظر می‌کند. URL داشبورد و URL مجوزی که هرمس چاپ می‌کند را کپی، در مرورگر ماشین محلی‌تان باز و عادی ادامه دهید — شنوندهٔ HTTP محلی همچنان روی میزبان راه‌دور و پورت <code>43827</code> اجراست. مرورگر لپ‌تاپ‌تان بدون SSH local-forward به loopback راه‌دور نمی‌رسد:</p>
 <div class="codebox"><pre><code>ssh -N -L 43827:127.0.0.1:43827 user@remote-host</code></pre></div>
-<p>برای راه‌اندازی‌های jump-box / bastion و گیراندازی‌های دیگر ‏(mosh، ‏tmux، تداخل پورت)، بخش <a href="https://hermes-agent.nousresearch.com/docs/guides/oauth-over-ssh" target="_blank" rel="noopener">OAuth over SSH / Remote Hosts</a> را ببینید.</p>
+<p>برای راه‌اندازی‌های jump-box / bastion و گیراندازی‌های دیگر ‏(mosh، ‏tmux، تداخل پورت)، بخش <a href="../../guides/oauth-over-ssh.html" target="_blank" rel="noopener">OAuth over SSH / Remote Hosts</a> را ببینید.</p>
 </section>
 
 <section class="doc-sec">

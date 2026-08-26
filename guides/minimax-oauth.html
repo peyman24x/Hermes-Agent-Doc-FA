@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiniMax OAuth — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/minimax-oauth" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>MiniMax OAuth</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>MiniMax OAuth</h1>
+<p>‏Hermes Agent از <b>MiniMax</b> از طریق جریان ورود OAuth مرورگری پشتیبانی می‌کند، با همان credential های <a href="https://www.minimax.io" target="_blank" rel="noopener">پرتال MiniMax</a>. نه کلید API لازم است نه کارت بانکی — یک بار وارد شوید و هرمس نشست تان را خودکار refresh می‌کند.</p>
+<p>ترنسپورت از آداپتور anthropic_messages بازمصرف می‌کند ‏(‏MiniMax نقطهٔ پایانی سازگار-با-Anthropic-Messages روی ‎/anthropic‎ expose می‌کند)، پس همهٔ قابلیت‌های موجود فراخوانی ابزار، استریم و زمینه بدون هیچ تغییری در آداپتور کار می‌کنند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نگاه کلی</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مورد</th><th>مقدار</th></tr></thead>
+<tbody>
+<tr><td>شناسهٔ ارائه‌دهنده</td><td>minimax-oauth</td></tr>
+<tr><td>نام نمایشی</td><td>MiniMax (OAuth)</td></tr>
+<tr><td>نوع احراز هویت</td><td>OAuth مرورگری ‏(جریان ریدایرکت PKCE)</td></tr>
+<tr><td>ترنسپورت</td><td>سازگار-با-Anthropic-Messages ‏(anthropic_messages)</td></tr>
+<tr><td>مدل‌ها</td><td>MiniMax-M2.7، ‏MiniMax-M2.7-highspeed</td></tr>
+<tr><td>نقطهٔ پایانی global</td><td>https://api.minimax.io/anthropic</td></tr>
+<tr><td>نقطهٔ پایانی چین</td><td>https://api.minimaxi.com/anthropic</td></tr>
+<tr><td>متغیر محیطی لازم؟</td><td>نه ‏(MINIMAX_API_KEY برای این ارائه‌دهنده <b>استفاده نمی‌شود</b>)</td></tr>
+</tbody>
+</table>
+</div>
+<h3>پیش‌نیازها</h3>
+<ul>
+  <li>Python نسخهٔ ۳٫۹ به بالا</li>
+  <li>Hermes Agent نصب‌شده</li>
+  <li>حساب MiniMax روی <a href="https://www.minimax.io" target="_blank" rel="noopener">minimax.io</a> ‏(global) یا <a href="https://www.minimaxi.com" target="_blank" rel="noopener">minimaxi.com</a> ‏(چین)</li>
+  <li>مرورگری روی ماشین محلی ‏(یا ‎--no-browser‎ برای نشست‌های راه‌دور)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> شروع سریع</h2>
+<pre dir="ltr"><code># Launch the provider and model picker
+hermes model
+# → Select "MiniMax (OAuth)" from the provider list
+# → Hermes opens your browser to the MiniMax authorization page
+# → Approve access in the browser
+# → Select a model (MiniMax-M2.7 or MiniMax-M2.7-highspeed)
+# → Start chatting
+
+hermes</code></pre>
+<p>بعد از اولین ورود، credential ها زیر ~/.hermes/auth.json ذخیره می‌شوند و قبل از هر نشست خودکار refresh می‌شوند.</p>
+<h3>ورود دستی</h3>
+<p>می‌توانید بدون گذر از انتخاب‌گر مدل هم ورود را فعال کنید:</p>
+<pre dir="ltr"><code>hermes auth add minimax-oauth</code></pre>
+<h4>منطقهٔ چین</h4>
+<p>اگر حسابتان روی پلتفرم چین است ‏(minimaxi.com)، به‌جایش از ارائه‌دهندهٔ مبتنی-بر-کلید-API ی minimax-cn استفاده کنید — ‏minimax-cn فقط با auth_type="api_key" ثبت شده ‏(بدون جریان OAuth). مقدار MINIMAX_CN_API_KEY ‏(و اختیاری MINIMAX_CN_BASE_URL) را مستقیم ست کنید:</p>
+<pre dir="ltr"><code>echo 'MINIMAX_CN_API_KEY=your-key' &gt;&gt; ~/.hermes/.env</code></pre>
+<h4>نشست‌های راه‌دور / بدون‌سر</h4>
+<p>روی سرورها یا کانتینرهایی که مرورگر ندارند:</p>
+<pre dir="ltr"><code>hermes auth add minimax-oauth --no-browser</code></pre>
+<p>هرمس URL تأیید و کد کاربر را چاپ می‌کند — URL را روی هر دستگاهی باز کنید و کد را موقع پرسیدن وارد کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> جریان OAuth</h2>
+<p>هرمس یک جریان OAuth مرورگری PKCE روی نقاط پایانی OAuth ی MiniMax پیاده می‌کند:</p>
+<ol>
+  <li>هرمس جفت verifier/challenge ی PKCE و یک مقدار state تصادفی تولید می‌کند.</li>
+  <li>به {base_url}/oauth/code با challenge درخواست POST می‌زند و user_code و verification_uri می‌گیرد.</li>
+  <li>مرورگر شما verification_uri را باز می‌کند. اگر خواست، user_code را وارد کنید.</li>
+  <li>هرمس تا رسیدن توکن ‏(یا گذشت مهلت) {base_url}/oauth/token را poll می‌کند.</li>
+  <li>توکن‌ها ‏(access_token، ‏refresh_token، انقضا) زیر کلید minimax-oauth در ~/.hermes/auth.json ذخیره می‌شوند.</li>
+</ol>
+<p>refresh توکن ‏(grant استاندارد refresh_token ی OAuth) در شروع هر نشست خودکار اجرا می‌شود وقتی access token کمتر از ۶۰ ثانیه تا انقضا دارد.</p>
+<h3>چک وضعیت ورود</h3>
+<pre dir="ltr"><code>hermes doctor</code></pre>
+<p>بخش ◆ Auth Providers این را نشان می‌دهد:</p>
+<pre dir="ltr"><code>✓ MiniMax OAuth  (logged in, region=global)</code></pre>
+<p>یا اگر وارد نشده باشید:</p>
+<pre dir="ltr"><code>⚠ MiniMax OAuth  (not logged in)</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> سوییچ مدل</h2>
+<pre dir="ltr"><code>hermes model
+# → Select "MiniMax (OAuth)"
+# → Pick from the model list</code></pre>
+<p>یا مستقیم مدل را ست کنید:</p>
+<pre dir="ltr"><code>hermes config set model.default MiniMax-M2.7
+hermes config set model.provider minimax-oauth</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> مرجع پیکربندی</h2>
+<p>بعد از ورود، ~/.hermes/config.yaml مدخل‌هایی شبیه این خواهد داشت:</p>
+<pre dir="ltr"><code>model:
+  default: MiniMax-M2.7
+  provider: minimax-oauth
+  base_url: https://api.minimax.io/anthropic</code></pre>
+<h3>نقاط پایانی منطقه‌ای</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>شناسهٔ ارائه‌دهنده</th><th>پرتال</th><th>نقطهٔ پایانی استنتاج</th></tr></thead>
+<tbody>
+<tr><td>minimax-oauth ‏(global)</td><td>https://api.minimax.io</td><td>https://api.minimax.io/anthropic</td></tr>
+<tr><td>minimax-cn ‏(چین)</td><td>https://api.minimaxi.com</td><td>https://api.minimaxi.com/anthropic</td></tr>
+</tbody>
+</table>
+</div>
+<h3>نام‌های مستعار ارائه‌دهنده</h3>
+<p>همهٔ موارد زیر به minimax-oauth حل می‌شوند:</p>
+<pre dir="ltr"><code>hermes --provider minimax-oauth    # canonical
+hermes --provider minimax-portal   # alias
+hermes --provider minimax-global   # alias
+hermes --provider minimax_oauth    # alias (underscore form)</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> متغیرهای محیطی</h2>
+<p>ارائه‌دهندهٔ minimax-oauth از MINIMAX_API_KEY یا MINIMAX_BASE_URL استفاده <b>نمی‌کند</b>. آن متغیرها فقط برای ارائه‌دهندگان مبتنی-بر-کلید-API ی minimax و minimax-cn هستند.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>متغیر</th><th>اثر</th></tr></thead>
+<tbody>
+<tr><td>MINIMAX_API_KEY</td><td>فقط توسط ارائه‌دهندهٔ minimax استفاده می‌شود — برای minimax-oauth نادیده گرفته می‌شود</td></tr>
+<tr><td>MINIMAX_CN_API_KEY</td><td>فقط توسط ارائه‌دهندهٔ minimax-cn استفاده می‌شود — برای minimax-oauth نادیده گرفته می‌شود</td></tr>
+</tbody>
+</table>
+</div>
+<p>برای فعال بودن minimax-oauth به‌عنوان ارائه‌دهنده، model.provider: minimax-oauth را در config.yaml ست کنید ‏(برای جریان هدایت‌شده hermes setup) یا برای یک فراخوانی ‎--provider minimax-oauth‎ بدهید:</p>
+<pre dir="ltr"><code>hermes --provider minimax-oauth</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> مدل‌ها</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مدل</th><th>بهترین برای</th></tr></thead>
+<tbody>
+<tr><td>MiniMax-M2.7</td><td>استدلال زمینه‌بلند، فراخوانی ابزار پیچیده</td></tr>
+<tr><td>MiniMax-M2.7-highspeed</td><td>تأخیر کمتر، کارهای سبک‌تر، فراخوانی‌های کمکی</td></tr>
+</tbody>
+</table>
+</div>
+<p>هر دو مدل تا ۲۰۰٬۰۰۰ توکن زمینه را پشتیبانی می‌کنند.</p>
+<p>وقتی minimax-oauth ارائه‌دهندهٔ اصلی باشد، مدل MiniMax-M2.7 به‌طور خودکار به‌عنوان مدل کمکی برای کارهای بینایی و واگذاری هم استفاده می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> عیب‌یابی</h2>
+<h3>توکن منقضی شد — دوباره خودکار وارد نمی‌شود</h3>
+<p>هرمس اگر توکن کمتر از ۶۰ ثانیه تا انقضا داشته باشد در شروع هر نشست آن را refresh می‌کند. اگر access token قبلاً منقضی شده باشد ‏(مثلاً بعد از یک دورهٔ طولانی آفلاین)، refresh خودکار در درخواست بعدی اتفاق می‌افتد. اگر refresh با refresh_token_reused یا invalid_grant شکست بخورد، هرمس نشست را نیازمند ورود مجدد علامت می‌زند.</p>
+<p>وقتی شکست refresh پایانی باشد ‏(HTTP 4xx، ‏invalid_grant، لغو grant و...)، هرمس refresh token را مرده علامت و محلیاً قرنطینه می‌کند تا تبادل محکوم‌به‌شکست را مدام تکرار نکند. ایجنت یک پیام «re-authentication required» نشان می‌دهد و تا وقتی دوباره وارد نشوید مزاحم نیست.</p>
+<p><b>راه حل:</b>hermes auth add minimax-oauth را دوباره اجرا کنید تا ورود تازه شروع شود. قرنطینه در اولین تبادل موفق پاک می‌شود.</p>
+<h3>احراز هویت تایم‌اوت شد</h3>
+<p>جریان کد دستگاه پنجرهٔ انقضای متناهی دارد. اگر به‌موقع تأیید نکنید هرمس خطای timeout می‌دهد.</p>
+<p><b>راه حل:</b>hermes auth add minimax-oauth ‏(یا hermes model) را دوباره اجرا کنید. جریان از نو شروع می‌شود.</p>
+<h3>ناهم‌خوانی state ‏(احتمال CSRF)</h3>
+<p>هرمس تشخیص داد مقدار state برگشتی از سرور احراز با آنچه فرستاده بود نمی‌خواند.</p>
+<p><b>راه حل:</b>ورود را دوباره اجرا کنید. اگر ادامه پیدا کرد، چک کنید پروکسی یا ریدایرکتی پاسخ OAuth را دستکاری نمی‌کند.</p>
+<h3>ورود از سرور راه‌دور</h3>
+<p>اگر hermes نتواند پنجرهٔ مرورگری باز کند از ‎--no-browser‎ استفاده کنید:</p>
+<pre dir="ltr"><code>hermes auth add minimax-oauth --no-browser</code></pre>
+<p>هرمس URL و کد را چاپ می‌کند. URL را روی هر دستگاهی باز کنید و جریان را همان‌جا کامل کنید.</p>
+<h3>خطای «Not logged into MiniMax OAuth» هنگام اجرا</h3>
+<p>مخزن احراز برای minimax-oauth هیچ credential ای ندارد. هنوز وارد نشده‌اید یا فایل credential حذف شده.</p>
+<p><b>راه حل:</b>hermes model را اجرا و گزینهٔ MiniMax (OAuth) را بردارید، یا hermes auth add minimax-oauth را بزنید.</p>
+<h3>خروج</h3>
+<p>برای حذف credential های ذخیره‌شدهٔ MiniMax OAuth:</p>
+<pre dir="ltr"><code>hermes auth logout minimax-oauth</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> ببینید نیز</h2>
+<ul>
+  <li><b><a href="../integrations/providers.html">مرجع ارائه‌دهندگان AI</a></b></li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/reference/environment-variables" target="_blank" rel="noopener">متغیرهای محیطی</a></b></li>
+  <li><b><a href="../user-guide/configuration.html">پیکربندی</a></b></li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/reference/cli-commands" target="_blank" rel="noopener">فرمان‌های CLI ‏(hermes doctor)</a></b></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="migrate-from-openclaw.html"><span class="dir">→ قبلی</span><span class="ttl">مهاجرت از OpenClaw</span></a>
+  <a class="next" href="oauth-over-ssh.html"><span class="dir">بعدی ←</span><span class="ttl">OAuth روی SSH / میزبان راه‌دور</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/minimax-oauth" target="_blank" rel="noopener">MiniMax OAuth</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

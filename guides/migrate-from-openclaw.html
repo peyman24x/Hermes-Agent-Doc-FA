@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مهاجرت از OpenClaw — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/migrate-from-openclaw" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>مهاجرت از OpenClaw</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>مهاجرت از OpenClaw</h1>
+<p>‏hermes claw migrate راه‌اندازی OpenClaw ‏(یا Clawdbot/Moldbot ی قدیمی) شما را وارد Hermes می‌کند. این راهنما دقیقاً پوشش می‌دهد چه چیزی مهاجرت می‌کند، نگاشت کلیدهای پیکربندی چگونه است و بعد از مهاجرت چه چیزهایی را باید تأیید کنید.</p>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>به‌جایش از <b>Claude Code</b> یا <b>OpenAI Codex CLI</b> می‌آیید؟ از <a href="../user-guide/import-from-other-agents.html">hermes import-agent</a> استفاده کنید.</p>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>اگر راه‌اندازی OpenClaw تان چندارائه‌دهنده‌ای بود، hermes setup --portal آن را به یک OAuth فشرده می‌کند — بیش از ۳۰۰ مدل به‌اضلاف Tool Gateway در یک ورود. بخش <a href="../integrations/nous-portal.html">Nous Portal</a> را ببینید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> شروع سریع</h2>
+<pre dir="ltr"><code># Preview then migrate (always shows a preview first, then asks to confirm)
+hermes claw migrate
+
+# Preview only, no changes
+hermes claw migrate --dry-run
+
+# Full migration including API keys, skip confirmation
+hermes claw migrate --preset full --migrate-secrets --yes</code></pre>
+<p>مهاجرت همیشه قبل از هر تغییری پیش‌نمایش کاملی از آنچه وارد می‌شود نشان می‌دهد. فهرست را مرور کنید، بعد تأیید کنید تا ادامه یابد.</p>
+<p>به‌طور پیش‌فرض از ~/.openclaw/ می‌خواند. پوشه‌های قدیمی ~/.clawdbot/ یا ~/.moltbot/ خودکار تشخیص داده می‌شوند. نام فایل‌های config ی قدیمی هم ‏(clawdbot.json، ‏moltbot.json) همین‌طور.</p>
+<h3>گزینه‌ها</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>گزینه</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td>--dry-run</td><td>فقط پیش‌نمایش — بعد از نمایش آنچه مهاجرت می‌شد متوقف می‌شود.</td></tr>
+<tr><td>--preset &lt;name&gt;</td><td>full ‏(همهٔ تنظیمات سازگار) یا user-data ‏(پیکربندی زیرساخت را حذف می‌کند). هیچ preset ای به‌طور پیش‌فرض رازها را وارد نمی‌کند — ‎--migrate-secrets‎ را صریح بدهید.</td></tr>
+<tr><td>--overwrite</td><td>در تداخل‌ها فایل‌های موجود Hermes را بازنویسی کن ‏(پیش‌فرض: وقتی برنامه تداخل دارد از اعمال سر باز می‌زند).</td></tr>
+<tr><td>--migrate-secrets</td><td>کلیدهای API را شامل شود. حتی زیر ‎--preset full‎ لازم است — هیچ preset ای رازها را بی‌سروصدا وارد نمی‌کند.</td></tr>
+<tr><td>--no-backup</td><td>اسنپ‌شات zip ی قبل-از-مهاجرتِ ~/.hermes/ را رد کن ‏(به‌طور پیش‌فرض یک آرشیو نقطهٔ-بازگشت قبل از اعمال زیر ~/.hermes/backups/pre-migration-*.zip نوشته می‌شود؛ با hermes import قابل بازیابی است).</td></tr>
+<tr><td>--source &lt;path&gt;</td><td>پوشهٔ سفارشی OpenClaw.</td></tr>
+<tr><td>--workspace-target &lt;path&gt;</td><td>AGENTS.md کجا گذاشته شود.</td></tr>
+<tr><td>--skill-conflict &lt;mode&gt;</td><td>skip ‏(پیش‌فرض)، overwrite یا rename.</td></tr>
+<tr><td>--yes</td><td>پرامپت تأیید بعد از پیش‌نمایش را رد کن.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> چه چیزهایی مهاجرت می‌کند</h2>
+<h3>شخصیت، حافظه و دستورالعمل‌ها</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>چه چیزی</th><th>منبع در OpenClaw</th><th>مقصد در Hermes</th><th>نکته‌ها</th></tr></thead>
+<tbody>
+<tr><td>شخصیت</td><td>workspace/SOUL.md</td><td>~/.hermes/SOUL.md</td><td>کپی مستقیم</td></tr>
+<tr><td>دستورالعمل‌های workspace</td><td>workspace/AGENTS.md</td><td>AGENTS.md در ‎--workspace-target‎</td><td>فلگ ‎--workspace-target‎ لازم دارد</td></tr>
+<tr><td>حافظهٔ بلندمدت</td><td>workspace/MEMORY.md</td><td>~/.hermes/memories/MEMORY.md</td><td>به مدخل parse و با موجود ادغام و غیرتکراری می‌شود. جداکنندهٔ § را استفاده می‌کند.</td></tr>
+<tr><td>پروفایل کاربر</td><td>workspace/USER.md</td><td>~/.hermes/memories/USER.md</td><td>همان منطق ادغام مدخل حافظه.</td></tr>
+<tr><td>فایل‌های حافظهٔ روزانه</td><td>workspace/memory/*.md</td><td>~/.hermes/memories/MEMORY.md</td><td>همهٔ فایل‌های روزانه در حافظهٔ اصلی ادغام می‌شوند.</td></tr>
+</tbody>
+</table>
+</div>
+<p>فایل‌های workspace در مسیرهای جایگزین workspace.default/ و workspace-main/ هم چک می‌شوند ‏(‏OpenClaw در نسخه‌های اخیر workspace/ را به workspace-main/ تغییر نام داد و برای راه‌اندازی چندایجنتی از workspace-{agentId} استفاده می‌کند).</p>
+<h3>مهارت‌ها ‏(۴ منبع)</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>منبع</th><th>محل در OpenClaw</th><th>مقصد در Hermes</th></tr></thead>
+<tbody>
+<tr><td>مهارت‌های workspace</td><td>workspace/skills/</td><td>~/.hermes/skills/openclaw-imports/</td></tr>
+<tr><td>مهارت‌های مدیریت‌شده/مشترک</td><td>~/.openclaw/skills/</td><td>~/.hermes/skills/openclaw-imports/</td></tr>
+<tr><td>شخصی بین-پروژه‌ای</td><td>~/.agents/skills/</td><td>~/.hermes/skills/openclaw-imports/</td></tr>
+<tr><td>مشترک سطح پروژه</td><td>workspace/.agents/skills/</td><td>~/.hermes/skills/openclaw-imports/</td></tr>
+</tbody>
+</table>
+</div>
+<p>تداخل مهارت‌ها با ‎--skill-conflict‎ مدیریت می‌شود: skip مهارت موجود Hermes را نگه می‌دارد، overwrite جایگزینش می‌کند و rename یک نسخهٔ ‎-imported‎ می‌سازد.</p>
+<h3>پیکربندی مدل و ارائه‌دهنده</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>چه چیزی</th><th>مسیر config ی OpenClaw</th><th>مقصد در Hermes</th><th>نکته‌ها</th></tr></thead>
+<tbody>
+<tr><td>مدل پیش‌فرض</td><td>agents.defaults.model</td><td>config.yaml ← model</td><td>می‌تواند رشته یا شیء {primary, fallbacks} باشد</td></tr>
+<tr><td>ارائه‌دهندگان سفارشی</td><td>models.providers.*</td><td>config.yaml ← custom_providers ‏(در مهاجرت config ی hermes update بعدی خودکار به دیکشنری متعارف providers: منتقل می‌شود)</td><td>baseUrl و apiType/api را نگاشت می‌کند — هم مقادیر کوتاه ‏("openai"، "anthropic") و هم خط‌تیره‌دار ‏("openai-completions"، "anthropic-messages"، "google-generative-ai") را هندل می‌کند</td></tr>
+<tr><td>کلیدهای API ی ارائه‌دهنده</td><td>models.providers.*.apiKey</td><td>~/.hermes/.env</td><td>‎--migrate-secrets‎ لازم دارد. حل کلید API پایین را ببینید.</td></tr>
+</tbody>
+</table>
+</div>
+<h3>رفتار ایجنت</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>چه چیزی</th><th>مسیر config ی OpenClaw</th><th>مسیر config ی Hermes</th><th>نگاشت</th></tr></thead>
+<tbody>
+<tr><td>بیشینهٔ نوبت‌ها</td><td>agents.defaults.timeoutSeconds</td><td>agent.max_turns</td><td>timeoutSeconds / 10 با سقف ۲۰۰</td></tr>
+<tr><td>حالت verbose</td><td>agents.defaults.verboseDefault</td><td>agent.verbose</td><td>"off" / "on" / "full"</td></tr>
+<tr><td>میزان reasoning</td><td>agents.defaults.thinkingDefault</td><td>agent.reasoning_effort</td><td>"always"/"high"/"xhigh" ← "high"؛ "auto"/"medium"/"adaptive" ← "medium"؛ "off"/"low"/"none"/"minimal" ← "low"</td></tr>
+<tr><td>فشرده‌سازی</td><td>agents.defaults.compaction.mode</td><td>compression.enabled</td><td>"off" ← false؛ هر چیز دیگر ← true</td></tr>
+<tr><td>مدل فشرده‌سازی</td><td>agents.defaults.compaction.model</td><td>compression.summary_model</td><td>کپی مستقیم رشته</td></tr>
+<tr><td>تأخیر انسانی</td><td>agents.defaults.humanDelay.mode</td><td>human_delay.mode</td><td>"natural" / "custom" / "off"</td></tr>
+<tr><td>زمان‌بندی تأخیر انسانی</td><td>agents.defaults.humanDelay.minMs / .maxMs</td><td>human_delay.min_ms / .max_ms</td><td>کپی مستقیم</td></tr>
+<tr><td>منطقهٔ زمانی</td><td>agents.defaults.userTimezone</td><td>timezone</td><td>کپی مستقیم رشته</td></tr>
+<tr><td>تایم‌اوت اجرا</td><td>tools.exec.timeoutSec</td><td>terminal.timeout</td><td>کپی مستقیم ‏(فیلد timeoutSec است نه timeout)</td></tr>
+<tr><td>سندباکس Docker</td><td>agents.defaults.sandbox.backend</td><td>terminal.backend</td><td>"docker" ← "docker"</td></tr>
+<tr><td>ایمیج Docker</td><td>agents.defaults.sandbox.docker.image</td><td>terminal.docker_image</td><td>کپی مستقیم</td></tr>
+</tbody>
+</table>
+</div>
+<h3>سیاست‌های ریست نشست</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مسیر config ی OpenClaw</th><th>مسیر config ی Hermes</th><th>نکته‌ها</th></tr></thead>
+<tbody>
+<tr><td>session.reset.mode</td><td>session_reset.mode</td><td>"daily"، "idle" یا هر دو</td></tr>
+<tr><td>session.reset.atHour</td><td>session_reset.at_hour</td><td>ساعت ‏(۰ تا ۲۳) برای ریست روزانه</td></tr>
+<tr><td>session.reset.idleMinutes</td><td>session_reset.idle_minutes</td><td>دقیقه‌های بی‌کاری</td></tr>
+</tbody>
+</table>
+</div>
+<p>توجه: OpenClaw مقدار session.resetTriggers را هم دارد ‏(آرایهٔ سادهٔ رشته‌ای مثل ["daily", "idle"]). اگر session.reset ی ساختاریافته نباشد، مهاجرت به استنتاج از resetTriggers برمی‌گردد.</p>
+<h3>سرورهای MCP</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فیلد OpenClaw</th><th>فیلد Hermes</th><th>نکته‌ها</th></tr></thead>
+<tbody>
+<tr><td>mcp.servers.*.command</td><td>mcp_servers.*.command</td><td>ترنسپورت Stdio</td></tr>
+<tr><td>mcp.servers.*.args</td><td>mcp_servers.*.args</td><td></td></tr>
+<tr><td>mcp.servers.*.env</td><td>mcp_servers.*.env</td><td></td></tr>
+<tr><td>mcp.servers.*.cwd</td><td>mcp_servers.*.cwd</td><td></td></tr>
+<tr><td>mcp.servers.*.url</td><td>mcp_servers.*.url</td><td>ترنسپورت HTTP/SSE</td></tr>
+<tr><td>mcp.servers.*.tools.include</td><td>mcp_servers.*.tools.include</td><td>فیلتر ابزار</td></tr>
+<tr><td>mcp.servers.*.tools.exclude</td><td>mcp_servers.*.tools.exclude</td><td></td></tr>
+</tbody>
+</table>
+</div>
+<h3>TTS ‏(متن-به-گفتار)</h3>
+<p>تنظیمات TTS از <b>دو</b> محل config ی OpenClaw با این اولویت خوانده می‌شوند:</p>
+<ol>
+  <li>messages.tts.providers.{provider}.* ‏(محل متعارف)</li>
+  <li>talk.providers.{provider}.* ی سطح‌بالا ‏(fallback)</li>
+  <li>کلیدهای تخت قدیمی messages.tts.{provider}.* ‏(قدیمی‌ترین قالب)</li>
+</ol>
+<div class="table-wrap">
+<table>
+<thead><tr><th>چه چیزی</th><th>مقصد در Hermes</th></tr></thead>
+<tbody>
+<tr><td>نام ارائه‌دهنده</td><td>config.yaml ← tts.provider</td></tr>
+<tr><td>شناسهٔ صدای ElevenLabs</td><td>config.yaml ← tts.elevenlabs.voice_id</td></tr>
+<tr><td>شناسهٔ مدل ElevenLabs</td><td>config.yaml ← tts.elevenlabs.model_id</td></tr>
+<tr><td>مدل OpenAI</td><td>config.yaml ← tts.openai.model</td></tr>
+<tr><td>صدای OpenAI</td><td>config.yaml ← tts.openai.voice</td></tr>
+<tr><td>صدای Edge TTS</td><td>config.yaml ← tts.edge.voice ‏(‏OpenClaw «edge» را به «microsoft» تغییر نام داد — هر دو شناسایی می‌شوند)</td></tr>
+<tr><td>دارایی‌های TTS</td><td>~/.hermes/tts/ ‏(کپی فایل)</td></tr>
+</tbody>
+</table>
+</div>
+<h3>پلتفرم‌های پیام‌رسانی</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پلتفرم</th><th>مسیر config ی OpenClaw</th><th>متغیر .env ی Hermes</th><th>نکته‌ها</th></tr></thead>
+<tbody>
+<tr><td>Telegram</td><td>channels.telegram.botToken یا .accounts.default.botToken</td><td>TELEGRAM_BOT_TOKEN</td><td>توکن می‌تواند رشته یا SecretRef باشد. هر دو چیدمان تخت و accounts پشتیبانی می‌شوند.</td></tr>
+<tr><td>Telegram</td><td>credentials/telegram-default-allowFrom.json</td><td>TELEGRAM_ALLOWED_USERS</td><td>با کاما از آرایهٔ allowFrom[] می‌چسبد</td></tr>
+<tr><td>Discord</td><td>channels.discord.token یا .accounts.default.token</td><td>DISCORD_BOT_TOKEN</td><td></td></tr>
+<tr><td>Discord</td><td>channels.discord.allowFrom یا .accounts.default.allowFrom</td><td>DISCORD_ALLOWED_USERS</td><td></td></tr>
+<tr><td>Slack</td><td>channels.slack.botToken یا .accounts.default.botToken</td><td>SLACK_BOT_TOKEN</td><td></td></tr>
+<tr><td>Slack</td><td>channels.slack.appToken یا .accounts.default.appToken</td><td>SLACK_APP_TOKEN</td><td></td></tr>
+<tr><td>Slack</td><td>channels.slack.allowFrom یا .accounts.default.allowFrom</td><td>SLACK_ALLOWED_USERS</td><td></td></tr>
+<tr><td>WhatsApp</td><td>channels.whatsapp.allowFrom یا .accounts.default.allowFrom</td><td>WHATSAPP_ALLOWED_USERS</td><td>احراز با جفت‌سازی QR ی Baileys — بعد از مهاجرت نیاز به جفت‌سازی دوباره دارد</td></tr>
+<tr><td>Signal</td><td>channels.signal.account یا .accounts.default.account</td><td>SIGNAL_ACCOUNT</td><td></td></tr>
+<tr><td>Signal</td><td>channels.signal.httpUrl یا .accounts.default.httpUrl</td><td>SIGNAL_HTTP_URL</td><td></td></tr>
+<tr><td>Signal</td><td>channels.signal.allowFrom یا .accounts.default.allowFrom</td><td>SIGNAL_ALLOWED_USERS</td><td></td></tr>
+<tr><td>Matrix</td><td>channels.matrix.accessToken یا .accounts.default.accessToken</td><td>MATRIX_ACCESS_TOKEN</td><td>از accessToken استفاده می‌کند ‏(نه botToken)</td></tr>
+<tr><td>Mattermost</td><td>channels.mattermost.botToken یا .accounts.default.botToken</td><td>MATTERMOST_BOT_TOKEN</td><td></td></tr>
+</tbody>
+</table>
+</div>
+<h3>سایر پیکربندی</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>چه چیزی</th><th>مسیر OpenClaw</th><th>مسیر Hermes</th><th>نکته‌ها</th></tr></thead>
+<tbody>
+<tr><td>حالت تأیید</td><td>approvals.exec.mode</td><td>config.yaml ← approvals.mode</td><td>"auto"←"off"، "always"←"manual"، "smart"←"smart"</td></tr>
+<tr><td>allowlist فرمان‌ها</td><td>exec-approvals.json</td><td>config.yaml ← command_allowlist</td><td>الگوها ادغام و غیرتکراری می‌شوند</td></tr>
+<tr><td>URL ی CDP مرورگر</td><td>browser.cdpUrl</td><td>config.yaml ← browser.cdp_url</td><td></td></tr>
+<tr><td>حالت headless مرورگر</td><td>browser.headless</td><td>config.yaml ← browser.headless</td><td></td></tr>
+<tr><td>کلید جستجوی Brave</td><td>tools.web.search.brave.apiKey</td><td>.env ← BRAVE_API_KEY</td><td>‎--migrate-secrets‎ لازم دارد</td></tr>
+<tr><td>توکن احراز گیت‌وی</td><td>gateway.auth.token</td><td>.env ← HERMES_GATEWAY_TOKEN</td><td>‎--migrate-secrets‎ لازم دارد</td></tr>
+<tr><td>پوشهٔ کاری</td><td>agents.defaults.workspace</td><td>config.yaml ← terminal.cwd</td><td>مهاجرت‌های قدیمی ممکن است همچنان MESSAGING_CWD را به‌عنوان fallback سازگاری صادر کنند</td></tr>
+</tbody>
+</table>
+</div>
+<h3>آرشیو شده ‏(معادل مستقیم در Hermes ندارد)</h3>
+<p>این‌ها در ~/.hermes/migration/openclaw/&lt;timestamp&gt;/archive/ برای بازبینی دستی ذخیره می‌شوند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>چه چیزی</th><th>فایل آرشیو</th><th>چطور در Hermes بازسازیش کنید</th></tr></thead>
+<tbody>
+<tr><td>IDENTITY.md</td><td>archive/workspace/IDENTITY.md</td><td>داخل SOUL.md ادغام کنید</td></tr>
+<tr><td>TOOLS.md</td><td>archive/workspace/TOOLS.md</td><td>هرمس دستورالعمل‌های ابزار داخلی دارد</td></tr>
+<tr><td>HEARTBEAT.md</td><td>archive/workspace/HEARTBEAT.md</td><td>برای کارهای دوره‌ای از کارهای cron استفاده کنید</td></tr>
+<tr><td>BOOTSTRAP.md</td><td>archive/workspace/BOOTSTRAP.md</td><td>از فایل‌های زمینه یا مهارت‌ها استفاده کنید</td></tr>
+<tr><td>کارهای Cron</td><td>archive/cron-config.json</td><td>با hermes cron create بازسازی کنید</td></tr>
+<tr><td>افزونه‌ها</td><td>archive/plugins-config.json</td><td>راهنمای افزونه‌ها را ببینید</td></tr>
+<tr><td>قلاب‌ها/وب‌هوک‌ها</td><td>archive/hooks-config.json</td><td>از hermes webhook یا قلاب‌های گیت‌وی استفاده کنید</td></tr>
+<tr><td>بک‌اند حافظه</td><td>archive/memory-backend-config.json</td><td>از طریق hermes honcho پیکربندی کنید</td></tr>
+<tr><td>رجیستری مهارت‌ها</td><td>archive/skills-registry-config.json</td><td>از hermes skills config استفاده کنید</td></tr>
+<tr><td>UI/هویت</td><td>archive/ui-identity-config.json</td><td>از فرمان ‎/skin‎ استفاده کنید</td></tr>
+<tr><td>لاگ‌گیری</td><td>archive/logging-diagnostics-config.json</td><td>در بخش logging ی config.yaml ست کنید</td></tr>
+<tr><td>فهرست چندایجنتی</td><td>archive/agents-list.json</td><td>از پروفایل‌های Hermes استفاده کنید</td></tr>
+<tr><td>اتصال کانال‌ها</td><td>archive/bindings.json</td><td>راه‌اندازی دستی per پلتفرم</td></tr>
+<tr><td>کانال‌های پیچیده</td><td>archive/channels-deep-config.json</td><td>پیکربندی دستی پلتفرم</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2 id="api-key-resolution"><span class="secnum">۳</span> حل کلید API</h2>
+<p>وقتی ‎--migrate-secrets‎ فعال باشد، کلیدهای API از <b>چهار منبع</b> با ترتیب اولویت جمع می‌شوند:</p>
+<ol>
+  <li><b>مقادیر config</b> — ‏models.providers.*.apiKey و کلیدهای ارائه‌دهندهٔ TTS در openclaw.json</li>
+  <li><b>فایل محیط</b> — ‏~/.openclaw/.env ‏(کلیدهایی مثل OPENROUTER_API_KEY، ‏ANTHROPIC_API_KEY و...)</li>
+  <li><b>زیرشیء env ی config</b> — ‏openclaw.json ← "env" یا "env"."vars" ‏(بعضی راه‌اندازی‌ها کلیدها را این‌جا ذخیره می‌کنند نه در فایل .env جدا)</li>
+  <li><b>پروفایل‌های auth</b> — ‏~/.openclaw/agents/main/agent/auth-profiles.json ‏(credential های per-ایجنت)</li>
+</ol>
+<p>مقادیر config اولویت دارند. هر منبع بعدی شکاف‌های باقی‌مانده را پر می‌کند.</p>
+<h3>مقصدهای کلیدی پشتیبانی‌شده</h3>
+<p>OPENROUTER_API_KEY، ‏OPENAI_API_KEY، ‏ANTHROPIC_API_KEY، ‏DEEPSEEK_API_KEY، ‏GEMINI_API_KEY، ‏ZAI_API_KEY، ‏MINIMAX_API_KEY، ‏ELEVENLABS_API_KEY، ‏TELEGRAM_BOT_TOKEN، ‏VOICE_TOOLS_OPENAI_KEY</p>
+<p>کلیدهایی که در این allowlist نیستند هرگز کپی نمی‌شوند.</p>
+<h3>مدیریت SecretRef</h3>
+<p>مقادیر config ی OpenClaw برای توکن‌ها و کلیدهای API می‌تواند سه قالب داشته باشد:</p>
+<pre dir="ltr"><code>// Plain string
+"channels": { "telegram": { "botToken": "123456:ABC-DEF..." } }
+
+// Environment template
+"channels": { "telegram": { "botToken": "${TELEGRAM_BOT_TOKEN}" } }
+
+// SecretRef object
+"channels": { "telegram": { "botToken": { "source": "env", "id": "TELEGRAM_BOT_TOKEN" } } }</code></pre>
+<p>مهاجرت هر سه قالب را حل می‌کند. برای قالب‌های محیطی و اشیاء SecretRef با source: "env" مقدار را در ~/.openclaw/.env و زیرشیء env ی openclaw.json جستجو می‌کند. اشیاء SecretRef با source: "file" یا source: "exec" خودکار قابل حل نیستند — مهاجرت درباره‌شان هشدار می‌دهد و آن مقادیر باید دستی از طریق hermes config set به هرمس اضافه شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> بعد از مهاجرت</h2>
+<ol>
+  <li><b>گزارش مهاجرت را چک کنید</b> — در پایان با شمار موارد مهاجرت‌یافته، رد‌شده و دارای-تداخل چاپ می‌شود.</li>
+  <li><b>فایل‌های آرشیو را مرور کنید</b> — هر چیزی در ~/.hermes/migration/openclaw/&lt;timestamp&gt;/archive/ به توجه دستی نیاز دارد.</li>
+  <li><b>نشست جدید شروع کنید</b> — مهارت‌ها و مدخل‌های حافظهٔ وارد‌شده در نشست‌های جدید اثر می‌کنند نه نشست فعلی.</li>
+  <li><b>کلیدهای API را تأیید کنید</b> — hermes status را اجرا کنید تا احراز ارائه‌دهنده‌ها چک شود.</li>
+  <li><b>پیام‌رسانی را تست کنید</b> — اگر توکن پلتفرمی مهاجرت دادید گیت‌وی را ری‌استارت کنید: systemctl --user restart hermes-gateway</li>
+  <li><b>سیاست‌های نشست را چک کنید</b> — hermes config show را اجرا و مطمئن شوید مقدار session_reset با انتظارات می‌خواند.</li>
+  <li><b>واتساپ را دوباره جفت کنید</b> — واتساپ از جفت‌سازی کد QR استفاده می‌کند ‏(Baileys) نه مهاجرت توکن. برای جفت‌سازی hermes whatsapp را اجرا کنید.</li>
+  <li><b>پاک‌سازی آرشیو</b> — بعد از مطمئن شدن از کارکرد همه‌چیز، hermes claw cleanup را اجرا کنید تا پوشه‌های باقی‌ماندهٔ OpenClaw به ‎.pre-migration/ تغییر نام یابند ‏(جلوی آشفتگی وضعیت را می‌گیرد).</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> عیب‌یابی</h2>
+<h3>«OpenClaw directory not found»</h3>
+<p>مهاجرت ~/.openclaw/ را چک می‌کند، بعد ~/.clawdbot/ و بعد ~/.moltbot/. اگر نصب تان جای دیگری است از ‎--source /path/to/your/openclaw‎ استفاده کنید.</p>
+<h3>«No provider API keys found»</h3>
+<p>کلیدها بسته به نسخهٔ OpenClaw تان ممکن است چند جا ذخیره شده باشند: داخل openclaw.json زیر models.providers.*.apiKey، در ~/.openclaw/.env، در زیرشیء "env" ی openclaw.json یا در agents/main/agent/auth-profiles.json. مهاجرت هر چهار جا را چک می‌کند. اگر کلیدها SecretRef با source: "file" یا source: "exec" باشند خودکار قابل حل نیستند — با hermes config set اضافه‌شان کنید.</p>
+<h3>مهارت‌ها بعد از مهاجرت ظاهر نمی‌شوند</h3>
+<p>مهارت‌های وارد‌شده در ~/.hermes/skills/openclaw-imports/ می‌افتند. برای اثرگذاری نشست جدیدی شروع کنید یا با ‎/skills‎ بار بودنشان را تأیید کنید.</p>
+<h3>صدای TTS مهاجرت نکرد</h3>
+<p>‏OpenClaw تنظیمات TTS را دو جا نگه می‌دارد: messages.tts.providers.* و config ی سطح‌بالای talk. مهاجرت هر دو را چک می‌کند. اگر voice ID تان از طریق UI ی OpenClaw ست شده بود ‏(در مسیری متفاوت ذخیره می‌شود) شاید لازم باشد دستی ستش کنید: hermes config set tts.elevenlabs.voice_id YOUR_VOICE_ID</p>
+</section>
+
+<div class="pager">
+  <a href="microsoft-graph-app-registration.html"><span class="dir">→ قبلی</span><span class="ttl">ثبت اپ Microsoft Graph</span></a>
+  <a class="next" href="minimax-oauth.html"><span class="dir">بعدی ←</span><span class="ttl">MiniMax OAuth</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/migrate-from-openclaw" target="_blank" rel="noopener">Migrate from OpenClaw</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
