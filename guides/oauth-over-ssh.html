@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OAuth روی SSH / میزبان راه‌دور — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/oauth-over-ssh" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>OAuth روی SSH / میزبان راه‌دور</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>OAuth روی SSH / Host های راه‌دور</h1>
+<p>بعضی ارائه‌دهنده‌های هرمس — <b>Spotify</b> و <b>سرورهای MCP ی راه‌دور</b> ‏(Linear، ‏Sentry، ‏Atlassian، ‏Asana، ‏Figma و...) — از جریان OAuth با <i>ریدایرکت loopback</i> استفاده می‌کنند. سرور احراز هویت مرورگر شما را به http://127.0.0.1:&lt;port&gt;/callback ریدایرکت می‌کند تا شنوندهٔ HTTP کوچکی که هرمس راه انداخته کد احراز را بگیرد.</p>
+<p>وقتی هرمس و مرورگرتان روی یک ماشین‌اند این بی‌نقص کار می‌کند. لحظه‌ای که نیستند می‌شکند: مرورگر لپ‌تاپ شما سعی می‌کند به 127.0.0.1 روی <b>لپ‌تاپ</b> برسد در حالی که شنونده به 127.0.0.1 روی <b>سرور راه‌دور</b> bind شده.</p>
+<p>راه‌حل یک forward محلی SSH تک‌خطی است. برای سرورهای MCP روی ترمینال تعاملی اغلب می‌توانید به‌جایش URL ی ریدایرکت را برگردانید و بچسبانید ‏(بدون تونل).</p>
+<p><b>‏xAI Grok OAuth ‏(xai-oauth) از کد دستگاه OAuth استفاده می‌کند</b> نه callback ی loopback — URL ی تأییدی چاپ‌شده را در هر مرورگری باز کنید و هرمس تا تأیید poll می‌کند. هیچ تونل SSH لازم نیست. <a href="https://hermes-agent.nousresearch.com/docs/guides/xai-grok-oauth" target="_blank" rel="noopener">xAI Grok OAuth</a> را ببینید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> خلاصهٔ فوری</h2>
+<pre dir="ltr"><code># On your local machine (laptop), in a separate terminal:
+ssh -N -L 43827:127.0.0.1:43827 user@remote-host
+
+# In your existing SSH session on the remote machine:
+hermes auth spotify --no-browser
+# → Hermes prints an authorize URL. Open it in a browser on your laptop.
+# → Your browser redirects to 127.0.0.1:43827/callback, the tunnel forwards
+#   the request to the remote listener, login completes.</code></pre>
+<p>هرمس پورت دقیقی که bind کرده را روی خط Waiting for callback on ... چاپ می‌کند — از همان‌جا بردارید. Spotify پیش‌فرضش پورت 43827 است.</p>
+<h3>کدام ارائه‌دهنده‌ها این را لازم دارند</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>پورت loopback</th><th>تونل لازم است؟</th></tr></thead>
+<tbody>
+<tr><td>Spotify</td><td>43827 ‏(پیش‌فرض)</td><td>بله وقتی هرمس راه‌دور است</td></tr>
+<tr><td>سرورهای MCP ‏(auth: oauth)</td><td>per سرور خودکار انتخاب می‌شود</td><td>بله وقتی هرمس راه‌دور است ‏(یا URL ی ریدایرکت را برگردانید)</td></tr>
+<tr><td>xai-oauth ‏(Grok SuperGrok)</td><td>—</td><td>نه — جریان کد دستگاه</td></tr>
+<tr><td>anthropic ‏(Claude Pro/Max)</td><td>—</td><td>نه — جریان چسباندنِ کد</td></tr>
+<tr><td>openai-codex ‏(ChatGPT Plus/Pro)</td><td>—</td><td>نه — جریان کد دستگاه</td></tr>
+<tr><td>minimax، ‏nous-portal</td><td>—</td><td>نه — جریان کد دستگاه</td></tr>
+</tbody>
+</table>
+</div>
+<p>اگر ارائه‌دهنده‌تان در جدول نیست، تونل لازم ندارید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> سرورهای MCP</h2>
+<p>سرورهای MCP ی راه‌دور ‏(Linear، ‏Sentry، ‏Atlassian، ‏Asana، ‏Figma و...) همان جریان ریدایرکت loopback را استفاده می‌کنند. هرمس per سرور خودکار پورت آزادی برمی‌دارد و هنگام شروع جریان OAuth URL ی تأیید را چاپ می‌کند — یا هنگام شروع ‏(وقتی سرور جدیدی در mcp_servers: ظاهر شود) یا وقتی hermes mcp login &lt;server&gt; اجرا کنید.</p>
+<p>از host راه‌دور دو راه برای کامل کردن دارید:</p>
+<h4>گزینهٔ ۱ — برگرداندن URL ی ریدایرکت ‏(بدون راه‌اندازی، همه‌جا کار می‌کند)</h4>
+<p>روی ترمینال تعاملی هرمس کنار اجرای شنوندهٔ محلی از شما می‌خواهد URL ی ریدایرکت را بچسبانید. بعد از تأیید در مرورگر، ریدایرکت به http://127.0.0.1:&lt;port&gt;/callback خطای اتصال نشان می‌دهد — طبیعی است. <b>URL کامل را از نوار آدرس مرورگر</b> کپی و در پرامپت هرمس بچسبانید:</p>
+<pre dir="ltr"><code>  MCP OAuth: authorization required.
+  Open this URL in your browser:
+
+    https://mcp.linear.app/authorize?response_type=code&amp;...
+
+  Or paste the redirect URL here (or the ?code=...&amp;state=... portion) and press Enter:
+&gt; https://mcp.linear.app/callback?code=abc123&amp;state=xyz
+  Got authorization code from paste — completing flow.</code></pre>
+<p>رشتهٔ کوئری لختِ ‎?code=...&amp;state=...‎ هم قبول می‌شود. این برای هر سرور MCP ای با auth: oauth کار می‌کند و هیچ تغییر پیکربندی SSH نمی‌خواهد.</p>
+<h4>گزینهٔ ۲ — port forward ی SSH ‏(مثل Spotify)</h4>
+<p>هرمس پورت دقیق bind‌شده را در راهنمای نشست SSH چاپ می‌کند. ترمینال جداگانه‌ای روی لپ‌تاپ باز کنید:</p>
+<pre dir="ltr"><code>ssh -N -L &lt;port&gt;:127.0.0.1:&lt;port&gt; user@remote-host</code></pre>
+<p>بعد URL ی تأیید را مثل همیشه در مرورگر باز کنید؛ ریدایرکت از داخل تونل عبور می‌کند و شنونده می‌گیردش. وقتی لازم است جریان بدون حضور شما کامل شود ‏(مثلاً re-auth اسکریپت‌شده که امکان چسباندن تعاملی نیست) از این استفاده کنید.</p>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p><b>دام — مسابقهٔ بارگذاری مجدد config با مهلت ۳۰ ثانیه:</b>اگر از داخل نشست در حال اجرای هرمس ~/.hermes/config.yaml را برای افزودن سرور MCP ی OAuth ویرایش کنید، CLI اتصال‌های MCP را با مهلت ۳۰ ثانیه خودکار بارگذاری مجدد می‌کند. برای کامل کردن یک جریان OAuth تعاملی کافی نیست و reload تسلیم می‌شود. به‌جایش hermes mcp login &lt;server&gt; را از ترمینال تازه اجرا کنید — سقفی ندارد و ۵ دقیقه کامل برای چسباندن صبر می‌کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> چرا شنونده نمی‌تواند فقط روی 0.0.0.0 بنشیند</h2>
+<p>‏Spotify و بیشتر سرورهای OAuth ی MCP پارامتر redirect_uri را با یک allowlist اعتبارسنجی می‌کنند. هر دو شکل loopback را الزامی می‌کنند ‏(http://127.0.0.1:&lt;exact-port&gt;/callback). Bind کردن شنونده روی 0.0.0.0 یا پورت متفاوت باعث می‌شود سرور احراز درخواست را به‌عنوان ناهمخوانی redirect_uri رد کند. تونل SSH شکل loopback را سرتاسری دست‌نخورده نگه می‌دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> قدم‌به‌قدم: یک پرش SSH</h2>
+<h3>۱. تونل را از ماشین محلی راه بیندازید</h3>
+<pre dir="ltr"><code># Spotify (port 43827)
+ssh -N -L 43827:127.0.0.1:43827 user@remote-host</code></pre>
+<p>‎-N‎ یعنی «شل راه‌دور باز نکن، فقط تونل را نگه دار». این ترمینال را تا پایان ورود روشن نگه دارید.</p>
+<h3>۲. در نشست SSH ی جداگانه فرمان احراز را اجرا کنید</h3>
+<pre dir="ltr"><code>ssh user@remote-host
+hermes auth spotify --no-browser</code></pre>
+<p>هرمس نشست SSH را تشخیص می‌دهد، باز شدن خودکار مرورگر را رد می‌کند و URL ی تأیید به‌اضلاف خطی مثل Waiting for callback on http://127.0.0.1:&lt;port&gt;/callback چاپ می‌کند.</p>
+<h3>۳. URL را در مرورگر محلی باز کنید</h3>
+<p>URL ی تأیید را از ترمینال راه‌دور کپی و در مرورگر لپ‌تاپ بچسبانید. صفحهٔ اجازه را تأیید کنید. سرور احراز به http://127.0.0.1:&lt;port&gt;/callback ریدایرکت می‌کند؛ مرورگر به تونل می‌خورد، درخواست به شنوندهٔ راه‌دور forward می‌شود و هرمس Login successful! چاپ می‌کند.</p>
+<p>وقتی خط موفقیت را دیدید می‌توانید تونل را جمع کنید ‏(Ctrl+C در ترمینال اول).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> قدم‌به‌قدم: از میان jump box</h2>
+<p>اگر از طریق bastion / jump host به هرمس می‌رسید، از ‎-J‎ داخلی SSH ‏(ProxyJump) استفاده کنید:</p>
+<pre dir="ltr"><code>ssh -N -L 43827:127.0.0.1:43827 -J jump-user@jump-host user@final-host</code></pre>
+<p>این یک اتصال SSH از داخل jump host زنجیر می‌کند بدون اینکه پورت loopback روی خود jump box بیفتد. مقدار 127.0.0.1:43827 ی محلی روی لپ‌تاپ مستقیم تا 127.0.0.1:43827 روی host نهایی راه‌دور تونل می‌شود.</p>
+<p>برای OpenSSH های قدیمی که ‎-J‎ ندارند، شکل بلند:</p>
+<pre dir="ltr"><code>ssh -N \
+    -o "ProxyCommand=ssh -W %h:%p jump-user@jump-host" \
+    -L 43827:127.0.0.1:43827 \
+    user@final-host</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> Mosh، ‏tmux و ControlMaster</h2>
+<p>تونل خاصیتِ اتصال SSH زیرین است. اگر هرمس را داخل tmux روی نشست mosh اجرا می‌کنید، roaming ی mosh forwarding ی ‎-L‎ را حمل نمی‌کند. یک نشست SSH سادهٔ <i>جداگانه</i> فقط برای تونل ‎-L‎ باز کنید — آن اتصالی است که باید حین جریان احراز زنده بماند. نشست تعاملی mosh/tmux می‌تواند عادی هرمس را ادامه دهد.</p>
+<p>اگر ssh -o ControlMaster=auto استفاده می‌کنید، port forward ها روی اتصال multiplex عمر master را دارند. اگر تونل بالا نیامد master را ری‌استارت کنید:</p>
+<pre dir="ltr"><code>ssh -O exit user@remote-host
+ssh -N -L 43827:127.0.0.1:43827 user@remote-host</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> عیب‌یابی</h2>
+<h3>خطای bind [127.0.0.1]:43827: Address already in use</h3>
+<p>چیزی روی لپ‌تاپ تان آن پورت را گرفته. یا تونل قبلی تمیز بسته نشده یا هرمس محلی هم رویش گوش می‌دهد. مقصر را پیدا و بکشید:</p>
+<pre dir="ltr"><code># macOS / Linux
+lsof -iTCP:43827 -sTCP:LISTEN
+kill &lt;PID&gt;</code></pre>
+<p>بعد فرمان ssh -L را دوباره امتحان کنید.</p>
+<h3>احراز هویت منتظر callback ی محلی تایم‌اوت شد</h3>
+<p>ریدایرکت هرگز به شنوندهٔ راه‌دور نرسیده. چک کنید تونل هنوز زنده است ‏(ssh -N خروجی نشان نمی‌دهد پس به ترمینالی که بازش کردید نگاه کنید)، مطمئن شوید پورت آخرین خط Waiting for callback on ... را استفاده کردید ‏(هرمس ممکن است اگر پورت موردعلاقه اشغال باشد خودکار bump کند)، در صورت نیاز تونل را ری‌استارت و فرمان احراز را دوباره اجرا کنید.</p>
+<h3>توکن‌ها در ~/.hermes اشتباه می‌افتند</h3>
+<p>توکن‌ها زیر کاربر لینوکسی نوشته می‌شوند که hermes auth add ... را اجرا کرده. اگر گیت‌وی / سرویس systemd تان با کاربر دیگری اجرا می‌شود ‏(مثلاً root یا کاربر اختصاصی hermes)، با <b>همان</b> کاربر احراز کنید تا توکن‌ها در auth.json ی همان کاربر بیفتند. مثلاً sudo -u hermes -i یا معادلش.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> ببینید نیز</h2>
+<ul>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/guides/xai-grok-oauth" target="_blank" rel="noopener">xAI Grok OAuth</a></b> — کد دستگاه؛ بدون تونل SSH</li>
+  <li><b><a href="../user-guide/features/spotify.html">Spotify ‏(اجرای روی SSH)</a></b></li>
+  <li><b><a href="../user-guide/features/mcp.html">سرویس‌گیرندهٔ بومی MCP ‏(بخش OAuth)</a></b></li>
+  <li><b><a href="https://man.openbsd.org/ssh#J" target="_blank" rel="noopener">SSH ‎-J‎ / ProxyJump ‏(صفحهٔ man)</a></b></li>
+</ul>
+</section>
+
+<div class="pager">
+  <span class="off prev"><span class="dir">→ قبلی</span><span class="ttl">MiniMax OAuth (به‌زودی)</span></span>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">راهبری خط لولهٔ جلسات تیمز (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/oauth-over-ssh" target="_blank" rel="noopener">OAuth over SSH / Remote Hosts</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

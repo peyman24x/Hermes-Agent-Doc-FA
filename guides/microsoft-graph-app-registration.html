@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ثبت اپ Microsoft Graph — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/microsoft-graph-app-registration" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>ثبت اپ Microsoft Graph</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>ثبت یک برنامهٔ Microsoft Graph</h1>
+<p>خط لولهٔ جلسات Teams رونوشت‌ها، ضبط‌ها و مصنوع‌های مرتبط جلسات را با احراز هویت <b>فقط-اپلیکیشن</b> ‏(daemon) از Microsoft Graph می‌خواند — بدون ورود کاربر، بدون تأیید تعاملی per جلسه. این به یک ثبت اپلیکیشن Azure AD با مجوزهای application ی admin-consent شده نیاز دارد.</p>
+<p>این راهنما عبور می‌کند از:</p>
+<ol>
+  <li>ساخت ثبت اپلیکیشن</li>
+  <li>ساخت client secret</li>
+  <li>اعطای مجوزهای Graph API که خط لوله لازم دارد</li>
+  <li>‏Admin-consent کردن آن مجوزها</li>
+  <li>‏(اختیاری) محدود کردن اپ به کاربران مشخص با Application Access Policy</li>
+</ol>
+<p>برای تمام کردن این مسیر به <b>دسترسی مدیر tenant</b> نیاز دارید ‏(یا مدیری که از طرف شما consent بدهد). مقادیری که جمع می‌کنید را علامت‌گذاری کنید — آخرش در ~/.hermes/.env می‌روند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li>یک tenant مایکروسافت ۳۶۵ با Teams Premium یا لایسنس‌های Teams ای که رونوشت و ضبط جلسه تولید کنند</li>
+  <li>دسترسی مدیریتی به پرتال Azure در <a href="https://entra.microsoft.com" target="_blank" rel="noopener">entra.microsoft.com</a></li>
+  <li>یک نقطهٔ پایانی HTTPS عموماً در دسترس برای اعلان تغییرات Graph ‏(بعداً در مرحلهٔ شنوندهٔ وب‌هوک راه می‌افتد)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: ساخت App Registration</h2>
+<ol>
+  <li>به‌عنوان مدیر tenant وارد <a href="https://entra.microsoft.com" target="_blank" rel="noopener">entra.microsoft.com</a> شوید.</li>
+  <li>به Identity → Applications → App registrations بروید.</li>
+  <li>روی New registration کلیک کنید.</li>
+  <li>پر کنید:
+    <ul>
+      <li><b>Name:</b> ‏Hermes Teams Meeting Pipeline ‏(یا هر اسمی که بشناسید).</li>
+      <li><b>Supported account types:</b> «Accounts in this organizational directory only (Single tenant)».</li>
+      <li><b>Redirect URI:</b> خالی بگذارید — احراز فقط-اپلیکیشن لازم ندارد.</li>
+    </ul>
+  </li>
+  <li>روی Register کلیک کنید.</li>
+</ol>
+<p>به صفحهٔ نمای کلی اپ می‌رسید. دو مقدار را کپی کنید:</p>
+<ul>
+  <li><b>Application (client) ID</b> ← MSGRAPH_CLIENT_ID</li>
+  <li><b>Directory (tenant) ID</b> ← MSGRAPH_TENANT_ID</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: ساخت Client Secret</h2>
+<ol>
+  <li>در ناوبری کناری Certificates &amp; secrets را باز کنید.</li>
+  <li>روی New client secret کلیک کنید.</li>
+  <li><b>Description:</b> ‏hermes-graph-secret. ‏<b>Expires:</b> مقداری هماهنگ با سیاست چرخش تان بردارید ‏(۶ تا ۲۴ ماه رایج است).</li>
+  <li>روی Add کلیک کنید.</li>
+  <li>ستون <b>Value</b> را بلافاصله کپی کنید — فقط یک بار نشان داده می‌شود. همان MSGRAPH_CLIENT_SECRET است.</li>
+</ol>
+<blockquote><p>ستون Secret ID خودِ راز نیست. شما ستون Value را می‌خواهید.</p></blockquote>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۳: اعطای مجوزهای Graph API</h2>
+<p>خط لوله از حداقلِ مجموعهٔ مجوزهای application استفاده می‌کند. فقط چیزی را اضافه کنید که لازم دارید؛ هر مجوز، دامنهٔ خواندن اپ در سراسر tenant را بازتر می‌کند.</p>
+<ol>
+  <li>در ناوبری کناری API permissions را باز کنید.</li>
+  <li>Add a permission → Microsoft Graph → Application permissions را بزنید.</li>
+  <li>از جدول زیر مجوزهایی را که با کاری که از خط لوله می‌خواهید می‌خواند اضافه کنید.</li>
+  <li>بعد از افزودن، روی Grant admin consent for &lt;tenant&gt; کلیک کنید. ستون Status باید برای هر مجوز تیک سبز شود.</li>
+</ol>
+<h3>لازم برای خلاصه‌های رونوشت-محور</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مجوز</th><th>به اپ اجازهٔ چه چیزی را می‌دهد</th></tr></thead>
+<tbody>
+<tr><td>OnlineMeetings.Read.All</td><td>خواندن متادیتای جلسات آنلاین Teams ‏(موضوع، شرکت‌کنندگان، URL ی ورود).</td></tr>
+<tr><td>OnlineMeetingTranscript.Read.All</td><td>خواندن رونوشت‌هایی که Teams تولید می‌کند.</td></tr>
+</tbody>
+</table>
+</div>
+<h3>لازم برای fallback ی ضبط ‏(وقتی رونوشت موجود نیست)</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مجوز</th><th>به اپ اجازهٔ چه چیزی را می‌دهد</th></tr></thead>
+<tbody>
+<tr><td>OnlineMeetingRecording.Read.All</td><td>دانلود ضبط‌های جلسهٔ Teams برای پردازش STT آفلاین.</td></tr>
+<tr><td>CallRecords.Read.All</td><td>حل کردن جلسات از سوابق تماس وقتی فقط URL ی ورود معلوم است.</td></tr>
+</tbody>
+</table>
+</div>
+<h3>لازم برای تحویل خروجی خلاصه‌ها ‏(فقط حالت graph)</h3>
+<p>اگر platforms.teams.extra.delivery_mode روی graph باشد، خط لوله خلاصه‌ها را از طریق API ی Graph داخل یک کانال یا گفتگوی Teams پست می‌کند. اگر از حالت delivery ی incoming_webhook استفاده می‌کنید این‌ها را رد کنید.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مجوز</th><th>به اپ اجازهٔ چه چیزی را می‌دهد</th></tr></thead>
+<tbody>
+<tr><td>ChannelMessage.Send</td><td>پست پیام داخل کانال‌های Teams از طرف اپ.</td></tr>
+<tr><td>Chat.ReadWrite.All</td><td>پست پیام داخل گفتگوهای ۱:۱ و گروهی ‏(فقط اگر chat_id را هدف تحویل ست کرده باشید).</td></tr>
+</tbody>
+</table>
+</div>
+<h3>توصیه نمی‌شود</h3>
+<ul>
+  <li>OnlineMeetings.ReadWrite.All / Chat.ReadWrite بدون ‎.All‎ — بازتر از نیاز خط لوله.</li>
+  <li>مجوزهای delegated — خط لوله از جریان فقط-اپلیکیشن ‏(client-credentials) استفاده می‌کند؛ مجوزهای delegated بدون ورود کاربر کار نمی‌کنند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۴: ‏(توصیه‌شده) محدود کردن اپ با Application Access Policy</h2>
+<p>به‌طور پیش‌فرض مجوزهای application مثل OnlineMeetings.Read.All به اپ دسترسی به <b>همهٔ</b> جلسات tenant را می‌دهند. برای دموهای شرکتی و tenant های dev اشکالی ندارد؛ برای production تقریباً حتماً می‌خواهید محدود کنید اپ بتواند جلسات کدام کاربران را بخواند.</p>
+<p>مایکروسافت دقیقاً برای همین <b>Application Access Policies</b> را برای Teams فراهم کرده. این سیاست فقط از PowerShell قابل مدیریت است؛ UI ی پرتال ندارد.</p>
+<p>از یک PowerShell ادمین با ماژول MicrosoftTeams نصب‌شده و متصل ‏(Connect-MicrosoftTeams):</p>
+<pre dir="ltr"><code># Create a policy scoped to the Hermes app
+New-CsApplicationAccessPolicy `
+  -Identity "Hermes-Meeting-Pipeline-Policy" `
+  -AppIds "&lt;MSGRAPH_CLIENT_ID&gt;" `
+  -Description "Restrict Hermes meeting pipeline to allow-listed users"
+
+# Grant the policy to specific users whose meetings the pipeline may read
+Grant-CsApplicationAccessPolicy `
+  -PolicyName "Hermes-Meeting-Pipeline-Policy" `
+  -Identity "alice@example.com"
+
+Grant-CsApplicationAccessPolicy `
+  -PolicyName "Hermes-Meeting-Pipeline-Policy" `
+  -Identity "bob@example.com"</code></pre>
+<p>انتشار بعد از اعطا تا ۳۰ دقیقه ممکن است طول بکشد. با این تأیید کنید:</p>
+<pre dir="ltr"><code>Test-CsApplicationAccessPolicy -Identity "alice@example.com" -AppId "&lt;MSGRAPH_CLIENT_ID&gt;"</code></pre>
+<p>بدون سیاست، جلسات <b>هر</b> کاربری خواندنی است — همان چیزی که مجوز از نظر فنی می‌دهد. این مرحله را روی tenant ی تولیدی رد نکنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۵: نوشتن credential ها در فایل env</h2>
+<p>سه مقدار جمع‌آوری‌شده را در ~/.hermes/.env بگذارید:</p>
+<pre dir="ltr"><code>MSGRAPH_TENANT_ID=&lt;directory-tenant-id&gt;
+MSGRAPH_CLIENT_ID=&lt;application-client-id&gt;
+MSGRAPH_CLIENT_SECRET=&lt;client-secret-value&gt;</code></pre>
+<p>مجوزهای فایل را طوری ست کنید که فقط خودتان بخوانید:</p>
+<pre dir="ltr"><code>chmod 600 ~/.hermes/.env</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> گام ۶: تأیید جریان توکن</h2>
+<p>هرمس یک تست دود احراز Graph همراه دارد. از نصب Hermes تان:</p>
+<pre dir="ltr"><code>python -c "
+import asyncio
+from tools.microsoft_graph_auth import MicrosoftGraphTokenProvider
+provider = MicrosoftGraphTokenProvider.from_env()
+token = asyncio.run(provider.get_access_token())
+print('Token acquired, length:', len(token))
+print(provider.inspect_token_health())
+"</code></pre>
+<p>اجرای موفق یک رشتهٔ توکن بلند و دیکشنری سلامت با cached: True و expires_in_seconds نزدیک ۳۶۰۰ چاپ می‌کند. شکست‌ها یک MicrosoftGraphTokenError با کد خطای Azure می‌دهند — رایج‌ترین‌ها:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>خطای Azure</th><th>معنا</th><th>راه حل</th></tr></thead>
+<tbody>
+<tr><td>AADSTS7000215: Invalid client secret</td><td>مقدار راز ناهم‌خوان یا منقضی.</td><td>در گام ۲ راز جدید بسازید؛ ‎.env را به‌روز کنید.</td></tr>
+<tr><td>AADSTS700016: Application not found</td><td>MSGRAPH_CLIENT_ID یا tenant غلط.</td><td>چک کنید مقادیر گام ۱ از همان اپ باشند.</td></tr>
+<tr><td>AADSTS90002: Tenant not found</td><td>غلط تایپی در MSGRAPH_TENANT_ID.</td><td>Directory (tenant) ID را دوباره از نمای کلی اپ کپی کنید.</td></tr>
+<tr><td>insufficient_claims هنگام فراخوانی ‏(نه هنگام توکن)</td><td>توکن گرفته می‌شود ولی Graph برمی‌گرداند 401/403.</td><td>گام ۳ admin-consent را رد کرده‌اید یا مجوزها را اضافه کردید ولی هنوز دوباره consent نکرده‌اید. به API permissions برگردید و Grant admin consent را دوباره بزنید.</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> چرخاندن Client Secret</h2>
+<p>رازهای سرویس‌گیرندهٔ Azure انقضای قطعی دارند. قبل از انقضای رازتان:</p>
+<ol>
+  <li>در گام ۲ یک client secret دوم بسازید بدون حذف اولی.</li>
+  <li>MSGRAPH_CLIENT_SECRET را در ~/.hermes/.env با مقدار جدید به‌روز کنید.</li>
+  <li>گیت‌وی را ری‌استارت کنید تا راز جدید خوانده شود: hermes gateway restart.</li>
+  <li>با تست دود بالا تأیید کنید.</li>
+  <li>راز قدیمی را از پرتال Azure حذف کنید.</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> قدم‌های بعدی</h2>
+<p>وقتی credential ها تمیز تأیید شدند ادامه دهید با:</p>
+<ul>
+  <li><b>راه‌اندازی شنوندهٔ وب‌هوک</b> — بالا آوردن پلتفرم گیت‌وی msgraph_webhook که اعلان تغییرات Graph را می‌گیرد.</li>
+  <li><b>پیکربندی خط لوله</b> — تنظیم زمان اجرای خط لولهٔ جلسات Teams و CLI ی عملیات.</li>
+  <li><b>تحویل خروجی</b> — رساندن خلاصه‌ها به کانال یا گفتگوی Teams.</li>
+</ul>
+<p>آن صفحه‌ها کنار PR‌هایی که زمان اجرای مربوطه را اضافه می‌کنند منتشر می‌شوند. این راه‌اندازی credential ها پیش‌نیازی مستقل است و انجامش از قبل امن است.</p>
+</section>
+
+<div class="pager">
+  <a href="manage-hermes-cloud-with-mcp.html"><span class="dir">→ قبلی</span><span class="ttl">مدیریت هرمس‌کلاد با MCP</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">مهاجرت از OpenClaw (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/microsoft-graph-app-registration" target="_blank" rel="noopener">Register a Microsoft Graph Application</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

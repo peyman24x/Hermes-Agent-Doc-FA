@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>گوگل Vertex AI — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/google-vertex" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>گوگل Vertex AI</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>گوگل Vertex AI</h1>
+<p>‏Hermes Agent از <b>مدل‌های Gemini روی Google Cloud Vertex AI</b> از طریق نقطهٔ پایانی سازگار-OpenAI ی Vertex پشتیبانی می‌کند. برخلاف ارائه‌دهندهٔ <a href="https://hermes-agent.nousresearch.com/docs/guides/google-gemini" target="_blank" rel="noopener">Google AI Studio</a> ‏(که کلید API ی ایستا روی generativelanguage.googleapis.com استفاده می‌کند)، Vertex به شما <b>محدودیت نرخ درجهٔ سازمانی و صورتحساب/اعتبارهای GCP</b> می‌دهد و انتخاب درست است وقتی می‌خواهید مصرف Gemini روی حساب Google Cloud تان بیفتد نه یک کلید AI Studio.</p>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p><b>‏Vertex با OAuth2 احراز هویت می‌کند، نه کلید API</b><br>Vertex برای نقطهٔ پایانی استاندارد <b>هیچ کلید API ی ایستایی ندارد</b>. هر درخواست به یک <b>توکن دسترسی OAuth2</b> کوتاه‌عمر ‏(عمر حدود ۱ ساعت) نیاز دارد که یا از JSON ی service-account یا از Application Default Credentials ‏(ADC) ضرب می‌شود. هرمس این توکن‌ها را برایتان ضرب و <b>خودکار refresh</b> می‌کند — هرگز توکن را دستی نمی‌چسبانید. برای همین چسباندن یک توکن موقت در فیلد api_key ی ارائه‌دهندهٔ سفارشی کار نمی‌کند: وسط نشست منقضی می‌شود.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li><b>یک پروژهٔ Google Cloud</b> با <b>API ی Vertex AI فعال</b> و صورتحساب فعال.</li>
+  <li><b>Credential</b>، یکی از این‌ها:
+    <ul>
+      <li>فایل کلید <b>JSON ی service-account</b> با نقش roles/aiplatform.user، یا</li>
+      <li><b>Application Default Credentials</b> از طریق gcloud auth application-default login ‏(یا متادیتا سرور هنگام اجرا روی VM ی GCP).</li>
+    </ul>
+  </li>
+  <li><b>google-auth</b> — دفعهٔ اول که Vertex را انتخاب کنید خودکار نصب می‌شود ‏(نصب lazy). اگر شکست خورد hermes setup را اجرا کنید تا نصب مدیریت‌شده تعمیر شود.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> شروع سریع</h2>
+<pre dir="ltr"><code># Option A — service account JSON (recommended for servers / gateways)
+echo "VERTEX_CREDENTIALS_PATH=/path/to/service-account.json" >> ~/.hermes/.env
+
+# Option B — Application Default Credentials (good for local dev)
+gcloud auth application-default login
+
+# Select Vertex as your provider
+hermes model
+# → Choose "More providers..." → "Google Vertex AI"
+# → Enter your GCP project ID (or leave blank to use the one in your credentials)
+# → Choose a region (default: global)
+# → Select a Gemini model
+
+# Start chatting
+hermes chat</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پیکربندی</h2>
+<p>‏Vertex تنظیماتش را بر اساس حساسیت جدا می‌کند:</p>
+<ul>
+  <li><b>مسیر credential</b> اشاره‌گر به یک راز است و در ~/.hermes/.env زندگی می‌کند.</li>
+  <li><b>شناسهٔ پروژه و منطقه</b> تنظیمات مسیریابی غیرمحرمانه‌اند و در ~/.hermes/config.yaml زندگی می‌کنند.</li>
+</ul>
+<p>فایل ~/.hermes/.env:</p>
+<pre dir="ltr"><code># One of these (checked in this order); omit both to use ADC:
+VERTEX_CREDENTIALS_PATH=/path/to/service-account.json
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json</code></pre>
+<p>فایل ~/.hermes/config.yaml:</p>
+<pre dir="ltr"><code>model:
+  default: google/gemini-3-flash-preview
+  provider: vertex
+
+vertex:
+  project_id: my-gcp-project   # blank → use the project embedded in the credentials
+  region: global               # "global" is required for the Gemini 3.x previews</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>متغیرهای محیطی از config.yaml قوی‌ترند:</b>VERTEX_PROJECT_ID و VERTEX_REGION مقادیر vertex.project_id / vertex.region در config.yaml را بازنویسی می‌کنند. آن‌ها را برای بازنویسی per-shell استفاده کنید؛ تنظیمات ماندگار را در config.yaml نگه دارید.</p>
+</div>
+<h3>احراز هویت چطور کار می‌کند</h3>
+<ol>
+  <li>هرمس credential ها را به این ترتیب حل می‌کند: VERTEX_CREDENTIALS_PATH ← GOOGLE_APPLICATION_CREDENTIALS ← ADC.</li>
+  <li>یک توکن دسترسی OAuth2 با دامنهٔ cloud-platform ضرب و کش می‌کند؛ تا ۵ دقیقه مانده به انقضا refresh می‌شود.</li>
+  <li>توکن به یک سرویس‌گیرندهٔ استاندارد OpenAI داده می‌شود که به نقطهٔ پایانی Vertex اشاره می‌کند:
+  <pre dir="ltr"><code>https://aiplatform.googleapis.com/v1beta1/projects/{project}/locations/{region}/endpoints/openapi</code></pre>
+  موقعیت‌های منطقه‌ای به‌جایش از host ی {region}-aiplatform.googleapis.com استفاده می‌کنند.</li>
+  <li>اگر نشستی بیشتر از عمر توکن طول بکشد و درخواستی 401 برگرداند، هرمس توکن را دوباره ضرب و خودکار retry می‌کند. روی گیت‌وی بلندمدت اگر refresh token ی ADC خودش منقضی شده باشد و JSON ی service-account پیکربندی شده باشد، هرمس به آن fallback می‌کند.</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مدل‌های موجود</h2>
+<p>‏Vertex پیشوند فروشندهٔ google/ را روی شناسه‌های مدل الزامی می‌کند. انتخاب‌گر hermes model این‌ها را می‌دهد:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مدل</th><th>شناسه</th></tr></thead>
+<tbody>
+<tr><td>Gemini 3.1 Pro Preview</td><td>google/gemini-3.1-pro-preview</td></tr>
+<tr><td>Gemini 3 Pro Preview</td><td>google/gemini-3-pro-preview</td></tr>
+<tr><td>Gemini 3 Flash Preview</td><td>google/gemini-3-flash-preview</td></tr>
+<tr><td>Gemini 3.1 Flash Lite Preview</td><td>google/gemini-3.1-flash-lite-preview</td></tr>
+<tr><td>Gemini 2.5 Pro</td><td>google/gemini-2.5-pro</td></tr>
+<tr><td>Gemini 2.5 Flash</td><td>google/gemini-2.5-flash</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p><b>منطقهٔ global برای Gemini 3.x:</b>مدل‌های preview ی Gemini 3.x از طریق نقطهٔ پایانی global سرویس می‌شوند. نقاط پایانی منطقه‌ای ‏(us-central1 و...) ممکن است 404 بدهند. مگر دلیل مشخصی برای pin کردن منطقه داشته باشید region: global را دست نزنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> سوئیچ مدل وسط نشست</h2>
+<pre dir="ltr"><code>/model google/gemini-3-pro-preview
+/model google/gemini-3-flash-preview</code></pre>
+<p>‏‎/model‎ بین ارائه‌دهنده‌ها و مدل‌هایی که قبلاً پیکربندی شده‌اند سوئیچ می‌کند؛ credential جدید جمع نمی‌کند. اول Vertex را با hermes model پیکربندی کنید.</p>
+<h3>Reasoning / تفکر</h3>
+<p>‏Vertex بودجهٔ تفکر Gemini را از سطح سازگار-OpenAI expose می‌کند. هرمس تنظیم reasoning-effort را خودکار روی extra_body.google.thinking_config نگاشت می‌کند، پس reasoning_effort همان‌طور که روی سطوح دیگر Gemini کار می‌کند این‌جا هم کار می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> عیب‌یابی</h2>
+<h3>«Vertex AI credentials could not be resolved»</h3>
+<p>هرمس نه JSON ی service-account پیدا کرده نه ADC ی کارا. یا VERTEX_CREDENTIALS_PATH را در ~/.hermes/.env ست کنید یا gcloud auth application-default login را اجرا کنید. اگر پروژه‌تان داخل credential جاسازی نشده، vertex.project_id را در config.yaml ست کنید.</p>
+<h3>google-auth نصب نیست</h3>
+<p>هرمس بار اولی که ارائه‌دهندهٔ Vertex را انتخاب کنید lazy نصبش می‌کند. اگر شکست خورد hermes setup را اجرا کنید تا نصب مدیریت‌شده تعمیر شود.</p>
+<h3>خطای 404 روی مدل‌های Gemini 3.x</h3>
+<p>احتمالاً روی نقطهٔ پایانی منطقه‌ای هستید. region: global را در بخش vertex: ی config.yaml ست کنید ‏(یا VERTEX_REGION را بردارید).</p>
+<h3>خطای 403 / اجازه‌نامهٔ رد شده</h3>
+<p>حساب خدمت ‏(یا هویت ADC ی شما) به نقش roles/aiplatform.user روی پروژه نیاز دارد و API ی Vertex AI باید برای آن پروژه فعال باشد.</p>
+<p>برای تشخیص، hermes doctor را اجرا کنید — گزارش می‌دهد credential های Vertex قابل حل هستند یا نه ‏(مسیر service-account یا ADC) و آیا ارائه‌دهنده پیکربندی شده است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> مرتبط</h2>
+<ul>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/guides/google-gemini" target="_blank" rel="noopener">گوگل جِمینای ‏(AI Studio)</a></b> — جِمینای با کلید API ی ایستا بدون GCP</li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/guides/aws-bedrock" target="_blank" rel="noopener">AWS Bedrock</a></b> — یکپارچه‌سازی بومی دیگر ابری</li>
+  <li><b><a href="../integrations/providers.html">ارائه‌دهندگان مدل</a></b></li>
+  <li><b><a href="../user-guide/configuration.html">پیکربندی</a></b></li>
+</ul>
+</section>
+
+<div class="pager">
+  <span class="off prev"><span class="dir">→ قبلی</span><span class="ttl">گوگل جِمینای (به‌زودی)</span></span>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">اجرای محلی با Ollama (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/google-vertex" target="_blank" rel="noopener">Google Vertex AI</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ورود بومی دسکتاپ ‏(RFC 8252) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/desktop-native-signin" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>ورود بومی دسکتاپ ‏(RFC 8252)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>ورود بومی دسکتاپ ‏(RFC 8252)</h1>
+<p>وقتی برنامهٔ دسکتاپ هرمس به یک <b>گیت‌وی گیت‌دار</b> وصل می‌شود ‏(داشبورد میزبانی‌شده یا خودمیزبانی که پشت یک ارائه‌دهندهٔ OAuth است)، دو راه برای ورود دارد:</p>
+<ol>
+  <li><b>ورود بومی ‏(RFC 8252)</b> — برنامه <b>مرورگر واقعی سیستم‌عامل</b> شما را باز می‌کند، شما در مرورگری که از قبل بهش اعتماد دارید تأیید می‌کنید و برنامه توکن‌هایی می‌گیرد که در keychain سیستم‌عامل ذخیره می‌کند. <b>بدون webview جاسازی‌شده، بدون کوکی نشست مرورگر.</b>هر وقت گیت‌وی پشتیبانی کند این حالت پیش‌فرض است.</li>
+  <li><b>ورود جاسازی‌شده ‏(جایگزین قدیمی)</b> — برنامه یک پنجرهٔ مرورگر کوچک داخل خودش باز می‌کند و کوکی نشست گیت‌وی را شکار می‌کند. وقتی گیت‌وی نسخهٔ قدیمی‌ای باشد که ورود بومی را تبلیغ نکند خودکار استفاده می‌شود.</li>
+</ol>
+<p>شما بین این دو انتخاب نمی‌کنید — برنامه تشخیص می‌دهد گیت‌وی چه چیزی پشتیبانی می‌کند و بهترین را برمی‌دارد. این صفحه توضیح می‌دهد چه اتفاقی می‌افتد و چرا.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چرا ورود بومی</h2>
+<p>جاسازی مرورگر داخل یک برنامهٔ بومی برای OAuth کاستی‌های شناخته‌شده‌ای دارد: صفحهٔ ورود نشست موجود مرورگر شما را نمی‌بیند ‏(پس credential ها را دوباره تایپ می‌کنید و MFA را دوباره انجام می‌دهید)، مدیرهای رمز و passkey ها اغلب کار نمی‌کنند و برنامه مجبور است کوکی نشست را از یک webview خصوصی بخواند. ‏RFC 8252 ‏(«OAuth 2.0 for Native Apps») بهترین شیوهٔ صنعتی است که از همهٔ این‌ها اجتناب می‌کند: <b>احراز هویت در مرورگر سیستم انجام شود و برنامه توکن‌های مخصوص خودش را بگیرد.</b></p>
+<p>برای خودِ هرمس، ورود بومی یعنی:</p>
+<ul>
+  <li><b>بدون webview جاسازی‌شده.</b>احراز هویت در Safari / Chrome / Firefox / Edge اتفاق می‌افتد — هرچه استفاده می‌کنید — با ورودها، افزونه‌ها و passkey های دست‌نخوردهٔ شما.</li>
+  <li><b>بدون کوکی نشست.</b>برنامه یک <b>access token</b> ی OAuth ‏(کوتاه‌عمر) و یک <b>refresh token</b> نگه می‌دارد که در حالت سکون با keychain سیستم‌عامل رمز شده‌اند ‏(safeStorage ی Electron). فراخوانی‌های REST و بلیت‌های WebSocket با هدر Authorization: Bearer احراز هویت می‌شوند نه با شیشهٔ کوکی.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> چطور کار می‌کند</h2>
+<pre dir="ltr"><code>Desktop app                Gateway (/auth/native/*)          Nous Portal (IDP)
+   │ 1. open loopback 127.0.0.1:&lt;random port&gt;
+   │ 2. system browser ─►  /auth/native/authorize
+   │    (PKCE challenge)    (starts the normal PKCE login) ─► /oauth/authorize
+   │                        ◄──── code ──── /auth/callback ◄──┘
+   │                        3. mint one-time gateway code
+   │ ◄─ 302 127.0.0.1/cb?code=… ─┘
+   │ 4. POST /auth/native/token (code + PKCE verifier)
+   │ ◄─ 5. { access_token, refresh_token, expires_at } ───────┘
+   │ 6. store in OS keychain; use Bearer for REST + WS tickets</code></pre>
+<p>گیت‌وی <b>واسطه‌گری</b> جریان را انجام می‌دهد: نسبت به برنامهٔ دسکتاپ، سرور احراز هویت است و نسبت به تأمین‌کنندهٔ هویت بالادستی ‏(Nous Portal)، یک سرویس‌گیرندهٔ OAuth. این لازم است چون client_id ی بالادستی و redirect URI های مجاز به origin خودِ گیت‌وی مقیدند — برنامهٔ دسکتاپ نمی‌تواند مستقیماً سرویس‌گیرندهٔ Portal باشد. دسکتاپ همچنان تجربهٔ کامل RFC 8252 را می‌گیرد: جفت PKCE مخصوص خودش، ریدایرکت loopback مخصوص خودش و توکن‌هایی که متعلق به خودش است.</p>
+<p><b>‏PKCE ‏(RFC 7636)</b> پرش loopback را محافظت می‌کند: کد یک‌بارمصرف گیت‌وی بدون code verifier بی‌ارزش است و verifier هرگز از برنامه خارج نمی‌شود. کد تک‌مصرف و کوتاه‌عمر است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> تشخیص قابلیت و fallback</h2>
+<p>دسکتاپ نقطهٔ پایانی عمومی ‎/api/status‎ ی گیت‌وی را می‌خواند که آرایه‌ای به نام auth_flows تبلیغ می‌کند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مقدار auth_flows</th><th>معنا</th></tr></thead>
+<tbody>
+<tr><td>["cookie", "native_pkce"]</td><td>گیت‌وی از ورود بومی پشتیبانی می‌کند ← برنامه از آن استفاده می‌کند</td></tr>
+<tr><td>["cookie"]</td><td>گیت‌وی فقط جریان قدیمی را پشتیبانی می‌کند ← برنامه از webview جاسازی‌شده استفاده می‌کند</td></tr>
+<tr><td><i>(فیلد غایب)</i></td><td>گیت‌وی قدیمی ← برنامه از webview جاسازی‌شده استفاده می‌کند</td></tr>
+</tbody>
+</table>
+</div>
+<p>اگر ورود بومی تبلیغ شده ولی به دلیل محلی شکست بخورد — مثلاً یک ابزار امنیتی شنوندهٔ loopback را مسدود کند یا تب مرورگر را ببندید — برنامه <b>خودکار به جریان جاسازی‌شده برمی‌گردد</b> تا همچنان بتوانید وارد شوید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> چرخهٔ حیات توکن</h2>
+<ul>
+  <li><b>Access token:</b> کوتاه‌عمر ‏(چند دقیقه). روی هر فراخوانی REST و هنگام ضرب بلیت WebSocket به‌صورت Authorization: Bearer فرستاده می‌شود.</li>
+  <li><b>Refresh token:</b> طولانی‌عمرتر، چرخان. وقتی access token نزدیک انقضاست برنامه ‎/auth/native/refresh‎ را صدا می‌زند تا هر دو توکن بچرخند و بعد keychain را به‌روز می‌کند.</li>
+  <li><b>انقضای پایانی:</b> اگر refresh token مرده باشد ‏(منقضی / لغوشده / استفادهٔ مجدد-تشخیص‌داده‌شده)، برنامه توکن‌های ذخیره‌شده را پاک و یک ورود تازه می‌خواهد.</li>
+  <li><b>خروج:</b> هم توکن‌های بومی ‏(keychain) و هم هر کوکی نشست قدیمی آن گیت‌وی را پاک می‌کند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> برای اپراتورهای گیت‌وی</h2>
+<p>ورود بومی روی هر گیت‌وی گیت‌داری که یک ارائه‌دهندهٔ نشست تعاملی ثبت کرده باشد خودکار موجوده. هیچ پیکربندی لازم نیست — مسیرهای ‎/auth/native/*‎ و تبلیغ auth_flows بخشی از زیرسیستم dashboard-auth هستند. ارائه‌دهنده‌های OAuth ‏(مثل ارائه‌دهندهٔ همراه Nous) ریدایرکت IDP ی بالادستی را واسطه‌گری می‌کنند؛ ارائه‌دهنده‌های رمزی ‏(مثل افزونهٔ همراه basic-auth) مرورگر سیستم را به فرم credential ی ‎/login‎ ی گیت‌وی می‌فرستند — همین چیزی است که به مدیرهای رمز سیستم‌عامل ‏(Passwords مک و…) اجازه می‌دهد فرم را autofill کنند؛ چیزی که هیچ webview دسکتاپی نمی‌تواند ارائه دهد. credential های فقط-توکنی ‏(مثل drain) ورود تعاملی نیستند و native_pkce تبلیغ نمی‌کنند.</p>
+<p>نقاط پایانی مربوطه ‏(همگی عمومی، bootstrap قبل-از-احراز، مثل مسیرهای OAuth ی موجود ‎/auth/*‎):</p>
+<ul>
+  <li>GET /auth/native/authorize — شروع ورود PKCE ی واسطه‌گری‌شده</li>
+  <li>POST /auth/native/token — تبدیل کد loopback + verifier به توکن‌ها</li>
+  <li>POST /auth/native/refresh — چرخاندن توکن‌ها از refresh token ی برنامه</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> ببینید نیز</h2>
+<ul>
+  <li><b><a href="oauth-over-ssh.html">OAuth روی SSH / Host های راه‌دور</a></b> — الگوی callback ی loopback برای OAuth ی ارائه‌دهنده/MCP روی ماشین‌های راه‌دور.</li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/guides/run-hermes-with-nous-portal" target="_blank" rel="noopener">اجرای Hermes با Nous Portal</a></b></li>
+</ul>
+</section>
+
+<div class="pager">
+  <span class="off prev"><span class="dir">→ قبلی</span><span class="ttl">عیب‌یابی Cron (به‌زودی)</span></span>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">گوگل جِمینای (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/desktop-native-signin" target="_blank" rel="noopener">Desktop Native Sign-In (RFC 8252)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

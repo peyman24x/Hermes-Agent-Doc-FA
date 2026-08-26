@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اجرای Nemotron 3 Ultra رایگان — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/run-nemotron-3-ultra-free" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>اجرای Nemotron 3 Ultra رایگان</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>اجرای رایگان Nemotron 3 Ultra در Hermes Agent</h1>
+<p>‏Nous Research به <b>ائتلاف Nemotron</b> از آزمایشگاه‌های پیشروی AI راه یافته که با NVIDIA روی پیشبرد مدل‌های بنیادی open frontier کار می‌کنند. به افتخار این اتفاق، با Nebius شراکت کردیم تا <b>Nemotron 3 Ultra</b> را برای دو هفته ‏(‏۴ تا ۱۸ ژوئن) روی <a href="https://portal.nousresearch.com" target="_blank" rel="noopener">Nous Portal</a> رایگان کنیم. برای همین امروز امتحانش کنید، دستورالعمل زیر را دنبال کنید.</p>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p><b>پیشنهاد محدود</b><br>tier ی nvidia/nemotron-3-ultra:free از ‏۴ تا ۱۸ ژوئن در دسترس است. برچسب :free است که آن را روی طرح بدون‌هزینه نگه می‌دارد — دقیقاً همان گونه را بردارید.</p>
+</div>
+<p>هر نصبی که fits تان است بردارید. <b>برنامهٔ دسکتاپ</b> ساده‌ترین است — بدون نیاز به ترمینال. اگر اهل ترمینال هستید، نصب <b>خط فرمانی</b> درست پایین‌ترش است.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> گزینهٔ A — برنامهٔ دسکتاپ ‏(توصیه‌شده)</h2>
+<p>ساده‌ترین مسیر: نصب‌کنندهٔ یک‌کلیکی با راه‌اندازی هدایت‌شده و کلیکی. بدون ترمینال.</p>
+<h3>۱. دانلود و نصب</h3>
+<p><a href="https://hermes-agent.nousresearch.com/" target="_blank" rel="noopener">نصب‌کنندهٔ Hermes Desktop</a> را برای macOS یا Windows دانلود و باز کنید. در اولین اجرا خودش راه‌اندازی‌اش را کامل می‌کند ‏(معمولاً زیر یک دقیقه).</p>
+<h3>۲. اتصال Nous Portal</h3>
+<p>وقتی برنامه باز شد صفحهٔ «Let's get you set up» را می‌بینید. روی <b>Nous Portal</b> کلیک کنید ‏(با نشان <b>Recommended</b>). مرورگرتان باز می‌شود — یک حساب <a href="https://portal.nousresearch.com" target="_blank" rel="noopener">Nous Portal</a> بسازید ‏(یا وارد شوید)، طرح <b>Free</b> را انتخاب و به هرمس دسترسی بدهید. برنامه خودکار وصل می‌شود.</p>
+<h3>۳. انتخاب مدل رایگان Nemotron 3 Ultra</h3>
+<p>بعد از اتصال، برنامه کارت <b>Default model</b> را نشان می‌دهد. روی Change کلیک کنید، عبارت nemotron 3 ultra را جستجو و گونه‌ای را انتخاب کنید که نشان Free tier دارد:</p>
+<pre dir="ltr"><code>nvidia/nemotron-3-ultra:free</code></pre>
+<p>برچسب :free همان چیزی است که آن را روی tier بدون‌هزینه نگه می‌دارد — همان گونه را بردارید.</p>
+<h3>۴. شروع گفتگو</h3>
+<p>روی Start chatting کلیک کنید. تمام — دارید رایگان با Nemotron 3 Ultra حرف می‌زنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گزینهٔ B — خط فرمان</h2>
+<p>ترمینال را ترجیح می‌دهید؟</p>
+<h3>۱. نصب Hermes Agent</h3>
+<p>روی macOS/Linux/WSL2/Android اجرا کنید:</p>
+<pre dir="ltr"><code>curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash</code></pre>
+<p>روی Windows:</p>
+<pre dir="ltr"><code>iex (irm https://hermes-agent.nousresearch.com/install.ps1)</code></pre>
+<p>ترجیح می‌دهید اول مرورش کنید؟ <a href="https://hermes-agent.nousresearch.com/install.sh" target="_blank" rel="noopener">install.sh</a> را دانلود، بازبینی و بعد اجرا کنید.</p>
+<p>بعد از پایان، شل تان را دوباره بار کنید:</p>
+<pre dir="ltr"><code>source ~/.bashrc   # or source ~/.zshrc</code></pre>
+<h3>۲. اجرای Quick Setup</h3>
+<pre dir="ltr"><code>hermes setup</code></pre>
+<p>گزینهٔ <b>Quick Setup</b> را انتخاب کنید. هرمس یک تب مرورگر باز می‌کند و منتظر می‌ماند شما مراحل بعد را تمام کنید.</p>
+<h3>۳. ساخت حساب Nous Portal</h3>
+<p>در مرورگر یک حساب <a href="https://portal.nousresearch.com" target="_blank" rel="noopener">Nous Portal</a> بسازید ‏(یا وارد شوید) و طرح <b>Free</b> را بردارید.</p>
+<h3>۴. اتصال حساب</h3>
+<p>وقتی برای اتصال حسابتان به Hermes Agent پرسید، روی Connect کلیک کنید. بعد از لینک شدن تأییدیه می‌بینید.</p>
+<h3>۵. انتخاب مدل رایگان Nemotron 3 Ultra</h3>
+<p>به ترمینال برگردید. از فهرست مدل‌ها این را انتخاب کنید:</p>
+<pre dir="ltr"><code>nvidia/nemotron-3-ultra:free</code></pre>
+<p>برچسب :free همان چیزی است که آن را روی tier بدون‌هزینه نگه می‌دارد؛ پس حتماً همان گونه را بردارید.</p>
+<h3>۶. شروع گفتگو</h3>
+<p>بقیهٔ مراحل Quick Setup را کامل کنید و بعد اجرا کنید:</p>
+<pre dir="ltr"><code>hermes</code></pre>
+<p>تمام — دارید رایگان با Nemotron 3 Ultra حرف می‌زنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> سوئیچ بعداً به آن</h2>
+<p>قبلاً با مدل دیگری راه‌اندازی کرده‌اید؟</p>
+<ul>
+  <li><b>برنامهٔ دسکتاپ:</b> انتخاب‌گر مدل را باز کنید، nemotron 3 ultra را جستجو و گونهٔ Free tier را انتخاب کنید.</li>
+  <li><b>CLI / TUI:</b> هر وقت خواستید داخل نشست با ‎/model nvidia/nemotron-3-ultra:free‎ سوئیچ کنید یا ‎/model‎ را اجرا کنید تا انتخاب‌گر باز شود و از فهرست بردارید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> عیب‌یابی</h2>
+<ul>
+  <li><b>مدل در فهرست دیده نمی‌شود؟</b>مطمئن شوید اتصال Nous Portal را کامل کرده‌اید و روی طرح Free هستید. در CLI فرمان hermes portal info تأیید می‌کند وارد شده‌اید و از مسیر Nous عبور می‌کنید.</li>
+  <li><b>گونهٔ اشتباه را برداشتید؟</b>دوباره nvidia/nemotron-3-ultra:free را انتخاب کنید — پسوند :free برای ماندن روی tier بدون‌هزینه الزامی است.</li>
+  <li><b>مرورگر باز نشد / روی host راه‌دور هستید ‏(CLI)؟</b>راه‌حل‌های port-forwarding را در <a href="oauth-over-ssh.html">OAuth روی SSH / Host های راه‌دور</a> ببینید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> ببینید نیز</h2>
+<ul>
+  <li><b><a href="../user-guide/desktop.html">برنامهٔ دسکتاپ</a></b> — برنامهٔ بومی یک‌کلیکی ‏(macOS، ‏Windows، ‏Linux)</li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/guides/run-hermes-with-nous-portal" target="_blank" rel="noopener">اجرای Hermes Agent با Nous Portal</a></b> — مرور کامل Portal: مدل‌ها، Tool Gateway و تأیید</li>
+  <li><b><a href="../integrations/nous-portal.html">یکپارچه‌سازی Nous Portal</a></b> — داخل اشتراک چه چیزی هست</li>
+  <li><b><a href="../getting-started/quickstart.html">شروع سریع</a></b> — از نصب تا گفتگو زیر ۵ دقیقه</li>
+</ul>
+</section>
+
+<div class="pager">
+  <span class="off prev"><span class="dir">→ قبلی</span><span class="ttl">اجرا با Nous Portal (به‌زودی)</span></span>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">اجرا روی ماشین کاری شخصی (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/run-nemotron-3-ultra-free" target="_blank" rel="noopener">Run Nemotron 3 Ultra free in Hermes Agent</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -603,6 +603,11 @@ hermes-docs-fa/
 - 🐞 اصلاح عقب‌ماندگی: مدخل ناوبری «ارائه‌دهندگان پشتیبان» در نشست ۷۷ به d:1 تبدیل نشده بود ‏(صفحه منتشر شده بود ولی از فهرست ناوبری مخفی مانده بود) — حالا فعال شد و شمارندهٔ واقعی دو واحد بالا آمد
 - زنجیرهٔ pager: index ← providers ← nous-portal؛ قبلیِ nous-portal به providers و بعدی‌اش به buzz وصل شد ✓
 - پیشرفت: **۱۲۲ از ۲۰۷ صفحه فعال (۵۹٪)**
+### نشست ۷۹ — 2026-08-27 — 📚 شروع گروه راهنماها — هشت صفحه
+- ترجمه و انتشار ۸ راهنما: «ایمیل اختصاصی برای ایجنت» ‏(مهارت Himalaya، پیکربندی IMAP/SMTP با config.toml نمونه، cron ی بررسی صندوق با پرامپت ضدتزریق، چهار نکتهٔ ایمنی)؛ «ورود بومی دسکتاپ RFC 8252» ‏(ورود بومی در برابر webview جاسازی‌شده، دیاگرام واسطه‌گری گیت‌وی، PKCE و loopback، جدول auth_flows، چرخهٔ حیات توکن، یادداشت اپراتورهای گیت‌وی)؛ «اجرای رایگان Nemotron 3 Ultra» ‏(دو مسیر دسکتاپ/CLI شش‌گامی، پیشنهاد محدود ژوئن، سوئیچ بعدی و عیب‌یابی)؛ «عیب‌یابی: ایجنت من کم‌هوش‌تر شده» ‏(چک‌لیست ۷ مرحله‌ای مرتب بر فراوانی: مدل نشست، فشار زمینه، طول زمینهٔ تشخیصی، اسنپ‌شات منجمد حافظه، سقف حافظهٔ گزینشی ۲۲۰۰ کاراکتری، بار مهارت‌ها/ابزارها، عوارض فشرده‌سازی + جدول مرجع سریع)؛ «گوگل Vertex AI» ‏(OAuth2 بدون کلید ایستا، ترتیب حل credential، region global الزامی Gemini 3.x، نگاشت reasoning_effort، چهار خطای رایج)؛ «OAuth روی SSH» ‏(تونل ‎ssh -N -L‎، جدول ارائه‌دهندگان نیازمند تونل، دو گزینهٔ MCP با چسباندن URL، مسابقهٔ reload ی ۳۰ ثانیه‌ای، jump box با ‎-J‎، mosh/tmux/ControlMaster، سه عیب‌یابی)؛ «مدیریت هرمس‌کلاد با MCP» ‏(سرور OAuth ی portal.nousresearch.com/mcp، جدول هفت درخواست↔ابزار، انتخاب‌گر سازمان، محدودسازی فقط-خواندنی با tools.include، پنج عیب‌یابی)؛ «ثبت اپ Microsoft Graph» ‏(شش گام از App Registration تا تست دود توکن، سه جدول مجوز حداقلی، Application Access Policy ی PowerShell-only، جدول خطاهای AADSTS، چرخش راز)
+- زنجیرهٔ pager داخل دسته: manage-hermes-cloud-with-mcp ← → microsoft-graph-app-registration وصل شد؛ بقیه همسایه‌های هنوز-ترجمه‌نشده off مانده‌اند تا بعداً زنجیر شوند
+- نکته: README بازطراحی کاربر محترم شد ‏(نسخهٔ فشردهٔ جدید) — به‌روزرسانی خودکار پیشرفت حالا روی بج و جدول «فهرست» اعمال می‌شود؛ بج کهنهٔ ۱۶/۲۰۷ هم اصلاح شد
+- پیشرفت: **۱۳۰ از ۲۰۷ صفحه فعال (۶۳٪)** — گروه یکپارچه‌سازی‌ها کامل، شروع گروه راهنماها
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -731,6 +736,14 @@ hermes-docs-fa/
 | 120 | `user-guide/features/fallback-providers.html` | ارائه‌دهندگان پشتیبان (Fallback) |
 | 121 | `user-guide/features/credential-pools.html` | استخر اعتبارنامه‌ها |
 | 122 | `integrations/providers.html` | ارائه‌دهندگان مدل (AI Providers) |
+| 123 | `guides/agent-email-address.html` | ایمیل اختصاصی برای ایجنت |
+| 124 | `guides/desktop-native-signin.html` | ورود بومی دسکتاپ (RFC 8252) |
+| 125 | `guides/run-nemotron-3-ultra-free.html` | اجرای Nemotron 3 Ultra رایگان |
+| 126 | `guides/troubleshooting-agent-quality.html` | عیب‌یابی: «ایجنت من کم‌هوش‌تر شده» |
+| 127 | `guides/google-vertex.html` | گوگل Vertex AI |
+| 128 | `guides/oauth-over-ssh.html` | OAuth روی SSH / میزبان راه‌ن |
+| 129 | `guides/manage-hermes-cloud-with-mcp.html` | مدیریت هرمس‌کلاد با MCP |
+| 130 | `guides/microsoft-graph-app-registration.html` | ثبت اپ Microsoft Graph |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

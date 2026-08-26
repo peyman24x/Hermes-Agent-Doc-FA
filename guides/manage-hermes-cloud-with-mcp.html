@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مدیریت هرمس‌کلاد با MCP — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/manage-hermes-cloud-with-mcp" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>مدیریت هرمس‌کلاد با MCP</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>مدیریت Hermes Cloud با MCP</h1>
+<p><a href="https://portal.nousresearch.com/cloud" target="_blank" rel="noopener">Hermes Cloud</a> نمونه‌های میزبانی‌شدهٔ Hermes Agent را برای شما اجرا می‌کند. معمولاً از صفحهٔ ‎/agents‎ در <a href="../integrations/nous-portal.html">Nous Portal</a> مدیریتشان می‌کنید. این راهنما هرمس محلیِ شما را به سرور MCP ی Portal وصل می‌کند تا نمونه‌های ابری را فقط با خواستن مدیریت کنید — «لیست ایجنت‌های ابری من»، «اون خاموش رو ری‌استارت کن»، «هزینه‌اش چقدر درمیاد» — بدون ترک ترمینال.</p>
+<p>این یک سرور استاندارد <a href="../user-guide/features/mcp.html">MCP</a> ی میزبانی‌شده توسط Nous Research است که با همان ورود OAuth ای گیت‌دار شده که برای Portal استفاده می‌کنید. بعد از اتصال، هرمس دو ابزار می‌گیرد که از طرف شما صدا می‌زند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> با آن چه کار می‌شود کرد</h2>
+<p>بعد از اتصال، مدل می‌تواند این‌ها را روی سازمان Hermes Cloud تان صدا بزند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>بخواهید که…</th><th>زیر کاپوت</th></tr></thead>
+<tbody>
+<tr><td>«لیست ایجنت‌های ابری من»</td><td>agents ‏(list)</td></tr>
+<tr><td>«وضعیت &lt;name&gt; چیه؟»</td><td>agents ‏(get / status)</td></tr>
+<tr><td>«تقریباً هزینهٔ این نمونه چقدره؟»</td><td>agents ‏(cost_estimate)</td></tr>
+<tr><td>«‎&lt;name&gt; رو روشن/خاموش/ری‌استارت کن»</td><td>agent ‏(start / stop / restart)</td></tr>
+<tr><td>«یک نمونهٔ جدید به اسم &lt;name&gt; بساز»</td><td>agent ‏(create)</td></tr>
+<tr><td>«‎&lt;name&gt; رو نابود کن»</td><td>agent ‏(destroy)</td></tr>
+<tr><td>«env / تصویر روی &lt;name&gt; رو به‌روز کن»</td><td>agent ‏(update_env / update_image)</td></tr>
+</tbody>
+</table>
+</div>
+<p>هر فراخوانی با هویت Portal ی شما روی سازمان <b>خودتان</b> اجرا می‌شود و عضویت در هر فراخوانی دوباره چک می‌شود — این اتصال فقط به نمونه‌هایی دست می‌زند که همین حالا هم از رابط وب کنترلشان می‌کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پیش‌نیازها</h2>
+<ul>
+  <li>حساب <a href="../integrations/nous-portal.html">Nous Portal</a> با دسترسی به <a href="https://portal.nousresearch.com/cloud" target="_blank" rel="noopener">Hermes Cloud</a> ‏(حداقل یک نمونه، یا توانایی ساختش).</li>
+  <li>پشتیبانی MCP نصب شده. اگر اسکریپت نصب استاندارد را زده‌اید از قبل هست؛ وگرنه:
+  <pre dir="ltr"><code>cd ~/.hermes/hermes-agent
+uv pip install -e ".[mcp]"</code></pre>
+  </li>
+</ul>
+<p>به کلید API یا client secret جداگانه نیاز <b>ندارید</b> — سرور از OAuth با PKCE استفاده می‌کند و ورود یک رفت‌وبرگشت مرورگری است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۱: افزودن سرور</h2>
+<pre dir="ltr"><code>hermes mcp add --url https://portal.nousresearch.com/mcp --auth oauth hermes-cloud</code></pre>
+<p>‎--auth oauth‎ به هرمس می‌گوید این یک سرور HTTP ی محافظت‌شده با OAuth است. در اولین اتصال هرمس:</p>
+<ol>
+  <li>نقاط پایانی OAuth ی سرور را خودکار کشف می‌کند ‏(متادیتای RFC 9728 / 8414).</li>
+  <li>خودش را به‌عنوان سرویس‌گیرنده ثبت می‌کند ‏(Dynamic Client Registration ی RFC 7591) — رازی برای کپی کردن نیست.</li>
+  <li>مرورگرتان را برای ورود و تأیید به Portal باز می‌کند.</li>
+  <li>توکن حاصل را زیر ~/.hermes/mcp-tokens/ ذخیره و دوباره استفاده می‌کند ‏(refresh خودکار است).</li>
+</ol>
+<h3>انتخاب سازمان</h3>
+<p>اگر حسابتان Portal به <b>بیش از یک سازمان</b> تعلق دارد، مرورگر هنگام تأیید یک <b>انتخاب‌گر سازمان</b> نشان می‌دهد — بردارید این اتصال باید کدام سازمان را مدیریت کند. انتخاب یک بار و داخل مرورگر انجام می‌شود؛ چیزی برای دادن در خط فرمان نیست. حساب‌های تک‌سازمانی این مرحله را رد می‌کنند و خودکار bind می‌شوند.</p>
+<p>هر وقت لازم شد اتصال به سازمان دیگری اشاره کند، سرور را بردارید و دوباره اضافه کنید ‏(hermes mcp remove hermes-cloud و بعد دوباره فرمان add) و در مرورگر سازمان دیگر را بردارید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۲: تأیید اتصال</h2>
+<pre dir="ltr"><code>hermes mcp test hermes-cloud</code></pre>
+<p>بعد یک نشست شروع ‏(یا reload) کنید:</p>
+<pre dir="ltr"><code>hermes chat</code></pre>
+<pre dir="ltr"><code>/reload-mcp</code></pre>
+<p>برای تأیید زنده بودن ابزارها یک سؤال فقط-خواندنی بپرسید:</p>
+<pre dir="ltr"><code>List my Hermes Cloud agents and their current status.</code></pre>
+<p>باید همان نمونه‌های صفحهٔ ‎/agents‎ ی Portal برگردند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۳: استفاده</h2>
+<p>سؤال‌های فقط-خواندنی همیشه امن‌اند:</p>
+<pre dir="ltr"><code>Which of my cloud agents is currently running, and roughly what is each one costing?</code></pre>
+<p>اقدام‌های چرخهٔ حیات به درخواست‌های ساده نگاشت می‌شوند:</p>
+<pre dir="ltr"><code>Restart the instance called research-bot.</code></pre>
+<pre dir="ltr"><code>Create a new Hermes Cloud instance named scratch, then tell me when it's ready.</code></pre>
+<p>هرمس برمی‌گرداند که هر ابزار چه داده — فهرست نمونه‌ها، وضعیت جدید، جزئیات نمونهٔ ساخته‌شده — تا مطمئن شوید اقدام جا افتاده.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> پیکربندی</h2>
+<p>بعد از hermes mcp add سرور در ~/.hermes/config.yaml زندگی می‌کند:</p>
+<pre dir="ltr"><code>mcp_servers:
+  hermes-cloud:
+    url: "https://portal.nousresearch.com/mcp"
+    auth: oauth</code></pre>
+<p>هیچ credential ای وارد config.yaml نمی‌شود — توکن OAuth جدا زیر ~/.hermes/mcp-tokens/ نگه داشته می‌شود، همان‌طور که refresh token ی Portal بیرون config می‌ماند.</p>
+<h3>محدود کردن سطح ابزار</h3>
+<p>سرور هم ابزارهای خواندن ‏(agents) و هم ابزارهای تغییردهنده ‏(agent) را expose می‌کند. اگر می‌خواهید اتصال <b>فقط-خواندنی</b> باشد — لیست و بازرسی، ولی هیچ‌وقت start/stop/create/destroy — آن را به ابزار agents محدود کنید:</p>
+<pre dir="ltr"><code>mcp_servers:
+  hermes-cloud:
+    url: "https://portal.nousresearch.com/mcp"
+    auth: oauth
+    tools:
+      include: [agents]</code></pre>
+<p>بعد از تغییر config یک ‎/reload-mcp‎ بزنید. مدل کامل فیلترینگ ‏(include/exclude، ‏prompts، ‏resources) را در <a href="https://hermes-agent.nousresearch.com/docs/guides/use-mcp-with-hermes" target="_blank" rel="noopener">استفاده از MCP با هرمس</a> ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> عیب‌یابی</h2>
+<h3>مرورگر انتخاب‌گر سازمان نشان می‌دهد و مطمئن نیستم کدام را بردارم</h3>
+<p>به چند سازمان Portal تعلق دارید. سازمانی را بردارید که نمونه‌های Hermes Cloud اش را می‌خواهید با این اتصال مدیریت کنید. اگر شک دارید، همان سازمانی است که نمونه‌های صفحهٔ ‎/agents‎ ی Portal را می‌بینید. بعداً با برداشتن و دوباره افزودن سرور می‌توانید دوباره انتخاب کنید.</p>
+<h3>خطای invalid_client یا unknown client هنگام اتصال</h3>
+<p>ثبت سرویس‌گیرندهٔ ذخیره‌شده دیگر با سرور نمی‌خواند ‏(مثلاً قبلاً به محیط متفاوتی وصل شده‌اید). وضعیت OAuth ی کش‌شدهٔ این سرور را پاک و دوباره اضافه کنید:</p>
+<pre dir="ltr"><code>hermes mcp remove hermes-cloud
+rm -f ~/.hermes/mcp-tokens/hermes-cloud.*
+hermes mcp add --url https://portal.nousresearch.com/mcp --auth oauth hermes-cloud</code></pre>
+<h3>بعد از افزودن سرور ابزارها ظاهر نمی‌شوند</h3>
+<p>داخل نشست MCP را دوباره بار کنید و دوباره چک کنید:</p>
+<pre dir="ltr"><code>/reload-mcp</code></pre>
+<pre dir="ltr"><code>Tell me which MCP-backed tools are available right now.</code></pre>
+<p>اگر هنوز غایب‌اند، hermes mcp test hermes-cloud را اجرا کنید تا خطای اتصال را مستقیم ببینید.</p>
+<h3>دوباره ازم می‌خواهد وارد شوم</h3>
+<p>توکن‌های OAuth خودکار refresh می‌شوند ولی اگر Portal نشست تان را باطل کند ‏(تغییر رمز، ‏revoke، انقضا)، فراخوانی بعدی re-authorize می‌خواهد. فرمان hermes mcp add را دوباره اجرا کنید — جریان مرورگری توکن تازه ضرب می‌کند.</p>
+<h3>بدون‌سر / SSH / host راه‌دور</h3>
+<p>callback ی مرورگر OAuth روی ماشینی اجرا می‌شود که هرمس رویش است. روی host راه‌دور پورت loopback را از طریق SSH forward کنید — همان الگوی هر ورود OAuth دیگری. بخش <a href="oauth-over-ssh.html">OAuth روی SSH / Host های راه‌دور</a> را ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> ببینید نیز</h2>
+<ul>
+  <li><b><a href="../integrations/nous-portal.html">Nous Portal</a></b> — اشتراک، مدل‌ها و Tool Gateway پشت همین ورود</li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/guides/use-mcp-with-hermes" target="_blank" rel="noopener">استفاده از MCP با هرمس</a></b> — اتصال و فیلترکردن کلی سرورهای MCP</li>
+  <li><b><a href="../user-guide/features/mcp.html">نمای کلی قابلیت MCP</a></b> — MCP چیست و هرمس چطور استفاده می‌کند</li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/reference/mcp-config-reference" target="_blank" rel="noopener">مرجع پیکربندی MCP</a></b> — همهٔ فیلدهای mcp_servers از جمله auth: oauth</li>
+  <li><b><a href="oauth-over-ssh.html">OAuth روی SSH</a></b> — ورود از محیط‌های راه‌دور یا فقط-مرورگر</li>
+</ul>
+</section>
+
+<div class="pager">
+  <span class="off prev"><span class="dir">→ قبلی</span><span class="ttl">اجرای محلی با Ollama (به‌زودی)</span></span>
+  <a class="next" href="microsoft-graph-app-registration.html"><span class="dir">بعدی ←</span><span class="ttl">ثبت اپ Microsoft Graph</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/manage-hermes-cloud-with-mcp" target="_blank" rel="noopener">Manage Hermes Cloud with MCP</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
