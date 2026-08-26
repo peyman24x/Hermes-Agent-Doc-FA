@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نکات و بهترین شیوه‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/tips" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>نکات و بهترین شیوه‌ها</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>نکات و بهترین شیوه‌ها</h1>
+<p>مجموعه‌ای از بردهای سریع: نکته‌های عملی که بلافاصله با هرمس مؤثرترتان می‌کند. هر بخش به جنبهٔ متفاوتی می‌پردازد — سرتیترها را اسکن کنید و به بخش مربوطه بپرید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>گیج شدید کدام مدل را بردارید؟</b><br>‏hermes setup --portal را اجرا کنید — بیش از ۳۰۰ مدل شامل Claude، ‏GPT-5 و Gemini زیر یک اشتراک می‌گیرید. <a href="../integrations/nous-portal.html">Nous Portal</a> را ببینید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> گرفتن بهترین نتیجه‌ها</h2>
+<h3>دقیق بگویید چه می‌خواهید</h3>
+<p>پرامپت مبهم نتیجهٔ مبهم می‌دهد. به‌جای «کد رو درست کن» بگویید «خطای TypeError در api/handlers.py خط ۴۷ رو درست کن — تابع process_request() از parse_body() مقدار None می‌گیره». هرچی زمینه بیشتر، تکرار کمتر.</p>
+<h3>زمینه را از اول بدهید</h3>
+<p>درخواست‌تان را با جزئیات مربوطه شروع کنید: مسیر فایل‌ها، پیام‌های خطا، رفتار موردانتظار. یک پیام خوب‌ساخته از سه دور روشن‌سازی بهتر است. traceback های خطا را مستقیم بچسبانید — ایجنت می‌تواند parse شان کند.</p>
+<h3>برای دستورالعمل‌های تکراری از فایل‌های زمینه استفاده کنید</h3>
+<p>اگر دیدید مدام همان دستورالعمل‌ها را تکرار می‌کنید ‏(«تب نه، فاصله»، «ما pytest استفاده می‌کنیم»، «API روی /api/v2 است»)، آن‌ها را در یک فایل AGENTS.md بگذارید. ایجنت هر نشست خودکار می‌خواندش — بعد از راه‌اندازی صفر زحمت.</p>
+<h3>بگذارید ایجنت از ابزارهایش استفاده کند</h3>
+<p>سعی نکنید هر قدم را دستش بگیرید. بگویید «تست خراب رو پیدا و درست کن» نه «فایل tests/test_foo.py رو باز کن، خط ۴۲ رو ببین بعد...». ایجنت جستجوی فایل، دسترسی ترمینال و اجرای کد دارد — بگذارید کاوش و تکرار کند.</p>
+<h3>برای گردش‌کارهای پیچیده از مهارت‌ها استفاده کنید</h3>
+<p>قبل از اینکه پرامپت بلندی دربارهٔ «چطور یک کار انجام شود» بنویسید، چک کنید مهارت آماده‌اش هست یا نه. ‎/skills‎ را بزنید تا مهارت‌های موجود را ببینید یا مستقیم صدایشان کنید مثل ‎/axolotl‎ یا ‎/github-pr-workflow‎.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> نکات کاربر حرفه‌ای CLI</h2>
+<h3>ورودی چندخطی</h3>
+<p>برای درج خط جدید بدون ارسال، ‏<b>Alt+Enter</b> یا ‏<b>Ctrl+J</b> یا ‏<b>Shift+Enter</b> را بزنید. Shift+Enter فقط وقتی کار می‌کند که ترمینال آن را ضربهٔ مجزا بفرستد ‏(Kitty / foot / WezTerm / Ghostty به‌صورت پیش‌فرض؛ iTerm2 / Alacritty / ترمینال VS Code بعد از فعال کردن پروتکل کیبورد Kitty). دو تای دیگر در همهٔ ترمینال‌ها کار می‌کنند.</p>
+<h3>تشخیص چسباندن</h3>
+<p>CLI چسباندن‌های چندخطی را خودکار تشخیص می‌دهد. بلوک کد یا traceback خطا را مستقیم بچسبانید — هر خط جدا فرستاده نمی‌شود. کل paste بافر و یک‌جا ارسال می‌شود.</p>
+<h3>قطع کردن و تغییر مسیر</h3>
+<p>یک بار <b>Ctrl+C</b> بزنید تا ایجنت وسط پاسخ قطع شود. بعد می‌توانید پیام جدیدی تایپ کنید تا مسیرش را عوض کنید. دو بار Ctrl+C در بازهٔ ۲ ثانیه خروج اجباری است. وقتی ایجنت راه اشتباه می‌رود طلاست.</p>
+<h3>ازسرگیری نشست‌ها با ‎-c‎</h3>
+<p>چیزی از نشست آخر یادتان رفته؟ hermes -c را اجرا کنید تا دقیقاً از همان‌جا ادامه دهید با تاریخچه کامل گفتگو. با عنوان هم می‌توانید ادامه دهید: hermes -r "my research project".</p>
+<h3>چسباندن تصویر از کلیپ‌بورد</h3>
+<p><b>Ctrl+V</b> را بزنید تا تصویر از کلیپ‌بورد مستقیم داخل گفتگو بیاید. ایجنت با بینایی، اسکرین‌شات، دیاگرام، پاپ‌آپ خطا یا ماکت UI را تحلیل می‌کند — لازم نیست اول در فایل ذخیره کنید.</p>
+<h3>تکمیل خودکار فرمان‌های اسلش</h3>
+<p>‏/‎ را تایپ و <b>Tab</b> را بزنید تا همهٔ فرمان‌ها را ببینید. هم فرمان‌های داخلی ‏(/compress، ‏/model، ‏/title) و هم تک‌تک مهارت‌های نصب‌شده. چیزی لازم نیست حفظ باشید — Tab همه را پوشش می‌دهد.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>با ‎/verbose‎ بین حالت‌های نمایش خروجی ابزار بچرخید: <b>off ← new ← all ← verbose</b>. حالت all برای تماشای کارِ ایجنت عالی است؛ off برای پرسش‌وپاسخ ساده تمیزترین است.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> فایل‌های زمینه</h2>
+<h3>AGENTS.md: مغز پروژهٔ شما</h3>
+<p>یک AGENTS.md در ریشهٔ پروژه بسازید با تصمیم‌های معماری، قراردادهای کدنویسی و دستورالعمل‌های مخصوص پروژه. این خودکار در هر نشست تزریق می‌شود، پس ایجنت همیشه قوانین پروژه‌تان را می‌داند.</p>
+<pre dir="ltr"><code># Project Context
+- This is a FastAPI backend with SQLAlchemy ORM
+- Always use async/await for database operations
+- Tests go in tests/ and use pytest-asyncio
+- Never commit .env files</code></pre>
+<h3>SOUL.md: شخصی‌سازی شخصیت</h3>
+<p>می‌خواهید هرمس صدای پیش‌فرض پایداری داشته باشد؟ ~/.hermes/SOUL.md را ویرایش کنید ‏(یا $HERMES_HOME/SOUL.md اگر خانهٔ سفارشی برای هرمس دارید). هرمس حالا خودکار یک SOUL آغازین می‌کارد و همان فایل global را منبع شخصیت کل نمونه می‌گیرد.</p>
+<p>مرور کامل را در <a href="https://hermes-agent.nousresearch.com/docs/guides/use-soul-with-hermes" target="_blank" rel="noopener">استفاده از SOUL.md با هرمس</a> ببینید.</p>
+<pre dir="ltr"><code># Soul
+You are a senior backend engineer. Be terse and direct.
+Skip explanations unless asked. Prefer one-liners over verbose solutions.
+Always consider error handling and edge cases.</code></pre>
+<p>‏SOUL.md برای شخصیت ماندگار. AGENTS.md برای دستورالعمل‌های مخصوص پروژه.</p>
+<h3>سازگاری با cursorrules.</h3>
+<p>از قبل فایل ‎.cursorrules‎ یا ‎.cursor/rules/*.mdc‎ دارید؟ هرمس آن‌ها را هم می‌خواند. لازم نیست قراردادهای کدنویسی‌تان را دو جا بنویسید — خودکار از پوشهٔ کاری بارگذاری می‌شوند.</p>
+<h3>کشف</h3>
+<p>هرمس AGENTS.md ی سطح‌بالای پوشهٔ کاری فعلی را هنگام شروع نشست بار می‌کند. فایل‌های AGENTS.md ی زیرپوشه‌ها هنگام فراخوانی ابزار به‌صورت lazy کشف می‌شوند ‏(از طریق subdirectory_hints.py) و داخل نتایج ابزار تزریق می‌شوند — از اول داخل system prompt بارگذاری نمی‌شوند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>فایل‌های زمینه را متمرکز و موجز نگه دارید. هر کاراکتر از بودجهٔ توکن شما حساب می‌شود چون در تک‌تک پیام‌ها تزریق می‌شوند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2 id="memory-skills"><span class="secnum">۴</span> حافظه و مهارت‌ها</h2>
+<h3>حافظه در برابر مهارت‌ها: چه چیزی کجا</h3>
+<p><b>حافظه</b> برای واقعیت‌هاست: محیط شما، ترجیحات، جای پروژه‌ها و چیزهایی که ایجنت درباره‌تان یاد گرفته. <b>مهارت‌ها</b> برای رویه‌هاست: گردش‌کارهای چندمرحله‌ای، دستورالعمل‌های مخصوص ابزار و دستورالعمل‌های قابل‌استفادهٔ مجدد. حافظه برای «چه»، مهارت برای «چگونه».</p>
+<h3>کی مهارت بسازیم</h3>
+<p>کاری پیدا کردید که ۵ قدم یا بیشتر دارد و دوباره انجامش خواهید داد؟ از ایجنت بخواهید برایش مهارت بسازد. بگویید «همین کاری که الان کردی رو به‌عنوان مهارتی به اسم deploy-staging ذخیره کن». دفعهٔ بعد فقط ‎/deploy-staging‎ را بزنید و ایجنت کل رویه را بار می‌کند.</p>
+<h3>مدیریت ظرفیت حافظه</h3>
+<p>حافظه عمداً محدود است ‏(حدود ۲٬۲۰۰ کاراکتر برای MEMORY.md و حدود ۱٬۳۷۵ کاراکتر برای USER.md). وقتی پر شود ایجنت مدخل‌ها را ادغام می‌کند. می‌توانید کمکش کنید: بگویید «حافظه‌ات رو مرتب کن» یا «یادداشت قدیمی Python 3.9 رو بردار — ما حالا روی ۳.۱۲ هستیم».</p>
+<h3>بگذارید ایجنت به یاد بسپارد</h3>
+<p>بعد از یک نشست پربار بگویید «این‌ها رو واسه دفعهٔ بعد یادت بمونه» و ایجنت نکات کلیدی را ذخیره می‌کند. مشخص هم می‌توانید باشید: «تو حافظه ذخیره کن که CI ما GitHub Actions با گردش‌کار deploy.yml است».</p>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p>حافظه یک اسنپ‌شات منجمد است — تغییرات وسط نشست تا شروع نشست بعد وارد system prompt نمی‌شوند. ایجنت بلافاصله روی دیسک می‌نویسد ولی کش پرامپت وسط نشست باطل نمی‌شود.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> کارایی و هزینه</h2>
+<h3>کش پرامپت را نشکنید</h3>
+<p>بیشتر ارائه‌دهندگان LLM پیشوند گفتگو را کش می‌کنند ‏(system prompt + تاریخچه). اگر system prompt تان را پایدار نگه دارید ‏(همان فایل‌های زمینه، همان حافظه)، پیام‌های بعدی نشست <b>cache hit</b> می‌گیرند که به‌طور چشمگیری ارزان‌تر است. کش به مدل و حساب کلید خورده — پس سوئیچ صریح ‎/model‎ یا <a href="../user-guide/features/fallback-providers.html">fallback خودکار ارائه‌دهنده</a> یا <a href="../user-guide/features/credential-pools.html">چرخش استخر credential</a> همه نوبت بعد را مجبور می‌کند کل گفتگو را با قیمت کامل ورودی دوباره بخواند. سوئیچ گاه‌به‌گاه اشکالی ندارد؛ سوئیچ مکرر در نشستی طولانی هزینه‌تان را ضربدر می‌کند.</p>
+<h3>قبل از خوردن به سقف ‎/compress‎ بزنید</h3>
+<p>نشست‌های طولانی توکن جمع می‌کنند. وقتی دیدید پاسخ‌ها کند شده یا قطع می‌شوند ‎/compress‎ را اجرا کنید. این تاریخچهٔ گفتگو را خلاصه می‌کند، زمینهٔ کلیدی را حفظ و توکن را به‌طور چشمگیری کم می‌کند. با ‎/usage‎ وضعیت را چک کنید.</p>
+<h3>برای کار موازی واگذار کنید</h3>
+<p>سه موضوع را باید هم‌زمان بررسی کنید؟ از ایجنت بخواهید delegate_task با زیروظایف موازی استفاده کند. هر زیرایجنت مستقل با زمینهٔ خودش اجرا می‌شود و فقط خلاصه‌های نهایی برمی‌گردند — مصرف توکن گفتگوی اصلی‌تان را به‌شدت کم می‌کند.</p>
+<h3>برای عملیات دسته‌ای از execute_code استفاده کنید</h3>
+<p>به‌جای اجرای فرمان‌های ترمینالی یکی‌یکی، از ایجنت بخواهید اسکریپتی بنویسد که همه را یک‌جا انجام دهد. «یه اسکریپت پایتون بنویس همهٔ فایل‌های jpeg. رو به jpg. تغییر نام بده و اجراش کن» ارزان‌تر و سریع‌تر از تغییر نام تک‌تک است.</p>
+<h3 id="choose-the-right-model">مدل درست را انتخاب کنید</h3>
+<p>با ‎/model‎ وسط نشست سوئیچ کنید. برای reasoning و تصمیم‌های معماری از مدل frontier ‏(Claude Sonnet/Opus، ‏GPT-4o) استفاده کنید. برای کارهای ساده مثل قالب‌بندی، تغییر نام یا تولید boilerplate به مدلی سریع‌تر سوئیچ کنید. در نظر داشته باشید هر سوئیچ کش پرامپت را ریست می‌کند ‏(بالا را ببینید)؛ پس در نشست‌های طولانی اغلب ارزان‌تر است که روی مدل دیگر یک نشست تازه شروع کنید تا رفت‌وبرگشت کنید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>دوره‌ای ‎/usage‎ را اجرا کنید تا مصرف توکن تان را ببینید. ‎/insights‎ نمای وسیع‌تری از الگوهای مصرف ۳۰ روز اخیر می‌دهد. برای دیدن هزینهٔ ثابت per-پیام قبل از هر گفتگو — system prompt، فهرست مهارت‌ها، حافظه، اسکیماهای ابزار — ‏hermes prompt-size را اجرا کنید ‏(آفلاین هم کار می‌کند).</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> نکات پیام‌رسانی</h2>
+<h3>کانال خانگی ست کنید</h3>
+<p>در گفتگوی تلگرام یا دیسکورد موردعلاقه‌تان ‎/sethome‎ را بزنید تا کانال خانگی شود. نتایج کارهای Cron و خروجی وظایف زمان‌بندی‌شده اینجا تحویل داده می‌شوند. بدون آن، ایجنت جایی برای فرستادن پیام‌های پیش‌دستانه ندارد.</p>
+<h3>با ‎/title‎ نشست‌ها را سازماندهی کنید</h3>
+<p>نشست‌هایتان را نام‌دار کنید: ‎/title auth-refactor‎ یا ‎/title research-llm-quantization‎. نشست‌های نام‌دار با hermes sessions list راحت پیدا و با hermes -r "auth-refactor" ادامه می‌یابند. نشست‌های بی‌اسم روی هم تلنبار می‌شوند و غیرقابل تفکیک.</p>
+<h3>جفت‌سازی DM برای دسترسی تیمی</h3>
+<p>به‌جای جمع کردن دستی شناسهٔ کاربران برای allowlist، جفت‌سازی DM را فعال کنید. وقتی هم‌تیمی به بات DM بدهد یک کد جفت‌سازی یک‌بارمصرف می‌گیرد. شما با hermes pairing approve telegram XKGH5N7P تأیید می‌کنید — ساده و امن.</p>
+<h3>حالت‌های نمایش پیشرفت ابزار</h3>
+<p>با ‎/verbose‎ کنترل کنید چقدر فعالیت ابزار ببینید. در پلتفرم‌های پیام‌رسانی معمولاً کمتر بهتر است — روی new بمانید تا فقط فراخوانی‌های جدید ابزار را ببینید. در CLI حالت all نمای زندهٔ رضایت‌بخشی از همهٔ کارهای ایجنت می‌دهد.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>به‌طور پیش‌فرض نشست‌های پیام‌رسانی هرگز خودکار ریست نمی‌شوند — زمینه تا وقتی ‎/reset‎ بزنید یا فشرده‌سازی فعال شود می‌ماند. اگر می‌خواهید نشست‌ها خودکار ریست شوند ‏(بعد از بی‌کاری یا روزانه ساعت معین) از طریق بخش session_reset در ~/.hermes/config.yaml opt-in کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> امنیت</h2>
+<h3>برای کد نامطمئن از Docker استفاده کنید</h3>
+<p>وقتی با مخازن نامطمئن کار می‌کنید یا کد ناآشنا اجرا می‌کنید، Docker یا Daytona را به‌عنوان backend ترمینال ست کنید. TERMINAL_ENV=docker را در .env بگذارید. فرمان‌های مخرب داخل کانتینر نمی‌توانند به سیستم host آسیب بزنند.</p>
+<pre dir="ltr"><code># In your .env:
+TERMINAL_ENV=docker
+TERMINAL_DOCKER_IMAGE=hermes-sandbox:latest</code></pre>
+<h3>از دام‌های انکودینگ ویندوز بپرهیزید</h3>
+<p>روی ویندوز بعضی انکودینگ‌های پیش‌فرض ‏(مثل cp125x) نمی‌توانند همهٔ کاراکترهای یونیکد را نشان دهند و موقع نوشتن فایل در تست‌ها یا اسکریپت‌ها UnicodeEncodeError می‌دهند.</p>
+<ul>
+  <li>باز کردن فایل‌ها با انکودینگ صریح UTF-8 را ترجیح دهید:
+  <pre dir="ltr"><code>with open("results.txt", "w", encoding="utf-8") as f:
+    f.write("✓ All good\n")</code></pre>
+  </li>
+  <li>در PowerShell می‌توانید نشست فعلی را برای خروجی کنسول و فرمان‌های native به UTF-8 ببرید:
+  <pre dir="ltr"><code>$OutputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)</code></pre>
+  </li>
+</ul>
+<p>این کار PowerShell و فرایندهای فرزند را روی UTF-8 نگه می‌دارد و از شکست‌های مخصوص-ویندوز جلوگیری می‌کند.</p>
+<h3>قبل از انتخاب «همیشه» بازبینی کنید</h3>
+<p>وقتی ایجنت تأیید فرمان خطرناک را فعال کند ‏(rm -rf، ‏DROP TABLE و...) چهار گزینه دارید: <b>once</b>، ‏<b>session</b>، ‏<b>always</b>، ‏<b>deny</b>. قبل از انتخاب always خوب فکر کنید — آن الگو را برای همیشه allowlist می‌کند. تا وقتی مطمئن نشده‌اید با session شروع کنید.</p>
+<h3>تأیید فرمان توری امنیتی شماست</h3>
+<p>هرمس هر فرمان را قبل از اجرا با فهرستی منتخب از الگوهای خطرناک چک می‌کند: حذف بازگشتی، ‏SQL drop، پایپ curl به شل و بیشتر. این را در production خاموش نکنید — دلیل خوبی برای وجودش هست.</p>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p>هنگام اجرا با backend کانتینری ‏(Docker، ‏Singularity، ‏Modal، ‏Daytona) چک‌های فرمان خطرناک <b>رد می‌شوند</b> چون خود کانتینر مرز امنیتی است. مطمئن شوید ایمیج‌های کانتینرتان درست قفل شده‌اند.</p>
+</div>
+<h3>برای بات‌های پیام‌رسان از allowlist استفاده کنید</h3>
+<p>هرگز GATEWAY_ALLOW_ALL_USERS=true را روی باتی با دسترسی ترمینال ست نکنید. همیشه از allowlist های مخصوص پلتفرم ‏(TELEGRAM_ALLOWED_USERS، ‏DISCORD_ALLOWED_USERS) یا جفت‌سازی DM استفاده کنید تا کنترل کنید چه کسی با ایجنت تان حرف می‌زند.</p>
+<pre dir="ltr"><code># Recommended: explicit allowlists per platform
+TELEGRAM_ALLOWED_USERS=123456789,987654321
+DISCORD_ALLOWED_USERS=123456789012345678
+
+# Or use cross-platform allowlist
+GATEWAY_ALLOWED_USERS=123456789,987654321</code></pre>
+</section>
+
+<p><i>نکته‌ای دارید که باید در این صفحه باشد؟ issue یا PR باز کنید — مشارکت‌های اجتماعی خوش‌آمدند.</i></p>
+
+<div class="pager">
+  <span class="off prev"><span class="dir">→ قبلی</span><span class="ttl">(اولین صفحهٔ گروه)</span></span>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">LLM محلی روی مک (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/tips" target="_blank" rel="noopener">Tips &amp; Best Practices</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

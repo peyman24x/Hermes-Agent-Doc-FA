@@ -140,7 +140,7 @@ window.HERMES_NAV = [
   { p:"user-guide/features/credential-pools.html",      t:"استخر اعتبارنامه‌ها",             d:1 }
 ]},
 { id:"guides", cat:"📚 راهنماها و آموزش‌ها", pages:[
-  { p:"guides/tips.html",                          t:"نکات و بهترین شیوه‌ها",              d:0 },
+  { p:"guides/tips.html",                          t:"نکات و بهترین شیوه‌ها",              d:1 },
   { p:"guides/local-llm-on-mac.html",              t:"LLM محلی روی مک",                    d:0 },
   { p:"guides/daily-briefing-bot.html",            t:"بات خلاصهٔ روزانه",                  d:0 },
   { p:"guides/team-telegram-assistant.html",       t:"دستیار تیمی تلگرام",                 d:0 },
