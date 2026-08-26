@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [hermes-agent-farsi.pages.dev](https://hermes-agent-farsi.pages.dev) ‏(اصلی) · [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) ‏(پشتیبان ماهانه) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۰۶ از ۲۰۷ صفحه (۵۱٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۰۸ از ۲۰۷ صفحه (۵۲٪)** |
 
 ---
 
@@ -540,6 +540,12 @@ hermes-docs-fa/
 - زنجیرهٔ pager: …managed-scope ← secrets ← bitwarden ← command و …secrets ← egress
 - پیشرفت: **۱۰۶ از ۲۰۷ صفحه فعال (۵۱٪)**
 
+### نشست ۶۷ — 2026-08-27 — 🔑 1Password + 🖥 اتصال دسکتاپ به چند نمونه
+- ترجمه و انتشار «1Password» (۷ بخش): حل کلیدها از طریق op://vault/item/field، دو حالت احراز هویت service-account/دسکتاپ، سه راه فراهم کردن توکن bootstrap با اولویت ‏(.env/.op.env ی gitignored/EnvironmentFile ی systemd)، ویزارد و نگاشت ارجاع‌ها، جدول کامل CLI با نام‌های مستعار op/1password، مرجع config شامل binary_path و cache_ttl صفر، جدول شکست‌ها، caching با کلید fingerprint شده و نکات امنیتی شامل allowlist محیط فرزند op
+- ترجمه و انتشار «اتصال دسکتاپ به چند نمونه» (۷ بخش، عمق ۱): registry ی گیت‌وی در Settings ← Gateways با چهار نوع اتصال و قواعد یکتایی/dedup/Primary، افزودن قدم‌به‌قدم چهارنوع، مهاجرت خودکار از تنظیمات تک‌اتصاله، ایجنت‌ها بین گیت‌وی‌ها با @name-device و socket های lazy، سلسله‌مراتب gateway←profile←sessions، به‌روزرسانی fan-out همهٔ نمونه‌ها، نکات امنیتی safeStorage و API ی SDK برای نویسندگان پلاگین و عیب‌یابی
+- زنجیرهٔ pager: …bitwarden ← command ← onepassword و …onepassword ← multi-connection-desktop
+- پیشرفت: **۱۰۸ از ۲۰۷ صفحه فعال (۵۲٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -652,6 +658,8 @@ hermes-docs-fa/
 | 104 | `user-guide/egress.html` | پروکسی خروجی (Egress) |
 | 105 | `user-guide/secrets/bitwarden.html` | Bitwarden Secrets Manager |
 | 106 | `user-guide/secrets/command.html` | منبع رمز Command Helper |
+| 107 | `user-guide/secrets/onepassword.html` | 1Password |
+| 108 | `user-guide/multi-connection-desktop.html` | اتصال دسکتاپ به چند نمونه |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

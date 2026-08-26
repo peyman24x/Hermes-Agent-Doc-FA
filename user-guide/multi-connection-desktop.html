@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اتصال دسکتاپ به چند نمونه — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/multi-connection-desktop" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>اتصال دسکتاپ به چند نمونه</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>اتصال Desktop به نمونه‌های متعدد هرمس</h1>
+<p>هر بک‌اند هرمس که دارید — runtime ی محلی، گیت‌وی‌های راه‌دور روی LAN یا VPS، ‏میزبان‌های SSH و نمونه‌های Hermes Cloud — را در یک اپ دسکتاپ ثبت کنید و با ایجنت‌های همهٔ آنها کنار هم کار کنید. اتصالات پایدارند: هر گیت‌وی ثبت‌شده در صورت نیاز بک‌اندها و WebSocket های خودش را dial می‌کند و ایجنت‌های پس‌زمینه حین نگاه شما به گیت‌وی دیگری به استریم ادامه می‌دهند.</p>
+<p>این مکمل سمت-دسکتاپِ صفحهٔ «اجرای چند گیت‌وی هم‌زمان» است: آن صفحه دربارهٔ میزبانی چند گیت‌وی روی یک ماشین است؛ این یکی دربارهٔ یک اپ دسکتاپ است که با چند ماشین حرف می‌زند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> کجا پیدا می‌شود</h2>
+<p>همه‌چیز در صفحهٔ واحد <b>Settings ← Gateways</b> است ‏(بیلدهای قدیمی‌تر صفحات جداگانهٔ Gateway و Connections داشتند؛ deep link های قدیمی Connections به آنجا redirect می‌شوند). سه در به آنجا می‌رسد:</p>
+<ul>
+  <li><b>Settings ← Gateways</b> — خود صفحه ‏(Cmd/Ctrl+، بعد Gateways در nav ی تنظیمات). registry ی اتصالات بخشی از آن صفحه است زیر کنترل‌های connection-mode ی سطح-ماشین.</li>
+  <li><b>ریل پروفایل sidebar</b> — دکمهٔ plug در انتهای راست ریل ‏(tooltip: «Connect another Hermes gateway…») مستقیم به صفحهٔ Gateways می‌رود. همیشه مرئی است حتی قبل از ساخت دومین پروفایل یا دومین اتصال.</li>
+  <li><b>پالت فرمان</b> — ‏Cmd/Ctrl+K و تایپ Gateways ‏(connections، add gateway، remote، ssh، instances را هم می‌یابد).</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> registry ی گیت‌وی</h2>
+<p>بخش <b>Registered gateways</b> ی Settings ← Gateways فهرستی نام‌دار از گیت‌وی‌های هرمس را مدیریت می‌کند. متن معرفی‌اش صریح است: «این دستگاه و هر گیت‌وی هرمس ی که می‌تواند برسد را از طریق اتصالات remote، ‏SSH یا Cloud مدیریت کنید.» هر ورودی یک <i>اتصال</i> است:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>نوع</th><th>چه چیزی است</th><th>Auth</th></tr></thead>
+<tbody>
+<tr><td><b>Local</b></td><td>«runtime ی هرمس که توسط این اپ مدیریت می‌شود.»</td><td>خودکار</td></tr>
+<tr><td><b>Remote gateway</b></td><td>«گیت‌وی هرمس ی که از طریق HTTP(S) قابل‌رسید است — LAN، ‏Tailscale یا اینترنت.»</td><td>session token یا OAuth</td></tr>
+<tr><td><b>SSH</b></td><td>«نصب هرمس ی که از طریق SSH رسیده می‌شود.» اپ tunnel را باز و داشبورد را برایتان شروع می‌کند</td><td>کلید SSH + توکن adopt شده</td></tr>
+<tr><td><b>Hermes Cloud</b></td><td>«نمونهٔ میزبانی‌شده کشف‌شده از طریق حسابتان در Hermes Cloud.»</td><td>ورود portal</td></tr>
+</tbody>
+</table>
+</div>
+<p>قواعدی که دانستنش می‌ارزد:</p>
+<ul>
+  <li><b>هر اتصال به نام دستگاه یکتا نیاز دارد</b> ‏(«Homelab»، «Work laptop»). نام هر جا که نمونه ظاهر شود دیده می‌شود — badge های roster، ‏handle ها، نتایج به‌روزرسانی. یکتایی case-insensitive است پس Homelab و homelab نمی‌توانند همزیست باشند.</li>
+  <li>ورودی <b>local</b> توسط اپ مدیریت می‌شود ‏(حبهٔ App-managed دارد) و قابل‌حذف نیست. حذف هر اتصال دیگر بک‌اندها و tunnel های زنده اش را جمع می‌کند؛ خود نمونه دست نمی‌خورد.</li>
+  <li>یک اتصال همیشه <b>Primary</b> است ‏(حبه روی ردیفش): fallback ی registry برای فراخوانی‌های چند-گیت‌وی‌ای که گیت‌وی نام نمی‌برند. Make primary فضای کاری فعلی Sessions را عوض نمی‌کند؛ حذف primary به ورودی local برمی‌گردد.</li>
+  <li>‏<b>At startup, return to Sessions on the last-used gateway</b> تعیین می‌کند بعد از ری‌استارت کامل اپ، Sessions روی کدام گیت‌وی باز شود. پیش‌فرض خاموش است پس Sessions روی Primary باز می‌شود. روشنش کنید تا آخرین گیت‌وی موفق بازیابی شود. سوئیچ ناموفق هرگز به یاد سپرده نمی‌شود و گیت‌وی ذخیره‌شدهٔ حذف‌شده یا غیرقابل‌رسید به Primary برمی‌گردد.</li>
+  <li><b>Test</b> هر دو پای HTTP <i>و</i> WebSocket ی اتصال را probe می‌کند، پس قبولی ‏(toast ی Reachable) یعنی چت واقعاً کار خواهد کرد — نه فقط اینکه host ping شد.</li>
+  <li><b>تکراری‌ها موقع ذخیره رد می‌شوند</b>: فقط همیشه یک ورودی local هست؛ ورودی‌های remote و cloud روی URL ی نرمال‌شده dedup می‌شوند ‏(trim، حذف اسلش انتهایی، حروف کوچک — و بین هر دو نوع، تا ورود cloud و remote به یک URL اشاره نکنند)؛ ورودی‌های SSH روی user@host:port ی نرمال‌شده به‌علاوه پروفایل راه‌دور dedup می‌شوند.</li>
+  <li>ورودی‌های Cloud معمولاً از جریان ورود/کشف Hermes Cloud در بالای صفحهٔ Gateways می‌آیند — مقدار Hermes Cloud در ادیتور افزودن-اتصال شما را به همانجا می‌فرستد.</li>
+</ul>
+<p>گیت‌وی‌ها را از sidebar ی Sessions عوض کنید. پروفایل‌ها، گفتگوها، پیام‌رسانی و cron به همان گیت‌وی scope می‌مانند؛ backend ی window ی مدیریت‌شده-توسط-اپ همچنان توسط کنترل‌های connection-mode ی بالا انتخاب می‌شود. Primary فقط fallback ی registry است و فضای کاری فعلی را عوض نمی‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> افزودن اتصال، قدم‌به‌قدم</h2>
+<ol>
+  <li>‏Settings ← Gateways را باز و به registry ی اتصالات اسکرول کنید ‏(یا plug را در ریل پروفایل کلیک کنید).</li>
+  <li>روی <b>Add connection</b> کلیک کنید.</li>
+  <li>نوع را بردارید: Local، ‏Hermes Cloud، ‏Remote gateway یا SSH. ‏(Local وقتی ورودی محلیِ مدیریت‌شده-توسط-اپ موجود باشد غیرفعال است — تقریباً همیشه؛ Hermes Cloud شما را به جریان ورود/کشف ابری می‌فرستد.)</li>
+  <li>فیلدها را پر کنید:
+    <ul>
+      <li><b>Name</b> — الزامی، یکتا؛ «نام دستگاه» که هر جا این نمونه ظاهر شود نمایش داده می‌شود ‏(placeholder: Homelab). حداکثر ۶۴ نویسه.</li>
+      <li><i>فقط Remote gateway:</i>
+        <ul>
+          <li><b>Gateway URL</b> — URL پایه یک backend ی در حال اجرای hermes serve مثلاً http://homelab.lan:9119. پیشوندهای مسیر reverse-proxy هم کار می‌کنند.</li>
+          <li><b>Authentication</b> — Session token یا OAuth:
+            <ul>
+              <li><b>Session token</b> — توکن نشست داشبورد گیت‌وی راه‌دور را paste کنید. هنگام ویرایش «برای نگه داشتن توکن ذخیره‌شده خالی بگذارید.»</li>
+              <li><b>OAuth</b> — از طریق جریان مرورگری Nous Portal وارد شوید؛ توکنی برای paste نیست.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><i>فقط SSH:</i>
+        <ul>
+          <li><b>SSH host</b> — یک فیلد ترکیبی به شکل user@host:22 ‏(کاربر و پورت اختیاری). کلید SSH شما استفاده می‌شود؛ اپ روی tunnel توکن داشبورد را adopt می‌کند.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Save connection ‏(یا Cancel) را کلیک کنید.</li>
+  <li>روی ردیف جدید Test را بزنید و منتظر Reachable بمانید.</li>
+</ol>
+<p>بعداً هر ورودی غیر-local را با دکمهٔ مداد ویرایش یا با دکمهٔ سطل حذف کنید — حذف تأیید می‌خواهد و یادآوری می‌کند «خود نمونه دست نمی‌خورد — هر وقت خواستید دوباره اضافه‌اش کنید.»</p>
+<div class="callout info">
+  <div class="callout-title">ℹ️ بک‌اند راه‌دور یک پروسهٔ در حال اجرای hermes serve است</div>
+  <p>هیچ‌کدام اینها کار نمی‌کند مگر اینکه backend واقعاً روی ماشین دیگر بالا و قابل‌رسید باشد. اپ دسکتاپ به آن attach می‌شود؛ آن را برایتان شروع نمی‌کند ‏(به‌جز اتصالات SSH که اپ داشبورد را on-demand روی tunnel شروع می‌کند). راه‌اندازی سمت-backend — ارائه‌دهنده‌های auth، ‏bind به آدرس غیر-loopback و راهنمای Tailscale — را در بخش اتصال-به-بک‌اند-راه‌دور راهنمای دسکتاپ ببینید.</p>
+</div>
+<h3>مهاجرت از تنظیمات تک-اتصاله</h3>
+<p>اولین اجرای یک build ی دارای-registry تنظیمات فعلی‌تان را خودکار import می‌کند: حالت اتصال سراسری و override های legacy ی per-profile از Settings ← Gateway به ورودی‌های نام‌دار registry تبدیل می‌شوند ‏(dedup روی URL/host). فایل تنظیمات قدیمی دست‌نخورده می‌ماند پس بیلدهای قدیمی‌تر روی همان ماشین همچنان کار می‌کنند. اگر نام مهاجرت‌شده تداخل داشت پسوند گرفت ‏(Homelab 2).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> ایجنت‌ها بین گیت‌وی‌ها</h2>
+<p>هر <a href="profiles.html">پروفایل</a> روی هر اتصال ثبت‌شده یک <i>ایجنت</i> است. roster ی اجتماع چیزی است که سطح‌های چند-گیت‌وی ‏(و roster ی Bot Mode داخلی) رندر می‌کنند:</p>
+<ul>
+  <li>وقتی نام پروفایل یکسان روی چند گیت‌وی وجود داشته باشد handle ها به‌صورت @name-device تفکیک می‌شوند — research روی Homelab شما @research-homelab رندر می‌شود در حالی که پروفایلی که سراسر گیت‌وی‌ها یکتاست نام لخت خودش را نگه می‌دارد.</li>
+  <li>شماره‌گذاری eager ولی socket ها lazy اند: اپ ایجنت‌ها را از طریق REST فهرست بدون dial کردن WebSocket هر گیت‌وی. گیت‌وی غیرقابل‌رسید per-row خطا گزارش می‌کند نه شکستن roster؛ اتصالات SSH تا اولین بار که رویشان ایجنتی باز کنید connect-on-demand می‌مانند ‏(بدون tunnel های غافلگیرکننده).</li>
+  <li>باز کردن ایجنت به گیت‌وی <b>خودش</b> dial می‌کند — چت‌ها، نشست‌ها و حافظه روی ماشینی زندگی می‌کنند که مالک پروفایل است، دقیقاً انگار مستقیم با آن نمونه کار می‌کردید.</li>
+</ul>
+<p>هر جفت (connection, profile) بک‌اند و socket خودش را دارد، pooled با همان idle-reaping ی بک‌اندهای per-profil ی محلی — ایجنت‌های پس‌زمینه حین نگاه شما به گیت‌وی دیگر به استریم ادامه می‌دهند.</p>
+<h3>سوئیچ و scope</h3>
+<p>پای sidebar یک سلسله‌مراتب را دنبال می‌کند: gateway ← profile ← sessions. گیت‌وی‌ها ماشین‌ها یا backend های میزبانی‌شده‌اند؛ پروفایل‌ها ایجنت‌های هرمس ایزوله‌ای هستند که روی یک گیت‌وی زندگی می‌کنند.</p>
+<ul>
+  <li>با یک گیت‌وی ثبت‌شده هیچ کنترل gateway اضافه نمی‌شود. Desktop فقط-محلی همان ریل پروفایل و جریان کیبورد قبلی را نگه می‌دارد.</li>
+  <li>با چند گیت‌وی، sidebar یک انتخابگر گیت‌وی نام‌دار نشان می‌دهد. آیکن device/cloud/network/terminal نوع اتصال را شناسایی می‌کند؛ آواتارهای پروفایل بعد از divider کنترل جدایی می‌مانند. همین انتخابگر از دو گیت‌وی تا fleet بزرگتر مقیاس می‌یابد بدون اینکه backend ها به glyph شبیه-پروفایل تبدیل یا اقدامات پروفایل از ریل بیرون رانده شوند.</li>
+  <li>انتخاب گیت‌وی آخرین پروفایل استفاده‌شده در آن را بازیابی می‌کند. ریل پروفایل سپس فقط پروفایل‌های همان گیت‌وی را نشان می‌دهد؛ حبهٔ home به پروفایل پیش‌فرض برمی‌گردد و حبهٔ layers مقدار «همهٔ پروفایل‌های این گیت‌وی» را نشان می‌دهد. Cmd/Ctrl+1–9 همچنان پروفایل‌ها را داخل گیت‌وی فعال عوض می‌کنند.</li>
+  <li>گیت‌وی انتخاب‌شده فقط وقتی از quit و relaunch جان می‌ماند که Settings ← Gateways ← At startup, return to Sessions on the last-used gateway روشن باشد. ترجیح و id ی گیت‌وی در registry ی user-data ی اپ زندگی می‌کنند، پس جایگزینی یا به‌روزرسانی bundle ی اپ آنها را reset نمی‌کند.</li>
+  <li>با بیش از سیزده پروفایل روی گیت‌وی فعال، نوار آواتارشان به یک انتخابگر پروفایل نام‌دار فشرده می‌شود. مجموعه‌های بزرگ گیت‌وی و پروفایل پس می‌توانند بدون تغییر مدل gateway ← profile ← sessions همزیست باشند.</li>
+  <li>This device حتی وقتی اتصال راه‌دوری Primary است یک گیت‌وی درجه‌یک می‌ماند. می‌تواند حین قطعی راه‌دور نشست‌های محلی را در دسترس نگه دارد ولی اپ آن را «offline mode» نمی‌نامد: مدل یا ابزارهای انتخابی ممکن است همچنان اینترنت بخواهند.</li>
+  <li>فهرست نشست‌ها، کانال‌های پیام‌رسانی، cron job ها، تنظیمات، فایل‌ها و حافظه همه به جفت فعال (gateway, profile) scope شده‌اند. سوئیچ از گیت‌وی تلگرامی به گیت‌وی سیگنالی نمی‌تواند گروه‌های کانال یا نشست‌های گیت‌وی قبلی را در sidebar باقی بگذارد.</li>
+  <li>صرف نمایش انتخابگر registry ی اتصال محلی Electron را می‌خواند. گیت‌وی‌های راه‌دور فقط موقع انتخاب باز می‌شوند؛ polling دوره‌ای fleet وجود ندارد.</li>
+  <li>hover روی ایجنت backend اش را pre-warm می‌کند تا سوئیچ هزینهٔ cold boot نپردازد.</li>
+  <li>صفحهٔ Capabilities ‏(Skills / Tools / MCP) scope ی متناظر دارد: انتخابگر Configuring اش هر ایجنت (profile, device) را از roster ی اجتماع فهرست و انتخاب یکی مهارت‌ها، تول‌ست‌ها و سرورهای MCP ی <b>آن ماشین</b> را می‌خواند و می‌نویسد بدون تعویض فضای کاری Sessions. نصب hub، ‏کلیدهای env و setup ی MCP همگی روی backend ی ایجنت انتخابی فرود می‌آیند. دکمهٔ hot-reload-into-a-live-session تب MCP فقط برای ایجنت‌های گیت‌وی‌ای که window به آن وصل است ظاهر می‌شود؛ ویرایش‌ها روی ماشین‌های دیگر در نشست بعدی‌شان اعمال می‌شوند.</li>
+</ul>
+<p>افزودن، تست، rename یا حذف گیت‌وی‌ها در Settings ← Gateways انجام می‌شود. دکمهٔ plug کنار اقدامات پروفایل میان‌بری به آن خانهٔ مدیریتی واحد است نه یک جریان add دوم.</p>
+<h3>Sessions و Bot Mode</h3>
+<p>‏Sessions عمداً هر بار یک گیت‌وی فعال نشان می‌دهد: تا فایل‌ها، ابزارها، کانال‌ها، cron و تاریخچهٔ نشست در یک زمینهٔ اجرایی قابل‌فهم بمانند. Bot Mode کار متفاوتی دارد و ممکن است roster ی اجتماع را گروه‌بندی-بر-اساس-گیت‌وی ارائه دهد تا کاربر از یک سطح، ایجنتی روی NAS و دیگری روی VPS باز کند. باز کردن یک bot همچنان route دقیق (gateway, profile) آن را فعال می‌کند.</p>
+<p>منشن مستقیم بات‌ها و delegation به‌طور پیش‌فرض gateway-local می‌مانند. عبور از مرز backend یعنی تغییر فایل‌سیستم، credential ها، ابزارها و زمینهٔ اعتماد، پس اجرای cross-gateway باید یک پُل صریح باشد نه عارضهٔ جانبی تصادفی شریک شدن یک پنجرهٔ Desktop.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> به‌روزرسانی همهٔ نمونه‌ها یکجا</h2>
+<p>‏Settings ← Gateways ← Update all instances ‏(با ثبت بیش از یک اتصال نمایش داده می‌شود) مقدار hermes update را به‌موازات به هر اتصال واجد شرایط dispatch می‌کند:</p>
+<ul>
+  <li><b>Local</b> از طریق خط‌لوله به‌روزرسانی خود اپ به‌روز می‌شود ‏(همان جریان Settings ← Updates).</li>
+  <li>اتصالات <b>Remote و SSH</b> told می‌شوند خودشان از طریق backend خودشان به‌روز شوند — به‌روزرسانی روی <b>آن</b> ماشین اجرا می‌شود.</li>
+  <li>نمونه‌های <b>Hermes Cloud</b> با یادداشت Managed by Hermes Cloud skip می‌شوند: پلتفرم نسخه‌هایشان را مدیریت می‌کند.</li>
+</ul>
+<p>هر نمونه مستقل گزارش می‌دهد، پس یک جعبه غیرقابل‌رسید هرگز batch را گیر نمی‌اندازد. backend هایی که به‌روزرسانی را بیرونی مدیریت می‌کنند ‏(Docker، ‏Nix) مؤدبانه با پیام خودشان در هر ردیف امتناع می‌کنند.</p>
+<p>البته به‌ندرت به دکمهٔ Settings نیاز دارید: به‌محض وجود بیش از یک هدف به‌روزرسانی، affordance های عادی به‌روزرسانی اپ ‏(Update now روی پنل About، ‏⌘K Update Hermes، ‏toast ی update-ready) همان fan-out را خودکار اجرا می‌کنند — اول backend فعال، بعد هر گیت‌وی واجد شرایط دیگر، و آخر از همه خود اپ دسکتاپ.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> نکات امنیتی</h2>
+<ul>
+  <li><b>توکن‌ها کجا زندگی می‌کنند.</b> توکن‌های نشست گیت‌وی راه‌دور با safeStorage ی Electron در حالت rest رمز می‌شوند ‏(keychain سیستم‌عامل — Keychain روی macOS، ‏DPAPI روی ویندوز، ‏backend ی session keyring روی لینوکس) و در پروسهٔ main ی Electron می‌مانند؛ renderer و پلاگین‌ها هرگز بایت‌های توکن را نمی‌بینند. توکن‌های OAuth ی ورود native هم به همین شکل کلیدخورده-با-URL پایهٔ گیت‌وی ذخیره و قبل از انقضا خودکار refresh می‌شوند.</li>
+  <li><b>لینوکس بدون keyring.</b> روی نشست لینوکسی بدون keychain قابل‌استفاده اپ نمی‌تواند توکن را رمز کند؛ ذخیرهٔ یکی قبل از نگهداری توکن به‌صورت plaintext دیالوگ opt-in ی صریح می‌طلبد.</li>
+  <li><b>فایل registry</b> ‏(connections.json زیر دایرکتوری user-data ی اپ) برچسب‌ها، URL ها و host ها را حمل می‌کند — secrets فقط داخل envelope های رمزشده ظاهر می‌شوند.</li>
+  <li>متد host.connections() ی SDK ی پلاگین عمداً فقط برچسب‌ها، انواع و id ی primary را برمی‌گرداند — هرگز مواد توکن نه.</li>
+</ul>
+<h3>برای نویسندگان پلاگین</h3>
+<p>‏SDK ی پلاگین Desktop سطح چند-گیت‌وی را مستقیم expose می‌کند ‏(<a href="https://hermes-agent.nousresearch.com/docs/developer-guide/desktop-plugin-sdk" target="_blank" rel="noopener">Desktop Plugin SDK</a>):</p>
+<ul>
+  <li>‏<code>host.connections()</code> — فهرست اتصالات ثبت‌شده ‏(برچسب‌ها، انواع، primary؛ هرگز بایت‌های توکن).</li>
+  <li>‏<code>host.agents()</code> — roster ی اجتماع: یک ردیف per جفت (gateway, profile) با handle ی از-قبل-محاسبه‌شده @name-device.</li>
+  <li>‏<code>host.ensureAgent(connectionId, profile)</code> — فعال‌سازی گیت‌وی ایجنت تا فراخوانی‌های بعدی host.request به backend او بخورد.</li>
+  <li>‏<code>host.warmAgent(connectionId, profile)</code> — pre-warm ی fire-and-forget ی socket ‏(hover-intent).</li>
+</ul>
+<p>هر چهار مورد feature-detected هستند: روی build ی قدیمی‌تر Desktop غایب‌اند و پلاگین باید به جریان تک-گیت‌وی profiles.list برگردد. roster ی چند-گیت‌وی Bot Mode مصرف‌کنندهٔ مرجع است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> عیب‌یابی</h2>
+<ul>
+  <li><b>«Connection test failed»</b> — backend از این ماشین در آن URL قابل‌رسید نیست. بررسی کنید hermes serve روی host ی راه‌دور اجرا باشد، پورت باز باشد و ‏(برای auth ی توکن) توکن current باشد. بعد از اصلاح دوباره Test را اجرا کنید.</li>
+  <li><b>ایجنتی نشان داده می‌شود ولی باز نمی‌شود</b> — روی اتصالش Test را اجرا کنید. شکست پای WebSocket همراه قبولی HTTP معمولاً یعنی proxy، ‏فایروال یا گارد auth/origin ی گیت‌وی /api/ws را بلاک می‌کند.</li>
+  <li><b>گیت‌وی راه‌دوری در roster نیست</b> — backend اش پایین یا غیرقابل‌رسید است؛ roster آن را همراه خطا زیر گیت‌وی‌ها فهرست می‌کند. اتصالات SSH تا اولین استفاده connect-on-demand نشان داده می‌شوند — این طراحی است نه شکست.</li>
+  <li><b>«Update Hermes Desktop to chat with agents on other connections»</b> — اپ قدیمی‌تر از stack ی چند-اتصاله است؛ خود اپ دسکتاپ را به‌روز کنید.</li>
+  <li><b>نام‌های تکراری دستگاه</b> — ممکن نیست؛ نام‌ها موقع ذخیره یکتا اجبار می‌شوند. اگر نام مهاجرت‌شده تداخل داشت پسوند گرفته بود ‏(Homelab 2).</li>
+  <li><b>«Could not save the connection»</b> — رایج‌ترین‌ها: Name جامانده، نامی که قبلاً استفاده شده یا Gateway URL / SSH host ی بدفرم؛ پیام خطا نقض دقیق را نام می‌برد.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="secrets/onepassword.html"><span class="dir">→ قبلی</span><span class="ttl">1Password</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/multi-connection-desktop" target="_blank" rel="noopener">Connecting Desktop to Many Hermes Instances</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
