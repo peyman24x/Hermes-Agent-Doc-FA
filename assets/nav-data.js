@@ -133,7 +133,7 @@ window.HERMES_NAV = [
   { p:"integrations/buzz.html",                         t:"Buzz",                            d:1 },
   { p:"user-guide/features/mcp.html",                   t:"پروتکل MCP",                      d:1 },
   { p:"user-guide/features/acp.html",                   t:"پروتکل ACP",                      d:1 },
-  { p:"user-guide/features/api-server.html",            t:"سرور API سازگار با OpenAI",       d:0 },
+  { p:"user-guide/features/api-server.html",            t:"سرور API سازگار با OpenAI",       d:1 },
   { p:"user-guide/features/honcho.html",                t:"حافظهٔ Honcho",                    d:1 },
   { p:"user-guide/features/provider-routing.html",      t:"مسیریابی ارائه‌دهنده",            d:0 },
   { p:"user-guide/features/fallback-providers.html",    t:"ارائه‌دهندگان پشتیبان",           d:0 },

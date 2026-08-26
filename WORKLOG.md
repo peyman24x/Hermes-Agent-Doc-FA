@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [hermes-agent-farsi.pages.dev](https://hermes-agent-farsi.pages.dev) ‏(اصلی) · [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) ‏(پشتیبان ماهانه) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۱۷ از ۲۰۷ صفحه (۵۷٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۱۸ از ۲۰۷ صفحه (۵۷٪)** |
 
 ---
 
@@ -581,6 +581,11 @@ hermes-docs-fa/
 - ترمیم زنجیره: pager بعدی acp به honcho وصل شد؛ honcho قبلی ← acp، بعدی ← api-server (به‌زودی)
 - پیشرفت: **۱۱۷ از ۲۰۷ صفحه فعال (۵۷٪)**
 
+### نشست ۷۴ — 2026-08-27 — 🌐 سرور API سازگار با OpenAI
+- ترجمه و انتشار «سرور API» (۷ بخش، ~۷۶۰ خط): شروع سریع سه‌گامی با curl و Open WebUI؛ نقاط پایانی chat/completions ‏(تصویر inline، استریم SSE با hermes.tool.progress)، responses با previous_response_id و گفتگوهای نام‌دار، models/options/capabilities؛ کنترل مرورگر افزونه‌ای با ticket ی تک‌مصرفی و معناشناسی authoritative ی controller؛ انتخاب مدل per-request با چهار سطح اولویت و opt-in ی direct_model_requests؛ Runs/Jobs/Sessions API کامل؛ X-Hermes-Session-Key برای حافظهٔ بلندمدت چندکاربره؛ auth با مسیریابی /p/<profile>/ و تغییر breaking ی ژوئیه ۲۰۲۶؛ جدول env vars و config.yaml، سقف اجرای هم‌زمان، CORS/هدرها، جدول frontend های سازگار، setup چندکاربره و proxy mode
+- ترمیم زنجیره: pager بعدی honcho به api-server وصل شد؛ بعدش provider-routing (به‌زودی)
+- پیشرفت: **۱۱۸ از ۲۰۷ صفحه فعال (۵۷٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -704,6 +709,7 @@ hermes-docs-fa/
 | 115 | `integrations/nous-portal.html` | Nous Portal |
 | 116 | `user-guide/features/acp.html` | پروتکل ACP |
 | 117 | `user-guide/features/honcho.html` | حافظهٔ Honcho |
+| 118 | `user-guide/features/api-server.html` | سرور API سازگار با OpenAI |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

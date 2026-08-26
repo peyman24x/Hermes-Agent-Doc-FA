@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سرور API سازگار با OpenAI — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>سرور API سازگار با OpenAI</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>سرور API ‏(سازگار با OpenAI)</h1>
+<p>سرور API مقدار hermes-agent را به‌عنوان یک نقطهٔ پایانی HTTP سازگار-با-OpenAI expose می‌کند. هر frontend ای که قالب OpenAI را حرف می‌زند — ‏Open WebUI، ‏LobeChat، ‏LibreChat، ‏NextChat، ‏ChatBox و صدهای دیگر — می‌تواند به hermes-agent وصل و آن را به‌عنوان backend مصرف کند.</p>
+<p>ایجنت شما درخواست‌ها را با تول‌ست کاملش هندل می‌کند ‏(ترمینال، عملیات فایل، جستجوی وب، حافظه، مهارت‌ها) و پاسخ نهایی را برمی‌گرداند. حین streaming نشانگرهای پیشرفت ابزار inline ظاهر می‌شوند تا frontend ها ببینند ایجنت چه می‌کند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 یک backend هم مدل هم ابزار</div>
+  <p>هرمس خودش ارائه‌دهندهٔ پیکربندی‌شده و بک‌اندهای ابزار می‌خواهد تا سرور API مفید باشد. اشتراک <a href="tool-gateway.html">Nous Portal</a> هر دو را هندل می‌کند — +۳۰۰ مدل به‌علاوهٔ وب/تصویر/TTS/مرورگر از طریق Tool Gateway. قبل از شروع سرور API یک بار ‏hermes setup --portal اجرا کنید تا frontend هایی مثل Open WebUI یا LobeChat بک‌اندی کاملاً مسلح-به-ابزار بگیرند.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> شروع سریع</h2>
+<h3>۱. فعال کردن سرور API</h3>
+<p>به ~/.hermes/.env اضافه کنید:</p>
+<pre dir="ltr"><code>API_SERVER_ENABLED=true
+API_SERVER_KEY=change-me-local-dev
+# Optional: only if a browser must call Hermes directly
+# API_SERVER_CORS_ORIGINS=http://localhost:3000</code></pre>
+<h3>۲. شروع گیت‌وی</h3>
+<pre dir="ltr"><code>hermes gateway</code></pre>
+<p>این را می‌بینید:</p>
+<pre dir="ltr"><code>[API Server] API server listening on http://127.0.0.1:8642</code></pre>
+<h3>۳. اتصال frontend</h3>
+<p>هر کلاینت سازگار-با-OpenAI را به ‏http://localhost:8642/v1 اشاره دهید:</p>
+<pre dir="ltr"><code># Test with curl
+curl http://localhost:8642/v1/chat/completions \
+  -H "Authorization: Bearer change-me-local-dev" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "hermes-agent", "messages": [{"role": "user", "content": "Hello!"}]}'</code></pre>
+<p>یا Open WebUI، ‏LobeChat یا هر frontend دیگری وصل کنید — راهنمای گام‌به‌گام در <a href="../messaging/open-webui.html">راهنمای یکپارچه‌سازی Open WebUI</a>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> نقاط پایانی</h2>
+<h3>‏POST /v1/chat/completions</h3>
+<p>قالب استاندارد Chat Completions ی OpenAI. stateless — کل گفتگو در هر درخواست از طریق آرایهٔ messages فرستاده می‌شود. درخواست و پاسخ JSON استاندارد؛ usage ی توکن هم برگردانده می‌شود.</p>
+<p><b>ورودی تصویر inline:</b> پیام‌های کاربر می‌توانند content را آرایه‌ای از بخش‌های text و image_url بفرستند. هم URL های راه‌دور http(s) و هم URL های data:image/... پشتیبانی می‌شوند. فایل‌های آپلودی ‏(file/input_file/file_id) و URL های data: ی غیر-تصویری 400 unsupported_content_type برمی‌گردانند.</p>
+<p><b>Streaming</b> ‏("stream": true): رویدادهای SSE با chunk های توکن-به-توکن برمی‌گرداند. برای Chat Completions استریم از رویدادهای استاندارد chat.completion.chunk به‌علاوهٔ رویداد سفارشی hermes.tool.progress هرمس برای UX ی شروع-ابزار استفاده می‌کند. برای Responses از انواع رویداد OpenAI Responses مثل response.created، ‏response.output_text.delta، ‏response.output_item.added/done و response.completed.</p>
+<ul>
+  <li><b>Chat Completions:</b> هرمس event: hermes.tool.progress را برای دید شروع ابزار emit می‌کند بدون آلوده کردن متن دستیارِ ماندگار.</li>
+  <li><b>Responses:</b> آیتم‌های خروجی spec-native ی function_call و function_call_output حین استریم SSE صادر می‌شود تا کلاینت‌ها UI ی ساختاریافتهٔ ابزار را بلادرنگ رندر کنند.</li>
+</ul>
+<h3>‏POST /v1/responses</h3>
+<p>قالب OpenAI Responses API. وضعیت گفتگوی سمت-سرور را با previous_response_id پشتیبانی می‌کند — سرور تاریخچهٔ کامل گفتگو ‏(شامل فراخوانی‌ها و نتایج ابزار) را ذخیره می‌کند تا زمینهٔ چندنوبتی بدون مدیریت سمت-کلاینت حفظ شود. فراخوانی‌های ابزار در آرایهٔ output قبلاً سمت-سرور توسط ایجنت هرمس اجرا شده‌اند — با status: completed برای UI ی ساختاریافته replay می‌شوند، هرگز به‌عنوان call های در-انتظار برای اجرا توسط کلاینت.</p>
+<p><b>چندنوبت با previous_response_id:</b> پاسخ‌ها را زنجیر کنید تا کل زمینه ‏(شامل tool calls) بین نوبت‌ها حفظ شود. سرور کل گفتگو را از زنجیرهٔ پاسخ ذخیره‌شده بازسازی می‌کند. درخواست‌های زنجیره‌شده همان نشست را هم share می‌کنند پس گفتگوهای چندنوبتی به‌صورت یک ورود واحد در داشبورد و تاریخچهٔ نشست دیده می‌شوند.</p>
+<p><b>گفتگوهای نام‌دار:</b> به‌جای ردیابی response ID ها از پارامتر conversation استفاده کنید — سرور خودکار به آخرین پاسخ همان گفتگو زنجیر می‌کند؛ مثل فرمان ‎/title‎ برای نشست‌های گیت‌وی.</p>
+<h3>‏GET /v1/responses/{id} و ‏DELETE /v1/responses/{id}</h3>
+<p>واکشی یا حذف یک پاسخ ذخیره‌شده با ID.</p>
+<h3>‏GET /v1/models</h3>
+<p>ایجنت را به‌عنوان مدل موجود advertise می‌کند. نام مدل advertised پیش‌فرض <a href="../profiles.html">نام پروفایل</a> است ‏(یا hermes-agent برای پروفایل پیش‌فرض). توسط بیشتر frontend ها برای کشف مدل لازم است. عمداً سطح ارزان سازگار-با-OpenAI است و همهٔ ترکیب‌های provider/model احراز‌شده یا قیمت‌گذاری را enumerate نمی‌کند.</p>
+<h3>‏GET /api/model/options</h3>
+<p>کلاینت‌های هرمس-آگاه می‌توانند همان موجودی منتخب provider/model که داشبورد و TUI مصرف می‌کنند را بخواهند. این route احراز bearer معمول سرور API را دارد و ردیف‌های ارائه‌دهنده، ‏سرنخ‌های قابلیت مدل و متادیتای قیمت‌گذاری خارج از محدودهٔ /v1/models را برمی‌گرداند. باز شدن‌های عادی برای ارائه‌دهنده‌های سفارشی محافظه‌کارند — فقط نقطهٔ پایانی سفارشیِ <b>فعلاً-انتخاب‌شده</b> probe می‌شود؛ refresh ی صریح به probing کامل فلپ و کش مدل ارائه‌دهنده را bust می‌کند ‏(?refresh=1).</p>
+<h3>‏GET /v1/capabilities</h3>
+<p>توصیف machine-readable از سطح پایدار سرور API برای UI های بیرونی، orchestrator ها و پل‌های پلاگین برمی‌گرداند — chat_completions، ‏responses_api، ‏run_submission/status/events_sse/stop و… . موقع یکپارچه‌سازی داشبوردها یا control plane ها این endpoint را مصرف کنید تا بدون اتکا به internals ی خصوصی پایتون تشخیص دهند نسخهٔ در حال اجرا چه پشتیبانی می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> کنترل مرورگر از طریق افزونه</h2>
+<p>هرمس می‌تواند ابزارهای مرورگر را از طریق افزونه‌ای احراز‌شده که نشست مرورگر مقید به نشست فعلی هرمس را کنترل می‌کند مسیریابی دهد. پیش‌فرض خاموش است؛ browser.extension_control.enabled را true کنید. مسیر API ی محلی هم کلید bearer ی سرور API را می‌خواهد. controller فقط برای یک نشست سرور موجود ثبت می‌شود و principal از وضعیت احراز‌شدهٔ سرور مشتق می‌شود؛ principal_id ی ارسالی-کلاینت نادیده گرفته می‌شود.</p>
+<p>قرارداد زنده را از GET /v1/capabilities کشف کنید — آبجکت browser_extension_control فعال بودن، نسخهٔ پروتکل، نام transport ها و allowlist ی دقیق قابلیت‌ها را گزارش می‌کند ‏(browser_click/navigate/type/scroll/snapshot/back/press/tabs/tab_activate/screenshot/controller.noop). قابلیت‌های خارج این فهرست فیلتر می‌شوند؛ ‏CDP خام، ‏eval ی اسکریپت دلخواه، ‏دسترسی console، ‏آپلود، ‏استخراج تصویر و vision بخش پروتکل controller نیستند.</p>
+<p>وقتی درخواستی هویت controller مقید ندارد یا قابلیت خاموش است هرمس backend ی موجود مرورگر را حفظ می‌کند. بعد از bind شدن controller به درخواست، آن لاین authoritative است: ‏controller های غایب/مبهم/قطع‌شده/ناکارا fail closed می‌کنند نه اینکه بی‌سروصدا به مرورگر محلی/ابری دیگری سوئیچ کنند. بعد از انتخاب دقیق controller نتیجه یا خطایش authoritative است و هرمس هرگز همان اقدام را از backend دیگری retry نمی‌کند.</p>
+<h4>ثبت از طریق API ی محلی</h4>
+<ol>
+  <li>‏POST /v1/browser-control/register ی احراز‌شده با protocol_version، ‏session_id، ‏controller_id، ‏browser_profile_id و capabilities ی خواسته بفرستید.</li>
+  <li>هرمس ticket ی تک‌مصرفی با TTL ی ۳۰ ثانیه و scope ی فیلترشده برمی‌گرداند.</li>
+  <li>GET /v1/browser-control/ws را با هر دو زیرپروتکل WebSocket باز کنید: hermes-browser-control-v1 و hermes-browser-control-ticket.&lt;ticket&gt;.</li>
+</ol>
+<p>ticket هرگز در query string پذیرفته نمی‌شود. ticket های ناشناخته، منقضی، ‏مصرف‌شده یا بدفرم قبل از upgrade ی WebSocket رد می‌شوند.</p>
+<h4>فریم‌های controller</h4>
+<p>هرمس فریم‌های browser.controller.command با command_id، ‏action، ‏arguments ی تغییرناپذیر، شناسه‌های مرورگر/controller و tool_call_id ی مبدأ می‌فرستد. controller با browser.controller.result، همان command_id، ‏ok ی دقیقاً boolean و result یا error جواب می‌دهد. لغو و timeout مقدار browser.controller.cancel emit می‌کنند؛ نتایج دیرهنگام نادیده گرفته می‌شوند.</p>
+<p>قطع غیرمنتظرهٔ socket کنترلر را offline علامت و کار در-جریان را تا deadline اصلی هر فرمان حفظ می‌کند. reconnect با همان هویت transport را refresh می‌کند بدون پذیرش کار جدید قبل از flush شدن cancel های معوق. تغییر controller id یا browser profile در همان lane ی احراز‌شده جایگزینی سخت است: کار معوق قدیمی قبل از قابل-مسیر شدن جانشین لغو می‌شود. ‏browser.controller.detach روی transport ی احراز‌شده برای detach سخت عمدی بفرستید — فوراً کار pending را لغو می‌کند؛ صرف بستن socket قطع قابل-ریکاوری تلقی می‌شود.</p>
+<p>transport ی داشبورد احراز‌شده همین معناشناسی ثبت/نتیجه/heartbeat/قابلیت/مالکیت را روی کانال RPC/event ی Gateway خودش ارائه می‌دهد. در هر دو transport، انتخاب نیازمند یک تطبیق دقیق بی‌ابهام روی principal، ‏profile، ‏session، ‏controller، ‏browser profile، ‏خانواده transport و قابلیت است. بعد از انتخاب شکست controller authoritative است و هرگز از backend مرورگری دیگر retry نمی‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> انتخاب مدل per-request</h2>
+<p>کلاینت‌های احراز‌شده می‌توانند انتخاب پیش‌فرض مدل هرمس را per-request بازنویسی کنند با ارسال model ‏(شناسه مدل هدف این نوبت)، ‏provider ‏(slug ی هرمس برای حل credential/runtime) و model_options ‏(کنترل‌های reasoning/service-tier ی scope‌شده-به-درخواست).</p>
+<p>همین فیلدها روی POST /v1/chat/completions، ‏POST /v1/responses، ‏POST /v1/runs، ‏POST /api/sessions/{id}/chat و chat/stream پذیرفته می‌شوند. اولویت قطعی است:</p>
+<ol>
+  <li>override ی ‎/model‎ ی نشست اگر آن نشست داشته باشد</li>
+  <li>نگاشت ایستای gateway.platforms.api_server.model_routes وقتی model ی درخواست alias ی مسیر پیکربندی‌شده باشد</li>
+  <li>model/provider مستقیم درخواست وقتی هیچ alias ای نخورد</li>
+  <li>پیش‌فرض‌های سراسری config ی گیت‌وی / محیط</li>
+</ol>
+<p>model_options فارغ از برنده بودن مدل/ارائه‌دهنده scope ی درخواست می‌ماند. اگر درخواست provider ای بفرستد که با alias ی model_routes تضاد داشته باشد هرمس با ۴۰۰ رد می‌کند نه اینکه بی‌سروصدا credential های مسیر را با ارائه‌دهندهٔ دیگری مخلوط کند.</p>
+<p><b>مقادیر لخت model روی نقاط پایانی سازگار-با-OpenAI opt-in اند.</b> کلاینت‌های عمومی OpenAI مرتباً نام مدل هاردکد می‌کنند ‏(gpt-4o و…) و استقرارهای فعلی به fallback آنها به پیش‌فرض گیت‌وی تکیه دارند. روی chat/completions و responses مقدار model بدون provider نادیده گرفته می‌شود مگر این را روشن کنید:</p>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code>gateway:
+  platforms:
+    api_server:
+      direct_model_requests: true</code></pre>
+</div>
+<p>درخواست‌های دارای provider صریح — و نقاط پایانی native ی ‎/v1/runs‎ و session-chat — فارغ از این فلگ مدل خواسته را محترم می‌شمارند. مثال درخواست با model_options شامل reasoning_effort: high و service_tier: priority.</p>
+<h3>‏GET /health و ‏GET /health/detailed</h3>
+<p>بررسی سلامت. ‏{"status": "ok"} برمی‌گرداند؛ روی GET /v1/health هم برای کلاینت‌های سازگار-با-OpenAI موجود است. ‏/health/detailed بررسی آمادگی احراز‌شده برای مانیتورینگ و control plane هاست و وضعیت محدود config پروفایل فعال، ‏DB ی وضعیت، ‏مدل پیکربندی‌شده، فضای دیسک، وضعیت گیت‌وی/پلتفرم، run های فعال API، تکمیل‌های pending ی پروسه و delegation های فعال را گزارش می‌کند — فقط وضعیت و شمارنده‌ها، نه مقادیر config، ‏credential ها، ‏مسیرها، فرمان‌ها، payload صف یا خطاهای خام. ‏/health عمومی همچنان probe ی ارزان liveness است و readiness چک نمی‌کند؛ نتیجهٔ degraded هنوز HTTP 200 است و فیلدهای status و readiness.checks را inspect کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> Runs API و Jobs API</h2>
+<h3>Runs API</h3>
+<p>علاوه بر chat/completions و responses، سرور API ی runs را برای نشست‌های بلند expose می‌کند که کلاینت می‌خواهد به رویدادهای پیشرفت مشترک شود به‌جای مدیریت خودِ streaming:</p>
+<ul>
+  <li><b>‏POST /v1/runs</b> — ایجاد run جدید؛ ‏run_id برای subscribe کردن به رویدادهای پیشرفت برمی‌گردد. ورودی رشتهٔ input ساده + session_id/instructions/conversation_history/previous_response_id اختیاری.</li>
+  <li><b>‏GET /v1/runs/{run_id}</b> — poll ی وضعیت فعلی؛ برای داشبوردهایی که SSE باز نگه نمی‌دارند. وضعیت‌ها مدتی بعد از حالات پایانه ‏(completed/failed/cancelled) برای reconciliation حفظ می‌شوند.</li>
+  <li><b>‏GET /v1/runs/{run_id}/events</b> — استریم SSE ی پیشرفت tool-call، دلتاهای توکن و رویدادهای چرخهٔ حیات. هنگام delegation به زیرایجنت‌ها رویدادهای subagent.start/complete هم carry می‌شوند ‏(وضعیت، خلاصه، مدت، توکن/هزینه، child_session_id)؛ رویدادهای per-tool فرزندان عمداً forward نمی‌شوند — transcript زندهٔ per-child را ببینید. بافرهای رویداد مصرف‌نشده بعد از ۵ دقیقه منقضی می‌شوند؛ فقط state ی transport است — run ی در حال اجرا برای polling، تأیید، stop و حساب concurrency تا خروج واقعی executor مرئی می‌ماند.</li>
+  <li><b>‏POST /v1/runs/{run_id}/stop</b> — قطع نوبت ایجنتی در حال اجرا؛ فوراً stopping برمی‌گرداند و بعد از خروج کار settled به cancelled می‌نشیند.</li>
+  <li><b>‏POST /v1/runs/{run_id}/approval</b> — حل تأیید pending برای run ی منتظر تصمیم انسانی؛ run بعد از ثبت تصمیم ادامه می‌یابد. در capabilities به‌عنوان run_approval advertise می‌شود.</li>
+</ul>
+<h3>Jobs API</h3>
+<p>سطح CRUD سبکی برای مدیریت اجراهای زمان‌بندی/پس‌زمینه از کلاینت راه‌دور؛ همه پشت همان auth ی bearer:</p>
+<ul>
+  <li>‏GET /api/jobs — فهرست همهٔ job های زمان‌بندی‌شده</li>
+  <li>‏POST /api/jobs — ساخت job جدید؛ body همان شکل hermes cron را می‌پذیرد ‏(prompt، schedule، مهارت‌ها، override ی ارائه‌دهنده، هدف تحویل)</li>
+  <li>‏GET/PATCH/DELETE /api/jobs/{job_id} — خواندن تعریف و آخرین اجرا / merge ی partial update / حذف همراه لغو اجرای در-جریان</li>
+  <li>‏POST …/pause و …/resume — توقف موقت (تعلیق timestamp های اجرای بعدی) و ازسرگیری</li>
+  <li>‏POST …/run — trigger ی فوری خارج از برنامه</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> Sessions API، کشف مهارت‌ها و کلید نشست بلندمدت</h2>
+<h3>Sessions API</h3>
+<p>UI های بیرونی می‌توانند نشست‌های هرمس را از طریق REST مدیریت کنند بدون بالا آوردن داشبورد. همه gated با API_SERVER_KEY و زیر /api/sessions/*: فهرست صفحه‌بندی‌شده، ‏ساخت نشست خالی، ‏خواندن متادیتا، ‏ویرایش title/end_reason، ‏حذف، ‏تاریخچهٔ پیام‌ها، ‏fork از طریق lineage ی SessionDB ‏(مطابق ‎/branch‎ ی CLI)، ‏اجرای یک نوبت همگام و wrapper ی SSE یک نوبت ‏(رویدادهای assistant.delta، ‏tool.started، ‏tool.completed، ‏run.completed). تصاویر inline در chat و chat/stream پشتیبانی می‌شوند. مثال curl برای fork و stream در متن اصلی.</p>
+<h3>کشف مهارت‌ها و تول‌ست‌ها</h3>
+<p>GET /v1/skills و GET /v1/toolsets به کلاینت‌های بیرونی اجازه می‌دهد قابلیت‌های ایجنت را قطعی از طریق REST enumerate کنند نه اینکه از مدل بپرسند. هر دو فقط-خواندنی و gated با کلید هستند؛ skills همان متادیتای hub ی مهارت‌ها و toolsets مجموعه‌های حل‌شده برای پلتفرم api_server با فهرست concrete ی tools هرکدام را برمی‌گرداند. هر دو در capabilities زیر endpoints.* advertise می‌شوند.</p>
+<h3>scope ی حافظهٔ بلندمدت ‏(X-Hermes-Session-Key)</h3>
+<p>frontend های چند-کاربره مثل Open WebUI برای حافظهٔ بلندمدت ‏(Honcho و…) به شناسهٔ پایدار per-channel نیاز دارند که <b>مستقل</b> از X-Hermes-Session-Id ی scope‌شده-به-transcript ‏(که روی ‎/new‎ می‌چرخد) باشد. مقدار X-Hermes-Session-Key را روی chat/completions، ‏responses یا runs بفرستید و هرمس آن را تا AIAgent(gateway_session_key=...) عبور می‌دهد تا ارائه‌دهندهٔ Honcho از آن scope ی پایدار مشتق کند. قواعد: حداکثر ۲۵۶ نویسه، نویسه‌های کنترلی رد می‌شوند و مقدار روی پاسخ‌ها echo می‌شود. بدون این کلید، استراتژی per-session ی Honcho per session_id یک scope متفاوت تولید می‌کند — دقیقاً رفتار قبلی هرمس.</p>
+<h3>هندل System Prompt</h3>
+<p>وقتی frontend پیام system ‏(Chat Completions) یا instructions ‏(Responses) بفرستد، hermes-agent آن را <b>روی</b> پرامپت سیستمی هسته‌اش لایه می‌کند. ایجنت همهٔ ابزارها، حافظه و مهارت‌هایش را نگه می‌دارد — پرامپت سیستم frontend فقط دستورالعمل اضافه می‌کند. یعنی رفتار را per-frontend سفارشی می‌کنید بدون از دست دادن قابلیت‌ها.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> احراز هویت، مسیریابی چند-پروفایلی و پیکربندی</h2>
+<h3>احراز هویت</h3>
+<p>Bearer token از طریق هدر Authorization. کلید با API_SERVER_KEY ست می‌شود. اگر مرورگر باید مستقیم صدا بزند API_SERVER_CORS_ORIGINS را هم به allowlist ی صریح ست کنید.</p>
+<h3>مسیریابی چند-پروفایلی ‏(‎/p/&lt;profile&gt;/…‎)</h3>
+<p>با فعال بودن <a href="../multi-profile-gateways.html">مسیریابی چند-پروفایلی گیت‌وی</a>، شنوندهٔ مشترک هر پروفایل را از طریق پیشوند /p/&lt;profile>/ سرو می‌کند و <b>احراز هویت به پروفایل مسیریابی‌شده مقید است</b>: درخواست‌های /p/&lt;profile>/v1/... باید API_SERVER_KEY ی خودِ آن پروفایل را ارائه کنند و کلید شنوندهٔ پیش‌فرض روی پیشوندهای نام‌دار رد می‌شود؛ مسیرهای بدون پیشوند و /p/default/... از کلید پیش‌فرض استفاده می‌کنند؛ پروفایل نام‌دار بدون کلید اختصاصی fail closed می‌شود.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ تغییر breaking ‏(ژوئیه ۲۰۲۶)</div>
+  <p>قبل از این fix، کلید معتبر پروفایل پیش‌فرض روی هر پیشوند /p/&lt;profile>/ پذیرفته می‌شد. اگر روی share کردن یک کلید بین پیشوندها تکیه داشتید، برای هر پروفایل API_SERVER_KEY ی متمایز ست کنید — کلیدهای پیش‌فرض بازیافتی روی پیشوندهای نام‌دار الان 401 می‌دهند.</p>
+</div>
+<div class="callout warning">
+  <div class="callout-title">⚠️ امنیت</div>
+  <p>سرور API دسترسی کامل به تول‌ست hermes-agent می‌دهد، <b>شامل فرمان‌های ترمینال</b>. ‏API_SERVER_KEY برای <b>هر استقراری الزامی است</b> حتی bind ی پیش‌فرض loopback روی 127.0.0.1. ‏API_SERVER_CORS_ORIGINS را محدود نگه دارید تا دسترسی مرورگر را وقتی صریحاً مجازش می‌کنید کنترل کنید.</p>
+</div>
+<h3>متغیرهای محیطی و config.yaml</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>متغیر</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>API_SERVER_ENABLED</code></td><td>false</td><td>فعال کردن سرور API</td></tr>
+<tr><td><code>API_SERVER_PORT</code></td><td>۸۶۴۲</td><td>پورت سرور HTTP</td></tr>
+<tr><td><code>API_SERVER_HOST</code></td><td>۱۲۷٫۰٫۰٫۱</td><td>آدرس bind ‏(پیش‌فرض فقط localhost)</td></tr>
+<tr><td><code>API_SERVER_KEY</code></td><td>الزامی</td><td>توکن bearer برای auth</td></tr>
+<tr><td><code>API_SERVER_CORS_ORIGINS</code></td><td>—</td><td>origin های مرورگری مجاز جداشده-با-کاما</td></tr>
+<tr><td><code>API_SERVER_MODEL_NAME</code></td><td>نام پروفایل</td><td>نام مدل روی /v1/models</td></tr>
+</tbody>
+</table>
+</div>
+<p>همین تنظیمات در config.yaml زیر gateway.api_server هم زندگی می‌کنند ‏(enabled/port/host/key/cors_origins/model_name/max_concurrent_runs). این مقادیر خودکار به extra ی پلتفرم پل می‌شوند و env vars بر config.yaml مقدم‌اند. بلوک زیر gateway.platforms.api_server یا platforms.api_server ی top-level هم پذیرفته می‌شود.</p>
+<h3>سقف اجرای هم‌زمان</h3>
+<p>سرور API محدود می‌کند چند اجرای ایجنت همزمان از نقاط پایانی سازگار-با-OpenAI و Runs اجرا شوند؛ از gateway.api_server.max_concurrent_runs خوانده می‌شود ‏(پیش‌فرض ۱۰؛ صفر = بی‌حد؛ منفی به صفر clamp). رسیدن به سقف یعنی درخواست‌های start جدید با HTTP 429 «Too many concurrent runs (max N)» رد می‌شوند — کلاینت backoff و retry کند.</p>
+<h3>هدرهای امنیتی و CORS</h3>
+<ul>
+  <li>همهٔ پاسخ‌ها X-Content-Type-Options: nosniff و Referrer-Policy: no-referrer دارند.</li>
+  <li>CORS پیش‌فرض روشن نیست؛ برای دسترسی مستقیم مرورگر allowlist ی صریح ست کنید. با فعال بودن CORS: ‏preflight ها Access-Control-Max-Age: 600 دارند، پاسخ‌های SSE هدرهای CORS دارند و Idempotency-Key هدر درخواست مجاز است ‏(پاسخ‌ها ۵ دقیقه per-key کش می‌شوند).</li>
+  <li>بیشتر frontend های مستند مثل Open WebUI server-to-server وصل می‌شوند و اصلاً CORS نمی‌خواهند.</li>
+</ul>
+<h3>frontend های سازگار</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Frontend</th><th>Stars</th><th>اتصال</th></tr></thead>
+<tbody>
+<tr><td><a href="../messaging/open-webui.html">Open WebUI</a></td><td>۱۲۶k</td><td>راهنمای کامل موجود</td></tr>
+<tr><td>LobeChat</td><td>۷۳k</td><td>نقطهٔ پایانی ارائه‌دهندهٔ سفارشی</td></tr>
+<tr><td>LibreChat</td><td>۳۴k</td><td>نقطهٔ پایانی سفارشی در librechat.yaml</td></tr>
+<tr><td>AnythingLLM</td><td>۵۶k</td><td>ارائه‌دهندهٔ عمومی OpenAI</td></tr>
+<tr><td>NextChat</td><td>۸۷k</td><td>متغیر BASE_URL</td></tr>
+<tr><td>ChatBox</td><td>۳۹k</td><td>تنظیم API Host</td></tr>
+<tr><td>Jan</td><td>۲۶k</td><td>config ی مدل راه‌دور</td></tr>
+<tr><td>HF Chat-UI</td><td>۸k</td><td>OPENAI_BASE_URL</td></tr>
+<tr><td>big-AGI</td><td>۷k</td><td>نقطهٔ پایانی سفارشی</td></tr>
+<tr><td>SDK ی Python ی OpenAI</td><td>—</td><td>OpenAI(base_url="http://localhost:8642/v1")</td></tr>
+<tr><td>curl</td><td>—</td><td>درخواست‌های HTTP ی مستقیم</td></tr>
+</tbody>
+</table>
+</div>
+<h3>setup چندکاربره با پروفایل‌ها</h3>
+<p>برای دادن نمونهٔ هرمس ایزوله به هر کاربر ‏(config، حافظه، مهارت‌های جدا) از <a href="../profiles.html">پروفایل‌ها</a> استفاده کنید: per کاربر profile بسازید، API_SERVER_* را در .env ی هر پروفایل با پورت و کلید متمایز بنویسید و گیت‌وی هر پروفایل را اجرا کنید. سرور API هر پروفایل خودکار نام پروفایل را به‌عنوان model ID advertise می‌کند — در Open WebUI هرکدام را اتصال جدا اضافه کنید تا alice و bob به‌عنوان مدل‌های متمایز با نمونه‌های هرمس کاملاً ایزوله دیده شوند.</p>
+<h3>محدودیت‌ها و Proxy Mode</h3>
+<ul>
+  <li><b>ذخیرهٔ پاسخ‌ها</b> — پاسخ‌های ذخیره‌شده ‏(برای previous_response_id) در SQLite ماندگارند و از ری‌استارت گیت‌وی جان می‌برند؛ حداکثر ۱۰۰ پاسخ ‏(eviction ی LRU).</li>
+  <li><b>بدون آپلود فایل</b> — تصاویر inline روی هر دو endpoint پشتیبانی می‌شوند ولی فایل‌های آپلودی و ورودی‌های سند غیر-تصویری از طریق API پشتیبانی نمی‌شوند.</li>
+  <li><b>کلاینت‌های ساده OpenAI همچنان alias می‌بینند</b> — ‎/v1/models‎ مقدار پایدار alias ی هرمس را advertise می‌کند؛ کلاینت‌های غنی می‌توانند provider/model_options صریح بفرستند.</li>
+  <li><b>Proxy Mode</b> — سرور API بک‌اند حالت proxy ی گیت‌وی هم هست: گیت‌وی هرمس دیگری با GATEWAY_PROXY_URL به این سرور همهٔ پیام‌ها را forward می‌کند به‌جای اجرای ایجنت خودش؛ استقرارهای split مثل کانتینر Docker ی هندل‌کنندهٔ Matrix E2EE که به ایجنت سمت-host relay می‌کند ممکن می‌شود. راهنمای کامل در بخش Proxy Mode ی Matrix.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="honcho.html"><span class="dir">→ قبلی</span><span class="ttl">حافظهٔ Honcho</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">مسیریابی ارائه‌دهنده (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server" target="_blank" rel="noopener">API Server</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>
