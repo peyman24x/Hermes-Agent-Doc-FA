@@ -83,7 +83,7 @@ window.HERMES_NAV = [
   { p:"user-guide/features/batch-processing.html", t:"پردازش گروهی",                  d:1 }
 ]},
 { id:"media", cat:"🎬 رسانه و وب", pages:[
-  { p:"user-guide/features/voice-mode.html",      t:"حالت صوتی",                       d:0 },
+  { p:"user-guide/features/voice-mode.html",      t:"حالت صوتی",                       d:1 },
   { p:"user-guide/features/browser.html",         t:"مرورگر",                           d:0 },
   { p:"user-guide/features/vision.html",          t:"بینایی (تصاویر)",                  d:1 },
   { p:"user-guide/features/image-generation.html", t:"تولید تصویر",                     d:1 },

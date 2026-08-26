@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حالت صوتی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/voice-mode" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>حالت صوتی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>حالت صوتی ‏(Voice Mode)</h1>
+<p>هرمس ایجنت از تعامل صوتی کامل در CLI و پلتفرم‌های پیام‌رسانی پشتیبانی می‌کند. با میکروفون با ایجنت حرف بزنید، پاسخ گفتاری بشنوید و در کانال‌های صوتی دیسکورد مکالمات صوتی زنده داشته باشید.</p>
+<p>اگر یک مرور عملی راه‌اندازی با پیکربندی‌های توصیه‌شده و الگوهای واقعی مصرف می‌خواهید، بخش <a href="https://hermes-agent.nousresearch.com/docs/guides/use-voice-mode-with-hermes" target="_blank" rel="noopener">Use Voice Mode with Hermes</a> را ببینید.</p>
+<p>برای شروع نشست بدون-دست — گفتن «hey hermes» ‏(یا هر عبارتی) برای باز کردن نشست صوتی تازه در CLI، TUI یا اپ دسکتاپ — بخش <a href="wake-word.html">واژهٔ بیدارباش</a> را ببینید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<p>قبل از استفاده از قابلیت‌های صوتی مطمئن شوید:</p>
+<ol>
+  <li><b>‏Hermes Agent نصب شده</b> — از طریق اسکریپت نصب ‏(بخش <a href="../../getting-started/installation.html">نصب</a>)</li>
+  <li><b>یک ارائه‌دهندهٔ LLM پیکربندی شده</b> — ‏<code>hermes model</code> را اجرا یا اعتبارنامهٔ ارائه‌دهندهٔ موردعلاقه‌تان را در ‏<code>~/.hermes/.env</code> ست کنید</li>
+  <li><b>یک setup پایه کارا دارید</b> — ‏<code>hermes</code> را اجرا کنید تا قبل از فعال کردن صوت تأیید شود ایجنت به متن جواب می‌دهد</li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>دایرکتوری ‏<code>~/.hermes/</code> و config.yaml ی پیش‌فرض اولین بار که ‏<code>hermes</code> را اجرا کنید خودکار ساخته می‌شوند. فقط ‏<code>~/.hermes/.env</code> را برای کلیدهای API دستی می‌سازید.</p>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 Nous Portal هر دو را پوشش می‌دهد</div>
+  <p>اشتراک پولی <a href="tool-gateway.html">Nous Portal</a> هم LLM را ‏(گام ۲) تأمین می‌کند <b>و</b> TTS ی OpenAI را از طریق Tool Gateway — بدون نیاز به کلید جداگانهٔ OpenAI. روی نصب تازه، ‏<code>hermes setup --portal</code> هر دو را یکجا سیم‌کشی می‌کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> نمای کلی و نیازمندی‌ها</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>قابلیت</th><th>پلتفرم</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><b>صوت تعاملی</b></td><td>CLI</td><td>Ctrl+B را بزنید تا ضبط شود، ایجنت سکوت را آشکار و جواب می‌دهد</td></tr>
+<tr><td><b>پاسخ صوتی خودکار</b></td><td>تلگرام، ‏دیسکورد</td><td>ایجنت کنار پاسخ متنی، صدای گفتاری هم می‌فرستد</td></tr>
+<tr><td><b>کانال صوتی</b></td><td>دیسکورد</td><td>ربات به VC می‌پیوندد، حرف زدن کاربران را گوش می‌دهد و پاسخ را در کانال می‌گوید</td></tr>
+</tbody>
+</table>
+</div>
+<h3>پکیج‌های پایتون</h3>
+<div class="codebox"><pre><code># CLI voice mode (microphone + audio playback)
+cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[voice]"
+
+# Discord + Telegram messaging (includes discord.py[voice] for VC support)
+cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[messaging]"
+
+# Premium TTS (ElevenLabs)
+cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[tts-premium]"
+
+# Local TTS (NeuTTS, optional)
+python -m pip install -U neutts[all]
+
+# Everything at once
+cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[all]"</code></pre></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Extra</th><th>پکیج‌ها</th><th>لازم برای</th></tr></thead>
+<tbody>
+<tr><td><code>voice</code></td><td><code>sounddevice</code>، ‏<code>numpy</code></td><td>حالت صوتی CLI</td></tr>
+<tr><td><code>messaging</code></td><td><code>discord.py[voice]</code>، ‏<code>python-telegram-bot</code>، ‏<code>aiohttp</code></td><td>بات‌های دیسکورد و تلگرام</td></tr>
+<tr><td><code>tts-premium</code></td><td><code>elevenlabs</code></td><td>ارائه‌دهندهٔ TTS ی ElevenLabs</td></tr>
+</tbody>
+</table>
+</div>
+<p>ارائه‌دهندهٔ TTS محلی اختیاری: ‏<code>neutts</code> را جداگانه با ‏<code>python -m pip install -U neutts[all]</code> نصب کنید. در اولین استفاده مدل را خوددانلود می‌کند.</p>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>‏<code>discord.py[voice]</code> مقدار <b>PyNaCl</b> ‏(برای رمزنگاری صدا) و <b>binding های opus</b> را خودکار نصب می‌کند. این برای پشتیبانی کانال صوتی دیسکورد لازم است.</p>
+</div>
+<h3>وابستگی‌های سیستمی</h3>
+<div class="codebox"><pre><code># macOS
+brew install portaudio ffmpeg opus
+brew install espeak-ng   # for NeuTTS
+
+# Ubuntu/Debian
+sudo apt install portaudio19-dev ffmpeg libopus0
+sudo apt install espeak-ng   # for NeuTTS</code></pre></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>وابستگی</th><th>هدف</th><th>لازم برای</th></tr></thead>
+<tbody>
+<tr><td><b>PortAudio</b></td><td>ورودی میکروفون و پخش صدا</td><td>حالت صوتی CLI</td></tr>
+<tr><td><b>ffmpeg</b></td><td>تبدیل فرمت صوتی ‏(MP3 ← Opus، ‏PCM ← WAV)</td><td>همهٔ پلتفرم‌ها</td></tr>
+<tr><td><b>Opus</b></td><td>کدک صدای دیسکورد</td><td>کانال‌های صوتی دیسکورد</td></tr>
+<tr><td><b>espeak-ng</b></td><td>بک‌اند phonemizer</td><td>ارائه‌دهندهٔ محلی NeuTTS</td></tr>
+</tbody>
+</table>
+</div>
+<h3>کلیدهای API</h3>
+<p>به ‏<code>~/.hermes/.env</code> اضافه کنید:</p>
+<pre dir="ltr"><code># Speech-to-Text — local provider needs NO key at all
+# pip install faster-whisper          # Free, runs locally, recommended
+GROQ_API_KEY=your-key                 # Groq Whisper — fast, free tier (cloud)
+VOICE_TOOLS_OPENAI_KEY=your-key       # OpenAI Whisper — paid (cloud)
+
+# Text-to-Speech (optional — Edge TTS and NeuTTS work without any key)
+ELEVENLABS_API_KEY=***           # ElevenLabs — premium quality
+# VOICE_TOOLS_OPENAI_KEY above also enables OpenAI TTS</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>اگر ‏<code>faster-whisper</code> نصب باشد، حالت صوتی برای STT با <b>صفر کلید API</b> کار می‌کند. مدل ‏(~۱۵۰MB برای base) در اولین استفاده خوددانلود می‌شود.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> حالت صوتی CLI</h2>
+<p>حالت صوتی هم در <b>CLI کلاسیک</b> ‏(<code>hermes chat</code>) و هم در <b>TUI</b> ‏(<code>hermes --tui</code>) موجود است. رفتار در هر دو یکسان است — همان دستورات اسلش، همان آشکارساز سکوت VAD، همان استریم TTS، همان فیلتر توهم. TUI به‌علاوه لاگ‌های جنایی-کرش را به ‏<code>~/.hermes/logs/</code> forward می‌کند تا شکست‌های push-to-talk روی بک‌اندهای صوتی نادر با stack trace کامل گزارش شوند نه اینکه بی‌سروصدا غیب شوند.</p>
+<h3>شروع سریع</h3>
+<p>CLI را شروع و حالت صوتی را روشن کنید:</p>
+<div class="codebox"><pre><code>hermes                # Start the interactive CLI</code></pre></div>
+<p>سپس این فرمان‌ها را داخل CLI استفاده کنید:</p>
+<pre dir="ltr"><code>/voice          Toggle voice mode on/off
+/voice on       Enable voice mode
+/voice off      Disable voice mode
+/voice tts      Toggle TTS output
+/voice status   Show current state</code></pre>
+<h3>نحوهٔ کار</h3>
+<ol>
+  <li>CLI را با ‏<code>hermes</code> شروع و حالت صوتی را با ‏<code>/voice on</code> روشن کنید</li>
+  <li><b>Ctrl+B را فشار دهید</b> — بیپ پخش ‏(۸۸۰Hz) می‌شود، ضبط شروع می‌شود</li>
+  <li><b>حرف بزنید</b> — نوار سطح صدای زنده ورودی شما را نشان می‌دهد: ‏<code>● [▁▂▃▅▇▇▅▂] ❯</code></li>
+  <li><b>حرف زدن را تمام کنید</b> — بعد از ۳ ثانیه سکوت ضبط خودکار تمام می‌شود</li>
+  <li><b>دو بیپ</b> پخش می‌شود ‏(۶۶۰Hz) تأیید پایان ضبط</li>
+  <li>صدا با Whisper رونویسی و به ایجنت فرستاده می‌شود</li>
+  <li>اگر TTS فعال باشد پاسخ ایجنت بلند خوانده می‌شود</li>
+  <li>ضبط <b>خودکار ری‌استارت می‌شود</b> — دوباره حرف بزنید بدون فشار هیچ کلیدی</li>
+</ol>
+<p>این حلقه ادامه می‌یابد تا اینکه هنگام ضبط <b>Ctrl+B</b> بزنید ‏(خروج از حالت پیوسته) یا ۳ ضبط متوالی هیچ سخنی آشکار نکنند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>کلید ضبط از طریق ‏<code>voice.record_key</code> در ‏<code>~/.hermes/config.yaml</code> قابل‌پیکربندی است ‏(پیش‌فرض: ‏ctrl+b).</p>
+</div>
+<h3>آشکارسازی سکوت</h3>
+<p>الگوریتم دومرحله‌ای تشخیص می‌دهد کی حرف زدنتان تمام شده:</p>
+<ol>
+  <li><b>تأیید گفتار</b> — منتظر صدای بالای آستانهٔ RMS ‏(۲۰۰) دست‌کم ‎۰٫۳ ثانیه می‌ماند و افت‌های کوتاه بین هجاهارا تحمل می‌کند</li>
+  <li><b>آشکارسازی پایان</b> — وقتی گفتار تأیید شد، بعد از ‎۳٫۰ ثانیه سکوت پیوسته شلیک می‌کند</li>
+</ol>
+<p>اگر اصلاً طی ۱۵ ثانیه هیچ سخنی آشکار نشود ضبط خودکار تمام می‌شود.</p>
+<p>هر ‏<code>silence_threshold</code> و ‏<code>silence_duration</code> در config قابل‌پیکربندی‌اند. بیپ‌های شروع/توقف ضبط را هم می‌توانید با ‏<code>voice.beep_enabled: false</code> خاموش کنید.</p>
+<h3>پایان دادن به چت صوتی با صدا</h3>
+<p>بگویید <b>«stop»</b> — و هیچ چیز دیگر — تا مکالمهٔ صوتی بدون-دست تمام شود. تطبیق عمداً سخت‌گیرانه است: کل گفته ‏(بدون حساسیت به بزرگی حروف و نقطه‌گذاری اطراف) باید برابر یک عبارت پیکربندی‌شده باشد، پس «stop doing that and try X instead» همچنان عادی به ایجنت می‌رسد. فهرست عبارت‌ها را با ‏<code>voice.stop_phrases</code> در config سفارشی کنید ‏(مثلاً ‏<code>["stop", "goodbye hermes"]</code>) یا برای غیرفعال شدن روی ‏<code>[]</code> بگذارید. چت صوتی بعد از سه چرخهٔ سکوت متوالی ‏(آشکار نشدن گفتار) هم خودش تمام می‌شود.</p>
+<p><b>تایپ کردن</b> یک عبارت stop ی لخت وقتی چت صوتی فعاله روی همهٔ سطوح ‏(CLI، TUI، دسکتاپ) همین‌طور کار می‌کند: پیام به‌جای رسیدن به ایجنت چت صوتی را تمام می‌کند. خارج از چت صوتی، تایپ «stop» پیامی عادی است.</p>
+<h3>استریم TTS</h3>
+<p>وقتی TTS فعاله، ایجنت پاسخش را همزمان با تولید متن <b>جمله‌به-جمله</b> می‌گوید — منتظر پاسخ کامل نمی‌مانید. این با <b>هر ارائه‌دهندهٔ TTS</b> کار می‌کند:</p>
+<ol>
+  <li>دلتاهای متن را در جمله‌های کامل بافر می‌کند ‏(حداقل ۲۰ نویسه)</li>
+  <li>فرمت markdown، ایموجی و بلوک‌های ‏<code>&lt;think&gt;</code> را می‌زداید</li>
+  <li>صدای هر جمله را بلادرنگ پخش می‌کند — ارائه‌دهنده‌های دارای API ی PCM chunked ‏(ElevenLabs، ‏OpenAI) صدای خام را برای کمترین زمان-تا-اولین-واژه استریم می‌کنند؛ بقیهٔ ارائه‌دهنده‌ها ‏(شامل Edge پیش‌فرض) هر جمله را همین که کامل شد ترکیب و پخش می‌کنند</li>
+</ol>
+<p>همان خط‌لوله در CLI کلاسیک، TUI و اپ دسکتاپ اجرا می‌شود. در گفتگوی صوتی دسکتاپ متن پاسخ <b>زنده</b> داخل یک WebSocket گفتارِ per-reply تزریق می‌شود همزمان با تولید مدل، پس گفتار روی تولید سوار می‌شود — یک socket و یک ساعت صوتی per-reply، بدون شکاف اتصال بین جملات.</p>
+<h3>Barge-in</h3>
+<p>می‌توانید ایجنت را در <b>هر لحظه</b> از نوبتش قطع کنید — میکروفون از لحظه‌ای که حرف زدن تمام می‌کنید تا پخش کامل پاسخ زنده می‌ماند ‏(فول‌دوبلکس):</p>
+<ul>
+  <li><b>میان حرف بزنید وقتی دارد فکر می‌کند</b> — در حالت صوتی پیوسته، حرف زدن حین تولید LLM ‏(قبل از پخش هر صوتی) نوبت در-جریان را قطع و میان‌جمله‌تان تبدیل به پیام بعدی می‌شود، مثل اینکه روی یک نوبت درحال-اجرا تایپ کرده باشید.</li>
+  <li><b>روی صدایش حرف بزنید</b> — حرف زدن هنگام پخش پاسخ، پخش را همان لحظه که شروع به صحبت می‌کنید قطع و گفته‌تان را ثبت می‌کند. آشکارساز کف نویزش را نسبت به <i>اتاق ساکت</i> در شروع نوبت کالیبره می‌کند ‏(هرگز نسبت به خود پخش)، پس نشت اسپیکر کرش نمیشود و گفتار عادی قابل‌اعتماد آن را شلیک می‌کند.</li>
+  <li><b>تایپ کنید یا کلید ضبط را بزنید</b> — فرستادن پیام جدید یا فشار کلید push-to-talk پخش را روی همهٔ سطوح فوراً متوقف می‌کند.</li>
+  <li><b>بگویید «stop»</b> — عبارت stop در هر دو فاز کار می‌کند: وسط تولید هم نوبت را قطع <b>و</b> هم چت صوتی را تمام می‌کند؛ وسط پخش گفتار را قطع و چت را می‌بندد.</li>
+</ul>
+<p>تنظیم دقیق ‏(config.yaml): ‏<code>voice.barge_in: false</code> غیرفعالش می‌کند؛ ‏<code>voice.barge_in_threshold_multiplier</code> ‏(پیش‌فرض ‏۳٫۰) تریگر گفتار را روی کف اتاق-ساکت مقیاس می‌دهد؛ ‏<code>voice.barge_in_grace_seconds</code> ‏(پیش‌فرض ‏۰٫۵) شلیک‌ها را درست بعد از شروع پخش سرکوب می‌کند. ‏<code>HERMES_VOICE_DEBUG=1</code> را ست کنید تا تشخیص‌های VAD هر-بلوک ‏(کف کالیبره‌شده، ‏RMS، تصمیم‌های شلیک) برای تنظیم زنده به stderr استریم شود.</p>
+<p>ایجنت <b>می‌داند</b> قطع شده: پیام بعدی یادداشت کوتاهی حمل می‌کند که به مدل می‌گوید پاسخ گفتاریش بریده شده، تا بتواند طبیعی واکنش نشان دهد ‏(«چه بی‌ادبی!») یا از همان‌جا که مانده بود ادامه دهد به‌جای بی‌خبری.</p>
+<h3>فیلتر توهم</h3>
+<p>‏Whisper گاهی از سکوت یا نویز پس‌زمینه متن شبح‌وار تولید می‌کند ‏(«Thank you for watching»، ‏«Subscribe» و…). ایجنت اینها را با مجموعه‌ای از ۲۶ عبارت توهم شناخته‌شده در چند زبان به‌علاوهٔ یک الگوی regex یگیرندهٔ تنوع‌های تکراری فیلتر می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پاسخ صوتی گیت‌وی ‏(تلگرام و دیسکورد)</h2>
+<p>اگر هنوز بات‌های پیام‌رسانی‌تان را راه نینداخته‌اید راهنماهای مخصوص پلتفرم را ببینید: بخش <a href="../messaging/telegram.html">راه‌اندازی تلگرام</a> و بخش <a href="../messaging/discord.html">راه‌اندازی دیسکورد</a>.</p>
+<p>گیت‌وی را شروع کنید تا به پلتفرم‌های پیام‌رسانی وصل شوید:</p>
+<div class="codebox"><pre><code>hermes gateway        # Start the gateway (connects to configured platforms)
+hermes gateway setup  # Interactive setup wizard for first-time configuration</code></pre></div>
+<h3>دیسکورد: کانال‌ها در برابر DM ها</h3>
+<p>ربات دو حالت تعامل روی دیسکورد پشتیبانی می‌کند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>حالت</th><th>چطور حرف بزنید</th><th>منشن لازم؟</th><th>راه‌اندازی</th></tr></thead>
+<tbody>
+<tr><td><b>پیام مستقیم ‏(DM)</b></td><td>پروفایل ربات را باز کنید ← «Message»</td><td>نه</td><td>فوری کار می‌کند</td></tr>
+<tr><td><b>کانال سرور</b></td><td>در یک کانال متنی که ربات حضور دارد تایپ کنید</td><td>بله ‏(<code>@botname</code>)</td><td>ربات باید به سرور دعوت شده باشد</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>DM ‏(توصیه‌شده برای استفاده شخصی):</b> فقط یک DM با ربات باز کنید و تایپ کنید — بدون نیاز به @mention. پاسخ‌های صوتی و همهٔ فرمان‌ها مثل کانال‌ها کار می‌کنند.</p>
+<p><b>کانال‌های سرور:</b> ربات فقط وقتی @mention اش کنید جواب می‌دهد ‏(مثلاً ‏<code>@hermesbyt4 hello</code>). مطمئن شوید <b>کاربرِ</b> ربات را از popup منشن انتخاب می‌کنید نه role ی همنام را.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>برای غیرفعال کردن الزام منشن در کانال‌های سرور به ‏<code>~/.hermes/.env</code> اضافه کنید:<br><code>DISCORD_REQUIRE_MENTION=false</code><br>یا کانال‌های مشخص را آزاد-پاسخ کنید ‏(بدون نیاز به منشن):<br><code>DISCORD_FREE_RESPONSE_CHANNELS=123456789,987654321</code></p>
+</div>
+<h3>فرمان‌ها</h3>
+<p>اینها هم در تلگرام هم در دیسکورد ‏(DM ها و کانال‌های متنی) کار می‌کنند:</p>
+<pre dir="ltr"><code>/voice          Toggle voice mode on/off
+/voice on       Voice replies only when you send a voice message
+/voice tts      Voice replies for ALL messages
+/voice off      Disable voice replies
+/voice status   Show current setting</code></pre>
+<h3>حالت‌ها</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>حالت</th><th>فرمان</th><th>رفتار</th></tr></thead>
+<tbody>
+<tr><td><code>off</code></td><td><code>/voice off</code></td><td>فقط متن ‏(پیش‌فرض)</td></tr>
+<tr><td><code>voice_only</code></td><td><code>/voice on</code></td><td>پاسخ گفتاری فقط وقتی پیام صوتی بفرستید</td></tr>
+<tr><td><code>all</code></td><td><code>/voice tts</code></td><td>پاسخ گفتاری برای هر پیام</td></tr>
+</tbody>
+</table>
+</div>
+<p>تنظیم حالت صوتی بین ری‌استارت‌های گیت‌وی ماندگار است.</p>
+<h3>تحویل پلتفرمی</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پلتفرم</th><th>فرمت</th><th>یادداشت‌ها</th></tr></thead>
+<tbody>
+<tr><td><b>تلگرام</b></td><td>حباب صوتی ‏(Opus/OGG)</td><td>داخل چت پخش می‌شود. ffmpeg در صورت نیاز MP3 ← Opus تبدیل می‌کند</td></tr>
+<tr><td><b>دیسکورد</b></td><td>حباب صوتی native ‏(Opus/OGG)</td><td>مثل پیام صوتی کاربر داخل چت پخش می‌شود. اگر API ی حباب صوتی شکست بخورد به پیوست فایل fallback می‌کند</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> کانال‌های صوتی دیسکورد</h2>
+<p>غرق‌کننده‌ترین قابلیت صوتی: ربات به کانال صوتی دیسکورد می‌پیوندد، به حرف زدن کاربران گوش می‌دهد، گفتارشان را رونویسی، از خط‌لوله ایجنت عبور و پاسخ را در همان کانال صوتی می‌گوید.</p>
+<h3>راه‌اندازی</h3>
+<h4>۱. مجوزهای بات دیسکورد</h4>
+<p>اگر از قبل بات دیسکوردی برای متن دارید ‏(بخش <a href="../messaging/discord.html">راه‌اندازی دیسکورد</a>) باید مجوزهای صوتی اضافه کنید.</p>
+<p>به <a href="https://discord.com/developers/applications" target="_blank" rel="noopener">Discord Developer Portal</a> بروید ← اپ شما ← <b>Installation</b> ← <b>Default Install Settings</b> ← <b>Guild Install</b>:</p>
+<p><b>این مجوزها را به مجوزهای متنی فعلی اضافه کنید:</b></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مجوز</th><th>هدف</th><th>الزامی؟</th></tr></thead>
+<tbody>
+<tr><td><b>Connect</b></td><td>پیوستن به کانال‌های صوتی</td><td>بله</td></tr>
+<tr><td><b>Speak</b></td><td>پخش صدای TTS در کانال‌های صوتی</td><td>بله</td></tr>
+<tr><td><b>Use Voice Activity</b></td><td>آشکارسازی حرف زدن کاربران</td><td>توصیه‌شده</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>عدد صحیح مجوزهای به‌روزشده:</b></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>سطح</th><th>عدد صحیح</th><th>شامل</th></tr></thead>
+<tbody>
+<tr><td>فقط متن</td><td><code>309237763136</code></td><td>View Channels، ‏Send Messages، ‏Read History، ‏Embeds، ‏Attachments، ‏Threads، ‏Reactions، ‏Create Public Threads</td></tr>
+<tr><td>متن + صوت</td><td><code>309240908864</code></td><td>همهٔ بالا + Connect، ‏Speak</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>ربات را با URL مجوزهای به‌روز دوباره دعوت کنید:</b></p>
+<pre dir="ltr"><code>https://discord.com/oauth2/authorize?client_id=YOUR_APP_ID&amp;scope=bot+applications.commands&amp;permissions=309240908864</code></pre>
+<p>‏<code>YOUR_APP_ID</code> را با Application ID تان از Developer Portal جایگزین کنید.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️</div>
+  <p>دعوت دوبارهٔ ربات به سروری که قبلاً در آن هست، مجوزهایش را بدون حذفش به‌روز می‌کند. هیچ داده یا پیکربندی‌ای از دست نمی‌دهید.</p>
+</div>
+<h4>۲. Privileged Gateway Intents</h4>
+<p>در Developer Portal ← اپ شما ← <b>Bot</b> ← <b>Privileged Gateway Intents</b> هر سه را فعال کنید:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Intent</th><th>هدف</th></tr></thead>
+<tbody>
+<tr><td><b>Presence Intent</b></td><td>آشکارسازی وضعیت آنلاین/آفلاین کاربر</td></tr>
+<tr><td><b>Server Members Intent</b></td><td>حل نام‌های کاربری در DISCORD_ALLOWED_USERS به ID عددی ‏(شرطی)</td></tr>
+<tr><td><b>Message Content Intent</b></td><td>خواندن محتوای پیام متنی در کانال‌ها</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>Message Content Intent الزامی است.</b> ‏<b>Server Members Intent</b> فقط وقتی لازم است که فهرست DISCORD_ALLOWED_USERS تان از نام کاربری استفاده کند — اگر از ID عددی استفاده می‌کنید می‌توانید OFF بگذارید. نگاشت SSRC ی کانال صوتی ← user_id از opcode ی SPEAKING دیسکورد روی websocket صوتی می‌آید و <b>نیازی</b> به Server Members Intent ندارد.</p>
+<h4>۳. کدک Opus</h4>
+<p>کتابخانهٔ کدک Opus باید روی ماشینی که گیت‌وی را اجرا می‌کند نصب باشد:</p>
+<div class="codebox"><pre><code># macOS (Homebrew)
+brew install opus
+
+# Ubuntu/Debian
+sudo apt install libopus0</code></pre></div>
+<p>ربات کدک را از این مسیرها auto-load می‌کند:</p>
+<ul>
+  <li><b>macOS:</b> ‏<code>/opt/homebrew/lib/libopus.dylib</code></li>
+  <li><b>لینوکس:</b> ‏<code>libopus.so.0</code></li>
+</ul>
+<h4>۴. متغیرهای محیطی</h4>
+<pre dir="ltr"><code># ~/.hermes/.env
+
+# Discord bot (already configured for text)
+DISCORD_BOT_TOKEN=your-bot-token
+DISCORD_ALLOWED_USERS=your-user-id
+
+# STT — local provider needs no key (pip install faster-whisper)
+# GROQ_API_KEY=your-key            # Alternative: cloud-based, fast, free tier
+
+# TTS — optional. Edge TTS and NeuTTS need no key.
+# ELEVENLABS_API_KEY=***      # Premium quality
+# VOICE_TOOLS_OPENAI_KEY=***  # OpenAI TTS / Whisper</code></pre>
+<h3>شروع گیت‌وی</h3>
+<div class="codebox"><pre><code>hermes gateway        # Start with existing configuration</code></pre></div>
+<p>ربات باید ظرف چند ثانیه در دیسکورد آنلاین شود.</p>
+<h3>فرمان‌ها</h3>
+<p>اینها را در کانال متنی دیسکوردی که ربات حضور دارد استفاده کنید:</p>
+<pre dir="ltr"><code>/voice join      Bot joins your current voice channel
+/voice channel   Alias for /voice join
+/voice leave     Bot disconnects from voice channel
+/voice status    Show voice mode and connected channel</code></pre>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>قبل از اجرای ‏<code>/voice join</code> باید خودتان در یک کانال صوتی باشید. ربات به همان VC ی شما می‌پیوندد.</p>
+</div>
+<h3>نحوهٔ کار</h3>
+<p>وقتی ربات به کانال صوتی می‌پیوندد:</p>
+<ol>
+  <li><b>گوش می‌دهد</b> به استریم صدای هر کاربر به‌طور مستقل</li>
+  <li><b>سکوت را آشکار می‌کند</b> — ‏۱٫۵ ثانیه سکوت بعد از حداقل ‎۰٫۵ ثانیه گفتار پردازش را شلیک می‌کند</li>
+  <li><b>رونویسی می‌کند</b> صدا را با Whisper STT ‏(محلی، ‏Groq یا OpenAI)</li>
+  <li><b>پردازش می‌کند</b> از کل خط‌لوله ایجنت ‏(نشست، ابزارها، حافظه)</li>
+  <li><b>می‌گوید</b> پاسخ را در همان کانال صوتی از طریق TTS</li>
+</ol>
+<h3>یکپارچگی کانال متنی</h3>
+<p>وقتی ربات در کانال صوتی است:</p>
+<ul>
+  <li>رونوشت‌ها در کانال متنی ظاهر می‌شوند: ‏<code>[Voice] @user: what you said</code></li>
+  <li>پاسخ‌های ایجنت هم به‌صورت متن در کانال فرستاده <b>و</b> هم در VC گفته می‌شوند</li>
+  <li>کانال متنی همان است که ‏/voice join در آن صادر شده</li>
+</ul>
+<h3>جلوگیری از اکو</h3>
+<p>ربات حین پخش پاسخ‌های TTS شنوندهٔ صوتی‌اش را خودکار pause می‌کند تا صدای خودش را نشنود و دوباره پردازش نکند.</p>
+<h3>کنترل دسترسی</h3>
+<p>فقط کاربران فهرست‌شده در ‏DISCORD_ALLOWED_USERS می‌توانند از طریق صوت تعامل کنند. صدای سایر کاربران بی‌صدا نادیده گرفته می‌شود.</p>
+<pre dir="ltr"><code># ~/.hermes/.env
+DISCORD_ALLOWED_USERS=284102345871466496</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> مرجع پیکربندی</h2>
+<h3>config.yaml</h3>
+<div class="codebox">
+  <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
+  <pre><code># Voice recording (CLI)
+voice:
+  record_key: "ctrl+b"            # Key to start/stop recording
+  max_recording_seconds: 120       # Maximum recording length
+  auto_tts: false                  # Auto-enable TTS when voice mode starts
+  beep_enabled: true               # Play record start/stop beeps
+  silence_threshold: 200           # RMS level (0-32767) below which counts as silence
+  silence_duration: 3.0            # Seconds of silence before auto-stop
+  stop_phrases: ["stop"]           # Saying exactly one of these ends the voice chat; [] disables
+
+# Speech-to-Text
+stt:
+  enabled: true                     # set to false to skip auto-transcription —
+                                    # the gateway still caches the audio file and
+                                    # passes its path to the agent as part of the
+                                    # inbound message, useful for custom pipelines
+                                    # (diarization, alignment, archival, etc.)
+  provider: "local"                  # "local" (free) | "groq" | "openai" | "mistral" | "xai"
+  local:
+    model: "base"                    # tiny, base, small, medium, large-v3
+    language: ""                     # optional ISO-639-1 hint; blank = use HERMES_LOCAL_STT_LANGUAGE if set, else auto-detect
+  groq:
+    language: ""                     # optional ISO-639-1 hint; blank = use HERMES_LOCAL_STT_LANGUAGE if set, else auto-detect
+  # model: "whisper-1"              # Legacy: used when provider is not set
+
+# Text-to-Speech
+tts:
+  provider: "edge"                 # "edge" (free) | "elevenlabs" | "openai" | "neutts" | "minimax" | "mistral" | "gemini" | "xai" | "kittentts" | "piper"
+  edge:
+    voice: "en-US-AriaNeural"      # 322 voices, 74 languages
+  elevenlabs:
+    voice_id: "pNInz6obpgDQGcFmaJgB"    # Adam
+    model_id: "eleven_multilingual_v2"
+  openai:
+    model: "gpt-4o-mini-tts"
+    voice: "alloy"                 # alloy, echo, fable, onyx, nova, shimmer
+    base_url: "https://api.openai.com/v1"  # optional: override for self-hosted or OpenAI-compatible endpoints
+    # The `text_to_speech` tool accepts an optional per-call `instructions`
+    # argument (tone, emotion, pacing, accent, whispering) that is forwarded
+    # to `gpt-4o-mini-tts` and to OpenAI-compatible voice-design servers
+    # (e.g. Qwen3-TTS-VoiceDesign via oMLX). See OpenAI's voice-design guide:
+    # https://platform.openai.com/docs/guides/text-to-speech
+  neutts:
+    ref_audio: ''
+    ref_text: ''
+    model: neuphonic/neutts-air-q4-gguf
+    device: cpu</code></pre>
+</div>
+<h3>متغیرهای محیطی</h3>
+<pre dir="ltr"><code># Speech-to-Text providers (local needs no key)
+# pip install faster-whisper        # Free local STT — no API key needed
+GROQ_API_KEY=...                    # Groq Whisper (fast, free tier)
+VOICE_TOOLS_OPENAI_KEY=...         # OpenAI Whisper (paid)
+
+# STT advanced overrides (optional)
+STT_GROQ_MODEL=whisper-large-v3-turbo    # Override default Groq STT model
+STT_OPENAI_MODEL=whisper-1               # Override default OpenAI STT model
+GROQ_BASE_URL=https://api.groq.com/openai/v1     # Custom Groq endpoint
+STT_OPENAI_BASE_URL=https://api.openai.com/v1    # Custom OpenAI STT endpoint
+
+# Text-to-Speech providers (Edge TTS and NeuTTS need no key)
+ELEVENLABS_API_KEY=***             # ElevenLabs (premium quality)
+# VOICE_TOOLS_OPENAI_KEY above also enables OpenAI TTS
+
+# Discord voice channel
+DISCORD_BOT_TOKEN=...
+DISCORD_ALLOWED_USERS=...</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> مقایسهٔ ارائه‌دهنده‌های STT و TTS</h2>
+<h3>مقایسهٔ STT</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>مدل</th><th>سرعت</th><th>کیفیت</th><th>هزینه</th><th>کلید API</th></tr></thead>
+<tbody>
+<tr><td><b>محلی</b></td><td><code>base</code></td><td>سریع ‏(بسته به CPU/GPU)</td><td>خوب</td><td>رایگان</td><td>نه</td></tr>
+<tr><td><b>محلی</b></td><td><code>small</code></td><td>متوسط</td><td>بهتر</td><td>رایگان</td><td>نه</td></tr>
+<tr><td><b>محلی</b></td><td><code>large-v3</code></td><td>کند</td><td>بهترین</td><td>رایگان</td><td>نه</td></tr>
+<tr><td><b>Groq</b></td><td><code>whisper-large-v3-turbo</code></td><td>خیلی سریع ‏(~۰٫۵ ثانیه)</td><td>خوب</td><td>تیر رایگان</td><td>بله</td></tr>
+<tr><td><b>Groq</b></td><td><code>whisper-large-v3</code></td><td>سریع ‏(~۱ ثانیه)</td><td>بهتر</td><td>تیر رایگان</td><td>بله</td></tr>
+<tr><td><b>OpenAI</b></td><td><code>whisper-1</code></td><td>سریع ‏(~۱ ثانیه)</td><td>خوب</td><td>پولی</td><td>بله</td></tr>
+<tr><td><b>OpenAI</b></td><td><code>gpt-4o-transcribe</code></td><td>متوسط ‏(~۲ ثانیه)</td><td>بهترین</td><td>پولی</td><td>بله</td></tr>
+<tr><td><b>OpenAI</b></td><td><code>gpt-transcribe</code></td><td>سریع</td><td>بهترین</td><td>پولی ‏($۰٫۰۰۴۵/دقیقه)</td><td>بله</td></tr>
+<tr><td><b>Mistral</b></td><td><code>voxtral-mini-latest</code></td><td>سریع</td><td>خوب</td><td>پولی</td><td>بله</td></tr>
+<tr><td><b>xAI</b></td><td><code>grok-stt</code></td><td>سریع</td><td>خوب</td><td>پولی</td><td>بله</td></tr>
+</tbody>
+</table>
+</div>
+<p>اولویت ارائه‌دهنده ‏(fallback خودکار): ‏<b>local</b> ← <b>groq</b> ← <b>openai</b></p>
+<h3>مقایسهٔ TTS</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>کیفیت</th><th>هزینه</th><th>تأخیر</th><th>کلید لازم؟</th></tr></thead>
+<tbody>
+<tr><td><b>Edge TTS</b></td><td>خوب</td><td>رایگان</td><td>~۱ ثانیه</td><td>نه</td></tr>
+<tr><td><b>ElevenLabs</b></td><td>عالی</td><td>پولی</td><td>~۲ ثانیه</td><td>بله</td></tr>
+<tr><td><b>OpenAI TTS</b></td><td>خوب</td><td>پولی</td><td>~۱٫۵ ثانیه</td><td>بله</td></tr>
+<tr><td><b>NeuTTS</b></td><td>خوب</td><td>رایگان</td><td>بسته به CPU/GPU</td><td>نه</td></tr>
+</tbody>
+</table>
+</div>
+<p>‏NeuTTS از بلوک config ی ‏<code>tts.neutts</code> بالا استفاده می‌کند.</p>
+<p>برای ‏<code>openai</code>، ابزار ‏text_to_speech آرگومان اختیاری instructions می‌پذیرد که قابلیت voice-design ی ‏gpt-4o-mini-tts را باز می‌کند ‏(لحن، احساس، ریتم، لهجه، زمزمه). همان فیلد به سرورهای voice-design سازگار-با-OpenAI ی mount‌شده از طریق ‏<code>tts.openai.base_url</code> ‏(مثلاً Qwen3-TTS-VoiceDesign از طریق oMLX) هم مسیریابی می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> عیب‌یابی</h2>
+<h3>«No audio device found» ‏(CLI)</h3>
+<p>PortAudio نصب نیست:</p>
+<div class="codebox"><pre><code>brew install portaudio    # macOS
+sudo apt install portaudio19-dev  # Ubuntu</code></pre></div>
+<p>اگر هرمس را داخل Docker روی دسکتاپ لینوکس اجرا می‌کنید، کانتینر به socket صدای میزبان هم نیاز دارد. یادداشت‌های <a href="https://hermes-agent.nousresearch.com/docs/user-guide/docker#optional-linux-desktop-audio-bridge" target="_blank" rel="noopener">پل صوتی Docker</a> را برای setup سازگار با PulseAudio/PipeWire ببینید.</p>
+<h3>ربات در کانال‌های سرور دیسکورد جواب نمی‌دهد</h3>
+<p>ربات به‌طور پیش‌فرض در کانال‌های سرور @mention می‌خواهد. مطمئن شوید:</p>
+<ol>
+  <li>‏<code>@</code> را تایپ و <b>کاربرِ</b> ربات را انتخاب می‌کنید ‏(با discriminator)، نه <b>role</b> ی همنام</li>
+  <li>یا به‌جایش از DM استفاده کنید — بدون نیاز به منشن</li>
+  <li>یا ‏<code>DISCORD_REQUIRE_MENTION=false</code> را در ‏<code>~/.hermes/.env</code> ست کنید</li>
+</ol>
+<h3>ربات به VC می‌پیوندد ولی صدایم را نمی‌شنود</h3>
+<ul>
+  <li>بررسی کنید ID کاربر دیسکوردتان در ‏DISCORD_ALLOWED_USERS باشد</li>
+  <li>مطمئن شوید در دیسکورد mute نیستید</li>
+  <li>ربات قبل از نگاشت صدایتان به یک رویداد SPEAKING از دیسکورد نیاز دارد — چند ثانیه بعد از پیوستن شروع به حرف زدن کنید</li>
+</ul>
+<h3>ربات می‌شنود ولی جواب نمی‌دهد</h3>
+<ul>
+  <li>تأیید کنید STT در دسترس است: ‏faster-whisper را نصب کنید ‏(بدون کلید) یا ‏GROQ_API_KEY / ‏VOICE_TOOLS_OPENAI_KEY ست کنید</li>
+  <li>بررسی کنید مدل LLM پیکربندی و قابل‌دسترس است</li>
+  <li>لاگ‌های گیت‌وی را مرور کنید: ‏<code>tail -f ~/.hermes/logs/gateway.log</code></li>
+</ul>
+<h3>ربات در متن جواب می‌دهد ولی در کانال صوتی نه</h3>
+<ul>
+  <li>شاید ارائه‌دهندهٔ TTS شکست می‌خورد — کلید API و سهمیه را چک کنید</li>
+  <li>Edge TTS ‏(رایگان، بدون کلید) fallback پیش‌فرض است</li>
+  <li>لاگ‌ها را برای خطاهای TTS بررسی کنید</li>
+</ul>
+<h3>Whisper متن آشغال برمی‌گرداند</h3>
+<p>فیلتر توهم بیشتر موارد را خودکار می‌گیرد. اگر هنوز transcript های شبح‌وار می‌گیرید:</p>
+<ul>
+  <li>محیط ساکت‌تری استفاده کنید</li>
+  <li>‏silence_threshold را در config تنظیم کنید ‏(بالاتر = کم‌حساس‌تر)</li>
+  <li>مدل STT دیگری امتحان کنید</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="extending-the-dashboard.html"><span class="dir">→ قبلی</span><span class="ttl">گسترش داشبورد وب</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/voice-mode" target="_blank" rel="noopener">Voice Mode</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>
