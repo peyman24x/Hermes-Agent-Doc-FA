@@ -8,7 +8,7 @@ window.HERMES_NAV = [
   { p:"getting-started/updating.html",         t:"به‌روزرسانی و حذف",                           d:1 },
   { p:"getting-started/platform-support.html", t:"پشتیبانی پلتفرم‌ها",                          d:1 },
   { p:"getting-started/termux.html",           t:"ترماکس (اندروید)",                            d:1 },
-  { p:"getting-started/nix-setup.html",        t:"نصب با Nix",                                  d:0 }
+  { p:"getting-started/nix-setup.html",        t:"نصب با Nix",                                  d:1 }
 ]},
 { id:"user-guide", cat:"⚙️ کار با Hermes", pages:[
   { p:"user-guide/cli.html",                        t:"رابط خط فرمان (CLI)",              d:1 },

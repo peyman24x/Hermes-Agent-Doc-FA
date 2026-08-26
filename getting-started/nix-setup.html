@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نصب با Nix — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/getting-started/nix-setup" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>شروع کار<span class="sep">/</span><strong>نصب با Nix</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی Nix و NixOS</h1>
+<div class="callout warning">
+  <div class="callout-title">⚠️ پلتفرم Tier 2</div>
+  <p>‏Nix و NixOS <a href="platform-support.html#tier-2">پلتفرم‌های Tier 2</a> هستند. فلیک و ماژول NixOS ی مستندشده اینجا فقط روی مبنای best-effort نگهداری می‌شوند. کامیت‌های main ممکن است هر لحظه این پکیج‌ها را بشکنند.</p>
+  <p>برای یک setup پشتیبانی‌شده از یکی از مسیرهای عادی <a href="installation.html">نصب</a> استفاده کنید — یا Docker یا یک محیط FHS.</p>
+</div>
+<p>‏Hermes Agent یک Nix flake، یک ماژول NixOS و یک ماژول Home Manager ارسال می‌کند.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>سطح</th><th>برای چه کسی</th><th>چه می‌گیرید</th></tr></thead>
+<tbody>
+<tr><td><b>‏<code>nix run</code> / ‏<code>nix profile install</code></b></td><td>هر کاربر Nix ‏(macOS، ‏Linux)</td><td>باینری از-پیش-ساخته با همهٔ وابستگی‌ها — بعد گردش‌کار عادی CLI</td></tr>
+<tr><td><b>ماژول Home Manager</b></td><td>یک ایجنت برای یک نفر، روی هر توزیعی یا macOS</td><td>پیکربندی تعریفی و یک سرویس کاربری، بدون root</td></tr>
+<tr><td><b>ماژول NixOS ‏(native)</b></td><td>استقرارهای سرور NixOS</td><td>پیکربندی تعریفی، سرویس systemd ی سخت‌گیرانه، secrets های مدیریت‌شده</td></tr>
+<tr><td><b>ماژول NixOS ‏(کانتینر)</b></td><td>ایجنت‌هایی که خوداصلاحی لازم دارند</td><td>همهٔ موارد بالا به‌علاوهٔ یک کانتینر Ubuntu ی پایدار که ایجنت می‌تواند در آن apt/pip/npm install کند</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌 فرقش با نصب استاندارد</div>
+  <p>نصب‌کنندهٔ curl | bash خودش Python، ‏Node و وابستگی‌ها را مدیریت می‌کند. Nix flake همهٔ آن را جایگزین می‌کند — هر وابستگی پایتونی یک derivation ی Nix است که توسط <a href="https://github.com/pyproject-nix/uv2nix" target="_blank" rel="noopener">uv2nix</a> ساخته می‌شود و ابزارهای runtime ‏(Node.js، ‏git، ‏ripgrep، ‏ffmpeg) داخل PATH باینری پیچیده شده‌اند. هیچ pip ی در runtime، هیچ فعال‌سازی venv، هیچ npm install وجود ندارد.</p>
+  <p><b>برای کاربران غیر-NixOS</b> این فقط مرحلهٔ نصب را عوض می‌کند. هر چیز بعد از آن ‏(hermes setup، hermes gateway install، ویرایش config) دقیقاً مثل نصب استاندارد کار می‌کند.</p>
+  <p><b>برای کاربران ماژول NixOS</b> کل چرخهٔ حیات متفاوت است: پیکربندی در configuration.nix زندگی می‌کند، secrets از sops-nix/agenix می‌روند، سرویس یک unit ی systemd است و فرمان‌های config ی CLI بلاک می‌شوند. hermes را همان‌طور مدیریت می‌کنید که هر سرویس NixOS دیگری را مدیریت می‌کنید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها و شروع سریع</h2>
+<h3>پیش‌نیازها</h3>
+<ul>
+  <li><b>Nix با flakes فعال</b> — ‏<a href="https://install.determinate.systems" target="_blank" rel="noopener">Determinate Nix</a> توصیه می‌شود ‏(flakes را پیش‌فرض فعال می‌کند)</li>
+  <li><b>کلیدهای API</b> برای سرویس‌هایی که می‌خواهید استفاده کنید ‏(حداقل: یک کلید OpenRouter یا Anthropic)</li>
+</ul>
+<h3>شروع سریع ‏(هر کاربر Nix)</h3>
+<p>بدون نیاز به clone. ‏Nix همه‌چیز را fetch، build و اجرا می‌کند:</p>
+<pre dir="ltr"><code># Run the desktop app
+nix run github:NousResearch/hermes-agent#desktop
+
+# Or install persistently
+nix profile install github:NousResearch/hermes-agent#desktop
+
+# run the tui
+nix run github:NousResearch/hermes-agent -- setup
+nix run github:NousResearch/hermes-agent -- --tui
+
+# or install it in your profile
+nix profile install github:NousResearch/hermes-agent
+hermes setup
+hermes --tui</code></pre>
+<p>بعد از nix profile install مقدار hermes و hermes-agent و hermes-acp روی PATH شما هستند. از اینجا گردش‌کار با <a href="installation.html">نصب استاندارد</a> یکی است — ‏hermes setup انتخاب ارائه‌دهنده را قدم‌به‌قدم انجام می‌دهد، ‏hermes gateway install یک سرویس کاربری launchd ‏(macOS) یا systemd راه می‌اندازد و config در ‏~/.hermes/ زندگی می‌کند.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ پلتفرم‌های پیام‌رسانی ‏(دیسکورد، تلگرام، اسلک)</div>
+  <p>پکیج default همهٔ کتابخانه‌هایی را دارد که hermes-agent ممکن است لازم داشته باشد. اگر نوع کوچک‌تری می‌خواهید سایر خروجی‌های فلیک را ببینید. پکیج default حدود ‎۷۰۰MB‎ به closure اضافه می‌کند. اگر فقط پلتفرم‌های پیام‌رسانی می‌خواهید مقدار #messaging فقط ~۳۳MB اضافه می‌کند.</p>
+</div>
+<details>
+<summary><b>اجرای از یک clone محلی</b></summary>
+<pre dir="ltr"><code>git clone https://github.com/NousResearch/hermes-agent.git
+cd hermes-agent
+nix develop
+hermes setup</code></pre>
+</details>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> ماژول NixOS</h2>
+<p>فلیک مقدار ‏nixosModules.default را export می‌کند — یک ماژول سرویس کامل NixOS که ساخت کاربر، دایرکتوری‌ها، تولید config، ‏secrets، ‏اسناد و چرخهٔ حیات سرویس را تعریفی مدیریت می‌کند.</p>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>این ماژول NixOS می‌خواهد. هرمس ایجنتی برای یک نفر است. اگر ایجنت برای یک نفر می‌خواهید و نه یک سرویس سیستمی، از <a href="#home-manager-module">ماژول Home Manager</a> استفاده کنید. آن ماژول روی NixOS و هر سیستم دیگری که Home Manager پشتیبانی می‌کند اجرا می‌شود.</p>
+</div>
+<h3>افزودن Flake Input</h3>
+<pre dir="ltr"><code># /etc/nixos/flake.nix (or your system flake)
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    hermes-agent.url = "github:NousResearch/hermes-agent";
+  };
+
+  outputs = { nixpkgs, hermes-agent, ... }: {
+    nixosConfigurations.your-host = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        hermes-agent.nixosModules.default
+        ./configuration.nix
+      ];
+    };
+  };
+}</code></pre>
+<h3>پیکربندی مینیمال</h3>
+<pre dir="ltr"><code># configuration.nix
+{ config, ... }: {
+  services.hermes-agent = {
+    enable = true;
+    settings.model.default = "anthropic/claude-sonnet-4";
+    environmentFiles = [ config.sops.secrets."hermes-env".path ];
+    addToSystemPackages = true;
+  };
+}</code></pre>
+<p>همین. ‏nixos-rebuild switch کاربر hermes را می‌سازد، config.yaml تولید، secrets را سیم‌کشی و گیت‌وی را شروع می‌کند — سرویسی بلندمدت که ایجنت را به پلتفرم‌های پیام‌رسانی ‏(تلگرام، ‏دیسکورد و…) وصل و پیام‌های ورودی را گوش می‌دهد.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ Secrets الزامی‌اند</div>
+  <p>خط environmentFiles بالا فرض می‌کند sops-nix یا agenix را پیکربندی کرده‌اید. فایل باید دست‌کم یک کلید ارائه‌دهندهٔ LLM داشته باشد ‏(مثل OPENROUTER_API_KEY=sk-or-...). setup کامل را در بخش مدیریت Secrets ببینید. هنوز مدیر secrets ندارید؟ می‌توانید موقتاً از یک فایل ساده استفاده کنید — فقط مطمئن شوید world-readable نباشد:</p>
+  <pre dir="ltr"><code>echo "OPENROUTER_API_KEY=sk-or-your-key" | sudo install -m 0600 -o hermes /dev/stdin /var/lib/hermes/env</code></pre>
+  <pre dir="ltr"><code>services.hermes-agent.environmentFiles = [ "/var/lib/hermes/env" ];</code></pre>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 addToSystemPackages</div>
+  <p>ست کردن addToSystemPackages = true دو کار می‌کند: CLI ی hermes را روی PATH سیستمی می‌گذارد <b>و</b> HERMES_HOME را system-wide ست می‌کند تا CLI ی تعاملی وضعیت ‏(نشست‌ها، مهارت‌ها، cron) را با سرویس گیت‌وی شریک کند. بدون آن اجرای hermes در شل شما یک دایرکتوری ~/.hermes/ جدا می‌سازد.</p>
+</div>
+<h3>CLI آگاه-از-کانتینر</h3>
+<div class="callout info">
+  <div class="callout-title">ℹ️</div>
+  <p>وقتی container.enable = true و addToSystemPackages = true باشد، <b>هر</b> فرمان hermes روی host خودکار وارد کانتینرِ مدیریت‌شده مسیریابی می‌شود. یعنی نشست تعاملی CLI تان داخل همان محیطی اجرا می‌شود که سرویس گیت‌وی — با دسترسی به همهٔ پکیج‌ها و ابزارهای نصب‌شده در کانتینر.</p>
+  <ul>
+    <li>مسیریابی شفاف است: hermes chat، ‏hermes sessions list، ‏hermes --version و… همگی زیر کاپوت exec به داخل کانتینر می‌شوند</li>
+    <li>همهٔ فلگ‌های CLI همان‌طور forward می‌شوند</li>
+    <li>اگر کانتینر اجرا نباشد CLI چند لحظه دوباره تلاش می‌کند ‏(۵ ثانیه با spinner برای مصرف تعاملی، ‏۱۰ ثانیه بی‌صدا برای اسکریپت‌ها) سپس با خطای واضح شکست می‌خورد — بدون fallback ی بی‌صدا</li>
+    <li>برای توسعه‌دهندگان روی codebase ی hermes مقدار HERMES_DEV=1 را ست کنید تا مسیریابی کانتینر دور زده و checkout ی محلی مستقیماً اجرا شود</li>
+  </ul>
+  <p>container.hostUsers را ست کنید تا symlink ای از ~/.hermes به دایرکتوری وضعیت سرویس ساخته شود تا CLI ی host و کانتینر نشست‌ها، config و حافظه‌ها را شریک کنند:</p>
+  <pre dir="ltr"><code>services.hermes-agent = {
+  container.enable = true;
+  container.hostUsers = [ "your-username" ];
+  addToSystemPackages = true;
+};</code></pre>
+  <p>کاربران فهرست‌شده در hostUsers خودکار به گروه hermes برای دسترسی مجوز فایل اضافه می‌شوند.</p>
+  <p><b>کاربران Podman:</b> سرویس NixOS کانتینر را به‌عنوان root اجرا می‌کند. کاربران Docker از طریق socket ی گروه docker دسترسی دارند ولی کانتینرهای rootful ی Podman به sudo نیاز دارند. sudo بی‌رمز برای runtime کانتینرتان اعطا کنید:</p>
+  <pre dir="ltr"><code>security.sudo.extraRules = [{
+  users = [ "your-username" ];
+  commands = [{
+    command = "/run/current-system/sw/bin/podman";
+    options = [ "NOPASSWD" ];
+  }];
+}];</code></pre>
+  <p>CLI وقتی sudo لازم است خودآشکار و شفاف استفاده می‌کند. بدون این باید دستی ‏sudo hermes chat اجرا کنید.</p>
+</div>
+<h3>تأیید اینکه کار می‌کند</h3>
+<p>بعد از nixos-rebuild switch بررسی کنید سرویس در حال اجراست:</p>
+<pre dir="ltr"><code># Check service status
+systemctl status hermes-agent
+
+# Watch logs (Ctrl+C to stop)
+journalctl -u hermes-agent -f
+
+# If addToSystemPackages is true, test the CLI
+hermes --version
+hermes config       # shows the generated config</code></pre>
+<h3>انتخاب حالت استقرار</h3>
+<p>ماژول دو حالت دارد که با container.enable کنترل می‌شوند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th><b>Native</b> ‏(پیش‌فرض)</th><th><b>Container</b></th></tr></thead>
+<tbody>
+<tr><td>چطور اجرا می‌شود</td><td>سرویس systemd ی سخت‌گیرانه روی host</td><td>کانتینر Ubuntu ی پایدار با /nix/store ی bind-mount‌شده</td></tr>
+<tr><td>امنیت</td><td>NoNewPrivileges، ‏ProtectSystem=strict، ‏PrivateTmp</td><td>ایزوله‌سازی کانتینر، اجرا به‌عنوان کاربر بدون-امتیاز داخل</td></tr>
+<tr><td>ایجنت می‌تواند پکیج self-install کند</td><td>نه — فقط ابزارهای روی PATH ی تأمین-Nix</td><td>بله — apt/pip/npm ها بین ری‌استارت‌ها می‌مانند</td></tr>
+<tr><td>سطح config</td><td>یکسان</td><td>یکسان</td></tr>
+<tr><td>کی انتخاب شود</td><td>استقرارهای استاندارد، بیشترین امنیت، بازتولیدپذیری</td><td>ایجنت به نصب پکیج runtime، محیط تغییرپذیر یا ابزارهای آزمایشی نیاز دارد</td></tr>
+</tbody>
+</table>
+</div>
+<p>برای فعال کردن حالت کانتینر یک خط اضافه کنید:</p>
+<pre dir="ltr"><code>{
+  services.hermes-agent = {
+    enable = true;
+    container.enable = true;
+    # ... rest of config is identical
+  };
+}</code></pre>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>حالت کانتینر virtualisation.docker.enable را از طریق mkDefault خودفعال می‌کند. Podman ترجیح می‌دهید؟ ‏container.backend = "podman" و ‏virtualisation.docker.enable = false را ست کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پیکربندی</h2>
+<h3>تنظیمات تعریفی</h3>
+<p>گزینهٔ settings یک attrset ی دلخواه می‌پذیرد که به‌صورت config.yaml رندر می‌شود. ادغام عمیق بین تعاریف متعدد ماژول را پشتیبانی می‌کند ‏(از طریق lib.recursiveUpdate)، پس می‌توانید config را بین فایل‌ها تقسیم کنید:</p>
+<pre dir="ltr"><code># base.nix
+services.hermes-agent.settings = {
+  model.default = "anthropic/claude-sonnet-4";
+  toolsets = [ "all" ];
+  terminal = { backend = "local"; timeout = 180; };
+};
+
+# personality.nix
+services.hermes-agent.settings = {
+  display = { compact = false; personality = "kawaii"; };
+  memory = { memory_enabled = true; user_profile_enabled = true; };
+};</code></pre>
+<p>هر دو موقع ارزیابی deep-merge می‌شوند. کلیدهای اعلام‌شده-Nix همیشه بر کلیدهای موجود در config.yaml ی روی دیسک برنده‌اند اما <b>کلیدهای اضافه‌شده-توسط-کاربر که Nix لمس نمی‌کند حفظ می‌شوند</b>. یعنی اگر ایجنت یا یک ویرایش دستی کلیدهایی مثل skills.disabled یا streaming.enabled اضافه کند آنها از nixos-rebuild switch جان سالم به در می‌برند.</p>
+<div class="callout note">
+  <div class="callout-title">📌 نام‌گذاری مدل</div>
+  <p>‏settings.model.default از شناسهٔ مدلی استفاده می‌کند که ارائه‌دهنده‌تان انتظار دارد. با OpenRouter ‏(پیش‌فرض) شبیه anthropic/claude-sonnet-4 یا google/gemini-3-flash است. ارائه‌دهنده را مستقیم استفاده می‌کنید؟ ‏settings.model.base_url را روی API شان ست و ID های native ی خودشان را به کار ببرید ‏(مثل claude-sonnet-4-20250514). بدون base_url هرمس به OpenRouter برمی‌گردد.</p>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡 کشف کلیدهای config ی موجود</div>
+  <p>‏nix build .#configKeys &amp;&amp; cat result را اجرا کنید تا هر کلید برگِ config استخراج‌شده از DEFAULT_CONFIG ی پایتون را ببینید. می‌توانید config.yaml ی فعلی‌تان را داخل attrset ی settings paste کنید — ساختار یک‌به-یک نگاشت می‌شود.</p>
+</div>
+<details>
+<summary><b>مثال کامل: همهٔ تنظیمات رایج سفارشی‌سازی‌شده</b></summary>
+<pre dir="ltr"><code>{ config, ... }: {
+  services.hermes-agent = {
+    enable = true;
+    container.enable = true;
+
+    # ── Model ──────────────────────────────────────────────────────────
+    settings = {
+      model = {
+        base_url = "https://openrouter.ai/api/v1";
+        default = "anthropic/claude-opus-4.6";
+      };
+      toolsets = [ "all" ];
+      max_turns = 100;
+      terminal = { backend = "local"; cwd = "."; timeout = 180; };
+      compression = {
+        enabled = true;
+        threshold = 0.85;
+        summary_model = "google/gemini-3-flash-preview";
+      };
+      memory = { memory_enabled = true; user_profile_enabled = true; };
+      display = { compact = false; personality = "kawaii"; };
+      agent = { max_turns = 60; verbose = false; };
+    };
+
+    # ── Secrets ────────────────────────────────────────────────────────
+    environmentFiles = [ config.sops.secrets."hermes-env".path ];
+
+    # ── Documents ──────────────────────────────────────────────────────
+    # USER.md is memory, so it goes to HERMES_HOME. Workspace files use
+    # `documents`, and that option needs an explicit `workingDirectory`.
+    hermesHomeFiles = {
+      "memories/USER.md" = ./documents/USER.md;
+    };
+
+    # ── MCP Servers ────────────────────────────────────────────────────
+    mcpServers.filesystem = {
+      command = "npx";
+      args = [ "-y" "@modelcontextprotocol/server-filesystem" "/data/workspace" ];
+    };
+
+    # ── Container options ──────────────────────────────────────────────
+    container = {
+      image = "ubuntu:24.04";
+      backend = "docker";
+      hostUsers = [ "your-username" ];
+      extraVolumes = [ "/home/user/projects:/projects:rw" ];
+      extraOptions = [ "--gpus" "all" ];
+    };
+
+    # ── Service tuning ─────────────────────────────────────────────────
+    addToSystemPackages = true;
+    extraArgs = [ "--verbose" ];
+    restart = "always";
+    restartSec = 5;
+  };
+}</code></pre>
+</details>
+<h3>دریچهٔ فرار: آوردن Config ی خودتان</h3>
+<p>اگر ترجیح می‌دهید config.yaml را کلاً بیرون Nix مدیریت کنید از configFile استفاده کنید:</p>
+<pre dir="ltr"><code>services.hermes-agent.configFile = /etc/hermes/config.yaml;</code></pre>
+<p>این کلاً از settings عبور می‌کند — بدون merge، بدون تولید. فایل هر بار موقع فعال‌سازی همان‌طور که هست به ‏$HERMES_HOME/config.yaml کپی می‌شود.</p>
+<h3>برگهٔ تقلب سفارشی‌سازی</h3>
+<p>مرجع سریع رایج‌ترین چیزهایی که کاربران Nix می‌خواهند سفارشی کنند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>می‌خواهم…</th><th>گزینه</th><th>مثال</th></tr></thead>
+<tbody>
+<tr><td>مدل LLM را عوض کنم</td><td><code>settings.model.default</code></td><td><code>"anthropic/claude-sonnet-4"</code></td></tr>
+<tr><td>نقطهٔ پایانی ارائه‌دهندهٔ دیگری</td><td><code>settings.model.base_url</code></td><td><code>"https://openrouter.ai/api/v1"</code></td></tr>
+<tr><td>کلیدهای API اضافه کنم</td><td><code>environmentFiles</code></td><td><code>[ config.sops.secrets."hermes-env".path ]</code></td></tr>
+<tr><td>به ایجنت هویت بدهم</td><td><code>hermesHomeFiles."SOUL.md"</code></td><td><code>"You are a terse ops assistant."</code></td></tr>
+<tr><td>زمینهٔ پروژه به workspace اضافه کنم</td><td><code>documents."AGENTS.md"</code></td><td><code>./documents/AGENTS.md</code></td></tr>
+<tr><td>بک‌اند اپ دسکتاپ یا داشبورد را اجرا کنم</td><td><code>backend.mode</code></td><td><code>"serve"</code> یا ‏<code>"dashboard"</code></td></tr>
+<tr><td>سرورهای MCP اضافه کنم</td><td><code>mcpServers.&lt;name&gt;</code></td><td>بخش MCP Servers را ببینید</td></tr>
+<tr><td>دیسکورد/تلگرام/اسلک را فعال کنم</td><td><code>extraDependencyGroups</code></td><td><code>[ "messaging" ]</code></td></tr>
+<tr><td>دایرکتوری‌های host را در کانتینر mount کنم</td><td><code>container.extraVolumes</code></td><td><code>[ "/data:/data:rw" ]</code></td></tr>
+<tr><td>GPU به کانتینر بدهم</td><td><code>container.extraOptions</code></td><td><code>[ "--gpus" "all" ]</code></td></tr>
+<tr><td>Podman به‌جای Docker</td><td><code>container.backend</code></td><td><code>"podman"</code></td></tr>
+<tr><td>وضعیت بین CLI ی host و کانتینر شریک شود</td><td><code>container.hostUsers</code></td><td><code>[ "sidbin" ]</code></td></tr>
+<tr><td>ابزارهای اضافه در دسترس ایجنت</td><td><code>extraPackages</code></td><td><code>[ pkgs.pandoc pkgs.imagemagick ]</code></td></tr>
+<tr><td>image پایهٔ سفارشی</td><td><code>container.image</code></td><td><code>"ubuntu:24.04"</code></td></tr>
+<tr><td>بازنویسی پکیج hermes</td><td><code>package</code></td><td><code>inputs.hermes-agent.packages.${system}.default.override { ... }</code></td></tr>
+<tr><td>تغییر دایرکتوری وضعیت</td><td><code>stateDir</code></td><td><code>"/opt/hermes"</code></td></tr>
+<tr><td>دایرکتوری کاری ایجنت</td><td><code>workingDirectory</code></td><td><code>"/home/user/projects"</code></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مدیریت Secrets</h2>
+<div class="callout danger">
+  <div class="callout-title">🚫 هرگز کلیدهای API داخل settings یا environment نگذارید</div>
+  <p>مقادیر داخل عبارات Nix به /nix/store می‌روند که world-readable است. همیشه از environmentFiles همراه یک مدیر secrets استفاده کنید.</p>
+</div>
+<p>هر ‏environment ‏(متغیرهای غیر-secret) و environmentFiles ‏(فایل‌های secret) موقع فعال‌سازی ‏(nixos-rebuild switch) داخل ‏$HERMES_HOME/.env ادغام می‌شوند. هرمس این فایل را در هر startup می‌خواند، پس تغییرات با systemctl restart hermes-agent مؤثر می‌شوند — بدون بازسازی کانتینر.</p>
+<h3>sops-nix</h3>
+<pre dir="ltr"><code>{
+  sops = {
+    defaultSopsFile = ./secrets/hermes.yaml;
+    age.keyFile = "/home/user/.config/sops/age/keys.txt";
+    secrets."hermes-env" = { format = "yaml"; };
+  };
+
+  services.hermes-agent.environmentFiles = [
+    config.sops.secrets."hermes-env".path
+  ];
+}</code></pre>
+<p>فایل secrets جفت‌های کلید-مقدار دارد:</p>
+<pre dir="ltr"><code># secrets/hermes.yaml (encrypted with sops)
+hermes-env: |
+    OPENROUTER_API_KEY=sk-or-...
+    TELEGRAM_BOT_TOKEN=123456:ABC...
+    ANTHROPIC_API_KEY=sk-ant-...</code></pre>
+<h3>agenix</h3>
+<pre dir="ltr"><code>{
+  age.secrets.hermes-env.file = ./secrets/hermes-env.age;
+
+  services.hermes-agent.environmentFiles = [
+    config.age.secrets.hermes-env.path
+  ];
+}</code></pre>
+<h3>Seed کردن OAuth / Auth</h3>
+<p>برای پلتفرم‌های نیازمند OAuth ‏(مثل دیسکورد) از authFile برای seed کردن credential ها در اولین استقرار استفاده کنید:</p>
+<pre dir="ltr"><code>{
+  services.hermes-agent = {
+    authFile = config.sops.secrets."hermes/auth.json".path;
+    # authFileForceOverwrite = true;  # overwrite on every activation
+  };
+}</code></pre>
+<p>فایل فقط وقتی کپی می‌شود که auth.json از قبل نباشد ‏(مگر authFileForceOverwrite = true). refresh های runtime ی توکن OAuth در دایرکتوری وضعیت نوشته و بین rebuild ها حفظ می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> اسناد</h2>
+<p>هرمس فایل‌ها را از دو دایرکتوری می‌خواند؛ پس دو گزینه وجود دارد. برای هر فایل از گزینهٔ دایرکتوری مربوطه استفاده کنید.</p>
+<p>‏documents داخل <b>دایرکتوری کاری</b> ایجنت نصب می‌کند که همان workingDirectory است. ایجنت زمینهٔ پروژه‌اش را از آن workspace می‌خواند:</p>
+<pre dir="ltr"><code>{
+  services.hermes-agent = {
+    # documents needs this option. Read the note below.
+    workingDirectory = "/var/lib/hermes/workspace";
+    documents = {
+      "AGENTS.md" = ./documents/AGENTS.md;   # path reference, copied from Nix store
+      "notes/oncall.md" = "Page #infra before restarting anything.";
+    };
+  };
+}</code></pre>
+<div class="callout warning">
+  <div class="callout-title">⚠️ documents به workingDirectory ی صریح نیاز دارد</div>
+  <p>ماژول تا وقتی workingDirectory را ست نکنید مقدار documents را نمی‌پذیرد. پیش‌فرض این گزینه در هر ماژول متفاوت است: روی Home Manager دایرکتوری خانهٔ شماست و روی NixOS مقدار ${stateDir}/workspace. پس پیش‌فرضِ unset فایل‌ها را در دایرکتوری‌ای می‌گذارد که انتخابش نکرده‌اید. انتخاب مسیری معادل پیش‌فرض هم صحیح است و قانون را ارضا می‌کند.</p>
+</div>
+<p>‏hermesHomeFiles داخل <b>HERMES_HOME</b> نصب می‌کند. هرمس فایل هویت و فایل‌های حافظهٔ ایجنت را از آن دایرکتوری می‌خواند. ‏SOUL.md و memories/ فقط از آنجا کار می‌کنند. یک SOUL.md داخل documents یک فایل workspace می‌سازد؛ هرمس آن را به‌عنوان هویت load نمی‌کند:</p>
+<pre dir="ltr"><code>{
+  services.hermes-agent.hermesHomeFiles = {
+    "SOUL.md" = "You are a helpful AI assistant.";
+    "memories/USER.md" = ./documents/USER.md;
+  };
+}</code></pre>
+<p>هر مقدار رشته یا مسیر است. کلید در هر دو گزینه می‌تواند زیردایرکتوری داشته باشد و ماژول دایرکتوری‌های والد را می‌سازد. هر فعال‌سازی فایل‌ها را دوباره نصب می‌کند.</p>
+<p>‏hermesHomeFiles به workingDirectory نیاز ندارد چون ماژول مالک دایرکتوری HERMES_HOME است. بیشتر کاربران hermesHomeFiles را می‌خواهند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> سرورهای MCP</h2>
+<p>گزینهٔ mcpServers سرورهای <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">MCP ‏(Model Context Protocol)</a> را تعریفی پیکربندی می‌کند. هر سرور یا transport ی stdio ‏(فرمان محلی) یا HTTP ‏(URL ی راه‌دور) دارد.</p>
+<h3>Transport ی Stdio ‏(سرورهای محلی)</h3>
+<pre dir="ltr"><code>{
+  services.hermes-agent.mcpServers = {
+    filesystem = {
+      command = "npx";
+      args = [ "-y" "@modelcontextprotocol/server-filesystem" "/data/workspace" ];
+    };
+    github = {
+      command = "npx";
+      args = [ "-y" "@modelcontextprotocol/server-github" ];
+      env.GITHUB_PERSONAL_ACCESS_TOKEN = "\${GITHUB_TOKEN}"; # resolved from .env
+    };
+  };
+}</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>متغیرهای محیطی در مقادیر env هنگام runtime از ‏$HERMES_HOME/.env حل می‌شوند. secrets را با environmentFiles تزریق کنید — هرگز توکن مستقیم داخل config ی Nix نگذارید.</p>
+</div>
+<h3>Transport ی HTTP ‏(سرورهای راه‌دور)</h3>
+<pre dir="ltr"><code>{
+  services.hermes-agent.mcpServers.remote-api = {
+    url = "https://mcp.example.com/v1/mcp";
+    headers.Authorization = "Bearer \${MCP_REMOTE_API_KEY}";
+    timeout = 180;
+  };
+}</code></pre>
+<h3>HTTP با OAuth</h3>
+<p>برای سرورهای OAuth 2.1 دار مقدار auth = "oauth" را ست کنید. هرمس جریان کامل PKCE را پیاده می‌کند — کشف metadata، ثبت داینامیک کلاینت، مبادلهٔ توکن و refresh خودکار.</p>
+<pre dir="ltr"><code>{
+  services.hermes-agent.mcpServers.my-oauth-server = {
+    url = "https://mcp.example.com/mcp";
+    auth = "oauth";
+  };
+}</code></pre>
+<p>توکن‌ها در ‏$HERMES_HOME/mcp-tokens/&lt;server-name&gt;.json ذخیره و بین ری‌استارت‌ها و rebuild ها می‌مانند.</p>
+<details>
+<summary><b>مجوزدهی اولیه OAuth روی سرورهای headless</b></summary>
+<p>اولین مجوزدهی OAuth جریان رضایت مرورگری می‌خواهد. در استقرار headless هرمس به‌جای باز کردن مرورگر URL مجوز را به stdout/لاگ چاپ می‌کند.</p>
+<p><b>گزینهٔ A: bootstrap تعاملی</b> — جریان را یک بار با docker exec ‏(کانتینر) یا sudo -u hermes ‏(native) اجرا کنید:</p>
+<pre dir="ltr"><code># Container mode
+docker exec -it hermes-agent \
+  hermes mcp add my-oauth-server --url https://mcp.example.com/mcp --auth oauth
+
+# Native mode
+sudo -u hermes HERMES_HOME=/var/lib/hermes/.hermes \
+  hermes mcp add my-oauth-server --url https://mcp.example.com/mcp --auth oauth</code></pre>
+<p>کانتینر از --network=host استفاده می‌کند پس شنوندهٔ callback ی OAuth روی 127.0.0.1 از مرورگر host قابل‌رسید است.</p>
+<p><b>گزینهٔ B: پیش-seed کردن توکن‌ها</b> — جریان را روی یک workstation تمام و توکن‌ها را کپی کنید:</p>
+<pre dir="ltr"><code>hermes mcp add my-oauth-server --url https://mcp.example.com/mcp --auth oauth
+scp ~/.hermes/mcp-tokens/my-oauth-server{,.client}.json \
+    server:/var/lib/hermes/.hermes/mcp-tokens/
+# Ensure: chown hermes:hermes, chmod 0600</code></pre>
+</details>
+<h3>Sampling ‏(درخواست‌های LLM آغاز-شده-توسط-سرور)</h3>
+<p>بعضی سرورهای MCP می‌توانند completion های LLM را از ایجنت بخواهند:</p>
+<pre dir="ltr"><code>{
+  services.hermes-agent.mcpServers.analysis = {
+    command = "npx";
+    args = [ "-y" "analysis-server" ];
+    sampling = {
+      enabled = true;
+      model = "google/gemini-3-flash";
+      max_tokens_cap = 4096;
+      timeout = 30;
+      max_rpm = 10;
+    };
+  };
+}</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> حالت Managed</h2>
+<p>وقتی hermas از طریق ماژول NixOS اجرا شود فرمان‌های CLI ی زیر با خطای توصیفیِ اشاره‌کننده به configuration.nix <b>بلاک</b> می‌شوند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فرمان بلاک‌شده</th><th>چرا</th></tr></thead>
+<tbody>
+<tr><td>‏<code>hermes setup</code></td><td>Config تعریفی است — settings را در config ی Nix ویرایش کنید</td></tr>
+<tr><td>‏<code>hermes config edit</code></td><td>Config از settings تولید می‌شود</td></tr>
+<tr><td>‏<code>hermes config set &lt;key&gt; &lt;value&gt;</code></td><td>Config از settings تولید می‌شود</td></tr>
+<tr><td>‏<code>hermes gateway install</code></td><td>سرویس systemd توسط NixOS مدیریت می‌شود</td></tr>
+<tr><td>‏<code>hermes gateway uninstall</code></td><td>سرویس systemd توسط NixOS مدیریت می‌شود</td></tr>
+</tbody>
+</table>
+</div>
+<p>این از واگرایی بین آنچه Nix اعلام می‌کند و آنچه روی دیسک است جلوگیری می‌کند. آشکارسازی از دو سیگنال استفاده می‌کند:</p>
+<ol>
+  <li><b>متغیر محیطی HERMES_MANAGED.</b> سرویس آن را ست و پروسهٔ گیت‌وی می‌خواند.</li>
+  <li><b>فایل نشانگر .managed</b> در HERMES_HOME. اسکریپت فعال‌سازی می‌نویسد و شل تعاملی می‌خواند. پس CLI فرمانی مثل docker exec -it hermes-agent hermes config set ... را هم بلاک می‌کند.</li>
+</ol>
+<p>هر دو سیگنال نام سیستمی که نصب را مدیریت می‌کند را حمل می‌کنند، پس refusal فرمان rebuild درست را نام می‌برد. ماژول NixOS مقدار sudo nixos-rebuild switch و ماژول Home Manager مقدار home-manager switch را می‌دهد.</p>
+</section>
+
+<section class="doc-sec" id="home-manager-module">
+<h2><span class="secnum">۸</span> ماژول Home Manager</h2>
+<p>فلیک همچنین homeManagerModules.default را export می‌کند. هرمس ایجنتی برای یک نفر است. credential ها، حافظه، نشست‌ها و cron job ها همه متعلق به همان نفرند؛ پس سرویس کاربری شکل درست روی ماشین شخصی است. روی هر توزیعی که Home Manager پشتیبانی می‌کند اجرا می‌شود نه فقط NixOS.</p>
+<p>مجموعهٔ گزینه‌ها همان مجموعه‌ای است که ماژول NixOS استفاده می‌کند: ‏services.hermes-agent با همان گزینه‌های settings، ‏environmentFiles، ‏documents، ‏mcpServers، ‏extraPlugins و backend. هر مثال بالا بدون تغییر اینجا هم کار می‌کند. فقط بخش‌های ضروری متفاوت‌اند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>ماژول NixOS</th><th>ماژول Home Manager</th></tr></thead>
+<tbody>
+<tr><td>اجرا به‌عنوان</td><td>یک کاربر سیستمی که اعلام می‌کنید با user، group و createUser</td><td>خودتان</td></tr>
+<tr><td>دایرکتوری وضعیت</td><td>stateDir و /.hermes</td><td>hermesHome، مستقیم ست می‌شود. پیش‌فرض ~/.hermes.</td></tr>
+<tr><td>سرویس</td><td>systemd.services</td><td>systemd.user.services روی لینوکس، launchd.agents روی macOS</td></tr>
+<tr><td>CLI روی PATH</td><td>addToSystemPackages که HERMES_HOME را برای کل سیستم export می‌کند</td><td>programs.hermes-agent.enable که فقط برای نشست شما export می‌کند</td></tr>
+<tr><td>اپلیکیشن دسکتاپ</td><td>پشتیبانی نمی‌شود چون سرویس سیستمی نمی‌تواند session ی کاربر را مالک شود</td><td>programs.hermes-agent.desktop.enable</td></tr>
+<tr><td>حالت کانتینر</td><td>پشتیبانی می‌شود</td><td>پشتیبانی نمی‌شود چون root و socket ی Docker لازم دارد</td></tr>
+</tbody>
+</table>
+</div>
+<h3>افزودن Flake Input</h3>
+<pre dir="ltr"><code>{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    hermes-agent.url = "github:NousResearch/hermes-agent";
+  };
+}</code></pre>
+<p>سپس ماژول را وارد config ی Home Manager تان کنید. config می‌تواند standalone باشد یا زیر home-manager.users.&lt;name&gt; در یک config ی NixOS یا nix-darwin:</p>
+<pre dir="ltr"><code>{
+  imports = [ hermes-agent.homeManagerModules.default ];
+
+  services.hermes-agent = {
+    enable = true;
+    gateway.enable = true;
+    settings.model.default = "anthropic/claude-sonnet-4";
+    environmentFiles = [ config.sops.secrets."hermes-env".path ];
+  };
+}</code></pre>
+<p>‏home-manager switch مقدار ~/.hermes را می‌سازد، config.yaml می‌نویسد، .env را build و گیت‌وی را به‌عنوان سرویس کاربری شروع می‌کند.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ linger را فعال کنید وگرنه سرویس موقع logout می‌ایستد</div>
+  <p>احتیاط: linger را برای حسابتان فعال کنید. بدون linger وقتی آخرین نشستتان تمام شود systemd مدیر کاربری را متوقف و گیت‌وی هم با آن می‌ایستد. Home Manager نمی‌تواند linger را ست کند چون linger ویژگی حساب است:</p>
+  <pre dir="ltr"><code># NixOS
+users.users.your-username.linger = true;</code></pre>
+  <pre dir="ltr"><code># anywhere else
+sudo loginctl enable-linger your-username</code></pre>
+  <p>macOS معادل ندارد. یک agent ی launchd با RunAtLoad موقع ورود شروع و به اجرا ادامه می‌دهد.</p>
+</div>
+<h3>اجرای بک‌اند Desktop / Dashboard</h3>
+<p>‏gateway.enable گیت‌وی پیام‌رسانی را برای تلگرام، دیسکورد، اسلک و سایر پلتفرم‌ها اجرا می‌کند. ‏Hermes Desktop و داشبورد وب به یک <i>پروسهٔ متفاوت</i> وصل می‌شوند که hermes serve یا hermes dashboard است. backend.mode آن پروسه را همراه گیت‌وی اجرا می‌کند:</p>
+<pre dir="ltr"><code>{
+  services.hermes-agent = {
+    enable = true;
+    gateway.enable = true;      # messaging platforms
+    backend.mode = "dashboard"; # + the browser dashboard on 127.0.0.1:9119
+    backend.port = 9119;
+  };
+}</code></pre>
+<p>‏serve بدون رابط کاربری اجرا می‌شود و socket های /api/ws و /api/pty ی که Hermes Desktop به آنها وصل می‌شود را می‌دهد و اپ وب را build نمی‌کند. dashboard همهٔ آن به‌علاوهٔ پنل مدیریتی مرورگری را می‌دهد. هر دو پروسه یک HERMES_HOME با گیت‌وی استفاده می‌کنند، پس نشست‌ها، مهارت‌ها، حافظه و cron job ها برای همه یکی است. backend.mode روی ماژول NixOS همین‌طور کار می‌کند ولی نه در حالت کانتینر.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ Bind به آدرسی غیر از loopback</div>
+  <p>آدرس پیش‌فرض 127.0.0.1 است. هر آدرس دیگر گیت احراز هویت داشبورد را روشن می‌کند. سرور همچنین هر درخواستی با هدر Host ی متفاوت از آدرسی که bind شده رد می‌کند — دفاعی در برابر DNS rebinding. به نام یا آدرسی bind کنید که کلاینت‌تان استفاده می‌کند.</p>
+</div>
+<h3>تأیید اینکه کار می‌کند</h3>
+<pre dir="ltr"><code># Linux
+systemctl --user status hermes-agent
+journalctl --user -u hermes-agent -f
+
+# macOS
+launchctl list | grep hermes
+tail -f ~/Library/Logs/hermes-agent.log
+
+hermes --version
+hermes config     # shows the configuration that Nix wrote</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> معماری کانتینر</h2>
+<div class="callout info">
+  <div class="callout-title">ℹ️</div>
+  <p>این بخش فقط اگر container.enable = true استفاده می‌کنید مربوط است. برای استقرارهای native ردش کنید.</p>
+</div>
+<p>با فعال بودن حالت کانتینر، هرمس داخل یک کانتینر Ubuntu ی پایدار اجرا می‌شود که باینری ساخته-Nix به‌صورت read-only از host در آن bind-mount شده:</p>
+<pre dir="ltr"><code>Host                                    Container
+────                                    ─────────
+/nix/store/...-hermes-agent-0.1.0  ──►  /nix/store/... (ro)
+~/.hermes -&gt; /var/lib/hermes/.hermes       (symlink bridge, per hostUsers)
+/var/lib/hermes/                    ──►  /data/          (rw)
+  ├── current-package -&gt; /nix/store/...    (symlink, updated each rebuild)
+  ├── .gc-root -&gt; /nix/store/...           (prevents nix-collect-garbage)
+  ├── .container-identity                  (sha256 hash, triggers recreation)
+  ├── .hermes/                             (HERMES_HOME)
+  │   ├── .env                             (merged from environment + environmentFiles)
+  │   ├── config.yaml                      (Nix-generated, deep-merged by activation)
+  │   ├── .managed                         (marker file)
+  │   ├── .container-mode                  (routing metadata: backend, exec_user, etc.)
+  │   ├── state.db, sessions/, memories/   (runtime state)
+  │   └── mcp-tokens/                      (OAuth tokens for MCP servers)
+  ├── home/                                ──►  /home/hermes    (rw)
+  └── workspace/                           (agent working directory)
+      ├── AGENTS.md                        (from the documents option)
+      └── (agent-created files)
+
+Container writable layer (apt/pip/npm):   /usr, /usr/local, /tmp</code></pre>
+<p>باینری ساخته-Nix داخل کانتینر Ubuntu کار می‌کند چون /nix/store ی bind-mount شده مفسر خودش و همهٔ وابستگی‌هایش را می‌آورد، پس اتکایی به کتابخانه‌های سیستمی کانتینر نیست. entrypoint ی کانتینر از طریق symlink ی current-package حل می‌شود: ‏/data/current-package/bin/hermes gateway run --replace. روی nixos-rebuild switch فقط symlink به‌روز می‌شود — کانتینر همچنان در حال اجراست.</p>
+<h3>چه چیزی بین چه چیزی ماندگار است</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>رویداد</th><th>کانتینر بازساخته می‌شود؟</th><th>‏/data ‏(وضعیت)</th><th>/home/hermes</th><th>لایهٔ قابل‌نوشتن ‏(apt/pip/npm)</th></tr></thead>
+<tbody>
+<tr><td>‏<code>systemctl restart hermes-agent</code></td><td>نه</td><td>می‌ماند</td><td>می‌ماند</td><td>می‌ماند</td></tr>
+<tr><td>‏<code>nixos-rebuild switch</code> ‏(تغییر کد)</td><td>نه ‏(symlink به‌روز می‌شود)</td><td>می‌ماند</td><td>می‌ماند</td><td>می‌ماند</td></tr>
+<tr><td>ری‌بوت host</td><td>نه</td><td>می‌ماند</td><td>می‌ماند</td><td>می‌ماند</td></tr>
+<tr><td>‏<code>nix-collect-garbage</code></td><td>نه ‏(GC root)</td><td>می‌ماند</td><td>می‌ماند</td><td>می‌ماند</td></tr>
+<tr><td>تغییر image ‏(container.image)</td><td><b>بله</b></td><td>می‌ماند</td><td>می‌ماند</td><td><b>از دست می‌رود</b></td></tr>
+<tr><td>تغییر volume/gزینه‌ها</td><td><b>بله</b></td><td>می‌ماند</td><td>می‌ماند</td><td><b>از دست می‌رود</b></td></tr>
+<tr><td>تغییر environment/environmentFiles</td><td>نه</td><td>می‌ماند</td><td>می‌ماند</td><td>می‌ماند</td></tr>
+</tbody>
+</table>
+</div>
+<p>کانتینر فقط وقتی بازسازی می‌شود که <b>hash ی هویت</b> اش عوض شود. hash پوشش می‌دهد: نسخهٔ schema، ‏image، ‏extraVolumes، ‏extraOptions و اسکریپت entrypoint را. تغییر متغیرهای محیطی، تنظیمات، اسناد یا خود پکیج hermes بازسازی را شلیک <b>نمی‌کند</b>.</p>
+<div class="callout warning">
+  <div class="callout-title">⚠️ از دست رفتن لایهٔ قابل‌نوشتن</div>
+  <p>وقتی hash ی هویت عوض شود ‏(ارتقای image، ‏volume های جدید، گزینه‌های جدید کانتینر) کانتینر نابود و از pull تازهٔ container.image بازسازی می‌شود. هر apt install یا pip install یا npm install داخل لایهٔ قابل‌نوشتن از دست می‌رود. وضعیت در /data و /home/hermes حفظ می‌شود ‏(اینها bind mount اند).</p>
+  <p>اگر ایجنت به پکیج‌های مشخصی تکیه دارد آنها را داخل یک image سفارشی بپزید ‏(container.image = "my-registry/hermes-base:latest") یا نصبشان را در SOUL.md ایجنت اسکریپت کنید.</p>
+</div>
+<h3>محافظت GC Root</h3>
+<p>اسکریپت preStart یک GC root در ${stateDir}/.gc-root می‌سازد که به پکیج فعلی hermes اشاره می‌کند. این مانع حذف باینری درحال-اجرا توسط nix-collect-garbage می‌شود. اگر GC root به هر دلیلی بشکند ری‌استارت سرویس دوباره می‌سازدش.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> پلاگین‌ها</h2>
+<p>ماژول NixOS نصب تعریفی پلاگین‌ها را پشتیبانی می‌کند — بدون نیاز به hermes plugins install ی امری.</p>
+<h3>پلاگین‌های دایرکتوری ‏(extraPlugins)</h3>
+<p>برای پلاگین‌هایی که صرفاً یک درخت سورس با plugin.yaml + __init__.py هستند ‏(مثل ‏<a href="https://github.com/stephenschoettler/hermes-lcm" target="_blank" rel="noopener">hermes-lcm</a>):</p>
+<pre dir="ltr"><code>services.hermes-agent.extraPlugins = [
+  (pkgs.fetchFromGitHub {
+    owner = "stephenschoettler";
+    repo = "hermes-lcm";
+    rev = "v0.7.0";
+    hash = "sha256-...";
+  })
+];</code></pre>
+<p>پلاگین‌ها موقع فعال‌سازی به‌صورت symlink داخل $HERMES_HOME/plugins/ می‌روند. هرمس با اسکن عادی دایرکتوری کشفشان می‌کند. حذف پلاگین از فهرست و اجرای nixos-rebuild switch symlink را حذف می‌کند.</p>
+<h3>پلاگین‌های Entry-Point ‏(extraPythonPackages)</h3>
+<p>برای پلاگین‌های pip-packaged که از طریق [project.entry-points."hermes_agent.plugins"] ثبت می‌شوند ‏(مثل ‏<a href="https://github.com/ogallotti/rtk-hermes" target="_blank" rel="noopener">rtk-hermes</a>):</p>
+<pre dir="ltr"><code>services.hermes-agent.extraPythonPackages = [
+  (pkgs.python312Packages.buildPythonPackage {
+    pname = "rtk-hermes";
+    version = "1.0.0";
+    src = pkgs.fetchFromGitHub {
+      owner = "ogallotti";
+      repo = "rtk-hermes";
+      rev = "v1.0.0";
+      hash = "sha256-...";
+    };
+    format = "pyproject";
+    build-system = [ pkgs.python312Packages.setuptools ];
+  })
+];</code></pre>
+<p>site-packages ی پکیج به PYTHONPATH در wrapper ی hermes اضافه می‌شود. importlib.metadata نقطهٔ ورود را در شروع نشست آشکار می‌کند.</p>
+<h3>گروه‌های وابستگی اختیاری ‏(extraDependencyGroups)</h3>
+<p>برای extras های اختیاری اعلام‌شده در pyproject.toml ی hermes-agent از extraDependencyGroups استفاده کنید تا در زمان build داخل venv مهرشده بگنجند. برای هر extra خارج از مجموعهٔ پیش‌فرض [all] الزامی است — روی Nix نصب runtime داخل store ی فقط-خواندنی ممکن نیست.</p>
+<pre dir="ltr"><code># Enable Discord, Telegram, Slack
+services.hermes-agent.extraDependencyGroups = [ "messaging" ];</code></pre>
+<pre dir="ltr"><code># Enable a memory provider
+services.hermes-agent = {
+  extraDependencyGroups = [ "hindsight" ];
+  settings.memory.provider = "hindsight";
+};</code></pre>
+<p>این توسط uv کنار وابستگی‌های هسته حل می‌شود — بدون وصلهٔ PYTHONPATH و بدون ریسک تداخل. گروه‌های موجود:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>گروه</th><th>چه چیزی فعال می‌کند</th></tr></thead>
+<tbody>
+<tr><td><code>messaging</code></td><td>دیسکورد، ‏تلگرام، ‏اسلک</td></tr>
+<tr><td><code>matrix</code></td><td>Matrix/Element ‏(mautrix با رمزنگاری؛ فقط لینوکس)</td></tr>
+<tr><td><code>dingtalk</code></td><td>DingTalk</td></tr>
+<tr><td><code>feishu</code></td><td>Feishu/Lark</td></tr>
+<tr><td><code>voice</code></td><td>تبدیل گفتار-به-متن محلی ‏(faster-whisper)</td></tr>
+<tr><td><code>edge-tts</code></td><td>ارائه‌دهندهٔ Edge TTS</td></tr>
+<tr><td><code>tts-premium</code></td><td>ElevenLabs TTS</td></tr>
+<tr><td><code>anthropic</code></td><td>SDK ی native ی Anthropic ‏(از مسیر OpenRouter لازم نیست)</td></tr>
+<tr><td><code>bedrock</code></td><td>AWS Bedrock ‏(boto3)</td></tr>
+<tr><td><code>azure-identity</code></td><td>احراز هویت Azure Entra ID</td></tr>
+<tr><td><code>honcho</code></td><td>ارائه‌دهندهٔ حافظهٔ Honcho</td></tr>
+<tr><td><code>hindsight</code></td><td>ارائه‌دهندهٔ حافظهٔ Hindsight</td></tr>
+<tr><td><code>modal</code></td><td>بک‌اند ترمینال Modal</td></tr>
+<tr><td><code>daytona</code></td><td>بک‌اند ترمینال Daytona</td></tr>
+<tr><td><code>exa</code></td><td>جستجوی وب Exa</td></tr>
+<tr><td><code>firecrawl</code></td><td>جستجوی وب Firecrawl</td></tr>
+<tr><td><code>fal</code></td><td>تولید تصویر FAL</td></tr>
+</tbody>
+</table>
+</div>
+<p>یا به‌جای پیکربندی per-extra از پکیج‌های فلیکی از پیش آمادهٔ #messaging یا #full استفاده کنید ‏(شروع سریع را ببینید).</p>
+<p><b>کی کدام:</b></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>نیاز</th><th>گزینه</th></tr></thead>
+<tbody>
+<tr><td>فعال کردن یک extra ی اختیاری pyproject.toml</td><td><code>extraDependencyGroups</code></td></tr>
+<tr><td>افزودن پلاگین پایتونی بیرونی که در pyproject.toml نیست</td><td><code>extraPythonPackages</code></td></tr>
+<tr><td>افزودن یک باینری سیستمی ‏(pandoc، jq و…)</td><td><code>extraPackages</code></td></tr>
+<tr><td>افزودن یک درخت سورس پلاگین دایرکتوری‌محور</td><td><code>extraPlugins</code></td></tr>
+</tbody>
+</table>
+</div>
+<h3>ترکیب هر دو</h3>
+<p>پلاگین دایرکتوری‌محور با وابستگی‌های پایتونی ثالث به هر دو گزینه نیاز دارد:</p>
+<pre dir="ltr"><code>services.hermes-agent = {
+  extraPlugins = [ my-plugin-src ];          # plugin source
+  extraPythonPackages = [ pkgs.python312Packages.redis ];  # its Python dep
+  extraPackages = [ pkgs.redis ];            # system binary it needs
+};</code></pre>
+<h3>استفاده از Overlay</h3>
+<p>فلیک‌های بیرونی می‌توانند پکیج را مستقیماً override کنند:</p>
+<pre dir="ltr"><code>{
+  inputs.hermes-agent.url = "github:NousResearch/hermes-agent";
+  outputs = { hermes-agent, nixpkgs, ... }: {
+    nixpkgs.overlays = [ hermes-agent.overlays.default ];
+    # Then:
+    #   pkgs.hermes-agent.override { extraPythonPackages = [...]; }
+    #   pkgs.hermes-agent.override { extraDependencyGroups = [ "hindsight" ]; }
+  };
+}</code></pre>
+<h3>پیکربندی پلاگین</h3>
+<p>پلاگین‌ها همچنان باید در config.yaml فعال شوند. از طریق تنظیمات تعریفی اضافه‌شان کنید:</p>
+<pre dir="ltr"><code>services.hermes-agent.settings.plugins.enabled = [
+  "hermes-lcm"
+  "rtk-rewrite"
+];</code></pre>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>یک بررسی تداخل build-time جلوگیری می‌کند پکیج‌های پلاگین سایه بر وابستگی‌های هستهٔ hermes بیندازند. اگر پلاگینی پکیجی بدهد که از قبل در venv مهرشده هست nixos-rebuild با خطای واضح شکست می‌خورد.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> توسعه</h2>
+<h3>Dev Shell</h3>
+<p>فلیک یک شل توسعه با Python ۳٫۱۲، ‏uv، ‏Node.js و همهٔ ابزارهای runtime فراهم می‌کند:</p>
+<pre dir="ltr"><code>cd hermes-agent
+nix develop
+
+# Shell provides:
+#   - Python 3.12 + uv (deps installed into .venv on first entry)
+#   - Node.js 26, ripgrep, git, openssh, ffmpeg on PATH
+#   - Stamp-file optimization: re-entry is near-instant if deps haven't changed
+
+hermes setup
+hermes chat</code></pre>
+<h3>direnv ‏(توصیه‌شده)</h3>
+<p>.envrc ی همراه شل dev را خودکار فعال می‌کند:</p>
+<pre dir="ltr"><code>cd hermes-agent
+direnv allow    # one-time
+# Subsequent entries are near-instant (stamp file skips dep install)</code></pre>
+<h3>Flake Checks</h3>
+<p>فلیک verification ی زمان-build دارد که در CI و محلی اجرا می‌شود:</p>
+<pre dir="ltr"><code># Run all checks
+nix flake check
+
+# Individual checks
+nix build .#checks.x86_64-linux.package-contents   # binaries exist + version
+nix build .#checks.x86_64-linux.entry-points-sync  # pyproject.toml ↔ Nix package sync
+nix build .#checks.x86_64-linux.cli-commands        # gateway/config subcommands
+nix build .#checks.x86_64-linux.managed-guard       # HERMES_MANAGED blocks mutation
+nix build .#checks.x86_64-linux.bundled-skills      # skills present in package
+nix build .#checks.x86_64-linux.config-roundtrip    # merge script preserves user keys</code></pre>
+<details>
+<summary><b>هر بررسی چه چیزی را verify می‌کند</b></summary>
+<div class="table-wrap">
+<table>
+<thead><tr><th>بررسی</th><th>چه چیزی تست می‌شود</th></tr></thead>
+<tbody>
+<tr><td><code>package-contents</code></td><td>باینری‌های hermes و hermes-agent وجود دارند و hermes --version اجرا می‌شود</td></tr>
+<tr><td><code>entry-points-sync</code></td><td>هر ورودی [project.scripts] در pyproject.toml یک باینری wrapped در پکیج Nix دارد</td></tr>
+<tr><td><code>cli-commands</code></td><td>‏hermes --help زیرفرمان‌های gateway و config را expose می‌کند</td></tr>
+<tr><td><code>managed-guard</code></td><td>‏HERMES_MANAGED=true hermes config set ... خطای NixOS چاپ می‌کند</td></tr>
+<tr><td><code>bundled-skills</code></td><td>دایرکتوری skills موجود است، فایل‌های SKILL.md دارد و HERMES_BUNDLED_SKILLS در wrapper ست است</td></tr>
+<tr><td><code>config-roundtrip</code></td><td>۷ سناریوی merge: نصب تازه، override ی Nix، حفظ کلید کاربر، merge مخلوط، merge ی افزایشی MCP، merge عمیق تو-در-تو، idempotency</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> مرجع گزینه‌ها</h2>
+<h3>هسته</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>گزینه</th><th>نوع</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>enable</code></td><td><code>bool</code></td><td><code>false</code></td><td>فعال کردن سرویس hermes-agent</td></tr>
+<tr><td><code>package</code></td><td><code>package</code></td><td><code>hermes-agent</code></td><td>پکیج hermes-agent مورد استفاده</td></tr>
+<tr><td><code>user</code></td><td><code>str</code></td><td><code>"hermes"</code></td><td>کاربر سیستم</td></tr>
+<tr><td><code>group</code></td><td><code>str</code></td><td><code>"hermes"</code></td><td>گروه سیستم</td></tr>
+<tr><td><code>createUser</code></td><td><code>bool</code></td><td><code>true</code></td><td>ساخت خودکار کاربر/گروه</td></tr>
+<tr><td><code>stateDir</code></td><td><code>str</code></td><td><code>"/var/lib/hermes"</code></td><td>دایرکتوری وضعیت ‏(والد HERMES_HOME)</td></tr>
+<tr><td><code>workingDirectory</code></td><td><code>str</code></td><td><code>"${stateDir}/workspace"</code></td><td>دایرکتوری کاری ایجنت</td></tr>
+<tr><td><code>addToSystemPackages</code></td><td><code>bool</code></td><td><code>false</code></td><td>CLI ی hermes روی PATH سیستمی و HERMES_HOME ی system-wide</td></tr>
+</tbody>
+</table>
+</div>
+<h3>پیکربندی</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>گزینه</th><th>نوع</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>settings</code></td><td><code>attrs</code> ‏(deep-merged)</td><td><code>{}</code></td><td>Config ی تعریفی رندر‌شده به config.yaml. تو در توی دلخواه؛ چند تعریف با lib.recursiveUpdate ادغام می‌شوند</td></tr>
+<tr><td><code>configFile</code></td><td><code>null</code> یا ‏<code>path</code></td><td><code>null</code></td><td>مسیر config.yaml ی موجود. اگر ست شود کاملاً بر settings مقدم است</td></tr>
+</tbody>
+</table>
+</div>
+<h3>Secrets و محیط</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>گزینه</th><th>نوع</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>environmentFiles</code></td><td><code>listOf str</code></td><td><code>[]</code></td><td>مسیر فایل‌های env دارای secrets. موقع فعال‌سازی داخل $HERMES_HOME/.env ادغام می‌شود</td></tr>
+<tr><td><code>environment</code></td><td><code>attrsOf str</code></td><td><code>{}</code></td><td>متغیرهای env غیر-secret. <b>در Nix store مرئی‌اند</b> — secrets اینجا نگذارید</td></tr>
+<tr><td><code>authFile</code></td><td><code>null</code> یا ‏<code>path</code></td><td><code>null</code></td><td>seed ی credential های OAuth. فقط در اولین استقرار کپی می‌شود</td></tr>
+<tr><td><code>authFileForceOverwrite</code></td><td><code>bool</code></td><td><code>false</code></td><td>همیشه auth.json را از authFile موقع فعال‌سازی بازنویسی کن</td></tr>
+</tbody>
+</table>
+</div>
+<h3>اسناد</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>گزینه</th><th>نوع</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>documents</code></td><td><code>attrsOf (either str path)</code></td><td><code>{}</code></td><td>فایل‌های workspace. هر کلید مسیری نسبت به workingDirectory است. برای استفاده از این گزینه باید آن را ست کنید.</td></tr>
+<tr><td><code>hermesHomeFiles</code></td><td><code>attrsOf (either str path)</code></td><td><code>{}</code></td><td>فایل‌هایی که به HERMES_HOME می‌روند. SOUL.md و memories/ باید اینجا باشند وگرنه هرمس load شان نمی‌کند.</td></tr>
+</tbody>
+</table>
+</div>
+<h3>سرورهای MCP</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>گزینه</th><th>نوع</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>mcpServers</code></td><td><code>attrsOf submodule</code></td><td><code>{}</code></td><td>تعاریف سرور MCP، ادغام‌شده در settings.mcp_servers</td></tr>
+<tr><td><code>mcpServers.&lt;name&gt;.command</code></td><td><code>null</code> یا ‏<code>str</code></td><td><code>null</code></td><td>فرمان سرور ‏(transport ی stdio)</td></tr>
+<tr><td><code>mcpServers.&lt;name&gt;.args</code></td><td><code>listOf str</code></td><td><code>[]</code></td><td>آرگومان‌های فرمان</td></tr>
+<tr><td><code>mcpServers.&lt;name&gt;.env</code></td><td><code>attrsOf str</code></td><td><code>{}</code></td><td>متغیرهای محیطی پروسهٔ سرور</td></tr>
+<tr><td><code>mcpServers.&lt;name&gt;.url</code></td><td><code>null</code> یا ‏<code>str</code></td><td><code>null</code></td><td>URL ی نقطهٔ پایانی سرور ‏(HTTP/StreamableHTTP)</td></tr>
+<tr><td><code>mcpServers.&lt;name&gt;.headers</code></td><td><code>attrsOf str</code></td><td><code>{}</code></td><td>هدرهای HTTP مثل Authorization</td></tr>
+<tr><td><code>mcpServers.&lt;name&gt;.auth</code></td><td><code>null</code> یا ‏<code>"oauth"</code></td><td><code>null</code></td><td>روش احراز هویت. oauth مقدار OAuth 2.1 PKCE را فعال می‌کند</td></tr>
+<tr><td><code>mcpServers.&lt;name&gt;.enabled</code></td><td><code>bool</code></td><td><code>true</code></td><td>فعال یا غیرفعال کردن این سرور</td></tr>
+<tr><td><code>mcpServers.&lt;name&gt;.timeout</code></td><td><code>null</code> یا ‏<code>int</code></td><td><code>null</code></td><td>timeout ی فراخوانی ابزار به ثانیه ‏(پیش‌فرض ۱۲۰)</td></tr>
+<tr><td><code>mcpServers.&lt;name&gt;.connect_timeout</code></td><td><code>null</code> یا ‏<code>int</code></td><td><code>null</code></td><td>timeout ی اتصال به ثانیه ‏(پیش‌فرض ۶۰)</td></tr>
+<tr><td><code>mcpServers.&lt;name&gt;.tools</code></td><td><code>null</code> یا ‏<code>submodule</code></td><td><code>null</code></td><td>فیلترکردن ابزارها ‏(فهرست‌های include/exclude)</td></tr>
+<tr><td><code>mcpServers.&lt;name&gt;.sampling</code></td><td><code>null</code> یا ‏<code>submodule</code></td><td><code>null</code></td><td>config ی sampling برای درخواست‌های LLM آغاز-شده-توسط-سرور</td></tr>
+</tbody>
+</table>
+</div>
+<h3>رفتار سرویس</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>گزینه</th><th>نوع</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>extraArgs</code></td><td><code>listOf str</code></td><td><code>[]</code></td><td>آرگومان‌های اضافه برای hermes gateway</td></tr>
+<tr><td><code>extraPackages</code></td><td><code>listOf package</code></td><td><code>[]</code></td><td>پکیج‌های اضافه در دسترس ایجنت. به پروفایل per-user ی کاربر hermes اضافه می‌شوند تا فرمان‌های ترمینال، مهارت‌ها و cron job ها همه ببینندشان</td></tr>
+<tr><td><code>extraPlugins</code></td><td><code>listOf package</code></td><td><code>[]</code></td><td>پکیج‌های پلاگین دایرکتوری‌محور که به $HERMES_HOME/plugins/ symlink می‌شوند. هرکدام باید plugin.yaml داشته باشد</td></tr>
+<tr><td><code>extraPythonPackages</code></td><td><code>listOf package</code></td><td><code>[]</code></td><td>پکیج‌های پایتونی افزوده به PYTHONPATH برای کشف پلاگین‌های entry-point. با python312Packages بسازید</td></tr>
+<tr><td><code>extraDependencyGroups</code></td><td><code>listOf str</code></td><td><code>[]</code></td><td>extras ی اختیاری pyproject.toml برای گنجاندن در venv مهرشده ‏(مثل ["hindsight"]). توسط uv حل می‌شود — بدون تداخل</td></tr>
+<tr><td><code>restart</code></td><td><code>str</code></td><td><code>"always"</code></td><td>سیاست Restart= ی systemd. macOS استفاده نمی‌کند.</td></tr>
+<tr><td><code>restartSec</code></td><td><code>int</code></td><td><code>5</code></td><td>مقدار RestartSec= ی systemd. macOS استفاده نمی‌کند.</td></tr>
+</tbody>
+</table>
+</div>
+<h3>Backend ‏(hermes serve / hermes dashboard)</h3>
+<p>این گزینه پروسه‌ای را که Hermes Desktop و داشبورد وب به آن وصل می‌شوند همراه گیت‌وی اجرا می‌کند. با container.enable قابل‌استفاده نیست.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>گزینه</th><th>نوع</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>backend.mode</code></td><td><code>enum ["none" "serve" "dashboard"]</code></td><td><code>"none"</code></td><td>serve بدون UI اجرا می‌شود و /api/ws و /api/pty می‌دهد. dashboard همچنین پنل مرورگری را سرو می‌کند.</td></tr>
+<tr><td><code>backend.host</code></td><td><code>str</code></td><td><code>"127.0.0.1"</code></td><td>آدرس bind. هر آدرسی غیر از loopback گیت احراز هویت را روشن می‌کند.</td></tr>
+<tr><td><code>backend.port</code></td><td><code>port</code></td><td><code>9119</code></td><td>پورت bind</td></tr>
+<tr><td><code>backend.extraArgs</code></td><td><code>listOf str</code></td><td><code>[]</code></td><td>آرگومان‌های بیشتر برای فرمان backend</td></tr>
+</tbody>
+</table>
+</div>
+<h3>فقط Home Manager</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>گزینه</th><th>نوع</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>hermesHome</code></td><td><code>str</code></td><td><code>"${config.home.homeDirectory}/.hermes"</code></td><td>HERMES_HOME مستقیم. ماژول NixOS آن را از stateDir می‌سازد.</td></tr>
+<tr><td><code>gateway.enable</code></td><td><code>bool</code></td><td><code>false</code></td><td>اجرای گیت‌وی پیام‌رسانی. روی ماژول NixOS خود گیت‌وی همان سرویس است پس این گزینه را ندارد.</td></tr>
+</tbody>
+</table>
+</div>
+<h3>‏programs.hermes-agent ‏(فقط Home Manager)</h3>
+<p>‏Home Manager «این اپ را برای من نصب کن» را از «این دیمون را اجرا کن» جدا می‌کند. services.hermes-agent وضعیت، پیکربندی و دیمون‌ها را نگه می‌دارد. programs.hermes-agent آنچه استفاده می‌کنید را نصب و hermesHome و آدرس backend را از services می‌خواند.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>گزینه</th><th>نوع</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>enable</code></td><td><code>bool</code></td><td><code>false</code></td><td>CLI ی hermes به home.packages اضافه و HERMES_HOME برای شل‌هایتان export می‌شود</td></tr>
+<tr><td><code>package</code></td><td><code>package</code></td><td><code>services.hermes-agent.package</code></td><td>پکیج نصبی. پیش‌فرض extraPythonPackages و extraDependencyGroups را از services اعمال می‌کند تا هر دو یک build باشند.</td></tr>
+<tr><td><code>desktop.enable</code></td><td><code>bool</code></td><td><code>false</code></td><td>افزودن اپ Hermes Desktop با launcher روی لینوکس</td></tr>
+<tr><td><code>desktop.package</code></td><td><code>package</code></td><td><code>package.hermesDesktop</code></td><td>پکیج دسکتاپ. پیش‌فرض از package پیروی می‌کند تا اپ و سرویس‌ها یک runtime ی هرمس اجرا کنند.</td></tr>
+</tbody>
+</table>
+</div>
+<pre dir="ltr"><code>programs.hermes-agent = {
+  enable = true;
+  desktop.enable = true;
+};
+
+services.hermes-agent = {
+  enable = true;
+  backend.mode = "serve";
+  backend.sessionTokenFile = config.sops.secrets."hermes/desktop-token".path;
+};</code></pre>
+<p>launcher خودش HERMES_HOME را حمل می‌کند. منوی دسکتاپ هیچ shell profile نمی‌خواند، پس مقداری که programs.hermes-agent.enable با home.sessionVariables export می‌کند فقط به شل تعاملی می‌رسد. بدون آن مقدار در launcher، اپ ~/.hermes را باز می‌کند در حالی که سرویس‌ها از hermesHome استفاده می‌کنند و نه نشستی می‌بینید و نه کلیدی.</p>
+<p>با backend.sessionTokenFile اپ به backend ی سرویس وصل می‌شود به‌جای راه انداختن یکی برای خودش. هر دو سمت فایل را موقع شروع می‌خوانند، پس توکن وارد هیچ مسیر Nix store نمی‌شود. بدون این گزینه هر سمت backend خودش را اجرا می‌کند.</p>
+<p>‏services.hermes-agent.installPackage توسط این تفکیک حذف شد. پیکربندی‌ای که هنوز ستش کند خطایی نام‌برندهٔ جایگزین می‌گیرد.</p>
+<h3>کانتینر ‏(فقط NixOS)</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>گزینه</th><th>نوع</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>container.enable</code></td><td><code>bool</code></td><td><code>false</code></td><td>فعال کردن حالت کانتینر OCI</td></tr>
+<tr><td><code>container.backend</code></td><td><code>enum ["docker" "podman"]</code></td><td><code>"docker"</code></td><td>runtime ی کانتینر</td></tr>
+<tr><td><code>container.image</code></td><td><code>str</code></td><td><code>"ubuntu:24.04"</code></td><td>image پایه ‏(هنگام runtime pull می‌شود)</td></tr>
+<tr><td><code>container.extraVolumes</code></td><td><code>listOf str</code></td><td><code>[]</code></td><td>mount های حجم اضافی ‏(host:container:mode)</td></tr>
+<tr><td><code>container.extraOptions</code></td><td><code>listOf str</code></td><td><code>[]</code></td><td>آرگومان‌های اضافی پاس‌داده به docker create</td></tr>
+<tr><td><code>container.hostUsers</code></td><td><code>listOf str</code></td><td><code>[]</code></td><td>کاربران تعاملی که symlink ی ~/.hermes به stateDir ی سرویس می‌گیرند و خودکار به گروه hermes اضافه می‌شوند</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> چیدمان دایرکتوری، به‌روزرسانی و عیب‌یابی</h2>
+<h3>چیدمان دایرکتوری</h3>
+<h4>حالت Native</h4>
+<pre dir="ltr"><code>/var/lib/hermes/                     # stateDir (owned by hermes:hermes, 0750)
+├── .hermes/                         # HERMES_HOME
+│   ├── SOUL.md                      # from hermesHomeFiles: the agent identity
+│   ├── config.yaml                  # Nix-generated (deep-merged each rebuild)
+│   ├── .managed                     # Marker: CLI config mutation blocked
+│   ├── .env                         # Merged from environment + environmentFiles
+│   ├── auth.json                    # OAuth credentials (seeded, then self-managed)
+│   ├── gateway.pid
+│   ├── state.db
+│   ├── mcp-tokens/                  # OAuth tokens for MCP servers
+│   ├── sessions/
+│   ├── memories/
+│   ├── skills/
+│   ├── cron/
+│   └── logs/
+├── home/                            # Agent HOME
+└── workspace/                       # Agent working directory
+    ├── AGENTS.md                    # from the documents option
+    └── (agent-created files)</code></pre>
+<h4>Home Manager</h4>
+<pre dir="ltr"><code>~/.hermes/                           # hermesHome (HERMES_HOME), 0700
+├── SOUL.md                          # from hermesHomeFiles
+├── config.yaml                      # written by Nix, merged at each activation
+├── .managed                         # marker: names the system that manages this
+├── .env                             # written again from environment + environmentFiles
+├── auth.json                        # OAuth credentials: seeded, then Hermes owns it
+├── memories/  sessions/  skills/  cron/  logs/  plugins/
+└── (runtime state)
+
+~/                                   # workingDirectory, your home by default
+└── AGENTS.md                        # from the documents option</code></pre>
+<h4>حالت Container</h4>
+<p>همان چیدمان، mount شده داخل کانتینر:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مسیر کانتینر</th><th>مسیر host</th><th>حالت</th><th>یادداشت‌ها</th></tr></thead>
+<tbody>
+<tr><td><code>/nix/store</code></td><td><code>/nix/store</code></td><td><code>ro</code></td><td>باینری hermes + همهٔ وابستگی‌های Nix</td></tr>
+<tr><td><code>/data</code></td><td><code>/var/lib/hermes</code></td><td><code>rw</code></td><td>تمام وضعیت، ‏config، ‏workspace</td></tr>
+<tr><td><code>/home/hermes</code></td><td><code>${stateDir}/home</code></td><td><code>rw</code></td><td>خانهٔ پایدار ایجنت — pip install --user، کش ابزارها</td></tr>
+<tr><td><code>/usr</code>، ‏<code>/usr/local</code>، ‏<code>/tmp</code></td><td>(لایهٔ قابل‌نوشتن)</td><td><code>rw</code></td><td>نصب‌های apt/pip/npm — بین ری‌استارت‌ها می‌ماند، هنگام بازسازی از دست می‌رود</td></tr>
+</tbody>
+</table>
+</div>
+<h3>به‌روزرسانی</h3>
+<pre dir="ltr"><code># Update the flake input (run from the directory containing flake.nix)
+cd /etc/nixos &amp;&amp; nix flake update hermes-agent
+
+# Rebuild
+sudo nixos-rebuild switch          # for the NixOS module
+home-manager switch                # for the Home Manager module</code></pre>
+<p>در حالت کانتینر symlink ی current-package به‌روز می‌شود و ایجنت بعد از ری‌استارت باینری جدید را می‌گیرد. بدون بازسازی کانتینر، بدون از دست رفتن پکیج‌های نصب‌شده.</p>
+<h3>عیب‌یابی</h3>
+<div class="callout tip">
+  <div class="callout-title">💡 کاربران Podman</div>
+  <p>همهٔ فرمان‌های docker پایین با podman هم همین‌طور کار می‌کنند. اگر container.backend = "podman" ست کرده‌اید متناظر جایگزین کنید.</p>
+</div>
+<h4>لاگ‌های سرویس</h4>
+<pre dir="ltr"><code># Both modes use the same systemd unit
+journalctl -u hermes-agent -f
+
+# Container mode: also available directly
+docker logs -f hermes-agent</code></pre>
+<h4>بازرسی کانتینر</h4>
+<pre dir="ltr"><code>systemctl status hermes-agent
+docker ps -a --filter name=hermes-agent
+docker inspect hermes-agent --format='{{.State.Status}}'
+docker exec -it hermes-agent bash
+docker exec hermes-agent readlink /data/current-package
+docker exec hermes-agent cat /data/.container-identity</code></pre>
+<h4>اجبار بازسازی کانتینر</h4>
+<p>برای ریست لایهٔ قابل‌نوشتن ‏(Ubuntu تازه):</p>
+<pre dir="ltr"><code>sudo systemctl stop hermes-agent
+docker rm -f hermes-agent
+sudo rm /var/lib/hermes/.container-identity
+sudo systemctl start hermes-agent</code></pre>
+<h4>تأیید بارگیری Secrets</h4>
+<p>اگر ایجنت شروع می‌شود ولی با ارائه‌دهندهٔ LLM احراز هویت نمی‌کند بررسی کنید فایل .env درست ادغام شده:</p>
+<pre dir="ltr"><code># Native mode
+sudo -u hermes cat /var/lib/hermes/.hermes/.env
+
+# Container mode
+docker exec hermes-agent cat /data/.hermes/.env</code></pre>
+<h4>تأیید GC Root</h4>
+<pre dir="ltr"><code>nix-store --query --roots $(docker exec hermes-agent readlink /data/current-package)</code></pre>
+<h4>مشکلات رایج</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>علامت</th><th>علت</th><th>اصلاح</th></tr></thead>
+<tbody>
+<tr><td>‏<code>Cannot save configuration: managed by NixOS</code></td><td>گاردهای CLI فعال‌اند</td><td>configuration.nix را ویرایش و nixos-rebuild switch کنید</td></tr>
+<tr><td>‏<code>No adapter available for discord</code> ‏(یا telegram/slack)</td><td>وابستگی‌های پیام‌رسانی در venv ی مهر-Nix غایب‌اند</td><td>نوع #messaging را نصب کنید: ‏nix profile install ...#messaging. برای ماژول NixOS: ‏extraDependencyGroups = [ "messaging" ]. برای خطای زیرین journalctl -u hermes-agent را برای FeatureUnavailable یا requirements not met چک کنید.</td></tr>
+<tr><td>کانتینر غیرمنتظره بازسازی شد</td><td>‏extraVolumes یا extraOptions یا image تغییر کرده</td><td>منتظر‌شده — لایهٔ قابل‌نوشتن ریست می‌شود. پکیج‌ها را دوباره نصب یا از image سفارشی استفاده کنید</td></tr>
+<tr><td>‏<code>hermes --version</code> نسخه قدیمی نشان می‌دهد</td><td>کانتینر ری‌استارت نشده</td><td>‏<code>systemctl restart hermes-agent</code></td></tr>
+<tr><td>Permission denied روی /var/lib/hermes</td><td>دایرکتوری وضعیت 0750 hermes:hermes است</td><td>از docker exec یا sudo -u hermes استفاده کنید</td></tr>
+<tr><td>‏<code>nix-collect-garbage</code> هرمس را حذف کرد</td><td>GC root غایب است</td><td>سرویس را ری‌استارت کنید ‏(preStart دوباره GC root می‌سازد)</td></tr>
+<tr><td>‏<code>no container with name or ID "hermes-agent"</code> ‏(Podman)</td><td>کانتینر rootful ی Podman برای کاربر عادی مرئی نیست</td><td>sudo بی‌رمز برای podman بدهید ‏(بخش حالت کانتینر را ببینید)</td></tr>
+<tr><td>‏<code>unable to find user hermes</code></td><td>کانتینر هنوز در حال شروع است ‏(entrypoint هنوز کاربر نساخته)</td><td>چند ثانیه صبر و دوباره تلاش — CLI خودکار retry می‌کند</td></tr>
+<tr><td>ابزارِ افزوده-با-extraPackages در ترمینال پیدا نمی‌شود</td><td>nixos-rebuild switch لازم است تا پروفایل per-user به‌روز شود</td><td>Rebuild و ری‌استارت: ‏nixos-rebuild switch &amp;&amp; systemctl restart hermes-agent</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<div class="pager">
+  <a href="termux.html"><span class="dir">→ قبلی</span><span class="ttl">ترماکس ‏(اندروید)</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+
+
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/getting-started/nix-setup" target="_blank" rel="noopener">Nix &amp; NixOS Setup</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

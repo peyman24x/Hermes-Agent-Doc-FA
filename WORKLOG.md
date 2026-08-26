@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۹۹ از ۲۰۷ صفحه (۴۸٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۰۰ از ۲۰۷ صفحه (۴۸٪)** |
 
 ---
 
@@ -512,6 +512,12 @@ hermes-docs-fa/
 - زنجیرهٔ pager: …teams-meetings ← whatsapp-cloud ← google_chat ← (به‌زودی)
 - پیشرفت: **۹۹ از ۲۰۷ صفحه فعال (۴۸٪)**
 
+### نشست ۶۳ — 2026-08-26 — 🐚 نصب با Nix — 🎉 شروع کار ۷/۷ کامل شد
+- ترجمه و انتشار «نصب با Nix» (۱۳ بخش، ~۱۲۰۰ خط، سه‌مرحله‌ای): هشدار Tier 2، جدول چهار سطح ‏(nix run/Home Manager/NixOS native/NixOS container)، شروع سریع بدون clone، ماژول NixOS با پیکربندی مینیمال و CLI آگاه-از-کانتینر و دو حالت استقرار، پیکربندی تعریفی با deep-merge و برگهٔ تقلب ۱۷گانه، مدیریت secrets با sops-nix/agenix و seed ی OAuth، اسناد دوگزینه‌ای documents/hermesHomeFiles، سرورهای MCP با stdio/HTTP/OAuth-PKCE و sampling، حالت Managed با بلاک پنج فرمان، ماژول Home Manager با هشدار linger و backend.mode، معماری کانتینر با جدول ماندگاری و GC root و hash ی هویت، پلاگین‌های تعریفی ‏(extraPlugins/extraPythonPackages/extraDependencyGroups + overlay)، dev shell و flake checks، مرجع کامل گزینه‌ها در ده جدول، چیدمان دایرکتوری هر سه حالت و عیب‌یابی
+- 🎉 گروه «شروع کار» کاملاً ترجمه شد: ۷ از ۷ صفحه — چهارمین گروه کامل پروژه
+- اصلاح: pager قبلی به termux اشاره کرد نه مسیر ناموجود
+- پیشرفت: **۱۰۰ از ۲۰۷ صفحه فعال (۴۸٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -617,6 +623,7 @@ hermes-docs-fa/
 | 97 | `user-guide/features/hooks.html` | هوک‌های چرخهٔ حیات |
 | 98 | `user-guide/messaging/whatsapp-cloud.html` | واتساپ بیزینس (Cloud API) |
 | 99 | `user-guide/messaging/google_chat.html` | گوگل‌چت |
+| 100 | `getting-started/nix-setup.html` | نصب با Nix |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|
