@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پروتکل ACP — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/acp" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌ها<span class="sep">/</span><strong>پروتکل ACP</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>یکپارچگی میزبان ACP ‏(ACP Host Integration)</h1>
+<p>‏Hermes Agent می‌تواند به‌عنوان سرور ACP اجرا شود تا میزبان‌های سازگار-با-ACP از طریق stdio با هرمس حرف بزنند. ویرایشگرها می‌توانند رندر کنند:</p>
+<ul>
+  <li>پیام‌های گفتگو</li>
+  <li>فعالیت ابزار</li>
+  <li>diff های فایل</li>
+  <li>فرمان‌های ترمینال</li>
+  <li>پرامپت‌های تأیید</li>
+  <li>chunk های استریم‌شدهٔ تفکر / پاسخ</li>
+</ul>
+<p>سایر میزبان‌ها می‌توانند با همین پروتکل رویدادهای همکاری را به هرمس مسیریابی کنند. ‏ACP وقتی انتخاب خوبی است که بخواهید هرمس هویت، ‏setup ی ارائه‌دهنده، حافظه، مهارت‌ها و ابزارهای فعلی‌اش را نگه دارد در حالی که اپ دیگری مالک transport ی گفتگوست.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> هرمس در حالت ACP چه چیزی expose می‌کند</h2>
+<p>هرمس با تول‌ست منتخب ‏hermes-acp طراحی‌شده برای گردش‌کارهای ویرایشگر اجرا می‌شود. شامل:</p>
+<ul>
+  <li>ابزارهای فایل: ‏read_file، ‏write_file، ‏patch، ‏search_files</li>
+  <li>ابزارهای ترمینال: ‏terminal، ‏process</li>
+  <li>ابزارهای وب/مرورگر</li>
+  <li>حافظه، ‏todo، جستجوی نشست</li>
+  <li>مهارت‌ها</li>
+  <li>execute_code و delegate_task</li>
+  <li>بینایی</li>
+</ul>
+<p>عمداً چیزهایی که در UX ی معمول ویرایشگر جا نمی‌شوند — مثل تحویل پیام‌رسانی و مدیریت cronjob — مستثنی‌اند.</p>
+<h3>نصب</h3>
+<p>هرمس را عادی نصب کنید سپس extra ی ACP را از checkout نصب اضافه کنید:</p>
+<pre dir="ltr"><code>cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e '.[acp]'</code></pre>
+<p>این وابستگی agent-client-protocol را نصب و اینها را فعال می‌کند: ‏hermes acp، ‏hermes-acp و python -m acp_adapter.</p>
+<h3>راه‌اندازی سرور ACP</h3>
+<p>هرکدام از این‌ها هرمس را در حالت ACP شروع می‌کنند: ‏<code>hermes acp</code> · ‏<code>hermes-acp</code> · ‏<code>python -m acp_adapter</code></p>
+<p>هرمس به stderr لاg می‌زند تا stdout فقط برای ترافیک ACP ی JSON-RPC محفوظ بماند. برای بررسی‌های غیرتعاملی: ‏hermes acp --version و hermes acp --check.</p>
+<h4>ابزارهای مرورگر ‏(اختیاری)</h4>
+<p>ابزارهای مرورگر ‏(browser_navigate، ‏browser_click و…) به پکیج npm ی agent-browser و Chromium تکیه دارند که بخشی از wheel ی پایتون نیستند. با این نصبشان کنید:</p>
+<pre dir="ltr"><code>hermes acp --setup-browser           # interactive (prompts before ~400 MB download)
+hermes acp --setup-browser --yes     # accept the download non-interactively</code></pre>
+<p>این فرمان مستقل است؛ جریان terminal-auth ‏(hermes acp --setup) بعد از انتخاب مدل سؤال bootstrap ی مرورگر را هم می‌پرسد، پس بیشتر کاربران هرگز لازم نیست مستقیم --setup-browser بزنند. کارهایی که می‌کند:</p>
+<ul>
+  <li>Node.js ۲۶ را اگر غایب باشد در ~/.hermes/node/ نصب می‌کند</li>
+  <li>‏agent-browser و @askjo/camofox-browser را با npm global داخل همان prefix نصب می‌کند ‏(--prefix ی npm به Node ی مدیریت‌شده-توسط-هرمسِ قابل-نوشتن-توسط-کاربر اشاره دارد؛ بدون sudo)</li>
+  <li>‏Chromium ی Playwright را نصب یا Chrome/Chromium سیستمی آشکارشده را مصرف می‌کند</li>
+</ul>
+<p>bootstrap ی idempotent است — اجرای دوباره سریع است و کار انجام‌شده را skip می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> راه‌اندازی میزبان‌ها</h2>
+<h3>کانال‌های Buzz ‏(relay bridge)</h3>
+<p><a href="https://github.com/block/buzz" target="_blank" rel="noopener">Buzz</a> پلتفرم همکاری مبتنی-بر-Nostr برای انسان‌ها و ایجنت‌هاست. harness ی buzz-acp آن کانال‌های Buzz را روی stdio به هر ایجنت ACP ی وصل می‌کند:</p>
+<pre dir="ltr"><code>Buzz relay &lt;-- WebSocket --&gt; buzz-acp &lt;-- ACP over stdio --&gt; Hermes Agent</code></pre>
+<p>این یک یکپارچگی transport است نه نصب دوم هرمس. زیرپروسهٔ launch‌شده توسط buzz-acp همان config، credential ها، حافظه، مهارت‌ها و وضعیت hermes ی همان host را مصرف می‌کند.</p>
+<p>(این با <a href="#buzz-desktop">runtime ی مدیریت‌شدهٔ Buzz Desktop</a> فرق دارد که هرمس را محلیاً به‌عنوان harness ی preset spawn می‌کند. relay bridge برای پیوستن به <i>کانال‌های</i> Buzz به‌عنوان هویت ایجنتی است، معمولاً روی سرور.)</p>
+<p>پیش‌نیازها:</p>
+<ul>
+  <li>نصب ACP و hermes acp --check بالا را کامل کرده باشید.</li>
+  <li>buzz-acp و CLI ی buzz را از مخزن Buzz بسازید ‏(cargo build --release -p buzz-acp).</li>
+  <li>یک keypair ی Nostr اختصاصی برای هرمس ضرب ‏(buzz-admin generate-key) و به‌عنوان عضو relay ثبت کنید ‏(buzz-admin add-member). هر ایجنت هویت خودش را needs — keypair انسانی را دوباره‌مصرف نکنید.</li>
+  <li>آن هویت را به کانال‌های مقصود Buzz اضافه کنید.</li>
+</ul>
+<p>اجرای یک پل:</p>
+<pre dir="ltr"><code>export BUZZ_RELAY_URL="wss://community.example.com"
+export BUZZ_PRIVATE_KEY="..."
+export BUZZ_API_TOKEN="..."
+export BUZZ_ACP_AGENT_COMMAND="hermes"
+export BUZZ_ACP_AGENT_ARGS="acp"
+
+buzz-acp</code></pre>
+<p>‏BUZZ_API_TOKEN فقط وقتی لازم است که relay احراز هویت توکنی اجبار کند. کلید خصوصی یا توکن API را commit یا paste نکنید.</p>
+<p>برای استقرار سروری پایدار buzz-acp را زیر service manager با همان کاربر سیستمی که مالک خانهٔ هرمس مقصود است اجرا کنید. ‏setup، تولید کلید، کشف کانال و گزینه‌های per-agent در README ی buzz-acp مستند است.</p>
+<p>پل هر کانال Buzz ی که هویت هرمس عضوش باشد را آشکار و موقع افزوده شدن به کانال جدید خودکار مشترک می‌شود. پس عضویت کانال Buzz همان مرز دسترسی می‌ماند؛ هرمس نیازی به فهرست کانال جداگانه در config خودش ندارد.</p>
+<p>برای expose کردن فعالیت ACP ی هرمس در Buzz Desktop ی owner مقدار زیر را اضافه کنید:</p>
+<div class="codebox"><pre><code>export BUZZ_ACP_RELAY_OBSERVER="true"</code></pre></div>
+<p>این فریم‌های observer رمزشدهٔ kind ۲۴۲۰۰ خطاب به owner ی ایجمنت منتشر می‌کند ‏(NIP-AO ی Buzz). ‏Desktop جریان زندهٔ چرخهٔ حیات، ابزار، پاسخ و مصرف را در Activity log ایجنت رندر می‌کند. relay این فریم‌ها را زودگذر تلقی می‌کند پس Desktop باید قبل از شروع نوبت آنلاین باشد؛ آرشیو observer ی محلی‌اش تاریخچهٔ پایدار سمت-owner است.</p>
+<p>پل‌های headless درخواست‌های مجوز ACP را خودشان جواب می‌دهند چون ویرایشگری حاضر نیست دیالوگ تأیید نشان دهد — بخش نگه داشتن ایجنت‌های Buzz فقط-owner را ببینید. پل را اتوماسیون ممتاز تلقی کنید: حساب OS ی اختصاصی، محدود کردن کاربران Buzz ای که می‌توانند ایجنت را prompt کنند ‏(buzz-acp گیت respond ی فقط-owner با BUZZ_ACP_AGENT_OWNER دارد) و اعطای عضویت فقط در کانال‌هایی که انتظار کار هرمس را دارید.</p>
+<h3>VS Code</h3>
+<p>افزونهٔ <a href="https://marketplace.visualstudio.com/items?itemName=formulahendry.acp-client" target="_blank" rel="noopener">ACP Client</a> را نصب کنید. اتصال: پنل ACP Client را از Activity Bar باز ← از فهرست ایجنت‌های داخلی <b>Hermes Agent</b> را بردارید ← Connect و شروع به چت.</p>
+<p>تعریف دستی از طریق settings ی VS Code زیر acp.agents:</p>
+<pre dir="ltr"><code>{
+  "acp.agents": {
+    "Hermes Agent": {
+      "command": "hermes",
+      "args": ["acp"]
+    }
+  }
+}</code></pre>
+<h3>Zed</h3>
+<p>هرمس را به‌عنوان سرور ایجنت سفارشی در settings ی Zed پیکربندی کنید: Agent Panel را باز، سرور ایجنت سفارشی را با config زیر اضافه کنید و thread جدید external-agent ی Hermes را شروع کنید.</p>
+<pre dir="ltr"><code>{
+  "agent_servers": {
+    "hermes-agent": {
+      "type": "custom",
+      "command": "hermes",
+      "args": ["acp"]
+    }
+  }
+}</code></pre>
+<p>پیش‌نیاز: اول credential های ارائه‌دهنده را با hermes model پیکربندی کنید یا در ~/.hermes/.env / ~/.hermes/config.yaml ست کنید.</p>
+<h3>JetBrains</h3>
+<p>افزونه‌ای سازگار-با-ACP مصرف و به hermes acp یا hermes-acp اشاره دهید.</p>
+<h3 id="buzz-desktop">Buzz Desktop</h3>
+<p>‏Buzz مقدار Hermes Agent را به‌عنوان runtime ی preset ارسال می‌کند. با نصب عادی هرمس، Buzz خودآشکارش می‌کند — Settings ← Runtimes را باز کنید و هرمس زیر runtimes تان ظاهر می‌شود.</p>
+<p>اگر کشف شکست خورد ‏(نصب‌های قدیمی) مطمئن شوید launcher ی ACP روی PATH ی login-shell حل می‌شود:</p>
+<pre dir="ltr"><code>command -v hermes-acp || command -v hermes</code></pre>
+<p>نصب‌های اخیر هر دو launcher ی hermes و hermes-acp را در ~/.local/bin می‌نویسند؛ ‏hermes update مقدار hermes-acp را به نصب‌های قدیمی اضافه می‌کند. fallback دستی: فرمان ایجنت Buzz را hermes با args ی [acp] پیکربندی کنید.</p>
+<h4>انتخاب‌گر مدل</h4>
+<p>‏Buzz Desktop ‏(v0.5.1+) منوی کامل مدل‌های هرمس را در settings ی runtime ایجنت رندر می‌کند. فهرست از خود هرمس روی ACP می‌آید: هر مدلی از ارائه‌دهنده‌هایی که در هرمس احراز کرده‌اید را نشان می‌دهد ‏(همان موجودی پشت hermes model و فرمان ‎/model‎)، پس نبود مدلی از منو یعنی provider اش در سمت هرمس credential ندارد.</p>
+<p>ID های ورودی به شکل provider:model ‏(مثل openrouter:z-ai/glm-5.1) یا custom:&lt;name&gt;:&lt;model&gt; برای نقاط پایانی سفارشی سازگار-با-OpenAI تعریف‌شده در config.yaml اند. انتخاب مدل به نشست همان ایجنت اعمال می‌شود؛ پیش‌فرض سراسری هرمس‌تان را عوض نمی‌کند — آن کار با hermes model.</p>
+<h4>نگه داشتن ایجنت‌های Buzz فقط-owner</h4>
+<p>‏Buzz هر ایجنتی را با «Who can talk to this agent» روی Owner only می‌سازد. وقتی runtime هرمس است همین‌جا رهایش کنید.</p>
+<p>دو رفتار روی این مسیر ترکیب می‌شوند. تول‌ست hermes-acp شامل terminal و execute_code است و پل ACP ی Buzz درخواست‌های مجوز هرمس را خودش با allow_once جواب می‌دهد نه اینکه surface کند. پس ایجنت هرمس در Buzz بدون پرامپت روی host فرمان شل اجرا می‌کند — یکی را برای rm -rf روی دایرکتوری scratch فرستادم و حذفش کرد، بدون هیچ پرامپتی.</p>
+<p>انتخاب Anyone همان دسترسی شل را به هر نویسنده‌ای که به کانال برسد می‌دهد. Buzz موقع انتخابش هشدار نمی‌دهد.</p>
+<p>هیچ‌کدام از mitigation های بدیهی امروز جواب نمی‌دهند:</p>
+<ul>
+  <li>‏approvals.mode: manual باعث می‌شود هرمس درخواست مجوز بدهد ولی Buzz خودکار approve و فرمان همچنان اجرا می‌شود.</li>
+  <li>platform_toolsets.acp تول‌ست ACP را تنگ نمی‌کند، پس نمی‌توان با آن terminal را انداخت.</li>
+</ul>
+<p>‏!shutdown از طرف owner ایجنت را در هر حالتی متوقف می‌کند و Buzz آن فرمان را از بقیه نادیده می‌گیرد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پیکربندی، credential ها و متغیرهای میزبان</h2>
+<h3>پیکربندی و credential ها</h3>
+<p>حالت ACP همان پیکربندی هرمسِ CLI را مصرف می‌کند: ‏~/.hermes/.env، ‏~/.hermes/config.yaml، ‏~/.hermes/skills/ و ~/.hermes/state.db.</p>
+<p>حل ارائه‌دهنده از resolver ی runtime عادی هرمس استفاده می‌کند، پس ACP ارائه‌دهنده و credential های فعلی‌تان را به ارث می‌برد. هرمس همچنین روش auth ی ترمینال ‏(--setup) را برای کلاینت‌های ACP ی اولین-اجرا advertise می‌کند که setup ی تعاملی مدل/ارائه‌دهنده را باز می‌کند.</p>
+<h3>یکپارچگی میزبان</h3>
+<p>این متغیرها توسط <b>پروسهٔ میزبان ACP</b> ‏(یک ویرایشگر یا harness ی ایجنت دیگر) روی زیرپروسهٔ هرمسِ spawn شده ست می‌شوند. پیکربندی کاربر نیستند — دستی در .env یا config.yaml ست نکنید.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>متغیر</th><th>مقدار</th><th>اثر</th></tr></thead>
+<tbody>
+<tr><td>‏<code>HERMES_ACP_SKIP_CONFIGURED_MCP</code></td><td><code>1</code></td><td>رد شدن از شروع سرورهای MCP ی پیکربندی-سراسری config.yaml قبل از شروع حلقهٔ JSON-RPC ی ACP.</td></tr>
+</tbody>
+</table>
+</div>
+<p>هرمس معمولاً قبل از ورود به حلقهٔ JSON-RPC ی ACP همهٔ سرورهای MCP ی config.yaml را شروع می‌کند. میزبانی که خودش MCP را مالک است — و سرورهای نشست را صریحاً از طریق session/new پاس می‌دهد — به آن startup سراسری نیاز ندارد وگرنه سرور MCP ی کند یا تعاملی نامرتبط initialize را به تأخیر می‌انداخت. ست کردن نشانگر دقیقاً به ۱ اجازه می‌دهد چنین میزبانی آن را skip کند.</p>
+<p>فقط کشف سراسری config.yaml رد می‌شود. <b>سرورهای MCP ی تأمین‌شده توسط نشست ACP از طریق session/new همچنان ثبت می‌شوند</b>، پس میزبان هیچ قابلیتی که خواسته را از دست نمی‌دهد. هر مقدار دیگر ‏(unset، ‏خالی، ۰، false) رفتار پیش‌فرض را نگه می‌دارد تا رشته‌ای truthy-نما نتواند بی‌سروصدا MCP را خاموش کند.</p>
+<h3>رفتار نشست</h3>
+<p>نشست‌های ACP تا سرور در حال اجراست توسط مدیر نشست درون-حافظه‌ای adapter ردیابی می‌شوند. هر نشست ذخیره می‌کند: شناسهٔ نشست، ‏دایرکتوری کاری، ‏مدل انتخابی، تاریخچهٔ فعلی گفتگو و cancel event. ‏AIAgent ی زیرین همچنان مسیرهای ماندگاری/لاg عادی هرمس را مصرف می‌کند ولی list/load/resume/fork ی ACP به پروسهٔ سرور ACP ی فعلاً-در-حال-اجرا scope شده‌اند.</p>
+<h3>رفتار دایرکتوری کاری</h3>
+<p>نشست‌های ACP مقدار cwd ی ویرایشگر را به task ID هرمس bind می‌کنند تا ابزارهای فایل و ترمینال نسبت به workspace ی ویرایشگر اجرا شوند نه cwd ی پروسهٔ سرور.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> تأییدها</h2>
+<p>فرمان‌های ترمینال خطرناک را می‌توان به‌عنوان پرامپت تأیید به ویرایشگر برگرداند. گزینه‌های تأیید ACP ساده‌تر از جریان CLI اند:</p>
+<ul>
+  <li>allow once</li>
+  <li>allow always</li>
+  <li>deny</li>
+</ul>
+<p>اینکه واقعاً پرامپت ببینید به میزبان بستگی دارد. میزبان آزاد است درخواست را برنامه‌نویسی‌شده جواب دهد به‌جای نمایش به شما، در این صورت این گزینه‌ها روی سیم وجود دارند ولی هرگز به انسان نمی‌رسند. ‏Buzz Desktop همین کار را می‌کند، پس آن مسیر را فارغ از تنظیم approvals تان execution ی بی‌نظارت تلقی کنید.</p>
+<p>روی timeout یا خطا، پل تأیید درخواست را deny می‌کند.</p>
+<h3>auto-approval ی ویرایش-محور scope شده-به-نشست</h3>
+<p>‏ACP طبقهٔ سومی بین allow once و allow always expose می‌کند: <b>Allow for session</b>. برداشتنش از پرامپت مجوز ویرایشگر، تأیید را فقط داخل نشست ACP ی فعلی ثبت می‌کند — هر فرمان منطبق بعدی در همان نشست بدون پرامپت عبور می‌کند ولی نشست ACP ی جدید ‏(یا ری‌استارت ویرایشگر) تخته را پاک و اولین بار دوباره prompt می‌کند.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>گزینه</th><th>برچسب ویرایشگر</th><th>Scope</th><th>ماندگار بین ری‌استارت‌ها؟</th></tr></thead>
+<tbody>
+<tr><td><code>allow_once</code></td><td>Allow once</td><td>همین یک فراخوانی ابزار</td><td>نه</td></tr>
+<tr><td><code>allow_session</code></td><td>Allow for session</td><td>همهٔ فراخوانی‌های منطبق در این نشست ACP</td><td>نه — پایان نشست پاک می‌شود</td></tr>
+<tr><td><code>allow_always</code></td><td>Allow always</td><td>همهٔ نشست‌های آینده</td><td>بله ‏(در allowlist ی دائمی هرمس نوشته می‌شود)</td></tr>
+<tr><td><code>deny</code></td><td>Deny</td><td>همین یک فراخوانی ابزار</td><td>نه</td></tr>
+</tbody>
+</table>
+</div>
+<p>‏allow_session پیش‌فرض درست برای گردش‌کار ویرایشگری است که ایجنت را در طول یک تسک اعتماد می‌کنید ولی نمی‌خواهید ورودی allowlist بلندعمر بدهید. مصالحه امنیتی ساده است: هرچه scope پهن‌تر، ویرایشگر کمتر مزاحمتان می‌شود و ایجنت بدرفتار ‏(یا prompt injection) بیشتر می‌تواند پیش از متوجه شدن‌تان خرابکاری کند. برای فرمان‌های ناآشنا از allow_once شروع؛ بعد از دیدن چند اجرای صحیح الگوی واحد به allow_session ارتقا دهید؛ ‏allow_always را برای فرمان‌های واقعاً idempotent ی همیشه-مورد-اعتماد ‏(مثل git status) نگه دارید.</p>
+<p>پل ACP این گزینه‌ها را روی معناشناسی تأیید داخلی هرمس نگاشت می‌کند — allow_always مثل CLI ورودی allowlist دائمی می‌نویسد و allow_session فقط cache ی تأیید درون-پروسه‌ای نشست ACP ی فعلی را تحت تأثیر می‌گذارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> عیب‌یابی</h2>
+<h3>ایجنت ACP در ویرایشگر ظاهر نمی‌شود</h3>
+<p>بررسی کنید:</p>
+<ul>
+  <li>برای توسعهٔ دستی/محلی، فرمان میزبان به hermes acp اشاره کند.</li>
+  <li>هرمس نصب و روی PATH باشد.</li>
+  <li>extra ی ACP نصب باشد ‏(cd ~/.hermes/hermes-agent && uv pip install -e '.[acp]').</li>
+</ul>
+<h3>ACP شروع می‌شود ولی فوراً خطا می‌دهد</h3>
+<p>این بررسی‌ها را امتحان کنید:</p>
+<pre dir="ltr"><code>hermes acp --version
+hermes acp --check
+hermes doctor
+hermes status</code></pre>
+<h3>credential های جامانده</h3>
+<p>حالت ACP از setup ی موجود هرمس مصرف می‌کند. با این credential ها را پیکربندی کنید:</p>
+<pre dir="ltr"><code>hermes model</code></pre>
+<p>یا با ویرایش ~/.hermes/.env. جریان terminal-auth ‏(hermes acp --setup) هم می‌تواند setup ی تعاملی ارائه‌دهنده/مدل را trigger کند.</p>
+<h3>ببینید نیز</h3>
+<ul>
+  <li><a href="https://github.com/block/buzz/tree/main/crates/buzz-acp" target="_blank" rel="noopener">harness ی ACP ی Buzz</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/acp-internals" target="_blank" rel="noopener">internals ی ACP</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/provider-runtime" target="_blank" rel="noopener">حل runtime ی ارائه‌دهنده</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/tools-runtime" target="_blank" rel="noopener">runtime ی ابزارها</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="memory-providers.html"><span class="dir">→ قبلی</span><span class="ttl">ارائه‌دهندگان حافظهٔ خارجی</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">صفحات دیگر (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/acp" target="_blank" rel="noopener">ACP Host Integration</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

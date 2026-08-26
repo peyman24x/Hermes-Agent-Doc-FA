@@ -12,7 +12,7 @@
 | **مخزن گیت‌هاب** | [peyman24x/Hermes-Agent-Doc-FA](https://github.com/peyman24x/Hermes-Agent-Doc-FA) |
 | **سایت آنلاین** | [hermes-agent-farsi.pages.dev](https://hermes-agent-farsi.pages.dev) ‏(اصلی) · [doc.hermes.peyman24x.ir](https://doc.hermes.peyman24x.ir) ‏(پشتیبان ماهانه) |
 | **تاریخ شروع** | ۲۰۲۶-۰۸-۲۳ |
-| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۱۵ از ۲۰۷ صفحه (۵۶٪)** |
+| **وضعیت کلان** | ✅ زیرساخت کامل · 🔄 ترجمه در جریان: **۱۱۶ از ۲۰۷ صفحه (۵۶٪)** |
 
 ---
 
@@ -571,6 +571,11 @@ hermes-docs-fa/
 - زنجیرهٔ pager: …integrations/index ← nous-portal ← (providers به‌زودی)
 - پیشرفت: **۱۱۵ از ۲۰۷ صفحه فعال (۵۶٪)**
 
+### نشست ۷۲ — 2026-08-27 — 🔌 یکپارچگی میزبان ACP
+- ترجمه و انتشار «پروتکل ACP» (۵ بخش): تول‌ست منتخب hermes-acp، نصب extra ی acp و سه راه راه‌اندازی سرور، bootstrap ی ابزار مرورگر با --setup-browser ‏(Node ۲۶ + agent-browser + Playwright)، میزبان Buzz کانال‌ها با relay bridge ‏(keypair ی Nostr اختصاصی، NIP-AO observer frames، گیت فقط-owner)، VS Code/Zed/JetBrains/Buzz Desktop با انتخاب‌گر مدل provider:model، متغیر میزبان HERMES_ACP_SKIP_CONFIGURED_MCP، چهار سطح تأیید شامل allow_session ی scope شده-به-نشست با جدول مصالحه امنیتی و عیب‌یابی
+- pager قبلی به memory-providers اشاره کرد (honcho هنوز ترجمه نشده؛ بعداً زنجیره درست می‌شود)
+- پیشرفت: **۱۱۶ از ۲۰۷ صفحه فعال (۵۶٪)**
+
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -692,6 +697,7 @@ hermes-docs-fa/
 | 113 | `integrations/index.html` | نمای کلی یکپارچه‌سازی‌ها |
 | 114 | `integrations/buzz.html` | Buzz |
 | 115 | `integrations/nous-portal.html` | Nous Portal |
+| 116 | `user-guide/features/acp.html` | پروتکل ACP |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|
