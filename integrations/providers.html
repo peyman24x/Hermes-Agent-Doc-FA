@@ -82,7 +82,7 @@
 </tbody>
 </table>
 </div>
-<p>برای مسیر رسمیِ کلید-API، <a href="https://hermes-agent.nousresearch.com/docs/guides/google-gemini" target="_blank" rel="noopener">راهنمای اختصاصی Google Gemini</a> را ببینید.</p>
+<p>برای مسیر رسمیِ کلید-API، <a href="../guides/google-gemini.html" target="_blank" rel="noopener">راهنمای اختصاصی Google Gemini</a> را ببینید.</p>
 <div class="callout tip">
   <div class="callout-title">💡</div>
   <p><b>نام مستعار کلید مدل:</b> در بخش model: پیکربندی، می‌توانید برای شناسهٔ مدل‌تان هم از default: استفاده کنید هم از model:. هر دو حالت model: { default: my-model } و model: { model: my-model } دقیقاً یکسان کار می‌کنند.</p>
@@ -147,7 +147,7 @@ hermes portal info        # inspect login + routing at any time</code></pre>
 <p><b>‏Anthropic.</b> مسیر OAuth مثل Claude Code روی حسابتان Anthropic عمل می‌کند و <b>فقط روی طرح Claude Max با اعتبارهای خریداری‌شدهٔ مصرف اضافه کار می‌کند</b> — سهمیهٔ پایهٔ Max هرگز توسط هرمس مصرف نمی‌شود، فقط اعتبارهای اضافه/مازاد روی آن. مشترکان Claude Pro نمی‌توانند از این مسیر استفاده کنند؛ جایگزین پشتیبانی‌شده ANTHROPIC_API_KEY است که per-token روی سازمان آن کلید با قیمت استاندارد API صورتحساب می‌شود. بخش <a href="#anthropic-native">‏Anthropic ‏(بومی)</a> پایین را ببینید.</p>
 <p><b>‏OpenAI Codex.</b> هرمس از طریق OAuth ی کد-دستگاه ChatGPT احراز هویت می‌شود، credential ها را در ~/.hermes/auth.json ذخیره می‌کند و می‌تواند credential های موجود Codex CLI را از ~/.codex/auth.json وارد کند. اینکه کدام رتبه‌های طرح ChatGPT واجد شرایط‌اند و مصرف هرمس چطور روی محدودیت‌های Codex طرح‌تان حساب می‌شود <b>فعلاً مستند نشده</b> — یادداشت Codex در بخش <a href="#nous-portal">Nous Portal</a> فقط رفتار احراز هویت و refresh توکن را پوشش می‌دهد.</p>
 <p><b>‏xAI ‏(SuperGrok / X Premium+).</b> OAuth مرورگری هم با اشتراک فعال SuperGrok کار می‌کند هم با اشتراک X Premium+ روی حساب X ی متصل، و همین bearer token توسط ابزارهای مستقیم-به-xAI هم دوباره استفاده می‌شود ‏(TTS، تولید تصویر، تولید ویدیو، پیاده‌سازی صدا، جستجوی X). اگر استنتاج بعد از ورود موفق HTTP 403 برگرداند، این محدودیت رتبه/صلاحیت از سمت xAI است نه توکن کهنه — راه‌حل، سوئیچ به XAI_API_KEY است. بخش <a href="#xai-grok">xAI ‏(Grok)</a> پایین و <a href="https://hermes-agent.nousresearch.com/docs/guides/xai-grok-oauth" target="_blank" rel="noopener">راهنمای xAI Grok OAuth</a> را ببینید.</p>
-<p><b>‏Google Gemini.</b> فعلاً هیچ راهی برای ورود به هرمس با اشتراک مصرف‌کنندهٔ Gemini وجود ندارد — ارائه‌دهندهٔ gemini کلید API می‌گیرد و <a href="https://hermes-agent.nousresearch.com/docs/guides/google-vertex" target="_blank" rel="noopener">Google Vertex AI</a> هم به پروژهٔ GCP تان صورتحساب می‌خورد. برای استفادهٔ ایجنت‌محور یک پروژهٔ Google Cloud با صورتحساب فعال توصیه می‌شود؛ سهمیه‌های tier رایگان برای نشست‌های طولانی ایجنتی خیلی کوچک‌اند. <a href="https://hermes-agent.nousresearch.com/docs/guides/google-gemini" target="_blank" rel="noopener">راهنمای Google Gemini</a> را ببینید.</p>
+<p><b>‏Google Gemini.</b> فعلاً هیچ راهی برای ورود به هرمس با اشتراک مصرف‌کنندهٔ Gemini وجود ندارد — ارائه‌دهندهٔ gemini کلید API می‌گیرد و <a href="https://hermes-agent.nousresearch.com/docs/guides/google-vertex" target="_blank" rel="noopener">Google Vertex AI</a> هم به پروژهٔ GCP تان صورتحساب می‌خورد. برای استفادهٔ ایجنت‌محور یک پروژهٔ Google Cloud با صورتحساب فعال توصیه می‌شود؛ سهمیه‌های tier رایگان برای نشست‌های طولانی ایجنتی خیلی کوچک‌اند. <a href="../guides/google-gemini.html" target="_blank" rel="noopener">راهنمای Google Gemini</a> را ببینید.</p>
 <div class="callout tip">
   <div class="callout-title">💡</div>
   <p><b>یک اشتراک به‌جای پنج‌تا:</b> اگر دوست ندارید دنبال معناشازی طرح per-ارائه‌دهنده باشید، <a href="#nous-portal">Nous Portal</a> بیش از ۳۰۰ مدل را زیر یک اشتراک واحد با یک ورود OAuth پوشش می‌دهد.</p>
@@ -396,7 +396,7 @@ hermes model   # → "Google Vertex AI" → project → region → model</code><
 vertex:
   project_id: "my-gcp-project"   # blank → use the project embedded in the credentials
   region: "global"               # required for the Gemini 3.x previews</code></pre>
-<p>متغیرهای محیطی VERTEX_PROJECT_ID / VERTEX_REGION مقادیر config.yaml را بازنویسی می‌کنند. هرمس google-auth را در اولین استفاده lazy نصب می‌کند؛ اگر نصب مدیریت‌شده نیاز به تعمیر داشت hermes setup را اجرا کنید. <a href="https://hermes-agent.nousresearch.com/docs/guides/google-vertex" target="_blank" rel="noopener">راهنمای Google Vertex AI</a> را برای مرور کامل ببینید و برای مسیر جایگزین کلید-API ی ثابت AI Studio، <a href="https://hermes-agent.nousresearch.com/docs/guides/google-gemini" target="_blank" rel="noopener">راهنمای Google Gemini</a>.</p>
+<p>متغیرهای محیطی VERTEX_PROJECT_ID / VERTEX_REGION مقادیر config.yaml را بازنویسی می‌کنند. هرمس google-auth را در اولین استفاده lazy نصب می‌کند؛ اگر نصب مدیریت‌شده نیاز به تعمیر داشت hermes setup را اجرا کنید. <a href="https://hermes-agent.nousresearch.com/docs/guides/google-vertex" target="_blank" rel="noopener">راهنمای Google Vertex AI</a> را برای مرور کامل ببینید و برای مسیر جایگزین کلید-API ی ثابت AI Studio، <a href="../guides/google-gemini.html" target="_blank" rel="noopener">راهنمای Google Gemini</a>.</p>
 
 <h3>Qwen Portal ‏(OAuth)</h3>
 <p>‏Qwen Portal ی Alibaba با ورود OAuth مرورگری. در hermes model گزینهٔ <b>Qwen OAuth (Portal)</b> را بردارید، از طریق مرورگر وارد شوید و هرمس refresh token را ذخیره می‌کند.</p>

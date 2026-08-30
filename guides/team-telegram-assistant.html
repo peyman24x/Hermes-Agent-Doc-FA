@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دستیار تیمی تلگرام — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/team-telegram-assistant" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>دستیار تیمی تلگرام</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راه‌اندازی دستیار تیمی تلگرام</h1>
+<p>این آموزش راه‌اندازی باتی تلگرامی با موتور Hermes Agent را قدم‌به‌قدم نشان می‌دهد که چند عضو تیم می‌توانند استفاده کنند. آخرِ کار تیم یک دستیار AI مشترک خواهد داشت که می‌تواند برای کمک دربارهٔ کد، تحقیق، مدیریت سیستم و هر چیز دیگری پیامش بدهند — با احراز هویت per-کاربر.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چه چیزی می‌سازیم</h2>
+<p>باتی تلگرامی که:</p>
+<ul>
+  <li><b>هر عضو مجاز تیم</b> می‌تواند برای کمک DM بدهد — بازبینی کد، تحقیق، فرمان‌های شل، عیب‌یابی</li>
+  <li><b>روی سرور شما اجرا می‌شود</b> با دسترسی کامل به ابزارها — ترمینال، ویرایش فایل، جستجوی وب، اجرای کد</li>
+  <li><b>نشست‌های per-کاربر</b> — هر نفر زمینهٔ گفتگوی خودش را دارد</li>
+  <li><b>پیش‌فرض امن</b> — فقط کاربران تأییدشده می‌توانند تعامل کنند، با دو روش احراز</li>
+  <li><b>وظایف زمان‌بندی‌شده</b> — استندآپ‌های روزانه، چک سلامت و یادآوری‌ها که به کانال تیم تحویل می‌شوند</li>
+</ul>
+<h3>پیش‌نیازها</h3>
+<p>قبل از شروع مطمئن شوید:</p>
+<ul>
+  <li><b>Hermes Agent روی سرور یا VPS نصب شده</b> ‏(نه لپ‌تاپ شما — بات باید همیشه روشن بماند). اگر هنوز نصب نکرده‌اید <a href="../getting-started/installation.html">راهنمای نصب</a> را دنبال کنید.</li>
+  <li><b>یک حساب تلگرام</b> برای خودتان ‏(مالک بات)</li>
+  <li><b>یک ارائه‌دهندهٔ LLM پیکربندی‌شده</b> — حداقل یک کلید API برای OpenAI، ‏Anthropic یا ارائه‌دهندهٔ پشتیبانی‌شدهٔ دیگر در ~/.hermes/.env</li>
+</ul>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>یک VPS پنج‌دلاری‌در-ماه برای اجرای گیت‌وی به‌قدر کافی است. خود هرمس سبک است — فراخوانی‌های API ی LLM است که هزینه دارد و آن‌ها راه‌دور اتفاق می‌افتند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: ساخت بات تلگرام</h2>
+<p>هر بات تلگرامی از <b>@BotFather</b> شروع می‌شود — بات رسمی تلگرام برای ساخت بات.</p>
+<ol>
+  <li><b>تلگرام را باز کنید</b> و عبارت ‎@BotFather‎ را جستجو کنید یا به <a href="https://t.me/BotFather" target="_blank" rel="noopener">t.me/BotFather</a> بروید</li>
+  <li><b>‏/newbot را بفرستید</b> — BotFather دو چیز می‌پرسد:
+    <ul>
+      <li><b>نام نمایشی</b> — چیزی که کاربران می‌بینند ‏(مثل Team Hermes Assistant)</li>
+      <li><b>نام کاربری</b> — باید به bot ختم شود ‏(مثل myteam_hermes_bot)</li>
+    </ul>
+  </li>
+  <li><b>توکن بات را کپی کنید</b> — BotFather چنین چیزی پاسخ می‌دهد:
+  <pre dir="ltr"><code>Use this token to access the HTTP API:
+7123456789:AAH1bGciOiJSUzI1NiIsInR5cCI6Ikp...</code></pre>
+  این توکن را نگه دارید — در گام بعد لازمش دارید.
+  </li>
+  <li><b>توضیح ست کنید</b> ‏(اختیاری ولی توصیه‌شده):
+  <pre dir="ltr"><code>/setdescription</code></pre>
+  بات را انتخاب و چیزی شبیه این وارد کنید:
+  <pre dir="ltr"><code>Team AI assistant powered by Hermes Agent. DM me for help with code, research, debugging, and more.</code></pre>
+  </li>
+  <li><b>فرمان‌های بات را ست کنید</b> ‏(اختیاری — منوی فرمان به کاربران می‌دهد):
+  <pre dir="ltr"><code>/setcommands</code></pre>
+  بات را انتخاب و این را بچسبانید:
+  <pre dir="ltr"><code>new - Start a fresh conversation
+model - Show or change the AI model
+status - Show session info
+help - Show available commands
+stop - Stop the current task</code></pre>
+  </li>
+</ol>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p>توکن بات را محرمانه نگه دارید. هر کسی که توکن را داشته باشد کنترل بات را در دست می‌گیرد. اگر لو رفت، با ‎/revoke‎ در BotFather توکن جدید بسازید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: پیکربندی گیت‌وی</h2>
+<p>دو گزینه دارید: ویزارد راه‌اندازی تعاملی ‏(توصیه‌شده) یا پیکربندی دستی.</p>
+<h3>گزینهٔ A: راه‌اندازی تعاملی ‏(توصیه‌شده)</h3>
+<pre dir="ltr"><code>hermes gateway setup</code></pre>
+<p>همه‌چیز را با انتخاب با کلیدهای جهت‌دار قدم‌به‌قدم می‌برد. گزینهٔ <b>Telegram</b> را بردارید، توکن بات را بچسبانید و شناسهٔ کاربر تان را وقتی پرسید وارد کنید.</p>
+<h3>گزینهٔ B: پیکربندی دستی</h3>
+<p>این خطوط را به ~/.hermes/.env اضافه کنید:</p>
+<pre dir="ltr"><code># Telegram bot token from BotFather
+TELEGRAM_BOT_TOKEN=7123456789:AAH1bGciOiJSUzI1NiIsInR5cCI6Ikp...
+
+# Your Telegram user ID (numeric)
+TELEGRAM_ALLOWED_USERS=123456789</code></pre>
+<h3>پیدا کردن شناسهٔ کاربری</h3>
+<p>شناسهٔ کاربری تلگرام شما یک مقدار عددی است ‏(نه نام کاربری). برای پیدا کردنش:</p>
+<ol>
+  <li>در تلگرام به <a href="https://t.me/userinfobot" target="_blank" rel="noopener">@userinfobot</a> پیام بدهید</li>
+  <li>فوراً شناسهٔ عددی شما را پاسخ می‌دهد</li>
+  <li>آن عدد را در TELEGRAM_ALLOWED_USERS کپی کنید</li>
+</ol>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>شناسه‌های کاربری تلگرام عدد‌های دائمی مثل 123456789 هستند. با ‎@username‎ تان که می‌تواند عوض شود فرق دارند. همیشه برای allowlist از شناسهٔ عددی استفاده کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۳: اجرای گیت‌وی</h2>
+<h3>تست سریع</h3>
+<p>اول گیت‌وی را در پیش‌زمینه اجرا کنید تا مطمئن شوید همه‌چیز کار می‌کند:</p>
+<pre dir="ltr"><code>hermes gateway</code></pre>
+<p>خروجی چنین چیزی می‌بینید:</p>
+<pre dir="ltr"><code>[Gateway] Starting Hermes Gateway...
+[Gateway] Telegram adapter connected
+[Gateway] Cron scheduler started (tick every 60s)</code></pre>
+<p>تلگرام را باز، بات تان را پیدا و یک پیام بفرستید. اگر جواب داد، در کار هستید. برای توقف Ctrl+C را بزنید.</p>
+<h3>تولید: نصب به‌عنوان سرویس</h3>
+<p>برای استقرار دائمی که از ری‌بوت جان سالم ببرد:</p>
+<pre dir="ltr"><code>hermes gateway install
+sudo hermes gateway install --system   # Linux only: boot-time system service</code></pre>
+<p>این یک سرویس پس‌زمینه می‌سازد: به‌طور پیش‌فرض سرویس کاربری <b>systemd</b> روی لینوکس، یا سرویس <b>launchd</b> روی macOS، یا سرویس سیستمیِ زمان-بوت لینوکس اگر ‎--system‎ بدهید.</p>
+<pre dir="ltr"><code># Linux — manage the default user service
+hermes gateway start
+hermes gateway stop
+hermes gateway status
+
+# View live logs
+journalctl --user -u hermes-gateway -f
+
+# Keep running after SSH logout
+sudo loginctl enable-linger $USER
+
+# Linux servers — explicit system-service commands
+sudo hermes gateway start --system
+sudo hermes gateway status --system
+journalctl -u hermes-gateway -f</code></pre>
+<pre dir="ltr"><code># macOS — manage the service
+hermes gateway start
+hermes gateway stop
+tail -f ~/.hermes/logs/gateway.log</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>‏PATH در macOS:</b>plist ی launchd PATH ی شل شما را هنگام نصب ثبت می‌کند تا زیرفرایندهای گیت‌وی ابزارهایی مثل Node.js و ffmpeg را پیدا کنند. اگر بعداً ابزار جدیدی نصب کردید hermes gateway install را دوباره اجرا کنید تا plist به‌روز شود.</p>
+</div>
+<h3>تأیید در حال اجرا بودن</h3>
+<pre dir="ltr"><code>hermes gateway status</code></pre>
+<p>بعد یک پیام تست به بات تان در تلگرام بفرستید. باید ظرف چند ثانیه پاسخ بگیرید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۴: راه‌اندازی دسترسی تیم</h2>
+<p>حالا به هم‌تیمی‌ها دسترسی بدهید. دو رویکرد هست.</p>
+<h3>رویکرد A: allowlist ایستا</h3>
+<p>شناسهٔ کاربری تلگرامی تک‌تک اعضا را جمع کنید ‏(بگویید به @userinfobot پیام بدهند) و به‌صورت فهرست جدا-با-کاما اضافه کنید:</p>
+<pre dir="ltr"><code># In ~/.hermes/.env
+TELEGRAM_ALLOWED_USERS=123456789,987654321,555555555</code></pre>
+<p>بعد از تغییرات گیت‌وی را ری‌استارت کنید:</p>
+<pre dir="ltr"><code>hermes gateway stop &amp;&amp; hermes gateway start</code></pre>
+<h3>رویکرد B: جفت‌سازی DM ‏(توصیه‌شده برای تیم‌ها)</h3>
+<p>جفت‌سازی DM انعطاف‌پذیرتر است — لازم نیست از قبل شناسه‌های کاربری جمع کنید. این‌طوری کار می‌کند:</p>
+<ol>
+  <li><b>هم‌تیمی به بات DM می‌دهد</b> — چون روی allowlist نیست، بات با کد جفت‌سازی یک‌بارمصرف پاسخ می‌دهد:
+  <pre dir="ltr"><code>🔐 Pairing code: XKGH5N7P
+Send this code to the bot owner for approval.</code></pre>
+  </li>
+  <li><b>هم‌تیمی کد را به شما می‌فرستد</b> ‏(از هر کانالی — اسلک، ایمیل، حضوری)</li>
+  <li><b>شما روی سرور تأییدش می‌کنید:</b>
+  <pre dir="ltr"><code>hermes pairing approve telegram XKGH5N7P</code></pre>
+  </li>
+  <li><b>وارد شد</b> — بات بلافاصله شروع به پاسخ به پیام‌هایش می‌کند</li>
+</ol>
+<p><b>مدیریت کاربران جفت‌شده:</b></p>
+<pre dir="ltr"><code># See all pending and approved users
+hermes pairing list
+
+# Revoke someone's access
+hermes pairing revoke telegram 987654321
+
+# Clear expired pending codes
+hermes pairing clear-pending</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>جفت‌سازی DM برای تیم‌ها ایده‌آل است چون برای افزودن کاربر جدید لازم نیست گیت‌وی ری‌استارت شود. تأییدها بلافاصله اثر می‌کنند.</p>
+</div>
+<h3>ملاحظات امنیتی</h3>
+<ul>
+  <li><b>هرگز GATEWAY_ALLOW_ALL_USERS=true را</b> روی باتی با دسترسی ترمینال ست نکنید — هر کسی بات تان را پیدا کند می‌تواند روی سرورتان فرمان اجرا کند</li>
+  <li>کدهای جفت‌سازی بعد از <b>۱ ساعت</b> منقضی می‌شوند و از تصادف رمزنگاری‌شده استفاده می‌کنند</li>
+  <li>محدودیت نرخ جلوی حملات brute-force را می‌گیرد: ۱ درخواست per کاربر per ۱۰ دقیقه، حداکثر ۳ کد در انتظار per پلتفرم</li>
+  <li>بعد از ۵ تلاش ناموفق تأیید، پلتفرم به قفل ۱ ساعته می‌رود</li>
+  <li>همهٔ داده‌های جفت‌سازی با مجوزهای chmod 0600 ذخیره می‌شوند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۵: پیکربندی بات</h2>
+<h3>کانال خانگی ست کنید</h3>
+<p><b>کانال خانگی</b> جایی است که بات نتایج کارهای cron و پیام‌های پیش‌دستانه را تحویل می‌دهد. بدون آن، وظایف زمان‌بندی‌شده جایی برای فرستادن خروجی ندارند.</p>
+<p><b>گزینهٔ ۱:</b> فرمان ‎/sethome‎ را در هر گروه یا گفتگوی تلگرامی که بات عضوش است بزنید.</p>
+<p><b>گزینهٔ ۲:</b> دستی در ~/.hermes/.env ست کنید:</p>
+<pre dir="ltr"><code>TELEGRAM_HOME_CHANNEL=-1001234567890
+TELEGRAM_HOME_CHANNEL_NAME="Team Updates"</code></pre>
+<p>برای پیدا کردن شناسهٔ کانال، ‏<a href="https://t.me/userinfobot" target="_blank" rel="noopener">@userinfobot</a> را به گروه اضافه کنید — شناسهٔ گفتگوی گروه را گزارش می‌دهد.</p>
+<h3>نمایش پیشرفت ابزار را پیکربندی کنید</h3>
+<p>کنترل کنید بات هنگام استفاده از ابزارها چقدر جزئیات نشان دهد. در ~/.hermes/config.yaml:</p>
+<pre dir="ltr"><code>display:
+  tool_progress: new    # off | new | all | verbose</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>حالت</th><th>چه می‌بینید</th></tr></thead>
+<tbody>
+<tr><td>off</td><td>فقط پاسخ‌های تمیز — بدون فعالیت ابزار</td></tr>
+<tr><td>new</td><td>وضعیت کوتاه برای هر فراخوانی ابزار جدید ‏(توصیه‌شده برای پیام‌رسانی)</td></tr>
+<tr><td>all</td><td>هر فراخوانی ابزار با جزئیات</td></tr>
+<tr><td>verbose</td><td>خروجی کامل ابزار شامل نتایج فرمان‌ها</td></tr>
+</tbody>
+</table>
+</div>
+<p>کاربران می‌توانند per-نشست با فرمان ‎/verbose‎ در چت هم عوضش کنند.</p>
+<h3>شخصیت با SOUL.md ست کنید</h3>
+<p>نحوهٔ ارتباط بات را با ویرایش ~/.hermes/SOUL.md سفارشی کنید.</p>
+<p>راهنمای کامل در <a href="use-soul-with-hermes.html">استفاده از SOUL.md با هرمس</a>.</p>
+<pre dir="ltr"><code># Soul
+You are a helpful team assistant. Be concise and technical.
+Use code blocks for any code. Skip pleasantries — the team
+values directness. When debugging, always ask for error logs
+before guessing at solutions.</code></pre>
+<h3>زمینهٔ پروژه اضافه کنید</h3>
+<p>اگر تیم تان روی پروژه‌های مشخصی کار می‌کند فایل‌های زمینه بسازید تا بات استک تان را بشناسد:</p>
+<pre dir="ltr"><code>&lt;!-- ~/.hermes/AGENTS.md --&gt;
+# Team Context
+- We use Python 3.12 with FastAPI and SQLAlchemy
+- Frontend is React with TypeScript
+- CI/CD runs on GitHub Actions
+- Production deploys to AWS ECS
+- Always suggest writing tests for new code</code></pre>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>فایل‌های زمینه در system prompt هر نشست تزریق می‌شوند. موجز نگهشان دارید — هر کاراکتر از بودجهٔ توکن تان حساب می‌شود.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> گام ۶: راه‌اندازی وظایف زمان‌بندی‌شده</h2>
+<p>با گیت‌وی در حال اجرا می‌توانید وظایف تکرارشونده‌ای زمان‌بندی کنید که نتایج را به کانال تیم تحویل دهند.</p>
+<h3>خلاصهٔ استندآپ روزانه</h3>
+<p>به بات در تلگرام پیام بدهید:</p>
+<pre dir="ltr"><code>Every weekday at 9am, check the GitHub repository at
+github.com/myorg/myproject for:
+1. Pull requests opened/merged in the last 24 hours
+2. Issues created or closed
+3. Any CI/CD failures on the main branch
+Format as a brief standup-style summary.</code></pre>
+<p>ایجنت خودکار کار cron می‌سازد و نتایج را به گفتگویی که درخواست کردید ‏(یا کانال خانگی) تحویل می‌دهد.</p>
+<h3>چک سلامت سرور</h3>
+<pre dir="ltr"><code>Every 6 hours, check disk usage with 'df -h', memory with 'free -h',
+and Docker container status with 'docker ps'. Report anything unusual —
+partitions above 80%, containers that have restarted, or high memory usage.</code></pre>
+<h3>مدیریت وظایف زمان‌بندی‌شده</h3>
+<pre dir="ltr"><code># From the CLI
+hermes cron list          # View all scheduled jobs
+hermes cron status        # Check if scheduler is running
+
+# From Telegram chat
+/cron list                # View jobs
+/cron remove &lt;job_id&gt;     # Remove a job</code></pre>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p>پرامپت‌های کار cron در نشست‌های کاملاً تازه بدون هیچ حافظه‌ای از گفتگوهای قبلی اجرا می‌شوند. مطمئن شوید هر پرامپت <b>همهٔ</b> زمینهٔ موردنیاز ایجنت را دارد — مسیر فایل‌ها، URL ها، آدرس‌های سرور و دستورالعمل‌های روشن.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> نکات تولید</h2>
+<h3>برای امنیت از Docker استفاده کنید</h3>
+<p>روی بات مشترک تیمی، Docker را backend ترمینال کنید تا فرمان‌های ایجنت داخل کانتینر اجرا شوند نه روی host شما:</p>
+<pre dir="ltr"><code># In ~/.hermes/.env
+TERMINAL_ENV=docker
+TERMINAL_DOCKER_IMAGE=nikolaik/python-nodejs:python3.11-nodejs20</code></pre>
+<p>یا در ~/.hermes/config.yaml:</p>
+<pre dir="ltr"><code>terminal:
+  backend: docker
+  container_cpu: 1
+  container_memory: 5120
+  container_persistent: true</code></pre>
+<p>این‌طوری حتی اگر کسی از بات بخواهد چیزی مخرب اجرا کند، سیستم host شما محافظت می‌شود.</p>
+<h3>گیت‌وی را پایش کنید</h3>
+<pre dir="ltr"><code># Check if the gateway is running
+hermes gateway status
+
+# Watch live logs (Linux)
+journalctl --user -u hermes-gateway -f
+
+# Watch live logs (macOS)
+tail -f ~/.hermes/logs/gateway.log</code></pre>
+<h3>هرمس را به‌روز نگه دارید</h3>
+<p>از تلگرام ‎/update‎ را به بات بفرستید — آخرین نسخه را می‌کشد و ری‌استارت می‌شود. یا از سرور:</p>
+<pre dir="ltr"><code>hermes update
+hermes gateway stop &amp;&amp; hermes gateway start</code></pre>
+<h3>محل لاگ‌ها</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>چه چیزی</th><th>محل</th></tr></thead>
+<tbody>
+<tr><td>لاگ‌های گیت‌وی</td><td>journalctl --user -u hermes-gateway ‏(لینوکس) یا ~/.hermes/logs/gateway.log ‏(macOS)</td></tr>
+<tr><td>خروجی کارهای cron</td><td>~/.hermes/cron/output/{job_id}/{timestamp}.md</td></tr>
+<tr><td>تعاریف کارهای cron</td><td>~/.hermes/cron/jobs.json</td></tr>
+<tr><td>داده‌های جفت‌سازی</td><td>~/.hermes/pairing/</td></tr>
+<tr><td>تاریخچهٔ نشست‌ها</td><td>~/.hermes/sessions/</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> قدم‌های بعدی</h2>
+<p>یک دستیار تلگرامی تیمی کارا دارید. مسیرهای بعدی:</p>
+<ul>
+  <li><b><a href="../user-guide/security.html">راهنمای امنیت</a></b> — عمیق‌تر در احراز هویت، ایزوله‌سازی کانتینر و تأیید فرمان</li>
+  <li><b><a href="../user-guide/messaging/index.html">گیت‌وی پیام‌رسانی</a></b> — مرجع کامل معماری گیت‌وی، مدیریت نشست و فرمان‌های چت</li>
+  <li><b><a href="../user-guide/messaging/telegram.html">راه‌اندازی تلگرام</a></b> — جزئیات مخصوص-پلتفرم شامل پیام‌های صوتی و TTS</li>
+  <li><b><a href="../user-guide/features/cron.html">وظایف زمان‌بندی‌شده</a></b> — زمان‌بندی پیشرفتهٔ cron با گزینه‌های تحویل و عبارات cron</li>
+  <li><b><a href="../user-guide/features/context-files.html">فایل‌های زمینه</a></b> — AGENTS.md، ‏SOUL.md و cursorrules. برای دانش پروژه</li>
+  <li><b><a href="../user-guide/features/personality.html">شخصیت</a></b> — پیش‌فرض‌های شخصیت داخلی و تعریف persona ی سفارشی</li>
+  <li><b>پلتفرم‌های بیشتر</b> — همان گیت‌وی می‌تواند هم‌زمان <a href="../user-guide/messaging/discord.html">دیسکورد</a>، <a href="../user-guide/messaging/slack.html">اسلک</a> و <a href="../user-guide/messaging/whatsapp.html">واتساپ</a> را هم اجرا کند</li>
+</ul>
+<p><i>سؤال یا مشکل؟ روی گیت‌هاب issue باز کنید — مشارکت خوش‌آمد است.</i></p>
+</section>
+
+<div class="pager">
+  <a href="daily-briefing-bot.html"><span class="dir">→ قبلی</span><span class="ttl">بات خلاصهٔ روزانه</span></a>
+  <a class="next" href="python-library.html"><span class="dir">بعدی ←</span><span class="ttl">استفاده به‌عنوان کتابخانهٔ پایتون</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/team-telegram-assistant" target="_blank" rel="noopener">Set Up a Team Telegram Assistant</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

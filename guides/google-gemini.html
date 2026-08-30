@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>گوگل جِمینای — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="../guides/google-gemini.html" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>گوگل جِمینای</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>گوگل جِمینای</h1>
+<p>‏Hermes Agent از Google Gemini به‌عنوان ارائه‌دهندهٔ بومی از طریق ‏<b>Google AI Studio / Gemini API</b> پشتیبانی می‌کند — نه نقطهٔ پایانی سازگار-OpenAI. این اجازه می‌دهد هرمس حلقهٔ پیام و ابزار داخلیِ شکل-OpenAI خود را به API ی بومی generateContent ی Gemini ترجمه کند در حالی که فراخوانی ابزار، استریم، ورودی‌های چندوجهی و متادیتای پاسخ مخصوص Gemini حفظ می‌شود.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+  <li><b>کلید API ی Google AI Studio</b> — در <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> بسازید</li>
+  <li><b>پروژهٔ Google Cloud با صورتحساب فعال</b> — برای استفادهٔ ایجنتی توصیه می‌شود. tier رایگان Gemini برای نشست‌های طولانی ایجنتی خیلی کوچک است چون هرمس ممکن است به‌ازای هر نوبت کاربر چندین فراخوانی مدل بزند.</li>
+  <li><b>Hermes نصب‌شده</b> — برای ارائه‌دهندهٔ بومی Gemini هیچ بستهٔ پایتونی اضافه لازم نیست.</li>
+</ul>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>مسیر کلید API:</b>GOOGLE_API_KEY یا GEMINI_API_KEY را ست کنید. هرمس برای ارائه‌دهندهٔ gemini هر دو نام را چک می‌کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> شروع سریع</h2>
+<pre dir="ltr"><code># Add your Gemini API key
+echo "GOOGLE_API_KEY=..." &gt;&gt; ~/.hermes/.env
+
+# Select Gemini as your provider
+hermes model
+# → Choose "More providers..." → "Google AI Studio"
+# → Hermes checks your key tier and shows Gemini models
+# → Select a model
+
+# Start chatting
+hermes chat</code></pre>
+<p>اگر ویرایش مستقیم config را ترجیح می‌دهید، URL پایهٔ بومی Gemini API را استفاده کنید:</p>
+<pre dir="ltr"><code>model:
+  default: gemini-3-flash-preview
+  provider: gemini
+  base_url: https://generativelanguage.googleapis.com/v1beta</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پیکربندی</h2>
+<p>بعد از اجرای hermes model فایل ~/.hermes/config.yaml تان شامل:</p>
+<pre dir="ltr"><code>model:
+  default: gemini-3-flash-preview
+  provider: gemini
+  base_url: https://generativelanguage.googleapis.com/v1beta</code></pre>
+<p>و در ~/.hermes/.env:</p>
+<pre dir="ltr"><code>GOOGLE_API_KEY=...</code></pre>
+<h3>API ی بومی Gemini</h3>
+<p>نقطهٔ پایانی توصیه‌شده:</p>
+<pre dir="ltr"><code>https://generativelanguage.googleapis.com/v1beta</code></pre>
+<p>هرمس این نقطهٔ پایانی را تشخیص و آداپتور بومی Gemini خودش را می‌سازد. درون، هرمس حلقهٔ ایجنت را همچنان در پیام‌های شکل-OpenAI نگه می‌دارد و بعد هر درخواست را به اسکیمای بومی Gemini ترجمه می‌کند:</p>
+<ul>
+  <li>messages[] ← contents[] ی Gemini</li>
+  <li>system prompt ها ← systemInstruction ی Gemini</li>
+  <li>اسکیماهای ابزار ← functionDeclarations ی Gemini</li>
+  <li>نتایج ابزار ← بخش‌های functionResponse ی Gemini</li>
+  <li>پاسخ‌های استریمی ← chunk های استریم شکل-OpenAI برای حلقهٔ هرمس</li>
+</ul>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p><b>امضاهای تفکر Gemini 3:</b>برای استفادهٔ ابزار در Gemini 3، هرمس مقادیر thoughtSignature ی چسبیده به بخش‌های فراخوانی-تابع را حفظ و در نوبت ابزار بعدی دوباره پخش می‌کند. مسیر حیاتی اعتبارسنجی گردش‌کارهای چندمرحله‌ای ایجنت همین است.<br><br>‏Gemini 3 ممکن است امضاهای تفکر را به بخش‌های دیگری از پاسخ هم بچسباند. آداپتور بومی هرمس امروز برای حلقه‌های ابزاری ایجنت بهینه شده، پس هنوز هر امضای غیر-فراخوانی-ابزار را با وفاداری کامل سطح-بخش دوباره پخش نمی‌کند.</p>
+</div>
+<h3>نقطهٔ پایانی بومی را ترجیح دهید</h3>
+<p>گوگل یک نقطهٔ پایانی سازگار-OpenAI هم دارد:</p>
+<pre dir="ltr"><code>https://generativelanguage.googleapis.com/v1beta/openai/</code></pre>
+<p>برای نشست‌های ایجنتی هرمس، نقطهٔ پایانی بومی Gemini بالا را ترجیح دهید. هرمس آداپتور بومی Gemini دارد تا استفادهٔ چندنوبتی ابزار، نتایج فراخوانی ابزار، استریم، ورودی‌های چندوجهی و متادیتای پاسخ Gemini را مستقیماً روی API ی generateContent نگاشت کند. نقطهٔ پایانی سازگار-OpenAI همچنان وقتی مفید است که خاصاً سازگاری API ی OpenAI لازم دارید.</p>
+<p>اگر قبلاً GEMINI_BASE_URL را روی URL ی ‎/openai گذاشته بودید، حذف یا عوضش کنید:</p>
+<pre dir="ltr"><code>GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مدل‌های موجود</h2>
+<p>انتخاب‌گر hermes model مدل‌های Gemini نگهداری‌شده در رجیستری ارائه‌دهندهٔ هرمس را نشان می‌دهد. انتخاب‌های رایج:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مدل</th><th>شناسه</th><th>نکته‌ها</th></tr></thead>
+<tbody>
+<tr><td>Gemini 3.1 Pro Preview</td><td>gemini-3.1-pro-preview</td><td>قوی‌ترین مدل preview وقتی موجوده</td></tr>
+<tr><td>Gemini 3 Pro Preview</td><td>gemini-3-pro-preview</td><td>مدل قدرتمند reasoning و کدنویسی</td></tr>
+<tr><td>Gemini 3 Flash Preview</td><td>gemini-3-flash-preview</td><td>پیش‌فرض توصیه‌شده با توازن سرعت/توانایی</td></tr>
+<tr><td>Gemini 3.1 Flash Lite Preview</td><td>gemini-3.1-flash-lite-preview</td><td>سریع‌ترین / ارزان‌ترین گزینه وقتی موجوده</td></tr>
+</tbody>
+</table>
+</div>
+<p>موجودی مدل‌ها با زمان تغییر می‌کند. اگر مدلی غایب شد یا برای کلید شما فعال نبود، hermes model را دوباره اجرا و از فهرست فعلی بردارید.</p>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p><b>شناسه‌های مدل:</b>وقتی provider: gemini دارید از شناسه‌های بومی Gemini مثل gemini-3-flash-preview استفاده کنید نه شناسه‌های سبک-OpenRouter مثل google/gemini-3-flash-preview.</p>
+</div>
+<h3>نام‌های مستعار latest</h3>
+<p>گوگل نام‌های مستعار متحرک برای خانواده‌های Pro و Flash منتشر می‌کند. مقدار gemini-pro-latest و gemini-flash-latest کاربردی است وقتی می‌خواهید گوگل بدون تغییر config ی هرمس شما مدل را خودکار جلو ببرد.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>نام مستعار</th><th>الان ردیابی می‌کند</th><th>نکته‌ها</th></tr></thead>
+<tbody>
+<tr><td>gemini-pro-latest</td><td>آخرین مدل Gemini Pro</td><td>بهترین وقتی پیش‌فرض فعلی Pro ی گوگل را می‌خواهید</td></tr>
+<tr><td>gemini-flash-latest</td><td>آخرین مدل Gemini Flash</td><td>بهترین وقتی پیش‌فرض فعلی Flash ی گوگل را می‌خواهید</td></tr>
+</tbody>
+</table>
+</div>
+<pre dir="ltr"><code>model:
+  default: gemini-pro-latest
+  provider: gemini
+  base_url: https://generativelanguage.googleapis.com/v1beta</code></pre>
+<p>اگر بازتولیدپذیری سخت‌گیرانه می‌خواهید، شناسه‌های صریح مثل gemini-3.1-pro-preview یا gemini-3-flash-preview را ترجیح دهید.</p>
+<h3>Gemma از طریق Gemini API</h3>
+<p>گوگل مدل‌های Gemma را هم از طریق Gemini API expose می‌کند. هرمس این‌ها را به‌عنوان مدل‌های گوگل می‌شناسد ولی مدخل‌های Gemma با throughput خیلی کم را از انتخاب‌گر پیش‌فرض مخفی می‌کند تا کاربران جدید تصادفی مدلی از tier ارزیابی را برای نشست طولانی ایجنتی انتخاب نکنند.</p>
+<p>شناسه‌های ارزیابی کاربردی:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مدل</th><th>شناسه</th><th>نکته‌ها</th></tr></thead>
+<tbody>
+<tr><td>Gemma 4 31B IT</td><td>gemma-4-31b-it</td><td>مدل Gemma بزرگ‌تر؛ برای ارزیابی سازگاری و کیفیت کاربردی</td></tr>
+<tr><td>Gemma 4 26B A4B IT</td><td>gemma-4-26b-a4b-it</td><td>گونهٔ کوچک‌تر پارامتر-فعال وقتی موجوده</td></tr>
+</tbody>
+</table>
+</div>
+<p>این مدل‌ها بهترین برخورد به‌عنوان گزینه‌های ارزیابی روی کلیدهای Gemini API دارند. قیمت‌گذاری Gemma API ی گوگل فقط-tier-رایگان است و سقف مصرف نسبت به مدل‌های Gemini تولیدی کم است، پس استفادهٔ پایدار ایجنتی هرمس معمولاً باید به یک مدل Gemini پرداختی، استقرار خودمیزبان یا ارائه‌دهندهٔ دیگری با سهمیه مناسب برسد.</p>
+<p>برای استفاده از مدلی Gemma که از انتخاب‌گر مخفی است مستقیم ستش کنید:</p>
+<pre dir="ltr"><code>model:
+  default: gemma-4-31b-it
+  provider: gemini
+  base_url: https://generativelanguage.googleapis.com/v1beta</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> سوئیچ مدل وسط نشست</h2>
+<p>در طول گفتگو از فرمان ‎/model‎ استفاده کنید:</p>
+<pre dir="ltr"><code>/model gemini-3-flash-preview
+/model gemini-flash-latest
+/model gemini-3-pro-preview
+/model gemini-pro-latest
+/model gemma-4-31b-it
+/model gemini-3.1-flash-lite-preview</code></pre>
+<p>اگر هنوز Gemini را پیکربندی نکرده‌اید، از نشست خارج و اول hermes model را اجرا کنید. ‏‎/model‎ بین ارائه‌دهنده‌ها و مدل‌های از-قبل-پیکربندی‌شده سوئیچ می‌کند؛ کلید API جدید جمع نمی‌کند.</p>
+<h3>تشخیص</h3>
+<pre dir="ltr"><code>hermes doctor</code></pre>
+<p>داکتور این‌ها را چک می‌کند:</p>
+<ul>
+  <li>آیا GOOGLE_API_KEY یا GEMINI_API_KEY موجوده</li>
+  <li>آیا credential های ارائه‌دهندهٔ پیکربندی‌شده قابل حلهستند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گیت‌وی ‏(پلتفرم‌های پیام‌رسانی)</h2>
+<p>‏Gemini با همهٔ پلتفرم‌های گیت‌وی هرمس کار می‌کند ‏(Telegram، ‏Discord، ‏Slack، ‏WhatsApp، ‏LINE، ‏Feishu و...). Gemini را به‌عنوان ارائه‌دهنده پیکربندی و بعد گیت‌وی را عادی اجرا کنید:</p>
+<pre dir="ltr"><code>hermes gateway setup
+hermes gateway start</code></pre>
+<p>گیت‌وی config.yaml را می‌خواند و همان پیکربندی ارائه‌دهندهٔ Gemini را استفاده می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> عیب‌یابی</h2>
+<h3>«Gemini native client requires an API key»</h3>
+<p>هرмос… ببخشید، هرمس کلید API ی قابل استفاده پیدا نکرد. یکی از این دو را در ~/.hermes/.env اضافه کنید:</p>
+<pre dir="ltr"><code>GOOGLE_API_KEY=...
+# or
+GEMINI_API_KEY=...</code></pre>
+<p>بعد hermes model را دوباره اجرا کنید.</p>
+<h3>«This Google API key is on the free tier»</h3>
+<p>هرمس هنگام راه‌اندازی کلیدهای Gemini API را آزمایش می‌کند. سهمیه‌های tier رایگان بعد از چند دور گفتگوی ایجنتی تمام می‌شوند چون استفاده از ابزار، ‏retry ها، فشرده‌سازی و کارهای کمکی ممکن است به چندین فراخوانی مدل نیاز داشته باشند.</p>
+<p>روی پروژهٔ Google Cloud متصل به کلیدتان صورتحساب را فعال کنید، در صورت نیاز کلید را از نو بسازید و بعد hermes model را اجرا کنید.</p>
+<h3>«404 model not found»</h3>
+<p>مدل انتخابی برای حسابتان، منطقه یا کلید موجود نیست. hermes model را دوباره اجرا و مدل دیگری از فهرست فعلی بردارید.</p>
+<h3>مدل Gemma در hermes model نشان داده نمی‌شود</h3>
+<p>هرمس ممکن است به‌طور پیش‌فرض مدل‌های Gemma ی کم-throughput را از انتخاب‌گر مخفی کند. اگر عامدانه می‌خواهید یکی را ارزیابی کنید شناسه مدل را مستقیم در ~/.hermes/config.yaml ست کنید.</p>
+<h3>«429 quota exceeded» روی Gemma</h3>
+<p>مدل‌های Gemma از طریق Gemini API برای ارزیابی خوب‌اند ولی سقف‌های tier رایگان Gemini API شان کم است. برای تست سازگاری استفاده‌شان کنید و برای نشست‌های پایدار ایجنتی به مدل Gemini ی پرداختی یا ارائه‌دهندهٔ دیگری سوئیچ کنید.</p>
+<h3>نقطهٔ پایانی سازگار-OpenAI پیکربندی شده</h3>
+<p>در ~/.hermes/.env چک کنید:</p>
+<pre dir="ltr"><code>GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/</code></pre>
+<p>به نقطهٔ پایانی بومی تغییرش دهید یا بازنویسی را حذف کنید:</p>
+<pre dir="ltr"><code>GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta</code></pre>
+<h3>فراخوانی ابزار با خطای schema شکست می‌خورد</h3>
+<p>هرمس را ارتقا دهید و hermes model را دوباره اجرا کنید. آداپتور بومی Gemini اسکیماهای ابزار را برای قالب سخت‌گیرتر function-declaration ی Gemini پاک‌سازی می‌کند؛ نسخه‌های قدیمی یا نقاط پایانی سفارشی ممکن است نه.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> مرتبط</h2>
+<ul>
+  <li><b><a href="../integrations/providers.html">ارائه‌دهندگان AI</a></b></li>
+  <li><b><a href="../user-guide/configuration.html">پیکربندی</a></b></li>
+  <li><b><a href="../user-guide/features/fallback-providers.html">ارائه‌دهندگان پشتیبان</a></b></li>
+  <li><b><a href="https://hermes-agent.nousresearch.com/docs/guides/aws-bedrock" target="_blank" rel="noopener">AWS Bedrock</a></b> — یکپارچه‌سازی بومی ابری با credential های AWS</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="desktop-native-signin.html"><span class="dir">→ قبلی</span><span class="ttl">ورود بومی دسکتاپ ‏(RFC 8252)</span></a>
+  <a class="next" href="local-ollama-setup.html"><span class="dir">بعدی ←</span><span class="ttl">اجرای محلی با Ollama</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="../guides/google-gemini.html" target="_blank" rel="noopener">Google Gemini</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

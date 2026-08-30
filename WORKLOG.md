@@ -621,6 +621,11 @@ hermes-docs-fa/
 - زنجیرهٔ pager: use-voice-mode(off) ← use-soul ← automate-with-cron ← work-with-skills ← delegation-patterns ← github-pr-review(off) ✓
 - لینک‌های موقت انگلیسی use-soul-with-hermes و automate-with-cron در سراسر سایت به نسخهٔ فارسی برگردانده شد ✓
 - پیشرفت: **۱۴۱ از ۲۰۷ صفحه فعال (۶۸٪)** — راهنماها از مرز ۴۰٪ گذشت
+### نشست ۸۳ — 2026-08-27 — 📚 راهنماها ۴ — جِمینای، Ollama محلی، دستیار تیمی تلگرام و کتابخانهٔ پایتون
+- ترجمه و انتشار «گوگل جِمینای» ‏(ارائه‌دهندهٔ بومی AI Studio با نگاشت messages←contents و systemInstruction و functionDeclarations و functionResponse، امضاهای تفکر Gemini 3، ترجیح نقطهٔ پایانی بومی بر ‎/openai‎، جدول مدل‌های preview، نام‌های مستعار latest، Gemma با مخفی‌سازی ارزیابی، شش عیب‌یابی)؛ «اجرای محلی با Ollama» ‏(هشت گام از نصب تا fallback، جدول سخت‌افزار و جدول مدل‌ها با ستون فراخوانی ابزار، Modelfile ی num_ctx 64000، OLLAMA_KEEP_ALIVE، انتقال GPU، بات گیت‌وی تلگرام/دیسکورد، prefill ی پاسخ اول با چهار راه‌حل، جدول مقایسهٔ هزینه)؛ «دستیار تیمی تلگرام» ‏(نه گام: BotFather و توکن، گیت‌وی setup/سرویس systemd/launchd، allowlist و جفت‌سازی DM با قوانین انقضای یک‌ساعته و قفل ۵-تلاشی، کانال خانگی، tool_progress چهارحالته، SOUL.md و AGENTS.md تیمی، استندآپ و چک سلامت cron، Docker ی امنیتی، جدول محل لاگ‌ها)؛ «کتابخانهٔ پایتون» ‏(import ی AIAgent با chat/run_conversation، enabled/disabled_toolsets، گفتگوی چندنوبتی با conversation_history، ذخیرهٔ trajectory ی ShareGPT، ephemeral_system_prompt، batch_runner و ThreadPoolExecutor، سه نمونهٔ یکپارچگی FastAPI/Discord/CI، جدول کامل پارامترها با هشدار thread-safety)
+- زنجیرهٔ pager: desktop-native-signin ← google-gemini ← local-ollama-setup ← manage-hermes-cloud-with-mcp ✓ و daily-briefing-bot ← team-telegram-assistant ← python-library ✓
+- لینک‌های موقت انگلیسی google-gemini و local-ollama-setup به نسخهٔ فارسی برگردانده شد ✓
+- پیشرفت: **۱۴۵ از ۲۰۷ صفحه فعال (۷۰٪)**
 ## ۵) وضعیت فعلی — موجودی دقیق (به‌روز: نشست ۴)
 
 ### ✅ ترجمه‌شده (۱۰ صفحه)
@@ -768,6 +773,10 @@ hermes-docs-fa/
 | 139 | `guides/automate-with-cron.html` | اتوماسیون هر چیزی با Cron |
 | 140 | `guides/work-with-skills.html` | کار با مهارت‌ها |
 | 141 | `guides/delegation-patterns.html` | واگذاری و کار موازی ‏(الگوها) |
+| 142 | `guides/google-gemini.html` | گوگل جِمینای |
+| 143 | `guides/local-ollama-setup.html` | اجرای محلی با Ollama — بدون هزینه |
+| 144 | `guides/team-telegram-assistant.html` | راه‌اندازی دستیار تیمی تلگرام |
+| 145 | `guides/python-library.html` | استفاده از هرمس به‌عنوان کتابخانهٔ پایتون |
 ### 📊 وضعیت به‌تفکیک بخش
 | بخش | پیشرفت | باقی‌مانده‌های مهم |
 |---|---|---|

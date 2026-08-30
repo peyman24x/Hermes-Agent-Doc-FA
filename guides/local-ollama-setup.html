@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اجرای محلی با Ollama — بدون هزینه — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="../guides/local-ollama-setup.html" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>اجرای محلی با Ollama — بدون هزینه</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>اجرای هرمس به‌صورت محلی با Ollama — هزینهٔ API صفر</h1>
+<h3>مسئله</h3>
+<p>API‌های ابری LLM per توکن پول می‌گیرند. یک نشست سنگین کدنویسی می‌تواند ۵ تا ۲۰ دلار آب بخورد. برای پروژه‌های شخصی، یادگیری یا کارهای حساس-به-حریم‌خصوصی این جمع می‌شود — و هر گفتگوی شما را به شخص ثالثی می‌فرستید.</p>
+<h3>این راهنما چه چیزی حل می‌کند</h3>
+<p>Hermes Agent را کاملاً روی سخت‌افزار خودتان راه می‌اندازید با <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a> به‌عنوان backend مدل. بدون کلید API، بدون اشتراک، بدون خروج داده از ماشین شما. بعد از پیکربندی، هرمس دقیقاً مثل وقتی کار می‌کند که OpenRouter یا Anthropic دارد — فرمان‌های ترمینال، ویرایش فایل، مرور وب، واگذاری — ولی مدل محلی اجرا می‌شود.</p>
+<p>آخرِ کار این‌ها را خواهید داشت:</p>
+<ul>
+  <li>Ollama که یک یا چند مدل open-weight را سرویس می‌کند</li>
+  <li>هرمس متصل به Ollama به‌عنوان نقطهٔ پایانی سفارشی</li>
+  <li>یک ایجنت محلی کارا که می‌تواند فایل ویرایش کند، فرمان اجرا کند و وب بگردد</li>
+  <li>اختیاری: بات تلگرام/دیسکورد که کاملاً روی سخت‌افزار خودتان کار می‌کند</li>
+</ul>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چه چیزی لازم دارید</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>قطعه</th><th>حداقل</th><th>توصیه‌شده</th></tr></thead>
+<tbody>
+<tr><td><b>رم</b></td><td>۸ گیگ ‏(برای مدل‌های 3B)</td><td>۳۲ گیگ به بالا ‏(برای مدل‌های 27B+)</td></tr>
+<tr><td><b>فضای ذخیره</b></td><td>۵ گیگ آزاد</td><td>۳۰ گیگ به بالا ‏(برای چند مدل)</td></tr>
+<tr><td><b>CPU</b></td><td>۴ هسته</td><td>۸+ هسته ‏(AMD EPYC، Ryzen، Intel Xeon)</td></tr>
+<tr><td><b>GPU</b></td><td>لازم نیست</td><td>NVIDIA با VRAM ی ۸+ گیگ سرعت را به‌طور چشمگیری بالا می‌برد</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>فقط-CPU جواب می‌دهد ولی پاسخ‌ها کندتر انتظار داشته باشید.</b>‏Ollama روی سرورهای فقط-CPU اجرا می‌شود. مدل 9B روی CPU ی مدرن ۸ هسته‌ای حدود ۱۰ توکن/ثانیه می‌دهد. مدل 31B روی CPU کندتر است ‏(حدود ۲ تا ۵ توکن/ثانیه) — هر پاسخ ۳۰ تا ۱۲۰ ثانیه طول می‌کشد ولی کار می‌کند. GPU این را به‌طرز چشمگیری بهتر می‌کند. برای راه‌اندازی‌های فقط-CPU تایم‌اوت API را با متغیر محیطی باز کنید ‏(کلید config.yaml ندارد):</p>
+  <pre dir="ltr"><code># ~/.hermes/.env
+HERMES_API_TIMEOUT=1800   # 30 minutes — generous for slow local models</code></pre>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: نصب Ollama</h2>
+<pre dir="ltr"><code>curl -fsSL https://ollama.com/install.sh | sh</code></pre>
+<p>تأیید کنید در حال اجراست:</p>
+<pre dir="ltr"><code>ollama --version
+curl http://localhost:11434/api/tags   # Should return {"models":[]}</code></pre>
+<h3>گام ۲: گرفتن یک مدل</h3>
+<p>بر اساس سخت‌افزارانتان انتخاب کنید:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مدل</th><th>حجم روی دیسک</th><th>رم لازم</th><th>فراخوانی ابزار</th><th>بهترین برای</th></tr></thead>
+<tbody>
+<tr><td>gemma4:31b</td><td>حدود ۲۰ گیگ</td><td>۲۴+ گیگ</td><td><b>بله</b></td><td>بهترین کیفیت — ابزار و reasoning قوی</td></tr>
+<tr><td>gemma2:27b</td><td>حدود ۱۶ گیگ</td><td>۲۰+ گیگ</td><td>خیر</td><td>کارهای مکالمه‌ای، بدون ابزار</td></tr>
+<tr><td>gemma2:9b</td><td>حدود ۵ گیگ</td><td>۸+ گیگ</td><td>خیر</td><td>چت سریع، پرسش‌وپاسخ — نمی‌تواند ابزار صدا بزند</td></tr>
+<tr><td>llama3.2:3b</td><td>حدود ۲ گیگ</td><td>۴+ گیگ</td><td>خیر</td><td>فقط پاسخ‌های سبک و سریع</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p><b>فراخوانی ابزار مهم است.</b>هرمس یک دستیار <b>ایجنتی</b> است — از طریق فراخوانی ابزار فایل ویرایش می‌کند، فرمان اجرا می‌کند و وب می‌گردد. مدل‌های بدون پشتیبانی فراخوانی ابزار فقط چت می‌کنند؛ نمی‌توانند اقدام کنند. برای تجربهٔ کامل هرمس مدلی بردارید که ابزار را پشتیبانی کند ‏(مثل gemma4:31b).</p>
+</div>
+<p>مدل انتخابیتان را بگیرید:</p>
+<pre dir="ltr"><code>ollama pull gemma4:31b</code></pre>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p><b>چند مدل:</b>می‌توانید چند مدل بگیرید و داخل هرمس با ‎/model‎ بینشان سوئیچ کنید. ‏Ollama مدل فعال را به‌صورت درخواستی در حافظه بار و بقیه را خودکار تخلیه می‌کند.</p>
+</div>
+<p>تأیید کنید مدل کار می‌کند:</p>
+<pre dir="ltr"><code>curl http://localhost:11434/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemma4:31b",
+    "messages": [{"role": "user", "content": "Say hello"}],
+    "max_tokens": 50
+  }'</code></pre>
+<p>باید پاسخی JSON حاوی جواب مدل ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۳: پیکربندی هرمس</h2>
+<p>ویزارد راه‌اندازی هرمس را اجرا کنید:</p>
+<pre dir="ltr"><code>hermes setup</code></pre>
+<p>وقتی ارائه‌دهنده پرسید گزینهٔ <b>Custom Endpoint</b> را بردارید و وارد کنید:</p>
+<ul>
+  <li><b>URL پایه:</b> http://localhost:11434/v1</li>
+  <li><b>کلید API:</b> خالی بگذارید یا no-key بنویسید ‏(‏Ollama لازم ندارد)</li>
+  <li><b>مدل:</b> gemma4:31b ‏(یا هر مدلی که گرفتید)</li>
+</ul>
+<p>یا مستقیم ~/.hermes/config.yaml را ویرایش کنید:</p>
+<pre dir="ltr"><code>model:
+  default: "gemma4:31b"
+  provider: "custom"
+  base_url: "http://localhost:11434/v1"</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۴: شروع استفاده</h2>
+<pre dir="ltr"><code>hermes</code></pre>
+<p>تمام. حالا یک ایجنت کاملاً محلی دارید. امتحانش کنید:</p>
+<pre dir="ltr"><code>You: List all Python files in this directory and count the lines of code in each
+
+You: Read the README.md and summarize what this project does
+
+You: Create a Python script that fetches the weather for Ho Chi Minh City</code></pre>
+<p>هرمس از ابزار ترمینال، عملیات فایل و مدل محلی‌تان استفاده می‌کند — بدون هیچ فراخوانی ابری.</p>
+<h3 id="step-6-optimize-for-speed">گام ۵: انتخاب مدل مناسب کار</h3>
+<p>هر کاری بزرگ‌ترین مدل را نمی‌خواهد. راهنمای عملی:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>وظیفه</th><th>مدل توصیه‌شده</th><th>چرا</th></tr></thead>
+<tbody>
+<tr><td>ویرایش فایل، کد، فرمان‌های ترمینال</td><td>gemma4:31b</td><td>تنها مدل با فراخوانی ابزار قابل‌اعتماد</td></tr>
+<tr><td>پرسش‌وپاسخ سریع ‏(بدون نیاز به ابزار)</td><td>gemma2:9b</td><td>پاسخ سریع برای کارهای مکالمه‌ای</td></tr>
+<tr><td>چت سبک</td><td>llama3.2:3b</td><td>سریع‌ترین ولی خیلی محدود</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout note">
+  <div class="callout-title">📌</div>
+  <p>برای کار ایجنتی کامل ‏(ویرایش فایل، اجرای فرمان، مرور وب)، gemma4:31b فعلاً بهترین گزینهٔ محلی با پشتیبانی فراخوانی ابزار است. <a href="https://ollama.com/library" target="_blank" rel="noopener">کتابخانهٔ مدل‌های Ollama</a> را برای مدل‌های جدیدتر چک کنید — پشتیبانی فراخوانی ابزار به‌سرعت در حال گسترش است.</p>
+</div>
+<p>سوئیچ مدل وسط نشست:</p>
+<pre dir="ltr"><code>/model gemma2:9b</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۶: بهینه‌سازی برای سرعت</h2>
+<h3>افزایش پنجرهٔ زمینهٔ Ollama</h3>
+<p>به‌طور پیش‌فرض Ollama زمینهٔ ۲۰۴۸ توکنی استفاده می‌کند. هرمس برای کار ایجنتی با ابزار حداقل ۶۴٬۰۰۰ توکن لازم دارد:</p>
+<pre dir="ltr"><code># Create a Modelfile that extends context
+cat &gt; /tmp/Modelfile &lt;&lt; 'EOF'
+FROM gemma4:31b
+PARAMETER num_ctx 64000
+EOF
+
+ollama create gemma4-64k -f /tmp/Modelfile</code></pre>
+<p>بعد پیکربندی هرمس را طوری عوض کنید که نام مدل gemma4-64k باشد.</p>
+<h3 id="keep-the-model-loaded">بار نگه داشتن مدل</h3>
+<p>به‌طور پیش‌فرض Ollama بعد از ۵ دقیقه بی‌کاری مدل را تخلیه می‌کند. برای بات گیت‌وی دائمی بار نگهش دارید:</p>
+<pre dir="ltr"><code># Set keep-alive to 24 hours
+curl http://localhost:11434/api/generate \
+  -d '{"model": "gemma4:31b", "keep_alive": "24h"}'</code></pre>
+<p>یا global در محیط Ollama ست کنید:</p>
+<pre dir="ltr"><code># /etc/systemd/system/ollama.service.d/override.conf
+[Service]
+Environment="OLLAMA_KEEP_ALIVE=24h"</code></pre>
+<h3 id="use-gpu-offloading-if-available">استفاده از انتقال به GPU ‏(در صورت وجود)</h3>
+<p>اگر NVIDIA دارید Ollama خودکار لایه‌ها را منتقل می‌کند. چک کنید:</p>
+<pre dir="ltr"><code>ollama ps   # Shows which model is loaded and how many GPU layers</code></pre>
+<p>برای مدل 31B روی GPU ی ۱۲ گیگی، انتقال جزئی می‌گیرید ‏(حدود ۴۰ لایه روی GPU بقیه روی CPU) که همچنان شتاب معناداری می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۷: اجرا به‌عنوان بات گیت‌وی ‏(اختیاری)</h2>
+<p>وقتی هرمس محلی در CLI کار کرد، می‌توانید به‌عنوان بات تلگرام یا دیسکورد expose‌اش کنید — همچنان کاملاً روی سخت‌افزار خودتان.</p>
+<h3>تلگرام</h3>
+<ol>
+  <li>بات را از طریق <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a> بسازید و توکن بگیرید</li>
+  <li>به ~/.hermes/config.yaml اضافه کنید:
+  <pre dir="ltr"><code>model:
+  default: "gemma4:31b"
+  provider: "custom"
+  base_url: "http://localhost:11434/v1"
+
+platforms:
+  telegram:
+    enabled: true
+    token: "YOUR_TELEGRAM_BOT_TOKEN"</code></pre>
+  </li>
+  <li>گیت‌وی را اجرا کنید:
+  <pre dir="ltr"><code>hermes gateway</code></pre>
+  </li>
+</ol>
+<p>حالا در تلگرام به بات پیام بدهید — با مدل محلی‌تان پاسخ می‌دهد.</p>
+<h3>دیسکورد</h3>
+<ol>
+  <li>در <a href="https://discord.com/developers/applications" target="_blank" rel="noopener">discord.com/developers</a> یک اپ بسازید</li>
+  <li>به config اضافه کنید:
+  <pre dir="ltr"><code>platforms:
+  discord:
+    enabled: true
+    token: "YOUR_DISCORD_BOT_TOKEN"</code></pre>
+  </li>
+  <li>اجرا: hermes gateway</li>
+</ol>
+<h3>گام ۸: راه‌اندازی fallback ‏(اختیاری)</h3>
+<p>مدل‌های محلی ممکن است در کارهای پیچیده زورشان نرسد. یک fallback ی ابری راه بیندازید که فقط وقتی مدل محلی شکست خورد فعال شود:</p>
+<pre dir="ltr"><code>model:
+  default: "gemma4:31b"
+  provider: "custom"
+  base_url: "http://localhost:11434/v1"
+
+fallback_providers:
+  - provider: openrouter
+    model: anthropic/claude-sonnet-4</code></pre>
+<p>این‌طوری ۹۰٪ مصرف شما رایگان است ‏(محلی) و فقط کارهای سخت به API پرداختی می‌روند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> عیب‌یابی</h2>
+<h3>«Connection refused» هنگام شروع</h3>
+<p>Ollama اجرا نمی‌شود. روشنش کنید:</p>
+<pre dir="ltr"><code>sudo systemctl start ollama
+# or
+ollama serve</code></pre>
+<h3>پاسخ‌های کند</h3>
+<ul>
+  <li><b>چک کنید اندازهٔ مدل نسبت به رم:</b>اگر مدل رم بیشتری از موجود می‌خواهد به دیسک swap می‌شود. مدل کوچک‌تر بردارید یا رم اضافه کنید.</li>
+  <li><b>chek ollama ps:</b>اگر هیچ لایه‌ای به GPU منتقل نشده پاسخ‌ها مقید به CPU هستند. برای سرورهای فقط-CPU طبیعی است.</li>
+  <li><b>زمینه را کم کنید:</b>گفتگوهای بزرگ استنتاج را کند می‌کنند. مرتب ‎/compress‎ بزنید یا آستانهٔ فشرده‌سازی پایین‌تری در config ست کنید.</li>
+</ul>
+<h3 id="slow-first-response-prefill">پاسخ اول کند ‏(prefill)</h3>
+<p>هرمس با هر فراخوانی API یک payload ثابت می‌فرستد — system prompt به‌اضلاف اسکیماهای ابزار همهٔ ابزارهای فعال — قبل از محتوای گفتگوی شما. روی راه‌اندازی‌های فقط-CPU یا کم-VRAM، پردازش آن پرامپت ‏(<i>فاز prefill</i>) نوبت اول را غالب می‌کند: مدل می‌تواند چند دقیقه بی‌صدا بنشیند در حالی که پرامپت را هضم می‌کند و بعد با سرعت معمول تولید می‌کند. رفتار موردانتظار است نه hang. راهنمای <a href="local-llm-on-mac.html">LLM محلی مک</a> همین اثر را مستند کرده — حین prefill روی زمینه‌های بزرگ مدل‌های محلی ممکن است چند دقیقه هیچ خروجی‌ای نداشته باشند — و هرمس برای نقاط پایانی محلی تایم‌اوت خواندن استریمش را خودکار از ۱۲۰ ثانیه به ۱۸۰۰ ثانیه بالا می‌برد ‏(HERMES_STREAM_READ_TIMEOUT).</p>
+<p>چه چیزی کمک می‌کند:</p>
+<ul>
+  <li><b>مدل را بار نگه دارید</b> — ‏Ollama مدل‌های بی‌کار را بعد از ۵ دقیقه تخلیه می‌کند و یک بارگذاری کامل قبل از prefill بعدی اضافه می‌شود. OLLAMA_KEEP_ALIVE=24h را ست کنید ‏(بخش «بار نگه داشتن مدل»).</li>
+  <li><b>تایم‌اوت API را باز کنید</b> — HERMES_API_TIMEOUT=1800 را در ~/.hermes/.env بگذارید ‏(بخش «چه چیزی لازم دارید»).</li>
+  <li><b>پرامپت ثابت را اندازه بگیرید و کوتاه کنید</b> — hermes prompt-size را اجرا کنید تا تفکیک بایتی system prompt و اسکیماهای ابزار را ببینید، بعد تول‌ست‌های بی‌استفاده را با hermes tools غیرفعال و مهارت‌های بلااستفاده را با hermes skills حذف کنید.</li>
+  <li><b>انتقال GPU استفاده کنید</b> — حتی انتقال جزئی شتاب معناداری می‌دهد.</li>
+</ul>
+<h3>مدل فراخوانی ابزار را رعایت نمی‌کند</h3>
+<p>مدل‌های بدون پشتیبانی فراخوانی ابزار به‌جای فراخوانی ساختاریافته متن ساده تولید می‌کنند. راه‌حل‌ها:</p>
+<ul>
+  <li><b>مدل با پشتیبانی فراخوانی ابزار بردارید</b> — از مدل‌های فهرست بالا فقط gemma4:31b فراخوانی ابزار قابل‌اعتماد دارد.</li>
+  <li><b>هرمس تعمیر خودکار دارد</b> — فراخوانی‌های بدشکل ابزار را تشخیص و تلاش می‌کند خودکار درست کند.</li>
+  <li><b>fallback راه بیندازید</b> — اگر مدل محلی ۳ بار شکست بخورد هرمس به ارائه‌دهندهٔ ابری برمی‌گردد.</li>
+</ul>
+<p>اگر مدل JSON خامی مثل {"name": "web_search", ...} در پاسخش چاپ کرد به‌جای اینکه واقعاً ابزار را اجرا کند، معمولاً مقصر <i>سرور</i> است نه مدل — فراخوانی ابزار فعال نیست یا قالب فراخوانی parse نمی‌شود. جدول راه‌حل per-server در بخش «فراخوانی‌های ابزار متن می‌شوند» صفحهٔ <a href="../integrations/providers.html">ارائه‌دهندگان مدل</a> را ببینید ‏(llama.cpp به ‎--jinja‎ نیاز دارد، vLLM به ‎--enable-auto-tool-choice --tool-call-parser hermes‎ و...).</p>
+<h3>خطاهای پنجرهٔ زمینه</h3>
+<p>زمینهٔ پیش‌فرض Ollama ‏(۲۰۴۸ توکن) برای کار ایجنتی خیلی کوچک است. بخش گام ۶ را برای افزایشش ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> مقایسه هزینه</h2>
+<p>اجرا محلی نسبت به API‌های ابری چیزی ذخیره می‌کند — بر اساس یک نشست کدنویسی معمولی ‏(حدود ۱۰۰ هزار توکن ورودی، ۲۰ هزار توکن خروجی):</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>هزینه per نشست</th><th>ماهانه ‏(استفاده روزانه)</th></tr></thead>
+<tbody>
+<tr><td>Anthropic Claude Sonnet</td><td>حدود ۰٫۸۰ دلار</td><td>حدود ۲۴ دلار</td></tr>
+<tr><td>OpenRouter ‏(GPT-4o)</td><td>حدود ۰٫۶۰ دلار</td><td>حدود ۱۸ دلار</td></tr>
+<tr><td><b>Ollama ‏(محلی)</b></td><td><b>۰٫۰۰ دلار</b></td><td><b>۰٫۰۰ دلار</b></td></tr>
+</tbody>
+</table>
+</div>
+<p>تنها هزینه‌تان برق است — تقریباً ۰٫۰۱ تا ۰٫۰۵ دلار per نشست بسته به سخت‌افزار.</p>
+<h3>چه چیزهایی محلی خوب جواب می‌دهد</h3>
+<ul>
+  <li><b>ویرایش فایل و تولید کد</b> — مدل‌های 9B+ خوب هندلش می‌کنند</li>
+  <li><b>فرمان‌های ترمینال</b> — هرمس فرمان را بسته‌بندی، اجرا و خروجی را می‌خواند فارغ از مدل</li>
+  <li><b>مرور وب</b> — ابزار مرورگر گیرش را انجام می‌دهد؛ مدل فقط نتایج را تفسیر می‌کند</li>
+  <li><b>کارهای cron و وظایف زمان‌بندی‌شده</b> — مثل راه‌اندازی‌های ابری کار می‌کنند</li>
+  <li><b>گیت‌وی چندپلتفرمی</b> — تلگرام، دیسکورد و اسلک همگی با مدل‌های محلی کار می‌کنند</li>
+</ul>
+<h3>چه چیزهایی با مدل‌های ابری بهتر است</h3>
+<ul>
+  <li><b>استدلال چندمرحله‌ای خیلی پیچیده</b> — ‏70B+ یا مدل‌های ابری مثل Claude Opus به‌طور محسوس بهترند</li>
+  <li><b>پنجره‌های زمینهٔ بلند</b> — مدل‌های ابری ۱۰۰ هزار تا ۱ میلیون توکن می‌دهند؛ زمان‌های اجرای محلی اغلب زیر حداقل ۶۴K ی هرمس پیش‌فرض می‌مانند مگر پیکربندی‌شان کنید</li>
+  <li><b>سرعت در پاسخ‌های بلند</b> — استنتاج ابری برای تولیدهای طولانی از محلیِ فقط-CPU سریع‌تر است</li>
+</ul>
+<p>نقطهٔ طلایی: کارهای روزمره محلی، برای کارهای سخت fallback ابری راه بیندازید.</p>
+</section>
+
+<div class="pager">
+  <a href="google-gemini.html"><span class="dir">→ قبلی</span><span class="ttl">گوگل جِمینای</span></a>
+  <a class="next" href="manage-hermes-cloud-with-mcp.html"><span class="dir">بعدی ←</span><span class="ttl">مدیریت هرمس‌کلاد با MCP</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="../guides/local-ollama-setup.html" target="_blank" rel="noopener">Run Hermes Locally with Ollama — Zero API Cost</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

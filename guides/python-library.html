@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استفاده به‌عنوان کتابخانهٔ پایتون — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/python-library" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>استفاده به‌عنوان کتابخانهٔ پایتون</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>استفاده از هرمس به‌عنوان کتابخانهٔ پایتون</h1>
+<p>هرمس فقط یک ابزار CLI نیست. می‌توانید AIAgent را مستقیم import کنید و به‌صورت برنامه‌پذیر در اسکریپت‌ها، اپ‌های وب یا خطوط لولهٔ اتوماسیون خودتان استفاده‌اش کنید. این راهنما نحوهٔ کار را نشان می‌دهد.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نصب</h2>
+<p>‏Hermes را کلون کنید و محیط توسعهٔ ویرایشی پشتیبانی‌شده‌اش را بسازید:</p>
+<pre dir="ltr"><code>git clone https://github.com/NousResearch/hermes-agent.git
+cd hermes-agent
+uv sync</code></pre>
+<p>برنامهٔ خودتان را با uv run python your_app.py از داخل همان checkout اجرا کنید. هرمس برای نصب‌های requirements.txt هیچ wheel یا source distribution پشتیبانی‌شده‌ای منتشر نمی‌کند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>همان متغیرهای محیطی که CLI استفاده می‌کند هنگام استفاده از هرمس به‌عنوان کتابخانه هم لازم‌اند. حداقل OPENROUTER_API_KEY را ست کنید ‏(یا OPENAI_API_KEY / ANTHROPIC_API_KEY اگر دسترسی مستقیم ارائه‌دهنده دارید).</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> استفادهٔ پایه</h2>
+<p>ساده‌ترین راه استفاده از هرمس متد chat() است — پیام بدهید، رشته بگیرید:</p>
+<pre dir="ltr"><code>from run_agent import AIAgent
+
+agent = AIAgent(
+    model="anthropic/claude-sonnet-4.6",
+    quiet_mode=True,
+)
+response = agent.chat("What is the capital of France?")
+print(response)</code></pre>
+<p>‏chat() کل حلقهٔ گفتگو را درون هندل می‌کند — فراخوانی‌های ابزار، ‏retry ها، همه‌چیز — و فقط متن پاسخ نهایی را برمی‌گرداند.</p>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p>هر وقت هرمس را در کد خودتان جاسازی می‌کنید quiet_mode=True را ست کنید. بدون آن ایجنت اسپینرهای CLI، نشانگرهای پیشرفت و بقیهٔ خروجی ترمینال را چاپ می‌کند که خروجی برنامه‌تان را شلوغ می‌کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> کنترل کامل گفتگو</h2>
+<p>برای کنترل بیشتر روی گفتگو مستقیماً از run_conversation() استفاده کنید. دیکشنری حاوی پاسخ کامل، تاریخچهٔ پیام و متادیتا برمی‌گرداند:</p>
+<pre dir="ltr"><code>agent = AIAgent(
+    model="anthropic/claude-sonnet-4.6",
+    quiet_mode=True,
+)
+
+result = agent.run_conversation(
+    user_message="Search for recent Python 3.13 features",
+    task_id="my-task-1",
+)
+
+print(result["final_response"])
+print(f"Messages exchanged: {len(result['messages'])}")</code></pre>
+<p>دیکشنری برگشتی شامل:</p>
+<ul>
+  <li><b>final_response</b> — پاسخ متنی نهایی ایجنت</li>
+  <li><b>messages</b> — تاریخچهٔ کامل پیام‌ها ‏(سیستم، کاربر، دستیار، فراخوانی‌های ابزار)</li>
+</ul>
+<p>‏(task_id ای که می‌دهید روی نمونهٔ ایجنت برای ایزوله‌سازی VM ذخیره می‌شود ولی در دیکشنری بازگشتی echo نمی‌شود.)</p>
+<p>می‌توانید پیام سیستم سفارشی هم بدهید که برای همان فراخوانی system prompt ی گذرا را بازنویسی می‌کند:</p>
+<pre dir="ltr"><code>result = agent.run_conversation(
+    user_message="Explain quicksort",
+    system_message="You are a computer science tutor. Use simple analogies.",
+)</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پیکربندی ابزارها</h2>
+<p>کنترل کنید ایجنت به کدام تول‌ست‌ها دسترسی دارد با enabled_toolsets یا disabled_toolsets:</p>
+<pre dir="ltr"><code># Only enable web tools (browsing, search)
+agent = AIAgent(
+    model="anthropic/claude-sonnet-4.6",
+    enabled_toolsets=["web"],
+    quiet_mode=True,
+)
+
+# Enable everything except terminal access
+agent = AIAgent(
+    model="anthropic/claude-sonnet-4.6",
+    disabled_toolsets=["terminal"],
+    quiet_mode=True,
+)</code></pre>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>وقتی ایجنتی مینیمال و قفل‌شده می‌خواهید ‏(مثلاً فقط جستجوی وب برای بات تحقیق) از enabled_toolsets استفاده کنید. وقتی بیشتر قابلیت‌ها را می‌خواهید ولی بعضی خاص باید محدود شوند ‏(مثلاً بدون دسترسی ترمینال در محیط مشترک) از disabled_toolsets.</p>
+</div>
+<h3>گفتگوهای چندنوبتی</h3>
+<p>وضعیت گفتگو را در چند نوبت با پاس دادن تاریخچهٔ پیام نگه دارید:</p>
+<pre dir="ltr"><code>agent = AIAgent(
+    model="anthropic/claude-sonnet-4.6",
+    quiet_mode=True,
+)
+
+# First turn
+result1 = agent.run_conversation("My name is Alice")
+history = result1["messages"]
+
+# Second turn — agent remembers the context
+result2 = agent.run_conversation(
+    "What's my name?",
+    conversation_history=history,
+)
+print(result2["final_response"])  # "Your name is Alice."</code></pre>
+<p>پارامتر conversation_history فهرست messages از نتیجهٔ قبلی را می‌پذیرد. ایجنت داخلی از آن کپی می‌گیرد، پس فهرست اصلی شما هرگز mutate نمی‌شود.</p>
+<h3>ذخیرهٔ مسیرها ‏(Trajectories)</h3>
+<p>ذخیرهٔ trajectory را فعال کنید تا گفتگوها در قالب ShareGPT ثبت شوند — برای تولید دادهٔ آموزشی یا عیب‌یابی:</p>
+<pre dir="ltr"><code>agent = AIAgent(
+    model="anthropic/claude-sonnet-4.6",
+    save_trajectories=True,
+    quiet_mode=True,
+)
+
+agent.chat("Write a Python function to sort a list")
+# Saves to trajectory_samples.jsonl in ShareGPT format</code></pre>
+<p>هر گفتگو به‌عنوان یک خط JSONL ضمیمه می‌شود و جمع کردن dataset از اجراهای خودکار را آسان می‌کند.</p>
+<h3>system prompt ی سفارشی</h3>
+<p>از ephemeral_system_prompt استفاده کنید تا system prompt ی سفارشی ست کنید که رفتار ایجنت را هدایت می‌کند ولی <b>در فایل‌های trajectory ذخیره نمی‌شود</b> ‏(دادهٔ آموزشی‌تان تمیز می‌ماند):</p>
+<pre dir="ltr"><code>agent = AIAgent(
+    model="anthropic/claude-sonnet-4",
+    ephemeral_system_prompt="You are a SQL expert. Only answer database questions.",
+    quiet_mode=True,
+)
+
+response = agent.chat("How do I write a JOIN query?")
+print(response)</code></pre>
+<p>برای ساختن ایجنت‌های تخصصی ایده‌آل است — بازبین کد، نویسندهٔ مستندات، دستیار SQL — همه با همان زیرساخت ابزاری.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> پردازش دسته‌ای</h2>
+<p>برای اجرای موازی پرامپت‌های زیاد، هرمس batch_runner.py را شامل می‌شود. نمونه‌های هم‌زمان AIAgent را با ایزوله‌سازی صحیح منابع مدیریت می‌کند:</p>
+<pre dir="ltr"><code>python batch_runner.py --input prompts.jsonl --output results.jsonl</code></pre>
+<p>هر پرامپت task_id و محیط ایزولهٔ خودش را می‌گیرد. اگر منطق دسته‌ای سفارشی لازم دارید مستقیم با AIAgent خودتان بسازید:</p>
+<pre dir="ltr"><code>import concurrent.futures
+from run_agent import AIAgent
+
+prompts = [
+    "Explain recursion",
+    "What is a hash table?",
+    "How does garbage collection work?",
+]
+
+def process_prompt(prompt):
+    # Create a fresh agent per task for thread safety
+    agent = AIAgent(
+        model="anthropic/claude-sonnet-4",
+        quiet_mode=True,
+        skip_memory=True,
+    )
+    return agent.chat(prompt)
+
+with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+    results = list(executor.map(process_prompt, prompts))
+
+for prompt, result in zip(prompts, results):
+    print(f"Q: {prompt}\nA: {result}\n")</code></pre>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p>همیشه <b>یک نمونهٔ AIAgent جدید per رشته یا task</b> بسازید. ایجنت وضعیت داخلی نگه می‌دارد ‏(تاریخچهٔ گفتگو، نشست‌های ابزار، شمارنده‌های تکرار) که برای اشتراک بین‌رشته‌ای thread-safe نیست.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> نمونه‌های یکپارچگی</h2>
+<h3>نقطهٔ پایانی FastAPI</h3>
+<pre dir="ltr"><code>from fastapi import FastAPI
+from pydantic import BaseModel
+from run_agent import AIAgent
+
+app = FastAPI()
+
+class ChatRequest(BaseModel):
+    message: str
+    model: str = "anthropic/claude-sonnet-4"
+
+@app.post("/chat")
+async def chat(request: ChatRequest):
+    agent = AIAgent(
+        model=request.model,
+        quiet_mode=True,
+        skip_context_files=True,
+        skip_memory=True,
+    )
+    response = agent.chat(request.message)
+    return {"response": response}</code></pre>
+<h3>بات دیسکورد</h3>
+<pre dir="ltr"><code>import discord
+from run_agent import AIAgent
+
+client = discord.Client(intents=discord.Intents.default())
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+    if message.content.startswith("!hermes "):
+        query = message.content[8:]
+        agent = AIAgent(
+            model="anthropic/claude-sonnet-4",
+            quiet_mode=True,
+            skip_context_files=True,
+            skip_memory=True,
+            platform="discord",
+        )
+        response = agent.chat(query)
+        await message.channel.send(response[:2000])
+
+client.run("YOUR_DISCORD_TOKEN")</code></pre>
+<h3>مرحلهٔ خط لولهٔ CI/CD</h3>
+<pre dir="ltr"><code>#!/usr/bin/env python3
+"""CI step: auto-review a PR diff."""
+import subprocess
+from run_agent import AIAgent
+
+diff = subprocess.check_output(["git", "diff", "main...HEAD"]).decode()
+
+agent = AIAgent(
+    model="anthropic/claude-sonnet-4",
+    quiet_mode=True,
+    skip_context_files=True,
+    skip_memory=True,
+    disabled_toolsets=["terminal", "browser"],
+)
+
+review = agent.chat(
+    f"Review this PR diff for bugs, security issues, and style problems:\n\n{diff}"
+)
+print(review)</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> پارامترهای کلیدی سازنده</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>پارامتر</th><th>نوع</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td>model</td><td>str</td><td>""</td><td>مدل در قالب OpenRouter ‏(پیش‌فرض خالی؛ در زمان اجرا از config ی هرمس‌تان حل می‌شود)</td></tr>
+<tr><td>quiet_mode</td><td>bool</td><td>False</td><td>سرکوب خروجی CLI</td></tr>
+<tr><td>enabled_toolsets</td><td>List[str]</td><td>None</td><td>allowlist تول‌ست‌های مشخص</td></tr>
+<tr><td>disabled_toolsets</td><td>List[str]</td><td>None</td><td>بلک‌لیست تول‌ست‌های مشخص</td></tr>
+<tr><td>save_trajectories</td><td>bool</td><td>False</td><td>ذخیرهٔ گفتگوها در JSONL</td></tr>
+<tr><td>ephemeral_system_prompt</td><td>str</td><td>None</td><td>system prompt سفارشی ‏(در trajectory ها ذخیره نمی‌شود)</td></tr>
+<tr><td>max_iterations</td><td>int</td><td>500</td><td>بیشینهٔ تکرارهای فراخوانی ابزار per گفتگو</td></tr>
+<tr><td>skip_context_files</td><td>bool</td><td>False</td><td>بارگذاری فایل‌های AGENTS.md را رد کن</td></tr>
+<tr><td>skip_memory</td><td>bool</td><td>False</td><td>خواندن/نوشتن حافظهٔ پایدار را خاموش کن</td></tr>
+<tr><td>api_key</td><td>str</td><td>None</td><td>کلید API ‏(به متغیرهای محیطی برمی‌گردد)</td></tr>
+<tr><td>base_url</td><td>str</td><td>None</td><td>URL ی نقطهٔ پایانی API سفارشی</td></tr>
+<tr><td>platform</td><td>str</td><td>None</td><td>راهنمای پلتفرم ‏("discord"، "telegram" و...)</td></tr>
+</tbody>
+</table>
+</div>
+<h3>نکته‌های مهم</h3>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <ul>
+    <li>اگر نمی‌خواهید فایل‌های AGENTS.md از پوشهٔ کاری به system prompt بار شوند skip_context_files=True را ست کنید.</li>
+    <li>برای جلوگیری از خواندن/نوشتن حافظهٔ پایدار skip_memory=True را ست کنید — برای نقطه‌های پایانی API بی‌وضعیت توصیه می‌شود.</li>
+    <li>پارامتر platform ‏(مثل "discord"، "telegram") راهنماهای قالب‌بندی مخصوص-پلتفرم را تزریق می‌کند تا ایجنت سبک خروجی‌اش را تطبیق دهد.</li>
+  </ul>
+</div>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <ul>
+    <li><b>ایمنی رشته‌ای:</b>per رشته یا task یک AIAgent بسازید. هرگز نمونه‌ای را بین فراخوانی‌های هم‌زمان به اشتراک نگذارید.</li>
+    <li><b>پاک‌سازی منابع:</b>ایجنت منابع را خودکار پاک می‌کند ‏(نشست‌های ترمینال، نمونه‌های مرورگر) وقتی گفتگو تمام می‌شود. اگر در فرایند بلندمدت اجرا می‌کنید مطمئن شوید هر گفتگو به‌طور عادی تمام می‌شود.</li>
+    <li><b>سقف تکرار:</b>پیش‌فرض max_iterations=500 سخاوتمندانه است. برای پرسش‌وپاسخ ساده آن را پایین‌تر بیاورید ‏(مثلاً max_iterations=10) تا از حلقه‌های فراخوانی-ابزارِ بی‌مهار و کنترل هزینه جلوگیری شود.</li>
+  </ul>
+</div>
+</section>
+
+<div class="pager">
+  <a href="team-telegram-assistant.html"><span class="dir">→ قبلی</span><span class="ttl">دستیار تیمی تلگرام</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">استفاده از MCP با هرمس (به‌زودی)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/python-library" target="_blank" rel="noopener">Using Hermes as a Python Library</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -28,7 +28,7 @@
 <main>
 
 <h1>گوگل Vertex AI</h1>
-<p>‏Hermes Agent از <b>مدل‌های Gemini روی Google Cloud Vertex AI</b> از طریق نقطهٔ پایانی سازگار-OpenAI ی Vertex پشتیبانی می‌کند. برخلاف ارائه‌دهندهٔ <a href="https://hermes-agent.nousresearch.com/docs/guides/google-gemini" target="_blank" rel="noopener">Google AI Studio</a> ‏(که کلید API ی ایستا روی generativelanguage.googleapis.com استفاده می‌کند)، Vertex به شما <b>محدودیت نرخ درجهٔ سازمانی و صورتحساب/اعتبارهای GCP</b> می‌دهد و انتخاب درست است وقتی می‌خواهید مصرف Gemini روی حساب Google Cloud تان بیفتد نه یک کلید AI Studio.</p>
+<p>‏Hermes Agent از <b>مدل‌های Gemini روی Google Cloud Vertex AI</b> از طریق نقطهٔ پایانی سازگار-OpenAI ی Vertex پشتیبانی می‌کند. برخلاف ارائه‌دهندهٔ <a href="../guides/google-gemini.html" target="_blank" rel="noopener">Google AI Studio</a> ‏(که کلید API ی ایستا روی generativelanguage.googleapis.com استفاده می‌کند)، Vertex به شما <b>محدودیت نرخ درجهٔ سازمانی و صورتحساب/اعتبارهای GCP</b> می‌دهد و انتخاب درست است وقتی می‌خواهید مصرف Gemini روی حساب Google Cloud تان بیفتد نه یک کلید AI Studio.</p>
 <div class="callout note">
   <div class="callout-title">📌</div>
   <p><b>‏Vertex با OAuth2 احراز هویت می‌کند، نه کلید API</b><br>Vertex برای نقطهٔ پایانی استاندارد <b>هیچ کلید API ی ایستایی ندارد</b>. هر درخواست به یک <b>توکن دسترسی OAuth2</b> کوتاه‌عمر ‏(عمر حدود ۱ ساعت) نیاز دارد که یا از JSON ی service-account یا از Application Default Credentials ‏(ADC) ضرب می‌شود. هرمس این توکن‌ها را برایتان ضرب و <b>خودکار refresh</b> می‌کند — هرگز توکن را دستی نمی‌چسبانید. برای همین چسباندن یک توکن موقت در فیلد api_key ی ارائه‌دهندهٔ سفارشی کار نمی‌کند: وسط نشست منقضی می‌شود.</p>
@@ -148,7 +148,7 @@ vertex:
 <section class="doc-sec">
 <h2><span class="secnum">۷</span> مرتبط</h2>
 <ul>
-  <li><b><a href="https://hermes-agent.nousresearch.com/docs/guides/google-gemini" target="_blank" rel="noopener">گوگل جِمینای ‏(AI Studio)</a></b> — جِمینای با کلید API ی ایستا بدون GCP</li>
+  <li><b><a href="../guides/google-gemini.html" target="_blank" rel="noopener">گوگل جِمینای ‏(AI Studio)</a></b> — جِمینای با کلید API ی ایستا بدون GCP</li>
   <li><b><a href="https://hermes-agent.nousresearch.com/docs/guides/aws-bedrock" target="_blank" rel="noopener">AWS Bedrock</a></b> — یکپارچه‌سازی بومی دیگر ابری</li>
   <li><b><a href="../integrations/providers.html">ارائه‌دهندگان مدل</a></b></li>
   <li><b><a href="../user-guide/configuration.html">پیکربندی</a></b></li>
