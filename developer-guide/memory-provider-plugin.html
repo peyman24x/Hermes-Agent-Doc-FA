@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پلاگین ارائه‌دهندهٔ حافظه — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/memory-provider-plugin" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>پلاگین ارائه‌دهندهٔ حافظه</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>پلاگین ارائه‌دهندهٔ حافظه</h1>
+<p>پلاگین‌های ارائه‌دهندهٔ حافظه به Hermes Agent دانش پایدار و میان‌نشستی می‌دهند که فراتر از MEMORY.md و USER.md داخلی است. این راهنما پوشش می‌دهد که چگونه یکی بسازید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>ارائه‌دهندگان حافظه یکی از دو نوع <strong>پلاگین ارائه‌دهنده</strong> هستند. نوع دیگر، <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/context-engine-plugin" target="_blank" rel="noopener">پلاگین موتور زمینه</a> است که فشرده‌ساز زمینهٔ داخلی را جایگزین می‌کند. هر دو از یک الگو پیروی می‌کنند: تک‌انتخابی، مبتنی بر پیکربندی و مدیریت‌شده از طریق <code>hermes plugins</code>.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چیدمان‌های نصب</h2>
+<p>هرمس ارائه‌دهندگان حافظه را از چهار منبع کشف می‌کند، با این ترتیب اولویت:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>منبع</th><th>مکان</th><th>توضیحات</th></tr></thead>
+  <tbody>
+    <tr><td>همراه بسته</td><td><code>plugins/memory/&lt;name&gt;/</code></td><td>همراه با Hermes عرضه می‌شود. برای ارائه‌دهندگان جدید بسته است — <a href="https://github.com/NousResearch/hermes-agent/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">CONTRIBUTING</a> را ببینید.</td></tr>
+    <tr><td>کاربر</td><td><code>$HERMES_HOME/plugins/&lt;name&gt;/</code></td><td>به‌دست کاربر اضافه می‌شود، به‌ازای هر پروفایل.</td></tr>
+    <tr><td>پروژه</td><td><code>./.hermes/plugins/&lt;name&gt;/</code></td><td>با انتخاب از طریق <code>HERMES_ENABLE_PROJECT_PLUGINS=1</code>.</td></tr>
+    <tr><td>پکیج</td><td>نقطهٔ ورودی <code>hermes_agent.memory_providers</code></td><td><code>pip install</code>؛ چیزی برای کپی کردن نیست.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>در برخورد نام، منابعِ زودتر برنده می‌شوند؛ بنابراین پوشه‌ای که در یک درخت کاری قرار بگیرد هرگز نمی‌تواند سایه‌ای بر ارائه‌دهندهٔ عرضه‌شده بیندازد.</p>
+<div class="callout note">
+  <div class="callout-title">ℹ️ توجه</div>
+  <p>این برعکسِ ترتیبِ «بعدی برنده می‌شود» در سیستم پلاگین عمومی است. ارائه‌دهندهٔ حافظه با <em>نام</em> فعال می‌شود (<code>memory.provider</code>)، پس سایه‌انداختن حافظهٔ ایجنت را بی‌سروصدا منحرف می‌کند، نه صرفاً بازنویسی یک ابزار.</p>
+</div>
+<p>کشف فقط <em>فهرست‌برداری</em> می‌کند — هرگز ارائه‌دهنده‌ای را import نمی‌کند. تا وقتی <code>memory.provider</code> نامش را نبرد، هیچ‌چیز اجرا نمی‌شود.</p>
+<h3>ارائه‌دهندهٔ پوشه‌ای</h3>
+<p>ارائه‌دهندهٔ پوشه‌ای در <code>plugins/memory/&lt;name&gt;/</code> وقتی همراه Hermes است، در <code>$HERMES_HOME/plugins/&lt;name&gt;/</code> وقتی کاربر نصبش کرده، یا در <code>./.hermes/plugins/&lt;name&gt;/</code> برای نمونهٔ محلیِ پروژه قرار می‌گیرد:</p>
+<pre dir="ltr"><code>plugins/memory/my-provider/
+├── __init__.py      # پیاده‌سازی MemoryProvider + نقطهٔ ورود register()
+├── plugin.yaml      # متادیتا (name، description، hooks)
+└── README.md        # دستورالعمل راه‌اندازی، مرجع پیکربندی، ابزارها</code></pre>
+<h3>ارائه‌دهندهٔ پکیجی</h3>
+<p>ارائه‌دهندهٔ نصب‌شده با pip یک نقطهٔ ورودی در گروه <code>hermes_agent.memory_providers</code> منتشر می‌کند. نام نقطهٔ ورودی همان نام ارائه‌دهنده‌ای است که کاربران در <code>memory.provider</code> انتخاب می‌کنند؛ مقدارش به تابع <code>register(ctx)</code> ارائه‌دهنده اشاره می‌کند:</p>
+<pre dir="ltr"><code># pyproject.toml
+[project.entry-points."hermes_agent.memory_providers"]
+my-provider = "my_provider:register"</code></pre>
+<p>نقطهٔ ورودی را به <strong>پکیج</strong> اشاره دهید، یا به یک <code>register(ctx)</code> داخل آن، و پیاده‌سازی، مهارت‌ها و سایر منابع را در چیدمان معمول پکیج پایتون نگه دارید. نیازی به هیچ کپی‌ای زیر <code>$HERMES_HOME/plugins/</code> نیست.</p>
+<p>نقطهٔ ورود پکیجی همه‌چیزِ یک نصب پوشه‌ای را می‌گیرد، از جمله دو فایلی که هرمس از روی دیسک می‌خواند نه با import — <code>config_schema.py</code> (پنل پیکربندی داشبورد) و <code>cli.py</code> (زیرفرمان‌های <code>hermes &lt;provider&gt;</code> شما). هر دو کنار <code>__init__.py</code> پکیج شما پیدا می‌شوند؛ پس اگر یکی را عرضه می‌کنید، نقطهٔ ورودی را به یک پکیج اشاره دهید نه یک ماژول تکی.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> کلاس انتزاعی MemoryProvider</h2>
+<p>پلاگین شما کلاس انتزاعی <code>MemoryProvider</code> را از <code>agent/memory_provider.py</code> پیاده‌سازی می‌کند:</p>
+<pre dir="ltr"><code>from agent.memory_provider import MemoryProvider
+
+class MyMemoryProvider(MemoryProvider):
+    @property
+    def name(self) -&gt; str:
+        return "my-provider"
+
+    def is_available(self) -&gt; bool:
+        """بررسی اینکه آیا این ارائه‌دهنده می‌تواند فعال شود. هیچ فراخوانی شبکه‌ای."""
+        return bool(os.environ.get("MY_API_KEY"))
+
+    def initialize(self, session_id: str, **kwargs) -&gt; None:
+        """یک‌بار در شروع ایجنت صدا زده می‌شود.
+
+        kwargs همیشه شامل این است:
+          hermes_home (str): مسیر فعال HERMES_HOME. برای ذخیره‌سازی استفاده کنید.
+        """
+        self._api_key = os.environ.get("MY_API_KEY", "")
+        self._session_id = session_id
+
+    # ... متدهای باقی‌مانده را پیاده‌سازی کنید</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> متدهای الزامی</h2>
+<h3>چرخهٔ حیات اصلی</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متد</th><th>چه زمانی صدا زده می‌شود</th><th>پیاده‌سازی الزامی؟</th></tr></thead>
+  <tbody>
+    <tr><td><code>name</code> (پراپرتی)</td><td>همیشه</td><td><strong>بله</strong></td></tr>
+    <tr><td><code>is_available()</code></td><td>آماده‌سازی ایجنت، پیش از فعال‌سازی</td><td><strong>بله</strong> — بدون فراخوانی شبکه</td></tr>
+    <tr><td><code>initialize(session_id, **kwargs)</code></td><td>شروع ایجنت</td><td><strong>بله</strong></td></tr>
+    <tr><td><code>get_tool_schemas()</code></td><td>پس از init، برای تزریق ابزار</td><td><strong>بله</strong></td></tr>
+    <tr><td><code>handle_tool_call(tool_name, args, **kwargs)</code></td><td>وقتی ایجنت از ابزارهای شما استفاده می‌کند</td><td><strong>بله</strong> (اگر ابزار دارید)</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>پیکربندی</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متد</th><th>هدف</th><th>پیاده‌سازی الزامی؟</th></tr></thead>
+  <tbody>
+    <tr><td><code>get_config_schema()</code></td><td>اعلام فیلدهای پیکربندی برای <code>hermes memory setup</code></td><td><strong>بله</strong></td></tr>
+    <tr><td><code>save_config(values, hermes_home)</code></td><td>نوشتن پیکربندی غیررمزی در مکان بومی</td><td><strong>بله</strong> (مگر فقط-متغیر-محیطی)</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>هوک‌های اختیاری</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متد</th><th>چه زمانی صدا زده می‌شود</th><th>موارد استفاده</th></tr></thead>
+  <tbody>
+    <tr><td><code>system_prompt_block()</code></td><td>سرهم‌بندی پرامپت سیستمی</td><td>اطلاعات ثابت ارائه‌دهنده</td></tr>
+    <tr><td><code>prefetch(query, *, session_id="")</code></td><td>پیش از هر فراخوانی API</td><td>بازگرداندن زمینهٔ فراخوانی‌شده (recall)</td></tr>
+    <tr><td><code>queue_prefetch(query, *, session_id="")</code></td><td>پس از هر نوبت</td><td>گرم‌کردن برای نوبت بعدی</td></tr>
+    <tr><td><code>sync_turn(user, assistant, *, session_id="", messages=None)</code></td><td>پس از هر نوبت کامل‌شده</td><td>ماندگاری گفتگو</td></tr>
+    <tr><td><code>on_session_end(messages)</code></td><td>پایان گفتگو</td><td>استخراج/خالی‌سازی نهایی</td></tr>
+    <tr><td><code>on_pre_compress(messages)</code></td><td>پیش از فشرده‌سازی زمینه</td><td>ذخیرهٔ بینش‌ها پیش از دورریختن</td></tr>
+    <tr><td><code>on_memory_write(action, target, content)</code></td><td>نوشته‌های حافظهٔ داخلی</td><td>آینه‌کردن روی بک‌اند شما</td></tr>
+    <tr><td><code>shutdown()</code></td><td>خروج پروسه</td><td>بستن تمیز اتصال‌ها</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> اسکیمای پیکربندی</h2>
+<p><code>get_config_schema()</code> فهرستی از توصیف‌گرهای فیلد برمی‌گرداند که <code>hermes memory setup</code> از آن‌ها استفاده می‌کند:</p>
+<pre dir="ltr"><code>def get_config_schema(self):
+    return [
+        {
+            "key": "api_key",
+            "description": "My Provider API key",
+            "secret": True,           # → در .env نوشته می‌شود
+            "required": True,
+            "env_var": "MY_API_KEY",   # نام صریح متغیر محیطی
+            "url": "https://my-provider.com/keys",  # محل دریافت
+        },
+        {
+            "key": "region",
+            "description": "Server region",
+            "default": "us-east",
+            "choices": ["us-east", "eu-west", "ap-south"],
+        },
+        {
+            "key": "project",
+            "description": "Project identifier",
+            "default": "hermes",
+        },
+    ]</code></pre>
+<p>فیلدهای دارای <code>secret: True</code> و <code>env_var</code> به <code>.env</code> می‌روند. فیلدهای غیرمخفی به <code>save_config()</code> پاس داده می‌شوند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته: اسکیمای حداقلی در برابر کامل</div>
+  <p>هر فیلد در <code>get_config_schema()</code> هنگام <code>hermes memory setup</code> از کاربر پرسیده می‌شود. ارائه‌دهندگانی که گزینه‌های زیادی دارند باید اسکیما را حداقلی نگه دارند — فقط فیلدهایی را بگنجانند که کاربر <strong>باید</strong> پیکربندی کند (کلید API، اعتبارنامه‌های الزامی). تنظیمات اختیاری را در یک مرجع فایل پیکربندی مستند کنید (مثلاً <code>$HERMES_HOME/myprovider.json</code>) نه این‌که همه را هنگام راه‌اندازی بپرسید. این جادوگر راه‌اندازی را سریع نگه می‌دارد و هم‌زمان از پیکربندی پیشرفته پشتیبانی می‌کند. ارائه‌دهندهٔ Supermemory را برای مثال ببینید — فقط کلید API را می‌پرسد؛ بقیهٔ گزینه‌ها در <code>supermemory.json</code> زندگی می‌کنند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> ذخیرهٔ پیکربندی</h2>
+<pre dir="ltr"><code>def save_config(self, values: dict, hermes_home: str) -&gt; None:
+    """پیکربندی غیرمخفی را در مکان بومی خودتان بنویسید."""
+    import json
+    from pathlib import Path
+    config_path = Path(hermes_home) / "my-provider.json"
+    config_path.write_text(json.dumps(values, indent=2))</code></pre>
+<p>برای ارائه‌دهندگان فقط-متغیر-محیطی، همان no-op پیش‌فرض را باقی بگذارید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> نقطهٔ ورود پلاگین</h2>
+<pre dir="ltr"><code>def register(ctx) -&gt; None:
+    """توسط سیستم کشف پلاگین حافظه صدا زده می‌شود."""
+    ctx.register_memory_provider(MyMemoryProvider())</code></pre>
+<p>یک ارائه‌دهنده می‌تواند از همان callback مهارت‌های فقط‌خواندنی هم در معرض بگذارد. مهارت‌ها با نام نقطهٔ ورودی تعیین‌صلاحیت می‌شوند و فقط وقتی آن ارائه‌دهندهٔ حافظه فعال است بارگذاری می‌شوند:</p>
+<pre dir="ltr"><code>from pathlib import Path
+
+SKILLS_DIR = Path(__file__).parent / "skills"
+
+def register(ctx) -&gt; None:
+    ctx.register_memory_provider(MyMemoryProvider())
+    ctx.register_skill(
+        "maintenance",
+        SKILLS_DIR / "maintenance" / "SKILL.md",
+        "Maintain the provider's memory store",
+    )</code></pre>
+<p>با فعال‌بودن نقطهٔ ورودی <code>my-provider</code>، مهارت به‌شکل <code>my-provider:maintenance</code> از طریق <code>skill_view()</code> در دسترس است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> plugin.yaml</h2>
+<pre dir="ltr"><code>name: my-provider
+version: 1.0.0
+description: "Short description of what this provider does."
+hooks:
+  - on_session_end    # هوک‌هایی که پیاده‌سازی می‌کنید را فهرست کنید</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> قرارداد نخ‌بندی</h2>
+<p><strong><code>sync_turn()</code> باید مسدودکننده نباشد.</strong> اگر بک‌اند شما تأخیر دارد (فراخوانی‌های API، پردازش LLM)، کار را در یک نخ دیمون اجرا کنید:</p>
+<pre dir="ltr"><code>def sync_turn(self, user_content, assistant_content, *, session_id="", messages=None):
+    def _sync():
+        try:
+            self._api.ingest(user_content, assistant_content, session_id=session_id, messages=messages)
+        except Exception as e:
+            logger.warning("Sync failed: %s", e)
+
+    if self._sync_thread and self._sync_thread.is_alive():
+        self._sync_thread.join(timeout=5.0)
+    self._sync_thread = threading.Thread(target=_sync, daemon=True)
+    self._sync_thread.start()</code></pre>
+<p><code>messages</code> زمینهٔ اختیاریِ گفتگو به سبک OpenAI تا پایان نوبتِ کامل‌شده است. وقتی موجود باشد، شامل پیام‌های کاربر/دستیار، فراخوانی‌های ابزار دستیار و پیام‌های نتیجهٔ ابزار است. ارائه‌دهندگانی که به زمینهٔ خام نوبت نیاز ندارند می‌توانند پارامتر <code>messages</code> را حذف کنند؛ هرمس همچنان آن‌ها را با امضای قدیمی فراخوانی خواهد کرد.</p>
+<p>ارائه‌دهندگان ابری باید مستند کنند که کدام بخش‌های <code>messages</code> از دستگاه خارج می‌شوند. فراخوانی‌های ابزار و نتایج ابزار ممکن است شامل مسیر فایل، خروجی دستور یا دادهٔ دیگرِ فضای کاری باشند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> ایزوله‌سازی پروفایل</h2>
+<p>همهٔ مسیرهای ذخیره‌سازی <strong>باید</strong> از kwarg به نام <code>hermes_home</code> از <code>initialize()</code> استفاده کنند، نه <code>~/.hermes</code> هاردکد‌شده:</p>
+<pre dir="ltr"><code># درست — مختص پروفایل
+from hermes_constants import get_hermes_home
+data_dir = get_hermes_home() / "my-provider"
+
+# غلط — میان همهٔ پروفایل‌ها مشترک
+data_dir = Path("~/.hermes/my-provider").expanduser()</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> تست</h2>
+<p>برای الگوهای انتها-به-انتها <code>tests/agent/test_memory_provider.py</code> و تست‌های حافظهٔ مجاور (<code>tests/agent/test_memory_session_switch.py</code>، <code>tests/agent/test_memory_user_id.py</code>، <code>tests/run_agent/test_memory_provider_init.py</code>) را ببینید.</p>
+<pre dir="ltr"><code>from agent.memory_manager import MemoryManager
+
+mgr = MemoryManager()
+mgr.add_provider(my_provider)
+mgr.initialize_all(session_id="test-1", platform="cli")
+
+# تست مسیریابی ابزار
+result = mgr.handle_tool_call("my_tool", {"action": "add", "content": "test"})
+
+# تست چرخهٔ حیات
+mgr.sync_all("user msg", "assistant msg")
+mgr.on_session_end([])
+mgr.shutdown_all()</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> افزودن دستورهای CLI</h2>
+<p>پلاگین‌های ارائه‌دهندهٔ حافظه می‌توانند درخت زیرفرمان CLI مخصوص خودشان را ثبت کنند (مثلاً <code>hermes my-provider status</code>، <code>hermes my-provider config</code>). این از یک سیستم کشف قرارداد‌محور استفاده می‌کند — بدون نیاز به تغییر فایل‌های هسته.</p>
+<h3>نحوهٔ کار</h3>
+<ol>
+<li>یک فایل <code>cli.py</code> به پوشهٔ پلاگین اضافه کنید</li>
+<li>یک تابع <code>register_cli(subparser)</code> تعریف کنید که درخت argparse را بسازد</li>
+<li>سیستم پلاگین حافظه آن را هنگام شروع از طریق <code>discover_plugin_cli_commands()</code> کشف می‌کند</li>
+<li>دستورهای شما زیر <code>hermes &lt;provider-name&gt; &lt;subcommand&gt;</code> ظاهر می‌شوند</li>
+</ol>
+<p><strong>گیتِ ارائه‌دهندهٔ فعال:</strong> دستورهای CLI شما فقط وقتی ظاهر می‌شوند که ارائه‌دهندهٔ شما <code>memory.provider</code> فعال در پیکربندی باشد. اگر کاربر ارائه‌دهندهٔ شما را پیکربندی نکرده باشد، دستورهایتان در <code>hermes --help</code> نشان داده نمی‌شوند.</p>
+<h3>مثال</h3>
+<pre dir="ltr"><code># plugins/memory/my-provider/cli.py
+
+def my_command(args):
+    """هندلری که argparse dispatch می‌کند."""
+    sub = getattr(args, "my_command", None)
+    if sub == "status":
+        print("Provider is active and connected.")
+    elif sub == "config":
+        print("Showing config...")
+    else:
+        print("Usage: hermes my-provider &lt;status|config&gt;")
+
+def register_cli(subparser) -&gt; None:
+    """درخت argparse مربوط به hermes my-provider را می‌سازد.
+
+    در زمان راه‌اندازی argparse توسط discover_plugin_cli_commands() صدا زده می‌شود.
+    """
+    subs = subparser.add_subparsers(dest="my_command")
+    subs.add_parser("status", help="Show provider status")
+    subs.add_parser("config", help="Show provider config")
+    subparser.set_defaults(func=my_command)</code></pre>
+<h3>پیاده‌سازی مرجع</h3>
+<p><code>plugins/memory/honcho/cli.py</code> را برای مثال کامل با ۱۳ زیرفرمان، مدیریت میان‌پروفیلی (<code>--target-profile</code>) و خواندن/نوشتن پیکربندی ببینید.</p>
+<h3>ساختار پوشه با CLI</h3>
+<pre dir="ltr"><code>plugins/memory/my-provider/
+├── __init__.py      # پیاده‌سازی MemoryProvider + register()
+├── plugin.yaml      # متادیتا
+├── cli.py           # register_cli(subparser) — دستورهای CLI
+└── README.md        # دستورالعمل راه‌اندازی</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> قاعدهٔ ارائه‌دهندهٔ تکی</h2>
+<p>در هر لحظه فقط <strong>یک</strong> ارائه‌دهندهٔ حافظهٔ خارجی می‌تواند فعال باشد. اگر کاربر بخواهد دومی را ثبت کند، MemoryManager آن را با یک هشدار رد می‌کند. این از بادکردن اسکیمای ابزارها و بک‌اندهای متعارض جلوگیری می‌کند.</p>
+</section>
+
+<div class="pager">
+  <a href="image-gen-provider-plugin.html"><span class="dir">→ قبلی</span><span class="ttl">پلاگین تولید تصویر</span></a>
+  <a class="next" href="model-provider-plugin.html"><span class="dir">بعدی ←</span><span class="ttl">پلاگین ارائه‌دهندهٔ مدل</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/memory-provider-plugin" target="_blank" rel="noopener">Memory Provider Plugins</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

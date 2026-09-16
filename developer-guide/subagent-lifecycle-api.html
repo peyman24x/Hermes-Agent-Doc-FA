@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API عمومی چرخهٔ حیات ساب‌ایجنت — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/subagent-lifecycle-api" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>API عمومی چرخهٔ حیات ساب‌ایجنت</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>API عمومی چرخهٔ حیات ساب‌ایجنت</h1>
+<p>پلاگین‌ها می‌توانند نشست‌های فرزندِ تازهٔ هرمس را بدون ایمپورت <code>tools.delegate_tool</code>، درون‌مایهٔ گیت‌وی، وضعیت TUI یا فیلدهای <code>AIAgent</code> راه بیندازند و تحت نظارت داشته باشند. این سرویس والدش را از نوبتِ فعلی ایجنت پیدا می‌کند، پس در نشست‌های CLI، گیت‌وی، غیرتعاملی و کارگر کانبان کار می‌کند. راه‌اندازی خارج از یک نوبت فعال ایجنت با <code>No active Hermes parent session</code> به‌شکل ایمن شکست می‌خورد.</p>
+
+<pre dir="ltr"><code>from agent.subagent_lifecycle import SubagentLaunchRequest
+
+def launch_review(ctx):
+    # Call from a plugin tool or hook while an agent turn is active.
+    service = ctx.subagent_lifecycle
+    handle = service.launch(SubagentLaunchRequest(
+        goal="Review this change for regressions.",
+        context="Only inspect the supplied repository.",
+        role="leaf",
+        correlation_id="review-42",
+        allowed_toolsets=("file",),
+    ))
+    # Persist handle.to_dict() if desired.
+    if service.wait(handle, timeout_seconds=2).timed_out:
+        return handle.to_dict()
+    return service.result(handle)
+</code></pre>
+
+<p><code>SubagentHandle</code> سریال‌پذیر است و یک قابلیت ماتِ نسخه‌دار با خود حمل می‌کند. آن را به <code>status</code>، ‏<code>wait</code>، ‏<code>cancel</code>، ‏<code>result</code> یا <code>reconnect</code> پس بدهید؛ هندل‌های بدشکل یا جعلی <code>UNKNOWN</code>/<code>UNKNOWN_HANDLE</code> برمی‌گردانند و به فرزند دسترسی ندارند.</p>
+
+<p>وضعیت‌های پایدار عبارت‌اند از <code>PENDING</code>، ‏<code>STARTING</code>، ‏<code>RUNNING</code>، ‏<code>SUCCEEDED</code>، ‏<code>FAILED</code>، ‏<code>INTERRUPTED</code>، ‏<code>CANCEL_REQUESTED</code>، ‏<code>CANCELLED</code> و <code>UNKNOWN</code>.</p>
+
+<p>‏<code>cancel(handle, reason=...)</code> مشارکتی است: از ایجنتِ فرزند می‌خواهد در بعدی مرزِ امن وقفه بیندازد و <code>CANCEL_REQUESTED</code> برمی‌گرداند؛ تا وقتی <code>wait</code> یا <code>result</code> یک وضعیت پایانی را مشاهده نکرده، هرگز تکمیل‌شدن را ادعا نمی‌کند. نتایج پایانی تغییرناپذیرند، ایدمپوتنت‌اند، به ۳۲هزار کاراکتر محدودند، رونوشت گفتگو و استدلال‌های پنهان را حذف می‌کنند و یک هشِ نتیجهٔ پایدار دارند.</p>
+
+<p>این API اجرای ناهمگامِ مدیریت‌شدهٔ چرخهٔ حیات است. ساختِ فرزند و تکمیلش از همان مسیرِ متعلق به میزبانِ <code>delegate_task</code> استفاده می‌کند — شامل بازگردانی تفکیک ابزارِ والد، اعلان حافظه، هوک‌های سریال‌شدهٔ <code>subagent_stop</code>، پاک‌سازی منابع و تجمیع هزینهٔ فرزند. ابزارِ همگامِ <code>delegate_task</code>، واگذاری دسته‌ای یا نمایش گیت‌وی/TUI آن را تغییر نمی‌دهد. پیاده‌سازی اولیه فراداده و نتایج پایانی را به‌مدت یک ساعت درون همان فرایند نگه می‌دارد.</p>
+
+<p>بعد از ری‌استارت فرایند، <code>reconnect</code> مقدار <code>RECONNECT_UNAVAILABLE</code> برمی‌گرداند و هرگز فرزندِ جایگزینی راه نمی‌اندازد. تردهای پایتونِ در حال اجرا هم نمی‌توانند از خروج فرایند جان سالم ببرند؛ فراخوان‌ها باید آن هندل‌ها را «قطع‌شده به‌دلیل خروج فرایند» ببینند.</p>
+
+<p>درخواست‌ها fail-closed هستند: اندازهٔ goal/context/فراداده سقف دارد، تول‌ست‌های ناشناخته یا گسترش‌دهندهٔ اختیاراتِ والد رد می‌شوند و بلوک‌های per-tool، بازنویسی‌های پوشهٔ کاری و تایم‌اوت‌های per-launch صریحاً رد می‌شوند تا هرمس بتواند بدون تضعیف ایزوله‌سازی از آن‌ها پشتیبانی کند. از <code>allowed_toolsets</code> برای محدود کردن فرزند استفاده کنید؛ بلوکِ ابزارهای ناامنِ فعلی هرمس همچنان برقرار است.</p>
+
+<div class="pager">
+  <a href="secret-source-plugin.html"><span class="dir">→ قبلی</span><span class="ttl">پلاگین منبع رمز</span></a>
+  <a class="next" href="tools-runtime.html"><span class="dir">بعدی ←</span><span class="ttl">زمان اجرای ابزارها</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/subagent-lifecycle-api" target="_blank" rel="noopener">Public Subagent Lifecycle API</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

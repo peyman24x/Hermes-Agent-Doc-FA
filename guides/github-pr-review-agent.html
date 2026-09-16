@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ایجنت بازبینی PR گیت‌هاب — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/github-pr-review-agent" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>ایجنت بازبینی PR گیت‌هاب</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>ایجنت بازبینی PR گیت‌هاب</h1>
+<p><b>مشکل:</b> تیم‌تان PR را سریع‌تر از توان بازبینیتان باز می‌کند. PRها روزها منتظر می‌مانند تا چشمی پیدا شود. توسعه‌دهنده‌های جونیور باگ مرج می‌کنند چون هیچ‌کس وقت بررسی نداشته. صبح‌هایتان را صرف به‌روزشدن با دیف‌ها می‌کنید به‌جای ساختن.</p>
+<p><b>راه‌حل:</b> یک ایجنت هوش مصنوعی که شبانه‌روز مخزن‌هایتان را زیر نظر دارد، هر PR تازه را از نظر باگ، مشکلات امنیتی و کیفیت کد بازبینی می‌کند و یک خلاصه برایتان می‌فرستد — تا فقط وقتتان را روی PRهایی بگذارید که واقعاً به قضاوت انسانی نیاز دارند.</p>
+<p><b>چه چیزی می‌سازید:</b></p>
+<pre dir="ltr"><code>┌───────────────────────────────────────────────────────────────────┐
+│                                                                   │
+│   Cron Timer  ──▶  Hermes Agent  ──▶  GitHub API  ──▶  Review     │
+│   (every 2h)       + gh CLI           (PR diffs)       delivery   │
+│                    + skill                             (Telegram, │
+│                    + memory                            Discord,   │
+│                                                        local)     │
+│                                                                   │
+└───────────────────────────────────────────────────────────────────┘</code></pre>
+<p>این راهنما از <b>کارهای کرون</b> برای پرس‌وجوی دوره‌ای PRها طبق زمان‌بندی استفاده می‌کند — نه سرور لازم دارد نه نقطهٔ پایانی عمومی. پشت NAT و فایروال کار می‌کند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>به‌جایش بازبینی بلادرنگ می‌خواهید؟</b><br>اگر یک نقطهٔ پایانی عمومی در دسترس دارید، <a href="https://hermes-agent.nousresearch.com/docs/guides/webhook-github-pr-review" target="_blank" rel="noopener">کامنت‌گذاری خودکار PR گیت‌هاب با وب‌هوک</a> را ببینید — گیت‌هاب وقتی PRها باز یا به‌روز می‌شوند رویدادها را بلافاصله به هرمس push می‌کند.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+<li><b>Hermes Agent نصب شده</b> — <a href="../getting-started/installation.html">راهنمای نصب</a> را ببینید</li>
+<li><b>گیت‌وی در حال اجرا</b> برای کارهای کرون:
+<pre dir="ltr"><code>hermes gateway install   # نصب به‌عنوان سرویس
+# یا
+hermes gateway           # اجرا در پیش‌زمینه</code></pre>
+</li>
+<li><b>GitHub CLI (<code>gh</code>) نصب و احراز هویت شده</b>:
+<pre dir="ltr"><code># نصب
+brew install gh        # macOS
+sudo apt install gh    # Ubuntu/Debian
+
+# احراز هویت
+gh auth login</code></pre>
+</li>
+<li><b>پیام‌رسانی پیکربندی‌شده</b> (اختیاری) — <a href="../user-guide/messaging/telegram.html">تلگرام</a> یا <a href="../user-guide/messaging/discord.html">دیسکورد</a></li>
+</ul>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><b>پیام‌رسانی ندارید؟ مشکلی نیست.</b><br>از <code>deliver: "local"</code> استفاده کنید تا بازبینی‌ها در <code>~/.hermes/cron/output/</code> ذخیره شوند. عالی برای تست قبل از وصل‌کردن اعلان‌ها.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: تأیید راه‌اندازی</h2>
+<p>مطمئن شوید هرمس می‌تواند به گیت‌هاب دسترسی داشته باشد. یک گفتگو شروع کنید:</p>
+<pre dir="ltr"><code>hermes</code></pre>
+<p>با یک فرمان ساده تست کنید:</p>
+<pre dir="ltr"><code>Run: gh pr list --repo NousResearch/hermes-agent --state open --limit 3</code></pre>
+<p>باید فهرستی از PRهای باز ببینید. اگر این کار کرد، آماده‌اید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: امتحان یک بازبینی دستی</h2>
+<p>همچنان در همان گفتگو، از هرمس بخواهید یک PR واقعی را بازبینی کند:</p>
+<pre dir="ltr"><code>Review this pull request. Read the diff, check for bugs, security issues,
+and code quality. Be specific about line numbers and quote problematic code.
+
+Run: gh pr diff 3888 --repo NousResearch/hermes-agent</code></pre>
+<p>هرمس این کارها را می‌کند:</p>
+<ol>
+<li><code>gh pr diff</code> را اجرا می‌کند تا تغییرات کد را بگیرد</li>
+<li>کل دیف را می‌خواند</li>
+<li>یک بازبینی ساخت‌یافته با یافته‌های مشخص تولید می‌کند</li>
+</ol>
+<p>اگر از کیفیت راضی هستید، وقت اتوماتیک‌کردنش است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۳: ساخت مهارت بازبینی</h2>
+<p>یک مهارت به هرمس رهنمودهای بازبینیِ یکدستی می‌دهد که در طول نشست‌ها و اجراهای کرون باقی می‌مانند. بدون آن، کیفیت بازبینی نوسان دارد.</p>
+<pre dir="ltr"><code>mkdir -p ~/.hermes/skills/code-review</code></pre>
+<p>فایل <code>~/.hermes/skills/code-review/SKILL.md</code> را بسازید:</p>
+<pre dir="ltr"><code>name: code-review
+description: Review pull requests for bugs, security issues, and code quality
+
+# Code Review Guidelines
+
+When reviewing a pull request:
+
+## What to Check
+1. **Bugs** — Logic errors, off-by-one, null/undefined handling
+2. **Security** — Injection, auth bypass, secrets in code, SSRF
+3. **Performance** — N+1 queries, unbounded loops, memory leaks
+4. **Style** — Naming conventions, dead code, missing error handling
+5. **Tests** — Are changes tested? Do tests cover edge cases?
+
+## Output Format
+For each finding:
+- **File:Line** — exact location
+- **Severity** — Critical / Warning / Suggestion
+- **What's wrong** — one sentence
+- **Fix** — how to fix it
+
+## Rules
+- Be specific. Quote the problematic code.
+- Don't flag style nitpicks unless they affect readability.
+- If the PR looks good, say so. Don't invent problems.
+- End with: APPROVE / REQUEST_CHANGES / COMMENT</code></pre>
+<p>تأیید کنید بارگذاری شده — <code>hermes</code> را اجرا کنید و باید <code>code-review</code> را در فهرست مهارت‌ها هنگام شروع ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۴: قراردادهایتان را به آن یاد بدهید</h2>
+<p>این چیزی است که بازبین را واقعاً مفید می‌کند. یک نشست شروع کنید و استانداردهای تیم‌تان را به هرمس یاد بدهید:</p>
+<pre dir="ltr"><code>Remember: In our backend repo, we use Python with FastAPI.
+All endpoints must have type annotations and Pydantic models.
+We don't allow raw SQL — only SQLAlchemy ORM.
+Test files go in tests/ and must use pytest fixtures.</code></pre>
+<pre dir="ltr"><code>Remember: In our frontend repo, we use TypeScript with React.
+No `any` types allowed. All components must have props interfaces.
+We use React Query for data fetching, never useEffect for API calls.</code></pre>
+<p>این حافظه‌ها برای همیشه می‌مانند — بازبین قراردادهایتان را بدون اینکه هر بار یادآوری کنید اجرا می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۵: ساخت کار کرون خودکار</h2>
+<p>حالا همه را به هم وصل کنید. یک کار کرون بسازید که هر ۲ ساعت اجرا شود:</p>
+<pre dir="ltr"><code>hermes cron create "0 */2 * * *" \
+  "Check for new open PRs and review them.
+
+Repos to monitor:
+- myorg/backend-api
+- myorg/frontend-app
+
+Steps:
+1. Run: gh pr list --repo REPO --state open --limit 5 --json number,title,author,createdAt
+2. For each PR created or updated in the last 4 hours:
+   - Run: gh pr diff NUMBER --repo REPO
+   - Review the diff using the code-review guidelines
+3. Format output as:
+
+## PR Reviews — today
+
+### [repo] #[number]: [title]
+**Author:** [name] | **Verdict:** APPROVE/REQUEST_CHANGES/COMMENT
+[findings]
+
+If no new PRs found, say: No new PRs to review." \
+  --name "pr-review" \
+  --deliver telegram \
+  --skill code-review</code></pre>
+<p>تأیید کنید زمان‌بندی شده:</p>
+<pre dir="ltr"><code>hermes cron list</code></pre>
+<h3>زمان‌بندی‌های مفید دیگر</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>زمان‌بندی</th><th>کِی</th></tr></thead>
+<tbody>
+<tr><td><code>0 */2 * * *</code></td><td>هر ۲ ساعت</td></tr>
+<tr><td><code>0 9,13,17 * * 1-5</code></td><td>سه بار در روز، فقط روزهای هفته</td></tr>
+<tr><td><code>0 9 * * 1</code></td><td>جمع‌بندی هفتگی، صبح دوشنبه</td></tr>
+<tr><td><code>30m</code></td><td>هر ۳۰ دقیقه (مخازن پرترافیک)</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> گام ۶: اجرای درخواستی</h2>
+<p>نمی‌خواهید منتظر زمان‌بندی بمانید؟ دستی اجرایش کنید:</p>
+<pre dir="ltr"><code>hermes cron run pr-review</code></pre>
+<p>یا از داخل یک نشست گفتگو:</p>
+<pre dir="ltr"><code>/cron run pr-review</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> فراتر بروید</h2>
+<h3>پست‌کردن بازبینی‌ها مستقیم در گیت‌هاب</h3>
+<p>به‌جای تحویل به تلگرام، بگذارید ایجنت روی خود PR کامنت بگذارد:</p>
+<p>این را به پرامپت کرونتان اضافه کنید:</p>
+<pre dir="ltr"><code>After reviewing, post your review:
+- For issues: gh pr review NUMBER --repo REPO --comment --body "YOUR_REVIEW"
+- For critical issues: gh pr review NUMBER --repo REPO --request-changes --body "YOUR_REVIEW"
+- For clean PRs: gh pr review NUMBER --repo REPO --approve --body "Looks good"</code></pre>
+<div class="callout caution">
+  <div class="callout-title">⛔</div>
+  <p>مطمئن شوید <code>gh</code> توکنی با اسکوپ <code>repo</code> دارد. بازبینی‌ها به نام هر کسی که <code>gh</code> با آن احراز هویت شده پست می‌شوند.</p>
+</div>
+<h3>داشبورد هفتگی PR</h3>
+<p>یک نمای کلیِ صبح دوشنبه از همهٔ مخزن‌هایتان بسازید:</p>
+<pre dir="ltr"><code>hermes cron create "0 9 * * 1" \
+  "Generate a weekly PR dashboard:
+- myorg/backend-api
+- myorg/frontend-app
+- myorg/infra
+
+For each repo show:
+1. Open PR count and oldest PR age
+2. PRs merged this week
+3. Stale PRs (older than 5 days)
+4. PRs with no reviewer assigned
+
+Format as a clean summary." \
+  --name "weekly-dashboard" \
+  --deliver telegram</code></pre>
+<h3>پایش چندمخزنی</h3>
+<p>با افزودن مخزن‌های بیشتر به پرامپت مقیاس بدهید. ایجنت آن‌ها را ترتیبی پردازش می‌کند — راه‌اندازی اضافه‌ای لازم نیست.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> عیب‌یابی</h2>
+<h3>«gh: command not found»</h3>
+<p>گیت‌وی در یک محیط مینیمال اجرا می‌شود. مطمئن شوید <code>gh</code> در PATH سیستم است و گیت‌وی را ری‌استارت کنید.</p>
+<h3>بازبینی‌ها بیش از حد کلی‌اند</h3>
+<ol>
+<li>مهارت <code>code-review</code> را اضافه کنید (گام ۳)</li>
+<li>قراردادهایتان را با حافظه به هرمس یاد بدهید (گام ۴)</li>
+<li>هرچه زمینهٔ بیشتری دربارهٔ استکتان داشته باشد، بازبینی‌ها بهتر می‌شوند</li>
+</ol>
+<h3>کار کرون اجرا نمی‌شود</h3>
+<pre dir="ltr"><code>hermes gateway status    # آیا گیت‌وی در حال اجراست؟
+hermes cron list         # آیا کار فعال است؟</code></pre>
+<h3>محدودیت‌های نرخ</h3>
+<p>گیت‌هاب به کاربران احراز-هویت‌شده ۵٬۰۰۰ درخواست API در ساعت می‌دهد. هر بازبینی PR حدود ۳ تا ۵ درخواست مصرف می‌کند (لیست + دیف + کامنت‌های اختیاری). حتی بازبینی ۱۰۰ PR در روز خیلی راحت داخل محدودیت‌ها می‌ماند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> قدم‌های بعدی</h2>
+<ul>
+<li><b><a href="https://hermes-agent.nousresearch.com/docs/guides/webhook-github-pr-review" target="_blank" rel="noopener">بازبینی‌های PR مبتنی بر وب‌هوک</a></b> — وقتی PRها باز می‌شوند بازبینی فوری بگیرید (به نقطهٔ پایانی عمومی نیاز دارد)</li>
+<li><b><a href="daily-briefing-bot.html">بات خلاصهٔ روزانه</a></b> — بازبینی‌های PR را با خلاصهٔ اخبار صبحتان ترکیب کنید</li>
+<li><b><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت پلاگین</a></b> — منطق بازبینی را در یک پلاگین قابل‌اشتراک بسته‌بندی کنید</li>
+<li><b><a href="../user-guide/profiles.html">پروفایل‌ها</a></b> — یک پروفایل بازبینِ اختصاصی با حافظه و پیکربندی مخصوص خودش اجرا کنید</li>
+<li><b><a href="../user-guide/features/fallback-providers.html">ارائه‌دهندگان پشتیبان</a></b> — مطمئن شوید بازبینی‌ها حتی وقتی یک ارائه‌دهنده از دسترس خارج شد اجرا می‌شوند</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="delegation-patterns.html"><span class="dir">→ قبلی</span><span class="ttl">الگوهای واگذاری</span></a>
+  <a class="next" href="agent-email-address.html"><span class="dir">بعدی ←</span><span class="ttl">ایمیل اختصاصی برای ایجنت</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/github-pr-review-agent" target="_blank" rel="noopener">GitHub PR Review Agent</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

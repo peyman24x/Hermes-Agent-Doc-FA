@@ -82,13 +82,13 @@ curl http://localhost:11434/api/tags   # Should return {"models":[]}</code></pre
 </div>
 <div class="callout warn">
   <div class="callout-title">⚠️</div>
-  <p><b>فراخوانی ابزار مهم است.</b>هرمس یک دستیار <b>ایجنتی</b> است — از طریق فراخوانی ابزار فایل ویرایش می‌کند، فرمان اجرا می‌کند و وب می‌گردد. مدل‌های بدون پشتیبانی فراخوانی ابزار فقط چت می‌کنند؛ نمی‌توانند اقدام کنند. برای تجربهٔ کامل هرمس مدلی بردارید که ابزار را پشتیبانی کند ‏(مثل gemma4:31b).</p>
+  <p><b>فراخوانی ابزار مهم است.</b> هرمس یک دستیار <b>ایجنتی</b> است — از طریق فراخوانی ابزار فایل ویرایش می‌کند، فرمان اجرا می‌کند و وب می‌گردد. مدل‌های بدون پشتیبانی فراخوانی ابزار فقط چت می‌کنند؛ نمی‌توانند اقدام کنند. برای تجربهٔ کامل هرمس مدلی بردارید که ابزار را پشتیبانی کند ‏(مثل gemma4:31b).</p>
 </div>
 <p>مدل انتخابیتان را بگیرید:</p>
 <pre dir="ltr"><code>ollama pull gemma4:31b</code></pre>
 <div class="callout note">
   <div class="callout-title">📌</div>
-  <p><b>چند مدل:</b>می‌توانید چند مدل بگیرید و داخل هرمس با ‎/model‎ بینشان سوئیچ کنید. ‏Ollama مدل فعال را به‌صورت درخواستی در حافظه بار و بقیه را خودکار تخلیه می‌کند.</p>
+  <p><b>چند مدل:</b> می‌توانید چند مدل بگیرید و داخل هرمس با ‎/model‎ بینشان سوئیچ کنید. ‏Ollama مدل فعال را به‌صورت درخواستی در حافظه بار و بقیه را خودکار تخلیه می‌کند.</p>
 </div>
 <p>تأیید کنید مدل کار می‌کند:</p>
 <pre dir="ltr"><code>curl http://localhost:11434/v1/chat/completions \
@@ -230,9 +230,9 @@ fallback_providers:
 ollama serve</code></pre>
 <h3>پاسخ‌های کند</h3>
 <ul>
-  <li><b>چک کنید اندازهٔ مدل نسبت به رم:</b>اگر مدل رم بیشتری از موجود می‌خواهد به دیسک swap می‌شود. مدل کوچک‌تر بردارید یا رم اضافه کنید.</li>
-  <li><b>chek ollama ps:</b>اگر هیچ لایه‌ای به GPU منتقل نشده پاسخ‌ها مقید به CPU هستند. برای سرورهای فقط-CPU طبیعی است.</li>
-  <li><b>زمینه را کم کنید:</b>گفتگوهای بزرگ استنتاج را کند می‌کنند. مرتب ‎/compress‎ بزنید یا آستانهٔ فشرده‌سازی پایین‌تری در config ست کنید.</li>
+  <li><b>چک کنید اندازهٔ مدل نسبت به رم:</b> اگر مدل رم بیشتری از موجود می‌خواهد به دیسک swap می‌شود. مدل کوچک‌تر بردارید یا رم اضافه کنید.</li>
+  <li><b>chek ollama ps:</b> اگر هیچ لایه‌ای به GPU منتقل نشده پاسخ‌ها مقید به CPU هستند. برای سرورهای فقط-CPU طبیعی است.</li>
+  <li><b>زمینه را کم کنید:</b> گفتگوهای بزرگ استنتاج را کند می‌کنند. مرتب ‎/compress‎ بزنید یا آستانهٔ فشرده‌سازی پایین‌تری در config ست کنید.</li>
 </ul>
 <h3 id="slow-first-response-prefill">پاسخ اول کند ‏(prefill)</h3>
 <p>هرمس با هر فراخوانی API یک payload ثابت می‌فرستد — system prompt به‌اضلاف اسکیماهای ابزار همهٔ ابزارهای فعال — قبل از محتوای گفتگوی شما. روی راه‌اندازی‌های فقط-CPU یا کم-VRAM، پردازش آن پرامپت ‏(<i>فاز prefill</i>) نوبت اول را غالب می‌کند: مدل می‌تواند چند دقیقه بی‌صدا بنشیند در حالی که پرامپت را هضم می‌کند و بعد با سرعت معمول تولید می‌کند. رفتار موردانتظار است نه hang. راهنمای <a href="local-llm-on-mac.html">LLM محلی مک</a> همین اثر را مستند کرده — حین prefill روی زمینه‌های بزرگ مدل‌های محلی ممکن است چند دقیقه هیچ خروجی‌ای نداشته باشند — و هرمس برای نقاط پایانی محلی تایم‌اوت خواندن استریمش را خودکار از ۱۲۰ ثانیه به ۱۸۰۰ ثانیه بالا می‌برد ‏(HERMES_STREAM_READ_TIMEOUT).</p>
@@ -293,7 +293,7 @@ ollama serve</code></pre>
 </main>
 </div>
 <footer class="page-footer">
-  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="../guides/local-ollama-setup.html" target="_blank" rel="noopener">Run Hermes Locally with Ollama — Zero API Cost</a><br>
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/local-ollama-setup" target="_blank" rel="noopener">Run Hermes Locally with Ollama — Zero API Cost</a><br>
   طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
 </footer>
 <button id="toTop" title="بازگشت به بالا">↑</button>

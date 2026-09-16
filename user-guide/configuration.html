@@ -270,7 +270,7 @@ real_home = Path(os.environ.get("HERMES_REAL_HOME", os.environ["HOME"]))</code><
   timeout: 180                     # تایم‌اوت به‌ازای-فرمان به ثانیه
   lifetime_seconds: 300            # پنجرهٔ هرسِ بیکاری؛ آستانهٔ هرس یتیم هم ۲ برابر همین است</code></pre>
 </div>
-<p><strong><code>docker_env</code></strong> در برابر <strong><code>docker_forward_env</code></strong>: اولی جفت‌های تحت‌اللفظی <code>KEY=value</code>ای که در پیکربندی مشخص می‌کنید تزریق می‌کند (مقادیر در config.yaml شما زندگی می‌کنند یا به‌صورت دیکشنری JSON با <code>TERMINAL_DOCKER_ENV='{"DEBUG":"1"}'</code> پاس می‌شوند). دومی مقادیر را از شل یا <code>~/.hermes/.env</code> فوروارد می‌کند، پس راز واقعی هرگز در فایل پیکربندی ظاهر نمی‌شود. برای توکن‌ها از <code>docker_forward_env</code> و برای پیچ‌های ایستایی که کانتینر لازم دارد از <code>docker_env</code> استفاده کنید.</p>
+<p><strong><code>docker_env</code></strong> در برابر <strong><code>docker_forward_env</code></strong>: اولی جفت‌های تحت‌اللفظی <code>KEY=value</code> ای که در پیکربندی مشخص می‌کنید تزریق می‌کند (مقادیر در config.yaml شما زندگی می‌کنند یا به‌صورت دیکشنری JSON با <code>TERMINAL_DOCKER_ENV='{"DEBUG":"1"}'</code> پاس می‌شوند). دومی مقادیر را از شل یا <code>~/.hermes/.env</code> فوروارد می‌کند، پس راز واقعی هرگز در فایل پیکربندی ظاهر نمی‌شود. برای توکن‌ها از <code>docker_forward_env</code> و برای پیچ‌های ایستایی که کانتینر لازم دارد از <code>docker_env</code> استفاده کنید.</p>
 <p><strong><code>terminal.docker_extra_args</code></strong> (قابل بازنویسی با <code>TERMINAL_DOCKER_EXTRA_ARGS='["--gpus=all"]'</code>) اجازه می‌دهد پرچم‌های دلخواه <code>docker run</code>ی را که هرمس به‌صورت درجه‌یک عرضه نکرده پاس دهید — ‏<code>--gpus</code>، ‏<code>--network</code>، ‏<code>--add-host</code>، بازنویسی‌های جایگزین <code>--security-opt</code> و غیره. هر مدخل باید رشته باشد؛ فهرست در انتهای فراخوانی <code>docker run</code> الصاق می‌شود تا بتواند در صورت نیاز پیش‌فرض‌های هرمس را بازنویسی کند. کم استفاده کنید — پرچم‌هایی که با سخت‌سازی سندباکس تعارض دارند (حذف قابلیت‌ها، ‏<code>--user</code>، مانت ورک‌اسپیس) ایزوله‌سازی را خاموش تضعیف می‌کنند.</p>
 <p><strong><code>terminal.docker_network</code></strong> (پیش‌فرض <code>true</code>؛ ‏env: ‏<code>TERMINAL_DOCKER_NETWORK</code>) — روی <code>false</code> بگذارید تا کانتینر سندباکس با <code>--network=none</code> اجرا شود و همهٔ خروجی شبکه از فرمان‌های ایجنت قطع شود. روی کانتینر اجراییِ استفاده‌شده توسط <code>terminal</code>، ‏<code>execute_code</code> و ابزارهای فایل اعمال می‌شود. چون کانتینرها بین پروسه‌های هرمس می‌مانند، ‏<code>false</code> کردن وقتی کانتینر شبکه‌دار قدیمی‌ای هست، آن کانتینر را حذف و یک قطع‌شده-از-شبکهٔ تازه می‌سازد (هشداری لاگ می‌شود)؛ پروسه‌های پس‌زمینهٔ داخلش از دست می‌روند. این کلید را به‌جای پاس‌دادن <code>--network=none</code> از <code>docker_extra_args</code> ترجیح دهید.</p>
 <p><strong>نیازمندی‌ها:</strong> Docker Desktop یا Docker Engine نصب و در حال اجرا. هرمس <code>$PATH</code> به‌علاوهٔ مسیرهای نصب رایج مک‏ (<code>/usr/local/bin/docker</code>، ‏<code>/opt/homebrew/bin/docker</code>، باندل اپ Docker Desktop) را می‌کاود. پودمن هم از جعبه پشتیبانی می‌شود: <code>HERMES_DOCKER_BINARY=podman</code> (یا مسیر کامل) را بگذارید تا وقتی هر دو نصب‌اند اجبار شود.</p>
@@ -301,7 +301,7 @@ real_home = Path(os.environ.get("HERMES_REAL_HOME", os.environ["HOME"]))</code><
   <li><strong>کشتن OOM‏ِ PID 1 داخل کانتینر</strong> وضعیت را به <code>Exited</code> می‌برد. استفادهٔ مجدد بعدی <code>docker start</code> می‌کند؛ وضعیت فایل‌سیستم می‌ماند، پروسه‌های پس‌زمینه نه.</li>
   <li><strong>تعویض پروفایل</strong> کانتینرها را از هم ایزوله می‌کند — کانتینری با برچسب <code>hermes-profile=work</code> برای پروسهٔ هرمسی که زیر <code>hermes-profile=research</code> اجرا می‌شود نامرئی است. هرس یتیم هم در دامنهٔ پروفایل است، پس کانتینرهای بین‌پروفایلی تصادفاً هرس نمی‌شوند، ولی تا وقتی دوباره زیر پروفایل اصلی‌شان هرمس اجرا نکنید خودکار پاک هم نمی‌شوند.</li>
 </ul>
-<p>ساب‌ایجنت‌های موازیِ تولیدشده با <code>delegate_task(tasks=[...])</code> از همین یک کانتینر استفاده می‌کنند — <code>cd</code>های هم‌زمان، جهش‌های محیط و نوشتن به همان مسیر با هم تصادم می‌کنند. اگر ساب‌ایجنتی سندباکس ایزوله لازم دارد، باید بازنویسی ایمیج به‌ازای-کار را با <code>register_task_env_overrides()</code> ثبت کند، که محیط‌های RL و بنچمارک‏ (TerminalBench2، ‏HermesSweEnv و غیره) برای ایمیج‌های داکری به‌ازای-کارِ خودشان خودکار انجام می‌دهند.</p>
+<p>ساب‌ایجنت‌های موازیِ تولیدشده با <code>delegate_task(tasks=[...])</code> از همین یک کانتینر استفاده می‌کنند — <code>cd</code> های هم‌زمان، جهش‌های محیط و نوشتن به همان مسیر با هم تصادم می‌کنند. اگر ساب‌ایجنتی سندباکس ایزوله لازم دارد، باید بازنویسی ایمیج به‌ازای-کار را با <code>register_task_env_overrides()</code> ثبت کند، که محیط‌های RL و بنچمارک‏ (TerminalBench2، ‏HermesSweEnv و غیره) برای ایمیج‌های داکری به‌ازای-کارِ خودشان خودکار انجام می‌دهند.</p>
 <p><strong>سخت‌سازی امنیتی:</strong></p>
 <ul>
   <li><code>--cap-drop ALL</code> با فقط <code>DAC_OVERRIDE</code>، ‏<code>CHOWN</code>، ‏<code>FOWNER</code> برگردانده‌شده</li>
@@ -498,14 +498,14 @@ VERCEL_OIDC_TOKEN="$(vc project token &lt;project-name&gt;)" hermes chat</code><
 </div>
 
 <h3>اجرای کانتینر به‌عنوان کاربر میزبان شما</h3>
-<p>به‌طور پیش‌فرض کانتینرهای داکر به‌عنوان <code>root</code> (‏UID 0) اجرا می‌شوند. فایل‌های ساخته‌شده داخل <code>/workspace</code> یا سایر bind-mountها روی میزبان در مالکیت root درمی‌آیند، پس بعد از نشست باید پیش از ویرایش از ادیتور میزبان <code>sudo chown</code>شان کنید. پرچم <code>terminal.docker_run_as_host_user</code> این را درست می‌کند:</p>
+<p>به‌طور پیش‌فرض کانتینرهای داکر به‌عنوان <code>root</code> (‏UID 0) اجرا می‌شوند. فایل‌های ساخته‌شده داخل <code>/workspace</code> یا سایر bind-mountها روی میزبان در مالکیت root درمی‌آیند، پس بعد از نشست باید پیش از ویرایش از ادیتور میزبان <code>sudo chown</code> شان کنید. پرچم <code>terminal.docker_run_as_host_user</code> این را درست می‌کند:</p>
 <div class="codebox">
   <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
   <pre><code>terminal:
   backend: docker
   docker_run_as_host_user: true   # پیش‌فرض: false</code></pre>
 </div>
-<p>وقتی فعال باشد، هرمس <code>--user $(id -u):$(id -g)</code> به فرمان <code>docker run</code> می‌افزاید تا فایل‌های نوشته‌شده در پوشه‌های bind-mount‏ (<code>/workspace</code>، ‏<code>/root</code>، هر چیزی در <code>docker_volumes</code>) در مالکیت کاربر میزبان شما باشند نه root. مبادله: کانتینر دیگر نمی‌تواند <code>apt install</code> کند یا به مسیرهای root-مالک مثل <code>/root/.npm</code> بنویسد — اگر هر دو را می‌خواهید از ایمیج پایه‌ای استفاده کنید که <code>HOME</code>ش در مالکیت کاربر غیر-root است (یا ابزار لازم را هنگام بیلد ایمیج اضافه کنید).</p>
+<p>وقتی فعال باشد، هرمس <code>--user $(id -u):$(id -g)</code> به فرمان <code>docker run</code> می‌افزاید تا فایل‌های نوشته‌شده در پوشه‌های bind-mount‏ (<code>/workspace</code>، ‏<code>/root</code>، هر چیزی در <code>docker_volumes</code>) در مالکیت کاربر میزبان شما باشند نه root. مبادله: کانتینر دیگر نمی‌تواند <code>apt install</code> کند یا به مسیرهای root-مالک مثل <code>/root/.npm</code> بنویسد — اگر هر دو را می‌خواهید از ایمیج پایه‌ای استفاده کنید که <code>HOME</code> ش در مالکیت کاربر غیر-root است (یا ابزار لازم را هنگام بیلد ایمیج اضافه کنید).</p>
 <p>برای رفتار سازگار-به-عقب <code>false</code> (پیش‌فرض) بگذارید. وقتی روشن کنید که گردش‌کارتان عمدتاً «ویرایش فایل‌های مانت‌شدهٔ میزبان» است و از <code>sudo chown -R</code> خسته شده‌اید.</p>
 
 <h3>اختیاری: مانت پوشهٔ اجرا در <code>/workspace</code></h3>
@@ -1218,7 +1218,7 @@ hermes chat --run-budget 850 -q "..."</code></pre>
 </div>
 
 <h3>زنجیرهٔ fallback به‌ازایی-کار برای کارهای کمکی</h3>
-<p>هر کار کمکی می‌تواند اختیاراً <code>fallback_chain</code>ای تعریف کند — فهرستی از مدخل‌های ارائه‌دهنده/مدل که هرمس وقتی ارائه‌دهندهٔ کمکیِ اصلی به‌خاطر محدودیت نرخ، مشکل اتصال یا محدودیت پرداخت شکست می‌خورد امتحان می‌کند:</p>
+<p>هر کار کمکی می‌تواند اختیاراً <code>fallback_chain</code> ای تعریف کند — فهرستی از مدخل‌های ارائه‌دهنده/مدل که هرمس وقتی ارائه‌دهندهٔ کمکیِ اصلی به‌خاطر محدودیت نرخ، مشکل اتصال یا محدودیت پرداخت شکست می‌خورد امتحان می‌کند:</p>
 <div class="codebox">
   <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
   <pre><code>auxiliary:
@@ -1890,7 +1890,7 @@ auxiliary:
   <div class="code-head"><span class="code-lang">yaml</span><button class="copy-btn">کپی</button></div>
   <pre><code>max_concurrent_sessions: null  # null/0 = نامحدود؛ عدد صحیح مثبت = سقف نشست فعال</code></pre>
 </div>
-<p>یک شیفت وقتی گرفته می‌شود که نشست <strong>اولین نوبت</strong>ش را اجرا کند، نه وقتی پنجرهٔ چت باز می‌شود. باز کردن، ازسرگیری یا اتصال‌مجدد به چت تا وقتی پیام نفرستید چیزی هزینه ندارد، پس تب‌های دسکتاپِ بیکار نمی‌توانند گیت‌وی پیام‌رسانیِ سهم این سقف را گرسنه کنند.</p>
+<p>یک شیفت وقتی گرفته می‌شود که نشست <strong>اولین نوبت</strong> ش را اجرا کند، نه وقتی پنجرهٔ چت باز می‌شود. باز کردن، ازسرگیری یا اتصال‌مجدد به چت تا وقتی پیام نفرستید چیزی هزینه ندارد، پس تب‌های دسکتاپِ بیکار نمی‌توانند گیت‌وی پیام‌رسانیِ سهم این سقف را گرسنه کنند.</p>
 <p>وقتی سقف پر شود، هرمس پیام محدودیت مستقیمی برمی‌گرداند که نام می‌برد کدام سطوح شیفتها را نگه داشته‌اند. نشست‌های فعالِ موجود رفتار عادی‌شان را نگه می‌دارند. <code>hermes status</code> مصرف فعلی شیفت‌ها و هر نگهدارنده را نشان می‌دهد. کلید متعارف سطح‌بالا <code>max_concurrent_sessions</code> است؛ ‏<code>gateway.max_concurrent_sessions</code> هم جایگزین است ولی سطح‌بالا وقتی هر دو تنظیم باشند می‌برد. سقف با فایل لیزِ اجرایی محلی اجرا و در-حد-توان است: هرمس اگر رجیستری خواندنی/قفل‌شدنی نباشد باز می‌شکند تا کاربران سرگردان نمانند. برای زمان-اجرای تک-میزبان/تک-پروفایل است، نه HERMES_HOME مشترک بین چند ماشین.</p>
 <p>کنترل کنید چت‌های مشترک یک گفتگو به‌ازای-اتاق نگه دارند یا به‌ازای-شرکت‌کننده:</p>
 <div class="codebox">
@@ -1935,7 +1935,7 @@ whatsapp:
     command: df -h /
   update:
     type: exec
-    command: cd ~/.hermes/hermes-agent && git pull && uv pip install -e .
+    command: cd ~/.hermes/hermes-agent &amp;&amp; git pull &amp;&amp; uv pip install -e .
   gpu:
     type: exec
     command: nvidia-smi --query-gpu=name,utilization.gpu,memory.used,memory.total --format=csv,noheader
@@ -2215,7 +2215,7 @@ whatsapp:
 <p><strong>پروتکل سیمی (<code>api_mode</code>):</strong> هرمس پروتکل سیمی را از <code>delegation.base_url</code> تشخیص می‌دهد (مثلاً مسیرهای منتهی به <code>/anthropic</code> ← <code>anthropic_messages</code>). برای اندپوینت‌هایی که ابتکار نمی‌تواند طبقه‌بندی کند — مثلاً Azure AI Foundry، ‏MiniMax، ‏Zhipu GLM یا پروکسی‌های LiteLLM جلوی بک‌اند آنتروپیک‌شکل — ‏<code>delegation.api_mode</code> را صریحاً روی یکی از سه مقدار بگذارید. خالی (پیش‌فرض) تشخیص خودکار را نگه می‌دارد.</p>
 <p>ارائه‌دهندهٔ واگذاری از همان حل اعتبارِ شروع CLI/گیت‌وی استفاده می‌کند. همهٔ ارائه‌دهندگان پیکربندی‌شده پشتیبانی می‌شوند: <code>openrouter</code>، ‏<code>nous</code>، ‏<code>copilot</code>، ‏<code>zai</code>، ‏<code>kimi-coding</code>، ‏<code>minimax</code>، ‏<code>minimax-cn</code>. وقتی ارائه‌دهنده‌ای تنظیم شود، سیستم خودکار base URL، کلید API و حالت API درست را حل می‌کند — بدون سیم‌کشی دستی اعتبار.</p>
 <p><strong>اولویت:</strong> ‏<code>delegation.base_url</code> در پیکربندی ← ‏<code>delegation.provider</code> در پیکربندی ← ارائه‌دهندهٔ والد (ارثی). ‏<code>delegation.model</code> در پیکربندی ← مدل والد (ارثی). تنظیمِ فقط <code>model</code> بدون <code>provider</code> فقط نام مدل را عوض می‌کند و اعتبار والد را نگه می‌دارد (مفید برای تعویض مدل در همان ارائه‌دهنده مثل OpenRouter).</p>
-<p><strong>عرض و عمق:</strong> ‏<code>max_concurrent_children</code> سقف می‌زند چند ساب‌ایجنت به‌ازای-بچ موازی اجرا شوند (پیش‌فرض <code>3</code>، کف ۱، بدون سقف). وقتی مدل آرایهٔ <code>tasks</code>ای بلندتر از سقپ می‌فرستد، <code>delegate_task</code> به‌جای برش خاموش، خطای ابزاری برمی‌گرداند که سقف را توضیح می‌دهد. <code>max_spawn_depth</code> عمق درخت واگذاری را کنترل می‌کند (سقف‌شده به ۱-۳). در پیش‌فرض <code>1</code>، واگذاری تخت است: فرزندان نمی‌توانند نوه بسازند و <code>role="orchestrator"</code> خاموش به <code>leaf</code> تنزل می‌کند. برای اینکه فرزندان ارکستراتور بتوانند نوهٔ برگ بسازند به <code>2</code>؛ برای درخت‌های سه‌سطحی <code>3</code>. ایجنت با <code>role="orchestrator"</code> به‌ازای-فراخوانی اختیار می‌کند؛ ‏<code>orchestrator_enabled: false</code> هر فرزندی را صرف‌نظر از همه به برگ برمی‌گرداند. هزینه ضربی مقیاس می‌شود — با <code>max_spawn_depth: 3</code> و <code>max_concurrent_children: 3</code>، درخت می‌تواند به ۳×۳×۳ = ۲۷ ایجنت برگِ هم‌زمان برسد. برای الگوهای استفاده به «واگذاری ساب‌ایجنت ← سقف عمق و ارکستراسیون تودرتو» مراجعه کنید.</p>
+<p><strong>عرض و عمق:</strong> ‏<code>max_concurrent_children</code> سقف می‌زند چند ساب‌ایجنت به‌ازای-بچ موازی اجرا شوند (پیش‌فرض <code>3</code>، کف ۱، بدون سقف). وقتی مدل آرایهٔ <code>tasks</code> ای بلندتر از سقپ می‌فرستد، <code>delegate_task</code> به‌جای برش خاموش، خطای ابزاری برمی‌گرداند که سقف را توضیح می‌دهد. <code>max_spawn_depth</code> عمق درخت واگذاری را کنترل می‌کند (سقف‌شده به ۱-۳). در پیش‌فرض <code>1</code>، واگذاری تخت است: فرزندان نمی‌توانند نوه بسازند و <code>role="orchestrator"</code> خاموش به <code>leaf</code> تنزل می‌کند. برای اینکه فرزندان ارکستراتور بتوانند نوهٔ برگ بسازند به <code>2</code>؛ برای درخت‌های سه‌سطحی <code>3</code>. ایجنت با <code>role="orchestrator"</code> به‌ازای-فراخوانی اختیار می‌کند؛ ‏<code>orchestrator_enabled: false</code> هر فرزندی را صرف‌نظر از همه به برگ برمی‌گرداند. هزینه ضربی مقیاس می‌شود — با <code>max_spawn_depth: 3</code> و <code>max_concurrent_children: 3</code>، درخت می‌تواند به ۳×۳×۳ = ۲۷ ایجنت برگِ هم‌زمان برسد. برای الگوهای استفاده به «واگذاری ساب‌ایجنت ← سقف عمق و ارکستراسیون تودرتو» مراجعه کنید.</p>
 </section>
 
 <section class="doc-sec">

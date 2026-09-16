@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>زمان اجرای ارائه‌دهنده — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/provider-runtime" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>زمان اجرای ارائه‌دهنده</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>زمان اجرای ارائه‌دهنده</h1>
+<p>هرمس یک حل‌وفصل‌کنندهٔ (resolver) مشترک زمان اجرای ارائه‌دهنده دارد که در این‌ها استفاده می‌شود:</p>
+<ul>
+<li>CLI</li>
+<li>گیت‌وی</li>
+<li>کارهای کرون</li>
+<li>ACP</li>
+<li>فراخوانی‌های مدل کمکی</li>
+</ul>
+<p>پیاده‌سازی اصلی:</p>
+<ul>
+<li><code>hermes_cli/runtime_provider.py</code> — حل‌وفصل اعتبارنامه، حل‌وفصل زمان اجرای نقطهٔ پایانی سفارشی</li>
+<li><code>hermes_cli/auth.py</code> — رجیستری ارائه‌دهنده، <code>resolve_provider()</code></li>
+<li><code>hermes_cli/model_switch.py</code> — خط لولهٔ مشترک تغییر <code>/model</code> (CLI + گیت‌وی)</li>
+<li><code>agent/auxiliary_client.py</code> — مسیریابی مدل کمکی</li>
+<li><code>providers/</code> — ABC + نقاط ورودی رجیستری (<code>ProviderProfile</code>، <code>register_provider</code>، <code>get_provider_profile</code>، <code>list_providers</code>)</li>
+<li><code>plugins/model-providers/&lt;name&gt;/</code> — پلاگین‌های مخصوص هر ارائه‌دهنده (هم‌بسته) که <code>api_mode</code>، <code>base_url</code>، <code>env_vars</code> و <code>fallback_models</code> را اعلام می‌کنند و در نخستین دسترسی، خودشان را در رجیستری ثبت می‌کنند. پلاگین‌های کاربر در <code>$HERMES_HOME/plugins/model-providers/&lt;name&gt;/</code> هم‌نام‌های هم‌بسته را بازنویسی می‌کنند.</li>
+</ul>
+<p><code>get_provider_profile()</code> در <code>providers/</code> برای یک شناسهٔ ارائه‌دهندهٔ مشخص، یک <code>ProviderProfile</code> برمی‌گرداند. <code>runtime_provider.py</code> این تابع را در زمان حل‌وفصل صدا می‌زند تا <code>base_url</code> مرجع، فهرست تقدم <code>env_vars</code>، <code>api_mode</code> و <code>fallback_models</code> را بگیرد، بدون آن‌که لازم باشد آن داده‌ها را در چند فایل تکرار کند. افزودن یک پلاگین جدید زیر <code>plugins/model-providers/&lt;your-provider&gt;/</code> (یا <code>$HERMES_HOME/plugins/model-providers/&lt;your-provider&gt;/</code>) که <code>register_provider()</code> را صدا بزند، برای آن‌که <code>runtime_provider.py</code> آن را بردارد کافی است — هیچ شاخه‌ای در خودِ حل‌وفصل‌کننده لازم نیست.</p>
+<p>اگر می‌خواهید یک ارائه‌دهندهٔ استنتاج درجه‌یک جدید اضافه کنید، این صفحه را همراه با <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-providers" target="_blank" rel="noopener">افزودن ارائه‌دهندهٔ جدید</a> و <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/model-provider-plugin" target="_blank" rel="noopener">راهنمای پلاگین ارائه‌دهندهٔ مدل</a> بخوانید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> ترتیب تقدم حل‌وفصل</h2>
+<p>در سطح بالا، حل‌وفصل ارائه‌دهنده از این‌ها استفاده می‌کند:</p>
+<ol>
+<li>درخواست صریح CLI/زمان اجرا</li>
+<li>پیکربندی مدل/ارائه‌دهنده در <code>config.yaml</code></li>
+<li>متغیرهای محیطی</li>
+<li>پیش‌فرض‌های مخصوص هر ارائه‌دهنده یا حل‌وفصل خودکار</li>
+</ol>
+<p>این ترتیب مهم است، چون هرمس انتخاب ذخیره‌شدهٔ مدل/ارائه‌دهنده را منبع حقیقت برای اجراهای عادی می‌داند. این کار جلوی آن را می‌گیرد که یک export قدیمی در شل، بی‌سروصدا نقطهٔ پایانی‌ای را که کاربر آخرین‌بار در <code>hermes model</code> انتخاب کرده بازنویسی کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> ارائه‌دهنده‌ها</h2>
+<p>خانواده‌های ارائه‌دهندهٔ فعلی شامل این‌ها هستند (مجموعهٔ کامل هم‌بسته را در <code>plugins/model-providers/</code> ببینید):</p>
+<ul>
+<li>AI Gateway (Vercel)</li>
+<li>OpenRouter</li>
+<li>Nous Portal</li>
+<li>OpenAI Codex</li>
+<li>Copilot / Copilot ACP</li>
+<li>Anthropic (بومی)</li>
+<li>Google / Gemini (<code>gemini</code>)</li>
+<li>Alibaba / DashScope (<code>alibaba</code>، <code>alibaba-coding-plan</code>)</li>
+<li>DeepSeek</li>
+<li>Z.AI</li>
+<li>Kimi / Moonshot (<code>kimi-coding</code>، <code>kimi-coding-cn</code>)</li>
+<li>MiniMax (<code>minimax</code>، <code>minimax-cn</code>، <code>minimax-oauth</code>)</li>
+<li>Kilo Code</li>
+<li>Hugging Face</li>
+<li>OpenCode Zen / OpenCode Go</li>
+<li>AWS Bedrock</li>
+<li>Azure Foundry</li>
+<li>NVIDIA NIM</li>
+<li>xAI (Grok)</li>
+<li>Arcee</li>
+<li>GMI Cloud</li>
+<li>StepFun</li>
+<li>Qwen OAuth</li>
+<li>Xiaomi</li>
+<li>Ollama Cloud</li>
+<li>LM Studio</li>
+<li>Tencent TokenHub</li>
+<li>Custom (<code>provider: custom</code>) — ارائه‌دهندهٔ درجه‌یک برای هر نقطهٔ پایانی سازگار با OpenAI</li>
+<li>ارائه‌دهنده‌های سفارشی نام‌دار (دیکشنری <code>providers:</code> در config.yaml؛ فهرست قدیمی <code>custom_providers</code> همچنان برای سازگاری با نسخه‌های پیشین خوانده می‌شود)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> خروجی حل‌وفصل زمان اجرا</h2>
+<p>حل‌وفصل‌کنندهٔ زمان اجرا داده‌هایی مثل این‌ها را برمی‌گرداند:</p>
+<ul>
+<li><code>provider</code></li>
+<li><code>api_mode</code></li>
+<li><code>base_url</code></li>
+<li><code>api_key</code></li>
+<li><code>source</code></li>
+<li>فرادادهٔ مخصوص ارائه‌دهنده مثل اطلاعات انقضا/تازه‌سازی</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> چرا این مهم است</h2>
+<p>این حل‌وفصل‌کننده دلیل اصلی آن است که هرمس می‌تواند منطق احراز هویت/زمان اجرا را بین این‌ها به اشتراک بگذارد:</p>
+<ul>
+<li><code>hermes chat</code></li>
+<li>مدیریت پیام گیت‌وی</li>
+<li>کارهای کرون که در نشست‌های تازه اجرا می‌شوند</li>
+<li>نشست‌های ویرایشگر ACP</li>
+<li>کارهای مدل کمکی</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> AI Gateway</h2>
+<p><code>AI_GATEWAY_API_KEY</code> را در <code>~/.hermes/.env</code> تنظیم کنید و با <code>--provider ai-gateway</code> اجرا کنید. هرمس مدل‌های موجود را از نقطهٔ پایانی <code>/models</code> گیت‌وی می‌گیرد و آن‌ها را به مدل‌های زبانیِ دارای پشتیبانی استفاده از ابزار محدود می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> OpenRouter، AI Gateway و base URLهای سفارشیِ سازگار با OpenAI</h2>
+<p>هرمس منطقی دارد برای جلوگیری از درزکردن کلید API اشتباه به یک نقطهٔ پایانی سفارشی وقتی چند کلید ارائه‌دهنده وجود دارد (مثلاً <code>OPENROUTER_API_KEY</code>، <code>AI_GATEWAY_API_KEY</code> و <code>OPENAI_API_KEY</code>).</p>
+<p>کلید API هر ارائه‌دهنده به base URL خودش محدود است:</p>
+<ul>
+<li><code>OPENROUTER_API_KEY</code> فقط به نقطه‌های پایانی <code>openrouter.ai</code> فرستاده می‌شود</li>
+<li><code>AI_GATEWAY_API_KEY</code> فقط به نقطه‌های پایانی <code>ai-gateway.vercel.sh</code> فرستاده می‌شود</li>
+<li><code>OPENAI_API_KEY</code> برای نقطه‌های پایانی سفارشی و به‌عنوان پشتیبان استفاده می‌شود</li>
+</ul>
+<p>هرمس همچنین بین این دو تمایز می‌گذارد:</p>
+<ul>
+<li>یک نقطهٔ پایانی سفارشی واقعی که کاربر انتخاب کرده</li>
+<li>مسیر پشتیبان OpenRouter که وقتی هیچ نقطهٔ پایانی سفارشی پیکربندی نشده استفاده می‌شود</li>
+</ul>
+<p>این تمایز به‌ویژه برای این‌ها مهم است:</p>
+<ul>
+<li>سرورهای مدل محلی</li>
+<li>APIهای سازگار با OpenAI که OpenRouter یا AI Gateway نیستند</li>
+<li>تغییر ارائه‌دهنده بدون اجرای مجدد راه‌اندازی</li>
+<li>نقطه‌های پایانی سفارشیِ ذخیره‌شده در پیکربندی که باید حتی وقتی <code>OPENAI_BASE_URL</code> در شل فعلی export نشده، به کار کردن ادامه دهند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> مسیر بومی Anthropic</h2>
+<p>Anthropic دیگر فقط «از طریق OpenRouter» نیست.</p>
+<p>وقتی حل‌وفصل ارائه‌دهنده <code>anthropic</code> را انتخاب کند، هرمس از این‌ها استفاده می‌کند:</p>
+<ul>
+<li><code>api_mode = anthropic_messages</code></li>
+<li>API بومی Anthropic Messages</li>
+<li><code>agent/anthropic_adapter.py</code> برای ترجمه</li>
+</ul>
+<p>حل‌وفصل اعتبارنامه برای Anthropic بومی حالا وقتی هر دو موجود باشند، اعتبارنامه‌های تازه‌شوندهٔ Claude Code را به توکن‌های کپی‌شده در متغیر محیطی ترجیح می‌دهد. در عمل یعنی:</p>
+<ul>
+<li>فایل‌های اعتبارنامهٔ Claude Code وقتی احراز هویت تازه‌شونده داشته باشند، منبع ترجیحی در نظر گرفته می‌شوند</li>
+<li>مقادیر دستی <code>ANTHROPIC_TOKEN</code> / <code>CLAUDE_CODE_OAUTH_TOKEN</code> همچنان به‌عنوان بازنویسی صریح کار می‌کنند</li>
+<li>هرمس قبل از فراخوانی‌های بومی Messages API، تازه‌سازی اعتبارنامهٔ Anthropic را پیش‌بررسی می‌کند</li>
+<li>هرمس همچنان روی 401 و بعد از بازسازی کلاینت Anthropic یک‌بار تلاش مجدد می‌کند، به‌عنوان مسیر پشتیبان</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> مسیر OpenAI Codex</h2>
+<p>Codex از یک مسیر جداگانهٔ Responses API استفاده می‌کند:</p>
+<ul>
+<li><code>api_mode = codex_responses</code></li>
+<li>حل‌وفصل اعتبارنامه و پشتیبانی مخزن احراز هویتِ اختصاصی</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> مسیریابی مدل کمکی</h2>
+<p>کارهای کمکی مثل:</p>
+<ul>
+<li>بینایی</li>
+<li>خلاصه‌سازی استخراج وب</li>
+<li>خلاصه‌های فشرده‌سازی زمینه</li>
+<li>عملیات هاب مهارت‌ها</li>
+<li>عملیات کمکی MCP</li>
+<li>تخلیه (flush) حافظه‌ها</li>
+</ul>
+<p>می‌توانند به‌جای مدل اصلی گفتگو، مسیریابی ارائه‌دهنده/مدل مخصوص خودشان را داشته باشند.</p>
+<p>وقتی یک کار کمکی با ارائه‌دهندهٔ <code>main</code> پیکربندی شود، هرمس آن را از همان مسیر مشترک زمان اجرای گفتگوی عادی حل‌وفصل می‌کند. در عمل یعنی:</p>
+<ul>
+<li>نقطه‌های پایانی سفارشیِ مبتنی بر متغیر محیطی همچنان کار می‌کنند</li>
+<li>نقطه‌های پایانی سفارشیِ ذخیره‌شده از طریق <code>hermes model</code> / <code>config.yaml</code> هم کار می‌کنند</li>
+<li>مسیریابی کمکی می‌تواند تفاوت نقطهٔ پایانی سفارشیِ واقعیِ ذخیره‌شده و مسیر پشتیبان OpenRouter را تشخیص دهد</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> مدل‌های پشتیبان</h2>
+<p>هرمس از زنجیرهٔ پشتیبانِ ارائه‌دهندهٔ پیکربندی‌شده پشتیبانی می‌کند — فهرستی از ورودی‌های <code>(provider, model)</code> که به ترتیب امتحان می‌شوند وقتی مدل اصلی با خطا روبه‌رو می‌شود. دیکشنری قدیمیِ تک‌جفتیِ <code>fallback_model</code> همچنان برای سازگاری با نسخه‌های پیشین پذیرفته می‌شود (و در اولین نوشتن مهاجرت داده می‌شود).</p>
+<h3>کارکرد داخلی چگونه است</h3>
+<ol>
+<li><strong>ذخیره‌سازی</strong>: <code>AIAgent.__init__</code> دیکشنری <code>fallback_model</code> را نگه می‌دارد و <code>_fallback_activated = False</code> را تنظیم می‌کند.</li>
+
+<li><strong>نقاط محرک</strong>: <code>_try_activate_fallback()</code> از سه جای حلقهٔ تلاش مجدد اصلی در <code>run_agent.py</code> صدا زده می‌شود:
+  <ul>
+  <li>بعد از حداکثر تلاش‌ها روی پاسخ‌های نامعتبر API (انتخاب‌های None، محتوای غایب)</li>
+  <li>روی خطاهای کلاینتِ غیرقابل‌تلاش‌مجدد (HTTP 401، 403، 404)</li>
+  <li>بعد از حداکثر تلاش‌ها روی خطاهای گذرا (HTTP 429، 500، 502، 503)</li>
+  </ul></li>
+
+<li><strong>جریان فعال‌سازی</strong> (<code>_try_activate_fallback</code>):
+  <ul>
+  <li>اگر قبلاً فعال شده یا پیکربندی نشده باشد، بلافاصله <code>False</code> برمی‌گرداند</li>
+  <li><code>resolve_provider_client()</code> را از <code>auxiliary_client.py</code> صدا می‌زند تا کلاینت جدیدی با احراز هویت درست بسازد</li>
+  <li><code>api_mode</code> را تعیین می‌کند: <code>codex_responses</code> برای openai-codex، <code>anthropic_messages</code> برای anthropic و <code>chat_completions</code> برای بقیه</li>
+  <li>درجا جابه‌جا می‌کند: <code>self.model</code>، <code>self.provider</code>، <code>self.base_url</code>، <code>self.api_mode</code>، <code>self.client</code>، <code>self._client_kwargs</code></li>
+  <li>برای پشتیبان anthropic: به‌جای کلاینت سازگار با OpenAI، کلاینت بومی Anthropic می‌سازد</li>
+  <li>کش پرامپت را دوباره ارزیابی می‌کند (برای مدل‌های Claude روی OpenRouter فعال است)</li>
+  <li><code>_fallback_activated = True</code> را تنظیم می‌کند — از فعال‌شدن دوباره جلوگیری می‌شود</li>
+  <li>شمارندهٔ تلاش مجدد را صفر می‌کند و حلقه را ادامه می‌دهد</li>
+  </ul></li>
+
+<li><strong>جریان پیکربندی</strong>:
+  <ul>
+  <li>CLI: زنجیرهٔ پشتیبان را با <code>hermes_cli/fallback_config.get_fallback_chain()</code> می‌خواند ← به <code>AIAgent(fallback_model=...)</code> می‌دهد</li>
+  <li>گیت‌وی: <code>gateway/run.py._load_fallback_model()</code> مقدار <code>config.yaml</code> را می‌خواند ← به <code>AIAgent</code> می‌دهد</li>
+  <li>اعتبارسنجی: هر دو کلید <code>provider</code> و <code>model</code> باید غیرخالی باشند، وگرنه پشتیبان غیرفعال می‌شود</li>
+  </ul></li>
+</ol>
+<h3>چه چیزهایی از پشتیبان پشتیبانی نمی‌کنند</h3>
+<ul>
+<li><strong>واگذاری به ساب‌ایجنت</strong> (<code>tools/delegate_tool.py</code>): ساب‌ایجنت‌ها ارائه‌دهندهٔ والد را به ارث می‌برند، اما نه پیکربندی پشتیبان را</li>
+<li><strong>کارهای کمکی</strong>: زنجیرهٔ تشخیص خودکار ارائه‌دهندهٔ مستقل خودشان را دارند (بخش مسیریابی مدل کمکی در بالا را ببینید)</li>
+</ul>
+<p>کارهای کرون از پشتیبان پشتیبانی می‌کنند: <code>run_job()</code> مقدار <code>fallback_providers</code> (یا <code>fallback_model</code> قدیمی) را از <code>config.yaml</code> می‌خواند و به <code>AIAgent(fallback_model=...)</code> می‌دهد؛ مطابق الگوی <code>_load_fallback_model()</code> گیت‌وی. بخش <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/cron-internals" target="_blank" rel="noopener">درون‌مایهٔ Cron</a> را ببینید.</p>
+<h3>پوشش تست</h3>
+<p>رفتار پشتیبان در چندین مجموعه تست بررسی می‌شود:</p>
+<ul>
+<li><code>tests/run_agent/test_fallback_credential_isolation.py</code> — جداسازی اعتبارنامه بین اصلی و پشتیبان</li>
+<li><code>tests/hermes_cli/test_fallback_cmd.py</code> — فرمان CLI مربوط به <code>/fallback</code></li>
+<li><code>tests/gateway/test_fallback_eviction.py</code> — اخراج ارائه‌دهنده‌های خراب در گیت‌وی</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> مستندات مرتبط</h2>
+<ul>
+<li><a href="agent-loop.html">حلقهٔ ایجنت</a></li>
+<li><a href="acp-internals.html">درون‌مایهٔ ACP</a></li>
+<li><a href="context-compression-and-caching.html">فشرده‌سازی و کش زمینه</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="session-storage.html"><span class="dir">→ قبلی</span><span class="ttl">ذخیره‌سازی نشست</span></a>
+  <a class="next" href="adding-tools.html"><span class="dir">بعدی ←</span><span class="ttl">افزودن ابزار جدید</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/provider-runtime" target="_blank" rel="noopener">Provider Runtime</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -171,20 +171,20 @@ hermes --provider minimax_oauth    # alias (underscore form)</code></pre>
 <h3>توکن منقضی شد — دوباره خودکار وارد نمی‌شود</h3>
 <p>هرمس اگر توکن کمتر از ۶۰ ثانیه تا انقضا داشته باشد در شروع هر نشست آن را refresh می‌کند. اگر access token قبلاً منقضی شده باشد ‏(مثلاً بعد از یک دورهٔ طولانی آفلاین)، refresh خودکار در درخواست بعدی اتفاق می‌افتد. اگر refresh با refresh_token_reused یا invalid_grant شکست بخورد، هرمس نشست را نیازمند ورود مجدد علامت می‌زند.</p>
 <p>وقتی شکست refresh پایانی باشد ‏(HTTP 4xx، ‏invalid_grant، لغو grant و...)، هرمس refresh token را مرده علامت و محلیاً قرنطینه می‌کند تا تبادل محکوم‌به‌شکست را مدام تکرار نکند. ایجنت یک پیام «re-authentication required» نشان می‌دهد و تا وقتی دوباره وارد نشوید مزاحم نیست.</p>
-<p><b>راه حل:</b>hermes auth add minimax-oauth را دوباره اجرا کنید تا ورود تازه شروع شود. قرنطینه در اولین تبادل موفق پاک می‌شود.</p>
+<p><b>راه حل:</b> hermes auth add minimax-oauth را دوباره اجرا کنید تا ورود تازه شروع شود. قرنطینه در اولین تبادل موفق پاک می‌شود.</p>
 <h3>احراز هویت تایم‌اوت شد</h3>
 <p>جریان کد دستگاه پنجرهٔ انقضای متناهی دارد. اگر به‌موقع تأیید نکنید هرمس خطای timeout می‌دهد.</p>
-<p><b>راه حل:</b>hermes auth add minimax-oauth ‏(یا hermes model) را دوباره اجرا کنید. جریان از نو شروع می‌شود.</p>
+<p><b>راه حل:</b> hermes auth add minimax-oauth ‏(یا hermes model) را دوباره اجرا کنید. جریان از نو شروع می‌شود.</p>
 <h3>ناهم‌خوانی state ‏(احتمال CSRF)</h3>
 <p>هرمس تشخیص داد مقدار state برگشتی از سرور احراز با آنچه فرستاده بود نمی‌خواند.</p>
-<p><b>راه حل:</b>ورود را دوباره اجرا کنید. اگر ادامه پیدا کرد، چک کنید پروکسی یا ریدایرکتی پاسخ OAuth را دستکاری نمی‌کند.</p>
+<p><b>راه حل:</b> ورود را دوباره اجرا کنید. اگر ادامه پیدا کرد، چک کنید پروکسی یا ریدایرکتی پاسخ OAuth را دستکاری نمی‌کند.</p>
 <h3>ورود از سرور راه‌دور</h3>
 <p>اگر hermes نتواند پنجرهٔ مرورگری باز کند از ‎--no-browser‎ استفاده کنید:</p>
 <pre dir="ltr"><code>hermes auth add minimax-oauth --no-browser</code></pre>
 <p>هرمس URL و کد را چاپ می‌کند. URL را روی هر دستگاهی باز کنید و جریان را همان‌جا کامل کنید.</p>
 <h3>خطای «Not logged into MiniMax OAuth» هنگام اجرا</h3>
 <p>مخزن احراز برای minimax-oauth هیچ credential ای ندارد. هنوز وارد نشده‌اید یا فایل credential حذف شده.</p>
-<p><b>راه حل:</b>hermes model را اجرا و گزینهٔ MiniMax (OAuth) را بردارید، یا hermes auth add minimax-oauth را بزنید.</p>
+<p><b>راه حل:</b> hermes model را اجرا و گزینهٔ MiniMax (OAuth) را بردارید، یا hermes auth add minimax-oauth را بزنید.</p>
 <h3>خروج</h3>
 <p>برای حذف credential های ذخیره‌شدهٔ MiniMax OAuth:</p>
 <pre dir="ltr"><code>hermes auth logout minimax-oauth</code></pre>

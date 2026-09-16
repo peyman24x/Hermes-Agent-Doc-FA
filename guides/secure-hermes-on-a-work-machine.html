@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اجرا روی ماشین کاری شخصی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/secure-hermes-on-a-work-machine" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>اجرا روی ماشین کاری شخصی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>اجرا روی ماشین کاری شخصی</h1>
+<p>می‌خواهید ایجنتی را روی ماشینی اجرا کنید که زندگی‌تان در آن می‌گذرد — یک لپ‌تاپ شخصی یا ایستگاه کاریِ مدیریت‌شده توسط کارفرما. موضع امن چیست؟</p>
+<p>پاسخ کوتاه: پیش‌فرض‌ها از قبل بیشتر کار را انجام می‌دهند. هرمس با امنیتِ پیش‌فرض عرضه می‌شود و با مدل دفاع در عمق (defense-in-depth) خود، تأیید فرمان‌ها، ایمنی نوشتن فایل و مدیریت اعتبارنامه‌ها را پوشش می‌دهد. این صفحه مرور می‌کند چه چیزهایی از ابتدا فعال‌اند، کدام تنظیم‌ها را برای ماشین اشتراکی یا کاری باید سفت‌تر کنید و وقتی اشتباهی رخ می‌دهد چطور آن را خنثی کنید. هر کنترل این صفحه در راهنمای <a href="../user-guide/security.html">امنیت</a> به‌تفصیل پوشش داده شده است.</p>
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌فرض‌ها از قبل از چه چیزهایی محافظت می‌کنند</h2>
+<p>نصب تازه، بدون هیچ پیکربندی — این محافظت‌ها فعال‌اند:</p>
+<p><b>فرمان‌های خطرناک نیاز به تأیید دارند.</b> پیش از اجرای هر فرمان، هرمس آن را با فهرستی منتخب از الگوهای خطرناک مقایسه می‌کند — حذف بازگشتی، نوشتن در ‏<code>/etc/</code>، عملیات دیسک، پایپ به شل و بیشتر. حالت پیش‌فرض ‏<code>approvals.mode: smart</code> از یک LLM کمکی برای سنجش ریسک استفاده می‌کند: فرمان‌های کم‌ریسک فقط برای همان فرمان به‌طور خودکار تأیید می‌شوند، فرمان‌های واقعاً خطرناک به‌طور خودکار رد می‌شوند و موارد نامطمئن به یک پرامپت دستی ارجاع می‌شوند.</p>
+<p><b>پرامپت‌های تأیید fail-closed هستند.</b> اگر تا پایان مهلت (پیش‌فرض ۳۰۰ ثانیه) به پرامپت تأیید پاسخ ندهید، فرمان <b>رد</b> می‌شود. دور شدن از میز کارتان هرگز چیزی را بی‌سروصدا تأیید نمی‌کند.</p>
+<p><b>یک فهرست مسدودِ سخت‌گیر همیشه فعال است.</b> بعضی فرمان‌ها — ‏<code>rm -rf /</code>، بمب‌های fork، صفر کردن دیسک فیزیکی — <b>مستقل از</b> حالت تأیید، ‏<code>--yolo</code> یا «allow always» صریح رد می‌شوند. این فهرست پیش از آن‌که لایهٔ تأیید اصلاً فرمان را ببیند فعال می‌شود و هیچ پرچمی برای نادیده گرفتنش وجود ندارد.</p>
+<p><b>نوشتن فایل در مسیرهای حساس مسدود است.</b> ابزارهای ‏<code>write_file</code> و ‏<code>patch</code> نمی‌توانند به مخازن اعتبارنامهٔ سیستم‌عامل (‏<code>~/.ssh/</code>، ‏<code>~/.aws/</code>، ‏<code>~/.kube/</code>، ‏<code>/etc/sudoers</code>، ‏<code>~/.netrc</code>)، مخازن اعتبارنامهٔ هرمس (‏<code>auth.json</code>، ‏<code>.env</code>، داده‌های جفت‌سازی) یا فایل‌های رمز پروژه (‏<code>.env</code>، ‏<code>.env.local</code>، ‏<code>.envrc</code>) در هیچ‌جای دیسک دست بزنند. نوشتن‌های مسدودشده بلافاصله خطا برمی‌گردانند — نه پرامپت تأییدی وجود دارد و نه راهی برای نادیده گرفتن آن از رابط چت.</p>
+<p><b>رمزها از خروجی ماسک می‌شوند.</b> ‏<code>security.redact_secrets</code> به‌صورت پیش‌فرض روشن است: الگوهایی که در خروجی ابزار شبیه کلید API، توکن و رمز عبور هستند، پیش از ورود به زمینهٔ گفتگو و لاگ‌ها ماسک می‌شوند.</p>
+<p><b>داده‌های شما فقط به جایی می‌روند که خودتان نشانی داده‌اید.</b> فراخوانی‌های API <b>فقط به ارائه‌دهندهٔ LLM که پیکربندی می‌کنید</b> می‌روند. Hermes Agent هیچ تله‌متری، دادهٔ مصرف یا آمار تحلیلی جمع نمی‌کند. گفتگوها، حافظه و مهارت‌های شما به‌صورت محلی در ‏<code>~/.hermes/</code> ذخیره می‌شوند. <a href="https://hermes-agent.nousresearch.com/docs/reference/faq#is-my-data-sent-anywhere" target="_blank" rel="noopener">سؤالات متداول</a> را ببینید.</p>
+<div class="callout note">
+  <div class="callout-title">ℹ️</div>
+  <p>زیر این سطح چیزهای بیشتری هم هست — محافظت SSRF روی همهٔ ابزارهای URL-دار، محیط‌های فیلترشده برای زیرفرایندهای MCP، و اسکن تزریق پرامپت روی فایل‌های زمینه. صفحهٔ <a href="../user-guide/security.html">امنیت</a> تک‌تک لایه‌ها را مستند کرده است.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> سفت‌تر کردن برای ماشین اشتراکی یا کاری</h2>
+<p>روی ماشینی که دادهٔ کارفرما، اعتبارنامه‌های production یا فایل‌های دیگران روی آن است، این لایه‌ها را روی پیش‌فرض‌ها اضافه کنید.</p>
+<h3>تغییر تأییدها به حالت دستی</h3>
+<p>حالت ‏<code>smart</code> فرمان‌های کم‌ریسک را خودکار تأیید می‌کند. اگر می‌خواهید هر فرمان علامت‌خورده را خودتان ببینید:</p>
+<pre dir="ltr"><code>approvals:
+  mode: manual</code></pre>
+<p>حالت دستی همیشه پیش از اجرای فرمان علامت‌خورده از شما می‌پرسد.</p>
+<h3>افزودن قوانین رد (deny) خودتان</h3>
+<p>‏<code>approvals.deny</code> فهرستی از الگوهای glob است که فرمان‌های منطبق ترمینال را بی‌قیدوشرط مسدود می‌کند — حتی زیر ‏<code>--yolo</code>، ‏<code>/yolo</code> یا ‏<code>mode: off</code>. این روبه‌رویِ قابل‌ویرایشِ کاربر از فهرست مسدود سخت‌گیرِ داخلی است. از آن برای اعلام چیزهایی که هرگز نباید روی این ماشین اجرا شوند استفاده کنید:</p>
+<pre dir="ltr"><code>approvals:
+  deny:
+    - "git push --force*"
+    - "*curl*|*sh*"
+    - "dd if=* of=/dev/*"</code></pre>
+<p>الگوها glob های <a href="https://docs.python.org/3/library/fnmatch.html" target="_blank" rel="noopener">fnmatch</a> بدون حساسیت به بزرگی و کوچکی حروف‌اند که با کل متن فرمان مقایسه می‌شوند، و مقایسه روی همان گونه‌های نرمال‌شده/رمزگشایی‌شده (deobfuscated) که آشکارساز الگوهای خطرناک استفاده می‌کند اجرا می‌شود؛ پس ترفندهای سادهٔ نقل‌قول از قوانین رد نمی‌شوند. همیشه الگوها را داخل نقل‌قول بگذارید — یک ‏<code>*</code> برهنه در ابتدا خطای parse در YAML می‌دهد. تغییرات بلافاصله اعمال می‌شوند و نیازی به راه‌اندازی دوباره نیست. جزئیات: <a href="../user-guide/security.html#user-defined-deny-rules-approvalsdeny">قوانین رد تعریف‌شده توسط کاربر</a>.</p>
+<h3>سندباکس کردن نوشتن فایل‌ها</h3>
+<p>‏<code>HERMES_WRITE_SAFE_ROOT</code> نوشتنِ ‏<code>write_file</code> و ‏<code>patch</code> را به پیشوندهای پوشه‌ای که فهرست می‌کنید محدود می‌کند — هر چیز بیرون از آن به‌طور قطعی مسدود می‌شود. چند ریشه روی یونیکس با ‏<code>:</code> جدا می‌شوند:</p>
+<pre dir="ltr"><code>export HERMES_WRITE_SAFE_ROOT=/path/to/project:/home/you/.hermes</code></pre>
+<p>مسیرهای حساس داخل ریشهٔ امن همچنان مسدود می‌مانند — نشانه‌دادن آن به ‏<code>$HOME</code> اجازهٔ نوشتن ‏<code>~/.ssh/id_rsa</code> را نمی‌دهد.</p>
+<div class="callout caution">
+  <div class="callout-title">⛔</div>
+  <p>این را بی‌دقت به ‏<code>~/.hermes/.env</code> اضافه نکنید. اگر فقط یک پوشهٔ پروژه ست کنید، ایجنت نمی‌تواند در ‏<code>~/.hermes/cron/jobs.json</code>، مهارت‌های پروفایل یا سایر وضعیت‌های هرمس بیرون از آن پیشوند بنویسد. خانهٔ هرمس‌تان را هم مثل بالا به‌عنوان ریشهٔ دوم لحاظ کنید.</p>
+</div>
+<h3>انتقال اجرای فرمان از روی میزبان</h3>
+<p>قوی‌ترین ایزوله‌سازی این است که اصلاً فرمان‌ها روی ماشین شما اجرا نشوند. ابزار ترمینال از چند <a href="../user-guide/features/tools.html#terminal-backends">بک‌اند</a> پشتیبانی می‌کند:</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>بک‌اند</th><th>ایزوله‌سازی</th></tr>
+</thead>
+<tbody>
+<tr><td>‏<code>local</code></td><td>هیچ — روی میزبان اجرا می‌شود (چک‌های فرمان خطرناک اعمال می‌شوند)</td></tr>
+<tr><td>‏<code>docker</code></td><td>کانتینر — خود کانتینر مرز امنیتی است</td></tr>
+<tr><td>‏<code>ssh</code></td><td>ماشین راه‌دور — اجرا روی یک سرور جدا نگه داشته می‌شود</td></tr>
+</tbody>
+</table>
+</div>
+<pre dir="ltr"><code>terminal:
+  backend: docker
+  docker_image: "nikolaik/python-nodejs:python3.11-nodejs20"
+  docker_forward_env: []  # Explicit allowlist only; empty keeps secrets out of the container</code></pre>
+<p>هر کانتینر Docker با تنظیمات سخت‌گیرانه اجرا می‌شود — حذف همهٔ قابلیت‌های لینوکس (با یک مجموعهٔ حداقلی بازگردانده‌شده)، ‏<code>no-new-privileges</code>، محدودیت تعداد فرایند و نقاط اتصال tmpfs با حجم محدود. با بک‌اند کانتینری، فرمان‌های مخرب داخل کانتینر نمی‌توانند به میزبان آسیب بزنند؛ به همین دلیل است که چک‌های فرمان خطرناک آنجا نادیده گرفته می‌شوند.</p>
+<p>برای ‏<code>ssh</code> مقدار ‏<code>terminal.backend: ssh</code> را در ‏<code>config.yaml</code> ست کنید و جزئیات میزبان را از طریق ‏<code>TERMINAL_SSH_HOST</code>، ‏<code>TERMINAL_SSH_USER</code> و ‏<code>TERMINAL_SSH_KEY</code> در ‏<code>~/.hermes/.env</code> بدهید. <a href="../user-guide/security.html#network-isolation">ایزوله‌سازی شبکه</a> را ببینید.</p>
+<h3>اگر پیام‌رسان روشن است: فهرست مجاز و جفت‌سازی</h3>
+<p><a href="../user-guide/security.html#user-authorization-gateway">گیت‌وی</a> را روی این ماشین اجرا می‌کنید؟ پیش‌فرض از قبل ردکردن است: اگر هیچ فهرست مجازی پیکربندی نشده و ‏<code>GATEWAY_ALLOW_ALL_USERS</code> ست نشده باشد، <b>همهٔ کاربران رد می‌شوند</b>. آن را صریح نگه دارید:</p>
+<pre dir="ltr"><code># ~/.hermes/.env
+TELEGRAM_ALLOWED_USERS=123456789
+GATEWAY_ALLOWED_USERS=123456789</code></pre>
+<p>یا به‌جای هاردکد کردن شناسه‌ها از جفت‌سازی DM استفاده کنید: کاربران ناشناس یک کد جفت‌سازی یک‌بارمصرف می‌گیرند و شما از CLI با ‏<code>hermes pairing approve &lt;platform&gt; &lt;code&gt;</code> تأییدشان می‌کنید. هرگز ‏<code>GATEWAY_ALLOW_ALL_USERS=true</code> را روی ماشینی که برایتان مهم است ست نکنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> لایهٔ خنثی‌سازی: چک‌پوینت‌ها و ‏<code>/rollback</code></h2>
+<p>دروازه‌های تأیید از آسیب جلوگیری می‌کنند؛ <a href="../user-guide/checkpoints-and-rollback.html">چک‌پوینت‌ها</a> آن را خنثی می‌کنند. وقتی فعال باشد، هرمس پیش از عملیات مخرب — ‏<code>write_file</code>، ‏<code>patch</code> و فرمان‌های مخرب ترمینال مثل ‏<code>rm</code>، ‏<code>mv</code>، ‏<code>sed -i</code> و ‏<code>git reset</code> — به‌طور خودکار از پروژهٔ شما اسنپ‌شات می‌گیرد و در یک مخزن git سایه زیر ‏<code>~/.hermes/checkpoints/store/</code> نگه می‌دارد. ‏<code>.git</code> واقعی پروژه هرگز دست‌نخورده می‌ماند.</p>
+<p>چک‌پوینت‌ها اختیاری‌اند (opt-in). برای هر نشست فعال کنید:</p>
+<pre dir="ltr"><code>hermes chat --checkpoints</code></pre>
+<p>یا به‌صورت سراسری:</p>
+<pre dir="ltr"><code>checkpoints:
+  enabled: true</code></pre>
+<p>بعد، داخل یک نشست:</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>فرمان</th><th>توضیح</th></tr>
+</thead>
+<tbody>
+<tr><td>‏<code>/rollback</code></td><td>فهرست همهٔ چک‌پوینت‌ها با آمار تغییرات</td></tr>
+<tr><td>‏<code>/rollback diff &lt;N&gt;</code></td><td>پیش‌نمایش آن‌چه از چک‌پوینت N به این‌سو تغییر کرده است</td></tr>
+<tr><td>‏<code>/rollback &lt;N&gt;</code></td><td>بازگشت به چک‌پوینت N (آخرین نوبت گفتگو را هم خنثی می‌کند)</td></tr>
+<tr><td>‏<code>/rollback &lt;N&gt; &lt;file&gt;</code></td><td>بازگرداندن یک فایل واحد از چک‌پوینت N</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>پیش از بازگرداندن با ‏<code>/rollback diff &lt;N&gt;</code> پیش‌نمایش بگیرید و برای بیشترین امنیت چک‌پوینت‌ها را با ورک‌تری‌های git ترکیب کنید — هر نشست هرمس در ورک‌تری خودش، با چک‌پوینت‌ها به‌عنوان یک لایهٔ اضافه.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> این مدل تهدید چیست — و چه چیزی نیست</h2>
+<p>دربارهٔ این‌که این کنترل‌ها در برابر چه چیزی دفاع می‌کنند واقع‌بین باشید. همان‌طور که راهنمای <a href="../user-guide/security.html#user-defined-deny-rules-approvalsdeny">امنیت</a> می‌گوید:</p>
+<blockquote>
+<p>قوانین رد، محافظی در برابر ایجنتی صادق‌اما-اشتباه‌اند؛ همان مدل تهدید آشکارساز الگوهای خطرناک. آن‌ها سندباکسی در برابر فرایندی عمداً خصمانه نیستند — برای آن کار از بک‌اند ایزوله (Docker، Modal) یا محیطی با خروجی محدودشده استفاده کنید.</p>
+</blockquote>
+<p>همین حکم دربارهٔ محافظ‌های نوشتن فایل هم صادق است: فقط روی ‏<code>write_file</code> و ‏<code>patch</code> اعمال می‌شوند، در حالی که ابزار ‏<code>terminal</code> با همان کاربر سیستم‌عامل اجرا می‌شود. این فهرست رد، آسیب‌های تصادفی را کم می‌کند و به مدل‌ها سیگنال توقف روشنی می‌دهد؛ اما ایجنتی خصمانه یا به‌خطرافتاده را سندباکس نمی‌کند. اگر نیاز شما محصورسازی است نه محافظ، پاسخ بک‌اند ترمینال ایزوله است — همان مرزی که دقیقاً برای این کار طراحی شده.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> یک پیکربندی شروعِ محتاطانه</h2>
+<p>همهٔ موارد بالا، یک‌جا جمع‌شده. در ‏<code>~/.hermes/config.yaml</code> به سلیقهٔ خود تنظیمش کنید:</p>
+<pre dir="ltr"><code>approvals:
+  mode: manual                  # See every flagged command yourself
+  timeout: 300                  # Unanswered prompts are denied (fail-closed)
+  deny:                         # Never-run list — survives even /yolo
+    - "git push --force*"
+    - "*curl*|*sh*"
+    - "dd if=* of=/dev/*"
+
+security:
+  redact_secrets: true          # Already the default; stated here for clarity
+
+checkpoints:
+  enabled: true                 # Snapshot before destructive operations
+
+terminal:
+  backend: docker               # Or ssh — keep execution off the host
+  docker_forward_env: []        # No host secrets inside the container</code></pre>
+<p>و در ‏<code>~/.hermes/.env</code>، اگر سندباکس نوشتن می‌خواهید:</p>
+<pre dir="ltr"><code>HERMES_WRITE_SAFE_ROOT=/path/to/project:/home/you/.hermes</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> همچنین ببینید</h2>
+<ul>
+<li><b><a href="../user-guide/security.html">امنیت</a></b> — مرجع کامل دفاع در عمق: همهٔ الگوهای تأیید، پرچم‌های سخت‌سازی کانتینر، مجوزدهی گیت‌وی، فیلترکردن اعتبارنامه‌های MCP</li>
+<li><b><a href="../user-guide/checkpoints-and-rollback.html">چک‌پوینت و بازگشت (Rollback)</a></b> — پیکربندی، نگهداری مخزن و گردش‌کارهای بازگردانی</li>
+<li><b><a href="../user-guide/features/tools.html">ابزارها و تول‌ست‌ها</a></b> — همهٔ بک‌اندهای ترمینال و پیکربندی آن‌ها</li>
+<li><b><a href="../user-guide/configuration.html">پیکربندی</a></b> — مرجع کامل ‏<code>config.yaml</code></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="run-nemotron-3-ultra-free.html"><span class="dir">→ قبلی</span><span class="ttl">اجرای Nemotron 3 Ultra رایگان</span></a>
+  <a class="next" href="troubleshooting-agent-quality.html"><span class="dir">بعدی ←</span><span class="ttl">عیب‌یابی: «ایجنت من کم‌هوش‌تر شده»</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/secure-hermes-on-a-work-machine" target="_blank" rel="noopener">Running Hermes on a Personal or Work Machine</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

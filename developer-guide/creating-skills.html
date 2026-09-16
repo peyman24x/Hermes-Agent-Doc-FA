@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ساخت مهارت — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/creating-skills" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>ساخت مهارت</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>ساخت مهارت</h1>
+<p>مهارت‌ها روش ترجیحی برای افزودن قابلیت‌های جدید به Hermes Agent هستند. ساختنشان از ابزارها آسان‌تر است، هیچ تغییری در کد ایجنت نمی‌خواهند و می‌توانشان را با جامعه به اشتراک گذاشت.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> مهارت باشد یا ابزار؟</h2>
+<p>آن را <strong>مهارت</strong> بسازید وقتی:</p>
+<ul>
+<li>قابلیت بتواند به‌شکل دستورالعمل + فرمان‌های شل + ابزارهای موجود بیان شود</li>
+<li>یک CLI یا API بیرونی را بسته‌بندی کند که ایجنت بتواند از طریق <code>terminal</code> یا <code>web_extract</code> صدا بزند</li>
+<li>نیازی به یکپارچه‌سازی پایتونِ سفارشی یا مدیریت کلید API داخل خود ایجنت ندارد</li>
+<li>مثال‌ها: جستجوی arXiv، گردش‌کارهای git، مدیریت Docker، پردازش PDF، ایمیل با ابزارهای CLI</li>
+</ul>
+<p>آن را <strong>ابزار</strong> بسازید وقتی:</p>
+<ul>
+<li>به یکپارچه‌سازی سرتاسری با کلیدهای API، جریان‌های احراز هویت یا پیکربندی چندجزئی نیاز دارد</li>
+<li>منطق پردازش سفارشی می‌خواهد که باید هر بار دقیقاً اجرا شود</li>
+<li>دادهٔ دودویی، استریم یا رخدادهای بی‌درنگ را مدیریت می‌کند</li>
+<li>مثال‌ها: اتوماسیون مرورگر، TTS، تحلیل بینایی</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> ساختار پوشهٔ مهارت</h2>
+<p>مهارت‌های همراه در <code>skills/</code> به تفکیک دسته زندگی می‌کنند. مهارت‌های اختیاریِ رسمی همین ساختار را در <code>optional-skills/</code> دارند:</p>
+<pre dir="ltr"><code>skills/
+├── research/
+│   └── arxiv/
+│       ├── SKILL.md              # الزامی: دستورالعمل‌های اصلی
+│       └── scripts/              # اختیاری: اسکریپت‌های کمکی
+│           └── search_arxiv.py
+├── productivity/
+│   └── ocr-and-documents/
+│       ├── SKILL.md
+│       ├── scripts/
+│       └── references/
+└── ...</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> قالب SKILL.md</h2>
+<pre dir="ltr"><code>name: my-skill
+description: Brief description (shown in skill search results)
+version: 1.0.0
+author: Your Name
+license: MIT
+platforms: [macos, linux]          # اختیاری — محدود به پلتفرم‌های سیستمی خاص
+                                   #   معتبر: macos, linux, windows
+                                   #   برای بارگیری روی همهٔ پلتفرم‌ها حذفش کنید (پیش‌فرض)
+metadata:
+  hermes:
+    tags: [Category, Subcategory, Keywords]
+    related_skills: [other-skill-name]
+    requires_toolsets: [web]            # اختیاری — فقط وقتی این تول‌ست‌ها فعال‌اند نشان بده
+    requires_tools: [web_search]        # اختیاری — فقط وقتی این ابزارها در دسترس‌اند نشان بده
+    fallback_for_toolsets: [browser]    # اختیاری — وقتی این تول‌ست‌ها فعال‌اند پنهان کن
+    fallback_for_tools: [browser_navigate]  # اختیاری — وقتی این ابزارها موجودند پنهان کن
+    config:                              # اختیاری — تنظیمات config.yaml که مهارت لازم دارد
+      - key: my.setting
+        description: "What this setting controls"
+        default: "sensible-default"
+        prompt: "Display prompt for setup"
+    blueprint:                              # اختیاری — این مهارت را به‌عنوان اتوماسیون قابل‌اجرا علامت می‌زند
+      schedule: "0 9 * * *"              #   عبارت کرون / "every 2h" / مهرزمان ISO
+      deliver: origin                    #   اختیاری (پیش‌فرض origin)
+      prompt: "Task instruction for each run"  # اختیاری
+      no_agent: false                    # اختیاری
+required_environment_variables:          # اختیاری — متغیرهای محیطی که مهارت لازم دارد
+  - name: MY_API_KEY
+    prompt: "Enter your API key"
+    help: "Get one at https://example.com"
+    required_for: "API access"
+
+# Skill Title
+
+Brief intro.
+
+## When to Use
+Trigger conditions — when should the agent load this skill?
+
+## Quick Reference
+Table of common commands or API calls.
+
+## Procedure
+Step-by-step instructions the agent follows.
+
+## Pitfalls
+Known failure modes and how to handle them.
+
+## Verification
+How the agent confirms it worked.</code></pre>
+<h3>مهارت‌های مخصوص پلتفرم</h3>
+<p>مهارت‌ها می‌توانند خودشان را با فیلد <code>platforms</code> به سیستم‌عامل‌های خاص محدود کنند:</p>
+<pre dir="ltr"><code>platforms: [macos]            # فقط macOS (مثلاً iMessage، Apple Reminders)
+platforms: [macos, linux]     # macOS و لینوکس
+platforms: [windows]          # فقط ویندوز</code></pre>
+<p>وقتی ست شده باشد، مهارت روی پلتفرم‌های ناسازگار به‌طور خودکار از پرامپت سیستمی، <code>skills_list()</code> و فرمان‌های اسلش پنهان می‌شود. اگر حذف یا خالی باشد، مهارت روی همهٔ پلتفرم‌ها بارگیری می‌شود (سازگار با رفتار قبلی).</p>
+<h3>فعال‌سازی شرطی مهارت</h3>
+<p>مهارت‌ها می‌توانند وابستگی به ابزارها یا تول‌ست‌های خاص را اعلام کنند. این کنترل می‌کند که مهارت در پرامپت سیستمیِ یک نشست معیّن ظاهر شود یا نه.</p>
+<pre dir="ltr"><code>metadata:
+  hermes:
+    requires_toolsets: [web]           # پنهان کن اگر تول‌ست وب فعال نیست
+    requires_tools: [web_search]       # پنهان کن اگر ابزار web_search در دسترس نیست
+    fallback_for_toolsets: [browser]   # پنهان کن اگر تول‌ست مرورگر فعال است
+    fallback_for_tools: [browser_navigate]  # پنهان کن اگر browser_navigate در دسترس است</code></pre>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فیلد</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><code>requires_toolsets</code></td><td>مهارت وقتی <strong>هر یک</strong> از تول‌ست‌های فهرست‌شده <strong>در دسترس نباشد</strong>، <strong>پنهان</strong> است</td></tr>
+    <tr><td><code>requires_tools</code></td><td>مهارت وقتی <strong>هر یک</strong> از ابزارهای فهرست‌شده <strong>در دسترس نباشد</strong>، <strong>پنهان</strong> است</td></tr>
+    <tr><td><code>fallback_for_toolsets</code></td><td>مهارت وقتی <strong>هر یک</strong> از تول‌ست‌های فهرست‌شده <strong>در دسترس باشد</strong>، <strong>پنهان</strong> است</td></tr>
+    <tr><td><code>fallback_for_tools</code></td><td>مهارت وقتی <strong>هر یک</strong> از ابزارهای فهرست‌شده <strong>در دسترس باشد</strong>، <strong>پنهان</strong> است</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>کاربرد <code>fallback_for_*</code>:</strong> مهارتی بسازید که وقتی ابزار اصلی در دسترس نیست، راه دورزیدنِ جایگزین فراهم کند. برای مثال، مهارت <code>duckduckgo-search</code> با <code>fallback_for_tools: [web_search]</code> فقط وقتی نشان داده می‌شود که ابزار جستجوی وب (که به کلید API نیاز دارد) پیکربندی نشده باشد.</p>
+<p><strong>کاربرد <code>requires_*</code>:</strong> مهارتی بسازید که فقط در حضور ابزارهای خاص معنا پیدا می‌کند. برای مثال، مهارت گردش‌کار وب‌اسکرپ با <code>requires_toolsets: [web]</code> وقتی ابزارهای وب غیرفعال‌اند، پرامپت را شلوغ نمی‌کند.</p>
+<h3>الزامات متغیرهای محیطی</h3>
+<p>مهارت‌ها می‌توانند متغیرهای محیطی موردنیازشان را اعلام کنند. وقتی مهارتی از طریق <code>skill_view</code> بارگیری می‌شود، متغیرهای الزامی‌اش به‌طور خودکار برای گذر به محیط‌های اجرای سندباکس‌شده (<code>terminal</code>، <code>execute_code</code>) ثبت می‌شوند.</p>
+<pre dir="ltr"><code>required_environment_variables:
+  - name: TENOR_API_KEY
+    prompt: "Tenor API key"               # هنگام پرامپت‌گرفتن از کاربر نشان داده می‌شود
+    help: "Get your key at https://tenor.com"  # متن راهنما یا URL
+    required_for: "GIF search functionality"   # چه چیزی به این متغیر نیاز دارد</code></pre>
+<p>هر مدخل از این‌ها پشتیبانی می‌کند:</p>
+<ul>
+<li><code>name</code> (الزامی) — نام متغیر محیطی</li>
+<li><code>prompt</code> (اختیاری) — متن پرامپت هنگام درخواست مقدار از کاربر</li>
+<li><code>help</code> (اختیاری) — متن راهنما یا URL برای به‌دست‌آوردن مقدار</li>
+<li><code>required_for</code> (اختیاری) — توضیح می‌دهد کدام قابلیت به این متغیر نیاز دارد</li>
+</ul>
+<p>کاربران می‌توانند متغیرهای گذر را دستی هم در <code>config.yaml</code> پیکربندی کنند:</p>
+<pre dir="ltr"><code>terminal:
+  env_passthrough:
+    - MY_CUSTOM_VAR
+    - ANOTHER_VAR</code></pre>
+<p>برای نمونه‌های مهارت‌های مخصوص macOS به <code>skills/apple/</code> نگاه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> راه‌اندازی امن هنگام بارگیری</h2>
+<p>وقتی مهارتی به کلید API یا توکن نیاز دارد، از <code>required_environment_variables</code> استفاده کنید. نبودِ مقدارها مهارت را از کشف پنهان <strong>نمی‌کند</strong>. در عوض، هرمس وقتی مهارت در CLI محلی بارگیری می‌شود، آن‌ها را به‌شکل امن پرامپت می‌کند.</p>
+<pre dir="ltr"><code>required_environment_variables:
+  - name: TENOR_API_KEY
+    prompt: Tenor API key
+    help: Get a key from https://developers.google.com/tenor
+    required_for: full functionality</code></pre>
+<p>کاربر می‌تواند از راه‌اندازی عبور کند و مهارت را همچنان بارگیری کند. هرمس هرگز مقدار خامِ رمز را به مدل نشان نمی‌دهد. گیت‌وی و نشست‌های پیام‌رسانی به‌جای جمع‌آوری رمزها درون باند، راهنمای راه‌اندازی محلی نشان می‌دهند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 گذر به سندباکس</div>
+  <p>وقتی مهارت شما بارگیری می‌شود، هر <code>required_environment_variables</code> اعلام‌شده‌ای که ست شده باشد <strong>به‌طور خودکار گذر داده می‌شود</strong> به سندباکس‌های <code>execute_code</code> و <code>terminal</code> — از جمله بک‌اندهای راه دور مثل Docker و Modal. اسکریپت‌های مهارت شما می‌توانند به <code>$TENOR_API_KEY</code> (یا <code>os.environ["TENOR_API_KEY"]</code> در پایتون) دسترسی داشته باشند، بدون آن‌که کاربر لازم باشد چیز اضافه‌ای پیکربندی کند. جزئیات را در <a href="../user-guide/security.html#environment-variable-passthrough">عبور متغیرهای محیطی</a> ببینید.</p>
+</div>
+<p><code>prerequisites.env_vars</code> قدیمی هم به‌عنوان نام مستعار سازگار با گذشته پشتیبانی می‌شود.</p>
+<h3>تنظیمات پیکربندی (config.yaml)</h3>
+<p>مهارت‌ها می‌توانند تنظیمات غیررمزی را اعلام کنند که در <code>config.yaml</code> زیر فضای‌نام <code>skills.config</code> ذخیره می‌شوند. برخلاف متغیرهای محیطی (که رمزهایی ذخیره‌شده در <code>.env</code> هستند)، تنظیمات پیکربندی برای مسیرها، ترجیحات و دیگر مقادیر غیرحساس است.</p>
+<pre dir="ltr"><code>metadata:
+  hermes:
+    config:
+      - key: myplugin.path
+        description: Path to the plugin data directory
+        default: "~/myplugin-data"
+        prompt: Plugin data directory path
+      - key: myplugin.domain
+        description: Domain the plugin operates on
+        default: ""
+        prompt: Plugin domain (e.g., AI/ML research)</code></pre>
+<p>هر مدخل از این‌ها پشتیبانی می‌کند:</p>
+<ul>
+<li><code>key</code> (الزامی) — دات‌پَثِ تنظیم (مثلاً <code>myplugin.path</code>)</li>
+<li><code>description</code> (الزامی) — توضیح می‌دهد تنظیم چه چیزی را کنترل می‌کند</li>
+<li><code>default</code> (اختیاری) — مقدار پیش‌فرض اگر کاربر پیکربندی‌اش نکند</li>
+<li><code>prompt</code> (اختیاری) — متن پرامپتی که در <code>hermes config migrate</code> نشان داده می‌شود؛ در نبودش به <code>description</code> برمی‌گردد</li>
+</ul>
+<p><strong>چطور کار می‌کند:</strong></p>
+<ol>
+<li><strong>ذخیره‌سازی:</strong> مقدارها در <code>config.yaml</code> زیر <code>skills.config.&lt;key&gt;</code> نوشته می‌شوند:
+<pre dir="ltr"><code>skills:
+  config:
+    myplugin:
+      path: ~/my-data</code></pre>
+</li>
+<li><strong>کشف:</strong> <code>hermes config migrate</code> همهٔ مهارت‌های فعال را اسکن می‌کند، تنظیمات پیکربندی‌نشده را پیدا می‌کند و از کاربر پرامپت می‌گیرد. تنظیمات همچنین در <code>hermes config show</code> زیر «Skill Settings» دیده می‌شوند.</li>
+<li><strong>تزریق در زمان اجرا:</strong> وقتی مهارتی بارگیری می‌شود، مقدارهای پیکربندی‌اش resolve و به پیام مهارت افزوده می‌شوند:
+<pre dir="ltr"><code>[Skill config (from ~/.hermes/config.yaml):
+  myplugin.path = /home/user/my-data
+]</code></pre>
+<p>ایجنت مقدارهای پیکربندی‌شده را می‌بیند، بدون آن‌که لازم باشد خود <code>config.yaml</code> را بخواند.</p>
+</li>
+<li><strong>راه‌اندازی دستی:</strong> کاربران می‌توانند مقدارها را مستقیم هم ست کنند:
+<pre dir="ltr"><code>hermes config set skills.config.myplugin.path ~/my-data</code></pre>
+</li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡 کدام را کجا استفاده کنیم</div>
+  <p>برای کلیدهای API، توکن‌ها و دیگر <strong>رمزها</strong> از <code>required_environment_variables</code> استفاده کنید (در <code>~/.hermes/.env</code> ذخیره می‌شوند و هرگز به مدل نشان داده نمی‌شوند). برای <strong>مسیرها، ترجیحات و تنظیمات غیرحساس</strong> از <code>config</code> استفاده کنید (در <code>config.yaml</code> ذخیره می‌شوند و در config show دیده می‌شوند).</p>
+</div>
+<h3>الزامات فایل‌های اعتبارنامه (توکن‌های OAuth و مانند آن)</h3>
+<p>مهارت‌هایی که از OAuth یا اعتبارنامه‌های فایل‌محور استفاده می‌کنند می‌توانند فایل‌هایی را اعلام کنند که باید به سندباکس‌های راه دور mount شوند. این برای اعتبارنامه‌هایی است که به‌شکل <strong>فایل</strong> ذخیره شده‌اند (نه متغیر محیطی) — معمولاً فایل‌های توکن OAuth که یک اسکریپت راه‌اندازی تولید می‌کند.</p>
+<pre dir="ltr"><code>required_credential_files:
+  - path: google_token.json
+    description: Google OAuth2 token (created by setup script)
+  - path: google_client_secret.json
+    description: Google OAuth2 client credentials</code></pre>
+<p>هر مدخل از این‌ها پشتیبانی می‌کند:</p>
+<ul>
+<li><code>path</code> (الزامی) — مسیر فایل نسبت به <code>~/.hermes/</code></li>
+<li><code>description</code> (اختیاری) — توضیح می‌دهد فایل چیست و چطور ساخته می‌شود</li>
+</ul>
+<p>هنگام بارگیری، هرمس وجود این فایل‌ها را بررسی می‌کند. فایل‌های غایب <code>setup_needed</code> را فعال می‌کنند. فایل‌های موجود به‌طور خودکار:</p>
+<ul>
+<li>به‌شکل bind mount فقط‌خواندنی به کانتینرهای <strong>Docker</strong> mount می‌شوند</li>
+<li>به سندباکس‌های <strong>Modal</strong> همگام‌سازی می‌شوند (هنگام ساخت + قبل از هر فرمان، تا OAuth وسط نشست کار کند)</li>
+<li>روی بک‌اند <strong>محلی</strong> بدون هیچ مدیریت خاصی در دسترس‌اند</li>
+</ul>
+<div class="callout tip">
+  <div class="callout-title">💡 کدام را کجا استفاده کنیم</div>
+  <p>برای کلیدها و توکن‌های سادهٔ API (رشته‌هایی که در <code>~/.hermes/.env</code> ذخیره می‌شوند) از <code>required_environment_variables</code> استفاده کنید. برای فایل‌های توکن OAuth، client secretها، JSON حساب سرویس، گواهی‌ها یا هر اعتبارنامه‌ای که روی دیسک فایل است، از <code>required_credential_files</code> استفاده کنید.</p>
+</div>
+<p>برای یک مثال کامل که از هر دو استفاده می‌کند، به <code>skills/productivity/google-workspace/SKILL.md</code> نگاه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> رهنمودهای مهارت</h2>
+<h3>بدون وابستگی خارجی</h3>
+<p>پایتون استاندارد (stdlib)، curl و ابزارهای موجود هرمس (<code>web_extract</code>، <code>terminal</code>، <code>read_file</code>) را ترجیح بدهید. اگر وابستگی لازم شد، گام‌های نصب را داخل خود مهارت مستند کنید.</p>
+<h3>افشای تدریجی</h3>
+<p>رایج‌ترین گردش‌کار را اول بگذارید. حالت‌های مرزی و کاربرد پیشرفته پایین می‌روند. این کار مصرف توکن را برای کارهای رایج پایین نگه می‌دارد.</p>
+<h3>اسکریپت‌های کمکی را بگنجانید</h3>
+<p>برای تجزیهٔ XML/JSON یا منطق پیچیده، اسکریپت‌های کمکی را در <code>scripts/</code> بگنجانید — توقع نداشته باشید LLM هر بار پارسر را درون‌خطی بنویسد.</p>
+<h3>تحویل رسانه به‌شکل سند (<code>[[as_document]]</code>)</h3>
+<p>اگر مهارت شما اسکرین‌شات با وضوح بالا، نمودار یا هر تصویری تولید می‌کند که فشرده‌سازی پیش‌نمایشِ اتلافی به آن ضربه می‌زند — دایرکتیوِ واقعیِ <code>[[as_document]]</code> را جایی در پاسخ صادر کنید (معمولاً آخرین خط). گیت‌وی دایرکتیو را حذف می‌کند و هر مسیر رسانهٔ استخراج‌شده در آن پاسخ را به‌جای حباب تصویر درون‌خطی، به‌شکل پیوست فایلِ قابل‌دانلود تحویل می‌دهد. برای معناشناسی کامل به <a href="../user-guide/features/skills.html#skill-output-and-media-delivery">خروجی مهارت و تحویل رسانه</a> نگاه کنید.</p>
+<h4>ارجاع به اسکریپت‌های همراه از داخل SKILL.md</h4>
+<p>وقتی مهارتی بارگیری می‌شود، پیامِ فعال‌سازی دایرکتوری مطلق مهارت را به‌شکل <code>[Skill directory: /abs/path]</code> نمایان می‌کند و دو توکن قالبی را هم هر جای بدنهٔ SKILL.md جایگزین می‌کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>توکن</th><th>جایگزین می‌شود با</th></tr></thead>
+  <tbody>
+    <tr><td><code>${HERMES_SKILL_DIR}</code></td><td>مسیر مطلق دایرکتوری مهارت</td></tr>
+    <tr><td><code>${HERMES_SESSION_ID}</code></td><td>شناسهٔ نشست فعال (اگر نشستی نباشد، سر جایش می‌ماند)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>پس یک SKILL.md می‌تواند به ایجنت بگوید اسکریپت همراه را مستقیم با این اجرا کند:</p>
+<pre dir="ltr"><code>To analyse the input, run:
+
+    node ${HERMES_SKILL_DIR}/scripts/analyse.js &lt;input&gt;</code></pre>
+<p>ایجنت مسیر مطلقِ جایگزین‌شده را می‌بیند و ابزار <code>terminal</code> را با فرمانی آمادهٔ اجرا صدا می‌زند — نه محاسبهٔ مسیر، نه رفت‌وبرگشت اضافهٔ <code>skill_view</code>. جایگزینی را به‌صورت سراسری با <code>skills.template_vars: false</code> در <code>config.yaml</code> خاموش کنید.</p>
+<h4>اسنیپت‌های شل درون‌خطی (opt-in)</h4>
+<p>مهارت‌ها می‌توانند اسنیپت‌های شل درون‌خطی را هم به‌شکل <code>!`cmd`</code> در بدنهٔ SKILL.md بگنجانند. وقتی فعال باشد، خروجی استانداردِ هر اسنیپت قبل از آن‌که ایجنت پیام را بخواند درون پیام می‌نشیند؛ پس مهارت‌ها می‌توانند زمینهٔ پویا تزریق کنند:</p>
+<pre dir="ltr"><code>Current date: !`date -u +%Y-%m-%d`
+Git branch: !`git -C ${HERMES_SKILL_DIR} rev-parse --abbrev-ref HEAD`</code></pre>
+<p>این قابلیت به‌صورت پیش‌فرض <strong>خاموش است</strong> — هر اسنیپت داخل SKILL.md بدون تأیید روی هاست اجرا می‌شود؛ پس فقط برای منابع مهارتی که به آن‌ها اعتماد دارید فعالش کنید:</p>
+<pre dir="ltr"><code># config.yaml
+skills:
+  inline_shell: true
+  inline_shell_timeout: 10   # ثانیه برای هر اسنیپت</code></pre>
+<p>اسنیپت‌ها با دایرکتوری مهارت به‌عنوان دایرکتوری کاری اجرا می‌شوند و خروجی‌شان به ۴۰۰۰ نویسه محدود است. شکست‌ها (تایم‌اوت، خروج غیرصفر) به‌شکل نشان کوتاه <code>[inline-shell error: ...]</code> دیده می‌شوند به‌جای آن‌که کل مهارت را بشکنند.</p>
+<h3>تستش کنید</h3>
+<p>مهارت را اجرا کنید و بررسی کنید ایجنت درست طبق دستورالعمل‌ها عمل می‌کند:</p>
+<pre dir="ltr"><code>hermes chat --toolsets skills -q "Use the X skill to do Y"</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> مهارت کجا باید باشد؟</h2>
+<p>مهارت‌های همراه (در <code>skills/</code>) با هر نصب هرمس عرضه می‌شوند. آن‌ها باید <strong>برای بیشتر کاربران به‌طور گسترده مفید</strong> باشند:</p>
+<ul>
+<li>مدیریت اسناد، پژوهش وب، گردش‌کارهای رایج توسعه، مدیریت سیستم</li>
+<li>به‌طور منظم توسط طیف گسترده‌ای از افراد استفاده می‌شوند</li>
+</ul>
+<p>اگر مهارت شما رسمی و مفید است ولی برای همه ضروری نیست (مثلاً یکپارچه‌سازی سرویس پولی، وابستگی سنگین)، آن را در <strong><code>optional-skills/</code></strong> بگذارید — با مخزن عرضه می‌شود، از طریق <code>hermes skills browse</code> قابل‌کشف است (با برچسب "official") و با اعتماد داخلی نصب می‌شود.</p>
+<p>اگر مهارت شما تخصصی، مشارکتی از سوی جامعه یا کم‌مخاطب است، جای بهتری برای آن <strong>Skills Hub</strong> است — آن را در یک رجیستری بارگذاری کنید و از طریق <code>hermes skills install</code> به اشتراک بگذارید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> نقشه‌های اتوماسیون (Blueprint): مهارت‌هایی که اتوماسیون هم هستند</h2>
+<p>یک <strong>نقشهٔ اتوماسیون (blueprint)</strong> یک مهارت معمولی است که در فرانت‌متر خود زمان‌بندی هم اعلام می‌کند. یک بلوک <code>metadata.hermes.blueprint</code> اضافه کنید و مهارت به اتوماسیونی قابل‌اشتراک و قابل‌اجرا تبدیل می‌شود:</p>
+<pre dir="ltr"><code>metadata:
+  hermes:
+    tags: [blueprint, email]
+    blueprint:
+      schedule: "0 8 * * *"     # حضور blueprint: آن را قابل‌اجرا علامت می‌زند
+      deliver: telegram          # اختیاری (پیش‌فرض: origin)
+      prompt: "Summarize my unread email and today's calendar."  # اختیاری
+      no_agent: false            # اختیاری</code></pre>
+<p>چون نقشهٔ اتوماسیون <strong>خودش</strong> مهارت است، بدون تغییر از کل خط لولهٔ مهارت‌ها می‌گذرد — جستجو، بازرسی، نصب، اسکن امنیتی، منشأ، tapها، فهرست متمرکز و <code>hermes skills publish</code> برای اشتراک. چیز جدیدی برای یادگرفتن نیست.</p>
+<p><strong>نصب یک نقشهٔ اتوماسیون.</strong> وقتی مهارتی را نصب می‌کنید که بلوک <code>blueprint:</code> دارد، هرمس آن را به‌عنوان <strong>کار کرون پیشنهادی</strong> ثبت می‌کند نه آن‌که زمان‌بندی‌اش کند. زمان‌بندی <strong>با پذیرش شماست</strong> — نصب هرگز بی‌سروصدا کار تکرارشونده نمی‌سازد. شما آن را از طریق <code>/suggestions</code> بازبینی و می‌پذیرید:</p>
+<pre dir="ltr"><code>hermes skills install owner/morning-brief
+# → Blueprint: 'morning-brief' یک اتوماسیون است (schedule 0 8 * * *).
+#   به پیشنهادهای شما اضافه شد — برای زمان‌بندی یا رد کردن، /suggestions را اجرا کنید.
+
+# سپس، در یک نشست:
+/suggestions             # پیشنهادهای در انتظار را شماره‌دار فهرست می‌کند
+/suggestions accept 1    # کار کرون را می‌سازد
+/suggestions dismiss 1   # دیگر هرگز پیشنهادش نمی‌کند</code></pre>
+<p>نقشه‌های اتوماسیون یکی از <strong>منابع</strong> سطح یکپارچهٔ کارهای کرون پیشنهادی‌اند — همان‌جایی که اتوماسیون‌های شروعِ منتخب و (بعداً) پیشنهادهای الگوی مصرف و یکپارچه‌سازی ظاهر می‌شوند. به <a href="#suggested-cron-jobs">کارهای کرون پیشنهادی</a> در پایین نگاه کنید.</p>
+<p><strong>به‌اشتراک‌گذاشتن اتوماسیونی که ساخته‌اید.</strong> نقشهٔ اتوماسیونی که یک کار کرون بارش می‌کند (<code>hermes cron create --skill &lt;name&gt; ...</code>) می‌تواند دوباره به SKILL.md برون‌بری شود و مثل هر مهارت دیگری منتشر شود؛ تا اتوماسیونی که برای خودتان تنظیم کرده‌اید، برای دیگری به نصبی با یک فرمان تبدیل شود.</p>
+<p>لایهٔ نقشهٔ اتوماسیون هیچ نوع شیء، مخزن یا مسیر انتقال جدیدی اضافه نمی‌کند — نقشهٔ اتوماسیون یک مهارت است، زمان‌بندی یک کار کرون است و اشتراک همان مسیر موجودِ publish/tap/index است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> کارهای کرون پیشنهادی</h2>
+<p>هرمس می‌تواند اتوماسیون‌ها را <em>پیشنهاد</em> دهد و بگذارد آن‌ها را با یک لمس بپذیرید، به‌جای آن‌که شما مجبور شوید کارهای کرون را دستی سرهم کنید. هر پیشنهاد، فارغ از منبعش، از یک سطح واحد می‌گذرد — فرمان <code>/suggestions</code>:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>منبع</th><th>محرک</th></tr></thead>
+  <tbody>
+    <tr><td><code>catalog</code></td><td>اتوماسیون‌های شروعِ منتخب (<code>/suggestions catalog</code>) — بریفینگ روزانه، پایش ایمیل‌های مهم، مرور هفتگی، یادآور شروع روز کاری</td></tr>
+    <tr><td><code>blueprint</code></td><td>مهارتی نصب کرده‌اید که بلوک <code>blueprint:</code> دارد</td></tr>
+    <tr><td><code>usage</code></td><td>بازبینی پس‌زمینه درخواست تکرارشونده‌ای را دیده که زمان‌بندی پاسخگوی آن است</td></tr>
+    <tr><td><code>integration</code></td><td>یک حساب وصل کرده‌اید (Gmail، GitHub و...) و اتوماسیون‌های بدیهی پیشنهاد می‌شوند</td></tr>
+  </tbody>
+</table>
+</div>
+<pre dir="ltr"><code>/suggestions             # فهرست موارد در انتظار
+/suggestions accept N    # پیشنهاد N را زمان‌بندی می‌کند (کار کرون می‌سازد)
+/suggestions dismiss N   # رد می‌کند — قفل می‌شود و دیگر هرگز پیشنهاد نمی‌شود
+/suggestions catalog     # اتوماسیون‌های شروعِ منتخب را اضافه می‌کند</code></pre>
+<p>پذیرفتن یک پیشنهاد همان <code>cron.jobs.create_job</code> را صدا می‌زند که ابزار <code>cronjob</code> استفاده می‌کند — موتور دومی برای کارها وجود ندارد. پیشنهادها <strong>هرگز</strong> به‌طور خودکار کار نمی‌سازند؛ پذیرش همیشه صریح است. پیشنهادهای ردشده با یک کلید پایدار قفل می‌شوند تا همان پیشنهاد دیگر هرگز تکرار نشود. فهرستِ در انتظارها سقف دارد تا هرگز به دیوارِ مزاحم تبدیل نشود.</p>
+<p>مدخل <strong>پایش ایمیل‌های مهم</strong> در کاتالوگ، الگوی پیمایش→طبقه‌بندی→نمایش است: آیتم‌های صندوق ورودی را با یک مدل طبقه‌بند ارزان (<code>auxiliary.monitor</code> در <code>config.yaml</code>) امتیاز می‌دهد و فقط موارد بالاتر از آستانهٔ فوریت را تحویل می‌دهد؛ در غیر این صورت ساکت می‌ماند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> انتشار مهارت‌ها</h2>
+<h3>به Skills Hub</h3>
+<pre dir="ltr"><code>hermes skills publish skills/my-skill --to github --repo owner/repo</code></pre>
+<h3>به مخزن سفارشی</h3>
+<p>مخزن خودتان را به‌عنوان tap اضافه کنید:</p>
+<pre dir="ltr"><code>hermes skills tap add owner/repo</code></pre>
+<p>سپس کاربران می‌توانند از مخزن شما جستجو و نصب کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> اسکن امنیتی</h2>
+<p>همهٔ مهارت‌های نصب‌شده از هاب از یک اسکنر امنیتی می‌گذرند که این‌ها را بررسی می‌کند:</p>
+<ul>
+<li>الگوهای برون‌بری داده</li>
+<li>تلاش‌های تزریق پرامپت</li>
+<li>فرمان‌های مخرب</li>
+<li>تزریق شل</li>
+</ul>
+<p>سطوح اعتماد:</p>
+<ul>
+<li><code>builtin</code> — همراه هرمس عرضه می‌شود (همیشه مورد اعتماد)</li>
+<li><code>official</code> — از <code>optional-skills/</code> در مخزن (اعتماد داخلی، بدون هشدار شخص ثالث)</li>
+<li><code>trusted</code> — از openai/skills، anthropics/skills، huggingface/skills</li>
+<li><code>community</code> — یافته‌های غیرخطرناک با <code>--force</code> قابل‌نادیده‌گرفتن‌اند؛ حکم‌های <code>dangerous</code> همچنان مسدود می‌مانند</li>
+</ul>
+<p>هرمس حالا می‌تواند مهارت‌های شخص ثالث را از چندین مدل کشف بیرونی مصرف کند:</p>
+<ul>
+<li>شناسه‌های مستقیم GitHub (مثلاً <code>openai/skills/k8s</code>)</li>
+<li>شناسه‌های <code>skills.sh</code> (مثلاً <code>skills-sh/vercel-labs/json-render/json-render-react</code>)</li>
+<li>نقاط پایانی well-known که از <code>/.well-known/skills/index.json</code> سرو می‌شوند</li>
+</ul>
+<p>اگر می‌خواهید مهارت‌هایتان بدون نصب‌کنندهٔ وابسته به GitHub قابل‌کشف باشند، علاوه بر انتشارشان در مخزن یا مارکت‌پلیس، سروکردنشان از یک نقطهٔ پایانی well-known را در نظر بگیرید.</p>
+</section>
+
+<div class="pager">
+  <a href="adding-platform-adapters.html"><span class="dir">→ قبلی</span><span class="ttl">افزودن آداپتور پلتفرم</span></a>
+  <a class="next" href="extending-the-cli.html"><span class="dir">بعدی ←</span><span class="ttl">گسترش CLI</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/creating-skills" target="_blank" rel="noopener">Creating Skills</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

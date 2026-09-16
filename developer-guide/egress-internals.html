@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>درون‌مایهٔ پروکسی خروجی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/egress-internals" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>درون‌مایهٔ پروکسی خروجی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>درون‌مایهٔ پروکسی خروجی</h1>
+<p>این صفحه، معماری دیوار آتشِ تزریق اعتبارنامهٔ خروجی (egress) (<code>hermes egress</code> / iron-proxy) را از دیدگاه مشارکت‌کننده / نویسندهٔ پلاگین پوشش می‌دهد. مستندات راه‌اندازی و استفادهٔ رو به کاربر نهایی در <a href="../user-guide/egress/iron-proxy.html">پروکسی iron (تزریق اعتبارنامه)</a> قرار دارد.</p>
+<p>مدل تهدید و طراحی کلان در صفحهٔ کاربر خلاصه شده است؛ این صفحه دربارهٔ <em>نحوهٔ</em> سیم‌کشی آن است، اینکه کدِ مرتبط با امنیت کجا زندگی می‌کند، و اگر دست به آن بزنید باید کدام ناورداها را حفظ کنید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چیدمان ماژول</h2>
+<pre dir="ltr"><code>agent/proxy_sources/iron_proxy.py     Core: binary install, CA gen, config build,
+                                       subprocess lifecycle, mappings I/O, PID/nonce
+                                       defense.  Pure-function surface where possible.
+
+hermes_cli/proxy_cli.py               Wizard + slash command handlers.
+                                       `hermes egress {install,setup,start,stop,
+                                       status,disable,config}`.  Wires the
+                                       core module into argparse.
+
+hermes_cli/main.py:_dispatch_egress   Top-level subparser dispatcher.
+                                       dest='egress_command' (intentionally
+                                       disjoint from the inbound OAuth
+                                       `hermes proxy` subparser, which uses
+                                       dest='proxy_command').
+
+hermes_cli/config.py: proxy schema    The `proxy:` block in DEFAULT_CONFIG.
+                                       Adding a knob means: add it here, add a
+                                       wizard prompt or `setdefault` in
+                                       proxy_cli.cmd_setup, and document it
+                                       in the user-guide page.
+
+tools/environments/docker.py
+  _egress_proxy_args_for_docker()     Builds the volume_args / env_overrides /
+                                       host_args triple that the Docker backend
+                                       injects when `proxy.enabled: true`.
+
+  DockerEnvironment.__init__          Docker-side merge logic: collision
+                                       detection against critical egress vars,
+                                       NODE_OPTIONS append-merge via the
+                                       _HERMES_EGRESS_NODE_OPTIONS_APPEND
+                                       sentinel, enforce_on_docker precedence.
+
+tests/test_iron_proxy.py              Hermetic tests (~70).  Binary install
+                                       path, config build, mappings I/O,
+                                       subprocess lifecycle, docker arg builder,
+                                       deny CIDR defaults, bind policy, CA
+                                       TOCTOU, ensure_audit_log behaviour, etc.
+
+tests/test_iron_proxy_cli.py          CLI handler unit tests (~20).  Argparse
+                                       wiring, fail-loud paths, BWS refresh
+                                       wire-up, dest='egress_command'
+                                       regression guard.
+
+tests/test_iron_proxy_e2e.py          Live E2E (gated on HERMES_RUN_E2E=1).
+                                       Real iron-proxy binary, real curl,
+                                       end-to-end token swap verified.</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> چرخهٔ حیات</h2>
+<pre dir="ltr"><code>hermes egress install
+  -&gt; agent.proxy_sources.iron_proxy.install_iron_proxy(force=...)
+       Downloads pinned tarball + checksums.txt from GitHub Releases.
+       SHA-256 verification before extraction.
+       tarfile.extract(..., filter="data") on Python 3.12+ (PEP 706);
+         falls back to plain extract on older Python with member-name
+         sanitisation via _pick_tar_member.
+       Stage into ~/.hermes/bin/.iron-proxy_XXXX, chmod 755, os.replace
+         to ~/.hermes/bin/iron-proxy (atomic).
+       _VERSION_CACHE.pop(target) so a forced reinstall re-probes
+         --version on next call.
+
+hermes egress setup [--from-bitwarden | --no-bitwarden] [--rotate-tokens]
+  -&gt; proxy_cli.cmd_setup
+       Step 1. find_iron_proxy(install_if_missing=False) -&gt; install if absent.
+       Step 2. ensure_ca_cert()
+                 Run openssl genrsa + req via subprocess.
+                 Write CA key via os.open(O_WRONLY|O_CREAT|O_TRUNC|O_NOFOLLOW, 0o600)
+                   + os.replace.  Never exists on disk under default umask.
+                 Write CA cert with 0o644 (public).
+       Step 3. discover_provider_mappings() or pull names from BWS via
+                 fetch_bitwarden_secrets() when --from-bitwarden.
+                 merge_mappings(existing=load_mappings(), discovered,
+                                rotate=args.rotate_tokens) preserves prior
+                 tokens unless --rotate-tokens is passed.
+                 discover_uncovered_providers() and surface warnings.
+       Step 4. ensure_audit_log(audit_log_path)   # در صورت OSError استثنا می‌دهد
+               build_proxy_config(...) with defaults applied at the call site
+                 (deny CIDRs default, bind policy from _default_http_listen).
+               write_proxy_config(cfg)            # اتمیک از طریق .tmp + os.replace، 0o600
+               write_mappings(mappings)           # اتمیک، 0o600
+       Step 5. proxy_cfg["enabled"] = True; credential_source preservation logic
+               (do NOT silently downgrade bitwarden -&gt; env on re-run);
+               save_config(cfg).
+
+hermes egress start
+  -&gt; proxy_cli.cmd_start
+       Pre-checks (refuse-start path):
+         - credential_source=bitwarden? -&gt; pre-validate access_token_env + project_id
+       -&gt; iron_proxy.start_proxy(
+            refresh_secrets_from_bitwarden=...,
+            bitwarden_config=...,
+          )
+            existing=_read_pid(); if alive, idempotent return.
+            _build_proxy_subprocess_env(...):  ALLOWLIST + mapped real_env_names,
+              strip HTTPS_PROXY/etc. to avoid recursion, optional BWS refresh
+              (raises on missing values unless allow_env_fallback=true).
+            Plant nonce: _proxy_nonce = sha256(urandom(16)); env[NONCE_ENV] = ...
+            Open log_path via O_NOFOLLOW + 0o600 + st_uid check.
+            Popen with stdin=DEVNULL, stdout=log_fd, stderr=STDOUT,
+              start_new_session=True (POSIX).
+            Close parent's log_fd in finally.
+            _write_pidfile_safely(pidfile, proc.pid)
+              O_EXCL + O_NOFOLLOW + uid check + persisted nonce sidecar.
+              FileExistsError -&gt; discriminate live vs stale, retry once if stale.
+            Install SIGINT/SIGTERM handlers (main-thread only).
+            Poll loop (do-while shape):
+              while True:
+                if proc.poll() is not None: tail log + unlink pidfile + raise
+                if _port_listening(probe_host, tunnel_port): break  # probe_host = میزبان bind پیکربندی‌شده
+                if time.time() &gt;= deadline: break  (do-while: checked AFTER first probe)
+                time.sleep(0.1)
+            If not listening at exit: _kill_and_wait(proc) + unlink pidfile + raise.
+
+hermes egress stop
+  -&gt; iron_proxy.stop_proxy
+       _read_pid + _pid_alive guard.
+       starttime_before = _pid_proc_starttime(pid)   # فقط لینوکس؛ در جای دیگر None
+       os.kill(pid, SIGTERM)
+       Wait up to 5s for graceful exit.
+       After grace: re-check starttime + _pid_alive.
+         If recycled (starttime drift OR _pid_alive False), DO NOT SIGKILL.
+         Otherwise os.kill(pid, _KILL_SIGNAL).
+       _cleanup_state_files: unlink pidfile + nonce sibling.</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> ناورداهای امنیتی</h2>
+<p>این‌ها خواصِ تکیه‌گاهی هستند. اگر ماژول را دست می‌زنید، باید آن‌ها را حفظ کنید. هرجا تست رگرسیون (regression) وجود دارد، نامش آمده است.</p>
+<h3>مجوزهای فایل‌سیستم</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>مسیر</th><th>حالت</th><th>تست</th></tr></thead>
+  <tbody>
+    <tr><td><code>~/.hermes/proxy/</code> (پوشه)</td><td><code>0o700</code></td><td><code>test_proxy_state_dir_is_0o700</code></td></tr>
+    <tr><td><code>ca.key</code></td><td><code>0o600</code></td><td><code>test_ca_key_created_with_0o600</code></td></tr>
+    <tr><td><code>ca.crt</code></td><td><code>0o644</code></td><td>(ضمنی؛ فراخوانی chmod در <code>ensure_ca_cert</code>)</td></tr>
+    <tr><td><code>proxy.yaml</code></td><td><code>0o600</code></td><td>(chmod پس از تغییر نام اتمیک در <code>write_proxy_config</code>)</td></tr>
+    <tr><td><code>mappings.json</code></td><td><code>0o600</code></td><td>(chmod پس از تغییر نام اتمیک در <code>write_mappings</code>)</td></tr>
+    <tr><td><code>iron-proxy.pid</code></td><td><code>0o600</code></td><td>(حالت <code>os.open(..., 0o600)</code> در <code>_write_pidfile_safely</code>)</td></tr>
+    <tr><td><code>iron-proxy.nonce</code></td><td><code>0o600</code></td><td>(حالت <code>os.open(..., 0o600)</code> در <code>_write_pidfile_safely</code>)</td></tr>
+    <tr><td><code>audit.log</code></td><td><code>0o600</code></td><td><code>test_ensure_audit_log_creates_with_0o600</code></td></tr>
+    <tr><td><code>iron-proxy.log</code></td><td><code>0o600</code></td><td>(<code>os.open(..., 0o600)</code> + <code>fchmod</code>)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>همهٔ مسیرهای نوشتن از <code>os.open(O_WRONLY | O_CREAT | O_NOFOLLOW, 0o600)</code> + بررسی <code>os.fstat().st_uid</code> استفاده می‌کنند. <code>shutil.copy2</code> + <code>os.chmod</code> ممنوع است، چون پنجرهٔ umask پیش‌فرض را لو می‌دهد.</p>
+<h3>کمینه‌سازی env ساب‌پروسس</h3>
+<p><code>_build_proxy_subprocess_env</code> نباید از <code>os.environ.copy()</code> استفاده کند. فهرست مجاز، <code>_PROXY_SUBPROCESS_ENV_ALLOWLIST</code> است (PATH، HOME، locale و...) به‌علاوهٔ نام‌های env ارجاع‌شده در <code>load_mappings()</code>. هر چیز دیگری روی میزبان می‌ماند.</p>
+<p>تست‌های رگرسیون: <code>test_subprocess_env_strips_unrelated_secrets</code>، <code>test_subprocess_env_strips_proxy_recursion_vars</code>، <code>test_subprocess_env_keeps_infrastructure_vars</code>.</p>
+<h3>سیاست bind</h3>
+<p><code>_default_http_listen</code> فهرستی تک‌عضوی برمی‌گرداند: روی لینوکس، IP گیت‌ویِ پل docker (کانتینرها از طریق <code>host.docker.internal:host-gateway</code> به پروکسی می‌رسند که به گیت‌ویِ پل حل می‌شود — bind روی loopback از درون کانتینرها آنجا دست‌نیافتنی است)؛ روی Docker Desktop مک/ویندوز، loopback (VPNkit مسیر <code>host.docker.internal</code> را به میزبان می‌برد). لینوکسی که پل docker0 قابل‌تشخیصی ندارد، با هشدار به loopback برمی‌گردد. هرگز <code>0.0.0.0</code>، هرگز <code>:PORT</code> (INADDR_ANY).</p>
+<p><code>_detect_docker_bridge_ip</code> از طریق <code>ipaddress.IPv4Address</code> اعتبارسنجی می‌کند و <code>is_unspecified</code> / <code>is_loopback</code> / <code>is_multicast</code> / <code>is_reserved</code> / <code>is_link_local</code> / <code>is_global</code> را رد می‌کند. یک شیم <code>ip</code> مخرب روی PATH نمی‌تواند <code>0.0.0.0</code> تزریق کند.</p>
+<p><strong>محدودیت اسکیمای v0.39 و نقش‌های شنونده (به‌صورت زنده روی باینری تأیید شده):</strong> ساختار <code>config.Proxy</code> باینری فقط فیلدهای شنوندهٔ مفرد دارد — فهرست <code>http_listens</code> (جمع) وجود ندارد. <code>tunnel_listen</code> شنوندهٔ CONNECT + MITM است (ترافیک <code>HTTPS_PROXY</code> به آن می‌خورد)؛ <code>http_listen</code> فقط فورواردهای plain-HTTPِ فرم-مطلق را هندل می‌کند (CONNECTی که به آن فرستاده شود، به‌عنوان یک درخواست معمولی به بالادست رله می‌شود و 400 می‌گیرد). بنابراین <code>build_proxy_config</code> روی <code>tunnel_port</code> به <code>tunnel_listen</code> و روی <code>tunnel_port + 1</code> به <code>http_listen</code> bind می‌زند، هر دو روی میزبان bind پلتفرم. بک‌اند Docker مقدار <code>HTTPS_PROXY</code> را روی <code>tunnel_port</code> و <code>HTTP_PROXY</code> را روی <code>tunnel_port + 1</code> می‌گذارد.</p>
+<p>پروب‌های زنده‌بودن (حلقهٔ poll در <code>start_proxy</code>، <code>get_status</code>) میزبان bind پیکربندی‌شده را از طریق <code>_read_http_listen_from_config()</code> می‌خوانند و همان میزبان را پروب می‌کنند — پروبِ هاردکدشدهٔ loopback، دیمونِ سالمِ متصل-به-پل را مرده گزارش می‌داد.</p>
+<p>تست‌های رگرسیون: <code>test_default_bind_is_loopback_not_zero_zero</code> (اعلام می‌کند نه INADDR_ANY هست و نه <code>http_listens</code> در yaml خروجی)، <code>test_default_bind_uses_docker_bridge_on_linux</code>، <code>test_default_bind_falls_back_to_loopback_without_bridge</code>، <code>test_default_bind_is_loopback_on_macos</code>، <code>test_detect_docker_bridge_ip_rejects_dangerous</code> (پارامتری‌شده روی ۸ ورودی حمله).</p>
+<h3>برخورد پورت متریک‌ها</h3>
+<p><code>metrics.listen</code> در iron-proxy v0.39 به‌طور پیش‌فرض <code>:9090</code> است — همان پورتی که پیش‌فرض هرمس یعنی <code>tunnel_port: 9090</code> است. <code>build_proxy_config</code> باید صریحاً <code>metrics.listen: 127.0.0.1:0</code> را پین کند تا اتصال متریک‌ها پورت loopback گذرایی بگیرد که هرگز با شنوندهٔ پروکسی برخورد نکند، فارغ از <code>tunnel_port</code> انتخابی اپراتور.</p>
+<p>تست رگرسیون: <code>test_metrics_listener_pinned_to_loopback_ephemeral</code>.</p>
+<h3>CIDRهای پیش‌فرضِ رد</h3>
+<p><code>_DEFAULT_UPSTREAM_DENY_CIDRS</code> شامل loopback (v4 + v6)، link-local (از جمله IMDS در 169.254.169.254 و فرم IPv4-mapped-v6)، RFC1918، IPv6 ULA، CGNAT و بازهٔ بنچمارک RFC2544 است. <code>build_proxy_config(..., upstream_deny_cidrs=None)</code> باید پیش‌فرض را صادر کند؛ فقط یک لیست خالیِ صریح از آن انصراف می‌دهد.</p>
+<p>تست‌های رگرسیون: <code>test_default_deny_cidrs_present_when_unspecified</code>، <code>test_default_deny_includes_ipv4_mapped_v6</code>.</p>
+<h3>خرابی پرصدای لاگ ممیزی</h3>
+<p><code>ensure_audit_log</code> روی هر <code>OSError</code> یک <code>RuntimeError</code> پرتاب می‌کند. روی v0.39 پین‌شده، دیمون هرگز این فایل را نمی‌نویسد (فیلد <code>log.audit_path</code> وجود ندارد)، پس <code>cmd_setup</code> خرابی را یک WARNING تلقی می‌کند (تا پیش از ارتقای نسخه، فایل تکیه‌گاهی نیست) و خط موفقیت را با عبارت «reserved» تعیین‌ویژگی می‌کند. وقتی پین به نسخه‌ای با <code>log.audit_path</code> منتقل شد، دوباره بررسی کنید: پیش‌ساختِ فایل برای تضمین «0o600 از اولین بایت» تکیه‌گاهی می‌شود و ویزارد باید دوباره پرصدا شکست بخورد.</p>
+<p><strong>محدودیت اسکیمای v0.39:</strong> <code>log.audit_path</code> فیلدی در ساختار <code>config.Log</code> در iron-proxy v0.39 نیست، پس <code>build_proxy_config</code> آرگومان کلیدواژه‌ای <code>audit_log</code> را می‌پذیرد ولی آن را در yaml خروجی صادر نمی‌کند. رکوردهای هر-درخواست در v0.39 کنار رویدادهای سطح دیمون در <code>iron-proxy.log</code> فرود می‌آیند. فایل <code>audit.log</code> همچنان با <code>0o600</code> و <code>O_NOFOLLOW</code> پیش‌ساخته می‌شود تا وقتی نسخهٔ پین‌شده به نسخه‌ای که جریان جداگانه را پشتیبانی می‌کند ارتقا یابد، قرارداد حریم خصوصی برقرار بماند.</p>
+<p>تست‌های رگرسیون: <code>test_ensure_audit_log_raises_on_immutable_parent</code>، <code>test_audit_log_kwarg_does_not_inject_audit_path_v039</code>.</p>
+<h3>خرابی پرصدای حالت Bitwarden</h3>
+<p>وقتی <code>credential_source: bitwarden</code> باشد و <code>proxy.allow_env_fallback: false</code> (پیش‌فرض):</p>
+<ul>
+<li>متغیر محیطی توکن دسترسی غایب باشد ← <code>cmd_start</code> امتناع می‌کند.</li>
+<li><code>project_id</code> غایب باشد ← <code>cmd_start</code> امتناع می‌کند.</li>
+<li><code>bws secret list</code> برای یک یا چند ارائه‌دهندهٔ نگاشت‌شده هیچ مقداری برنگرداند ← <code>_build_proxy_subprocess_env</code> استثنا می‌دهد.</li>
+</ul>
+<p>بازگشت به env میزبان در حالت BW، دقیقاً همان باگِ کهنگی را دوباره وارد می‌کند که مسیر BW برای شکست‌دادنش ساخته شده است.</p>
+<p>تست‌های رگرسیون: <code>test_cmd_start_refuses_when_bitwarden_token_missing</code> (لایهٔ CLI)؛ ادعاهای حالت سخت‌گیرانه در <code>_build_proxy_subprocess_env</code> (لایهٔ دیمون).</p>
+<h3>تشخیص برخورد docker_env</h3>
+<p>وقتی <code>enforce_on_docker: true</code> باشد، بازنویسیِ <code>docker_env</code> روی هر یک از متغیرهای کنترل‌کنندهٔ خروجی (HTTPS_PROXY، SSL_CERT_FILE، NODE_EXTRA_CA_CERTS و...) یا هر <code>real_env_name</code> نگاشت‌شده (OPENROUTER_API_KEY و...)، قبل از راه‌افتادن کانتینر یک <code>RuntimeError</code> برمی‌گرداند.</p>
+<p>تست رگرسیون: <code>test_docker_env_collision_with_proxy_raises_when_enforce</code>.</p>
+<h3>دفاع در برابر بازیافت PID</h3>
+<p><code>_pid_alive</code> قبل از اعتماد به تطبیق نام پایهٔ <code>argv[0]</code>، باید یا <code>_proxy_nonce</code> درون‌پروسسی (حالت هم‌پروسس) یا <code>iron-proxy.nonce</code> روی دیسک (حالت بین-CLI) را بررسی کند. <code>stop_proxy</code> قبل از SIGKILL باید starttime مربوط به <code>/proc/&lt;pid&gt;/stat</code> را دوباره چک کند و در صورت رانش starttime، سیگنال را سرکوب کند.</p>
+<p>تست‌های رگرسیون: <code>test_stop_proxy_suppresses_sigkill_on_pid_recycle</code>، <code>test_pid_proc_starttime_parses_comm_with_parens</code>، <code>test_persisted_nonce_roundtrip</code>.</p>
+<h3>حفظ توکن‌ها در راه‌اندازی مجدد</h3>
+<p><code>merge_mappings(existing, discovered, rotate=False)</code> برای ارائه‌دهنده‌های هم‌پوشان باید توکن‌های قبلی را برگرداند. اجرای دوبارهٔ <code>hermes egress setup</code> نباید سندباکس‌های در حال اجرا را بی‌سروصدا 401 کند. <code>--rotate-tokens</code> انتخابِ آگاهانهٔ صریح است.</p>
+<p>تست‌های رگرسیون: <code>test_merge_mappings_preserves_existing_tokens</code>، <code>test_merge_mappings_rotate_mints_fresh_tokens</code>.</p>
+<h3>حفظ <code>credential_source</code></h3>
+<p><code>cmd_setup</code> نباید بدون پرچم صریح <code>--no-bitwarden</code>، در اجرای مجدد <code>credential_source: bitwarden</code> را به <code>env</code> تنزل دهد. اجرای <code>hermes egress setup</code> (بدون پرچم) هر چه قبلاً پیکربندی شده را حفظ می‌کند.</p>
+<p>از طریق جریان <code>cmd_setup</code> در تست‌های CLI آزموده شده (مسیر حفظ bitwarden وقتی آزموده می‌شود که <code>--from-bitwarden</code> با یک اجرای مجددِ <code>setup</code> ساده دنبال شود).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> نقاط توسعه</h2>
+<h3>افزودن یک ارائه‌دهندهٔ توکن Bearer جدید</h3>
+<p><code>_BEARER_PROVIDERS</code> در <code>iron_proxy.py</code> نام متغیر env را به یک تاپلی از میزبان‌های بالادست نگاشت می‌کند. افزودن یک ورودی، آن را برای <code>discover_provider_mappings()</code> قابل‌کشف می‌کند؛ ویزارد وقتی متغیر env موجود باشد، به‌طور خودکار برایش توکن ضرب می‌کند.</p>
+<pre dir="ltr"><code>_BEARER_PROVIDERS: Dict[str, Tuple[str, ...]] = {
+    ...,
+    "MY_PROVIDER_API_KEY": ("api.myprovider.com",),
+}</code></pre>
+<p><code>_DEFAULT_ALLOWED_HOSTS</code> را هم به‌روزرسانی کنید تا پروکسی به‌طور پیش‌فرض بالادست را مجاز بداند. برای اطمینان <code>test_discover_provider_mappings_*</code> را اجرا کنید.</p>
+<h3>افزودن یک ارائه‌دهندهٔ توکن هدری جدید (خانوادهٔ x-api-key)</h3>
+<p>اگر ارائه‌دهنده با یک هدرِ استاتیکِ غیر-Authorization احرازهویت می‌کند (مثل <code>x-api-key</code> در Anthropic، <code>api-key</code> در Azure، یا <code>x-goog-api-key</code> در Gemini)، آن را به <code>_HEADER_AUTH_PROVIDERS</code> بیفزایید — <code>secrets.replace.match_headers</code> در iron-proxy نام هدرهای دلخواه را نشانه می‌گیرد، پس این‌ها ارائه‌دهنده‌های تعویض‌شوندهٔ درجه‌یک هستند:</p>
+<pre dir="ltr"><code>_HEADER_AUTH_PROVIDERS: Dict[str, Dict[str, Tuple[str, ...]]] = {
+    ...,
+    "MY_PROVIDER_API_KEY": {
+        "hosts": ("api.myprovider.com",),
+        "match_headers": ("x-my-auth-header", "Authorization"),
+        "aliases": (),
+    },
+}</code></pre>
+<p>از <code>aliases</code> فقط برای نام‌های متغیر envِ قابل‌جایگزینِ <em>همان</em> اعتبارنامه استفاده کنید (مثلاً <code>GOOGLE_API_KEY</code> به‌جای <code>GEMINI_API_KEY</code>) — نام‌های مستعار در یک نگاشت واحد جمع می‌شوند، چون دو قانون <code>require: true</code> روی یک میزبان، درخواست‌های همدیگر را رد می‌کنند. <code>_DEFAULT_ALLOWED_HOSTS</code> را هم به‌روزرسانی کنید.</p>
+<h3>افزودن یک ارائه‌دهندهٔ احرازهویت امضایی جدید (بدون پوشش)</h3>
+<p>اگر ارائه‌دهنده از SigV4 / OAuth ضرب‌شده در SDK / امضای درخواست استفاده می‌کند، تعویض هدرِ استاتیک نمی‌تواند آن را پوشش دهد. متغیر env را به <code>_NON_BEARER_PROVIDERS</code> بیفزایید تا ویزارد و <code>hermes egress status</code> درباره‌اش هشدار بدهند:</p>
+<pre dir="ltr"><code>_NON_BEARER_PROVIDERS: Tuple[str, ...] = (
+    ...,
+    "MY_SIGNED_PROVIDER_ACCESS_KEY",
+)</code></pre>
+<h3>سیم‌کشی iron-proxy در یک بک‌اند غیر-Docker</h3>
+<p><code>_egress_proxy_args_for_docker</code> مخصوص Docker است. بک‌اندهایی که سیم‌کشی مشابه می‌خواهند به همتای مخصوص خودشان نیاز دارند که:</p>
+<ol>
+<li><code>load_config().get("proxy", {})</code> را می‌خواند؛ اگر <code>enabled</code> نادرست باشد آرگومان‌های خالی برمی‌گرداند.</li>
+<li><code>iron_proxy.get_status()</code> را صدا می‌زند؛ معناشناسی <code>enforce</code> را روی مسیرهای خرابیِ <code>configured</code> / <code>pid</code> / <code>listening</code> / <code>ca_cert_path</code> آشکار می‌کند.</li>
+<li><code>iron_proxy.load_mappings()</code> را صدا می‌زند؛ اگر خالی بود و <code>enforce_on_docker: true</code>، از سوارکردن امتناع می‌کند.</li>
+<li>هفت متغیر env را ست می‌کند (HTTPS_PROXY، NO_PROXY، REQUESTS_CA_BUNDLE، SSL_CERT_FILE، CURL_CA_BUNDLE، NODE_EXTRA_CA_CERTS، HERMES_EGRESS_PROXY) و متغیرهای <code>HERMES_PROXY_TOKEN_&lt;NAME&gt;</code> را به‌ازای هر نگاشت.</li>
+<li>گواهی CA را در مسیری که زمان اجرا به آن اعتماد می‌کند داخل سندباکس توزیع می‌کند (معمولاً <code>/etc/ssl/certs/hermes-egress-ca.crt</code>).</li>
+<li>تشخیص برخورد را نسبت به پیکربندی env اختصاصیِ بک‌اندِ کاربر پیاده‌سازی می‌کند.</li>
+</ol>
+<p>پیاده‌سازی Docker حدود ۱۵۰ خط است؛ برای Modal / Daytona / SSH حجمی مشابه انتظار داشته باشید.</p>
+<h3>مشترک‌شدن در رویدادهای ممیزیِ هر-درخواست</h3>
+<p>iron-proxy روی v0.39ِ فعلاً پین‌شده، JSON خط-جدا شده در <code>~/.hermes/proxy/iron-proxy.log</code> می‌نویسد (رکوردهای دیمون + هر-درخواست، ترکیب‌شده؛ «لاگ‌برداری در iron-proxy v0.39» را در راهنمای کاربر ببینید). یک پلاگین / ناظر بیرونی می‌تواند آن فایل را tail کند و به ردِ فهرست مجاز، تعویض رمزها یا خطاهای بالادست واکنش نشان دهد. وقتی نسخهٔ پین‌شده به نسخه‌ای ارتقا یابد که <code>log.audit_path</code> را پشتیبانی می‌کند، جریان هر-درخواست به <code>audit.log</code> منتقل می‌شود و ناظرهایی که به آن مسیر وصل‌اند بدون اقدام اپراتور زنده می‌شوند. اسکیما در <a href="https://docs.iron.sh/audit" target="_blank" rel="noopener">docs.iron.sh/audit</a> مستند شده است (لینک).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> تست</h2>
+<pre dir="ltr"><code># مجموعهٔ هرمتیک (بدون شبکه، بدون باینری واقعی)
+scripts/run_tests.sh tests/test_iron_proxy.py tests/test_iron_proxy_cli.py
+
+# E2E زنده (باینری واقعی، curl واقعی، تونل CONNECT واقعی)
+HERMES_RUN_E2E=1 scripts/run_tests.sh tests/test_iron_proxy_e2e.py
+
+# دودآزمایی PTY زنده روی `hermes egress`
+HERMES_HOME=/tmp/hermes-egress-test python3 -m hermes_cli.main egress --help
+HERMES_HOME=/tmp/hermes-egress-test python3 -m hermes_cli.main egress setup --help</code></pre>
+<p>CLI از argparse استفاده می‌کند، پس <code>--help</code> اولین پروبِ خوب برای این سؤال است که «آیا پرچم جدیدم درست ثبت شده».</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> همچنین ببینید</h2>
+<ul>
+<li>راه‌اندازی و عیب‌یابی رو به کاربر: <a href="../user-guide/egress/iron-proxy.html">پروکسی iron (تزریق اعتبارنامه)</a></li>
+<li>درون‌مایهٔ بک‌اند Docker: <a href="../user-guide/docker.html">اجرای داکر</a></li>
+<li>یکپارچگی Bitwarden Secrets Manager: <a href="../user-guide/secrets/bitwarden.html"><code>hermes secrets bitwarden</code></a></li>
+<li>مرجع فرمان‌های CLI: <a href="https://hermes-agent.nousresearch.com/docs/reference/cli-commands#hermes-egress" target="_blank" rel="noopener"><code>hermes egress</code></a></li>
+<li>متغیرهای محیطی تزریق‌شده در سندباکس: <a href="https://hermes-agent.nousresearch.com/docs/reference/environment-variables#egress-proxy-sandbox-injected" target="_blank" rel="noopener">پروکسی خروجی (تزریق‌شده در سندباکس)</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="desktop-plugin-sdk.html"><span class="dir">→ قبلی</span><span class="ttl">SDK پلاگین دسکتاپ</span></a>
+  <a class="next" href="image-gen-provider-plugin.html"><span class="dir">بعدی ←</span><span class="ttl">پلاگین تولید تصویر</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/egress-internals" target="_blank" rel="noopener">Egress proxy internals</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

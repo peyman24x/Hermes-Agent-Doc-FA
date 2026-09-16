@@ -353,7 +353,7 @@ MATRIX_ALLOWED_ROOMS=!ops:matrix.example.org,!dmroom:matrix.example.org</code></
 pip install 'mautrix[encryption]'
 
 # یا نصب با extras هرمس
-cd ~/.hermes/hermes-agent && uv pip install -e ".[matrix]"</code></pre>
+cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[matrix]"</code></pre>
 </div>
 <p>همچنین <code>libolm</code> باید روی سیستم نصب باشد:</p>
 <div class="codebox">
@@ -572,7 +572,7 @@ sudo sntp -sS time.apple.com</code></pre>
 <p>یا با extras هرمس:</p>
 <div class="codebox">
   <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
-  <pre><code>cd ~/.hermes/hermes-agent && uv pip install -e ".[matrix]"</code></pre>
+  <pre><code>cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[matrix]"</code></pre>
 </div>
 
 <h3>خطاهای رمزنگاری / «could not decrypt event»</h3>
@@ -743,8 +743,8 @@ curl http://&lt;mac-ip&gt;:8642/health</code></pre>
   <div class="code-head"><span class="code-lang">dockerfile</span><button class="copy-btn">کپی</button></div>
   <pre><code>FROM python:3.11-slim
 
-RUN apt-get update && apt-get install -y libolm-dev && rm -rf /var/lib/apt/lists/*
-RUN cd ~/.hermes/hermes-agent && uv pip install -e ".[matrix]"
+RUN apt-get update &amp;&amp; apt-get install -y libolm-dev &amp;&amp; rm -rf /var/lib/apt/lists/*
+RUN cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[matrix]"
 
 CMD ["hermes", "gateway"]</code></pre>
 </div>

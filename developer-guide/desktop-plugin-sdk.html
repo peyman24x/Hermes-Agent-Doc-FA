@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SDK پلاگین دسکتاپ — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/desktop-plugin-sdk" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>SDK پلاگین دسکتاپ</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>SDK پلاگین دسکتاپ</h1>
+<p>اپلیکیشن بومی <a href="../user-guide/desktop.html">Hermes Desktop</a> مبتنی بر مشارکت است: هر سطح در پنجره — پن‌ها، مسیرها، ناوبری سایدبار، آیتم‌های نوار وضعیت، ورودی‌های پالت، کلیدهای میان‌بر و تم‌ها — در یک رجیستری مرکزی واحد ثبت می‌شود. هسته سطوح خودش را دقیقاً به همان شکلی ثبت می‌کند که یک پلاگین ثبت می‌کند؛ بنابراین داستان پلاگین همان داستان اصلی و واقعی است، نه یک الحاقِ بعدیِ چسبانده‌شده.</p>
+<p>یک <strong>پلاگین دسکتاپ</strong> یک فایل ESM تکی است که به‌طور پیش‌فرض یک <code>HermesPlugin</code> اکسپورت می‌کند. فقط یک ماژول ایمپورت می‌کند — <code>@hermes/plugin-sdk</code> — و همه‌چیز را می‌گیرد: وضعیت زندهٔ اپلیکیشن، درِ JSON-RPC گیت‌وی، یک فضای‌نام بک‌اند REST/socket با محدودهٔ مشخص، React Query و کیت UI خودِ اپلیکیشن، به‌طوری که UI پلاگین به‌طور پیش‌فرض بومی به نظر می‌رسد. نه کلونِ مخزن لازم است، نه <code>npm run build</code>، نه دست‌کاری سورس اپلیکیشن. فایل را در <code>$HERMES_HOME/desktop-plugins/&lt;id&gt;/plugin.js</code> بگذارید؛ اپلیکیشن ظرف چند ثانیه آن را بارگذاری می‌کند و با هر ذخیره hot-reload می‌کند.</p>
+<div class="callout warn">
+  <div class="callout-title">⚠️ این، SDK پلاگینِ داشبورد وب نیست</div>
+  <p>واژهٔ «پلاگین» در سراسر Hermes چند معنای نامرتبط دارد. این صفحه SDKِ <strong>اپلیکیشن دسکتاپ بومی</strong> (<code>hermes desktop</code>) است — یعنی ماژول <code>@hermes/plugin-sdk</code> و مسیر <code>$HERMES_HOME/desktop-plugins/</code>. <strong>داشبورد وب</strong> (<code>hermes dashboard</code>) سیستم پلاگین جداگانه و نامرتبط خودش را دارد که روی <code>window.__HERMES_PLUGIN_SDK__</code> کار می‌کند و <code>manifest.json</code> دارد — مستندات آن در <a href="../user-guide/features/extending-the-dashboard.html">گسترش داشبورد وب</a> است. پلاگین‌های پایتونیِ CLI/گیت‌وی در <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت پلاگین هرمس</a> مستند شده‌اند. این سه هیچ کد، API یا روش توزیع مشترکی ندارند. تنها بخش مشترک میان SDK دسکتاپ و داشبورد، فضای‌نام بک‌اندِ <code>plugin_api.py</code> (یعنی <code>/api/plugins/&lt;id&gt;</code>) است.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> مدل ذهنی</h2>
+<p>این SDK از مدل ماژولِ VS Code پیروی می‌کند. نویسندهٔ پلاگین دقیقاً یک ماژول ایمپورت می‌کند و هرگز با بخش‌های داخلی اپلیکیشن کار نمی‌کند (در پلاگین هم‌بسته با لینت مسدودند و در پلاگین دیسکی resolve نمی‌شوند). قابلیت‌ها در لایه‌هایی عرضه می‌شوند:</p>
+<ul>
+<li><strong><code>host.state.*</code></strong> — نمای‌های فقط-خواندنی روی وضعیت زندهٔ اپلیکیشن (اتم‌های nanostore): نشست فعال، مشغول‌بودنِ نوبت به تفکیک نشست، cwd، وضعیت سوکت گیت‌وی، مدل، پروفایل و viewport. <code>gateway</code> وضعیت WebSocket است، نه مشغول‌بودنِ نوبت.</li>
+<li><strong>اکشن‌های <code>host.*</code></strong> — فعل‌های امنِ گزینش‌شده: نمایش toast، ناوبری، دنبال‌کردن لاگ‌ها، ری‌استارت گیت‌وی و اشتراک در جریان رویداد گیت‌وی.</li>
+<li><strong><code>host.request</code></strong> — درِ JSON-RPC گیت‌وی: نشست‌ها، پیکربندی، مهارت‌ها، کرون — هرچه خودِ اپلیکیشن فراخوانی می‌کند.</li>
+<li><strong><code>ctx.rest</code> / <code>ctx.socket</code></strong> — فضای‌نام بک‌اندِ اختصاصی پلاگین شما (<code>/api/plugins/&lt;id&gt;</code>)، اگر یک <code>plugin_api.py</code> همراه پلاگین بفرستید.</li>
+<li><strong><code>ui.*</code></strong> — زبان طراحی: کامپوننت‌های واقعی اپلیکیشن، متغیرهای تم، آیکون‌ها و قالب‌بندها، تا UI شما با اپلیکیشن پیکسل‌به‌پیکسل هم‌خوان شود.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> دو حالت تحویل</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>حالت</th><th>مکان</th><th>چه کسی</th><th>مرحلهٔ بیلد</th></tr></thead>
+  <tbody>
+    <tr><td><strong>دیسکی</strong> (توصیه‌شده)</td><td><code>$HERMES_HOME/desktop-plugins/&lt;id&gt;/plugin.js</code></td><td>کاربران، ایجنت‌ها</td><td>ندارد — ESM ساده، بدون کامپایل بارگذاری می‌شود</td></tr>
+    <tr><td><strong>بستهٔ یکپارچه</strong></td><td><code>$HERMES_HOME/plugins/&lt;id&gt;/desktop/plugin.js</code></td><td>پلاگین‌هایی که کد سمت ایجنت هم ارسال می‌کنند</td><td>ندارد — همان خط لولهٔ دیسکی</td></tr>
+    <tr><td><strong>هم‌بسته</strong></td><td><code>apps/desktop/src/plugins/&lt;id&gt;/plugin.tsx</code></td><td>درون‌درخت، همراه خودِ اپلیکیشن</td><td>بیلد Vite خودِ اپلیکیشن</td></tr>
+  </tbody>
+</table>
+</div>
+<p>هر سه همان قرارداد <code>HermesPlugin</code> را می‌پذیرند، در <strong>تنظیمات ← افزونه‌ها</strong> دیده می‌شوند و به‌صورت زنده فعال/غیرفعال می‌شوند. بستهٔ یکپارچه چیزی جز اسکنِ درِ دیسکی داخل پوشهٔ پلاگین ایجنتی شما نیست — به <a href="#one-package-both-sdks">یک بسته، هر دو SDK</a> نگاه کنید. همه‌چیز در این صفحه بر پایهٔ درِ دیسکی نوشته شده است (همان که شما و ایجنت می‌نویسید)؛ <a href="#bundled-plugins">پلاگین‌های هم‌بسته</a> دو تفاوت را یادآوری می‌کند. امروز هیچ پلاگین دسکتاپی در درخت هسته ارسال نمی‌شود — دموهای مرجع در مخزن همراهِ <a href="https://github.com/NousResearch/hermes-example-plugins" target="_blank" rel="noopener"><code>hermes-example-plugins</code></a> زندگی می‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> شروع سریع — اولین پلاگین شما</h2>
+<p>فایل <code>$HERMES_HOME/desktop-plugins/hello/plugin.js</code> را بسازید (به‌طور پیش‌فرض یعنی <code>~/.hermes/...</code>، یا زیر یک پروفایل نام‌دار در <code>~/.hermes/profiles/&lt;name&gt;/...</code>). نام پوشه باید با <code>id</code> پلاگین برابر باشد.</p>
+<pre dir="ltr"><code>// ~/.hermes/desktop-plugins/hello/plugin.js
+import { host, haptic, useValue } from '@hermes/plugin-sdk'
+import { jsx, jsxs } from 'react/jsx-runtime'
+
+function HelloPane() {
+  const gateway = useValue(host.state.gateway)
+
+  return jsxs('div', {
+    className: 'flex h-full flex-col gap-2 p-3 text-sm',
+    children: [
+      jsx('div', { className: 'font-medium', children: 'Hello, Hermes' }),
+      jsx('div', {
+        className: 'text-(--ui-text-tertiary)',
+        children: `gateway: ${gateway}`
+      })
+    ]
+  })
+}
+
+export default {
+  id: 'hello', // باید با نام پوشه یکی باشد
+  name: 'Hello',
+  register(ctx) {
+    ctx.register({
+      id: 'pane',
+      area: 'panes',
+      title: 'hello',
+      data: { placement: 'right', width: '260px' },
+      render: () =&gt; jsx(HelloPane, {})
+    })
+    ctx.register({
+      id: 'chip',
+      area: 'statusBar.right',
+      order: 130,
+      render: () =&gt;
+        jsx('button', {
+          type: 'button',
+          className: 'px-1.5 text-[0.6875rem] text-(--ui-text-tertiary)',
+          onClick: () =&gt; {
+            haptic('tap')
+            host.notify({ kind: 'info', message: 'Hello from my plugin!' })
+          },
+          children: 'hello'
+        })
+    })
+  }
+}</code></pre>
+<p>ذخیره‌اش کنید. اپلیکیشن پوشهٔ <code>desktop-plugins/</code> را زیر نظر دارد، فایل را ظرف چند ثانیه بارگذاری می‌کند و ذخیره‌های بعدی را در جا hot-reload می‌کند. اگر ظاهر نشد، ⌘K را بزنید و <strong>Reload desktop plugins</strong> را اجرا کنید. اگر بارگذاری شکست بخورد، یک toast نام خطا را اعلام می‌کند — اصلاح کنید و دوباره ذخیره کنید.</p>
+<div class="callout note">
+  <div class="callout-title">ℹ️ بدون JSX، بدون بیلد</div>
+  <p>فایل دیسکی <strong>بدون کامپایل</strong> بارگذاری می‌شود، پس سینتکس JSX پارس نخواهد شد. UI را با فراخوانی‌های <code>jsx()</code> / <code>jsxs()</code> از <code>react/jsx-runtime</code> (یا <code>React.createElement</code>) بنویسید. تنها specifierهای قابل ایمپورت، <code>@hermes/plugin-sdk</code> و <code>react</code> و <code>react/jsx-runtime</code> هستند — هر چیز دیگری عمداً resolve نمی‌شود.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> قرارداد پلاگین</h2>
+<p>هر پلاگین یک <code>HermesPlugin</code> را به‌طور پیش‌فرض اکسپورت می‌کند:</p>
+<pre dir="ltr"><code>interface HermesPlugin {
+  /** اسلاگِ پایدار — به منبع `plugin:&lt;id&gt;` و فضای‌نام id تبدیل می‌شود. */
+  id: string
+  /** نام انسانی برای Settings / رابط about. پیش‌فرض همان `id` است. */
+  name?: string
+  /** هنگام بارگذاری ثبت می‌شود وقتی کاربر انتخابی نکرده باشد (پیش‌فرض true). برای پلاگین‌های opt-in
+   *  مقدار false بگذارید: در Settings ▸ Plugins فهرست می‌شوند، اما تا وقتی کاربر کلید را نزند خاموش‌اند. */
+  defaultEnabled?: boolean
+  /** یک‌بار هنگام بارگذاری صدا زده می‌شود؛ مشارکت‌ها را از طریق `ctx` وصل کنید. */
+  register: (ctx: PluginContext) =&gt; void
+}</code></pre>
+<p><code>register</code> یک <code>PluginContext</code> <strong>با محدودهٔ مشخص</strong> دریافت می‌کند. این کانتکست هرگز مستقیماً با رجیستری کار نمی‌کند — کانتکست به‌طور خودکار منشأ را تگ می‌زند (<code>source: 'plugin:&lt;id&gt;'</code>) و id هر مشارکت را در فضای‌نام قرار می‌دهد (<code>&lt;id&gt;:&lt;localId&gt;</code>)، بنابراین دو پلاگین هرگز با هم تداخل نمی‌کنند.</p>
+<pre dir="ltr"><code>interface PluginContext {
+  /** تگ منبعِ حل‌شده، مثلاً 'plugin:hello'. */
+  readonly source: string
+  /** ثبت یک مشارکت (id در فضای‌نام، منبع مهر شده). یک disposer برمی‌گرداند. */
+  register: (c: PluginContribution) =&gt; () =&gt; void
+  /** ثبت چند مشارکت با هم؛ disposer برگشتی همهٔ آن‌ها را حذف می‌کند. */
+  registerMany: (cs: PluginContribution[]) =&gt; () =&gt; void
+  /** REST به فضای‌نام بک‌اندِ خودِ همین پلاگین (`/api/plugins/&lt;id&gt;`). */
+  rest: &lt;T&gt;(path: string, opts?: PluginRestOptions) =&gt; Promise&lt;T&gt;
+  /** WebSocket زنده به فضای‌نام خودِ همین پلاگین. یک disposer برمی‌گرداند. */
+  socket: (path: string, onMessage: (data: unknown) =&gt; void) =&gt; () =&gt; void
+  /** درِ OS گزینش‌شده: نوتیفیکیشن بومی، open-external، reveal-in-file-manager، کلیپ‌بورد. */
+  os: PluginOs
+  /** ذخیره‌سازی JSON با محدودهٔ پلاگین (کلیدها زیر `hermes.plugin.&lt;id&gt;.` زندگی می‌کنند). */
+  storage: PluginStorage
+}</code></pre>
+<p>یک <strong>مشارکت</strong> (contribution) تنها پریمیتیوی است که همهٔ سطوح با هم مشترک‌اند:</p>
+<pre dir="ltr"><code>interface Contribution {
+  id: string          // شما id محلی را می‌نویسید؛ میزبان آن را در فضای‌نام قرار می‌دهد
+  area: string        // کجا می‌رود (یک ثابت contribution-area)
+  title?: string
+  order?: number      // مرتب‌سازی داخل حوزه (کمتر = جلوتر)
+  when?: () =&gt; boolean // visibility پویا؛ توسط حوزه دوباره ارزیابی می‌شود
+  enabled?: boolean
+  render?: () =&gt; ReactNode  // کامپوننتی که mount می‌شود
+  data?: unknown      // payload مخصوص حوزه (کتاب آشپزی را ببینید)
+}</code></pre>
+<p>بسته به حوزه، <code>render</code> را می‌دهید، یا <code>data</code> را، یا هر دو را.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> حوزه‌های مشارکت — کتاب آشپزی</h2>
+<p>ثابت‌های حوزه را از SDK ایمپورت کنید؛ هر حوزه payloadِ <code>data</code> مخصوص خودش را دارد.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>سطح</th><th><code>area</code></th><th>شما چه می‌دهید</th></tr></thead>
+  <tbody>
+    <tr><td>پن چیدمان</td><td><code>PANES_AREA</code> (<code>'panes'</code>)</td><td><code>title</code> + <code>render</code> + <code>data: { placement, dock?, width?, height? }</code></td></tr>
+    <tr><td>صفحهٔ کامل</td><td><code>ROUTES_AREA</code></td><td><code>data: { path }</code> + <code>render</code></td></tr>
+    <tr><td>ناوبری سایدبار</td><td><code>SIDEBAR_NAV_AREA</code></td><td><code>data: { path, label, codicon }</code></td></tr>
+    <tr><td>نوار وضعیت</td><td><code>STATUSBAR_AREAS.left</code> / <code>.right</code></td><td><code>render</code> (یا <code>data</code> به‌صورت <code>StatusbarItem</code>)</td></tr>
+    <tr><td>نوار عنوان</td><td><code>TITLEBAR_AREAS.left</code> / <code>.center</code> / <code>.right</code></td><td><code>data</code> به‌صورت <code>TitlebarTool</code>، یا یک <code>&lt;Contribute&gt;</code> با محدودهٔ mount</td></tr>
+    <tr><td>پالت ⌘K</td><td><code>PALETTE_AREA</code></td><td><code>data: PaletteContribution</code></td></tr>
+    <tr><td>کلید میان‌بر</td><td><code>KEYBINDS_AREA</code></td><td><code>data: KeybindContribution</code></td></tr>
+    <tr><td>تم</td><td><code>THEMES_AREA</code></td><td><code>data</code> به‌صورت یک <code>DesktopTheme</code></td></tr>
+    <tr><td>کامپوزر</td><td><code>COMPOSER_AREAS.*</code></td><td>اسلات‌های render، یا middleware / ارائه‌دهندهٔ پیوست</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>پن‌ها</h3>
+<p>پن، یک کاشی در درخت چیدمان است. <code>placement</code> نقشِ معنایی است — پن با پن‌های موجودِ همان نقش (به‌شکل تب) پشته می‌شود؛ کاربر بعداً می‌تواند آن را هر جا خواست بکشد.</p>
+<pre dir="ltr"><code>ctx.register({
+  id: 'pane',
+  area: 'panes',
+  title: 'my pane',
+  data: { placement: 'right', width: '260px' },
+  render: () =&gt; jsx(MyPane, {})
+})</code></pre>
+<p><code>placement</code> یکی از <code>'main' | 'left' | 'right' | 'top' | 'bottom'</code> است. برای فرودادن روی یک <strong>لبهٔ</strong> مشخص به‌جای پشته‌شدن، یک ژست <code>dock</code> اضافه کنید — همان کاری که با کشیدن روی drop chipِ یک پن انجام می‌شود:</p>
+<pre dir="ltr"><code>// زیر مکالمه، به ارتفاع 200px
+data: {
+  placement: 'bottom',
+  dock: { pane: 'workspace', pos: 'bottom' },
+  height: '200px'
+}</code></pre>
+<p><code>dock.pane</code> هر pane id می‌تواند باشد (<code>workspace</code> همان thread اصلی است؛ همچنین <code>sessions</code> و <code>terminal</code> و <code>files</code> و <code>review</code> و <code>logs</code>)؛ <code>dock.pos</code> یکی از <code>'top' | 'bottom' | 'left' | 'right' | 'center'</code> است. یک <code>width</code>/<code>height</code> هم اعلام کنید تا پن نیمی از ناحیه را تصاحب نکند.</p>
+<p>بستنِ تنها پنی که یک پلاگین contributed کرده، آن پلاگین را غیرفعال می‌کند و می‌توان از <strong>تنظیمات ← افزونه‌ها</strong> دوباره فعالش کرد. وقتی پلاگین چند پن contributes می‌کند، بستن یکی فقط همان پن را می‌بندد و بقیهٔ پن‌ها، فرمان‌ها و middlewareهای پلاگین فعال می‌مانند. <strong>بازنشانی چیدمان</strong> پن‌های contributedِ بسته‌شده را برمی‌گرداند.</p>
+<h3>صفحه‌ها و ناوبری سایدبار</h3>
+<p>یک route یک صفحهٔ کامل را در پن ورک‌اسپیس سوار می‌کند، مثل هر نمای داخلی دیگری. برای قابل‌دسترس‌شدن، آن را با یک ردیف ناوبری سایدبار (و/یا یک فرمان پالت) جفت کنید.</p>
+<pre dir="ltr"><code>import { ROUTES_AREA, SIDEBAR_NAV_AREA } from '@hermes/plugin-sdk'
+
+ctx.registerMany([
+  {
+    id: 'page',
+    area: ROUTES_AREA,
+    data: { path: '/my-page' },
+    render: () =&gt; jsx(MyPage, {})
+  },
+  {
+    id: 'nav',
+    area: SIDEBAR_NAV_AREA,
+    data: { path: '/my-page', label: 'My Page', codicon: 'project' }
+  }
+])</code></pre>
+<p><code>codicon</code> یک id از <a href="https://microsoft.github.io/vscode-codicons/dist/codicon.html" target="_blank" rel="noopener">codiconهای VS Code</a> است. با <code>host.navigate('/my-page')</code> از هر جا به یک route ناوبری کنید.</p>
+<h3>نوار وضعیت و نوار عنوان</h3>
+<p>آیتم‌های نوار وضعیت در خوشهٔ چپ یا راست نوار پایین رندر می‌شوند. ساده‌ترین حالت یک تابع <code>render</code> است؛ برای یک دکمهٔ ساده، <code>data</code> را به‌صورت <code>StatusbarItem</code> بدهید (<code>{ id, label?, icon?, detail?, variant?, menuItems?, … }</code>).</p>
+<pre dir="ltr"><code>import { STATUSBAR_AREAS, TITLEBAR_AREAS } from '@hermes/plugin-sdk'
+
+ctx.register({
+  id: 'count',
+  area: STATUSBAR_AREAS.right,
+  order: 120,
+  render: () =&gt; jsx(MyStatus, {})
+})</code></pre>
+<p>ابزارهای نوار عنوان در <code>TITLEBAR_AREAS.left | .center | .right</code> به‌عنوان دادهٔ <code>TitlebarTool</code> زندگی می‌کنند (<code>{ id, label, icon, active?, onSelect? }</code>).</p>
+<h3>فرمان‌های پالت و کلیدهای میان‌بر</h3>
+<pre dir="ltr"><code>import { PALETTE_AREA, KEYBINDS_AREA } from '@hermes/plugin-sdk'
+
+ctx.registerMany([
+  {
+    id: 'open',
+    area: PALETTE_AREA,
+    data: {
+      id: 'my-page.open',
+      label: 'Open My Page',
+      keywords: ['my', 'page'],
+      run: () =&gt; host.navigate('/my-page')
+    }
+  },
+  {
+    id: 'refresh',
+    area: KEYBINDS_AREA,
+    data: {
+      id: 'my-page.refresh',
+      label: 'Refresh My Page',
+      category: 'My Plugin',
+      defaults: ['mod+shift+r'],
+      run: () =&gt; void doRefresh()
+    }
+  }
+])</code></pre>
+<p>کلیدهای میان‌بر را کاربر می‌تواند در تنظیمات دوباره bind کند؛ <code>defaults</code> فقط اتصال اولیه است.</p>
+<h3>تم‌ها</h3>
+<p>یک مشارکتِ تم، یک <code>DesktopTheme</code> کامل را به‌عنوان <code>data</code> خودش ارسال می‌کند (name، label، رنگ‌ها و...). در انتخاب‌گر تم مثل یک مورد داخلی دیده می‌شود.</p>
+<pre dir="ltr"><code>import { THEMES_AREA } from '@hermes/plugin-sdk'
+
+ctx.register({ id: 'noir', area: THEMES_AREA, data: myDesktopTheme })</code></pre>
+<p>ثبت تم فقط آن را فهرست می‌کند؛ انتخابش نمی‌کند. <code>useTheme()</code> ظاهرِ نقش‌شده را می‌خواند (<code>theme</code>، <code>themeName</code>، <code>availableThemes</code>، <code>resolvedMode</code>) و از داخل یک کامپوننت تغییرش می‌دهد (<code>setTheme</code>، <code>setMode</code>، <code>previewTheme</code>):</p>
+<pre dir="ltr"><code>import { Button, useTheme } from '@hermes/plugin-sdk'
+
+function ThemePicker() {
+  const { availableThemes, setTheme, themeName } = useTheme()
+
+  return availableThemes.map(t =&gt; (
+    &lt;Button key={t.name} disabled={t.name === themeName} onClick={() =&gt; setTheme(t.name)}&gt;
+      {t.label}
+    &lt;/Button&gt;
+  ))
+}</code></pre>
+<p>تغییری که چیزی غیر از رندر محرکش است — اتصال گیت‌وی، یک رویداد سوکت، هر callback از <code>host.onEvent</code> — کامپوننتی ندارد که هوک را به آن آویزان کند. در آن‌جا از <code>requestTheme(name)</code> استفاده کنید. نامی که resolve نشود رد می‌شود و به اسکین پیش‌فرض اجبار نمی‌شود؛ بنابراین مقدار بازگشتی هم‌زمان نقش بررسیِ در-دسترس‌بودن را هم بازی می‌کند و یک نام اشتباه هرگز به‌طور بی‌صدا ظاهر کسی را reset نمی‌کند:</p>
+<pre dir="ltr"><code>import { host, requestTheme } from '@hermes/plugin-sdk'
+
+host.onEvent('gateway.ready', () =&gt; {
+  if (!requestTheme('noir')) {
+    host.notifyError('Connected, but the noir theme is not installed.')
+  }
+})</code></pre>
+<p>هر دو درگاه به‌تفکیک پروفایل ذخیره می‌شوند، پس تغییری که پلاگین اعمال می‌کند دقیقاً مثل انتخاب دستی ماندگار است. برای رنگ‌آمیزی تمِ <em>فعال</em> به‌جای جایگزینی‌اش، از <code>setAccentOverride(hex)</code> استفاده کنید و در <code>ctx.onDispose</code> پاکش کنید — پلاگین هم‌بستهٔ <code>accent</code> نمونهٔ کارشدهٔ آن است.</p>
+<h3>گسترش‌های کامپوزر</h3>
+<p><code>COMPOSER_AREAS</code> (<code>top</code>، <code>bottom</code>، <code>leading</code>، <code>actions</code>، <code>attachments</code>، <code>middleware</code>) به پلاگین اجازه می‌دهند کنترل‌هایی دور کامپوزر پیام اضافه کند، منبع پیوست فراهم کند یا پیش‌نویس را قبل از ارسال تبدیل کند (<code>ComposerMiddleware</code> با یک <code>handler(draft) =&gt; draft | null</code>).</p>
+<h3>دایرکتیوهای ترنسکریپت — کامپوننت‌های درون‌خطی که مدل آن‌ها را خطاب می‌کند</h3>
+<p><code>TRANSCRIPT_DIRECTIVE_AREA</code> خودِ ترنسکریپت را به یک حوزهٔ مشارکت تبدیل می‌کند. یک دایرکتیو نام‌دار ثبت کنید تا ایجنت بتواند کامپوننت شما را با emitکردن پاراگرافی به شکل <code>::name{key="value"}</code> به‌صورت درون‌خطی در پیام دستیار رندر کند:</p>
+<pre dir="ltr"><code>import { TRANSCRIPT_DIRECTIVE_AREA } from '@hermes/plugin-sdk'
+
+ctx.register({
+  id: 'task-card',
+  area: TRANSCRIPT_DIRECTIVE_AREA,
+  data: {
+    name: 'task', // مدل می‌نویسد ::task{id="BB-12"}
+    render: ({ attrs, streaming }) =&gt; jsx(TaskCard, { taskId: attrs.id, streaming })
+  }
+})</code></pre>
+<p>قواعدی که میزبان اعمال می‌کند تا سطح امن بماند:</p>
+<ul>
+<li>دایرکتیو باید <strong>کل پاراگراف</strong> باشد — <code>::name</code> وسط متن، همان متن می‌ماند، بنابراین کامپوننت‌های پلاگین هرگز نمی‌توانند میانهٔ متنِ جاری را بربایند.</li>
+<li>اتریبیوت‌ها <strong>خروجی مدل و غیرقابل‌اعتماد</strong> اند (جفت‌های <code>key="value"</code>، فقط رشته). فیلدهای خودتان را اعتبارسنجی کنید؛ با ورودی نامعتبر به‌جای حدس‌زدن، هیچ‌چیز رندر نکنید.</li>
+<li>دایرکتیوی که <strong>ادعانشده</strong> باشد (هیچ پلاگینی برای آن نام ثبت نکرده باشد) مثل همان پاراگراف سادهٔ همیشگی رندر می‌شود — وقتی پلاگین خاموش است چیزی نمی‌شکند.</li>
+<li>رندرها در error boundary مشارکت پیچیده می‌شوند: یک throw به یک چیپ خطای درون‌خطی تنزل می‌یابد، هرگز یک پیام مرده نمی‌شود.</li>
+<li>در تداخل نام، اولین ثبت برنده است؛ نام‌های پرمدعا را با اسلاگ خودتان در فضای‌نام بگذارید (<code>myplugin-board</code>، نه <code>board</code>).</li>
+</ul>
+<p>هسته یک دایرکتیو را به‌عنوان مصرف‌کنندهٔ مرجع ارسال می‌کند: <code>::preview{file="…"}</code> فایل HTML ورک‌اسپیس را <strong>زنده داخل پیام</strong> رندر می‌کند — یک iframe سندباکس‌شدهٔ <code>srcdoc</code> با origin مات (اسکریپت‌ها اجرا می‌شوند و ویجت کاملاً تعاملی است؛ هیچ دست‌رسی به اپلیکیشن، حافظهٔ آن یا bridge نیست). قاب خودش را با محتوا هم‌اندازه می‌کند (ارتفاع زنده، عرض از گسترهٔ ذاتیِ محتوا گرفته می‌شود، چسبیده به چپ در جریان پیام)، و یک prelude تم، توکن‌های resolve‌شدهٔ اپلیکیشن (<code>--foreground</code>، <code>--muted-foreground</code>، <code>--accent</code>، <code>--border</code>، <code>--card</code>)، فونت اپلیکیشن و پس‌زمینهٔ شفاف را به سند می‌دهد — بنابراین HTML ویجت‌مانند بومی به نظر می‌رسد، در حالی که یک صفحهٔ کامل طراحی خودش را نگه می‌دارد. مقصدهای غیر-HTML و گیت‌وی‌های راه دور به کارت پیش‌نمایش کلاسیک برمی‌گردند. دایرکتیو خودتان را در یک مهارت به ایجنت معرفی کنید (همین‌طور یاد می‌گیرد emitش کند).</p>
+<p>ویجت‌های پیش‌نمایش‌شده می‌توانند <strong>جواب هم بدهند</strong>. داخل قاب، <code>window.hermes.send('get-price eth')</code> (یا یک <code>&lt;button data-hermes-send="get-price eth"&gt;</code> اعلانی — بدون نیاز به اسکریپت) آن پرامپت را به‌عنوان یک نوبت کاربری به ایجنت می‌دهد، خارج از صفحه: هیچ حبابی فضای ترنسکریپت را اشغال نمی‌کند و به‌روز شدن ویجت همان پاسخِ قابل‌مشاهده است. نوبت همچنان واقعی است — ایجنت را بیدار می‌کند، از قواعد steer/queue کامپوزر پیروی می‌کند و ذخیره می‌شود (با نوع <code>hidden</code>) تا resume و دیتابیس نشست‌ها رکورد کامل را نگه دارند. پرامپت‌ها trim می‌شوند، به ۵۰۰ کاراکتر محدودند و به یک عدد در ثانیه به‌ازای هر قاب throttle می‌شوند.</p>
+<h3>کروم با محدودهٔ mount (<code>Contribute</code>)</h3>
+<p><code>ctx.register</code> برای مشارکت‌های <strong>دائمی</strong> است. وقتی کروم باید با کامپوننتی که همین حالا روی صفحه است زنده بماند و بمیرد (کنترل نوارعنوانِ خودِ صفحه، وقتی صفحه unmount شود می‌رود)، به‌جایش <code>&lt;Contribute&gt;</code> را داخل آن رندر کنید:</p>
+<pre dir="ltr"><code>import { Contribute, TITLEBAR_AREAS } from '@hermes/plugin-sdk'
+
+jsx(Contribute, {
+  area: TITLEBAR_AREAS.center,
+  id: 'my-page:switcher', // با اسلاگ خودتان فضای‌نام کنید
+  children: jsx(MySwitcher, {})
+})</code></pre>
+<p>با mount ثبت می‌شود و با unmount خودکار dispose می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> API میزبان</h2>
+<p>همه‌چیز روی <code>host</code> از هر نقطهٔ پلاگین در دسترس است. اتم‌های وضعیت فقط-خواندنی‌اند — در هندلرها با <code>.get()</code> بخوانید و در کامپوننت‌ها با <code>useValue(atom)</code> مشترک شوید.</p>
+<pre dir="ltr"><code>host.state.activeSessionId  // ReadableAtom&lt;string | null&gt;
+host.state.awaitingResponse // ReadableAtom&lt;boolean&gt;  تا اولین payload دستیار true است
+host.state.busy             // ReadableAtom&lt;boolean&gt;  چت متمرکز پس از ارسال در حال کار است
+host.state.busyBySession    // ReadableAtom&lt;Record&lt;string, boolean&gt;&gt;  runtime id → وسط نوبت
+host.state.focusedSessionId // ReadableAtom&lt;string | null&gt;  (runtime id نشست متمرکز — آگاه از tile؛ برای RPCهای session.* ترجیح داده شود)
+host.state.focusedSessionProfile // ReadableAtom&lt;string&gt;  (پروفایل مالکِ چت متمرکز — برای نمایش‌های per-bot/profile ترجیح داده شود)
+host.state.focusedStoredSessionId // ReadableAtom&lt;string | null&gt;  (id پایدار — ناوبری / تطبیق فهرست نشست‌ها)
+host.state.focusedUsage     // ReadableAtom&lt;UsageStats | null&gt;  (usage زندهٔ در-حال-stream نشست متمرکز، بدون نیاز به RPC)
+host.state.cwd              // ReadableAtom&lt;string&gt;
+host.state.gateway          // ReadableAtom&lt;string&gt;  وضعیت سوکت ('idle' | 'connecting' | 'open' | …)
+host.state.model            // ReadableAtom&lt;string&gt;
+host.state.profile          // ReadableAtom&lt;string&gt;
+host.state.viewport         // ReadableAtom&lt;{ width, height, narrow }&gt;</code></pre>
+<p><code>host.state.gateway</code> اتصال WebSocket است، نه اینکه آیا یک نوبت چت در حال اجراست. یک نشست می‌تواند وسط نوبت باشد در حالی که سوکت <code>open</code> است؛ هم‌زمان نشست دیگری می‌تواند بیکار باشد. اکشن‌های کامپوزر یا پلاگین را بر اساس مشغول‌بودنِ نوبتِ <strong>نشست متمرکز</strong> غیرفعال کنید (<code>host.state.busyBySession[sessionId]</code>، یا <code>view.$busy</code> همان نشست) — هرگز بر اساس <code>gateway</code>، و هرگز بر اساس یک فلگ busy سراسریِ پروسس.</p>
+<pre dir="ltr"><code>host.notify({ kind, message, title?, detail?, action? })  // toast؛ یک id برمی‌گرداند
+host.notifyError(error, fallbackMessage)                   // toast دادن یک خطا
+ctx.os.notify({ title, body?, silent?, icon?, activate?, onActivate?, actions? })
+                                           // نوتیفیکیشن بومی OS (منتسب به پلاگین شما)
+ctx.os.openExternal(url)                   // هندلر پیش‌فرض OS (مرورگر، ایمیل، spotify:) → Promise&lt;boolean&gt;
+ctx.os.revealPath(path)                    // نمایش در Finder / Explorer → Promise&lt;boolean&gt;
+ctx.os.writeClipboard(text)                // کلیپ‌بورد سیستم → Promise&lt;boolean&gt;
+host.navigate('/route')                    // ناوبری hash-route
+host.openSession(id, { profile?, intent? }) // باز کردن یک نشست ذخیره‌شده به سبک هسته؛
+                                           //   profile: اول سوییچ نرم به بک‌اند همان پروفایل
+                                           //   intent: 'in-place' (پیش‌فرض) | 'stack' | 'tab' | 'window'
+host.newChat(profile?)                     // پیش‌نویس چت تازه، اختیاراً در پروفایلی دیگر
+host.openWorkspace(id, { render, title?, minWidth?, onClose? })
+                                           // سوار کردن تبِ رندر‌شدهٔ پلاگین در ناحیهٔ MAIN
+                                           //   ورک‌اسپیس و آشکارسازی آن؛ یک disposer برمی‌گرداند
+host.paneVisibility(paneId)                // ReadableAtom&lt;boolean&gt; — آیا پنِ contributed
+                                           //   واقعاً روی صفحه است (تبِ فعالِ ناحیه‌اش)؟
+host.onEvent(type, fn)                     // جریان رویداد گیت‌وی ('*' = همه)؛ disposer برمی‌گرداند
+host.logs(...)                             // دنبال کردن یک فایل لاگ اپلیکیشن
+host.status()                              // اسنپ‌شاتِ یک‌بارهٔ وضعیت سیستم
+host.restartGateway()                      // ری‌استارت گیت‌وی بک‌اند
+host.profileRoutes()                       // [{ profile, targetProfile, connectionId, mode }]
+host.requestProfile&lt;T&gt;(route, method, params?)   // RPC مسیریابی‌شده با رجیستری؛ بدون جابه‌جایی foreground
+host.requestProfile&lt;T&gt;(profile, method, params?) // اورلود قدیمی v1/local
+host.request&lt;T&gt;(method, params?)           // JSON-RPC گیت‌وی فعال — قدرت واقعی</code></pre>
+<p><code>host.request</code> همان JSON-RPCای است که خودِ اپلیکیشن استفاده می‌کند (نشست‌ها، پیکربندی، مهارت‌ها، کرون، کانبان و...). <code>host.requestProfile</code> یک descriptor از <code>host.profileRoutes()</code> می‌پذیرد و آن RPC را دقیقاً از طریق همان منبع رجیستری و همان پروفایل مسیریابی می‌کند، بدون تغییر چت فعال یا گیت‌وی. اورلودِ فقط-پروفایل فقط برای توپولوژی تک-محلی/قدیمی نگه داشته شده است؛ پلاگین‌های آگاه-از-رجیستری باید descriptor را بدهند تا دو منبعی که یک نام پروفایل یکسان را expose می‌کنند نتوانند تداخل کنند.</p>
+<p><code>host.openWorkspace(id, { render, title?, minWidth?, onClose? })</code> نمایِ رندر‌شدهٔ پلاگین را به‌شکل یک تب در <strong>ناحیهٔ اصلی ورک‌اسپیس</strong> — همان ناحیهٔ مرکزی که کاشی‌های نشست و پیش‌نمایش‌ها استفاده می‌کنند — سوار می‌کند و آشکارش می‌سازد. فراخوانی دوباره با همان <code>id</code> محتوا را در جا تازه می‌کند و تب را دوباره جلو می‌آورد، به‌جای باز کردن یک نسخهٔ تکراری. بستن تب (کنترل Close خودِ تب یا ⌘W) ثبت را برمی‌چیند و <code>onClose</code> شما را اجرا می‌کند؛ disposer برگشتی آن را به‌صورت برنامه‌نویسی‌شده می‌بندد. آن را با feature-detect بررسی کنید (<code>typeof host.openWorkspace === 'function'</code>) و روی بیلدهای قدیمی‌تر دسکتاپ به یک پنِ contributed معمولی برگردید — اتاق‌های چت گروهی در Bot Mode مصرف‌کنندهٔ مرجع هستند (تصاحب پنجرهٔ اصلی وقتی موجود است، وگرنه نمای درون‌پنل).</p>
+<p><code>host.paneVisibility(paneId)</code> یک اتم واکنش‌گرای فقط-خواندنی برمی‌گرداند که وقتی یک پنِ contributed واقعاً روی صفحه است <code>true</code> است: در درخت چیدمان حاضر باشد، بسته یا پنهان نشده باشد، ناحیه‌اش minimize نشده باشد و اسلاتِ تبِ فعالِ ناحیه‌اش را نگه داشته باشد (پنِ تنها در ناحیهٔ خودش هم حساب است). id، همان pane id با محدودهٔ مشارکت است، یعنی <code>&lt;pluginId&gt;:&lt;paneId&gt;</code>. اتم‌ها به‌ازای هر id memoize می‌شوند، پس فراخوانی‌اش در render امن است. از آن برای ثبت UI همراه فقط وقتی پن شما دیده می‌شود استفاده کنید — پنِ Cronjobs در Bot Mode مصرف‌کنندهٔ مرجع است: وقتی پنِ Bots تبِ سایدبار را نگه داشته ثبت می‌شود و وقتی کاربر به Sessions برمی‌گردد ثبتش برمی‌دارد. روی دسکتاپ‌های قدیمی‌تر feature-detect کنید (<code>typeof host.paneVisibility === 'function'</code>) و به رفتار همیشه-ثبت‌شده برگردید.</p>
+<p><code>host.profileRoutes()</code> همهٔ منابع ثبت‌شده در رجیستری اتصال جاری را فهرست می‌کند. منابع SSH از نوع connect-on-demand یک مسیر seed به نام <code>default</code> بدون اعتبارنامه ارائه می‌کنند، بدون اینکه تونلی باز شود، بنابراین یک پلاگین می‌تواند اولین تماس‌گیری باشد که شماره‌گیری‌شان می‌کند؛ <code>remoteProfile</code> یک اتصال SSH همان <code>targetProfile</code> بک‌اندِ مسیر باقی می‌ماند. <code>connectionId</code> هویت مسیریابی رجیستری است؛ برای کلیدها و ماندگاری، آن را با <code>profile</code> جفت کنید. نقطهٔ پایانی، توکن، هاست/کلید SSH و بقیهٔ فیلدهای خام اتصال هرگز از مرز IPC پلاگین عبور نمی‌کنند. <code>profile</code> مسیرِ محلیِ منبع است که برای درخواست‌ها استفاده می‌شود؛ <code>targetProfile</code> پروفایل هرمسِ بک‌اندی است که آن مسیر سرو می‌کند. وقتی مسیری صریحاً به یک پروفایل بک‌اند دیگر نگاشت شود (مثلاً یک override از نوع <code>remoteProfile</code> در SSH یا یک نام مستعار URL قدیمیِ per-profile) این دو با هم فرق می‌کنند. این تمایز، هویت بک‌اند را بدون افشای رمزهای اتصال حفظ می‌کند.</p>
+<p>پلاگین‌های پروفایل‌محور متدهای درجه‌یک هم می‌گیرند: <code>profiles.list</code> (هر پروفایل + آخرین مکالمه‌اش به‌صورت <code>last_session</code>؛ برای رد کردن پروب دیتابیس per-profile مقدار <code>include_sessions: false</code> را بدهید؛ برای یک جست‌وجوی دقیق و existence-checkedِ یک نشست سنجاق‌شده به‌ازای هر پروفایل، <code>preferred_session_ids: { profileName: sessionId }</code> را بدهید — هر ردیف نام‌برده یک خلاصهٔ <code>preferred_session</code> می‌گیرد که ردیف‌های پنهان و نسب‌های فشرده‌سازی را به نوک زندهٔ آن‌ها resolve می‌کند، یا <code>null</code> وقتی id قطعاً از بین رفته است؛ گیت‌وی‌های قدیمی‌تر این پارامتر را نادیده می‌گیرند و آن فیلد را نمی‌فرستند) و <code>profiles.create</code> (<code>name</code>، <code>description</code>، <code>clone_from</code>، <code>clone_all</code>، <code>no_skills</code>، <code>soul</code>، پین اختیاری <code>model</code> + <code>provider</code>) — دوقلوهای ws مسیرهای REST <code>/api/profiles</code> داشبورد. <code>host.state.busy</code> نوبت زندهٔ چت متمرکز است (thinking و streaming). <code>host.state.awaitingResponse</code> از لحظهٔ ارسال تا اولین payload دستیار true می‌ماند. هر دو از چتی پیروی می‌کنند که کاربر واقعاً نگاهش می‌کند — کاشی نشست متمرکز وقتی یکی فوکوس دارد، وگرنه چت اصلی ورک‌اسپیس (همان سیگنالی که پالس busy نوار وضعیت می‌خواند). در یک کامپوننت مشترک شوید:</p>
+<pre dir="ltr"><code>const busy = useValue(host.state.busy)</code></pre>
+<p>برای جزئیات در سطح توکن، با <code>host.onEvent</code> گوش دهید (<code>message.start</code>، <code>message.delta</code>، <code>message.complete</code>).</p>
+<p><code>host.onEvent</code> رویدادهای زندهٔ گیت‌وی را استریم می‌کند (دلتاهای پیام، چرخهٔ حیات نشست، فعالیت ابزار). شنونده‌ها ایزوله‌اند — یک throw در شنوندهٔ شما نمی‌تواند dispatch اپلیکیشن را تحت تأثیر بگذارد. هر درگاه <code>host</code> از نظر async امن است: یک throw همگام از یک helper داخلی (مثلاً نبودِ desktop bridge در یک مرورگر ساده) به یک rejection تبدیل می‌شود که <code>.catch()</code> شما می‌بیند، هرگز یک کرشِ error-boundary نیست.</p>
+<p><code>ctx.os</code> درِ OS گزینش‌شده است — هر راهی که پلاگین از پنجرهٔ اپلیکیشن بیرون می‌زند، در یک فضای‌نام که به پلاگین شما منتسب است. <code>ctx.os.notify</code> یک <strong>نوتیفیکیشن بومی OS</strong> می‌فرستد — همان خط لولهٔ Electron که هشدارهای approval/turn خودِ اپلیکیشن استفاده می‌کنند. فقط وقتی اجرا می‌شود که کاربر از Hermes دور باشد (background / بدون فوکوس)؛ برای toast درون‌برنامه‌ای وقتی کاربر نگاه می‌کند از <code>host.notify</code> استفاده کنید. کاربران می‌توانند آن را به‌تفکیک دستگاه زیر Settings ▸ Notifications ▸ «Plugin notifications» بی‌صدا کنند و تکرارها از یک پلاگین throttle می‌شوند، پس با آن مثل سیگنالی برای رویدادهای واقعاً قابل‌توجه رفتار کنید — نه یک لاگ.</p>
+<p>ارائهٔ غنی + فعال‌سازی (گسترش درگاه اصلی <code>ctx.os</code>):</p>
+<pre dir="ltr"><code>ctx.os.notify({
+  title: 'New match found',
+  body: 'Someone matched your signal',
+  icon: '/abs/path/to/icon.png', // آیکون Electron Notification
+  // کلیک روی بدنه → فوکوس Hermes + ناوبری. همان واژگان deep linkهای OS:
+  activate: 'hermes://index-network/intent/1',
+  // یا: activate: '/index-network/intent/1'
+  // یا: activate: { path: '/index-network/intent/1' }
+  onActivate: () =&gt; focusLocalState('1'), // callback اختیاری renderer
+  actions: [
+    { id: 'open', label: 'Open', activate: 'hermes://index-network/intent/1' },
+    { id: 'dismiss', label: 'Dismiss', onAction: () =&gt; dismiss('1') },
+  ],
+})</code></pre>
+<p><code>activate</code> با deeplink سازگار است: <code>hermes://index-network/intent/1</code> و مسیر hash به شکل <code>/index-network/intent/1</code> به همان route درون‌برنامه‌ای resolve می‌شوند (و همان URL <code>hermes://…</code> به‌عنوان OS deep link هم کار می‌کند). دکمه‌های اکشن فقط روی بیلدهای امضاشدهٔ macOS رندر می‌شوند؛ در جاهای دیگر کلیک روی بدنه همچنان فعال‌سازی می‌کند. ناوبری فقط با کلیک کاربر رخ می‌دهد — هرگز فقط از یک رویداد پس‌زمینه.</p>
+<p>درگاه‌های دیگر (<code>openExternal</code>، <code>revealPath</code>، <code>writeClipboard</code>) وقتی قابلیت در دسترس نیست (شل دسکتاپ قدیمی، مرورگر ساده) به‌جای throw کردن، <code>false</code> برمی‌گردانند — روی نتیجه شاخه‌بندی کنید، نه بو کشیدنِ bridge.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> لایهٔ داده — React Query + nanostores</h2>
+<p>پلاگین‌ها همان <code>QueryClient</code> واحد اپلیکیشن را به اشتراک می‌گذارند، بنابراین کوئری‌های پلاگین دقیقاً مثل صفحات هسته کش می‌شوند، dedupe می‌شوند، poll می‌کنند و invalidate می‌شوند — هرگز یک حلقهٔ fetch دست‌ساز ننویسید.</p>
+<pre dir="ltr"><code>import { useQuery, useMutation, useQueryClient, atom, computed, useValue } from '@hermes/plugin-sdk'
+
+function MyPanel() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['my-plugin', 'items'],
+    queryFn: () =&gt; host.request('my.list', {})
+  })
+  // …
+}</code></pre>
+<p>برای وضعیت مشترک بین یک محرک و پنلش (یا یک حلقهٔ poll)، از <code>atom</code> / <code>computed</code> استفاده کنید — همان پریمیتیوی که <code>host.state</code> استفاده می‌کند. در برگِی که مقدار را رندر می‌کند با <code>useValue</code> مشترک شوید. برای invalidateکردن یک کوئری از <strong>بیرون</strong> React (مثلاً رسیدن یک فریم <code>ctx.socket</code>)، <code>queryClient</code> مشترک را ایمپورت کنید:</p>
+<pre dir="ltr"><code>import { queryClient } from '@hermes/plugin-sdk'
+
+ctx.socket('/events', () =&gt; {
+  queryClient.invalidateQueries({ queryKey: ['my-plugin', 'items'] })
+})</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> کیت UI و تم‌بندی</h2>
+<p>کامپوننت‌های واقعی اپلیکیشن را مستقیم ایمپورت کنید تا UI شما به‌طور پیش‌فرض بومی باشد:</p>
+<blockquote><p><code>Button</code>, <code>Input</code>, <code>Textarea</code>, <code>Select*</code>, <code>Switch</code>, <code>Checkbox</code>, <code>SegmentedControl</code>, <code>Tabs*</code>, <code>Dialog*</code>, <code>ConfirmDialog</code>, <code>DropdownMenu*</code>, <code>ContextMenu*</code>, <code>Popover*</code>, <code>Tip</code>/<code>Tooltip*</code>, <code>Badge</code>, <code>Kbd</code>/<code>KbdGroup</code>, <code>SearchField</code>, <code>ScrollArea</code>, <code>Separator</code>, <code>Skeleton</code>, <code>GlyphSpinner</code>, <code>Loader</code>, <code>EmptyState</code>, <code>ErrorState</code>, <code>CopyButton</code>, <code>StatusDot</code>, <code>LogView</code>, <code>Codicon</code>, <code>DecodeText</code>.</p></blockquote>
+<p>به‌علاوه helperها: <code>cn</code> (ادغام کلاس)، <code>icons.*</code> (مجموعهٔ lucide اپلیکیشن)، <code>haptic</code>، <code>profileColor</code> / <code>profileColorSoft</code> (رنگ‌های هویتی قطعی)، قالب‌بندهای زمان <code>relativeTime</code> / <code>fmtDateTime</code> / <code>fmtDayTime</code> / <code>coarseElapsed</code>، <code>useI18n</code> (متن‌های بومی‌سازی‌شده — پلاگین شما قابل ترجمه می‌ماند) و <code>evaluateRuntimeReadiness</code>.</p>
+<p><strong>با متغیرهای تم استایل بدهید، هرگز رنگ هاردکد نکنید.</strong> پن‌ها همین حالا روی پس‌زمینهٔ ادیتور اپلیکیشن نشسته‌اند — پس‌زمینه را به حال خود بگذارید و برای بقیهٔ چیزها از varها استفاده کنید: <code>var(--ui-text-secondary)</code>، <code>var(--ui-text-tertiary)</code>، <code>var(--ui-text-quaternary)</code>، <code>var(--ui-stroke-secondary)</code>، <code>var(--ui-accent)</code>. برای رسم روی canvas، یک‌بار آن‌ها را با <code>getComputedStyle(canvas).getPropertyValue('--ui-accent')</code> resolve کنید. همین چیزی است که باعث می‌شود یک پلاگین با هر تم به‌طور خودکار reskin شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> یک بک‌اند برای پلاگین شما</h2>
+<p>اگر پلاگین شما کار سمت سرور لازم دارد، یک <code>plugin_api.py</code> پایتونی بفرستید و از طریق <code>ctx.rest</code> / <code>ctx.socket</code> به آن برسید — فضای‌نامی که <strong>ذاتاً</strong> به پلاگین شما محدود است.</p>
+<h3 id="one-package-both-sdks">یک بسته، هر دو SDK</h3>
+<p>قابلیتی که هم UI دسکتاپ <strong>و هم</strong> کد سمت ایجنت لازم دارد (یک پلاگین پایتونی، مسیرهای بک‌اندش، مهارت‌هایش) لازم نیست به‌شکل دو نصبِ وابسته به هم ارسال شود. اپلیکیشن دسکتاپ <code>$HERMES_HOME/plugins/&lt;id&gt;/</code> — ریشهٔ معمول پلاگین‌های ایجنتی — را هم برای یک <code>desktop/plugin.js</code> اسکن می‌کند و آن را از دقیقاً همان خط لولهٔ درِ دیسکی مستقل بارگذاری می‌کند (شامل hot reload):</p>
+<pre dir="ltr"><code>~/.hermes/plugins/&lt;id&gt;/           # یک پوشهٔ قابل‌نصبِ واحد
+├── plugin.yaml                   # نیمهٔ ایجنتی: ابزارها، هوک‌ها، فرمان‌ها
+├── skills/…
+├── dashboard/
+│   ├── manifest.json             # { "name": "&lt;id&gt;", "api": "plugin_api.py" }
+│   └── plugin_api.py             # مسیرهای بک‌اند → /api/plugins/&lt;id&gt;/
+└── desktop/
+    └── plugin.js                 # نیمهٔ دسکتاپ: پن‌ها، فرمان‌ها، ctx.rest</code></pre>
+<p>نیمهٔ <code>desktop/plugin.js</code> یک پلاگین دیسکی معمولی است — همان قرارداد، همان ایمپورت‌ها، همان <code>ctx.rest('/…')</code> که به <code>plugin_api.py</code> کنارش می‌رسد. نصب، اشتراک‌گذاری یا حذف این قابلیت، یک پوشه است.</p>
+<p>دو کلید فعال‌سازی همچنان اعمال می‌شوند، عمداً، و هر دو به‌طور پیش‌فرض <strong>خاموش‌اند</strong>: نیمهٔ دسکتاپ به‌صورت opt-in ارسال می‌شود — در <strong>تنظیمات ← افزونه‌ها</strong> فهرست می‌شود اما تا کاربر آن را نزند غیرفعال می‌ماند — مطابق با گیتِ <code>plugins.enabled</code> نیمهٔ پایتونی در <code>config.yaml</code> (همان مرز امنیتی پایین). گذاشتن یک بسته در <code>~/.hermes/plugins</code> روی همهٔ سطوح بی‌اثر است تا وقتی کاربر چیز دیگری بگوید. نیمهٔ دسکتاپ وقتی نیمهٔ بک‌اند خاموش است به‌شکل لطیف تنزل می‌یابد — <code>ctx.rest</code> خطا برمی‌گرداند، نه کرش.</p>
+<div class="callout note">
+  <div class="callout-title">ℹ️</div>
+  <p>اسکن، محلی روی ماشینی است که اپلیکیشن دسکتاپ رویش اجراست. در برابر یک بک‌اند راه دور، <code>~/.hermes/plugins</code>ِ آن ماشینِ دور به‌عنوان فایل‌سیستم قابل‌دسترس نیست — فقط بسته‌های نصب‌شدهٔ محلی نیمهٔ دسکتاپ دارند (همان قاعدهٔ درِ مستقل).</p>
+</div>
+<h3 id="install-link">توزیع با لینک نصب</h3>
+<p>مخزن پلاگین خودتان را ارسال کنید (نیمهٔ ایجنتی، نیمهٔ دسکتاپ، یا هر دو) و با اسکیم <code>hermes://</code> به آن لینک بدهید — یک anchor ساده در وب‌سایت یا README شما:</p>
+<pre dir="ltr"><code>&lt;a href="hermes://plugin/install?repo=owner/repo&amp;enable=1"&gt;Install in Hermes&lt;/a&gt;</code></pre>
+<p>کاربر یک دیالوگ تأیید می‌گیرد (id مخزن، لینک‌های منبع، پروبِ اینکه مخزن چه چیزی ارسال می‌کند) و قبل از اینکه چیزی نصب شود اجزا را انتخاب می‌کند — deep linkها هرگز خودکار نصب نمی‌کنند. <code>force=1</code> نصب موجود را جایگزین می‌کند؛ بیلدهای dev از <code>hermes-dev://</code> استفاده می‌کنند. مرجع کامل لینک‌ها: <a href="../user-guide/features/plugins.html#one-click-install-links-desktop">لینک‌های نصب یک‌کلیکی</a>.</p>
+<h3>سمت پایتون</h3>
+<p>پلاگین‌های دسکتاپ mount بک‌اندِ پلاگینِ داشبورد را دوباره استفاده می‌کنند. بک‌اند را در زیرپوشهٔ <code>dashboard/</code> یک پلاگین معمولی هرمس بگذارید و در یک <code>manifest.json</code> اعلامش کنید:</p>
+<pre dir="ltr"><code>~/.hermes/plugins/&lt;id&gt;/
+└── dashboard/
+    ├── manifest.json      # { "name": "&lt;id&gt;", "api": "plugin_api.py" }
+    └── plugin_api.py      # صادر می‌کند `router = APIRouter()`</code></pre>
+<pre dir="ltr"><code># plugin_api.py
+from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/board")
+async def board():
+    return {"items": ["one", "two", "three"]}
+
+@router.post("/action")
+async def action(body: dict):
+    return {"ok": True, "received": body}</code></pre>
+<p>مسیرها زیر <code>/api/plugins/&lt;id&gt;/</code> سوار می‌شوند (<code>GET /api/plugins/&lt;id&gt;/board</code> و...). کد بک‌اند داخل پروسس گیت‌وی اجرا می‌شود، بنابراین می‌تواند مستقیماً از کدبیس hermes-agent ایمپورت کند (<code>hermes_state</code>، <code>hermes_cli.config</code> و...). برای مرجع کامل بک‌اند به <a href="../user-guide/features/extending-the-dashboard.html#backend-api-routes">گسترش داشبورد وب ← مسیرهای API بک‌اند</a> نگاه کنید — mount دقیقاً یکسان است.</p>
+<div class="callout caution">
+  <div class="callout-title">⛔ بک‌اند پایتون جداگانه گیت شده است</div>
+  <p>فعال‌کردن یک پلاگین در پنل <strong>تنظیمات ← افزونه‌ها</strong> دسکتاپ یک انتخاب سمت renderer است؛ پایتون را import <strong>نمی‌کند</strong>. <code>plugin_api.py</code> یک پلاگین کاربری فقط وقتی import می‌شود که پلاگین در فهرست مجازِ <code>plugins.enabled</code> در <code>config.yaml</code> باشد (و در <code>plugins.disabled</code> نباشد). پلاگین‌های پروژه (<code>./.hermes/</code>) هرگز پایتون را خودکار import نمی‌کنند. این یک مرز امنیتی است، نه یک سهو (GHSA-mcfc-hp25-cjv7).</p>
+</div>
+<h3>فراخوانی از داخل پلاگین</h3>
+<pre dir="ltr"><code>register(ctx) {
+  // REST — مسیر نسبت به فضای‌نام.
+  const load = () =&gt; ctx.rest('/board')                 // GET /api/plugins/&lt;id&gt;/board
+  const act  = () =&gt; ctx.rest('/action', { method: 'POST', body: { go: true } })
+
+  // دوقلوی زنده — یک WebSocket به فضای‌نام خودتان.
+  const stop = ctx.socket('/events', frame =&gt; {
+    queryClient.invalidateQueries({ queryKey: [ctx.source, 'board'] })
+  })
+}</code></pre>
+<p><code>ctx.rest</code> پروفایل-آگاه است و پیمایش مسیر (<code>..</code>) را رد می‌کند، بنابراین هرگز نمی‌توانید از طریق آن API پلاگین دیگری یا یک مسیر هسته را صدا بزنید. <code>PluginRestOptions</code> این است: <code>{ method?, body?, upload?: { filename, contentType?, bytes }, timeoutMs? }</code>.</p>
+<p><code>ctx.socket</code> تا وقتی dispose شود، با backoff خودکار دوباره وصل می‌شود. <strong>روی ریموت‌های OAuth به یک no-op resolve می‌شود</strong> (تیکت‌های WS یک‌بارمصرف توسط هسته مدیریت می‌شوند) — با سوکت مثل یک شتاب‌دهنده روی polling رفتار کنید، هرگز جایگزین. هر مصرف‌کننده به هر حال به یک fallback وابسته به polling نیاز دارد، چون هر سوکتی می‌تواند بیفتد.</p>
+<p>برای داده‌های سراسر گیت‌وی (نه فضای‌نام خودتان)، به‌جایش از <code>host.request</code> (JSON-RPC) و <code>host.onEvent</code> (جریان رویداد گیت‌وی) استفاده کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> تنظیمات، وضعیت فعال‌سازی و ذخیره‌سازی</h2>
+<p>هر پلاگین — فعال یا غیرفعال — در <strong>تنظیمات ← افزونه‌ها</strong> فهرست می‌شود، جایی که کاربر به‌صورت زنده آن را toggle می‌کند (بدون ری‌استارت اپلیکیشن)، پوشه‌اش را آشکار می‌کند یا rescan می‌کند. انتخاب کاربر به یاد سپرده می‌شود:</p>
+<ul>
+<li>هنوز انتخابی نشده ← <code>defaultEnabled</code> خودِ پلاگین (پیش‌فرض <code>true</code>). با <code>defaultEnabled: false</code> یک پلاگین opt-in ارسال کنید که تا کاربر روشنش نکند تاریک می‌ماند.</li>
+<li>انتخاب صریح ← ذخیره می‌شود و در ری‌استارت‌ها محترم شمرده می‌شود. پلاگینِ غیرفعال غیرفعال می‌ماند — با آن نجنگید؛ کاربر شما را خاموش کرده است.</li>
+</ul>
+<p>وضعیت خودتان را با <code>ctx.storage</code> ماندگار کنید که به پلاگین شما فضای‌نام شده (<code>hermes.plugin.&lt;id&gt;.*</code>) تا پلاگین‌ها نتوانند همدیگر را بخوانند یا از بین ببرند:</p>
+<pre dir="ltr"><code>ctx.storage.set('lastTab', 'board')
+const tab = ctx.storage.get('lastTab', 'summary')
+ctx.storage.remove('lastTab')</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2 id="bundled-plugins"><span class="secnum">۱۱</span> پلاگین‌های هم‌بسته</h2>
+<p>یک پلاگین می‌تواند درون‌درخت در <code>apps/desktop/src/plugins/&lt;id&gt;/plugin.tsx</code> ارسال شود (default export یک <code>HermesPlugin</code>). توسط <code>discoverBundledPlugins()</code> هنگام boot کشف می‌شود — بدون ایمپورت، بدون ویرایش رجیستری — و دقیقاً همان قرارداد فهرست‌سازی + فعال/غیرفعال‌سازی زندهٔ یک پلاگین دیسکی را دارد. دو تفاوت:</p>
+<ol>
+<li>از بیلد Vite خودِ اپلیکیشن عبور می‌کند، پس می‌توانید <strong>JSX واقعی</strong> بنویسید و SDK را با نام مستعار <code>@hermes/plugin-sdk</code> ایمپورت کنید.</li>
+<li>همچنان از نظر لینت فقط به <code>@hermes/plugin-sdk</code> + <code>react</code> محدود است — بدون بخش‌های داخلی <code>@/…</code> اپلیکیشن.</li>
+</ol>
+<p>امروز هیچ پلاگین دسکتاپی در درخت هسته ارسال نمی‌شود؛ اپلیکیشنِ ارسالی خلوت می‌ماند و دموها در مخزن همراهِ <a href="https://github.com/NousResearch/hermes-example-plugins" target="_blank" rel="noopener"><code>hermes-example-plugins</code></a> زندگی می‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> مدل امنیتی</h2>
+<p>پلاگینِ بارگذاری‌شده به‌عنوان ESM در قلمرو renderer با <strong>اختیار کامل اپلیکیشن</strong> ارزیابی می‌شود — سینگلتون React، کل SDK (RPC گیت‌وی از طریق <code>host.request</code>، <code>ctx.rest</code>، حافظهٔ ذخیره‌سازی، <code>navigate</code>). ایزوله‌ای که لودر فراهم می‌کند فقط <strong>ایزولهٔ خطا</strong> است: پلاگین نمی‌تواند اپلیکیشن را کرش کند (مشارکت‌ها error-boundedاند، شنونده‌ها ایزوله‌اند)، اما هر کاری که اپلیکیشن می‌تواند انجام دهد را می‌تواند انجام دهد.</p>
+<p>این برای منابع <strong>محلی</strong> قابل‌قبول است — یک فایل دیسکی همین حالا هم می‌تواند روی ماشین شما کد اجرا کند — و دقیقاً به همین دلیل درِ دیسکی فقط فایل‌های محلی را بارگذاری می‌کند که شما (یا ایجنت شما) نوشته‌اید. بررسی اختیاری <code>integrity</code> (<code>sha256-…</code>) فقط اثبات می‌کند بایت‌ها با یک هش مطابق‌اند؛ <strong>سندباکس نمی‌کند</strong>. یک درگاه منبع-راه-دورِ آینده قبل از فرود به یک مرز واقعی نیاز خواهد داشت (iframe/worker + CSP + گیت‌بندی قابلیت)؛ این خط لوله را مرز اعتماد فرض نکنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> دام‌های رایج</h2>
+<ul>
+<li><strong>JSX در پلاگین دیسکی پارس نمی‌شود.</strong> فایل بدون کامپایل بارگذاری می‌شود — از <code>jsx()</code> / <code>jsxs()</code> (یا <code>React.createElement</code>) استفاده کنید، نه سینتکس JSX. (پلاگین‌های هم‌بسته بیلد می‌شوند، پس JSX آن‌جا اشکالی ندارد.)</li>
+<li><strong>فقط سه specifier resolve می‌شود:</strong> <code>@hermes/plugin-sdk</code>، <code>react</code> و <code>react/jsx-runtime</code>. هر ایمپورت دیگری یک خطای بارگذاریِ از-ابتدا نشان می‌دهد.</li>
+<li><strong>هرگز رنگ هاردکد نکنید</strong> (<code>#000</code>، <code>black</code>، <code>rgb(...)</code>). پس‌زمینه را به حال خود بگذارید؛ برای همه‌چیز از متغیرهای تم (<code>var(--ui-*)</code>) استفاده کنید.</li>
+<li><strong>فقط به چیزهایی ارجاع بدهید که ایمپورت کرده‌اید.</strong> کامپوننتی که فراموش کرده‌اید ایمپورت کنید (مثلاً <code>StatusDot</code>) در زمان رندر یک <code>ReferenceError</code> است — دوباره چک کنید که هر شناسه در فراخوانی‌های <code>jsx()</code> شما در خط ایمپورت آمده باشد.</li>
+<li><strong>در هندلرها به‌صورت دستوری وضعیت بخوانید</strong> (<code>$atom.get()</code>)، هرگز از یک closure رندر — وگرنه رویدادهای سریع مقادیر کهنه خواهند دید. فقط در برگِی که مقدار را رندر می‌کند مشترک شوید (<code>useValue</code>).</li>
+<li><strong>پن‌های canvas باید ظرف خودشان را دنبال کنند</strong> با یک <code>ResizeObserver</code> و اندازهٔ canvas را تغییر دهند (اتریبیوت‌های width/height، نه فقط CSS) — پن‌ها مدام resize می‌شوند.</li>
+<li><strong>با <code>host.request</code> سریع‌تر از چند ثانیه poll نکنید</strong>؛ <code>host.onEvent</code> / <code>ctx.socket</code> را ترجیح بدهید و بگذارید React Query دوباره‌کاری را حذف کند.</li>
+<li><strong><code>ctx.socket</code> روی ریموت‌های OAuth یک no-op است.</strong> همیشه یک fallback وابسته به polling داشته باشید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> مرجع</h2>
+<h3>اکسپورت‌های SDK در یک نگاه</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>دسته</th><th>اکسپورت‌ها</th></tr></thead>
+  <tbody>
+    <tr><td>میزبان</td><td><code>host</code> (<code>.state.*</code>, <code>.notify</code>, <code>.notifyError</code>, <code>.navigate</code>, <code>.onEvent</code>, <code>.logs</code>, <code>.status</code>, <code>.restartGateway</code>, <code>.request</code>)</td></tr>
+    <tr><td>قرارداد پلاگین</td><td><code>HermesPlugin</code>, <code>PluginContext</code>, <code>PluginContribution</code>, <code>PluginStorage</code>, <code>PluginOs</code>, <code>PluginRestOptions</code>, <code>PluginNativeNotificationInput</code>, <code>PluginNotificationAction</code>, <code>HermesOpenTarget</code>, <code>Contribution</code></td></tr>
+    <tr><td>ثابت‌های حوزه</td><td><code>PANES_AREA</code>, <code>ROUTES_AREA</code>, <code>SIDEBAR_NAV_AREA</code>, <code>STATUSBAR_AREAS</code>, <code>TITLEBAR_AREAS</code>, <code>PALETTE_AREA</code>, <code>KEYBINDS_AREA</code>, <code>THEMES_AREA</code>, <code>COMPOSER_AREAS</code></td></tr>
+    <tr><td>payloadهای حوزه</td><td><code>RouteContribution</code>, <code>SidebarNavContribution</code>, <code>StatusbarItem</code>, <code>TitlebarTool</code>, <code>PaletteContribution</code>, <code>KeybindContribution</code>, <code>ComposerMiddleware</code>, <code>ComposerAttachmentProvider</code></td></tr>
+    <tr><td>React / وضعیت</td><td><code>useValue</code>, <code>atom</code>, <code>computed</code>, <code>useQuery</code>, <code>useMutation</code>, <code>useQueryClient</code>, <code>queryClient</code>, <code>Contribute</code></td></tr>
+    <tr><td>تم‌بندی</td><td><code>useTheme</code>, <code>requestTheme</code>, <code>setAccentOverride</code>, <code>$accentOverride</code>, <code>retintTheme</code>, <code>themeHue</code>, <code>DesktopTheme</code>, <code>DesktopThemeColors</code>, به‌علاوه ریاضیات OKLCH (<code>hexToOklch</code>, <code>oklchToHex</code>, <code>oklchToSrgb255</code>, <code>mixOklab</code>, <code>maxChroma</code>, <code>hueDelta</code>, <code>contrastRatio</code>, <code>readableOn</code>, <code>normalizeHex</code>)</td></tr>
+    <tr><td>کیت UI</td><td><code>Button</code>, <code>Input</code>, <code>Textarea</code>, <code>Select*</code>, <code>Switch</code>, <code>Checkbox</code>, <code>SegmentedControl</code>, <code>Tabs*</code>, <code>Dialog*</code>, <code>ConfirmDialog</code>, <code>DropdownMenu*</code>, <code>ContextMenu*</code>, <code>Popover*</code>, <code>Tip</code>/<code>Tooltip*</code>, <code>Badge</code>, <code>Kbd</code>/<code>KbdGroup</code>, <code>SearchField</code>, <code>ScrollArea</code>, <code>Separator</code>, <code>Skeleton</code>, <code>GlyphSpinner</code>, <code>Loader</code>, <code>EmptyState</code>, <code>ErrorState</code>, <code>CopyButton</code>, <code>StatusDot</code>, <code>LogView</code>, <code>Codicon</code>, <code>DecodeText</code></td></tr>
+    <tr><td>helperها</td><td><code>cn</code>, <code>icons</code>, <code>haptic</code>, <code>useI18n</code>, <code>profileColor</code>, <code>profileColorSoft</code>, <code>relativeTime</code>, <code>fmtDateTime</code>, <code>fmtDayTime</code>, <code>coarseElapsed</code>, <code>evaluateRuntimeReadiness</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>فهرست اکسپورتِ مرجع و همیشه-به‌روز، فایل <code>apps/desktop/src/sdk/index.ts</code> است.</p>
+<h3>ایجنت‌ها: مهارت <code>hermes-desktop-plugins</code></h3>
+<p>وقتی ایجنت یک پلاگین دسکتاپ می‌نویسد، باید مهارت هم‌بستهٔ <strong><code>hermes-desktop-plugins</code></strong> را بارگذاری کند — این مهارت همان قرارداد این صفحه را به‌شکل رو-به-ایجنت حمل می‌کند، همراه با <code>templates/plugin.js</code> آمادهٔ کپی. این صفحه مرجع انسان/توسعه‌دهنده است؛ مهارت، چک‌لیست عملیاتی است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> عیب‌یابی</h2>
+<p><strong>پلاگین من ظاهر نمی‌شود.</strong> مطمئن شوید فایل در <code>$HERMES_HOME/desktop-plugins/&lt;id&gt;/plugin.js</code> است و نام پوشه با <code>id</code> اکسپورت‌شده یکی است. ⌘K را بزنید و <strong>Reload desktop plugins</strong> را اجرا کنید. اپلیکیشن را برای یک toast خطا که نام شکست را اعلام می‌کند چک کنید و <code>hermes logs gui -f</code> را دنبال کنید.</p>
+<p><strong>پیام «unsupported import» هنگام بارگذاری.</strong> پلاگین دیسکی فقط می‌تواند <code>@hermes/plugin-sdk</code> و <code>react</code> و <code>react/jsx-runtime</code> را ایمپورت کند. هر ایمپورت دیگری را حذف کنید.</p>
+<p><strong>یک المنت <code>jsx</code> هیچ‌چیز رندر نمی‌کند / <code>ReferenceError</code> می‌دهد.</strong> شناسه‌ای که در فراخوانی <code>jsx()</code> استفاده شده ایمپورت نشده است. آن را به خط ایمپورت اضافه کنید.</p>
+<p><strong><code>ctx.rest</code> مقدار 404 برمی‌گرداند.</strong> بک‌اند سوار نشده است: مطمئن شوید <code>~/.hermes/plugins/&lt;id&gt;/dashboard/manifest.json</code> مقدار <code>"api": "plugin_api.py"</code> را دارد، پلاگین در <code>plugins.enabled</code> در <code>config.yaml</code> هست، و گیت‌وی را ری‌استارت کنید (مسیرهای بک‌اند هنگام راه‌اندازی سوار می‌شوند). <code>~/.hermes/logs/errors.log</code> را برای پیام <code>Failed to load plugin &lt;id&gt; API routes</code> دنبال کنید.</p>
+<p><strong><code>ctx.socket</code> هرگز اجرا نمی‌شود.</strong> روی ریموت OAuth عمداً no-op است — از fallback وابسته به polling خودتان استفاده کنید. در غیر این صورت بررسی کنید بک‌اند مسیر <code>@router.websocket(...)</code> متناظر را زیر فضای‌نامش expose می‌کند.</p>
+<p><strong>رنگ‌ها بعد از تعویض تم اشتباه به نظر می‌رسند.</strong> شما یک رنگ را هاردکد کرده‌اید. آن را با یک متغیر تم <code>var(--ui-*)</code> جایگزین کنید.</p>
+</section>
+
+<div class="pager">
+  <a href="cron-internals.html"><span class="dir">→ قبلی</span><span class="ttl">درون‌مایهٔ Cron</span></a>
+  <a class="next" href="egress-internals.html"><span class="dir">بعدی ←</span><span class="ttl">درون‌مایهٔ پروکسی خروجی</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/desktop-plugin-sdk" target="_blank" rel="noopener">Desktop Plugin SDK</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

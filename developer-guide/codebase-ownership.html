@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نقشهٔ مالکیت کدبیس — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/codebase-ownership" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>نقشهٔ مالکیت کدبیس</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>نقشهٔ مالکیت کدبیس</h1>
+<p>هرمس یک مخزن بزرگ است و بیشتر مشارکت‌ها دقیقاً یک زیرسیستم را لمس می‌کنند. این صفحه هر زیرسیستم را به پوشه‌های سورس و نقطهٔ ورود مستنداتی که باید قبل از تغییر بخوانید نگاشت می‌کند. از آن برای پیدا کردن سند شروعِ درست، جای درستِ یک تغییر و پوشهٔ تستِ درست استفاده کنید (تست‌ها آینهٔ سورس‌اند: کدِ <code>tools/</code> در <code>tests/tools/</code> تست می‌شود، پلاگین‌ها در <code>tests/plugins/&lt;type&gt;/</code> و به همین ترتیب).</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نگاشت زیرسیستم‌ها</h2>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>زیرسیستم</th><th>پوشه‌های سورس</th><th>نقطهٔ ورود مستندات</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>هستهٔ ایجنت (حلقه، ترنسپورت‌ها، فشرده‌سازی)</td><td><code>agent/</code>، ‏<code>run_agent.py</code></td><td><a href="agent-loop.html">حلقهٔ ایجنت</a>، ‏<a href="context-compression-and-caching.html">فشرده‌سازی و کش زمینه</a></td></tr>
+    <tr><td>ساخت پرامپت</td><td><code>agent/prompt_builder.py</code>، ‏<code>agent/system_prompt.py</code></td><td><a href="prompt-assembly.html">ساخت پرامپت سیستمی</a></td></tr>
+    <tr><td>ارائه‌دهندگان مدل و ترنسپورت‌ها</td><td><code>agent/transports/</code>، ‏<code>plugins/model-providers/</code>، ‏<code>hermes_cli/models.py</code></td><td><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-providers" target="_blank" rel="noopener">افزودن ارائه‌دهنده</a>، ‏<a href="https://hermes-agent.nousresearch.com/docs/developer-guide/model-provider-plugin" target="_blank" rel="noopener">پلاگین ارائه‌دهندهٔ مدل</a>، ‏<a href="https://hermes-agent.nousresearch.com/docs/developer-guide/provider-runtime" target="_blank" rel="noopener">زمان اجرای ارائه‌دهنده</a></td></tr>
+    <tr><td>ابزارهای داخلی</td><td><code>tools/</code></td><td><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-tools" target="_blank" rel="noopener">افزودن ابزار</a>، ‏<a href="https://hermes-agent.nousresearch.com/docs/developer-guide/tools-runtime" target="_blank" rel="noopener">زمان اجرای ابزارها</a></td></tr>
+    <tr><td>گیت‌وی پیام‌رسانی</td><td><code>gateway/</code>، ‏<code>plugins/platforms/</code></td><td><a href="gateway-internals.html">درون‌مایهٔ گیت‌وی</a>، ‏<a href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-platform-adapters" target="_blank" rel="noopener">افزودن آداپتور پلتفرم</a></td></tr>
+    <tr><td>CLI</td><td><code>hermes_cli/</code></td><td><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/extending-the-cli" target="_blank" rel="noopener">گسترش CLI</a></td></tr>
+    <tr><td>سیستم پلاگین‌ها</td><td><code>plugins/</code></td><td><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins/index" target="_blank" rel="noopener">ساخت پلاگین هرمس</a></td></tr>
+    <tr><td>مهارت‌ها (داخلی و اختیاری)</td><td><code>skills/</code>، ‏<code>optional-skills/</code></td><td><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/creating-skills" target="_blank" rel="noopener">ساخت مهارت</a></td></tr>
+    <tr><td>کرون / کارهای زمان‌بندی‌شده</td><td><code>cron/</code></td><td><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/cron-internals" target="_blank" rel="noopener">درون‌مایهٔ Cron</a></td></tr>
+    <tr><td>ذخیره‌سازی نشست</td><td><code>hermes_state.py</code></td><td><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/session-storage" target="_blank" rel="noopener">ذخیره‌سازی نشست</a></td></tr>
+    <tr><td>پشتهٔ مرورگر</td><td><code>tools/browser_tool.py</code>، ‏<code>tools/browser_supervisor.py</code>، ‏<code>tools/browser_cdp_tool.py</code></td><td><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/browser-supervisor" target="_blank" rel="noopener">ناظر مرورگر</a></td></tr>
+    <tr><td>دیوار آتش خروجی (egress)</td><td><code>agent/proxy_sources/iron_proxy.py</code></td><td><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/egress-internals" target="_blank" rel="noopener">درون‌مایهٔ خروجی (egress)</a></td></tr>
+    <tr><td>ACP (یکپارچگی IDE)</td><td><code>acp_adapter/</code></td><td><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/acp-internals" target="_blank" rel="noopener">درون‌مایهٔ ACP</a></td></tr>
+    <tr><td>اپلیکیشن دسکتاپ</td><td><code>apps/desktop/</code></td><td><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/desktop-plugin-sdk" target="_blank" rel="noopener">SDK پلاگین دسکتاپ</a>، ‏<a href="worktree-ui-dev.html">توسعهٔ UI ورک‌تری</a></td></tr>
+    <tr><td>TUI</td><td><code>ui-tui/</code>، ‏<code>tui_gateway/</code></td><td><a href="worktree-ui-dev.html">توسعهٔ UI ورک‌تری</a></td></tr>
+    <tr><td>سایت مستندات</td><td><code>website/</code></td><td><a href="contributing.html">مشارکت در پروژه</a></td></tr>
+    <tr><td>تست‌ها</td><td><code>tests/</code>، ‏<code>tests-js/</code></td><td><a href="contributing.html#before-submitting">مشارکت ← قبل از ارسال</a></td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> چند قرارداد که از این نقشه درمی‌آید</h2>
+<ul>
+  <li><b>تغییرات باید داخل زیرسیستم خودشان بمانند.</b> پلاگینی که لازم دارد فایل‌های هسته را ویرایش کند بوی بد طراحی است — به‌جایش سطح پلاگینِ عمومی را گسترده‌تر کنید (معیارهای مشارکت در <code>AGENTS.md</code> مخزن را ببینید).</li>
+  <li><b>برای هر پوشهٔ سورسی که لمس می‌کنید، پوشهٔ تستِ آینه‌اش را اجرا کنید.</b> تغییری در <code>plugins/platforms/telegram/</code> لازم دارد <code>tests/plugins/platforms/</code> سبز باشد، نه فقط فایل تستی که به ذهنتان رسیده.</li>
+  <li><b>وقتی دو زیرسیستم درگیرند، تغییر متعلق به همان باریک‌تر است.</b> فیکس در یک آداپتور یا پلاگین را به انشعاب زدن در هستهٔ ایجنت ترجیح دهید؛ هسته یک «کمر باریک» است و هر افزودنی به آن روی هر فراخوانی API هزینه دارد.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="browser-supervisor.html"><span class="dir">→ قبلی</span><span class="ttl">ناظر CDP مرورگر</span></a>
+  <a class="next" href="context-engine-plugin.html"><span class="dir">بعدی ←</span><span class="ttl">پلاگین موتور زمینه</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/codebase-ownership" target="_blank" rel="noopener">Codebase Ownership Map</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

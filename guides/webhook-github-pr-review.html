@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>کامنت خودکار PR با وب‌هوک — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/webhook-github-pr-review" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>کامنت خودکار PR با وب‌هوک</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>کامنت خودکار PR با وب‌هوک</h1>
+<p>این راهنما اتصال Hermes Agent به GitHub را قدم‌به‌قدم نشان می‌دهد تا ایجنت به‌طور خودکار diff یک pull request را بگیرد، تغییرات کد را تحلیل کند و یک کامنت بگذارد — با یک رویداد وب‌هوک فعال می‌شود و هیچ پرامپت دستی لازم نیست.</p>
+<p>وقتی PR ای باز یا به‌روز می‌شود، GitHub یک درخواست POST وب‌هوک به نمونهٔ هرمس شما می‌فرستد. هرمس ایجنت را با پرامپتی اجرا می‌کند که به آن می‌گوید diff را از طریق CLI ‏<code>gh</code> بگیرد، و پاسخ در رشتهٔ همان PR پست می‌شود.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 دنبال راه‌اندازی ساده‌تر بدون نقطهٔ پایانی عمومی هستید؟</div>
+  <p>اگر URL عمومی ندارید یا فقط می‌خواهید سریع شروع کنید، راهنمای <a href="github-pr-review-agent.html">ایجنت بازبینی PR گیت‌هاب</a> را ببینید — از کارهای کرون برای بررسی دوره‌ای PRها طبق زمان‌بندی استفاده می‌کند و پشت NAT و فایروال هم کار می‌کند.</p>
+</div>
+<div class="callout note">
+  <div class="callout-title">ℹ️ مستندات مرجع</div>
+  <p>برای مرجع کامل پلتفرم وب‌هوک (همهٔ گزینه‌های پیکربندی، انواع تحویل، اشتراک‌های پویا، مدل امنیتی) <a href="../user-guide/messaging/webhooks.html">وب‌هوک‌ها</a> را ببینید.</p>
+</div>
+<div class="callout warn">
+  <div class="callout-title">⚠️ ریسک تزریق پرامپت</div>
+  <p>بارهای وب‌هوک داده‌ای دارند که مهاجم کنترلشان می‌کند — عنوان PR، پیام‌های commit و توضیحات می‌توانند دستورالعمل مخرب داشته باشند. وقتی نقطهٔ پایانی وب‌هوک شما در معرض اینترنت است، گیت‌وی را در محیط سندباکس‌شده اجرا کنید (Docker، بک‌اند SSH). <a href="#security-notes">بخش نکات امنیتی</a> در پایین را ببینید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+<li>Hermes Agent نصب و در حال اجرا باشد (‏<code>hermes gateway</code>)</li>
+<li><a href="https://cli.github.com/" target="_blank" rel="noopener">CLI ‏<code>gh</code></a> روی میزبان گیت‌وی نصب و احراز هویت شده باشد (‏<code>gh auth login</code>)</li>
+<li>یک URL با دسترسی عمومی برای نمونهٔ هرمس شما (اگر محلی اجرا می‌کنید <a href="#local-testing-with-ngrok">آزمایش محلی با ngrok</a> را ببینید)</li>
+<li>دسترسی مدیر به مخزن GitHub (برای مدیریت وب‌هوک‌ها لازم است)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱ — فعال کردن پلتفرم وب‌هوک</h2>
+<p>موارد زیر را به ‏<code>~/.hermes/config.yaml</code> اضافه کنید:</p>
+<pre dir="ltr"><code>platforms:
+  webhook:
+    enabled: true
+    extra:
+      port: 8644          # default; change if another service occupies this port
+      rate_limit: 30      # max requests per minute per route (not a global cap)
+
+      routes:
+        github-pr-review:
+          secret: "your-webhook-secret-here"   # must match the GitHub webhook secret exactly
+          events:
+            - pull_request
+
+          # The agent is instructed to fetch the actual diff before reviewing.
+          # {number} and {repository.full_name} are resolved from the GitHub payload.
+          prompt: |
+            A pull request event was received (action: {action}).
+
+            PR #{number}: {pull_request.title}
+            Author: {pull_request.user.login}
+            Branch: {pull_request.head.ref} → {pull_request.base.ref}
+            Description: {pull_request.body}
+            URL: {pull_request.html_url}
+
+            If the action is "closed" or "labeled", stop here and do not post a comment.
+
+            Otherwise:
+            1. Run: gh pr diff {number} --repo {repository.full_name}
+            2. Review the code changes for correctness, security issues, and clarity.
+            3. Write a concise, actionable review comment and post it.
+
+          deliver: github_comment
+          deliver_extra:
+            repo: "{repository.full_name}"
+            pr_number: "{number}"</code></pre>
+<p><b>فیلدهای کلیدی:</b></p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>فیلد</th><th>توضیح</th></tr>
+</thead>
+<tbody>
+<tr><td>‏<code>secret</code> (سطح مسیر)</td><td>رمز HMAC برای این مسیر. اگر حذف شود به ‏<code>extra.secret</code> سراسری برمی‌گردد.</td></tr>
+<tr><td>‏<code>events</code></td><td>فهرست مقادیر هدر ‏<code>X-GitHub-Event</code> که پذیرفته می‌شوند. فهرست خالی = پذیرش همه.</td></tr>
+<tr><td>‏<code>prompt</code></td><td>قالب؛ ‏<code>{field}</code> و ‏<code>{nested.field}</code> از بار GitHub جایگذاری می‌شوند.</td></tr>
+<tr><td>‏<code>deliver</code></td><td>‏<code>github_comment</code> از طریق ‏<code>gh pr comment</code> پست می‌کند. ‏<code>log</code> فقط در لاگ گیت‌وی می‌نویسد.</td></tr>
+<tr><td>‏<code>deliver_extra.repo</code></td><td>از بار به مثلاً ‏<code>org/repo</code> حل می‌شود.</td></tr>
+<tr><td>‏<code>deliver_extra.pr_number</code></td><td>به شمارهٔ PR از بار حل می‌شود.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout note">
+  <div class="callout-title">ℹ️ بار شامل کد نیست</div>
+  <p>بار وب‌هوک GitHub فرادادهٔ PR را شامل می‌شود (عنوان، توضیحات، نام شاخه‌ها، URLها) اما <b>diff را نه</b>. پرامپت بالا به ایجنت می‌گوید ‏<code>gh pr diff</code> را اجرا کند تا تغییرات واقعی را بگیرد. تول‌ست پیش‌فرض ‏<code>hermes-webhook</code> عمداً محدود نگه داشته شده (جستجو/استخراج وب، بینایی، روشن‌سازی — <b>بدون ترمینال</b>) چون بارهای وب‌هوک می‌توانند محتوای غیرقابل‌اعتماد حمل کنند. برای این‌که این مسیر بتواند ‏<code>gh</code> را اجرا کند، یک مجوز تول‌ست در سطح مسیر اضافه کنید: ‏<code>toolsets: ["terminal", "web"]</code> در پیکربندی مسیر — <a href="../user-guide/messaging/webhooks.html#per-route-toolsets">تول‌ست‌های مخصوص هر مسیر</a> را ببینید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲ — راه‌اندازی گیت‌وی</h2>
+<pre dir="ltr"><code>hermes gateway</code></pre>
+<p>باید این را ببینید:</p>
+<pre dir="ltr"><code>[webhook] Listening on 0.0.0.0:8644 — routes: github-pr-review</code></pre>
+<p>بررسی کنید که در حال اجراست:</p>
+<pre dir="ltr"><code>curl http://localhost:8644/health
+# {"status": "ok", "platform": "webhook"}</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۳ — ثبت وب‌هوک در GitHub</h2>
+<ol>
+<li>به مخزن خود بروید ← ‏<b>Settings</b> ← ‏<b>Webhooks</b> ← ‏<b>Add webhook</b></li>
+<li>این‌ها را پر کنید:
+<ul>
+<li>‏<b>Payload URL:</b> ‏<code>https://your-public-url.example.com/webhooks/github-pr-review</code></li>
+<li>‏<b>Content type:</b> ‏<code>application/json</code></li>
+<li>‏<b>Secret:</b> همان مقداری که برای ‏<code>secret</code> در پیکربندی مسیر ست کرده‌اید</li>
+<li>‏<b>Which events?</b> ← انتخاب «رویدادهای مجزا» ← تیک ‏<b>Pull requests</b></li>
+</ul>
+</li>
+<li>روی ‏<b>Add webhook</b> کلیک کنید</li>
+</ol>
+<p>‏GitHub بلافاصله برای تأیید اتصال یک رویداد ‏<code>ping</code> می‌فرستد. این رویداد بی‌خطر نادیده گرفته می‌شود — ‏<code>ping</code> در فهرست ‏<code>events</code> شما نیست — و ‏<code>{"status": "ignored", "event": "ping"}</code> برمی‌گرداند. فقط در سطح DEBUG لاگ می‌شود، پس در کنسول با سطح لاگ پیش‌فرض دیده نمی‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۴ — باز کردن یک PR آزمایشی</h2>
+<p>یک شاخه بسازید، یک تغییر push کنید و یک PR باز کنید. ظرف ۳۰ تا ۹۰ ثانیه (بسته به حجم PR و مدل)، هرمس باید یک کامنت بازبینی بگذارد.</p>
+<p>برای دنبال کردن پیشرفت ایجنت به‌صورت زنده:</p>
+<pre dir="ltr"><code>tail -f "${HERMES_HOME:-$HOME/.hermes}/logs/gateway.log"</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2 id="local-testing-with-ngrok"><span class="secnum">۶</span> آزمایش محلی با ngrok</h2>
+<p>اگر هرمس روی لپ‌تاپ شما اجرا می‌شود، با <a href="https://ngrok.com/" target="_blank" rel="noopener">ngrok</a> آن را در دسترس بیرون بگذارید:</p>
+<pre dir="ltr"><code>ngrok http 8644</code></pre>
+<p>URL ‏<code>https://...ngrok-free.app</code> را کپی کنید و به‌عنوان Payload URL در GitHub استفاده کنید. در پلن رایگان ngrok هر بار که ngrok ری‌استارت شود URL عوض می‌شود — هر نشست، وب‌هوک GitHub خود را به‌روز کنید. حساب‌های پولی ngrok دامنهٔ ثابت می‌گیرند.</p>
+<p>می‌توانید یک مسیر استاتیک را مستقیم با ‏<code>curl</code> آزمون اولیه بگیرید — نه حساب GitHub لازم است نه PR واقعی.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 هنگام آزمایش محلی از ‏<code>deliver: log</code> استفاده کنید</div>
+  <p>حین آزمایش در پیکربندی‌تان ‏<code>deliver: github_comment</code> را به ‏<code>deliver: log</code> تغییر دهید. وگرنه ایجنت تلاش می‌کند برای مخزن جعلی ‏<code>org/repo#99</code> در بار آزمایشی کامنت بگذارد و شکست می‌خورد. وقتی از خروجی پرامپت راضی شدید، به ‏<code>deliver: github_comment</code> برگردید.</p>
+</div>
+<pre dir="ltr"><code>SECRET="your-webhook-secret-here"
+BODY='{"action":"opened","number":99,"pull_request":{"title":"Test PR","body":"Adds a feature.","user":{"login":"testuser"},"head":{"ref":"feat/x"},"base":{"ref":"main"},"html_url":"https://github.com/org/repo/pull/99"},"repository":{"full_name":"org/repo"}}'
+SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$SECRET" -hex | awk '{print "sha256="$2}')
+
+curl -s -X POST http://localhost:8644/webhooks/github-pr-review \
+  -H "Content-Type: application/json" \
+  -H "X-GitHub-Event: pull_request" \
+  -H "X-Hub-Signature-256: $SIG" \
+  -d "$BODY"
+# Expected: {"status":"accepted","route":"github-pr-review","event":"pull_request","delivery_id":"..."}</code></pre>
+<p>بعد تماشا کنید که ایجنت اجرا می‌شود:</p>
+<pre dir="ltr"><code>tail -f "${HERMES_HOME:-$HOME/.hermes}/logs/gateway.log"</code></pre>
+<div class="callout note">
+  <div class="callout-title">ℹ️</div>
+  <p>‏<code>hermes webhook test &lt;name&gt;</code> فقط برای <b>اشتراک‌های پویا</b> کار می‌کند که با ‏<code>hermes webhook subscribe</code> ساخته شده‌اند. مسیرها را از ‏<code>config.yaml</code> نمی‌خواند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> فیلتر کردن روی اکشن‌های خاص</h2>
+<p>‏GitHub برای اکشن‌های زیادی رویداد ‏<code>pull_request</code> می‌فرستد: ‏<code>opened</code>، ‏<code>synchronize</code>، ‏<code>reopened</code>، ‏<code>closed</code>، ‏<code>labeled</code> و غیره. فهرست ‏<code>events</code> بر اساس مقدار هدر ‏<code>X-GitHub-Event</code> فیلتر می‌کند و ‏<code>filters</code> در سطح مسیر می‌تواند بر اساس فیلدهای بار مثل ‏<code>action</code> محدودترش کند.</p>
+<p>پرامپت در گام ۱ همین را از قبل مدیریت می‌کند و به ایجنت می‌گوید برای رویدادهای ‏<code>closed</code> و ‏<code>labeled</code> زودتر متوقف شود.</p>
+<div class="callout warn">
+  <div class="callout-title">⚠️ ایجنت همچنان اجرا می‌شود و توکن مصرف می‌کند</div>
+  <p>دستورالعمل «اینجا متوقف شو» جلوی یک بازبینی معنادار را می‌گیرد، اما ایجنت برای هر رویداد ‏<code>pull_request</code> فارغ از اکشن همچنان تا اتمام اجرا می‌شود. بهتر است پیش از بیدار شدن ایجنت فیلتر کنید:</p>
+<pre dir="ltr"><code>filters:
+  - field: "action"
+    in: ["opened", "synchronize", "reopened"]</code></pre>
+  <p>برای مخازن پربازدید، همچنان می‌توانید بالادست با یک گردش‌کار GitHub Actions که به‌شرط URL وب‌هوک شما را صدا می‌زند فیلتر کنید.</p>
+</div>
+<blockquote>
+<p>هیچ سینتکس قالب‌بندی شرطی یا Jinja2 وجود ندارد. ‏<code>{field}</code> و ‏<code>{nested.field}</code> تنها جایگزینی‌های پشتیبانی‌شده‌اند. هر چیز دیگری عیناً به ایجنت پاس داده می‌شود.</p>
+</blockquote>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> استفاده از مهارت برای سبک بازبینی یکدست</h2>
+<p>یک <a href="../user-guide/features/skills.html">مهارت هرمس</a> بارگذاری کنید تا به ایجنت شخصیت بازبینی یکدستی بدهید. ‏<code>skills</code> را به مسیر خود داخل ‏<code>platforms.webhook.extra.routes</code> در ‏<code>config.yaml</code> اضافه کنید:</p>
+<pre dir="ltr"><code>platforms:
+  webhook:
+    enabled: true
+    extra:
+      routes:
+        github-pr-review:
+          secret: "your-webhook-secret-here"
+          events: [pull_request]
+          prompt: |
+            A pull request event was received (action: {action}).
+            PR #{number}: {pull_request.title} by {pull_request.user.login}
+            URL: {pull_request.html_url}
+
+            If the action is "closed" or "labeled", stop here and do not post a comment.
+
+            Otherwise:
+            1. Run: gh pr diff {number} --repo {repository.full_name}
+            2. Review the diff using your review guidelines.
+            3. Write a concise, actionable review comment and post it.
+          skills:
+            - review
+          deliver: github_comment
+          deliver_extra:
+            repo: "{repository.full_name}"
+            pr_number: "{number}"</code></pre>
+<blockquote>
+<p><b>توجه:</b> فقط اولین مهارتِ یافت‌شده در فهرست بارگذاری می‌شود. هرمس چند مهارت را روی هم سوار نمی‌کند — مدخل‌های بعدی نادیده گرفته می‌شوند.</p>
+</blockquote>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> ارسال پاسخ‌ها به Slack یا Discord به‌جای آن</h2>
+<p>فیلدهای ‏<code>deliver</code> و ‏<code>deliver_extra</code> داخل مسیر خود را با پلتفرم مقصدتان عوض کنید:</p>
+<pre dir="ltr"><code># Inside platforms.webhook.extra.routes.&lt;route-name&gt;:
+
+# Slack
+deliver: slack
+deliver_extra:
+  chat_id: "C0123456789"   # Slack channel ID (omit to use the configured home channel)
+
+# Discord
+deliver: discord
+deliver_extra:
+  chat_id: "987654321012345678"  # Discord channel ID (omit to use home channel)</code></pre>
+<p>پلتفرم مقصد هم باید در گیت‌وی فعال و متصل باشد. اگر ‏<code>chat_id</code> حذف شود، پاسخ به کانال خانگی پیکربندی‌شدهٔ آن پلتفرم فرستاده می‌شود.</p>
+<p>مقادیر معتبر ‏<code>deliver</code>: ‏<code>log</code> · ‏<code>github_comment</code> · ‏<code>telegram</code> · ‏<code>discord</code> · ‏<code>slack</code> · ‏<code>signal</code> · ‏<code>sms</code></p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> پشتیبانی GitLab</h2>
+<p>همان آداپتور با GitLab هم کار می‌کند. GitLab برای احراز هویت از ‏<code>X-Gitlab-Token</code> استفاده می‌کند (مقایسهٔ رشتهٔ ساده، نه HMAC) — هرمس هر دو را خودکار مدیریت می‌کند.</p>
+<p>برای فیلتر رویدادها، GitLab مقدار ‏<code>X-GitLab-Event</code> را مقادیری مثل ‏<code>Merge Request Hook</code>، ‏<code>Push Hook</code>، ‏<code>Pipeline Hook</code> ست می‌کند. مقدار دقیق هدر را در ‏<code>events</code> استفاده کنید:</p>
+<pre dir="ltr"><code>events:
+  - Merge Request Hook</code></pre>
+<p>فیلدهای بار GitLab با GitHub فرق دارد — مثلاً ‏<code>{object_attributes.title}</code> برای عنوان MR و ‏<code>{object_attributes.iid}</code> برای شمارهٔ MR. ساده‌ترین راه کشف ساختار کامل بار، دکمهٔ ‏<b>Test</b> در تنظیمات وب‌هوک GitLab است همراه با لاگ ‏<b>Recent Deliveries</b>. راه دیگر این‌که ‏<code>prompt</code> را از پیکربندی مسیر حذف کنید — هرمس در این حالت کل بار را به‌صورت JSON قالب‌بندی‌شده مستقیم به ایجنت می‌دهد و پاسخ ایجنت (که در لاگ گیت‌وی با ‏<code>deliver: log</code> دیده می‌شود) ساختار آن را توضیح می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="security-notes"><span class="secnum">۱۱</span> نکات امنیتی</h2>
+<ul>
+<li><b>هرگز در production از ‏<code>INSECURE_NO_AUTH</code> استفاده نکنید</b> — اعتبارسنجی امضا را کاملاً غیرفعال می‌کند. فقط برای توسعهٔ محلی است.</li>
+<li><b>رمز وب‌هوک‌تان را دوره‌ای عوض کنید</b> و هم در GitHub (تنظیمات وب‌هوک) و هم در ‏<code>config.yaml</code> به‌روزرسانی‌اش کنید.</li>
+<li><b>محدودیت نرخ</b> به‌صورت پیش‌فرض ۳۰ درخواست در دقیقه برای هر مسیر است (از طریق ‏<code>extra.rate_limit</code> قابل تنظیم). عبور از آن ‏<code>429</code> برمی‌گرداند.</li>
+<li><b>تحویل‌های تکراری</b> (ریترای وب‌هوک) از طریق یک کش idempotency یک‌ساعته حذف‌تکرار می‌شوند. کلید کش در صورت وجود ‏<code>X-GitHub-Delivery</code> است، بعد ‏<code>X-Request-ID</code>، و بعد یک timestamp میلی‌ثانیه‌ای. وقتی هیچ‌کدام از هدرهای شناسهٔ تحویل ست نشده باشند، ریترای‌ها <b>حذف‌تکرار نمی‌شوند</b>.</li>
+<li><b>تزریق پرامپت:</b> عنوان‌های PR، توضیحات و پیام‌های commit کنترلِ مهاجم‌اند. PRهای مخرب می‌توانند تلاش کنند اقدامات ایجنت را دستکاری کنند. وقتی در معرض اینترنت عمومی است، گیت‌وی را در محیط سندباکس‌شده (Docker، VM) اجرا کنید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> عیب‌یابی</h2>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>نشانه</th><th>بررسی</th></tr>
+</thead>
+<tbody>
+<tr><td>‏<code>401 Invalid signature</code></td><td>رمز در config.yaml با رمز وب‌هوک GitHub مطابقت ندارد</td></tr>
+<tr><td>‏<code>404 Unknown route</code></td><td>نام مسیر در URL با کلید داخل ‏<code>routes:</code> مطابقت ندارد</td></tr>
+<tr><td>‏<code>429 Rate limit exceeded</code></td><td>عبور از ۳۰ درخواست در دقیقه برای هر مسیر — رایج هنگام تحویل دوبارهٔ رویدادهای آزمایشی از UI گیت‌هاب؛ یک دقیقه صبر کنید یا ‏<code>extra.rate_limit</code> را بالا ببرید</td></tr>
+<tr><td>کامنتی پست نشد</td><td>‏<code>gh</code> نصب نیست، روی PATH نیست یا احراز هویت نشده است (‏<code>gh auth login</code>)</td></tr>
+<tr><td>ایجنت اجرا می‌شود ولی کامنتی نیست</td><td>لاگ گیت‌وی را چک کنید — اگر خروجی ایجنت خالی یا فقط «SKIP» بوده باشد، تحویل همچنان تلاش می‌شود</td></tr>
+<tr><td>پورت در حال استفاده است</td><td>‏<code>extra.port</code> را در config.yaml عوض کنید</td></tr>
+<tr><td>ایجنت اجرا می‌شود ولی فقط توضیحات PR را بازبینی می‌کند</td><td>پرامپت دستورالعمل ‏<code>gh pr diff</code> را شامل نمی‌شود — diff داخل بار وب‌هوک نیست</td></tr>
+<tr><td>رویداد ping را نمی‌بینید</td><td>رویدادهای نادیده‌گرفته‌شده فقط در سطح لاگ DEBUG ‏<code>{"status":"ignored","event":"ping"}</code> برمی‌گردانند — لاگ تحویل GitHub را چک کنید (repo ← Settings ← Webhooks ← وب‌هوک شما ← Recent Deliveries)</td></tr>
+</tbody>
+</table>
+</div>
+<p><b>تب Recent Deliveries در GitHub</b> (repo ← Settings ← Webhooks ← وب‌هوک شما) هدرهای دقیق درخواست، بار، وضعیت HTTP و بدنهٔ پاسخ هر تحویل را نشان می‌دهد. سریع‌ترین راه عیب‌یابی شکست‌ها بدون سرک کشیدن به لاگ‌های سرورتان است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> مرجع کامل پیکربندی</h2>
+<pre dir="ltr"><code>platforms:
+  webhook:
+    enabled: true
+    extra:
+      port: 8644               # listen port (default: 8644)
+      secret: ""               # optional global fallback secret
+      rate_limit: 30           # requests per minute per route
+      max_body_bytes: 1048576  # payload size limit in bytes (default: 1 MB)
+
+      routes:
+        &lt;route-name&gt;:
+          secret: "required-per-route"
+          events: []            # [] = accept all; otherwise list X-GitHub-Event values
+          prompt: ""            # {field} / {nested.field} resolved from payload
+          skills: []            # first matching skill is loaded (only one)
+          deliver: "log"        # log | github_comment | telegram | discord | slack | signal | sms
+          deliver_extra: {}     # repo + pr_number for github_comment; chat_id for others</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> قدم بعدی؟</h2>
+<ul>
+<li><b><a href="github-pr-review-agent.html">بازبینی PR مبتنی بر کرون</a></b> — بررسی دوره‌ای PRها طبق زمان‌بندی، بدون نیاز به نقطهٔ پایانی عمومی</li>
+<li><b><a href="../user-guide/messaging/webhooks.html">مرجع وب‌هوک</a></b> — مرجع کامل پیکربندی پلتفرم وب‌هوک</li>
+<li><b><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت پلاگین</a></b> — بسته‌بندی منطق بازبینی در یک پلاگین قابل‌هم‌رسانی</li>
+<li><b><a href="../user-guide/profiles.html">پروفایل‌ها</a></b> — اجرای یک پروفایل بازبین اختصاصی با حافظه و پیکربندی خودش</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="troubleshooting-agent-quality.html"><span class="dir">→ قبلی</span><span class="ttl">عیب‌یابی: «ایجنت من کم‌هوش‌تر شده»</span></a>
+  <a class="next" href="xai-grok-oauth.html"><span class="dir">بعدی ←</span><span class="ttl">xAI Grok OAuth (SuperGrok)</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/webhook-github-pr-review" target="_blank" rel="noopener">Automated GitHub PR Comments with Webhooks</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

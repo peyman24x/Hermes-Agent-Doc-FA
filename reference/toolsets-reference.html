@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مرجع تول‌ست‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/reference/toolsets-reference" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>مرجع<span class="sep">/</span><strong>مرجع تول‌ست‌ها</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>مرجع تول‌ست‌ها</h1>
+<p>تول‌ست‌ها بسته‌های نام‌دار ابزارند که کنترل می‌کنند ایجنت چه کارهایی بتواند بکند. آن‌ها سازوکار اصلی پیکربندیِ دسترسی‌پذیری ابزارها به‌ازای هر پلتفرم، هر نشست یا هر وظیفه‌اند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> تول‌ست‌ها چطور کار می‌کنند</h2>
+<p>هر ابزار دقیقاً به یک تول‌ست تعلق دارد. وقتی یک تول‌ست را فعال می‌کنید، همهٔ ابزارهای آن بسته برای ایجنت در دسترس می‌شوند. تول‌ست‌ها سه نوع‌اند:</p>
+
+<ul>
+  <li><b>هسته‌ای (Core)</b> — یک گروه منطقیِ منسجم از ابزارهای مرتبط (مثلاً <code>file</code> شامل <code>read_file</code>، ‏<code>write_file</code>، ‏<code>patch</code> و <code>search_files</code> است)</li>
+  <li><b>ترکیبی (Composite)</b> — چند تول‌ست هسته‌ای را برای یک سناریوی رایج ترکیب می‌کند (مثلاً <code>debugging</code> ابزارهای فایل، ترمینال و وب را یک‌جا دارد)</li>
+  <li><b>پلتفرمی (Platform)</b> — یک پیکربندی کامل ابزار برای یک زمینهٔ استقرار مشخص (مثلاً <code>hermes-cli</code> پیش‌فرض نشست‌های تعاملی CLI است)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پیکربندی تول‌ست‌ها</h2>
+<h3>به‌ازای هر نشست (CLI)</h3>
+<pre dir="ltr"><code>hermes chat --toolsets web,file,terminal
+hermes chat --toolsets debugging        # ترکیبی — به file + terminal + web باز می‌شود
+hermes chat --toolsets all              # همه‌چیز
+</code></pre>
+
+<h3>به‌ازای هر پلتفرم (config.yaml)</h3>
+<pre dir="ltr"><code>toolsets:
+  - hermes-cli          # پیش‌فرض CLI
+  # - hermes-telegram   # بازنویسی برای گیت‌وی تلگرام
+</code></pre>
+
+<h3>مدیریت تعاملی</h3>
+<pre dir="ltr"><code>hermes tools                            # رابط curses برای فعال/غیرفعال‌کردن به‌ازای هر پلتفرم
+</code></pre>
+
+<p>یا داخل نشست:</p>
+
+<pre dir="ltr"><code>/tools list
+/tools disable browser
+/tools enable homeassistant
+</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> تول‌ست‌های هسته‌ای</h2>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>تول‌ست</th><th>ابزارها</th><th>هدف</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>browser</code></td><td><code>browser_back</code>، ‏<code>browser_cdp</code>، ‏<code>browser_click</code>، ‏<code>browser_console</code>، ‏<code>browser_dialog</code>، ‏<code>browser_get_images</code>، ‏<code>browser_navigate</code>، ‏<code>browser_press</code>، ‏<code>browser_scroll</code>، ‏<code>browser_snapshot</code>، ‏<code>browser_type</code>، ‏<code>browser_vision</code>، ‏<code>web_search</code></td><td>اتوماسیون هسته‌ای مرورگر. <code>web_search</code> را به‌عنوان جایگزینِ جستجوی سریع دارد. <code>browser_cdp</code> و <code>browser_dialog</code> در زمان اجرا گیت‌دارند — فقط وقتی ثبت می‌شوند که نقطهٔ پایانی CDP در شروع نشست قابل‌دسترس باشد (از طریق <code>/browser connect</code>، ‏<code>browser.cdp_url</code> در پیکربندی، Browserbase یا Camofox). <code>browser_dialog</code> همراه فیلدهای <code>pending_dialogs</code> و <code>frame_tree</code> کار می‌کند که <code>browser_snapshot</code> وقتی ناظر CDP وصل است اضافه می‌کند.</td></tr>
+    <tr><td><code>clarify</code></td><td><code>clarify</code></td><td>وقتی ایجنت به شفاف‌سازی نیاز دارد از کاربر سؤال بپرسد.</td></tr>
+    <tr><td><code>code_execution</code></td><td><code>execute_code</code></td><td>اجرای اسکریپت‌های پایتون که به‌صورت برنامه‌پذیر ابزارهای هرمس را صدا می‌زنند.</td></tr>
+    <tr><td><code>coding</code></td><td>ترکیبی (<code>file</code> + <code>terminal</code> + <code>search</code> + <code>web</code> + <code>skills</code> + <code>browser</code> + <code>todo</code> + <code>memory</code> + <code>session_search</code> + <code>clarify</code> + <code>code_execution</code> + <code>delegation</code> + <code>vision</code>)</td><td>بستهٔ کدنویسی برای کارهای نرم‌افزاری: ویرایش فایل، ترمینال، جستجو، وب‌داک، مهارت‌ها، مرورگر، واگذاری و اجرای کد.</td></tr>
+    <tr><td><code>cronjob</code></td><td><code>cronjob</code></td><td>زمان‌بندی و مدیریت کارهای تکرارشونده.</td></tr>
+    <tr><td><code>debugging</code></td><td>ترکیبی (<code>file</code> + <code>terminal</code> + <code>web</code>)</td><td>بستهٔ عیب‌یابی — فایل، فرایند/ترمینال، استخراج/جستجوی وب.</td></tr>
+    <tr><td><code>delegation</code></td><td><code>delegate_task</code></td><td>به‌راه‌انداختن نمونه‌های ساب‌ایجنت ایزوله برای کار موازی.</td></tr>
+    <tr><td><code>discord</code></td><td><code>discord</code></td><td>اقدامات اصلی دیسکورد (متن/امبد/DM) — فقط گیت‌وی. روی تول‌ست <code>hermes-discord</code> فعال است.</td></tr>
+    <tr><td><code>discord_admin</code></td><td><code>discord_admin</code></td><td>ناظم‌گری دیسکورد (بن، تغییر نقش، مدیریت کانال). روی تول‌ست <code>hermes-discord</code> فعال است؛ نیازمند داشتن دسترسی‌های مرتبط دیسکورد برای بات.</td></tr>
+    <tr><td><code>feishu_doc</code></td><td><code>feishu_doc_read</code></td><td>خواندن محتوای سند Feishu/Lark. هندلر پاسخ هوشمند کامنت سند فایشو از آن استفاده می‌کند.</td></tr>
+    <tr><td><code>feishu_drive</code></td><td><code>feishu_drive_add_comment</code>، ‏<code>feishu_drive_list_comments</code>، ‏<code>feishu_drive_list_comment_replies</code>، ‏<code>feishu_drive_reply_comment</code></td><td>عملیات کامنت درایو Feishu/Lark. محدود به ایجنت کامنت؛ روی <code>hermes-cli</code> یا تول‌ست‌های دیگر پیام‌رسانی عرضه نمی‌شود.</td></tr>
+    <tr><td><code>file</code></td><td><code>patch</code>، ‏<code>read_file</code>، ‏<code>search_files</code>، ‏<code>write_file</code></td><td>خواندن، نوشتن، جستجو و ویرایش فایل.</td></tr>
+    <tr><td><code>homeassistant</code></td><td><code>ha_call_service</code>، ‏<code>ha_get_state</code>، ‏<code>ha_list_entities</code>، ‏<code>ha_list_services</code></td><td>کنترل خانهٔ هوشمند از طریق Home Assistant. فقط وقتی <code>HASS_TOKEN</code> ست شده باشد در دسترس است.</td></tr>
+    <tr><td><code>computer_use</code></td><td><code>computer_use</code></td><td>کنترل دسکتاپ در پس‌زمینه از طریق cua-driver — مکان‌نما/فوکوس را نمی‌قاپد. با هر مدلِ ابزارپذیر کار می‌کند. مک، ویندوز و لینوکس؛ نیازمند <code>cua-driver</code> روی <code>$PATH</code>.</td></tr>
+    <tr><td><code>context_engine</code></td><td>(متغیر)</td><td>ابزارهای زمان‌اجرای عرضه‌شده توسط پلاگین موتور زمینهٔ فعال (تا وقتی پلاگینی پرش نکند خالی است).</td></tr>
+    <tr><td><code>image_gen</code></td><td><code>image_generate</code></td><td>تولید تصویر از متن از طریق FAL.ai (با بک‌اندهای انتخابی OpenAI / xAI).</td></tr>
+    <tr><td><code>video_gen</code></td><td><code>video_generate</code>، ‏<code>xai_video_edit</code>، ‏<code>xai_video_extend</code></td><td>متن‌به‌ویدیو و تصویربه‌ویدیو از طریق بک‌اندهای ثبت‌شدهٔ پلاگینی (xAI Grok-Imagine، ‏FAL.ai Veo 3.1 / Pixverse v6 / Kling O3). برای متحرک‌سازی یک تصویر <code>image_url</code> بدهید؛ برای متن‌به‌ویدیو حذفش کنید. <code>xai_video_edit</code> / <code>xai_video_extend</code> ابزارهای ویرایش/ادامهٔ مخصوص ارائه‌دهنده‌اند و به اعتبارنامه‌های xAI Imagine گیت دارند.</td></tr>
+    <tr><td><code>kanban</code></td><td><code>kanban_attach</code>، ‏<code>kanban_attach_url</code>، ‏<code>kanban_attachments</code>، ‏<code>kanban_block</code>، ‏<code>kanban_comment</code>، ‏<code>kanban_complete</code>، ‏<code>kanban_create</code>، ‏<code>kanban_heartbeat</code>، ‏<code>kanban_link</code>، ‏<code>kanban_list</code>، ‏<code>kanban_request_changes</code>، ‏<code>kanban_request_review</code>، ‏<code>kanban_show</code>، ‏<code>kanban_unblock</code></td><td>ابزارهای هماهنگی چندایجنتی. برای کارگرهای وظیفهٔ دیسپچرزاده (<code>HERMES_KANBAN_TASK</code>) و پروفایل‌هایی که تول‌ست <code>kanban</code> را صریحاً با نام فهرست کرده‌اند ثبت می‌شود (وایلدکاردِ <code>all</code>/<code>*</code> آن را <b>فعال نمی‌کند</b>). کارگرها وظایف را انجام‌شده علامت می‌زنند، بازبینی درجه‌یک می‌خواهند، بلاک می‌کنند، ضربان می‌فرستند، کامنت می‌گذارند و وظیفه‌های پیگیری می‌سازند/لینک می‌کنند؛ پروفایل‌های ارکستراتور علاوه بر آن ابزارهای مسیریابی برد مثل list/unblock می‌گیرند. فرزندان <code>delegate_task</code> مالکِ اجرای کانبان نیستند: اسکیمای این تول‌ست را از آن‌ها حذف/غیرفعال می‌کند و گاردهای زمان‌اجرا جهش مستقیمِ برد را رد می‌کنند، حتی اگر متغیرهای محیطی <code>HERMES_KANBAN_*</code> والد حاضر باشند.</td></tr>
+    <tr><td><code>memory</code></td><td><code>memory</code></td><td>مدیریت حافظهٔ پایدار بین‌نشستی.</td></tr>
+    <tr><td><code>desktop_ui</code></td><td><code>annotate_preview</code>، ‏<code>close_preview</code>، ‏<code>close_terminal</code>، ‏<code>drive_preview</code>، ‏<code>focus_pane</code>، ‏<code>open_preview</code>، ‏<code>react_to_message</code>، ‏<code>read_preview</code>، ‏<code>read_terminal</code>، ‏<code>read_window_below</code>، ‏<code>tour</code></td><td>قابلیت‌هایی که روی خود اپلیکیشن دسکتاپ هرمس اثر می‌کنند — خواندن/بستن پنل ترمینال جاسازی‌شده، باز/خواندن/بستن/تعامل/حاشیه‌نویسی مرورگر درون‌برنامه‌ای، شناسایی پنجرهٔ OS پشت اپ، نمایان‌کردن یک پنل، واکنش به پیام و اجرای تورِ راهنما (هایلایت + روایت عناصر UI در اپ یا پنل پیش‌نمایش). برای نشست‌هایی فعال است که مبدأشان اپ دسکتاپ باشد، هر بک‌اندی که وصل باشد (محلی، SSH، URL یا Hermes Cloud). هرگز روی نشست‌های CLI، TUI، پیام‌رسانی یا کرون حاضر نیست.</td></tr>
+    <tr><td><code>project</code></td><td><code>project_create</code>، ‏<code>project_list</code>، ‏<code>project_switch</code></td><td>ساخت و جابه‌جایی <a href="../user-guide/cli.html">پروژه‌های</a> دسکتاپ (فضاکارهای چندپوشه‌ای نام‌دار). فقط نشست‌های GUI / دسکتاپ.</td></tr>
+    <tr><td><code>safe</code></td><td><code>image_generate</code>، ‏<code>vision_analyze</code>، ‏<code>web_extract</code>، ‏<code>web_search</code> (از طریق <code>includes</code>)</td><td>پژوهش فقط‌خواندنی + تولید رسانه. بدون نوشتن فایل، بدون ترمینال، بدون اجرای کد.</td></tr>
+    <tr><td><code>search</code></td><td><code>web_search</code></td><td>فقط جستجوی وب (بدون استخراج).</td></tr>
+    <tr><td><code>session_search</code></td><td><code>session_search</code></td><td>جستجو در نشست‌های گفتگوی گذشته.</td></tr>
+    <tr><td><code>skills</code></td><td><code>skill_manage</code>، ‏<code>skill_view</code>، ‏<code>skills_list</code></td><td>CRUD و مرور مهارت‌ها.</td></tr>
+    <tr><td><code>spotify</code></td><td><code>spotify_albums</code>، ‏<code>spotify_devices</code>، ‏<code>spotify_library</code>، ‏<code>spotify_playback</code>، ‏<code>spotify_playlists</code>، ‏<code>spotify_queue</code>، ‏<code>spotify_search</code></td><td>کنترل بومی Spotify (پخش، صف، جستجو، پلی‌لیست‌ها، آلبوم‌ها، کتابخانه). توسط پلاگین داخلی <code>spotify</code> ثبت می‌شود.</td></tr>
+    <tr><td><code>terminal</code></td><td><code>process</code>، ‏<code>terminal</code></td><td>اجرای فرمان شل و مدیریت فرایندهای پس‌زمینه.</td></tr>
+    <tr><td><code>todo</code></td><td><code>todo</code></td><td>مدیریت فهرست وظایف داخل یک نشست.</td></tr>
+    <tr><td><code>tts</code></td><td><code>text_to_speech</code></td><td>تولید صدای متن‌به‌گفتار.</td></tr>
+    <tr><td><code>vision</code></td><td><code>vision_analyze</code></td><td>تحلیل تصویر با مدل‌های بینایی‌دار.</td></tr>
+    <tr><td><code>video</code></td><td><code>video_analyze</code></td><td>ابزارهای تحلیل و فهم ویدیو (اختیاری، در تول‌ست پیش‌فرض نیست — با <code>--toolsets</code> صریحاً اضافه کنید).</td></tr>
+    <tr><td><code>web</code></td><td><code>web_extract</code>، ‏<code>web_search</code></td><td>جستجوی وب و استخراج محتوای صفحه.</td></tr>
+    <tr><td><code>x_search</code></td><td><code>x_search</code></td><td>کشف عمومی X فقط‌خواندنی از طریق ابزار Responses داخلی <code>x_search</code> ی xAI. برای خواندن‌های احراز هویت‌شدهٔ X API و اقدامات حساب از مهارت <code>xurl</code> استفاده کنید. پیش‌فرض خاموش؛ با <code>hermes tools</code> فعالش کنید. اسکیما فقط وقتی اعتبارنامه‌های xAI (SuperGrok OAuth یا <code>XAI_API_KEY</code>) پیکربندی شده باشد ثبت می‌شود.</td></tr>
+    <tr><td><code>yuanbao</code></td><td><code>yb_query_group_info</code>، ‏<code>yb_query_group_members</code>، ‏<code>yb_search_sticker</code>، ‏<code>yb_send_dm</code>، ‏<code>yb_send_sticker</code></td><td>اقدامات DM/گروه یوان‌بائو و جستجوی استیکر. فقط روی <code>hermes-yuanbao</code> ثبت می‌شود.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> تول‌ست‌های پلتفرمی</h2>
+<p>تول‌ست‌های پلتفرمی پیکربندی کامل ابزار برای یک هدف استقرار را تعریف می‌کنند. بیشتر پلتفرم‌های پیام‌رسانی همان مجموعهٔ <code>hermes-cli</code> را دارند:</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>تول‌ست</th><th>تفاوت با <code>hermes-cli</code></th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>hermes-cli</code></td><td>تول‌ست کامل — پیش‌فرض نشست‌های تعاملی CLI. شامل فایل، ترمینال، وب، مرورگر، حافظه، مهارت‌ها، بینایی، image_gen، todo، tts، واگذاری، اجرای کد، cronjob، جستجوی نشست، clarify، computer_use، Home Assistant و ابزارهای کانبان (همگی در زمان اجرا با check_fn گیت دارند).</td></tr>
+    <tr><td><code>hermes-acp</code></td><td>‏<code>clarify</code>، ‏<code>cronjob</code>، ‏<code>image_generate</code>، ‏<code>text_to_speech</code>، ‏<code>computer_use</code>، هر چهار ابزار Home Assistant و ابزارهای کانبان را حذف می‌کند. متمرکز بر کارهای کدنویسی در بستر IDE.</td></tr>
+    <tr><td><code>hermes-api-server</code></td><td>‏<code>clarify</code>، ‏<code>text_to_speech</code>، ‏<code>computer_use</code> و ابزارهای کانبان را حذف می‌کند. بقیه را نگه می‌دارد — مناسب دسترسی برنامه‌پذیر که تعامل کاربری ممکن نیست.</td></tr>
+    <tr><td><code>hermes-cron</code></td><td>مانند <code>hermes-cli</code>.</td></tr>
+    <tr><td><code>hermes-telegram</code></td><td>مانند <code>hermes-cli</code>.</td></tr>
+    <tr><td><code>hermes-discord</code></td><td>‏<code>discord</code> و <code>discord_admin</code> را روی <code>hermes-cli</code> اضافه می‌کند.</td></tr>
+    <tr><td><code>hermes-slack</code></td><td>مانند <code>hermes-cli</code>.</td></tr>
+    <tr><td><code>hermes-whatsapp</code></td><td>مانند <code>hermes-cli</code>.</td></tr>
+    <tr><td><code>hermes-signal</code></td><td>مانند <code>hermes-cli</code>.</td></tr>
+    <tr><td><code>hermes-matrix</code></td><td>مانند <code>hermes-cli</code>.</td></tr>
+    <tr><td><code>hermes-mattermost</code></td><td>مانند <code>hermes-cli</code>.</td></tr>
+    <tr><td><code>hermes-email</code></td><td>مانند <code>hermes-cli</code>.</td></tr>
+    <tr><td><code>hermes-sms</code></td><td>مانند <code>hermes-cli</code>.</td></tr>
+    <tr><td><code>hermes-bluebubbles</code></td><td>مانند <code>hermes-cli</code>.</td></tr>
+    <tr><td><code>hermes-dingtalk</code></td><td>مانند <code>hermes-cli</code>.</td></tr>
+    <tr><td><code>hermes-feishu</code></td><td>پنج ابزار <code>feishu_doc_*</code> / <code>feishu_drive_*</code> را اضافه می‌کند (فقط هندلر کامنت سند از آن‌ها استفاده می‌کند، نه آداپتور گفتگوی عادی).</td></tr>
+    <tr><td><code>hermes-qqbot</code></td><td>مانند <code>hermes-cli</code>.</td></tr>
+    <tr><td><code>hermes-wecom</code></td><td>مانند <code>hermes-cli</code>.</td></tr>
+    <tr><td><code>hermes-wecom-callback</code></td><td>مانند <code>hermes-cli</code>.</td></tr>
+    <tr><td><code>hermes-weixin</code></td><td>مانند <code>hermes-cli</code>.</td></tr>
+    <tr><td><code>hermes-yuanbao</code></td><td>پنج ابزار <code>yb_*</code> (DM/گروه/استیکر) را روی <code>hermes-cli</code> اضافه می‌کند.</td></tr>
+    <tr><td><code>hermes-homeassistant</code></td><td>مانند <code>hermes-cli</code> (ابزارهای Home Assistant از قبل پیش‌فرض‌اند و وقتی <code>HASS_TOKEN</code> ست شود فعال می‌شوند).</td></tr>
+    <tr><td><code>hermes-webhook</code></td><td>زیرمجموعهٔ ایمنِ محدودشده — فقط <code>web_search</code>، ‏<code>web_extract</code>، ‏<code>vision_analyze</code> و <code>clarify</code>. اجراهای وب‌هوکی هیچ دسترسی ترمینال، فایل یا مرورگر نمی‌گیرند.</td></tr>
+    <tr><td><code>hermes-gateway</code></td><td>تول‌ست ارکستراتور داخلی گیت‌وی — اجتماع همهٔ تول‌ست‌های <code>hermes-&lt;platform&gt;</code>؛ وقتی استفاده می‌شود که گیت‌وی لازم باشد از هر مبدأ پیامی بپذیرد.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> تول‌ست‌های پویا</h2>
+<h3>تول‌ست‌های سرور MCP</h3>
+<p>هر سرور MCP پیکربندی‌شده در زمان اجرا یک تول‌ست <code>mcp-&lt;server&gt;</code> می‌سازد. مثلاً اگر سرور MCP ی <code>github</code> پیکربندی کنید، یک تول‌ست <code>mcp-github</code> ساخته می‌شود که همهٔ ابزارهای عرضه‌شدهٔ آن سرور را دارد.</p>
+
+<pre dir="ltr"><code># config.yaml
+mcp_servers:
+  github:
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-github"]
+</code></pre>
+
+<p>این کار تول‌ست <code>mcp-github</code> را می‌سازد که می‌توانید در <code>--toolsets</code> یا پیکربندی‌های پلتفرم به آن ارجاع بدهید.</p>
+
+<h3>تول‌ست‌های پلاگینی</h3>
+<p>پلاگین‌ها می‌توانند حین مقداردهی اولیه با <code>ctx.register_tool()</code> تول‌ست خودشان را ثبت کنند. این‌ها کنار تول‌ست‌های داخلی ظاهر می‌شوند و به همان شکل فعال/غیرفعال می‌شوند.</p>
+
+<h3>تول‌ست‌های سفارشی</h3>
+<p>در <code>config.yaml</code> تول‌ست سفارشی تعریف کنید تا بسته‌های مخصوص پروژه بسازید:</p>
+
+<pre dir="ltr"><code>toolsets:
+  - hermes-cli
+custom_toolsets:
+  data-science:
+    - file
+    - terminal
+    - code_execution
+    - web
+    - vision
+</code></pre>
+
+<h3>وایلدکاردها</h3>
+<ul>
+  <li><code>all</code> یا <code>*</code> — به هر تول‌ست ثبت‌شده (داخلی + پویا + پلاگینی) باز می‌شود</li>
+</ul>
+
+<p>چند ابزار علاوه بر عضویت در تول‌ست، یک بررسی دسترس‌پذیریِ اضافه هم دارند و فقط با <code>all</code>/<code>*</code> روشن <b>نمی‌شوند</b>:</p>
+
+<ul>
+  <li>ابزارهای <b>قابلیت‌گیت‌شده</b> (مرورگر، <code>computer_use</code>، ‏<code>code_execution</code>، فایشو، Home Assistant، cronjob) فقط وقتی پیش‌نیاز بک‌اند/اعتبارنامه‌شان پیکربندی شده باشد ظاهر می‌شوند.</li>
+  <li>ابزارهای <b>گردش‌کارگیت‌شده</b> — تول‌ست <code>kanban</code> — عمداً opt-in هستند. ‏<code>all</code>/<code>*</code> کانبان را <b>فعال نمی‌کند</b>؛ باید <code>kanban</code> را صریحاً فهرست کنید (یا کارگری دیسپچرزاده با <code>HERMES_KANBAN_TASK</code> ست‌شده باشید). ابزارهای کانبان وضعیت اشتراکی برد را تغییر می‌دهند، پس حتی زیر <code>all</code> هم پیش‌فرض خاموش می‌مانند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> رابطه با <code>hermes tools</code></h2>
+<p>فرمان <code>hermes tools</code> یک UI مبتنی بر curses برای روشن/خاموش‌کردن ابزارهای تکی به‌ازای هر پلتفرم می‌دهد. این دست در سطح ابزار کار می‌کند (ریزتر از تول‌ست‌ها) و در <code>config.yaml</code> ماندگار می‌شود. ابزارهای غیرفعال حتی اگر تول‌ستشان فعال باشد فیلتر می‌شوند.</p>
+
+<p>ببینید همچنین: <a href="tools-reference.html">مرجع ابزارها</a> برای فهرست کامل ابزارهای تکی و پارامترهایشان.</p>
+</section>
+
+<div class="pager">
+  <a href="tools-reference.html"><span class="dir">→ قبلی</span><span class="ttl">مرجع ابزارها</span></a>
+  <a class="next" href="mcp-config-reference.html"><span class="dir">بعدی ←</span><span class="ttl">مرجع پیکربندی MCP</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/reference/toolsets-reference" target="_blank" rel="noopener">Toolsets Reference</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

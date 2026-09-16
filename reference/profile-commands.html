@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>فرمان‌های پروفایل — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/reference/profile-commands" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>مرجع<span class="sep">/</span><strong>فرمان‌های پروفایل</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>فرمان‌های پروفایل</h1>
+<p>این صفحه همهٔ فرمان‌های مرتبط با <a href="../user-guide/profiles.html">پروفایل‌های Hermes</a> را پوشش می‌دهد. برای فرمان‌های عمومی CLI، <a href="cli-commands.html">مرجع فرمان‌های CLI</a> را ببینید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> <code>hermes profile</code></h2>
+<pre dir="ltr"><code>hermes profile &lt;subcommand&gt;
+</code></pre>
+
+<p>فرمان سطح بالا برای مدیریت پروفایل‌ها. اجرای <code>hermes profile</code> بدون زیرفرمان، راهنما را نشان می‌دهد.</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>زیرفرمان</th><th>توضیح</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>list</code></td><td>فهرست همهٔ پروفایل‌ها.</td></tr>
+    <tr><td><code>use</code></td><td>تنظیم پروفایل فعال (پیش‌فرض).</td></tr>
+    <tr><td><code>create</code></td><td>ساخت پروفایل جدید.</td></tr>
+    <tr><td><code>describe</code></td><td>خواندن یا تنظیم توضیحات یک پروفایل (ارکستراتور کانبان برای مسیریابی از آن استفاده می‌کند).</td></tr>
+    <tr><td><code>delete</code></td><td>حذف یک پروفایل.</td></tr>
+    <tr><td><code>show</code></td><td>نمایش جزئیات یک پروفایل.</td></tr>
+    <tr><td><code>alias</code></td><td>بازتولید الیاس شل برای یک پروفایل.</td></tr>
+    <tr><td><code>rename</code></td><td>تغییر نام یک پروفایل.</td></tr>
+    <tr><td><code>export</code></td><td>خروجی گرفتن از یک پروفایل به‌صورت آرشیو tar.gz.</td></tr>
+    <tr><td><code>import</code></td><td>واردکردن یک پروفایل از آرشیو tar.gz.</td></tr>
+    <tr><td><code>install</code></td><td>نصب توزیع پروفایل از یک URL گیت یا پوشهٔ محلی. <a href="../user-guide/profile-distributions.html">توزیع‌های پروفایل</a> را ببینید.</td></tr>
+    <tr><td><code>update</code></td><td>دریافت دوبارهٔ یک پروفایل مدیریت‌شده با توزیع و اعمال دوبارهٔ بستهٔ آن.</td></tr>
+    <tr><td><code>info</code></td><td>نمایش فرادادهٔ توزیع برای یک پروفایل (URL مبدأ، کامیت، آخرین به‌روزرسانی).</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> <code>hermes profile list</code></h2>
+<pre dir="ltr"><code>hermes profile list
+</code></pre>
+
+<p>همهٔ پروفایل‌ها را فهرست می‌کند. پروفایل فعالِ فعلی با <code>*</code> علامت خورده است.</p>
+
+<p><b>مثال:</b></p>
+
+<pre dir="ltr"><code>$ hermes profile list
+  default
+* work
+  dev
+  personal
+</code></pre>
+
+<p>هیچ گزینه‌ای ندارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> <code>hermes profile use</code></h2>
+<pre dir="ltr"><code>hermes profile use &lt;name&gt;
+</code></pre>
+
+<p>‏<code>&lt;name&gt;</code> را به‌عنوان پروفایل فعال تنظیم می‌کند. همهٔ فرمان‌های بعدی <code>hermes</code> (بدون <code>-p</code>) از این پروفایل استفاده می‌کنند.</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>آرگومان</th><th>توضیح</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>&lt;name&gt;</code></td><td>نام پروفایلی که باید فعال شود. برای بازگشت به پروفایل پایه از <code>default</code> استفاده کنید.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p><b>مثال:</b></p>
+
+<pre dir="ltr"><code>hermes profile use work
+hermes profile use default
+</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> <code>hermes profile create</code></h2>
+<pre dir="ltr"><code>hermes profile create &lt;name&gt; [options]
+</code></pre>
+
+<p>یک پروفایل جدید می‌سازد.</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>آرگومان / گزینه</th><th>توضیح</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>&lt;name&gt;</code></td><td>نام پروفایل جدید. باید یک نام پوشهٔ معتبر باشد (حروف و ارقام، خط تیره، زیرخط).</td></tr>
+    <tr><td><code>--clone</code></td><td>‏<code>config.yaml</code>، ‏<code>.env</code>، ‏<code>SOUL.md</code> و مهارت‌ها را از پروفایل فعلی کپی می‌کند.</td></tr>
+    <tr><td><code>--clone-all</code></td><td>همه‌چیز (پیکربندی، حافظه‌ها، مهارت‌ها، کرون، پلاگین‌ها) را از پروفایل فعلی کپی می‌کند. تاریخچهٔ مخصوص هر پروفایل مستثناست: نشست‌ها، ‏<code>state.db</code>، پشتیبان‌ها، اسنپ‌شات‌های وضعیت، چک‌پوینت‌ها.</td></tr>
+    <tr><td><code>--clone-from &lt;profile&gt;</code></td><td>پیکربندی/مهارت‌ها/SOUL را به‌جای پروفایل فعلی از یک پروفایل مشخص کلون می‌کند. مگر همراه <code>--clone-all</code> باشد، <code>--clone</code> را هم implying می‌کند.</td></tr>
+    <tr><td><code>--no-alias</code></td><td>از ساخت اسکریپت wrapper می‌پرد.</td></tr>
+    <tr><td><code>--description "&lt;text&gt;"</code></td><td>توضیح یک‌ یا دومĕ جمله‌ای از اینکه این پروفایل در چه کاری خوب است. ارکستراتور کانبان برای مسیریابی وظایف بر اساس نقش — نه فقط نام پروفایل — از آن استفاده می‌کند. می‌توانید ردش کنید و بعداً با <code>hermes profile describe</code> اضافه‌اش کنید. در <code>&lt;profile_dir&gt;/profile.yaml</code> ذخیره می‌شود.</td></tr>
+    <tr><td><code>--no-skills</code></td><td>پروفایلی <b>خالی</b> می‌سازد که هیچ مهارت باندل‌شده‌ای فعال نداشته باشد. یک نشانگر <code>.no-bundled-skills</code> داخل پروفایل می‌نویسد تا اجراهای بعدی <code>hermes update</code> مجموعهٔ باندل‌شده را دوباره نکارند، و ترکیبش با <code>--clone</code>، ‏<code>--clone-from</code> یا <code>--clone-all</code> (که به هر حال مهارت‌ها را کپی می‌کنند) رد می‌شود. برای پروفایل‌های ارکستراتورِ باریک یا پروفایل‌های سندباکس که نباید کاتالوگ کامل مهارت‌ها را به ارث ببرند کاربرد دارد. برای فعال/غیرفعال‌کردن این حالت روی یک پروفایل ازقبل‌ساخته‌شده (از جمله <code>~/.hermes</code> پیش‌فرض)، از <code>hermes skills opt-out</code> / <code>hermes skills opt-in</code> استفاده کنید.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>ساختن یک پروفایل آن پوشهٔ پروفایل را <b>نمی‌کند</b> پوشهٔ پیش‌فرض پروژه/ورک‌اسپیس برای فرمان‌های ترمینال. اگر می‌خواهید پروفایلی در یک پروژهٔ مشخص شروع شود، <code>terminal.cwd</code> را در <code>config.yaml</code> همان پروفایل تنظیم کنید.</p>
+
+<p><b>مثال‌ها:</b></p>
+
+<pre dir="ltr"><code># پروفایل خالی — نیاز به راه‌اندازی کامل
+hermes profile create mybot
+
+# کلون فقط پیکربندی از پروفایل فعلی
+hermes profile create work --clone
+
+# کلون همه‌چیز از پروفایل فعلی
+hermes profile create backup --clone-all
+
+# کلون پیکربندی از یک پروفایل مشخص
+hermes profile create work2 --clone-from work
+
+# کلون همه‌چیز از یک پروفایل مشخص
+hermes profile create work2-backup --clone-from work --clone-all
+</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> <code>hermes profile describe</code></h2>
+<pre dir="ltr"><code>hermes profile describe [&lt;name&gt;] [options]
+</code></pre>
+
+<p>توضیحات یک پروفایل را می‌خواند یا تنظیم می‌کند. ارکستراتور کانبان برای مسیریابی وظایف بر اساس اینکه هر پروفایل در چه کاری خوب است — نه حدس زدن صرفاً از روی نام پروفایل — از این توضیحات استفاده می‌کند. در <code>&lt;profile_dir&gt;/profile.yaml</code> ذخیره می‌شود تا از ریبوت جان سالم ببرد و با گیت‌وی به اشتراک گذاشته شود.</p>
+
+<p>بدون هیچ فلگی، توضیحات فعلی را چاپ می‌کند (یا اگر خالی باشد، پیام <code>(no description set for '&lt;name&gt;')</code> را می‌دهد).</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>آرگومان / گزینه</th><th>توضیح</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>&lt;name&gt;</code></td><td>پروفایلی که باید توصیف شود. مگر <code>--all --auto</code> استفاده شود، الزامی است.</td></tr>
+    <tr><td><code>--text "&lt;text&gt;"</code></td><td>توضیحات را دقیقاً روی این متن تنظیم می‌کند (نوشتهٔ کاربر). هر توضیحات موجودی را بازنویسی می‌کند.</td></tr>
+    <tr><td><code>--auto</code></td><td>تولید خودکار یک توضیح ۱ تا ۲ جمله‌ای با LLM کمکی، بر اساس مهارت‌های نصب‌شده، مدل پیکربندی‌شده و نام پروفایل. مدل را زیر <code>auxiliary.profile_describer</code> در <code>config.yaml</code> پیکربندی کنید. توضیحات خودکار با <code>description_auto: true</code> علامت می‌خورند تا داشبورد آن‌ها را برای بازبینی پرچم بزند.</td></tr>
+    <tr><td><code>--overwrite</code></td><td>همراه <code>--auto</code>، توضیحات نوشتهٔ کاربر را هم جایگزین می‌کند (پیش‌فرض: از پروفایل‌هایی که توضیحاتشان صریحاً تنظیم شده می‌پرد).</td></tr>
+    <tr><td><code>--all</code></td><td>همراه <code>--auto</code>، همهٔ پروفایل‌های فاقد توضیحات را پوشش می‌دهد.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p><b>مثال‌ها:</b></p>
+
+<pre dir="ltr"><code># خواندن توضیحات فعلی
+hermes profile describe researcher
+
+# تنظیم صریح آن
+hermes profile describe researcher --text "Reads source code and writes findings."
+
+# گذاشتن تولید توضیح به عهدهٔ LLM
+hermes profile describe researcher --auto
+
+# پرکردن توضیحات همهٔ پروفایل‌هایی که توضیح ندارند
+hermes profile describe --all --auto
+</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> <code>hermes profile delete</code></h2>
+<pre dir="ltr"><code>hermes profile delete &lt;name&gt; [options]
+</code></pre>
+
+<p>پروفایل را حذف می‌کند و الیاس شل‌اش را برمی‌دارد.</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>آرگومان / گزینه</th><th>توضیح</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>&lt;name&gt;</code></td><td>پروفایلی که باید حذف شود.</td></tr>
+    <tr><td><code>--yes</code>، ‏<code>-y</code></td><td>از پرسش تأیید می‌پرد.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p><b>مثال:</b></p>
+
+<pre dir="ltr"><code>hermes profile delete mybot
+hermes profile delete mybot --yes
+</code></pre>
+
+<div class="callout warn">
+  <div class="callout-title">⚠️ هشدار</div>
+  <p>این کار کل پوشهٔ پروفایل شامل همهٔ پیکربندی، حافظه‌ها، نشست‌ها و مهارت‌ها را برای همیشه حذف می‌کند. پروفایل <code>default</code> (یعنی <code>~/.hermes</code>) قابل حذف نیست — برای برداشتن همه‌چیز از <code>hermes uninstall</code> استفاده کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> <code>hermes profile show</code></h2>
+<pre dir="ltr"><code>hermes profile show &lt;name&gt;
+</code></pre>
+
+<p>جزئیات یک پروفایل را نشان می‌دهد؛ از جمله پوشهٔ خانگی، مدل پیکربندی‌شده، وضعیت گیت‌وی، تعداد مهارت‌ها و وضعیت فایل پیکربندی.</p>
+
+<p>این پوشهٔ خانگی Hermes پروفایل را نشان می‌دهد، نه پوشهٔ کاری ترمینال. فرمان‌های ترمینال از <code>terminal.cwd</code> (یا پوشهٔ اجرا در بک‌اند محلی وقتی <code>cwd: "."</code> است) شروع می‌شوند.</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>آرگومان</th><th>توضیح</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>&lt;name&gt;</code></td><td>پروفایلی که باید بازرسی شود.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p><b>مثال:</b></p>
+
+<pre dir="ltr"><code>$ hermes profile show work
+Profile: work
+Path:    ~/.hermes/profiles/work
+Model:   anthropic/claude-sonnet-4 (anthropic)
+Gateway: stopped
+Skills:  12
+.env:    exists
+SOUL.md: exists
+Alias:   ~/.local/bin/work
+</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> <code>hermes profile alias</code></h2>
+<pre dir="ltr"><code>hermes profile alias &lt;name&gt; [options]
+</code></pre>
+
+<p>اسکریپت الیاس شل در <code>~/.local/bin/&lt;name&gt;</code> را دوباره تولید می‌کند. وقتی الیاس به‌اشتباه حذف شده یا بعد از جابه‌جایی نصب Hermes باید به‌روزرسانی‌اش کنید کاربرد دارد.</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>آرگومان / گزینه</th><th>توضیح</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>&lt;name&gt;</code></td><td>پروفایلی که الیاسش باید ساخته/به‌روزرسانی شود.</td></tr>
+    <tr><td><code>--remove</code></td><td>به‌جای ساخت اسکریپت wrapper، آن را حذف می‌کند.</td></tr>
+    <tr><td><code>--name &lt;alias&gt;</code></td><td>نام سفارشی الیاس (پیش‌فرض: نام پروفایل).</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p><b>مثال:</b></p>
+
+<pre dir="ltr"><code>hermes profile alias work
+# ساخت/به‌روزرسانی ~/.local/bin/work
+
+hermes profile alias work --name mywork
+# ساخت ~/.local/bin/mywork
+
+hermes profile alias work --remove
+# حذف اسکریپت wrapper
+</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> <code>hermes profile rename</code></h2>
+<pre dir="ltr"><code>hermes profile rename &lt;old-name&gt; &lt;new-name&gt;
+</code></pre>
+
+<p>نام یک پروفایل را تغییر می‌دهد. پوشه و الیاس شل را به‌روزرسانی می‌کند.</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>آرگومان</th><th>توضیح</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>&lt;old-name&gt;</code></td><td>نام فعلی پروفایل.</td></tr>
+    <tr><td><code>&lt;new-name&gt;</code></td><td>نام جدید پروفایل.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p><b>مثال:</b></p>
+
+<pre dir="ltr"><code>hermes profile rename mybot assistant
+# ~/.hermes/profiles/mybot → ~/.hermes/profiles/assistant
+# ~/.local/bin/mybot → ~/.local/bin/assistant
+</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> <code>hermes profile export</code></h2>
+<pre dir="ltr"><code>hermes profile export &lt;name&gt; [options]
+</code></pre>
+
+<p>پروفایل را به‌صورت یک آرشیو فشردهٔ tar.gz خروجی می‌گیرد — اسنپ‌شاتی قابل‌حمل که می‌توانید از آن پشتیبان بگیرید، به ماشین دیگری ببرید یا به کسی بدهید. ‏<code>auth.json</code> و <code>.env</code> همیشه مستثنا هستند.</p>
+
+<p>در گفتگو هم به‌صورت <a href="slash-commands.html"><code>/export</code></a> و هم در اپ دسکتاپ از طریق <b>⌘K → Export profile…</b> یا منوی راست‌کلیکِ مربع پروفایل در دسترس است. خروجی دسکتاپ علاوه بر آن، ‏<code>desktop.json</code> (اسکین، حالت روشن/تاریک، تم‌های سفارشی، رنگ ریل، چیدمان پنجره) را هم در آرشیو می‌گذارد.</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>آرگومان / گزینه</th><th>توضیح</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>&lt;name&gt;</code></td><td>پروفایلی که باید خروجی گرفته شود.</td></tr>
+    <tr><td><code>-o</code>، ‏<code>--output &lt;path&gt;</code></td><td>مسیر فایل خروجی (پیش‌فرض: <code>&lt;name&gt;.tar.gz</code>).</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p><b>مثال:</b></p>
+
+<pre dir="ltr"><code>hermes profile export work
+# ساخت work.tar.gz در پوشهٔ فعلی
+
+hermes profile export work -o ./work-2026-03-29.tar.gz
+</code></pre>
+
+<p>برای اینکه دقیقاً چه چیزهایی در آرشیو می‌افتد و قبل از فرستادن آن به کسی چه چیزهایی را باید بررسی کنید، <a href="../user-guide/profile-distributions.html#export-and-import-a-profile-file">خروجی و واردکردن فایل پروفایل</a> را ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> <code>hermes profile import</code></h2>
+<pre dir="ltr"><code>hermes profile import &lt;archive&gt; [options]
+</code></pre>
+
+<p>پروفایلی را از یک آرشیو tar.gz به‌عنوان یک پروفایل جدید وارد می‌کند. از بازنویسی پروفایل موجود خودداری می‌کند و نمی‌تواند به‌صورت <code>default</code> (پروفایل ریشهٔ داخلی) وارد شود — در هر دو حالت <code>--name</code> را بدهید. وقتی نام با یک فرمان موجود تصادم نداشته باشد، یک wrapper شل ساخته می‌شود.</p>
+
+<p>در گفتگو هم به‌صورت <a href="slash-commands.html"><code>/import</code></a> و هم در اپ دسکتاپ از طریق <b>⌘K → Import profile…</b> یا دکمهٔ واردکردن کنار <b>+</b> ریل پروفایل‌ها در دسترس است. واردکردن دسکتاپ هر <code>desktop.json</code> همراه‌شده (تم، چیدمان) را هم اعمال می‌کند و شما را به پروفایل جدید می‌برد.</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>آرگومان / گزینه</th><th>توضیح</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>&lt;archive&gt;</code></td><td>مسیر آرشیو tar.gz برای واردکردن.</td></tr>
+    <tr><td><code>--name &lt;name&gt;</code></td><td>نام پروفایل واردشده (پیش‌فرض: استنتاج از آرشیو).</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p><b>مثال:</b></p>
+
+<pre dir="ltr"><code>hermes profile import ./work-2026-03-29.tar.gz
+# استنتاج نام پروفایل از آرشیو
+
+hermes profile import ./work-2026-03-29.tar.gz --name work-restored
+</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> فرمان‌های توزیع</h2>
+
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p><b>با توزیع‌ها آشنا نیستید؟</b> با <a href="../user-guide/profile-distributions.html">راهنمای کاربری توزیع‌های پروفایل</a> شروع کنید — چرایی، زمان و چگونگی را با مثال‌های کامل پوشش می‌دهد. بخش‌های زیر یک مرجع خشک CLI‌اند برای وقتی که می‌دانید چه می‌خواهید.</p>
+</div>
+
+<p>توزیع‌ها یک پروفایل را به مصنوعی قابل‌اشتراک و نسخه‌دار تبدیل می‌کنند که به‌شکل <b>مخزن گیت</b> منتشر می‌شود. گیرنده توزیع را با یک فرمان نصب می‌کند و بعداً می‌تواند بدون دست زدن به حافظه‌ها، نشست‌ها یا اعتبارنامه‌های محلی‌اش، آن را در‌جا به‌روزرسانی کند.</p>
+
+<p>‏<code>auth.json</code> و <code>.env</code> هرگز جزء توزیع نیستند — روی ماشین کاربرِ نصب‌کننده باقی می‌مانند.</p>
+
+<p>داده‌های کاربری گیرنده (حافظه‌ها، نشست‌ها، احراز هویت، ویرایش‌های خودش روی <code>.env</code>) همیشه در طول نصب اولیه و به‌روزرسانی‌های بعدی حفظ می‌شود.</p>
+
+<div class="callout note">
+  <div class="callout-title">ℹ️ توجه</div>
+  <p>دو راه برای اشتراک‌گذاری پروفایل وجود دارد و مکمل یکدیگرند. ‏<code>hermes profile export</code> / <code>import</code> (و در گفتگو هم <code>/export</code> و <code>/import</code>) یک <b>فایل تکی</b> تولید می‌کنند — بدون مخزن، بدون مانیفست، و خروجی دسکتاپ تم و چیدمان شما را هم حمل می‌کند. توزیع (<code>install</code> / <code>update</code> / <code>info</code>) پروفایل را به‌شکل <b>مخزن گیت</b> منتشر می‌کند تا گیرندگان بعداً به‌روزرسانی‌های نسخه‌دار را بگیرند. کار دیگر فایل خروجی، پشتیبان‌گیری و بازیابی است. <a href="../user-guide/profile-distributions.html#two-ways-to-share-a-profile">دو راه اشتراک‌گذاری پروفایل</a> را ببینید.</p>
+</div>
+
+<h3><code>hermes profile install</code></h3>
+
+<pre dir="ltr"><code>hermes profile install &lt;source&gt; [--name &lt;name&gt;] [--alias] [--force] [--yes]
+</code></pre>
+
+<p>یک توزیع پروفایل را از URL گیت یا یک پوشهٔ محلی نصب می‌کند.</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>گزینه</th><th>توضیح</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>&lt;source&gt;</code></td><td>URL گیت (<code>github.com/user/repo</code>، ‏<code>https://...</code>، ‏<code>git@...</code>، ‏<code>ssh://</code>، ‏<code>git://</code>) یا پوشهٔ محلی‌ای که <code>distribution.yaml</code> در ریشهٔ آن باشد.</td></tr>
+    <tr><td><code>--name NAME</code></td><td>نام پروفایل را نسبت به مانیفست بازنویسی می‌کند.</td></tr>
+    <tr><td><code>--alias</code></td><td>علاوه بر آن یک wrapper شل هم می‌سازد (مثلاً <code>telemetry</code> ← <code>hermes -p telemetry</code>).</td></tr>
+    <tr><td><code>--force</code></td><td>پروفایل هم‌نام موجود را بازنویسی می‌کند. داده‌های کاربر همچنان حفظ می‌شوند.</td></tr>
+    <tr><td><code>-y</code>، ‏<code>--yes</code></td><td>از پرسش تأییدِ پیش‌نمایش مانیفست می‌پرد.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>نصب‌کننده مانیفست را نشان می‌دهد، متغیرهای محیطی موردنیاز را فهرست می‌کند و پیش از گرفتن تأیید، دربارهٔ کارهای کرون هشدار می‌دهد. متغیرهای محیطی الزامی در فایلی به‌نام <code>.env.EXAMPLE</code> می‌روند که آن را به <code>.env</code> کپی و پر می‌کنید.</p>
+
+<p><b>مثال‌ها:</b></p>
+
+<pre dir="ltr"><code># نصب از یک مخزن GitHub (شکل کوتاه)
+hermes profile install github.com/kyle/telemetry-distribution --alias
+
+# نصب از یک URL کامل HTTPS گیت
+hermes profile install https://github.com/kyle/telemetry-distribution.git
+
+# نصب از SSH
+hermes profile install git@github.com:kyle/telemetry-distribution.git
+
+# نصب از پوشهٔ محلی در حین توسعه
+hermes profile install ./telemetry/
+</code></pre>
+
+<h3><code>hermes profile update</code></h3>
+
+<pre dir="ltr"><code>hermes profile update &lt;name&gt; [--force-config] [--yes]
+</code></pre>
+
+<p>توزیع را از منبع ثبت‌شده‌اش دوباره کلون می‌کند و به‌روزرسانی‌ها را اعمال می‌کند. فایل‌های متعلق به توزیع (‏<code>SOUL.md</code>، ‏<code>skills/</code>، ‏<code>cron/</code>، ‏<code>mcp.json</code>) بازنویسی می‌شوند؛ داده‌های کاربر (حافظه‌ها، نشست‌ها، احراز هویت، ‏<code>.env</code>) هرگز دست نمی‌خورند.</p>
+
+<p>‏<code>config.yaml</code> به‌طور پیش‌فرض حفظ می‌شود تا بازنویسی‌های محلی شما بماند. برای ریست‌کردن آن به پیکربندیِ ارسالی توزیع، <code>--force-config</code> را بدهید.</p>
+
+<h3><code>hermes profile info</code></h3>
+
+<pre dir="ltr"><code>hermes profile info &lt;name&gt;
+</code></pre>
+
+<p>مانیفست توزیع پروفایل را چاپ می‌کند — نام، نسخه، نسخهٔ الزامی Hermes، نویسنده، الزامات متغیرهای محیطی، URL/مسیر منبع و مهر زمانیِ <code>Installed:</code> که در آخرین <code>install</code> یا <code>update</code> ثبت شده است. برای بررسی اینکه یک پروفایل اشتراکی قبل از نصب به چه چیزی نیاز دارد کاربرد دارد، و برای پیدا کردن مواردی مثل «این پروفایل ۶ ماه پیش نصب شده و از آن زمان به‌روزرسانی نشده».</p>
+
+<p>‏<code>hermes profile list</code> هم نام و نسخهٔ توزیع را در یک ستون <code>Distribution</code> نشان می‌دهد و <code>hermes profile show &lt;name&gt;</code> / <code>delete &lt;name&gt;</code> هم URL منبع را نمایش می‌دهند تا یک‌نگاهی بفهمید کدام پروفایل‌ها از مخزن گیت آمده‌اند و کدام‌ها محلی ساخته شده‌اند.</p>
+
+<h3>توزیع‌های خصوصی</h3>
+
+<p>یک مخزن گیت خصوصی بدون هیچ پیکربندی اضافه‌ای به‌عنوان منبع توزیع کار می‌کند — نصب، کار <code>git</code> عادی شما را صدا می‌زند، پس هر احراز هویتی که شل شما از قبل برایش تنظیم است (کلید SSH، helper مربوط به <code>git credential</code>، اعتبارنامه‌های HTTPS ذخیره‌شدهٔ GitHub CLI) شفاف اعمال می‌شود.</p>
+
+<pre dir="ltr"><code># از کلید SSH شما استفاده می‌کند، مثل هر git clone دیگری
+hermes profile install git@github.com:your-org/internal-assistant.git
+
+# از git credential helper شما استفاده می‌کند
+hermes profile install https://github.com/your-org/internal-assistant.git
+</code></pre>
+
+<p>اگر در حین نصب، عمل کلون در ترمینال شما به‌صورت تعاملی اعتبارنامه بخواهد، همان پرسش به داخل عبور می‌کند. اول احراز هویت‌تان را همان‌طور که معمولاً برای <code>git clone</code> روی همان مخزن استفاده می‌کنید راه بیندازید، بعد نصب کنید.</p>
+
+<h3>مانیفست توزیع (<code>distribution.yaml</code>)</h3>
+
+<p>هر توزیع یک <code>distribution.yaml</code> در ریشهٔ مخزن خودش دارد:</p>
+
+<pre dir="ltr"><code>name: telemetry
+version: 0.1.0
+description: "Compliance monitoring harness"
+hermes_requires: "&gt;=0.12.0"
+author: "Your Name"
+license: "MIT"
+env_requires:
+  - name: OPENAI_API_KEY
+    description: "OpenAI API key"
+    required: true
+  - name: GRAPHITI_MCP_URL
+    description: "Memory graph URL"
+    required: false
+    default: "http://127.0.0.1:8000/sse"
+distribution_owned:   # اختیاری؛ پیش‌فرض‌ها: SOUL.md، config.yaml،
+                      #   mcp.json، skills/، cron/، distribution.yaml
+  - SOUL.md
+  - skills/compliance/
+  - cron/
+</code></pre>
+
+<p>‏<code>hermes_requires</code> از <code>&gt;=</code>، ‏<code>&lt;=</code>، ‏<code>==</code>، ‏<code>!=</code>، ‏<code>&gt;</code>، ‏<code>&lt;</code> یا یک نسخهٔ لخت (که <code>&gt;=</code> فرض می‌شود) پشتیبانی می‌کند. اگر نسخهٔ فعلی Hermes معیار را ارضا نکند، نصب با یک خطای واضح شکست می‌خورد.</p>
+
+<p>‏<code>distribution_owned</code> اختیاری است. اگر تنظیم شود، فقط همان مسیرها در به‌روزرسانی جایگزین می‌شوند؛ هر چیز دیگری در پروفایل متعلق به کاربر می‌ماند. اگر حذف شود، پیش‌فرض‌های بالا اعمال می‌شوند.</p>
+
+<h3>انتشار یک توزیع</h3>
+
+<p>ساختن یک توزیع فقط یک git push است:</p>
+
+<ol>
+  <li>در پوشهٔ پروفایل‌تان، یک <code>distribution.yaml</code> با دست‌کم <code>name</code> و <code>version</code> بسازید.</li>
+  <li>یک مخزن گیت مقداردهی اولیه کنید (یا از مخزن موجود استفاده کنید) و به GitHub / GitLab / هر میزبانی که Hermes بتواند از آن کلون کند push بزنید.</li>
+  <li>به گیرندگان بگویید <code>hermes profile install &lt;your-repo-url&gt;</code> را اجرا کنند.</li>
+</ol>
+
+<p>برای انتشارهای نسخه‌دار از تگ‌های گیت استفاده کنید — گیرندگانی که <code>HEAD</code> را کلون می‌کنند آخرین وضعیت شما را می‌گیرند و شما همیشه می‌توانید <code>version:</code> را در مانیفست بالا ببرید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> <code>hermes -p</code> / <code>hermes --profile</code></h2>
+<pre dir="ltr"><code>hermes -p &lt;name&gt; &lt;command&gt; [options]
+hermes --profile &lt;name&gt; &lt;command&gt; [options]
+</code></pre>
+
+<p>فلگ سراسری برای اجرای هر فرمان Hermes تحت یک پروفایل مشخص، بدون تغییر پیش‌فرض چسبنده. این فلگ پروفایل فعال را فقط برای طول همان فرمان بازنویسی می‌کند.</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>گزینه</th><th>توضیح</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>-p &lt;name&gt;</code>، ‏<code>--profile &lt;name&gt;</code></td><td>پروفایلی که برای این فرمان استفاده می‌شود.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p><b>مثال‌ها:</b></p>
+
+<pre dir="ltr"><code>hermes -p work chat -q "Check the server status"
+hermes --profile dev gateway start
+hermes -p personal skills list
+hermes -p work config edit
+</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> <code>hermes completion</code></h2>
+<pre dir="ltr"><code>hermes completion &lt;shell&gt;
+</code></pre>
+
+<p>اسکریپت‌های تکمیل خودکار شل تولید می‌کند. شامل تکمیل نام پروفایل‌ها و زیرفرمان‌های پروفایل هم هست.</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>آرگومان</th><th>توضیح</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>&lt;shell&gt;</code></td><td>شلی که تکمیل خودکار برایش تولید می‌شود: <code>bash</code>، ‏<code>zsh</code> یا <code>fish</code>.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p><b>مثال‌ها:</b></p>
+
+<pre dir="ltr"><code># نصب تکمیل خودکار
+hermes completion bash &gt;&gt; ~/.bashrc
+hermes completion zsh &gt;&gt; ~/.zshrc
+hermes completion fish &gt; ~/.config/fish/completions/hermes.fish
+
+# بارگذاری دوباره شل
+source ~/.bashrc
+</code></pre>
+
+<p>بعد از نصب، تکمیل با Tab برای این‌ها کار می‌کند:</p>
+<ul>
+  <li><code>hermes profile &lt;TAB&gt;</code> — زیرفرمان‌ها (‏<code>list</code>، ‏<code>use</code>، ‏<code>create</code> و غیره)</li>
+  <li><code>hermes profile use &lt;TAB&gt;</code> — نام پروفایل‌ها</li>
+  <li><code>hermes -p &lt;TAB&gt;</code> — نام پروفایل‌ها</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> ببینید همچنین</h2>
+<ul>
+  <li><a href="../user-guide/profiles.html">راهنمای کاربری پروفایل‌ها</a></li>
+  <li><a href="cli-commands.html">مرجع فرمان‌های CLI</a></li>
+  <li><a href="faq.html#profiles">سؤالات متداول — بخش پروفایل‌ها</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="slash-commands.html"><span class="dir">→ قبلی</span><span class="ttl">فرمان‌های اسلش (/)</span></a>
+  <a class="next" href="environment-variables.html"><span class="dir">بعدی ←</span><span class="ttl">متغیرهای محیطی</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/reference/profile-commands" target="_blank" rel="noopener">Profile Commands Reference</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

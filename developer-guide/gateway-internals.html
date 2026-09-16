@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>درون‌مایهٔ گیت‌وی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/gateway-internals" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>درون‌مایهٔ گیت‌وی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>درون‌مایهٔ گیت‌وی</h1>
+<p>گیت‌وی پیام‌رسان، فرایند طولانی‌اجراست که هرمس را از طریق یک معماری یکپارچه به بیش از ۲۰ پلتفرم پیام‌رسانی خارجی وصل می‌کند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> فایل‌های کلیدی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فایل</th><th>کاربرد</th></tr></thead>
+  <tbody>
+    <tr><td><code>gateway/run.py</code></td><td><code>GatewayRunner</code> — حلقهٔ اصلی، فرمان‌های اسلش، ارسال پیام (فایل بزرگ؛ برای تعداد خطوط فعلی گیت را ببینید)</td></tr>
+    <tr><td><code>gateway/session.py</code></td><td><code>SessionStore</code> — پایدارسازی گفتگو و ساخت کلید نشست</td></tr>
+    <tr><td><code>gateway/delivery.py</code></td><td>تحویل پیام خروجی به پلتفرم‌ها/کانال‌های مقصد</td></tr>
+    <tr><td><code>gateway/pairing.py</code></td><td>جریان جفت‌سازی (pairing) DM برای مجوزدهی به کاربر</td></tr>
+    <tr><td><code>gateway/channel_directory.py</code></td><td>نگاشت شناسه‌های گفتگو به نام‌های خوانا برای تحویل کرون</td></tr>
+    <tr><td><code>gateway/hooks.py</code></td><td>یافتن، بارگذاری و ارسال رویدادهای چرخهٔ حیات هوک‌ها</td></tr>
+    <tr><td><code>gateway/mirror.py</code></td><td>آینه‌سازی پیام بین نشست‌ها برای <code>send_message</code></td></tr>
+    <tr><td><code>gateway/status.py</code></td><td>مدیریت قفل توکن برای نمونه‌های گیت‌وی دامنه‌دار به پروفایل</td></tr>
+    <tr><td><code>gateway/builtin_hooks/</code></td><td>نقطهٔ توسعه برای هوک‌های همیشه‌ثبت‌شده (هیچ‌کدام عرضه نشده است)</td></tr>
+    <tr><td><code>gateway/platform_registry.py</code></td><td>ثبت آداپتورها، کارخانه‌ها و بارگذارهای مؤخر (تنبل) برای پلاگین‌های پلتفرمِ همراه</td></tr>
+    <tr><td><code>plugins/platforms/&lt;name&gt;/</code></td><td>آداپتورهای پیام‌رسانیِ همراه (بیشتر پلتفرم‌ها: <code>adapter.py</code> + <code>plugin.yaml</code>)</td></tr>
+    <tr><td><code>gateway/platforms/</code></td><td><code>base.py</code> مشترک به‌علاوهٔ آداپتورهای قدیمی/مستقیم (Signal، سرور API، وب‌هوک‌ها و...)</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> نگاه کلی معماری</h2>
+<pre dir="ltr"><code>┌─────────────────────────────────────────────────┐
+│                  GatewayRunner                  │
+│                                                 │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐       │
+│  │ Telegram │  │ Discord  │  │  Slack   │       │
+│  │ Adapter  │  │ Adapter  │  │ Adapter  │       │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘       │
+│       │             │             │             │
+│       └─────────────┼─────────────┘             │
+│                     ▼                           │
+│              _handle_message()                  │
+│                     │                           │
+│         ┌───────────┼───────────┐               │
+│         ▼           ▼           ▼               │
+│  Slash command   AIAgent    Queue/BG            │
+│    dispatch      creation   sessions            │
+│                     │                           │
+│                     ▼                           │
+│                 SessionStore                    │
+│              (SQLite persistence)               │
+└───────┴─────────────┴─────────────┴─────────────┘</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> جریان پیام</h2>
+<p>وقتی پیامی از هر پلتفرمی می‌رسد:</p>
+<ol>
+<li><strong>آداپتور پلتفرم</strong> رویداد خام را می‌گیرد و آن را به یک <code>MessageEvent</code> نرمال‌سازی می‌کند</li>
+<li><strong>آداپتور پایه</strong> گارد نشست فعال را بررسی می‌کند:
+  <ul>
+  <li>اگر برای این نشست ایجنت در حال اجرا باشد ← پیام صف می‌شود و رویداد وقفه (interrupt) ست می‌شود</li>
+  <li>برای <code>/approve</code>، <code>/deny</code> و <code>/stop</code> ← از گارد عبور می‌کند (به‌صورت درون‌خطی ارسال می‌شود)</li>
+  </ul>
+</li>
+<li><strong>GatewayRunner._handle_message()</strong> رویداد را می‌گیرد:
+  <ul>
+  <li>حل کلید نشست از طریق <code>_session_key_for_source()</code> (قالب: <code>agent:main:{platform}:{chat_type}:{chat_id}</code>)</li>
+  <li>بررسی مجوزدهی (بخش مجوزدهی را پایین ببینید)</li>
+  <li>بررسی این‌که فرمان اسلش است یا نه ← ارسال به کنترل‌کنندهٔ فرمان</li>
+  <li>بررسی این‌که ایجنت از قبل در حال اجراست ← رهگیری فرمان‌هایی مثل <code>/stop</code> و <code>/status</code></li>
+  <li>در غیر این صورت ← ساختن نمونهٔ <code>AIAgent</code> و اجرای گفتگو</li>
+  </ul>
+</li>
+<li><strong>پاسخ</strong> از طریق آداپتور پلتفرم به عقب برمی‌گردد</li>
+</ol>
+<h3>قالب کلید نشست</h3>
+<p>کلیدهای نشست، کل زمینهٔ مسیریابی را رمزگذاری می‌کنند:</p>
+<pre dir="ltr"><code>agent:main:{platform}:{chat_type}:{chat_id}</code></pre>
+<p>برای مثال: <code>agent:main:telegram:private:123456789</code></p>
+<p>پلتفرم‌های آگاه از ترید (موضوعات فروم Telegram، تریدهای Discord و Slack) ممکن است شناسه‌های ترید را در بخش <code>chat_id</code> بگنجانند. <strong>هرگز کلید نشست را دستی نسازید</strong> — همیشه از <code>build_session_key()</code> در <code>gateway/session.py</code> استفاده کنید.</p>
+<h3>گارد دومرحله‌ای پیام</h3>
+<p>وقتی ایجنت فعالانه در حال اجراست، پیام‌های ورودی از دو گارد پشت‌سرهم عبور می‌کنند:</p>
+<ol>
+<li><strong>سطح ۱ — آداپتور پایه</strong> (<code>gateway/platforms/base.py</code>): <code>_active_sessions</code> را بررسی می‌کند. اگر نشست فعال باشد، پیام را در <code>_pending_messages</code> صف می‌کند و یک رویداد وقفه ست می‌کند. این گارد پیام‌ها را <em>قبل از</em> رسیدن به اجراکنندهٔ گیت‌وی می‌گیرد.</li>
+<li><strong>سطح ۲ — اجراکنندهٔ گیت‌وی</strong> (<code>gateway/run.py</code>): <code>_running_agents</code> را بررسی می‌کند. فرمان‌های خاص (<code>/stop</code>، <code>/new</code>، <code>/queue</code>، <code>/status</code>، <code>/approve</code>، <code>/deny</code>) را رهگیری و به‌درستی مسیریابی می‌کند. هر چیز دیگری باعث <code>running_agent.interrupt()</code> می‌شود.</li>
+</ol>
+<p>فرمان‌هایی که باید وقتی ایجنت گیر کرده به اجراکننده برسند (مثل <code>/approve</code>) به‌صورت <strong>درون‌خطی</strong> از طریق <code>await self._message_handler(event)</code> ارسال می‌شوند — این فرمان‌ها از سامانهٔ تسک پس‌زمینه عبور می‌کنند تا شرایط مسابقه (race condition) پیش نیاید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مجوزدهی</h2>
+<p>گیت‌وی از بررسی مجوز چندلایه‌ای استفاده می‌کند که به این ترتیب ارزیابی می‌شود:</p>
+<ol>
+<li><strong>فلگ allow-all مخصوص هر پلتفرم</strong> (مثلاً <code>TELEGRAM_ALLOW_ALL_USERS</code>) — اگر ست شده باشد، همهٔ کاربران آن پلتفرم مجاز می‌شوند</li>
+<li><strong>فهرست مجاز پلتفرم</strong> (مثلاً <code>TELEGRAM_ALLOWED_USERS</code>) — شناسه‌های کاربر جداشده با ویرگول</li>
+<li><strong>جفت‌سازی DM</strong> — کاربران احراز هویت‌شده می‌توانند با یک کد جفت‌سازی، کاربران جدید را جفت کنند</li>
+<li><strong>allow-all سراسری</strong> (<code>GATEWAY_ALLOW_ALL_USERS</code>) — اگر ست شده باشد، همهٔ کاربران در همهٔ پلتفرم‌ها مجاز می‌شوند</li>
+<li><strong>پیش‌فرض: رد</strong> — کاربران بدون مجوز رد می‌شوند</li>
+</ol>
+<h3>جریان جفت‌سازی DM</h3>
+<pre dir="ltr"><code>Admin: /pair
+Gateway: "Pairing code: ABC123. Share with the user."
+New user: ABC123
+Gateway: "Paired! You're now authorized."</code></pre>
+<p>وضعیت جفت‌سازی در <code>gateway/pairing.py</code> پایدار می‌شود و از ری‌استارت‌ها جان سالم به در می‌برد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> ارسال فرمان اسلش</h2>
+<p>همهٔ فرمان‌های اسلش در گیت‌وی از یک خط لولهٔ حل‌شدن یکسان عبور می‌کنند:</p>
+<ol>
+<li><code>resolve_command()</code> از <code>hermes_cli/commands.py</code> ورودی را به نام کانونی نگاشت می‌کند (نام‌های مستعار و تطبیق پیشوند را هندل می‌کند)</li>
+<li>نام کانونی با <code>GATEWAY_KNOWN_COMMANDS</code> بررسی می‌شود</li>
+<li>کنترل‌کنندهٔ موجود در <code>_handle_message()</code> بر اساس نام کانونی ارسال می‌کند</li>
+<li>بعضی فرمان‌ها به پیکربندی گیت می‌خورند (<code>gateway_config_gate</code> روی <code>CommandDef</code>)</li>
+</ol>
+<h3>گارد ایجنتِ در حال اجرا</h3>
+<p>فرمان‌هایی که نباید حین پردازش ایجنت اجرا شوند، زود رد می‌شوند:</p>
+<pre dir="ltr"><code>if _quick_key in self._running_agents:
+    if canonical == "model":
+        return "⏳ Agent is running — wait for it to finish or /stop first."</code></pre>
+<p>فرمان‌های عبورکننده از گارد (<code>/stop</code>، <code>/new</code>، <code>/approve</code>، <code>/deny</code>، <code>/queue</code>، <code>/status</code>) هندل خاص دارند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> منابع پیکربندی</h2>
+<p>گیت‌وی پیکربندی را از چند منبع می‌خواند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>منبع</th><th>چه چیزی فراهم می‌کند</th></tr></thead>
+  <tbody>
+    <tr><td><code>~/.hermes/.env</code></td><td>کلیدهای API، توکن‌های بات، اعتبارنامه‌های پلتفرم</td></tr>
+    <tr><td><code>~/.hermes/config.yaml</code></td><td>تنظیمات مدل، پیکربندی ابزار، گزینه‌های نمایش</td></tr>
+    <tr><td>متغیرهای محیطی</td><td>بازنویسی هر یک از موارد بالا</td></tr>
+  </tbody>
+</table>
+</div>
+<p>برخلاف CLI (که از <code>load_cli_config()</code> با پیش‌فرض‌های هاردکدشده استفاده می‌کند)، گیت‌وی <code>config.yaml</code> را مستقیماً و با بارگذار YAML می‌خواند. یعنی کلیدهای پیکربندی که در دیکشنری پیش‌فرض‌های CLI هستند ولی در فایل پیکربندی کاربر نیستند، ممکن است بین CLI و گیت‌وی رفتار متفاوتی داشته باشند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> آداپتورهای پلتفرم</h2>
+<p>بیشتر پلتفرم‌های پیام‌رسانی به‌صورت آداپتورهای پلاگینی زیر <code>plugins/platforms/&lt;name&gt;/adapter.py</code> عرضه می‌شوند؛ چند آداپتور قدیمی هم هنوز مستقیماً در <code>gateway/platforms/</code> زندگی می‌کنند. همه از <code>BasePlatformAdapter</code> در <code>gateway/platforms/base.py</code> ارث می‌برند:</p>
+<pre dir="ltr"><code>plugins/platforms/                  # آداپتورهای بسته‌بندی‌شده به‌صورت پلاگین (هر کدام یک پوشه)
+├── telegram/adapter.py     # Telegram Bot API (long polling یا وب‌هوک)
+├── discord/adapter.py      # بات Discord از طریق discord.py
+├── slack/adapter.py        # Slack Socket Mode
+├── whatsapp/adapter.py     # WhatsApp Business Cloud API
+├── matrix/adapter.py       # Matrix از طریق mautrix (E2EE اختیاری)
+├── mattermost/adapter.py   # Mattermost WebSocket API
+├── email/adapter.py        # ایمیل از طریق IMAP/SMTP
+├── sms/adapter.py          # پیامک از طریق Twilio
+├── dingtalk/adapter.py     # DingTalk WebSocket
+├── feishu/adapter.py       # Feishu/Lark WebSocket یا وب‌هوک
+├── wecom/adapter.py        # WeCom (WeChat Work) callback
+├── line/adapter.py         # LINE Messaging API
+├── teams/adapter.py        # Microsoft Teams
+├── irc/adapter.py          # IRC (نمونهٔ مرجع scoped-lock)
+├── homeassistant/adapter.py # یکپارچگی گفتگوی Home Assistant
+└── …                       # google_chat، ntfy، photon، raft، simplex و…
+
+gateway/platforms/                  # base هسته + آداپتورهای مستقیم قدیمی
+├── base.py              # BasePlatformAdapter — منطق مشترک همهٔ پلتفرم‌ها
+├── signal.py            # Signal از طریق signal-cli REST API
+├── weixin.py            # Weixin (WeChat شخصی) از طریق iLink Bot API
+├── bluebubbles.py       # Apple iMessage از طریق سرور BlueBubbles در macOS
+├── qqbot/               # QQ Bot (Tencent QQ) از طریق Official API v2 (زیر-پکیج)
+├── yuanbao.py           # آداپتور DM/گروه Yuanbao (Tencent)
+├── msgraph_webhook.py   # وب‌هوک اعلان تغییر Microsoft Graph (Teams، Outlook و...)
+├── webhook.py           # آداپتور وب‌هوک ورودی/خروجی
+└── api_server.py        # آداپتور سرور REST API</code></pre>
+<p><strong>بارگذاری مؤخر:</strong> پلاگین‌های همراهِ <code>kind: platform</code> بارگذارهای ارزان <code>register_deferred</code> را در <code>gateway/platform_registry.py</code> (از طریق <code>hermes_cli/plugins.py</code>) ثبت می‌کنند تا SDKهای پلتفرم فقط وقتی ایمپورت شوند که گیت‌وی استارت بخورد، تحویل انجام دهد یا setup/status را اجرا کند — نه روی <code>hermes chat</code> ساده. حل‌شدن، هنگام جستجو فقط یک آداپتور را بار می‌کند؛ شمارش کامل، بارگذارهای در انتظار را فقط روی مسیرهایی اجرا می‌کند که به همهٔ پلتفرم‌ها نیاز دارند.</p>
+<p>پلتفرم‌های آزمایشیِ متکی به کانکتور به‌جای ماژول مستقیم پلتفرم، از آداپتور رلهٔ عمومی در <code>gateway/relay/</code> استفاده می‌کنند. وقتی <code>GATEWAY_RELAY_URL</code> یا <code>gateway.relay_url</code> پیکربندی شده باشد، گیت‌وی پلتفرم <code>relay</code> را ثبت می‌کند، از طریق یک WebSocket خروجی به کانکتور وصل می‌شود و فریم‌های <code>descriptor</code>، <code>inbound</code> و <code>interrupt_inbound</code> را روی همان سوکت می‌گیرد. کانکتور یک <code>CapabilityDescriptor</code> اعلام می‌کند؛ هرمس می‌تواند پاسخ‌های خروجی عادی، عملیات‌های <code>follow_up</code> بدون توکن و فریم‌های وقفه را از طریق رله برگرداند. قرارداد سیمِ مبتنی بر سورس در <a href="https://github.com/NousResearch/hermes-agent/blob/main/docs/relay-connector-contract.md" target="_blank" rel="noopener"><code>docs/relay-connector-contract.md</code></a> است.</p>
+<p>آداپتورها یک رابط مشترک را پیاده‌سازی می‌کنند:</p>
+<ul>
+<li><code>connect()</code> / <code>disconnect()</code> — مدیریت چرخهٔ حیات</li>
+<li><code>send()</code> — تحویل پیام خروجی</li>
+<li>رویدادهای ورودی به یک <code>MessageEvent</code> نرمال‌سازی و از طریق <code>handle_message()</code> فوروارد می‌شوند</li>
+</ul>
+<h3>قفل‌های توکن</h3>
+<p>آداپتورهایی که با اعتبارنامه‌های یکتا وصل می‌شوند، در <code>connect()</code> تابع <code>acquire_scoped_lock()</code> و در <code>disconnect()</code> تابع <code>release_scoped_lock()</code> را صدا می‌زنند. این کار جلوگیری می‌کند که دو پروفایل هم‌زمان از یک توکن بات استفاده کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> مسیر تحویل</h2>
+<p>تحویل‌های خروجی (<code>gateway/delivery.py</code>) این کارها را انجام می‌دهند:</p>
+<ul>
+<li><strong>پاسخ مستقیم</strong> — فرستادن پاسخ به همان گفتگوی مبدأ</li>
+<li><strong>تحویل به کانال خانه</strong> — مسیریابی خروجی‌های کارهای کرون و نتایج پس‌زمینه به یک کانال خانهٔ پیکربندی‌شده</li>
+<li><strong>تحویل به مقصد صریح</strong> — موتور ارسال با تعیین مقصدی مثل <code>telegram:-1001234567890</code>؛ از طریق <a href="../guides/pipe-script-output.html">CLI به نام <code>hermes send</code></a> برای اسکریپت‌های شل و از طریق مقصدهای <code>deliver:</code> کرون در دسترس است</li>
+<li><strong>تحویل بین‌پلتفرمی</strong> — تحویل به پلتفرمی غیر از پلتفرم پیام مبدأ</li>
+</ul>
+<p>تحویل‌های کارهای کرون به تاریخچهٔ نشست گیت‌وی آینه‌سازی <strong>نمی‌شوند</strong> — آن‌ها فقط در نشست کرون خودشان زندگی می‌کنند. این یک انتخاب عمدی طراحی برای جلوگیری از نقض تناوب پیام‌ها (message alternation) است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> هوک‌ها</h2>
+<p>هوک‌های گیت‌وی ماژول‌های پایتونی هستند که به رویدادهای چرخهٔ حیات پاسخ می‌دهند:</p>
+<h3>رویدادهای هوک گیت‌وی</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>رویداد</th><th>چه زمانی فعال می‌شود</th></tr></thead>
+  <tbody>
+    <tr><td><code>gateway:startup</code></td><td>پروسس گیت‌وی استارت می‌خورد</td></tr>
+    <tr><td><code>session:start</code></td><td>نشست گفتگوی جدید آغاز می‌شود</td></tr>
+    <tr><td><code>session:end</code></td><td>نشست کامل می‌شود یا زمانش تمام می‌شود</td></tr>
+    <tr><td><code>session:reset</code></td><td>کاربر نشست را با <code>/new</code> ریست می‌کند</td></tr>
+    <tr><td><code>agent:start</code></td><td>ایجنت پردازش یک پیام را شروع می‌کند</td></tr>
+    <tr><td><code>agent:step</code></td><td>ایجنت یک تکرار فراخوانی ابزار را کامل می‌کند</td></tr>
+    <tr><td><code>agent:end</code></td><td>ایجنت کارش تمام می‌شود و پاسخ برمی‌گرداند</td></tr>
+    <tr><td><code>command:*</code></td><td>هر فرمان اسلشی اجرا می‌شود</td></tr>
+  </tbody>
+</table>
+</div>
+<p>هوک‌ها از <code>gateway/builtin_hooks/</code> (نقطهٔ توسعه — در توزیع عرضه‌شده فعلاً خالی است؛ <code>_register_builtin_hooks()</code> یک استاب بدون عمل است) و <code>~/.hermes/hooks/</code> (نصب‌شده توسط کاربر) کشف می‌شوند. هر هوک یک پوشه است با یک مانیفست <code>HOOK.yaml</code> و <code>handler.py</code>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> یکپارچگی ارائه‌دهندهٔ حافظه</h2>
+<p>وقتی یک پلاگین ارائه‌دهندهٔ حافظه (مثلاً Honcho) فعال باشد:</p>
+<ol>
+<li>گیت‌وی برای هر پیام یک <code>AIAgent</code> با شناسهٔ نشست می‌سازد</li>
+<li><code>MemoryManager</code> ارائه‌دهنده را با زمینهٔ نشست مقداردهی اولیه می‌کند</li>
+<li>ابزارهای ارائه‌دهنده (مثلاً <code>honcho_profile</code>، <code>viking_search</code>) از این مسیر عبور می‌کنند:
+<pre dir="ltr"><code>AIAgent._invoke_tool()
+  → self._memory_manager.handle_tool_call(name, args)
+    → provider.handle_tool_call(name, args)</code></pre>
+</li>
+<li>در پایان/ریست نشست، <code>on_session_end()</code> برای پاک‌سازی و تخلیهٔ نهایی داده فعال می‌شود</li>
+</ol>
+<h3>چرخهٔ حیات تخلیهٔ حافظه</h3>
+<p>وقتی نشست ریست، از سر گرفته یا منقضی می‌شود:</p>
+<ol>
+<li>حافظه‌های داخلی روی دیسک تخلیه می‌شوند</li>
+<li>هوک <code>on_session_end()</code> ارائه‌دهندهٔ حافظه فعال می‌شود</li>
+<li>یک <code>AIAgent</code> موقت، یک نوبت گفتگوی فقط-حافظه اجرا می‌کند</li>
+<li>سپس زمینه دور انداخته یا آرشیو می‌شود</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> نگهداری پس‌زمینه</h2>
+<p>گیت‌وی نگهداری دوره‌ای را در کنار هندل پیام اجرا می‌کند:</p>
+<ul>
+<li><strong>تیک کرون</strong> — زمان‌بندی‌های کارها را بررسی و کارهای سررسیده را فعال می‌کند</li>
+<li><strong>انقضای نشست</strong> — نشست‌های رهاشده را بعد از timeout پاک می‌کند</li>
+<li><strong>تخلیهٔ حافظه</strong> — قبل از انقضای نشست، حافظه را پیش‌دستانه تخلیه می‌کند</li>
+<li><strong>تازه‌سازی کش</strong> — فهرست مدل‌ها و وضعیت ارائه‌دهنده را تازه می‌کند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> مدیریت پروسس</h2>
+<p>گیت‌وی به‌صورت یک پروسس ماندگار اجرا می‌شود و از این طریق مدیریت می‌شود:</p>
+<ul>
+<li><code>hermes gateway start</code> / <code>hermes gateway stop</code> — کنترل دستی</li>
+<li><code>systemctl</code> (لینوکس) یا <code>launchctl</code> (macOS) — مدیریت سرویس</li>
+<li>فایل PID در <code>~/.hermes/gateway.pid</code> — ردیابی پروسس در دامنهٔ پروفایل</li>
+</ul>
+<p><strong>دامنهٔ پروفایل در برابر سراسری</strong>: <code>start_gateway()</code> از فایل‌های PID دامنه‌دار به پروفایل استفاده می‌کند. <code>hermes gateway stop</code> فقط گیت‌وی پروفایل فعلی را متوقف می‌کند. <code>hermes gateway stop --all</code> با اسکن سراسری <code>ps aux</code> همهٔ پروسس‌های گیت‌وی را می‌کشد (در زمان به‌روزرسانی‌ها استفاده می‌شود).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> مستندات مرتبط</h2>
+<ul>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/session-storage" target="_blank" rel="noopener">ذخیره‌سازی نشست</a></li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/cron-internals" target="_blank" rel="noopener">درون‌مایهٔ Cron</a></li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/acp-internals" target="_blank" rel="noopener">درون‌مایهٔ ACP</a></li>
+<li><a href="agent-loop.html">درون‌مایهٔ حلقهٔ ایجنت</a></li>
+<li><a href="../user-guide/messaging/index.html">گیت‌وی پیام‌رسان (راهنمای کاربر)</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="context-compression-and-caching.html"><span class="dir">→ قبلی</span><span class="ttl">فشرده‌سازی و کش زمینه</span></a>
+  <a class="next" href="session-storage.html"><span class="dir">بعدی ←</span><span class="ttl">ذخیره‌سازی نشست</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/gateway-internals" target="_blank" rel="noopener">Gateway Internals</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

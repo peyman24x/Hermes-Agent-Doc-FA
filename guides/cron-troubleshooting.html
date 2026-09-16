@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>عیب‌یابی Cron — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/cron-troubleshooting" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>عیب‌یابی Cron</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>عیب‌یابی Cron</h1>
+<p>وقتی یک کار کرون آن‌طور که انتظار می‌رود رفتار نمی‌کند، این بررسی‌ها را به ترتیب انجام دهید. بیشتر مشکل‌ها در یکی از چهار دسته قرار می‌گیرند: زمان‌بندی، تحویل، مجوزها یا بارگذاری مهارت‌ها.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> کارها اجرا نمی‌شوند</h2>
+<h3>بررسی ۱: مطمئن شوید کار وجود دارد و فعال است</h3>
+<pre dir="ltr"><code>hermes cron list</code></pre>
+<p>کار را پیدا کنید و مطمئن شوید حالت آن <code>[active]</code> است (نه <code>[paused]</code> و نه <code>[completed]</code>). اگر <code>[completed]</code> نشان می‌دهد، شمارندهٔ تکرار احتمالاً تمام شده است — برای بازنشانی آن، کار را ویرایش کنید.</p>
+<h3>بررسی ۲: مطمئن شوید زمان‌بندی درست است</h3>
+<p>زمان‌بندی با قالب اشتباه، بی‌سروصدا به اجرای یک‌باره برمی‌گردد یا به‌طور کامل رد می‌شود. عبارت‌تان را تست کنید:</p>
+<div class="table-wrap">
+<table>
+<tr><th>عبارت شما</th><th>ارزیابی مورد انتظار</th></tr>
+<tr><td><code>0 9 * * *</code></td><td>هر روز ساعت ۹:۰۰ صبح</td></tr>
+<tr><td><code>0 9 * * 1</code></td><td>هر دوشنبه ساعت ۹:۰۰ صبح</td></tr>
+<tr><td><code>every 2h</code></td><td>هر ۲ ساعت از الان به بعد</td></tr>
+<tr><td><code>30m</code></td><td>۳۰ دقیقه از الان به بعد</td></tr>
+<tr><td><code>2025-06-01T09:00:00</code></td><td>۱ ژوئن ۲۰۲۵، ساعت ۹:۰۰ صبح به وقت UTC</td></tr>
+</table>
+</div>
+<p>اگر کار یک‌بار اجرا می‌شود و بعد از فهرست محو می‌شود، یعنی زمان‌بندیِ یک‌بارِ مصرف است (<code>30m</code>، <code>1d</code> یا یک مهر زمانی ISO) — این رفتار مورد انتظار است.</p>
+<h3>بررسی ۳: آیا گیت‌وی در حال اجراست؟</h3>
+<p>کارهای کرون توسط رشتهٔ تیکِ پس‌زمینهٔ گیت‌وی اجرا می‌شوند که هر ۶۰ ثانیه یک‌بار تیک می‌خورد. یک نشست چت عادی در CLI کارهای کرون را به‌طور خودکار اجرا <b>نمی‌کند</b>.</p>
+<p>اگر انتظار دارید کارها به‌طور خودکار اجرا شوند، به یک گیت‌وی در حال اجرا نیاز دارید (<code>hermes gateway</code> برای حالت پیش‌زمینه، یا <code>hermes gateway start</code> برای سرویس نصب‌شده). برای دیباگ‌های موردی، می‌توانید یک تیک را به‌صورت دستی با <code>hermes cron tick</code> راه بیندازید.</p>
+<h3>بررسی ۴: ساعت سیستم و منطقهٔ زمانی را چک کنید</h3>
+<p>کارها از منطقهٔ زمانی محلی استفاده می‌کنند. اگر ساعت ماشین‌تان اشتباه یا در منطقهٔ زمانی متفاوتی از آنچه انتظار دارید باشد، کارها در زمان‌های اشتباه اجرا می‌شوند. بررسی کنید:</p>
+<pre dir="ltr"><code>date
+hermes cron list   # مقایسهٔ زمان‌های next_run با زمان محلی</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> شکست‌های تحویل</h2>
+<h3>بررسی ۱: مطمئن شوید مقصد تحویل درست است</h3>
+<p>مقاصد تحویل به بزرگی/کوچکی حروف حساس‌اند و نیازمند پیکربندی درست پلتفرم مربوطه هستند. یک مقصد بدپیکربندی‌شده، پاسخ را بی‌سروصدا دور می‌ریزد.</p>
+<div class="table-wrap">
+<table>
+<tr><th>مقصد</th><th>نیازمندی</th></tr>
+<tr><td><code>telegram</code></td><td><code>TELEGRAM_BOT_TOKEN</code> در <code>~/.hermes/.env</code></td></tr>
+<tr><td><code>discord</code></td><td><code>DISCORD_BOT_TOKEN</code> در <code>~/.hermes/.env</code></td></tr>
+<tr><td><code>slack</code></td><td><code>SLACK_BOT_TOKEN</code> در <code>~/.hermes/.env</code></td></tr>
+<tr><td><code>whatsapp</code></td><td>گیت‌وی WhatsApp پیکربندی شده باشد</td></tr>
+<tr><td><code>signal</code></td><td>گیت‌وی Signal پیکربندی شده باشد</td></tr>
+<tr><td><code>matrix</code></td><td>هوم‌سرور Matrix پیکربندی شده باشد</td></tr>
+<tr><td><code>email</code></td><td>SMTP در <code>config.yaml</code> پیکربندی شده باشد</td></tr>
+<tr><td><code>sms</code></td><td>ارائه‌دهندهٔ SMS پیکربندی شده باشد</td></tr>
+<tr><td><code>local</code></td><td>دسترسی نوشتن به <code>~/.hermes/cron/output/</code></td></tr>
+<tr><td><code>origin</code></td><td>به چتی که کار در آن ساخته شده تحویل می‌دهد</td></tr>
+</table>
+</div>
+<p>سایر پلتفرم‌های پشتیبانی‌شده عبارت‌اند از <code>mattermost</code>، <code>homeassistant</code>، <code>dingtalk</code>، <code>feishu</code>، <code>wecom</code>، <code>weixin</code>، <code>bluebubbles</code>، <code>qqbot</code> و <code>webhook</code>. همچنین می‌توانید با دستور <code>platform:chat_id</code> یک چت مشخص را هدف بگیرید (مثلاً <code>telegram:-1001234567890</code>).</p>
+<p>اگر تحویل شکست بخورد، کار همچنان اجرا می‌شود — فقط به هیچ‌جا ارسال نمی‌شود. فیلد <code>last_error</code> را در <code>hermes cron list</code> چک کنید (اگر موجود باشد).</p>
+<h3>بررسی ۲: بررسی استفاده از <code>[SILENT]</code></h3>
+<p>اگر کار کرون‌تان هیچ خروجی‌ای تولید نکند، تحویل سرکوب می‌شود. اگر پاسخ ایجنت شامل نشانگر سکوت کرون یعنی <code>[SILENT]</code> باشد، تحویل سرکوب می‌شود. این رفتار برای کارهای پایش عمدی است — اما مطمئن شوید پرامپت‌تان اشتباهی همه‌چیز را سرکوب نمی‌کند.</p>
+<p>از پرامپت‌هایی مثل «فقط اگر چیزی تغییر نکرده بود با [SILENT] پاسخ بده» استفاده کنید. از ایجنت نخواهید که <code>[SILENT]</code> را داخل یک توضیح بلندتر بیاورد، چون کرون آن نشانگر را سیگنال سرکوب می‌داند.</p>
+<h3>بررسی ۳: مجوزهای توکن پلتفرم</h3>
+<p>باتِ هر پلتفرم پیام‌رسانی برای دریافت پیام‌ها به مجوزهای خاصی نیاز دارد. اگر تحویل بی‌سروصدا شکست می‌خورد:</p>
+<ul>
+<li><b>تلگرام:</b> بات باید در گروه/کانال مقصد ادمین باشد</li>
+<li><b>دیسکورد:</b> بات باید مجوز ارسال در کانال مقصد را داشته باشد</li>
+<li><b>اسلک:</b> بات باید به ورک‌اسپیس اضافه شده باشد و اسکوپ <code>chat:write</code> را داشته باشد</li>
+</ul>
+<h3>بررسی ۴: قاب‌بندی پاسخ</h3>
+<p>به‌صورت پیش‌فرض، پاسخ‌های کرون با یک سرصفحه و پاصفحه قاب‌بندی می‌شوند (<code>cron.wrap_response: true</code> در <code>config.yaml</code>). بعضی پلتفرم‌ها یا یکپارچه‌سازی‌ها ممکن است با این رفتار خوب کنار نیایند. برای غیرفعال‌کردن:</p>
+<pre dir="ltr"><code>cron:
+  wrap_response: false</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> شکست‌های بارگذاری مهارت</h2>
+<h3>بررسی ۱: مطمئن شوید مهارت‌ها نصب‌اند</h3>
+<pre dir="ltr"><code>hermes skills list</code></pre>
+<p>مهارت‌ها باید قبل از اینکه بتوان آن‌ها را به کارهای کرون وصل کرد نصب شده باشند. اگر مهارتی جا افتاده، اول آن را با <code>hermes skills install &lt;skill-name&gt;</code> یا از طریق <code>/skills</code> در CLI نصب کنید.</p>
+<h3>بررسی ۲: مقایسهٔ نام مهارت با نام پوشهٔ مهارت</h3>
+<p>نام مهارت‌ها به بزرگی/کوچکی حروف حساس است و باید با نام پوشهٔ مهارتِ نصب‌شده مطابقت داشته باشد. اگر کار شما <code>ai-funding-report</code> را مشخص کرده ولی پوشهٔ مهارت <code>ai-funding-daily-report</code> است، نام دقیق را از <code>hermes skills list</code> تأیید کنید.</p>
+<h3>بررسی ۳: مهارت‌هایی که به ابزارهای تعاملی نیاز دارند</h3>
+<p>کارهای کرون با تول‌ست‌های <code>cronjob</code>، <code>messaging</code> و <code>clarify</code>ِ غیرفعال اجرا می‌شوند. این کار جلوی ساخت بازگشتیِ کرون، ارسال مستقیم پیام (تحویل را زمان‌بند انجام می‌دهد) و پرامپت‌های تعاملی را می‌گیرد. اگر مهارتی به این تول‌ست‌ها تکیه کند، در بستر کرون کار نخواهد کرد.</p>
+<p>مستندات مهارت را چک کنید تا مطمئن شوید در حالت غیرتعاملی (headless) کار می‌کند.</p>
+<h3>بررسی ۴: ترتیب چند مهارت</h3>
+<p>وقتی از چند مهارت استفاده می‌کنید، آن‌ها به ترتیب بارگذاری می‌شوند. اگر مهارت A به زمینهٔ مهارت B وابسته است، مطمئن شوید B اول بارگذاری شود:</p>
+<pre dir="ltr"><code>/cron add "0 9 * * *" "..." --skill context-skill --skill target-skill</code></pre>
+<p>در این مثال، <code>context-skill</code> قبل از <code>target-skill</code> بارگذاری می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> خطاها و شکست‌های کار</h2>
+<h3>بررسی ۱: خروجی اخیر کار را مرور کنید</h3>
+<p>اگر کاری اجرا شده و شکست خورده، ممکن است بافت خطا را در این‌ها ببینید:</p>
+<ol>
+<li>چتی که کار به آن تحویل می‌دهد (اگر تحویل موفق بوده باشد)</li>
+<li><code>~/.hermes/logs/agent.log</code> برای پیام‌های زمان‌بند (یا <code>errors.log</code> برای هشدارها)</li>
+<li>فرادادهٔ <code>last_run</code> کار از طریق <code>hermes cron list</code></li>
+</ol>
+<h3>بررسی ۲: الگوهای رایج خطا</h3>
+<p><b>«No such file or directory» برای اسکریپت‌ها</b><br>
+مسیر <code>script</code> باید یک مسیر مطلق باشد (یا نسبی نسبت به پوشهٔ پیکربندی هرمس). بررسی کنید:</p>
+<pre dir="ltr"><code>ls ~/.hermes/scripts/your-script.py   # باید وجود داشته باشد
+hermes cron edit &lt;job_id&gt; --script ~/.hermes/scripts/your-script.py</code></pre>
+<p><b>«Skill not found» هنگام اجرای کار</b><br>
+مهارت باید روی ماشینی که زمان‌بند روی آن اجراست نصب شده باشد. اگر بین ماشین‌ها جابه‌جا می‌شوید، مهارت‌ها خودکار همگام نمی‌شوند — آن‌ها را با <code>hermes skills install &lt;skill-name&gt;</code> دوباره نصب کنید.</p>
+<p><b>کار اجرا می‌شود ولی چیزی تحویل نمی‌دهد</b><br>
+احتمالاً مشکل از مقصد تحویل است (به شکست‌های تحویل در بالا نگاهی بیندازید)، خروجی وجود ندارد، یا پاسخ شامل نشانگر سکوت کرون یعنی <code>[SILENT]</code> است.</p>
+<p><b>کار هنگ می‌کند یا تایم‌اوت می‌شود</b><br>
+زمان‌بند از تایم‌اوت مبتنی بر بی‌تحرکی استفاده می‌کند (پیش‌فرض ۶۰۰ ثانیه، قابل تنظیم با متغیر محیطی <code>HERMES_CRON_TIMEOUT</code>، مقدار <code>0</code> برای بی‌نهایت). ایجنت تا وقتی فعالانه ابزار فراخوانی می‌کند می‌تواند اجرا شود — تایمر فقط بعد از بی‌تحرکی ممتد فعال می‌شود. کارهای طولانی‌مدت باید برای جمع‌آوری داده از اسکریپت استفاده کنند و فقط نتیجه را تحویل بدهند.</p>
+<h3>بررسی ۳: تداخل قفل</h3>
+<p>زمان‌بند برای جلوگیری از هم‌پوشانی تیک‌ها از قفلِ مبتنی بر فایل استفاده می‌کند. اگر دو نمونه گیت‌وی در حال اجرا باشند (یا یک نشست CLI با گیت‌وی تداخل داشته باشد)، ممکن است کارها به تأخیر بیفتند یا از قلم بیفتند.</p>
+<p>پروسه‌های تکراری گیت‌وی را ببندید:</p>
+<pre dir="ltr"><code>ps aux | grep hermes
+# پروسه‌های تکراری را ببندید، فقط یکی را نگه دارید</code></pre>
+<h3>بررسی ۴: مجوزهای jobs.json</h3>
+<p>کارها در <code>~/.hermes/cron/jobs.json</code> ذخیره می‌شوند. اگر این فایل برای کاربر شما خواندنی/نوشتنی نباشد، زمان‌بند بی‌سروصدا شکست می‌خورد:</p>
+<pre dir="ltr"><code>ls -la ~/.hermes/cron/jobs.json
+chmod 600 ~/.hermes/cron/jobs.json   # باید متعلق به کاربر شما باشد</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> مشکلات کارایی</h2>
+<h3>شروعِ کند کار</h3>
+<p>هر کار کرون یک نشست AIAgent تازه می‌سازد که ممکن است شامل احراز هویت ارائه‌دهنده و بارگذاری مدل باشد. برای زمان‌بندی‌های حساس به زمان، زمان بافر اضافه کنید (مثلاً <code>0 8 * * *</code> به‌جای <code>0 9 * * *</code>).</p>
+<h3>کارهای هم‌پوشانِ بیش از حد</h3>
+<p>زمان‌بند کارها را در هر تیک به‌صورت ترتیبی اجرا می‌کند. اگر چند کار هم‌زمان سررسید شوند، پشت سر هم اجرا می‌شوند. برای جلوگیری از تأخیر، زمان‌بندی‌ها را پلکانی کنید (مثلاً <code>0 9 * * *</code> و <code>5 9 * * *</code> به‌جای اینکه هر دو در <code>0 9 * * *</code> باشند).</p>
+<h3>خروجی حجیم اسکریپت</h3>
+<p>اسکریپت‌هایی که مگابایت‌ها خروجی می‌ریزند ایجنت را کند می‌کنند و ممکن است به سقف توکن بخورند. در سطح اسکریپت فیلتر/خلاصه کنید — فقط چیزی را خروجی بدهید که ایجنت برای استدلال به آن نیاز دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> فرمان‌های تشخیصی</h2>
+<pre dir="ltr"><code>hermes cron list                    # نمایش همهٔ کارها، حالت‌ها و زمان‌های next_run
+hermes cron run &lt;job_id&gt;            # زمان‌بندی برای تیک بعدی (برای تست)
+hermes cron edit &lt;job_id&gt;           # رفع مشکلات پیکربندی
+hermes logs                         # مشاهدهٔ لاگ‌های اخیر هرمس
+hermes skills list                  # تأیید مهارت‌های نصب‌شده</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> کمک بیشتر</h2>
+<p>اگر این راهنما را کامل انجام داده‌اید و مشکل همچنان باقی است:</p>
+<ol>
+<li>کار را با <code>hermes cron run &lt;job_id&gt;</code> اجرا کنید (در تیک بعدی گیت‌وی اجرا می‌شود) و خروجی چت را برای خطاها زیر نظر بگیرید</li>
+<li><code>~/.hermes/logs/agent.log</code> را برای پیام‌های زمان‌بند و <code>~/.hermes/logs/errors.log</code> را برای هشدارها چک کنید</li>
+<li>در <a href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noopener">github.com/NousResearch/hermes-agent</a> یک ایشو باز کنید، همراه با:
+<ul>
+<li>شناسهٔ کار و زمان‌بندی</li>
+<li>مقصد تحویل</li>
+<li>آنچه انتظار داشتید در مقایسه با آنچه اتفاق افتاد</li>
+<li>پیام‌های خطای مرتبط از لاگ‌ها</li>
+</ul>
+</li>
+</ol>
+</section>
+
+<p><em>برای مرجع کامل کرون، به <a href="automate-with-cron.html">اتوماسیون با Cron</a> و <a href="../user-guide/features/cron.html">کارهای زمان‌بندی (Cron)</a> نگاهی بیندازید.</em></p>
+
+<div class="pager">
+  <a href="cron-script-only.html"><span class="dir">→ قبلی</span><span class="ttl">Cron فقط با اسکریپت (بدون LLM)</span></a>
+  <a class="next" href="desktop-native-signin.html"><span class="dir">بعدی ←</span><span class="ttl">ورود بومی دسکتاپ (RFC 8252)</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/cron-troubleshooting" target="_blank" rel="noopener">Cron Troubleshooting</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

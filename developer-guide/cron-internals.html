@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>درون‌مایهٔ Cron — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/cron-internals" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>درون‌مایهٔ Cron</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>درون‌مایهٔ Cron</h1>
+<p>زیرسیستم کرون، اجرای وظایف زمان‌بندی‌شده را فراهم می‌کند — از تأخیرهای سادهٔ یک‌بارمصرف تا کارهای تکرارشوندهٔ مبتنی بر عبارت cron، همراه با تزریق مهارت و تحویلِ بین‌پلتفرمی.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> فایل‌های کلیدی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فایل</th><th>هدف</th></tr></thead>
+  <tbody>
+    <tr><td><code>cron/jobs.py</code></td><td>مدل کار، ذخیره‌سازی، خواندن/نوشتن اتمیک <code>jobs.json</code></td></tr>
+    <tr><td><code>cron/scheduler.py</code></td><td>حلقهٔ زمان‌بند — تشخیص کارهای سررسیده، اجرا، پیگیری تکرار</td></tr>
+    <tr><td><code>tools/cronjob_tools.py</code></td><td>ثبت و هندلر ابزار <code>cronjob</code> رو به مدل</td></tr>
+    <tr><td><code>gateway/run.py</code></td><td>یکپارچگی گیت‌وی — تیک‌خوردنِ کرون در حلقهٔ بلندمدت</td></tr>
+    <tr><td><code>hermes_cli/cron.py</code></td><td>زیرفرمان‌های <code>hermes cron</code> در CLI</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> مدل زمان‌بندی</h2>
+<p>چهار قالب زمان‌بندی پشتیبانی می‌شود:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>قالب</th><th>مثال</th><th>رفتار</th></tr></thead>
+  <tbody>
+    <tr><td><strong>تأخیر نسبی</strong></td><td><code>30m</code>، <code>2h</code>، <code>1d</code></td><td>یک‌بارمصرف؛ پس از مدتِ مشخص اجرا می‌شود</td></tr>
+    <tr><td><strong>بازه‌ای</strong></td><td><code>every 2h</code>، <code>every 30m</code></td><td>تکرارشونده؛ در فواصل منظم اجرا می‌شود</td></tr>
+    <tr><td><strong>عبارت cron</strong></td><td><code>0 9 * * *</code></td><td>سینتکس استاندارد ۵ فیلدی cron (دقیقه، ساعت، روز، ماه، روز هفته)</td></tr>
+    <tr><td><strong>مهر زمانی ISO</strong></td><td><code>2025-01-15T09:00:00</code></td><td>یک‌بارمصرف؛ در زمانِ دقیق اجرا می‌شود</td></tr>
+  </tbody>
+</table>
+</div>
+<p>سطحِ رو به مدل، یک ابزار واحد <code>cronjob</code> با عملیات‌های اکشن‌محور است: <code>create</code>، <code>list</code>، <code>update</code>، <code>pause</code>، <code>resume</code>، <code>run</code>، <code>remove</code>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> ذخیره‌سازی کارها</h2>
+<p>کارها در <code>~/.hermes/cron/jobs.json</code> با معناشناسی نوشتنِ اتمیک ذخیره می‌شوند (نوشتن در فایل موقت، سپس تغییر نام). هر رکورد کار شامل موارد زیر است:</p>
+<pre dir="ltr"><code>{
+  "id": "a1b2c3d4e5f6",
+  "name": "Daily briefing",
+  "prompt": "Summarize today's AI news and funding rounds",
+  "schedule": {
+    "kind": "cron",
+    "expr": "0 9 * * *",
+    "display": "0 9 * * *"
+  },
+  "skills": ["ai-funding-daily-report"],
+  "deliver": "telegram:-1001234567890",
+  "repeat": {
+    "times": null,
+    "completed": 42
+  },
+  "state": "scheduled",
+  "enabled": true,
+  "next_run_at": "2025-01-16T09:00:00Z",
+  "last_run_at": "2025-01-15T09:00:00Z",
+  "last_status": "ok",
+  "created_at": "2025-01-01T00:00:00Z",
+  "model": null,
+  "provider": null,
+  "script": null
+}</code></pre>
+<h3>وضعیت‌های چرخهٔ حیات کار</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>وضعیت</th><th>معنا</th></tr></thead>
+  <tbody>
+    <tr><td><code>scheduled</code></td><td>فعال؛ در زمان‌بندی بعدی اجرا می‌شود</td></tr>
+    <tr><td><code>paused</code></td><td>معلق — تا زمان از سرگیری، اجرا نمی‌شود</td></tr>
+    <tr><td><code>completed</code></td><td>شمار تکرار تمام شده یا یک‌بارمصرفی که اجرا شده است</td></tr>
+    <tr><td><code>running</code></td><td>در حال اجرا (وضعیت گذرا)</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>سازگاری با نسخه‌های قدیمی</h3>
+<p>کارهای قدیمی‌تر ممکن است به‌جای آرایهٔ <code>skills</code>، یک فیلد تکی <code>skill</code> داشته باشند. زمان‌بند این را هنگام بارگذاری نرمال‌سازی می‌کند — <code>skill</code> تکی به <code>skills: [skill]</code> ارتقا می‌یابد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> زمان اجرای زمان‌بند</h2>
+<h3>چرخهٔ تیک</h3>
+<p>زمان‌بند روی تیکِ دوره‌ای اجرا می‌شود (پیش‌فرض: هر ۶۰ ثانیه):</p>
+<pre dir="ltr"><code>tick()
+  1. Acquire scheduler lock (prevents overlapping ticks)
+  2. Load all jobs from jobs.json
+  3. Filter to due jobs (next_run &lt;= now AND state == "scheduled")
+  4. For each due job:
+     a. Set state to "running"
+     b. Create fresh AIAgent session (no conversation history)
+     c. Load attached skills in order (injected as user messages)
+     d. Run the job prompt through the agent
+     e. Deliver the response to the configured target
+     f. Update run_count, compute next_run
+     g. If repeat count exhausted → state = "completed"
+     h. Otherwise → state = "scheduled"
+  5. Write updated jobs back to jobs.json
+  6. Release scheduler lock</code></pre>
+<h3>یکپارچگی گیت‌وی</h3>
+<p>در حالت گیت‌وی، <strong>تریگرِ</strong> کرون (بخشی که تصمیم می‌گیرد یک کار سررسیده <em>چه زمانی</em> به‌وقت برسد — «محور B») از طریق یک ارائه‌دهندهٔ <code>CronScheduler</code> قابل‌تعویض انتخاب می‌شود. گیت‌وی <code>resolve_cron_scheduler()</code> را صدا می‌زند (<code>cron/scheduler_provider.py</code>) و <code>start()</code> ارائه‌دهندهٔ حل‌شده را در یک نخ پس‌زمینهٔ اختصاصی، در کنار نخِ جداگانهٔ خانه‌داریِ گیت‌وی اجرا می‌کند.</p>
+<p>ارائه‌دهندهٔ فعال با کلید پیکربندی <code>cron.provider</code> انتخاب می‌شود:</p>
+<ul>
+<li><strong>خالی (پیش‌فرض)</strong> ← <code>InProcessCronScheduler</code> داخلی، که حلقهٔ تاریخی درون‌پروسسی را اجرا می‌کند و هر ۶۰ ثانیه <code>scheduler.tick()</code> را صدا می‌زند. این رفتار بایت‌به‌بایت با رفتار پیش از ارائه‌دهنده یکسان است.</li>
+<li><strong>یک ارائه‌دهندهٔ نام‌دار</strong> (مثلاً <code>chronos</code>، ارائه‌دهندهٔ کرونِ مدیریت‌شده برای استقرارهایی که به صفر مقیاس می‌شوند) ← از <code>plugins/cron_providers/&lt;name&gt;/</code> یا <code>$HERMES_HOME/plugins/&lt;name&gt;/</code> کشف می‌شود.</li>
+</ul>
+<p>اگر ارائه‌دهندهٔ نام‌دار غایب باشد، بارگذاری‌اش شکست بخورد، یا <code>is_available() == False</code> گزارش کند، حل‌کننده با یک هشدار به نمونهٔ داخلی برمی‌گردد — <strong>کرون هرگز بدون تریگر رها نمی‌شود.</strong> ارائه‌دهندهٔ داخلی در هسته (<code>cron/scheduler_provider.py</code>) زندگی می‌کند، نه در <code>plugins/</code>، پس پشتیبان نمی‌تواند به‌طور تصادفی حذف شود.</p>
+<p>آنچه «به‌وقت‌رسیدن» <em>معنا می‌دهد</em> (اجرای کار + تحویل) تغییری نکرده و بین همهٔ ارائه‌دهندگان مشترک است — همان‌جا باقی می‌ماند: <code>scheduler.run_job()</code> / <code>scheduler._deliver_result()</code>. ارائه‌دهنده فقط تریگر را کنترل می‌کند، هرگز اجرا را.</p>
+<p>در حالت CLI، کارهای کرون فقط وقتی به‌وقت می‌رسند که فرمان‌های <code>hermes cron</code> اجرا شده باشند یا نشست‌های فعال CLI در جریان باشد.</p>
+<h3>کرون مدیریت‌شده (Chronos) برای مقیاس تا صفر</h3>
+<p>گیت‌وی‌های میزبانی‌شده می‌توانند به‌جای تیکر داخلی، ارائه‌دهندهٔ <strong>Chronos</strong> را اجرا کنند (<code>cron.provider: chronos</code>). Chronos به گیت‌ویِ بیکار اجازه می‌دهد <strong>به صفر مقیاس شود</strong> و همچنان کارهای کرون را به‌وقت اجرا کند: به‌جای حلقهٔ درون‌پروسسیِ ۶۰ ثانیه‌ای (که پروسس را بیدار نگه می‌داشت)، از زیرساخت Nous می‌خواهد دقیقاً <strong>یک one-shot مدیریت‌شده به‌ازای هر کار، در زمانِ واقعیِ اجرای بعدیِ همان کار</strong> مسلح کند. در زمان اجرا، Nous از طریق یک وب‌هوکِ احرازهویت‌شده (<code>POST /api/cron/fire</code>) دوباره گیت‌وی را صدا می‌زند؛ گیت‌وی کار را از همان مسیر <code>run_one_job</code> نمونهٔ داخلی اجرا می‌کند و سپس one-shot بعدی را دوباره مسلح می‌کند. بین اجراها پروسس می‌تواند کاملاً متوقف باشد — فقط با یک اجرای واقعی بیدار می‌شود، هرگز با تایمر دوره‌ای.</p>
+<p>جریان کار (زمان‌بندِ مدیریت‌شده توسط Nous ارائه می‌شود؛ ایجنت هیچ اعتبارنامهٔ زمان‌بندی ندارد):</p>
+<pre dir="ltr"><code>create/update a cron job
+  → Chronos asks Nous to arm a one-shot at the job's next_run_at
+      (authenticated with the agent's existing Nous token)
+  → at fire time Nous calls the gateway: POST {callback_url}/api/cron/fire
+      (authenticated with a short-lived, purpose-scoped Nous-minted JWT)
+  → the gateway verifies the token, claims the job (store compare-and-set so
+    multi-replica deployments fire at-most-once), runs it, and re-arms the next
+    one-shot</code></pre>
+<p>پیکربندی (همه غیرمحرمانه؛ روی ایجنت‌های میزبانی‌شده، Nous این‌ها را در زمان فراهم‌سازی تنظیم می‌کند):</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کلید</th><th>معنا</th></tr></thead>
+  <tbody>
+    <tr><td><code>cron.provider</code></td><td><code>chronos</code> برای فعال‌سازی (خالی = تیکر داخلی)</td></tr>
+    <tr><td><code>cron.chronos.portal_url</code></td><td>URL پایهٔ Nous (مسلح‌سازی + صادرکنندهٔ توکن اجرا)</td></tr>
+    <tr><td><code>cron.chronos.callback_url</code></td><td>URL پایهٔ عمومیِ خودِ گیت‌وی برای اجراهای ورودی</td></tr>
+    <tr><td><code>cron.chronos.expected_audience</code></td><td>مخاطب (audience) توکن اجرای این ایجنت</td></tr>
+    <tr><td><code>cron.chronos.nas_jwks_url</code></td><td>مجموعهٔ کلید برای اعتبارسنجی توکن اجرای ورودی</td></tr>
+  </tbody>
+</table>
+</div>
+<p>اگر Chronos بد پیکربندی شده باشد یا ایجنت وارد Nous نشده باشد، <code>resolve_cron_scheduler()</code> به تیکر داخلی برمی‌گردد (با ثبت هشدار در لاگ) — کرون هرگز تریگرش را از دست نمی‌دهد. کارهای تکرارشونده پس از هر اجرا دوباره مسلح می‌شوند؛ کارهای <code>repeat</code>-N وقتی شمارش تمام شود تمیز متوقف می‌شوند (بدون one-shot یتیم). قرارداد کامل سیمیِ ایجنت↔Nous در <code>docs/chronos-managed-cron-contract.md</code> است.</p>
+<h3>ایزوله‌سازی نشست تازه</h3>
+<p>هر کار کرون در یک نشست ایجنتِ کاملاً تازه اجرا می‌شود:</p>
+<ul>
+<li>بدون تاریخچهٔ گفتگو از اجراهای قبلی</li>
+<li>بدون حافظه از اجراهای قبلی کرون (حافظهٔ مانا — MEMORY.md / USER.md — مثل هر اجرای دیگر ایجنت بارگذاری می‌شود، پس ترجیحات و واقعیت‌های ماندگار باقی می‌مانند؛ زمینهٔ گفتگوی هر اجرا نه)</li>
+<li>پرامپت باید خودبسنده باشد — کارهای کرون نمی‌توانند سؤال شفاف‌سازی بپرسند</li>
+<li>تول‌ست <code>cronjob</code> غیرفعال است (گارد بازگشتی)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> کارهای مبتنی بر مهارت</h2>
+<p>یک کار کرون می‌تواند از طریق فیلد <code>skills</code> یک یا چند مهارت پیوست کند. در زمان اجرا:</p>
+<ol>
+<li>مهارت‌ها به ترتیب مشخص‌شده بارگذاری می‌شوند</li>
+<li>محتوای SKILL.md هر مهارت به‌عنوان زمینه تزریق می‌شود</li>
+<li>پرامپت کار به‌عنوان دستورِ کار ضمیمه می‌شود</li>
+<li>ایجنت مجموعِ زمینهٔ مهارت + پرامپت را پردازش می‌کند</li>
+</ol>
+<p>این قابلیت، گردش‌کارهای قابل‌استفادهٔ مجدد و تست‌شده را بدون چسباندن دستورالعمل کامل در پرامپت‌های کرون ممکن می‌کند. برای مثال:</p>
+<pre dir="ltr"><code>Create a daily funding report → attach "ai-funding-daily-report" skill</code></pre>
+<h3>کارهای مبتنی بر اسکریپت</h3>
+<p>کارها همچنین می‌توانند از طریق فیلد <code>script</code> یک اسکریپت پایتون پیوست کنند. اسکریپت <em>قبل از</em> هر نوبت ایجنت اجرا می‌شود و خروجی stdout آن به‌عنوان زمینه در پرامپت تزریق می‌شود. این، الگوهای جمع‌آوری داده و تشخیص تغییر را ممکن می‌کند:</p>
+<pre dir="ltr"><code># ~/.hermes/scripts/check_competitors.py
+import requests, json
+# یادداشت‌های انتشار رقبا را بگیر، با اجرای قبلی diff بزن
+# خلاصه را در stdout چاپ کن — ایجنت تحلیل و گزارش می‌کند</code></pre>
+<p>تایم‌اوت اسکریپت به‌طور پیش‌فرض ۳۶۰۰ ثانیه (۱ ساعت) است. <code>_get_script_timeout()</code> این محدودیت را از طریق یک زنجیرهٔ سه‌لایه حل می‌کند:</p>
+<ol>
+<li><strong>بازنویسی در سطح ماژول</strong> — <code>_SCRIPT_TIMEOUT</code> (برای تست‌ها/monkeypatching). فقط وقتی استفاده می‌شود که با پیش‌فرض فرق داشته باشد.</li>
+<li><strong>متغیر محیطی</strong> — <code>HERMES_CRON_SCRIPT_TIMEOUT</code></li>
+<li><strong>پیکربندی</strong> — <code>cron.script_timeout_seconds</code> در <code>config.yaml</code> (خوانده‌شده از طریق <code>load_config()</code>)</li>
+<li><strong>پیش‌فرض</strong> — ۳۶۰۰ ثانیه (۱ ساعت)</li>
+</ol>
+<p>این تایم‌اوت فقط <strong>اسکریپتِ پیش از اجرا</strong> را محدود می‌کند، نه ایجنت را. کارهای مبتنی بر مهارت / رانده‌شده با LLM روی بودجهٔ جداگانه‌ای بر مبنای <em>بی‌فعالیتی</em> اجرا می‌شوند (<code>HERMES_CRON_TIMEOUT</code>، پیش‌فرض ۶۰۰ ثانیه بیکاری، <code>0</code> = نامحدود) — این کارها می‌توانند ساعت‌ها اجرا شوند تا وقتی مدام ابزار فراخوانی می‌کنند یا توکن استریم می‌کنند، و فقط پس از دورهٔ بیکاریِ پیکربندی‌شده و بدون هیچ فعالیتی کشته می‌شوند. اسکریپت‌ها به یک استخر نخِ ماندگار سپرده می‌شوند (تحت قفل تیک نگه داشته نمی‌شوند)، پس یک اسکریپت طولانی‌اجرا مانع به‌وقت‌رسیدنِ کارهای سررسیدهٔ دیگر نمی‌شود.</p>
+<h3>بازیابی ارائه‌دهنده</h3>
+<p><code>run_job()</code> ارائه‌دهندگان پشتیبان و استخر اعتبارنامهٔ پیکربندی‌شدهٔ کاربر را به نمونهٔ <code>AIAgent</code> می‌دهد:</p>
+<ul>
+<li><strong>ارائه‌دهندگان پشتیبان</strong> — <code>fallback_providers</code> (لیست) یا <code>fallback_model</code> (دیکشنری قدیمی) را از <code>config.yaml</code> می‌خواند، مطابق الگوی <code>_load_fallback_model()</code> گیت‌وی. به‌صورت <code>fallback_model=</code> به <code>AIAgent.__init__</code> داده می‌شود که هر دو قالب را به یک زنجیرهٔ پشتیبان نرمال‌سازی می‌کند.</li>
+<li><strong>استخر اعتبارنامه</strong> — از طریق <code>load_pool(provider)</code> از <code>agent.credential_pool</code> با نام ارائه‌دهندهٔ زمان‌اجرای حل‌شده بارگذاری می‌شود. فقط وقتی داده می‌شود که استخر اعتبارنامه داشته باشد (<code>pool.has_credentials()</code>). چرخش کلیدِ همان ارائه‌دهنده را روی خطاهای 429/محدودیت نرخ ممکن می‌کند.</li>
+</ul>
+<p>این کار آینهٔ رفتار گیت‌وی است — بدون آن، ایجنت‌های کرون روی محدودیت‌های نرخ شکست می‌خوردند بدون آنکه تلاشی برای بازیابی کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> مدل تحویل</h2>
+<p>نتایج کارهای کرون را می‌توان به هر پلتفرم پشتیبانی‌شده‌ای تحویل داد.</p>
+<p>یک نام پلتفرمِ لخت (<code>slack</code>، <code>telegram</code> و...) به <strong>کانال خانه</strong> پیکربندی‌شدهٔ آن پلتفرم تحویل می‌دهد. برای نشانه‌گیری یک مقصد <strong>خاص</strong>، بعد از دونقطه یک هدف اضافه کنید: <code>platform:&lt;target&gt;</code>. هدف در زمان اجرا حل می‌شود (نه هنگام ساخته‌شدن کار)، پس یک کار می‌تواند مقصدی روی پلتفرمی که هنوز متصل نشده نام ببرد و به‌محض آنلاین‌شدن آن، تحویل را شروع کند.</p>
+<p>بیشتر پلتفرم‌ها همچنین یک ترید/تاپیک اختیاری را به‌عنوان سگمنت سوم می‌پذیرند: <code>platform:&lt;chat_id&gt;:&lt;thread_id&gt;</code>.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>هدف</th><th>نحو</th><th>مثال</th></tr></thead>
+  <tbody>
+    <tr><td>گفتگوی مبدأ</td><td><code>origin</code></td><td>تحویل به گفتگویی که کار در آن ساخته شده</td></tr>
+    <tr><td>فایل محلی</td><td><code>local</code></td><td>ذخیره در <code>~/.hermes/cron/output/</code></td></tr>
+    <tr><td>Telegram</td><td><code>telegram</code>، <code>telegram:&lt;chat_id&gt;</code>، <code>telegram:&lt;chat_id&gt;:&lt;thread_id&gt;</code>، <code>telegram:@username</code></td><td><code>telegram:-1001234567890:17585</code></td></tr>
+    <tr><td>Discord</td><td><code>discord</code>، <code>discord:#channel</code>، <code>discord:&lt;channel_id&gt;</code>، <code>discord:&lt;channel_id&gt;:&lt;thread_id&gt;</code></td><td><code>discord:#engineering</code></td></tr>
+    <tr><td>Slack</td><td><code>slack</code>، <code>slack:#channel</code>، <code>slack:&lt;channel_id&gt;</code>، <code>slack:&lt;channel_id&gt;:&lt;thread_ts&gt;</code></td><td><code>slack:#engineering</code></td></tr>
+    <tr><td>Matrix</td><td><code>matrix</code>، <code>matrix:&lt;!room_id:server&gt;</code>، <code>matrix:&lt;@user:server&gt;</code></td><td><code>matrix:!abc123:example.org</code></td></tr>
+    <tr><td>Feishu</td><td><code>feishu</code>، <code>feishu:&lt;chat_id&gt;</code>، <code>feishu:&lt;chat_id&gt;:&lt;thread_id&gt;</code></td><td><code>feishu:oc_abc123def</code></td></tr>
+    <tr><td>WhatsApp</td><td><code>whatsapp</code>، <code>whatsapp:&lt;jid&gt;</code>، <code>whatsapp:+&lt;E.164&gt;</code></td><td><code>whatsapp:123456@g.us</code></td></tr>
+    <tr><td>Signal</td><td><code>signal</code>، <code>signal:group:&lt;id&gt;</code>، <code>signal:+&lt;E.164&gt;</code></td><td><code>signal:group:aBcD==</code></td></tr>
+    <tr><td>SMS</td><td><code>sms</code>، <code>sms:+&lt;E.164&gt;</code></td><td><code>sms:+&lt;E.164 number&gt;</code></td></tr>
+    <tr><td>Email</td><td><code>email</code>، <code>email:&lt;address&gt;</code></td><td><code>email:alerts@example.com</code></td></tr>
+    <tr><td>Weixin</td><td><code>weixin</code>، <code>weixin:&lt;wxid&gt;</code></td><td><code>weixin:wxid_abc123</code></td></tr>
+    <tr><td>Mattermost</td><td><code>mattermost</code> یا <code>mattermost:&lt;channel_id&gt;</code></td><td>نام لخت به کانال خانهٔ Mattermost تحویل می‌دهد</td></tr>
+    <tr><td>Home Assistant</td><td><code>homeassistant</code> یا <code>homeassistant:&lt;conversation&gt;</code></td><td>نام لخت به گفتگوی HA تحویل می‌دهد</td></tr>
+    <tr><td>DingTalk</td><td><code>dingtalk</code> یا <code>dingtalk:&lt;chat_id&gt;</code></td><td>نام لخت به DingTalk تحویل می‌دهد</td></tr>
+    <tr><td>WeCom</td><td><code>wecom</code> یا <code>wecom:&lt;chat_id&gt;</code></td><td>نام لخت به WeCom تحویل می‌دهد</td></tr>
+    <tr><td>BlueBubbles</td><td><code>bluebubbles</code> یا <code>bluebubbles:&lt;chat_guid&gt;</code></td><td>نام لخت به iMessage از طریق BlueBubbles تحویل می‌دهد</td></tr>
+    <tr><td>QQ Bot</td><td><code>qqbot</code> یا <code>qqbot:&lt;chat_id&gt;</code></td><td>نام لخت به QQ (Tencent) از طریق Official API v2 تحویل می‌دهد</td></tr>
+    <tr><td>Bot Chat</td><td><code>bot-chat</code> یا <code>bot-chat:&lt;profile&gt;</code></td><td>تزریق به Bot Chat مرجعِ یک پروفایل محلی (بات پاسخ می‌دهد)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>پلتفرم‌های گروه اول نحوِ هدفِ صریح و اعتبارسنجی‌شده دارند — کانال‌های نام‌دار (<code>#channel</code>)، تاپیک‌ها/تریدها، شناسه‌های اتاق/کاربر، شناسه‌های گروه یا شماره تلفن. بقیهٔ پلتفرم‌ها قالب عمومی <code>platform:&lt;chat_id&gt;</code> را می‌پذیرند (مقدار بعد از دونقطه عیناً به‌عنوان شناسهٔ مقصد استفاده می‌شود)؛ نام لختِ پلتفرم همیشه به کانال خانه تحویل می‌دهد.</p>
+<p><strong>کانال‌های نام‌دار</strong> (<code>slack:#engineering</code>، <code>discord:#engineering</code> یا یک نام دوستانه مثل <code>slack:engineering</code>) بر اساس فهرست کانال‌هایی حل می‌شوند که گیت‌وی از آداپتورهای متصل می‌سازد، پس برای موفقیتِ حلِ نام، گیت‌وی باید کانال را کشف کرده باشد؛ شناسه‌های خام (<code>slack:C0123ABCD45</code>) همیشه کار می‌کنند.</p>
+<p>برای <strong>تاپیک‌های Telegram</strong> از <code>telegram:&lt;chat_id&gt;:&lt;thread_id&gt;</code> استفاده کنید (مثلاً <code>telegram:-1001234567890:17585</code>). برای <strong>تریدهای Slack</strong>، سگمنت سوم <code>thread_ts</code> پیام والد است (مثلاً <code>slack:C0123ABCD45:1700000000.000100</code>)، پس فقط وقتی اعمال می‌شود که زیر یک پیام موجود پاسخ بدهید.</p>
+<p><strong>Bot Chat</strong> (<code>bot-chat</code>، <code>bot-chat:&lt;profile&gt;</code>) یک شبه‌پلتفرمِ محلیِ ماشین است، نه یک آداپتور گیت‌وی: زمان‌بند با اجرای <code>hermes [-p &lt;profile&gt;] chat --in ~ -c "Bot Chat" --create-if-missing -Q --query-file &lt;tmp&gt;</code> تحویل می‌دهد — همان لِینی که پیام‌های ایجنت‌به‌ایجنتِ حالت بات استفاده می‌کنند — بنابراین خروجی به‌صورت یک نوبت ورودی واقعی در Bot Chat مرجعِ پروفایل می‌رسد و بات روی آن یک نوبت کامل ایجنت اجرا می‌کند (از نظر تناوبِ پیام، به‌طرزی ساختاری ایمن؛ این لِین فرمان چت است، نه آینهٔ ترنسکریپت). توکن لخت، پروفایل خودِ کار را نشانه می‌گیرد؛ قالب نام‌دار هنگام ساختن کار و دوباره هنگام اجرا نسبت به <code>~/.hermes/profiles/</code> اعتبارسنجی می‌شود و هرگز بین ماشین‌ها حل نمی‌شود. هدف‌های bot-chat از توکن مسیریابی <code>all</code> و از پیش‌بررسیِ تحویل مستثنی هستند (هیچ اعتبارنامهٔ گیت‌وی در کار نیست). تایم‌اوت ساب‌پروسسِ هر تحویل، <code>cron.bot_chat_delivery_timeout_seconds</code> است (پیش‌فرض ۶۰۰).</p>
+<h3>پوشش پاسخ</h3>
+<p>به‌طور پیش‌فرض (<code>cron.wrap_response: true</code>)، تحویل‌های کرون با این‌ها پوشانده می‌شوند:</p>
+<ul>
+<li>سرصفحه‌ای که نام کار کرون و وظیفه را مشخص می‌کند</li>
+<li>پاصفحه‌ای که یادآوری می‌کند ایجنت پیامِ تحویل‌شده را در گفتگو نمی‌بیند</li>
+</ul>
+<p>پیشوند <code>[SILENT]</code> در پاسخ کرون، تحویل را کاملاً متوقف می‌کند — برای کارهایی که فقط باید در فایل‌ها بنویسند یا عوارض جانبی انجام دهند مفید است.</p>
+<h3>ایزوله‌سازی نشست</h3>
+<p>تحویل‌های کرون در تاریخچهٔ گفتگوی نشستِ گیت‌وی <strong>آینه‌سازی نمی‌شوند</strong>. آن‌ها فقط در نشستِ خودِ کار کرون وجود دارند. این کار از نقض تناوب پیام در گفتگوی چتِ هدف جلوگیری می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> گارد بازگشتی</h2>
+<p>نشست‌های اجراشده توسط کرون، تول‌ست <code>cronjob</code> را غیرفعال دارند. این کار جلوگیری می‌کند از:</p>
+<ul>
+<li>ساختن کارهای کرون جدید توسط یک کارِ زمان‌بندی‌شده</li>
+<li>زمان‌بندی بازگشتی‌ای که می‌تواند مصرف توکن را منفجر کند</li>
+<li>تغییر تصادفی زمان‌بندی کار از درون خودِ کار</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> قفل‌گذاری</h2>
+<p>زمان‌بند از قفل‌گذاریِ فایل‌محورِ بین‌پروسسی (<code>fcntl.flock</code> روی یونیکس، <code>msvcrt.locking</code> روی ویندوز) استفاده می‌کند تا تیک‌های هم‌پوشان، همان دستهٔ کارِ سررسیده را دو بار اجرا نکنند — حتی بین تیکر درون‌پروسسیِ گیت‌وی و فراخوانی مستقل <code>hermes cron</code> یا <code>tick()</code> دستی. اگر نتوان قفل را به دست آورد، <code>tick()</code> بلافاصله ۰ برمی‌گرداند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> رابط CLI</h2>
+<p>رابط خط فرمان <code>hermes cron</code> مدیریت مستقیم کارها را فراهم می‌کند:</p>
+<pre dir="ltr"><code>hermes cron list                    # نمایش همهٔ کارها
+hermes cron create                  # ساخت تعاملی کار (نام مستعار: add)
+hermes cron edit &lt;job_id&gt;           # ویرایش پیکربندی کار
+hermes cron pause &lt;job_id&gt;          # توقف موقت یک کار در حال اجرا
+hermes cron resume &lt;job_id&gt;         # از سرگیری کار متوقف‌شده
+hermes cron run &lt;job_id&gt;            # اجرای فوری
+hermes cron remove &lt;job_id&gt;         # حذف کار</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> مستندات مرتبط</h2>
+<ul>
+<li><a href="../user-guide/features/cron.html">راهنمای قابلیت کرون</a></li>
+<li><a href="gateway-internals.html">درون‌مایهٔ گیت‌وی</a></li>
+<li><a href="agent-loop.html">حلقهٔ ایجنت</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="context-engine-plugin.html"><span class="dir">→ قبلی</span><span class="ttl">پلاگین موتور زمینه</span></a>
+  <a class="next" href="desktop-plugin-sdk.html"><span class="dir">بعدی ←</span><span class="ttl">SDK پلاگین دسکتاپ</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/cron-internals" target="_blank" rel="noopener">Cron Internals</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>افزودن آداپتور پلتفرم — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-platform-adapters" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>افزودن آداپتور پلتفرم</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>افزودن آداپتور پلتفرم</h1>
+<p>این راهنما افزودن یک پلتفرم (platform) پیام‌رسانی جدید به گیت‌وی (gateway) هرمس را پوشش می‌دهد. آداپتور پلتفرم (platform adapter) هرمس را به یک سرویس پیام‌رسانی خارجی (Telegram، Discord، WeCom و…) متصل می‌کند تا کاربران بتوانند از طریق آن سرویس با ایجنت تعامل کنند.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>دو راه برای افزودن پلتفرم وجود دارد:</p>
+  <ul>
+  <li><strong>پلاگین</strong> (برای جامعه/اشخاص ثالث توصیه‌شده): یک پوشهٔ پلاگین در <code>~/.hermes/plugins/</code> بیندازید — بدون هیچ تغییری در کد هسته. پایین به <a href="#plugin-path-recommended">مسیر پلاگین</a> نگاه کنید.</li>
+  <li><strong>داخلی</strong>: ویرایش بیش از ۲۰ فایل در کد، پیکربندی و مستندات. از <a href="#step-by-step-checklist-built-in-path">چک‌لیست مسیر داخلی</a> پایین استفاده کنید.</li>
+  </ul>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نمای کلی معماری</h2>
+<pre dir="ltr"><code>User ↔ Messaging Platform ↔ Platform Adapter ↔ Gateway Runner ↔ AIAgent</code></pre>
+<p>هر آداپتور از <code>BasePlatformAdapter</code> در <code>gateway/platforms/base.py</code> ارث می‌برد و این‌ها را پیاده می‌کند:</p>
+<ul>
+<li><strong><code>connect()</code></strong> — برقراری اتصال (WebSocket، long-poll، سرور HTTP و…) ‏<em>(انتزاعی)</em></li>
+<li><strong><code>disconnect()</code></strong> — خاموشی تمیز ‏<em>(انتزاعی)</em></li>
+<li><strong><code>send()</code></strong> — ارسال یک پیام متنی به یک چت ‏<em>(انتزاعی)</em></li>
+<li><strong><code>send_typing()</code></strong> — نمایش نشانگر در-حال-نوشتن (بازنویسی اختیاری)</li>
+<li><strong><code>get_chat_info()</code></strong> — برگرداندن متادیتای چت (بازنویسی اختیاری)</li>
+</ul>
+<p>پیام‌های ورودی توسط آداپتور دریافت و از طریق <code>self.handle_message(event)</code> هدایت می‌شوند؛ کلاس پایه آن‌ها را به gateway runner مسیریابی می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="plugin-path-recommended"><span class="secnum">۲</span> مسیر پلاگین (توصیه‌شده)</h2>
+<p>سامانهٔ پلاگین اجازه می‌دهد بدون دست‌زدن به هیچ کد هستهٔ هرمس، آداپتور پلتفرم اضافه کنید. پلاگین شما یک پوشه با دو فایل است:</p>
+<pre dir="ltr"><code>~/.hermes/plugins/my-platform/
+  plugin.yaml      # متادیتای پلاگین
+  adapter.py       # کلاس آداپتور + نقطهٔ ورود register()</code></pre>
+<h3><code>plugin.yaml</code></h3>
+<p>متادیتای پلاگین. بلوک‌های <code>requires_env</code> و <code>optional_env</code> موارد رابط کاربریِ <code>hermes config</code> را به‌طور خودکار پر می‌کنند (پایین به <a href="#surfacing-env-vars-in-hermes-config">نمایش متغیرهای محیطی</a> نگاه کنید).</p>
+<pre dir="ltr"><code>name: my-platform
+label: My Platform
+kind: platform
+version: 1.0.0
+description: My custom messaging platform adapter
+author: Your Name
+requires_env:
+  - MY_PLATFORM_TOKEN          # رشتهٔ ساده هم کار می‌کند
+  - name: MY_PLATFORM_CHANNEL  # یا دیکشنری کامل برای UX بهتر
+    description: "Channel to join"
+    prompt: "Channel"
+    password: false
+optional_env:
+  - name: MY_PLATFORM_HOME_CHANNEL
+    description: "Default channel for cron delivery"
+    password: false</code></pre>
+<h4>ابزارهای کلاینت خروجی: <code>provides_tools</code></h4>
+<p>پلاگین‌های <code>kind: platform</code> ‌<strong>به‌تأخیر بارگذاری می‌شوند (deferred)</strong>: ماژول آداپتور (و ایمپورت‌های SDK آن) فقط وقتی بارگذاری می‌شود که مسیر گیت‌وی، کرون یا <code>send_message</code> برای اولین‌بار از رجیستری پلتفرم‌ها آن پلتفرم را بخواهد. اگر پلاگین شما هم‌چنین <em>ابزارهای کلاینت</em> خروجی‌ای دارد که ایجنت باید بتواند از هر نشستی (session) صدا بزند (مثل <code>a2a_call</code> / <code>a2a_discover</code> پلاگین همراه <code>a2a</code>)، آن‌ها را در یک <code>tools.py</code> جداگانه با تابع <code>register_tools(ctx)</code> بگذارید و در مانیفست اعلام کنید:</p>
+<pre dir="ltr"><code>provides_tools:
+  - my_platform_call
+  - my_platform_list</code></pre>
+<p>با اعلام <code>provides_tools</code>، هرمس در زمان کشف پلاگین فقط <code>tools.py</code> را ایمپورت می‌کند و ابزارهای کلاینت را در همهٔ پروسس‌ها — از جمله CLI و TUI — ثبت می‌کند، درحالی‌که آداپتور deferred می‌ماند. <code>__init__.py</code> پکیج را از نظر ایمپورت سبک نگه دارید و آداپتور را از داخل <code>register()</code> بیاورید تا ایمپورتِ پیش از موعد ارزان بماند. بدون این فیلد چیزی عوض نمی‌شود: کل پلاگین deferred می‌ماند.</p>
+<p>کاربران تول‌ست (toolset) را مثل هر تول‌ست دیگری برای هر پلتفرم فعال می‌کنند، مثلاً با <code>hermes tools enable my_platform --platform cli</code>، یا با فهرست‌کردن کلید تول‌ست زیر <code>platform_toolsets</code> در <code>config.yaml</code>. نام پلتفرم‌های پلاگینی هم مقصد <code>--platform</code> معتبری‌اند، پس می‌توان به یک نشست ورودی روی پلتفرم شما، ابزارهای خروجی مخصوص خودش را داد.</p>
+<h3><code>adapter.py</code></h3>
+<pre dir="ltr"><code>import os
+from gateway.platforms.base import (
+    BasePlatformAdapter, SendResult, MessageEvent, MessageType,
+)
+from gateway.config import Platform, PlatformConfig
+
+
+class MyPlatformAdapter(BasePlatformAdapter):
+    def __init__(self, config: PlatformConfig):
+        super().__init__(config, Platform("my_platform"))
+        extra = config.extra or {}
+        self.token = os.getenv("MY_PLATFORM_TOKEN") or extra.get("token", "")
+
+    async def connect(self, *, is_reconnect: bool = False) -> bool:
+        # اتصال به API پلتفرم، راه‌اندازی شنونده‌ها
+        self._mark_connected()
+        return True
+
+    async def disconnect(self) -> None:
+        self._mark_disconnected()
+
+    async def send(self, chat_id, content, reply_to=None, metadata=None):
+        # ارسال پیام از طریق API پلتفرم
+        return SendResult(success=True, message_id="...")
+
+    async def get_chat_info(self, chat_id):
+        return {"name": chat_id, "type": "dm"}
+
+
+def check_requirements() -> bool:
+    return bool(os.getenv("MY_PLATFORM_TOKEN"))
+
+
+def validate_config(config) -> bool:
+    extra = getattr(config, "extra", {}) or {}
+    return bool(os.getenv("MY_PLATFORM_TOKEN") or extra.get("token"))
+
+
+def _env_enablement() -> dict | None:
+    token = os.getenv("MY_PLATFORM_TOKEN", "").strip()
+    channel = os.getenv("MY_PLATFORM_CHANNEL", "").strip()
+    if not (token and channel):
+        return None
+    seed = {"token": token, "channel": channel}
+    home = os.getenv("MY_PLATFORM_HOME_CHANNEL")
+    if home:
+        seed["home_channel"] = {"chat_id": home, "name": "Home"}
+    return seed
+
+
+def register(ctx):
+    """نقطهٔ ورود پلاگین — توسط سامانهٔ پلاگین هرمس صدا زده می‌شود."""
+    ctx.register_platform(
+        name="my_platform",
+        label="My Platform",
+        adapter_factory=lambda cfg: MyPlatformAdapter(cfg),
+        # پروب منفعل (PASSIVE) — «آیا الان وابستگی‌ها/کانفیگ حاضرند؟». از
+        # نمایش‌های وضعیت و بارگذاری کانفیگ صدا زده می‌شود، پس هرگز نباید
+        # pip-install انجام دهد.
+        check_fn=check_requirements,
+        # نصب‌کنندهٔ فعال (اختیاری) — فقط برای پلتفرم‌هایی با SDK نصب‌شدنیِ
+        # تنبل. create_adapter() وقتی check_fn مقدار False برگرداند، درست
+        # قبل از اتصال گیت‌وی به پلتفرم آن را صدا می‌زند. معمولاً
+        # tools.lazy_deps.ensure_and_bind(...) را wrap می‌کند. اگر حذفش
+        # کنید، False بودن check_fn یک بلاک سخت است.
+        # ensure_deps_fn=ensure_requirements,
+        validate_config=validate_config,
+        required_env=["MY_PLATFORM_TOKEN"],
+        install_hint="pip install my-platform-sdk",
+        # پیکربندی خودکار با متغیرهای محیطی — قبل از ساخته‌شدن آداپتور،
+        # PlatformConfig.extra را از متغیرهای محیطی پر می‌کند. بخش
+        # «پیکربندی خودکار با متغیرهای محیطی» را پایین ببینید.
+        env_enablement_fn=_env_enablement,
+        # پشتیبانی از تحویل کرون به کانال خانه. باعث می‌شود کارهای کرونِ
+        # deliver=my_platform بدون ویرایش cron/scheduler.py مسیریابی شوند.
+        # بخش «تحویل کرون» را پایین ببینید.
+        cron_deliver_env_var="MY_PLATFORM_HOME_CHANNEL",
+        # متغیرهای محیطی مجوز کاربر به‌تفکیک پلتفرم
+        allowed_users_env="MY_PLATFORM_ALLOWED_USERS",
+        allow_all_env="MY_PLATFORM_ALLOW_ALL_USERS",
+        # محدودیت طول پیام برای تقسیم‌بندی هوشمند (0 = بدون محدودیت)
+        max_message_length=4000,
+        # راهنمای LLM که به پرامپت سیستم تزریق می‌شود
+        platform_hint=(
+            "You are chatting via My Platform. "
+            "It supports markdown formatting."
+        ),
+        # نمایش
+        emoji="💬",
+    )
+
+    # اختیاری: ثبت ابزارهای مخصوص پلتفرم
+    ctx.register_tool(
+        name="my_platform_search",
+        toolset="my_platform",
+        schema={...},
+        handler=my_search_handler,
+    )</code></pre>
+<h3>پیکربندی</h3>
+<p>کاربران پلتفرم را در <code>config.yaml</code> پیکربندی می‌کنند:</p>
+<pre dir="ltr"><code>gateway:
+  platforms:
+    my_platform:
+      enabled: true
+      extra:
+        token: "..."
+        channel: "#general"</code></pre>
+<p>یا از طریق متغیرهای محیطی (که آداپتور در <code>__init__</code> می‌خواند).</p>
+<h3>چیزهایی که سامانهٔ پلاگین به‌طور خودکار مدیریت می‌کند</h3>
+<p>وقتی <code>ctx.register_platform()</code> را صدا می‌زنید، این نقاط یکپارچه‌سازی برایتان مدیریت می‌شوند — بدون هیچ تغییری در کد هسته:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نقطهٔ یکپارچه‌سازی</th><th>نحوهٔ کار</th></tr></thead>
+  <tbody>
+    <tr><td>ساخت آداپتور گیت‌وی</td><td>رجیستری قبل از زنجیرهٔ if/elif داخلی بررسی می‌شود</td></tr>
+    <tr><td>پارس کانفیگ</td><td>‏<code>Platform._missing_()</code> هر نام پلتفرمی را می‌پذیرد</td></tr>
+    <tr><td>اعتبارسنجی پلتفرم متصل‌شده</td><td>‏<code>validate_config()</code> رجیستری صدا زده می‌شود</td></tr>
+    <tr><td>مجوز کاربر</td><td>‏<code>allowed_users_env</code> / <code>allow_all_env</code> بررسی می‌شوند</td></tr>
+    <tr><td>فعال‌سازی خودکار فقط-محیطی</td><td>‏<code>env_enablement_fn</code> ‏<code>PlatformConfig.extra</code> و <code>home_channel</code> را پر می‌کند</td></tr>
+    <tr><td>پل کانفیگ YAML</td><td>‏<code>apply_yaml_config_fn</code> کلیدهای <code>config.yaml</code> را به متغیرهای محیطی / extras ترجمه می‌کند</td></tr>
+    <tr><td>تحویل کرون</td><td>‏<code>cron_deliver_env_var</code> باعث می‌شود <code>deliver=&lt;name&gt;</code> کار کند</td></tr>
+    <tr><td>موارد رابط کاربری <code>hermes config</code></td><td>‏<code>requires_env</code> / <code>optional_env</code> در <code>plugin.yaml</code> خودکار پر می‌شوند</td></tr>
+    <tr><td>موتور ارسال‏ (<code>tools/send_message_tool.py</code>)</td><td>از آداپتور زندهٔ گیت‌وی مسیریابی می‌شود</td></tr>
+    <tr><td>تحویل بین‌پلتفرمی وب‌هوک</td><td>رجیستری برای پلتفرم‌های شناخته‌شده بررسی می‌شود</td></tr>
+    <tr><td>دسترسی به فرمان <code>/update</code></td><td>پرچم <code>allow_update_command</code></td></tr>
+    <tr><td>فهرست کانال‌ها</td><td>پلتفرم‌های پلاگینی در شمارش لحاظ می‌شوند</td></tr>
+    <tr><td>راهنماهای پرامپت سیستم</td><td>‏<code>platform_hint</code> به زمینهٔ LLM تزریق می‌شود</td></tr>
+    <tr><td>تکه‌تکه‌کردن پیام</td><td>‏<code>max_message_length</code> برای تقسیم هوشمند</td></tr>
+    <tr><td>حذف اطلاعات شخصی (PII)</td><td>پرچم <code>pii_safe</code></td></tr>
+    <tr><td><code>hermes status</code></td><td>پلتفرم‌های پلاگینی را با برچسب <code>(plugin)</code> نشان می‌دهد</td></tr>
+    <tr><td><code>hermes gateway setup</code></td><td>پلتفرم‌های پلاگینی در منوی setup ظاهر می‌شوند</td></tr>
+    <tr><td><code>hermes tools</code> / <code>hermes skills</code></td><td>پلتفرم‌های پلاگینی در پیکربندی به‌تفکیک پلتفرم</td></tr>
+    <tr><td>قفل توکن (چند-پروفایل)</td><td>از <code>acquire_scoped_lock()</code> در <code>connect()</code> خودتان استفاده کنید</td></tr>
+    <tr><td>هشدار کانفیگ یتیم</td><td>لاگ توصیفی وقتی پلاگین موجود نیست</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> افزونه‌های مسیر ارسال مستقل</h2>
+<p>یک پلتفرم مستقل می‌تواند با اعلام رفتار ارسال روی همان <code>PlatformEntry</code> که <code>ctx.register_platform()</code> می‌سازد، در تحویل خروجیِ به‌راه‌انداختهٔ میزبان از طریق <code>hermes send --to ...</code> مستقیم و کرونِ <code>deliver=platform:...</code> شرکت کند. <code>send_message</code> عمداً یک ابزار مدلِ قابل‌فراخوانیِ ایجنت نیست؛ پلاگین‌ها نباید معادل سطح‌مدلی ثبت کنند که ایجنت بتواند خودش پیام خروجی آغاز کند.</p>
+<pre dir="ltr"><code>async def _send_request(args, chat_id, platform_name, pconfig):
+    # `args` فیلدهای درخواست ارسالِ به‌راه‌انداختهٔ میزبان را در خود دارد.
+    message_id = await client.send(
+        address=chat_id,
+        body=args["message"],
+        subject=args.get("subject"),
+    )
+    return {"success": True, "platform": platform_name,
+            "chat_id": chat_id, "message_id": message_id}
+
+
+def _parse_address(raw):
+    normalized = raw.strip().lower()
+    if normalized.startswith("@") and "@" in normalized[1:]:
+        return normalized, None  # (chat_id، thread_id اختیاری)
+    return None                 # ادامه به resolve فهرست کانال‌ها
+
+
+def _validate_address(address):
+    # True یعنی پذیرش؛ False یعنی رد؛ رشته یعنی رد با همان پیام تشخیصی.
+    return True if address.endswith("@example.com") else "unsupported domain"
+
+
+def register(ctx):
+    ctx.register_platform(
+        name="fmsg",
+        label="Fixture Message",
+        adapter_factory=lambda cfg: FmsgAdapter(cfg),
+        check_fn=check_requirements,
+        parse_target_ref_fn=_parse_address,
+        validate_target_ref_fn=_validate_address,
+        # می‌تواند تابع معمولی یا async def باشد. هرمس هر نتیجهٔ awaitable
+        # را — از جمله آبجکت‌های callable و wrapperهای functools.partial —
+        # await می‌کند.
+        send_message_handler=_send_request,
+        # وقتی کرون باید از پروسسی بدون گیت‌وی زنده ارسال کند، این هوکِ
+        # سطح‌پایین‌تر را ترجیح دهید.
+        standalone_sender_fn=_standalone_send,
+    )</code></pre>
+<p>resolve مقصد بین هر سه سطح خروجی مشترک است. خروجی پارسر اول نرمال می‌شود و شناسه‌های فهرست کانال مورد اعتمادند. پارسر پلاگین باید سینتکس بومی مقصد را صریحاً بپذیرد؛ رشته‌های resolve‌نشده هرگز به‌صورت اپک از میان عبور داده نمی‌شوند. پلتفرم‌های ناشناخته و شکست‌های اعتبارسنج به‌جای تلاش بی‌سروصدا برای تحویل، یک پیام تشخیصی برمی‌گردانند. reload اجباری پلاگین و گذار پروفایل، رکوردهای متعلق به پلاگین را لغو ثبت می‌کنند، پس پارسرها و هندلرها نمی‌توانند به پروفایل بعدی نشت کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پیکربندی خودکار با متغیرهای محیطی</h2>
+<p>بیشتر کاربران پلتفرم را با ریختن متغیرهای محیطی در <code>~/.hermes/.env</code> راه می‌اندازند، نه با ویرایش <code>config.yaml</code>. هوک (hook) ‏<code>env_enablement_fn</code> به پلاگین شما اجازه می‌دهد آن متغیرهای محیطی را <strong>قبل از</strong> ساخته‌شدن آداپتور بردارد، تا <code>hermes gateway status</code>، ‏<code>get_connected_platforms()</code> و تحویل کرون بدون نمونه‌سازی SDK پلتفرم، وضعیت درست را ببینند.</p>
+<pre dir="ltr"><code>def _env_enablement() -> dict | None:
+    """پر کردن PlatformConfig.extra از متغیرهای محیطی.
+
+    رجیستری پلتفرم در زمان load_gateway_config() آن را صدا می‌زند.
+    وقتی پلتفرم حداقلی پیکربندی نشده None برگردانید — در این صورت
+    فراخوان از فعال‌سازی خودکار می‌گذرد. برای پر کردن extras یک dict
+    برگردانید.
+
+    کلید خاص 'home_channel' جدا می‌شود و به یک HomeChannel dataclass
+    واقعی روی PlatformConfig تبدیل می‌شود؛ هر کلید دیگری در
+    PlatformConfig.extra ادغام می‌شود.
+    """
+    token = os.getenv("MY_PLATFORM_TOKEN", "").strip()
+    channel = os.getenv("MY_PLATFORM_CHANNEL", "").strip()
+    if not (token and channel):
+        return None
+    seed = {"token": token, "channel": channel}
+    home = os.getenv("MY_PLATFORM_HOME_CHANNEL")
+    if home:
+        seed["home_channel"] = {
+            "chat_id": home,
+            "name": os.getenv("MY_PLATFORM_HOME_CHANNEL_NAME", "Home"),
+        }
+    return seed
+
+
+def register(ctx):
+    ctx.register_platform(
+        name="my_platform",
+        label="My Platform",
+        adapter_factory=lambda cfg: MyPlatformAdapter(cfg),
+        check_fn=check_requirements,
+        validate_config=validate_config,
+        env_enablement_fn=_env_enablement,
+        # ... بقیهٔ فیلدها
+    )</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> پل کانفیگ YAML→env</h2>
+<p>بعضی کاربران ترجیح می‌دهند به‌جای متغیرهای محیطی، کلیدهای <code>config.yaml</code>‏ (مثل <code>my_platform.require_mention</code>، ‏<code>my_platform.allowed_channels</code> و…) را تنظیم کنند. هوک <code>apply_yaml_config_fn</code> اجازه می‌دهد این ترجمه کارِ پلاگین خودتان باشد، به‌جای آنکه هستهٔ <code>gateway/config.py</code> مجبور شود اسکیمای YAML پلتفرم شما را بداند.</p>
+<pre dir="ltr"><code>import os
+
+def _apply_yaml_config(yaml_cfg: dict, platform_cfg: dict) -> dict | None:
+    """ترجمهٔ کلیدهای `my_platform:` در config.yaml به متغیرهای محیطی / extras.
+
+    yaml_cfg     — دیکشنری کاملِ config.yaml پارس‌شده در سطح بالا
+    platform_cfg — زیردیکشنری خود پلتفرم (yaml_cfg.get("my_platform", {}))
+
+    می‌تواند مستقیماً os.environ را تغییر دهد (با گاردهای
+    `not os.getenv(...)` اولویت env &gt; YAML حفظ می‌شود) و/یا یک dict
+    برای ادغام در PlatformConfig.extra برگرداند. برای «بدون extras»
+    مقدار None یا {} برگردانید.
+    """
+    if "require_mention" in platform_cfg and not os.getenv("MY_PLATFORM_REQUIRE_MENTION"):
+        os.environ["MY_PLATFORM_REQUIRE_MENTION"] = str(platform_cfg["require_mention"]).lower()
+    allowed = platform_cfg.get("allowed_channels")
+    if allowed is not None and not os.getenv("MY_PLATFORM_ALLOWED_CHANNELS"):
+        if isinstance(allowed, list):
+            allowed = ",".join(str(v) for v in allowed)
+        os.environ["MY_PLATFORM_ALLOWED_CHANNELS"] = str(allowed)
+    return None  # چیزی برای ادغام در PlatformConfig.extra نیست
+
+def register(ctx):
+    ctx.register_platform(
+        name="my_platform",
+        ...,
+        apply_yaml_config_fn=_apply_yaml_config,
+    )</code></pre>
+<p>این هوک در زمان <code>load_gateway_config()</code> بعد از حلقهٔ عمومی کلیدهای مشترک (که کلیدهای رایج مثل <code>unauthorized_dm_behavior</code>، ‏<code>notice_delivery</code>، ‏<code>reply_prefix</code>، ‏<code>require_mention</code> و… را مدیریت می‌کند) و قبل از <code>_apply_env_overrides()</code> صدا زده می‌شود، پس پلاگین شما فقط لازم است کلیدهای <strong>مخصوص پلتفرم</strong> را پل بزند.</p>
+<p>اکششن‌های raisedشده توسط هوک بلعیده و در سطح debug لاگ می‌شوند — پلاگینِ بدرفتار هرگز بارگذاری کانفیگ گیت‌وی را متوقف نمی‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> تحویل کرون</h2>
+<p>برای اینکه کارهای کرونِ <code>deliver=my_platform</code> به کانال خانهٔ پیکربندی‌شده مسیریابی شوند، <code>cron_deliver_env_var</code> را برابر نام متغیر محیطی‌ای بگذارید که شناسهٔ پیش‌فرض چت/اتاق/کانال را نگه می‌دارد:</p>
+<pre dir="ltr"><code>ctx.register_platform(
+    name="my_platform",
+    ...
+    cron_deliver_env_var="MY_PLATFORM_HOME_CHANNEL",
+)</code></pre>
+<p>زمان‌بند هنگام resolve مقصد خانه برای کارهای <code>deliver=my_platform</code> این متغیر محیطی را می‌خواند و در بررسی‌های به سبک <code>_KNOWN_DELIVERY_PLATFORMS</code> هم پلتفرم را هدف کرونِ معتبر حساب می‌کند. اگر <code>env_enablement_fn</code> شما یک دیکشنری <code>home_channel</code> پر کند (بالا را ببینید)، همان اولویت دارد — ‏<code>cron_deliver_env_var</code> پشتیبانِ کارهای کرونی است که قبل از seeding متغیرهای محیطی اجرا می‌شوند.</p>
+<h3>تحویل کرون بیرون از پروسس</h3>
+<p>‏<code>cron_deliver_env_var</code> پلتفرم شما را به یک مقصد شناخته‌شدهٔ <code>deliver=</code> تبدیل می‌کند. برای اینکه ارسال واقعی وقتی کار کرون در پروسسی جدا از گیت‌وی اجرا می‌شود (یعنی <code>hermes cron run</code> جدا از <code>hermes gateway</code>) موفق شود، یک <code>standalone_sender_fn</code> ثبت کنید:</p>
+<pre dir="ltr"><code>async def _standalone_send(
+    pconfig,
+    chat_id,
+    message,
+    *,
+    thread_id=None,
+    media_files=None,
+    force_document=False,
+):
+    """یک اتصال زودگذر باز کن / توکن تازه بگیر، ارسال کن، و ببند."""
+    # ... اتصال را باز کن، پیام را بفرست، نتیجه را برگردان ...
+    return {"success": True, "message_id": "..."}
+    # یا {"error": "..."}
+
+ctx.register_platform(
+    name="my_platform",
+    ...
+    cron_deliver_env_var="MY_PLATFORM_HOME_CHANNEL",
+    standalone_sender_fn=_standalone_send,
+)</code></pre>
+<p>چرا این هوک لازم است: پلتفرم‌های داخلی (Telegram، Discord، Slack و…) helperهای REST مستقیم را در <code>tools/send_message_tool.py</code> دارند تا کرون بتواند بدون نگه‌داشتن گیت‌وی در همان پروسس تحویل دهد. پلتفرم‌های پلاگینی سابقاً به <code>_gateway_runner_ref()</code> وابسته بودند که بیرون از پروسس گیت‌وی ‏<code>None</code> برمی‌گرداند؛ پس بدون <code>standalone_sender_fn</code> ارسالِ سمت کرون با خطای <code>No live adapter for platform '&lt;name&gt;'</code> شکست می‌خورد.</p>
+<p>این تابع همان <code>pconfig</code> و <code>chat_id</code>‌ای را می‌گیرد که آداپتور زنده می‌گرفت، به‌علاوهٔ آرگومان‌های کلیدواژه‌ای اختیاری <code>thread_id</code>، ‏<code>media_files</code> و <code>force_document</code>. برگرداندن <code>{"success": True, "message_id": ...}</code> تحویل موفق حساب می‌شود؛ برگرداندن <code>{"error": "..."}</code> پیام را در <code>delivery_errors</code> کرون ظاهر می‌کند. اکششن‌های داخل تابع توسط dispatcher گرفته می‌شوند و با پیام <code>Plugin standalone send failed: &lt;reason&gt;</code> گزارش می‌شوند. پیاده‌سازی‌های مرجع در <code>plugins/platforms/{irc,teams,google_chat}/adapter.py</code> هستند.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="surfacing-env-vars-in-hermes-config"><span class="secnum">۷</span> نمایش متغیرهای محیطی در <code>hermes config</code></h2>
+<p>‏<code>hermes_cli/config.py</code> در زمان ایمپورت، ‏<code>plugins/platforms/*/plugin.yaml</code> را اسکن می‌کند و <code>OPTIONAL_ENV_VARS</code> را از بلوک‌های <code>requires_env</code> و (اختیاری) <code>optional_env</code> به‌طور خودکار پر می‌کند. از فرم دیکشنریِ کامل استفاده کنید تا description، prompt، پرچم password و URLهای درست به UI بدهید — رابط setup در CLI آن‌ها را مجانی برمی‌دارد.</p>
+<pre dir="ltr"><code># plugins/platforms/my_platform/plugin.yaml
+name: my_platform-platform
+label: My Platform
+kind: platform
+version: 1.0.0
+description: &gt;
+  My Platform gateway adapter for Hermes Agent.
+author: Your Name
+requires_env:
+  - name: MY_PLATFORM_TOKEN
+    description: "Bot API token from the My Platform console"
+    prompt: "My Platform bot token"
+    url: "https://my-platform.example.com/bots"
+    password: true
+  - name: MY_PLATFORM_CHANNEL
+    description: "Channel to join (e.g. #hermes)"
+    prompt: "Channel"
+    password: false
+optional_env:
+  - name: MY_PLATFORM_HOME_CHANNEL
+    description: "Default channel for cron delivery (defaults to MY_PLATFORM_CHANNEL)"
+    prompt: "Home channel (or empty)"
+    password: false
+  - name: MY_PLATFORM_ALLOWED_USERS
+    description: "Comma-separated user IDs allowed to talk to the bot"
+    prompt: "Allowed users (comma-separated)"
+    password: false</code></pre>
+<p><strong>کلیدهای دیکشنری پشتیبانی‌شده:</strong> ‏<code>name</code>‏ (لازم)، ‏<code>description</code>، ‏<code>prompt</code>، ‏<code>url</code>، ‏<code>password</code>‏ (بولی؛ در صورت حذف، از پسوند <code>*_TOKEN</code> / <code>*_SECRET</code> / <code>*_KEY</code> / <code>*_PASSWORD</code> / <code>*_JSON</code> خودکار تشخیص داده می‌شود)، ‏<code>category</code>‏ (پیش‌فرض <code>"messaging"</code>).</p>
+<p>موارد رشتهٔ ساده‏ (<code>- MY_PLATFORM_TOKEN</code>) هم‌چنان کار می‌کنند — توضیح عمومی‌ای می‌گیرند که از <code>label</code> پلاگین به‌طور خودکار ساخته می‌شود. اگر برای همان متغیر از قبل رکورد هاردکدی در <code>OPTIONAL_ENV_VARS</code> وجود داشته باشد، آن برنده است (سازگاری با گذشته)؛ فرم plugin.yaml نقش پشتیبان را دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> تجربهٔ کاربری مخصوص پلتفرم برای LLMِ کند</h2>
+<p>بعضی پلتفرم‌ها محدودیت‌هایی دارند که نحوهٔ ارائهٔ پاسخِ کندِ LLM را عوض می‌کند:</p>
+<ul>
+<li><strong>LINE</strong> یک <em>reply token</em> یک‌بارمصرف صادر می‌کند که تقریباً ۶۰ ثانیه بعد از رویداد ورودی منقضی می‌شود. پاسخ‌دادن با آن توکن مجانی است؛ افتادن به API پولی Push این‌طور نیست. اگر LLM تا ددلاین کارش تمام نشده باشد، انتخاب بین «سوزاندن سهمیهٔ پولی Push» یا «کار هوشمندانه‌تر با reply token قبل از انقضای آن» است.</li>
+<li><strong>WhatsApp</strong> بعد از ۲۴ ساعت نشست را غیرفعال علامت می‌زند و بعد از آن فقط پیام‌های template پذیرفته می‌شوند.</li>
+<li><strong>SMS</strong> مفهوم نشانگر در-حال-نوشتن یا به‌روزرسانی تدریجی ندارد — پاسخ‌های طولانی فقط این حس را می‌دهند که بات آفلاین است.</li>
+</ul>
+<p>این‌ها محدودیت‌های واقعی‌ای هستند که <code>BasePlatformAdapter</code> پایه نمی‌تواند پیش‌بینی‌شان کند. سطح پلاگین عمداً جا می‌گذارد تا آداپتور بتواند UX مخصوص پلتفرم را روی حلقهٔ typing پایه لایه کند، بدون آنکه فهرست kwargها بزرگ شود.</p>
+<h3>الگو: زیرکلاس‌کردن <code>_keep_typing</code> برای لایه‌کردن UX حین کار</h3>
+<p>‏<code>BasePlatformAdapter._keep_typing</code> تپشِ نشانگر typing است — درحالی‌که LLM در حال تولید است به‌عنوان تسک پس‌زمینه اجرا می‌شود و وقتی پاسخ تحویل داده شد لغو می‌شود. برای لایه‌کردن یک رفتار مخصوص پلتفرم روی یک آستانه (مثلاً فرستادن حباب «هنوز دارم فکر می‌کنم» در ثانیهٔ ۴۵)، در آداپتور خودتان <code>_keep_typing</code> را بازنویسی کنید، تسک خودتان را کنار <code>super()._keep_typing()</code> زمان‌بندی کنید، و در <code>finally</code> جمعش کنید:</p>
+<pre dir="ltr"><code>class LineAdapter(BasePlatformAdapter):
+    async def _keep_typing(self, chat_id: str, *args, **kwargs) -&gt; None:
+        if self.slow_response_threshold &lt;= 0:
+            await super()._keep_typing(chat_id, *args, **kwargs)
+            return
+
+        async def _fire_at_threshold() -&gt; None:
+            try:
+                await asyncio.sleep(self.slow_response_threshold)
+            except asyncio.CancelledError:
+                raise
+            # کار مخصوص پلتفرم اینجا — برای LINE، حباب Template Buttons
+            # «Get answer» را با reply token کش‌شده بفرستید تا کاربر
+            # بعداً بتواند پاسخ کش‌شده را با یک reply token تازه
+            # (مجانی) از کال‌بک postback بگیرد.
+            await self._send_slow_response_button(chat_id)
+
+        side_task = asyncio.create_task(_fire_at_threshold())
+        try:
+            await super()._keep_typing(chat_id, *args, **kwargs)
+        finally:
+            if not side_task.done():
+                side_task.cancel()
+                try:
+                    await side_task
+                except (asyncio.CancelledError, Exception):
+                    pass</code></pre>
+<p>نکات کلیدی:</p>
+<ul>
+<li><strong>همیشه ‏<code>await super()._keep_typing(...)</code> را صدا بزنید.</strong> تپش typing به‌خودش مفید است — جایگزینش نکنید، روی آن لایه بگذارید.</li>
+<li><strong>تسک جانبی را در <code>finally</code> جمع کنید.</strong> وقتی LLM تمام می‌شود (یا <code>/stop</code> ران را لغو می‌کند)، گیت‌وی تسک typing را لغو می‌کند. تسک جانبی شما هم باید آن لغو را حس کند، وگرنه باقی می‌ماند و ممکن است بعد از تحویل‌شدن پاسخ آتش بگیرد.</li>
+<li><strong>با <code>interrupt_session_activity</code> جفت کنید</strong> تا هر وضعیت UX یتیم وقتی کاربر <code>/stop</code> می‌زند حل شود. برای LINE یعنی انتقال رکورد کش postback از <code>PENDING</code> به <code>ERROR</code> تا دکمهٔ پایدار «Get answer» به‌جای حلقه‌زدن، پیام «Run was interrupted» تحویل دهد.</li>
+</ul>
+<h3>الگو: زیرکلاس‌کردن <code>send</code> برای مسیردادن از طریق کش به‌جای ارسال فوری</h3>
+<p>اگر UX پاسخ‌کندِ شما پاسخ را برای بازیابی بعدی کش می‌کند (جریان postback خط LINE)، بازنویسی <code>send</code> شما باید سه حالت را تشخیص دهد:</p>
+<ol>
+<li><strong>postback در انتظار برای این چت فعال است</strong> → پاسخ را زیر request_id کش کن، هیچ چیز قابل‌دیدنی نفرست.</li>
+<li><strong>تأیید مشغولیت سیستم</strong>‏ (<code>⚡ Interrupting</code>، ‏<code>⏳ Queued</code>، ‏<code>⏩ Steered</code>) → از کش عبور کن و قابل‌دیدن بفرست تا کاربر پاسخ گیت‌وی به ورودی‌اش را ببیند.</li>
+<li><strong>پاسخ عادی</strong> → مثل همیشه با reply-token-یا-push بفرست.</li>
+</ol>
+<pre dir="ltr"><code>async def send(self, chat_id: str, content: str, **kw) -&gt; SendResult:
+    if _is_system_bypass(content):
+        return await self._send_text_chunks(chat_id, content, force_push=False)
+    pending_rid = self._pending_buttons.get(chat_id)
+    if pending_rid:
+        self._cache.set_ready(pending_rid, content)
+        return SendResult(success=True, message_id=pending_rid)
+    return await self._send_text_chunks(chat_id, content, force_push=False)</code></pre>
+<p>‏<code>_SYSTEM_BYPASS_PREFIXES</code> پیشوندهای تأیید مشغولیتِ خودِ گیت‌وی‌اند‏ (<code>⚡</code>، ‏<code>⏳</code>، ‏<code>⏩</code>، ‏<code>💾</code>). فارغ از وضعیت UX کش‌شده، همیشه اجازه دهید این‌ها قابل‌دیدن رد شوند.</p>
+<h3>چه وقت این الگو مناسب است</h3>
+<p>رویکرد بازنویسی حلقهٔ typing را وقتی استفاده کنید که:</p>
+<ul>
+<li>API خروجی پلتفرم محدودیت پنجرهٔ زمانی سخت دارد (reply token یک‌بارمصرف، نشست sticky منقضی‌شونده و…) <strong>و</strong></li>
+<li>یک <em>حباب قابل‌مشاهدهٔ حین کار</em> در آن پلتفرم UX قابل‌قبولی باشد.</li>
+</ul>
+<p>مسیر ساده‌ترِ همیشه-Push با <code>slow_response_threshold = 0</code> را وقتی استفاده کنید که:</p>
+<ul>
+<li>پلتفرم تفکیک معنادار مجانی/پولی ندارد، <strong>یا</strong></li>
+<li>جامعهٔ کاربران «سکوتِ بعد-پاسخ» به سبک «loading… loading… DONE» را به یک حباب تعاملی میانی ترجیح می‌دهد.</li>
+</ul>
+<p>LINE هر دو را پشتیبانی می‌کند: آستانه به‌طور پیش‌فرض برای واکشی مجانی postback ‏۴۵ ثانیه است و <code>LINE_SLOW_RESPONSE_THRESHOLD=0</code> به «همیشه fallback به Push» برمی‌گردد.</p>
+<h3>پیاده‌سازی مرجع</h3>
+<p>پیاده‌سازی کامل postback خط LINE را در <code>plugins/platforms/line/adapter.py</code> ببینید — یک ماشین حالت <code>RequestCache</code>‏ (<code>PENDING → READY → DELIVERED</code>، به‌علاوهٔ <code>ERROR</code> برای <code>/stop</code>)، یک بازنویسی <code>_keep_typing</code> که در آستانه حباب Template Buttons را می‌فرستد، یک بازنویسی <code>send</code> که از کش مسیر می‌دهد، و یک بازنویسی <code>interrupt_session_activity</code> که رکوردهای PENDING یتیم را حل می‌کند.</p>
+<h3>پیاده‌سازی‌های مرجع (مسیر پلاگین)</h3>
+<p>یک مثال کامل و کارا را در <code>plugins/platforms/irc/</code> مخزن ببینید — یک آداپتور IRC ناهمگامِ کامل بدون هیچ وابستگی خارجی. ‏<code>plugins/platforms/teams/</code> پوشش Bot Framework / Adaptive Cards است، ‏<code>plugins/platforms/google_chat/</code> پوشش APIهای REST مبتنی بر OAuth و ‏<code>plugins/platforms/line/</code> پوشش APIهای پیام‌رسانیِ وب‌هوک‌محور با UX مخصوص پلتفرم برای LLM کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="step-by-step-checklist-built-in-path"><span class="secnum">۹</span> چک‌لیست گام‌به‌گام (مسیر داخلی)</h2>
+<div class="callout note">
+  <div class="callout-title">ℹ️</div>
+  <p>این چک‌لیست برای افزودن پلتفرم مستقیماً به کدبیس هستهٔ هرمس است — معمولاً توسط مشارکت‌کنندگان هسته برای پلتفرم‌های رسمیِ پشتیبانی‌شده انجام می‌شود. پلتفرم‌های جامعه/اشخاص ثالث باید از <a href="#plugin-path-recommended">مسیر پلاگین</a> بالا استفاده کنند.</p>
+</div>
+<h3>۱. Enum پلتفرم</h3>
+<p>پلتفرم خودتان را به enum ‏<code>Platform</code> در <code>gateway/config.py</code> اضافه کنید:</p>
+<pre dir="ltr"><code>class Platform(Enum):
+    # ... پلتفرم‌های موجود ...
+    NEWPLAT = "newplat"</code></pre>
+<h3>۲. فایل آداپتور</h3>
+<p>‏<code>plugins/platforms/newplat/adapter.py</code> را بسازید:</p>
+<pre dir="ltr"><code>from gateway.config import Platform, PlatformConfig
+from gateway.platforms.base import (
+    BasePlatformAdapter, MessageEvent, MessageType, SendResult,
+)
+
+def check_newplat_requirements() -&gt; bool:
+    """برمی‌گرداند که وابستگی‌ها در دسترس‌اند یا نه."""
+    return SOME_SDK_AVAILABLE
+
+class NewPlatAdapter(BasePlatformAdapter):
+    def __init__(self, config: PlatformConfig):
+        super().__init__(config, Platform.NEWPLAT)
+        # خواندن کانفیگ از دیکشنری config.extra
+        extra = config.extra or {}
+        self._api_key = extra.get("api_key") or os.getenv("NEWPLAT_API_KEY", "")
+
+    async def connect(self, *, is_reconnect: bool = False) -&gt; bool:
+        # راه‌اندازی اتصال، شروع polling/webhook
+        self._mark_connected()
+        return True
+
+    async def disconnect(self) -&gt; None:
+        self._running = False
+        self._mark_disconnected()
+
+    async def send(self, chat_id, content, reply_to=None, metadata=None):
+        # ارسال پیام از طریق API پلتفرم
+        return SendResult(success=True, message_id="...")
+
+    async def get_chat_info(self, chat_id):
+        return {"name": chat_id, "type": "dm"}</code></pre>
+<p>برای پیام‌های ورودی، یک <code>MessageEvent</code> بسازید و <code>self.handle_message(event)</code> را صدا بزنید:</p>
+<pre dir="ltr"><code>source = self.build_source(
+    chat_id=chat_id,
+    chat_name=name,
+    chat_type="dm",  # یا "group"
+    user_id=user_id,
+    user_name=user_name,
+)
+event = MessageEvent(
+    text=content,
+    message_type=MessageType.TEXT,
+    source=source,
+    message_id=msg_id,
+)
+await self.handle_message(event)</code></pre>
+<h3>۳. کانفیگ گیت‌وی‏ (<code>gateway/config.py</code>)</h3>
+<p>سه نقطهٔ تماس:</p>
+<ol>
+<li><strong><code>get_connected_platforms()</code></strong> — بررسیِ اعتبارنامه‌های لازم پلتفرم خودتان را اضافه کنید</li>
+<li><strong><code>load_gateway_config()</code></strong> — رکورد نگاشت توکنِ متغیر محیطی اضافه کنید: ‏<code>Platform.NEWPLAT: "NEWPLAT_TOKEN"</code></li>
+<li><strong><code>_apply_env_overrides()</code></strong> — همهٔ متغیرهای محیطی <code>NEWPLAT_*</code> را به کانفیگ نگاشت کنید</li>
+</ol>
+<h3>۴. Gateway Runner‏ (<code>gateway/run.py</code>)</h3>
+<p>شش نقطهٔ تماس:</p>
+<ol>
+<li><strong><code>_create_adapter()</code></strong> — یک شاخهٔ ‏<code>elif platform == Platform.NEWPLAT:</code> اضافه کنید</li>
+<li><strong>نگاشت allowed_users در <code>_is_user_authorized()</code></strong> — ‏<code>Platform.NEWPLAT: "NEWPLAT_ALLOWED_USERS"</code></li>
+<li><strong>نگاشت allow_all در <code>_is_user_authorized()</code></strong> — ‏<code>Platform.NEWPLAT: "NEWPLAT_ALLOW_ALL_USERS"</code></li>
+<li><strong>تاپل <code>_any_allowlist</code> در بررسی زودهنگام متغیرهای محیطی</strong> — ‏<code>"NEWPLAT_ALLOWED_USERS"</code> را اضافه کنید</li>
+<li><strong>تاپل <code>_allow_all</code> در بررسی زودهنگام متغیرهای محیطی</strong> — ‏<code>"NEWPLAT_ALLOW_ALL_USERS"</code> را اضافه کنید</li>
+<li><strong>فروزن‌ست <code>_UPDATE_ALLOWED_PLATFORMS</code></strong> — ‏<code>Platform.NEWPLAT</code> را اضافه کنید</li>
+</ol>
+<h3>۵. تحویل بین‌پلتفرمی</h3>
+<ol>
+<li><strong><code>gateway/platforms/webhook.py</code></strong> — ‏<code>"newplat"</code> را به تاپل نوع‌های تحویل اضافه کنید</li>
+<li><strong><code>cron/scheduler.py</code></strong> — به فروزن‌ست <code>_KNOWN_DELIVERY_PLATFORMS</code> و نگاشت پلتفرمِ <code>_deliver_result()</code> اضافه کنید</li>
+</ol>
+<h3>۶. یکپارچه‌سازی CLI</h3>
+<ol>
+<li><strong><code>hermes_cli/config.py</code></strong> — همهٔ متغیرهای <code>NEWPLAT_*</code> را به <code>_EXTRA_ENV_KEYS</code> اضافه کنید</li>
+<li><strong><code>hermes_cli/gateway.py</code></strong> — رکوردی با key، label، emoji، token_var، setup_instructions و vars به فهرست <code>_PLATFORMS</code> اضافه کنید</li>
+<li><strong><code>hermes_cli/platforms.py</code></strong> — رکورد <code>PlatformInfo</code> با label و default_toolset اضافه کنید (توسط TUIهای <code>skills_config</code> و <code>tools_config</code> استفاده می‌شود)</li>
+<li><strong><code>hermes_cli/setup.py</code></strong> — تابع <code>_setup_newplat()</code> را اضافه کنید (می‌تواند به <code>gateway.py</code> واگذار کند) و تاپل را به فهرست پلتفرم‌های پیام‌رسانی اضافه کنید</li>
+<li><strong><code>hermes_cli/status.py</code></strong> — رکورد تشخیص پلتفرم اضافه کنید: ‏<code>"NewPlat": ("NEWPLAT_TOKEN", "NEWPLAT_HOME_CHANNEL")</code></li>
+<li><strong><code>hermes_cli/dump.py</code></strong> — ‏<code>"newplat": "NEWPLAT_TOKEN"</code> را به دیکشنری تشخیص پلتفرم اضافه کنید</li>
+</ol>
+<h3>۷. ابزارها</h3>
+<ol>
+<li><strong><code>tools/send_message_tool.py</code></strong> — ‏<code>"newplat": Platform.NEWPLAT</code> را به نگاشت پلتفرم اضافه کنید</li>
+<li><strong><code>tools/cronjob_tools.py</code></strong> — ‏<code>newplat</code> را به رشتهٔ توضیح مقصدهای تحویل اضافه کنید</li>
+</ol>
+<h3>۸. تول‌ست‌ها</h3>
+<ol>
+<li><strong><code>toolsets.py</code></strong> — تعریف تول‌ست <code>"hermes-newplat"</code> را با <code>_HERMES_CORE_TOOLS</code> اضافه کنید</li>
+<li><strong><code>toolsets.py</code></strong> — ‏<code>"hermes-newplat"</code> را به فهرست includes در <code>"hermes-gateway"</code> اضافه کنید</li>
+</ol>
+<h3>۹. اختیاری: راهنماهای پلتفرم</h3>
+<p><strong><code>agent/prompt_builder.py</code></strong> — اگر پلتفرم شما محدودیت‌های رندر مشخصی دارد (بدون markdown، محدودیت طول پیام و…)، یک رکورد به دیکشنری <code>PLATFORM_HINTS</code> اضافه کنید. این کار راهنمای مخصوص پلتفرم را به پرامپت سیستم تزریق می‌کند:</p>
+<pre dir="ltr"><code>PLATFORM_HINTS = {
+    # ...
+    "newplat": (
+        "You are chatting via NewPlat. It supports markdown formatting "
+        "but has a 4000-character message limit."
+    ),
+}</code></pre>
+<p>همهٔ پلتفرم‌ها hint لازم ندارند — فقط وقتی اضافه کنید که قرار است رفتار ایجنت فرق کند.</p>
+<h3>۱۰. تست‌ها</h3>
+<p>‏<code>tests/gateway/test_newplat.py</code> را بسازید که این‌ها را پوشش دهد:</p>
+<ul>
+<li>ساخت آداپتور از کانفیگ</li>
+<li>ساخت رویداد پیام</li>
+<li>متد send‏ (mock کردن API خارجی)</li>
+<li>قابلیت‌های مخصوص پلتفرم (رمزنگاری، مسیریابی و…)</li>
+</ul>
+<h3>۱۱. مستندات</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فایل</th><th>چه چیزی اضافه کنید</th></tr></thead>
+  <tbody>
+    <tr><td><code>website/docs/user-guide/messaging/newplat.md</code></td><td>صفحهٔ کامل راه‌اندازی پلتفرم</td></tr>
+    <tr><td><code>website/docs/user-guide/messaging/index.md</code></td><td>جدول مقایسهٔ پلتفرم‌ها، نمودار معماری، جدول تول‌ست‌ها، بخش امنیت، لینک گام‌های بعدی</td></tr>
+    <tr><td><code>website/docs/reference/environment-variables.md</code></td><td>همهٔ متغیرهای محیطی <code>NEWPLAT_*</code></td></tr>
+    <tr><td><code>website/docs/reference/toolsets-reference.md</code></td><td>تول‌ست hermes-newplat</td></tr>
+    <tr><td><code>website/docs/integrations/index.md</code></td><td>لینک پلتفرم</td></tr>
+    <tr><td><code>website/sidebars.ts</code></td><td>مورد سایدبار برای صفحهٔ مستندات</td></tr>
+    <tr><td><code>website/docs/developer-guide/architecture.md</code></td><td>تعداد + فهرست آداپتورها</td></tr>
+    <tr><td><code>website/docs/developer-guide/gateway-internals.md</code></td><td>فهرست فایل آداپتورها</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> ممیزی برابری (parity)</h2>
+<p>قبل از علامت‌زدن PR پلتفرم جدید به‌عنوان کامل، یک ممیزی برابری در برابر یک پلتفرم جاافتاده اجرا کنید:</p>
+<pre dir="ltr"><code># پیدا کردن هر فایل .py که به پلتفرم مرجع اشاره می‌کند
+search_files "bluebubbles" output_mode="files_only" file_glob="*.py"
+
+# پیدا کردن هر فایل .py که به پلتفرم جدید اشاره می‌کند
+search_files "newplat" output_mode="files_only" file_glob="*.py"
+
+# هر فایلی که در مجموعهٔ اول باشد ولی در دوم نه، یک شکاف احتمالی است</code></pre>
+<p>برای فایل‌های <code>.md</code> و <code>.ts</code> هم تکرار کنید. هر شکاف را بررسی کنید — یک شمارش پلتفرم است (باید به‌روز شود) یا یک ارجاع مخصوص پلتفرم (رد شود)؟</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> الگوهای رایج</h2>
+<h3>آداپتورهای Long-Poll</h3>
+<p>اگر آداپتور شما long-polling استفاده می‌کند (مثل Telegram یا Weixin)، از یک تسک حلقهٔ polling استفاده کنید:</p>
+<pre dir="ltr"><code>async def connect(self):
+    self._poll_task = asyncio.create_task(self._poll_loop())
+    self._mark_connected()
+
+async def _poll_loop(self):
+    while self._running:
+        messages = await self._fetch_updates()
+        for msg in messages:
+            await self.handle_message(self._build_event(msg))</code></pre>
+<h3>آداپتورهای Callback/Webhook</h3>
+<p>اگر پلتفرم پیام‌ها را به نقطهٔ پایانی شما push می‌کند (مثل WeCom Callback)، یک سرور HTTP اجرا کنید:</p>
+<pre dir="ltr"><code>async def connect(self):
+    self._app = web.Application()
+    self._app.router.add_post("/callback", self._handle_callback)
+    # ... سرور aiohttp را راه بیندازید
+    self._mark_connected()
+
+async def _handle_callback(self, request):
+    event = self._build_event(await request.text())
+    await self._message_queue.put(event)
+    return web.Response(text="success")  # بلافاصله تأیید (ack) کن</code></pre>
+<p>برای پلتفرم‌هایی با ددلاین پاسخِ تنگ (مثل محدودیت ۵ ثانیه‌ای WeCom)، همیشه بلافاصله تأیید کنید و پاسخ ایجنت را بعداً به‌طور فعال از طریق API تحویل دهید. نشست‌های ایجنت ۳ تا ۳۰ دقیقه طول می‌کشند — پاسخ درون‌خطی داخل پنجرهٔ پاسخ کال‌بک عملی نیست.</p>
+<h3>قفل‌های توکن</h3>
+<p>اگر آداپتور یک اتصال پایدار با یک اعتبارنامهٔ یکتا نگه می‌دارد، یک قفل scoped اضافه کنید تا دو پروفایل از یک اعتبارنامه استفاده نکنند:</p>
+<pre dir="ltr"><code>from gateway.status import acquire_scoped_lock, release_scoped_lock
+
+async def connect(self, *, is_reconnect: bool = False):
+    acquired, _existing = acquire_scoped_lock("newplat", self._token)
+    if not acquired:
+        logger.error("Token already in use by another profile")
+        return False
+    # ... اتصال
+
+async def disconnect(self):
+    release_scoped_lock("newplat", self._token)</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> پیاده‌سازی‌های مرجع</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>آداپتور</th><th>الگو</th><th>پیچیدگی</th><th>مرجع خوب برای</th></tr></thead>
+  <tbody>
+    <tr><td><code>bluebubbles.py</code></td><td>REST + وب‌هوک</td><td>متوسط</td><td>یکپارچه‌سازی سادهٔ REST API</td></tr>
+    <tr><td><code>weixin.py</code></td><td>Long-poll + CDN</td><td>بالا</td><td>مدیریت رسانه، رمزنگاری</td></tr>
+    <tr><td><code>plugins/platforms/wecom/callback_adapter.py</code></td><td>Callback/وب‌هوک</td><td>متوسط</td><td>سرور HTTP، رمزنگاری AES، چند-اپ</td></tr>
+    <tr><td><code>plugins/platforms/irc/adapter.py</code></td><td>Long-poll + پروتکل IRC</td><td>بالا</td><td>آداپتور پلاگینِ تمام‌عیار با قفل توکن scoped</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<div class="pager">
+  <a href="adding-providers.html"><span class="dir">→ قبلی</span><span class="ttl">افزودن ارائه‌دهندهٔ جدید</span></a>
+  <a class="next" href="creating-skills.html"><span class="dir">بعدی ←</span><span class="ttl">ساخت مهارت</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-platform-adapters" target="_blank" rel="noopener">Adding Platform Adapters</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

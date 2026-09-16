@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>راهبری خط لولهٔ جلسات تیمز — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/operate-teams-meeting-pipeline" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>راهبری خط لولهٔ جلسات تیمز</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راهبری خط لولهٔ جلسات تیمز</h1>
+<p>این راهنما را بعد از آن به کار ببرید که قابلیت را از <a href="../user-guide/messaging/teams-meetings.html">جلسات تیمز (خلاصه‌جلسه)</a> فعال کرده باشید.</p>
+<p>این صفحه شامل این‌هاست:</p>
+<ul>
+<li>گردش‌کارهای CLI اپراتور</li>
+<li>نگهداری روتین اشتراک‌ها</li>
+<li>تریاژ خرابی‌ها</li>
+<li>بررسی‌های راه‌اندازی نهایی (go-live)</li>
+<li>کاربرگ استقرار</li>
+</ul>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> فرمان‌های اصلی اپراتور</h2>
+<h3>اعتبارسنجی اسنپ‌شات پیکربندی</h3>
+<pre dir="ltr"><code>hermes teams-pipeline validate</code></pre>
+<p>بعد از هر تغییر پیکربندی، اول این را اجرا کنید.</p>
+<h3>بررسی سلامت توکن</h3>
+<pre dir="ltr"><code>hermes teams-pipeline token-health
+hermes teams-pipeline token-health --force-refresh</code></pre>
+<p>وقتی به کهنه‌بودن وضعیت احراز هویت شک دارید از <code>--force-refresh</code> استفاده کنید.</p>
+<h3>بررسی اشتراک‌ها</h3>
+<pre dir="ltr"><code>hermes teams-pipeline subscriptions</code></pre>
+<h3>تمدید اشتراک‌های نزدیک به انقضا</h3>
+<pre dir="ltr"><code>hermes teams-pipeline maintain-subscriptions
+hermes teams-pipeline maintain-subscriptions --dry-run</code></pre>
+<h3 id="automating-subscription-renewal-required-for-production">خودکارسازی تمدید اشتراک‌ها (برای پروداکشن الزامی است)</h3>
+<p><b>اشتراک‌های Microsoft Graph حداکثر ظرف ۷۲ ساعت منقضی می‌شوند.</b> اگر چیزی آن‌ها را تمدید نکند، اعلان‌های جلسات بعد از ۳ روز بی‌سروصدا متوقف می‌شوند و خط لوله «خراب» به نظر می‌رسد. این شایع‌ترین حالت خرابی عملیاتی برای هر یکپارچه‌سازی مبتنی بر Graph است.</p>
+<p>باید <code>maintain-subscriptions</code> را زمان‌بندی‌شده اجرا کنید. یکی از این سه گزینه را انتخاب کنید:</p>
+<h4>گزینهٔ ۱: کرون هرمس (پیشنهادی اگر از قبل گیت‌وی هرمس را اجرا می‌کنید)</h4>
+<p>هرمس یک زمان‌بند کرون داخلی دارد. حالت <code>--no-agent</code> یک اسکریپت را به‌عنوان کار اجرا می‌کند (به‌جای استفاده از LLM) و <code>--script</code> باید به فایلی زیر <code>~/.hermes/scripts/</code> اشاره کند. اول اسکریپت را بسازید:</p>
+<pre dir="ltr"><code>mkdir -p ~/.hermes/scripts
+cat &gt; ~/.hermes/scripts/maintain-teams-subscriptions.sh &lt;&lt;'EOF'
+#!/usr/bin/env bash
+exec hermes teams-pipeline maintain-subscriptions
+EOF
+chmod +x ~/.hermes/scripts/maintain-teams-subscriptions.sh</code></pre>
+<p>بعد یک کار کرونِ فقط-اسکریپتی ثبت کنید که هر ۱۲ ساعت اجرا می‌شود (۶ برابر حاشیهٔ اطمینان نسبت به پنجرهٔ انقضای ۷۲ ساعته):</p>
+<pre dir="ltr"><code>hermes cron create "0 */12 * * *" \
+  --name "teams-pipeline-maintain-subscriptions" \
+  --no-agent \
+  --script maintain-teams-subscriptions.sh \
+  --deliver local</code></pre>
+<p>مطمئن شوید ثبت شده و زمان اجرای بعدی را بررسی کنید:</p>
+<pre dir="ltr"><code>hermes cron list
+hermes cron status        # وضعیت زمان‌بند</code></pre>
+<h4>گزینهٔ ۲: تایمر systemd (پیشنهادی برای استقرارهای پروداکشن لینوکس)</h4>
+<p>فایل <code>/etc/systemd/system/hermes-teams-pipeline-maintain.service</code> را بسازید:</p>
+<pre dir="ltr"><code>[Unit]
+Description=Hermes Teams pipeline subscription maintenance
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=hermes
+EnvironmentFile=/etc/hermes/env
+ExecStart=/usr/local/bin/hermes teams-pipeline maintain-subscriptions</code></pre>
+<p>و <code>/etc/systemd/system/hermes-teams-pipeline-maintain.timer</code>:</p>
+<pre dir="ltr"><code>[Unit]
+Description=Run Hermes Teams pipeline subscription maintenance every 12 hours
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=12h
+Persistent=true
+
+[Install]
+WantedBy=timers.target</code></pre>
+<p>فعال‌سازی:</p>
+<pre dir="ltr"><code>sudo systemctl daemon-reload
+sudo systemctl enable --now hermes-teams-pipeline-maintain.timer
+systemctl list-timers hermes-teams-pipeline-maintain.timer</code></pre>
+<h4>گزینهٔ ۳: crontab ساده</h4>
+<pre dir="ltr"><code>0 */12 * * * /usr/local/bin/hermes teams-pipeline maintain-subscriptions &gt;&gt; /var/log/hermes/teams-pipeline-maintain.log 2&gt;&amp;1</code></pre>
+<p>مطمئن شوید محیط کرون اعتبارنامه‌های <code>MSGRAPH_*</code> را دارد. ساده‌ترین راه‌حل: سورس‌کردن <code>~/.hermes/.env</code> در ابتدای یک اسکریپت رپر که crontab صدا می‌زند.</p>
+<h4>تأیید اینکه تمدید کار می‌کند</h4>
+<p>بعد از اینکه زمان‌بندی را راه انداختید، پس از اولین اجرای زمان‌بندی‌شده فعالیت تمدید را چک کنید:</p>
+<pre dir="ltr"><code>hermes teams-pipeline subscriptions   # باید جلو رفتن expirationDateTime را نشان دهد
+hermes teams-pipeline maintain-subscriptions --dry-run   # بیشتر مواقع باید "0 expiring soon" نشان بدهد</code></pre>
+<p>اگر دیدید وب‌هوک Graph‌تان بعد از دقیقاً ~۷۲ ساعت به‌طور مرموز «از کار افتاد»، اولین چیزی که باید چک کنید همین است: آیا کارِ تمدید واقعاً اجرا شده؟</p>
+<h3>بررسی کارهای اخیر</h3>
+<pre dir="ltr"><code>hermes teams-pipeline list
+hermes teams-pipeline list --status failed
+hermes teams-pipeline show &lt;job-id&gt;</code></pre>
+<h3>اجرای مجدد یک کار ذخیره‌شده</h3>
+<pre dir="ltr"><code>hermes teams-pipeline run &lt;job-id&gt;</code></pre>
+<h3>واکشی آزمایشی آرتیفکت‌های جلسه</h3>
+<pre dir="ltr"><code>hermes teams-pipeline fetch --meeting-id &lt;meeting-id&gt;
+hermes teams-pipeline fetch --join-web-url "&lt;join-url&gt;"
+hermes teams-pipeline fetch --join-web-url "&lt;join-url&gt;" --organizer-user-id &lt;entra-user-id&gt;</code></pre>
+<p><code>--organizer-user-id</code> (شناسهٔ کاربر Microsoft Entra برگزارکننده) را پاس بدهید تا رفع ارجاع از مسیر Graphِ محدود به برگزارکننده یعنی <code>/users/{id}/onlineMeetings</code> انجام شود. این کار برای URLهای کوتاه <code>/meet/</code> تیمز ضروری است، چون Graph آن‌ها را روی نقطهٔ پایانی <code>/communications/onlineMeetings</code> رد می‌کند. کارهای وب‌هوک‌محور، برگزارکننده را به‌طور خودکار از <code>@odata.id</code> اعلان استخراج می‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> راهنمای عملیاتی روتین</h2>
+<h3>بعد از اولین راه‌اندازی</h3>
+<p>این‌ها را به ترتیب اجرا کنید:</p>
+<pre dir="ltr"><code>hermes teams-pipeline validate
+hermes teams-pipeline token-health --force-refresh
+hermes teams-pipeline subscriptions</code></pre>
+<p>سپس یک رویداد جلسهٔ واقعی را راه بیندازید یا منتظرش بمانید و تأیید کنید:</p>
+<pre dir="ltr"><code>hermes teams-pipeline list
+hermes teams-pipeline show &lt;job-id&gt;</code></pre>
+<h3>بررسی‌های روزانه یا دوره‌ای</h3>
+<ul>
+<li><code>hermes teams-pipeline maintain-subscriptions --dry-run</code> را اجرا کنید</li>
+<li><code>hermes teams-pipeline list --status failed</code> را بررسی کنید</li>
+<li>مطمئن شوید مقصد تحویل تیمز همچنان همان چت یا کانال درست است</li>
+</ul>
+<h3>قبل از تغییر URLهای وب‌هوک یا مقاصد تحویل</h3>
+<ul>
+<li>URL عمومی اعلان‌ها یا پیکربندی مقصد تیمز را به‌روزرسانی کنید</li>
+<li><code>hermes teams-pipeline validate</code> را اجرا کنید</li>
+<li>اشتراک‌های تحت تأثیر را تمدید یا بازسازی کنید</li>
+<li>مطمئن شوید رویدادهای جدید در مقصد نهایی (sink) مورد انتظار فرود می‌آیند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> تریاژ خرابی‌ها</h2>
+<h3>هیچ کاری ساخته نمی‌شود</h3>
+<p>چک کنید:</p>
+<ul>
+<li><code>msgraph_webhook</code> فعال باشد</li>
+<li>URL عمومی اعلان‌ها به <code>/msgraph/webhook</code> اشاره کند</li>
+<li>client state داخل اشتراک با <code>MSGRAPH_WEBHOOK_CLIENT_STATE</code> مطابقت داشته باشد</li>
+<li>اشتراک‌ها هنوز در سمت سرویس وجود داشته باشند و منقضی نشده باشند</li>
+</ul>
+<h3>کارها در حالت retry می‌مانند یا قبل از خلاصه‌سازی شکست می‌خورند</h3>
+<p>چک کنید:</p>
+<ul>
+<li>مجوزها و در دسترس‌بودن رونوشت (transcript)</li>
+<li>مجوزهای ضبط و در دسترس‌بودن آرتیفکت‌ها</li>
+<li>در دسترس‌بودن <code>ffmpeg</code> اگر حالت پشتیبان ضبط فعال باشد</li>
+<li>سلامت توکن Graph</li>
+</ul>
+<h3>خلاصه‌ها تولید می‌شوند ولی به تیمز تحویل داده نمی‌شوند</h3>
+<p>چک کنید:</p>
+<ul>
+<li><code>platforms.teams.enabled: true</code></li>
+<li><code>delivery_mode</code></li>
+<li><code>incoming_webhook_url</code> برای حالت وب‌هوک</li>
+<li><code>chat_id</code> یا <code>team_id</code> به‌همراه <code>channel_id</code> برای حالت Graph</li>
+<li>پیکربندی احراز هویت تیمز اگر ارسال از طریق Graph استفاده می‌شود</li>
+</ul>
+<h3>اجرای مجدد تکراری یا غیرمنتظره</h3>
+<p>چک کنید:</p>
+<ul>
+<li>آیا کاری را با <code>hermes teams-pipeline run</code> دستی دوباره اجرا کرده‌اید</li>
+<li>آیا رکورد مقصد نهایی برای آن جلسه از قبل وجود دارد</li>
+<li>آیا عمداً مسیر ارسال مجدد را در پیکربندی محلی‌تان فعال کرده‌اید</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> چک‌لیست راه‌اندازی نهایی</h2>
+<ul>
+<li>☐ اعتبارنامه‌های Graph موجود و درست‌اند</li>
+<li>☐ <code>msgraph_webhook</code> فعال است و از اینترنت عمومی قابل دسترسی است</li>
+<li>☐ <code>MSGRAPH_WEBHOOK_CLIENT_STATE</code> تنظیم شده و با اشتراک‌ها مطابقت دارد</li>
+<li>☐ اشتراک رونوشت ساخته شده است</li>
+<li>☐ اگر حالت پشتیبان STT لازم است، اشتراک ضبط ساخته شده است</li>
+<li>☐ اگر حالت پشتیبان ضبط فعال است، <code>ffmpeg</code> نصب شده است</li>
+<li>☐ مقصد تحویل خروجی تیمز پیکربندی و تأیید شده است</li>
+<li>☐ مقاصد نهایی Notion و Linear فقط اگر واقعاً لازم‌اند پیکربندی شده‌اند</li>
+<li>☐ <code>hermes teams-pipeline validate</code> یک اسنپ‌شات OK برمی‌گرداند</li>
+<li>☐ <code>hermes teams-pipeline token-health --force-refresh</code> با موفقیت انجام می‌شود</li>
+<li>☐ <b><code>maintain-subscriptions</code> زمان‌بندی شده است</b> (کرون هرمس، تایمر systemd یا crontab — به <a href="#automating-subscription-renewal-required-for-production">خودکارسازی تمدید اشتراک‌ها</a> نگاهی بیندازید). بدون این، اشتراک‌های Graph ظرف ۷۲ ساعت بی‌سروصدا منقضی می‌شوند.</li>
+<li>☐ یک رویداد واقعی جلسهٔ سرتاسری، یک کار ذخیره‌شده تولید کرده است</li>
+<li>☐ حداقل یک خلاصه به مقصد تحویل مورد نظر رسیده است</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> راهنمای انتخاب حالت تحویل</h2>
+<div class="table-wrap">
+<table>
+<tr><th>حالت</th><th>چه زمانی استفاده شود</th><th>بده‌بستان</th></tr>
+<tr><td><code>incoming_webhook</code></td><td>فقط به ارسال ساده در تیمز نیاز دارید</td><td>ساده‌ترین راه‌اندازی، کنترل کمتر</td></tr>
+<tr><td><code>graph</code></td><td>به ارسال در کانال یا چت از طریق Graph نیاز دارید</td><td>کنترل بیشتر، احراز هویت و پیکربندی مقصد بیشتر</td></tr>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> کاربرگ اپراتور</h2>
+<p>قبل از استقرار این را پر کنید:</p>
+<div class="table-wrap">
+<table>
+<tr><th>مورد</th><th>مقدار</th></tr>
+<tr><td>URL عمومی اعلان‌ها</td><td></td></tr>
+<tr><td>شناسهٔ tenant در Graph</td><td></td></tr>
+<tr><td>شناسهٔ client در Graph</td><td></td></tr>
+<tr><td>client state وب‌هوک</td><td></td></tr>
+<tr><td>اشتراک منبع رونوشت</td><td></td></tr>
+<tr><td>اشتراک منبع ضبط</td><td></td></tr>
+<tr><td>حالت تحویل تیمز</td><td></td></tr>
+<tr><td>شناسهٔ چت تیمز یا team/کانال</td><td></td></tr>
+<tr><td>شناسهٔ دیتابیس Notion</td><td></td></tr>
+<tr><td>شناسهٔ تیم Linear</td><td></td></tr>
+<tr><td>مسیر جایگزین ذخیره‌سازی، در صورت وجود</td><td></td></tr>
+<tr><td>مسئول بررسی‌های روزانه</td><td></td></tr>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> کاربرگ بازبینی تغییرات</h2>
+<p>قبل از تغییر استقرار از این استفاده کنید:</p>
+<div class="table-wrap">
+<table>
+<tr><th>پرسش</th><th>پاسخ</th></tr>
+<tr><td>آیا URL عمومی وب‌هوک را تغییر می‌دهیم؟</td><td></td></tr>
+<tr><td>آیا اعتبارنامه‌های Graph را تعویض می‌کنیم؟</td><td></td></tr>
+<tr><td>آیا حالت تحویل تیمز را تغییر می‌دهیم؟</td><td></td></tr>
+<tr><td>آیا به چت یا کانال تیمز جدیدی می‌رویم؟</td><td></td></tr>
+<tr><td>آیا اشتراک‌ها باید بازسازی یا تمدید شوند؟</td><td></td></tr>
+<tr><td>آیا به یک اجرای تأیید سرتاسری تازه نیاز داریم؟</td><td></td></tr>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> مستندات مرتبط</h2>
+<ul>
+<li><a href="../user-guide/messaging/teams-meetings.html">راه‌اندازی جلسات تیمز</a></li>
+<li><a href="../user-guide/messaging/teams.html">راه‌اندازی بات مایکروسافت تیمز</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="oauth-over-ssh.html"><span class="dir">→ قبلی</span><span class="ttl">OAuth روی SSH / میزبان راهن</span></a>
+  <a class="next" href="pipe-script-output.html"><span class="dir">بعدی ←</span><span class="ttl">ارسال خروجی اسکریپت به پیام‌رسان‌ها</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/operate-teams-meeting-pipeline" target="_blank" rel="noopener">Operate the Teams Meeting Pipeline</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پلاگین ارائه‌دهندهٔ مرورگر — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/browser-provider-plugin" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>پلاگین ارائه‌دهندهٔ مرورگر</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>پلاگین ارائه‌دهندهٔ مرورگر</h1>
+<p>پلاگین‌های ارائه‌دهندهٔ مرورگر یک <strong>بک‌اند مرورگر ابری</strong> ثبت می‌کنند که فراخوانی‌های ابزار <code>browser_*</code> در حالت ابری (navigate، click، screenshot و...) را سرویس می‌کند. ارائه‌دهندگان داخلی — Browserbase، Browser Use و Firecrawl — همگی به‌شکل پلاگین زیر <code>plugins/browser/&lt;name&gt;/</code> عرضه می‌شوند. می‌توانید یکی جدید اضافه کنید یا یکی از همراه‌ها را بازنویسی کنید؛ کافی است دایرکتوری‌ای کنارشان بگذارید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>بک‌اندهای مرورگر یکی از چند <strong>پلاگین بک‌اندی</strong> هستند که هرمس پشتیبانی می‌کند. بقیه (هر کدام با ABC خودشان) عبارت‌اند از <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/web-search-provider-plugin" target="_blank" rel="noopener">پلاگین‌های ارائه‌دهندهٔ جستجوی وب</a> (که این ABC آگاهانه از آن تقلید می‌کند)، <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/image-gen-provider-plugin" target="_blank" rel="noopener">تولید تصویر</a>، <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/video-gen-provider-plugin" target="_blank" rel="noopener">تولید ویدیو</a>، <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/memory-provider-plugin" target="_blank" rel="noopener">ارائه‌دهندگان حافظه</a>، <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/context-engine-plugin" target="_blank" rel="noopener">موتورهای زمینه</a>، <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/secret-source-plugin" target="_blank" rel="noopener">منابع رمز</a> و <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/model-provider-plugin" target="_blank" rel="noopener">ارائه‌دهندگان مدل</a>. پلاگین‌های عمومی ابزار/هوک/CLI در <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت پلاگین هرمس</a> هستند.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> سازوکار کلی</h2>
+<p>یک ارائه‌دهندهٔ مرورگر مرور کردن را پیاده‌سازی <strong>نمی‌کند</strong>. او <strong>چرخهٔ حیات نشست</strong> را پیاده‌سازی می‌کند: ساخت نشست مرورگر راه دور، تحویل URL وب‌سوکت CDP و برچیدن نشست. پشتهٔ مرورگر خود هرمس (<code>agent-browser</code> + <code>tools/browser_tool.py</code>) به هر URL ای CDP که برگردانید وصل می‌شود و از همان‌جا صفحه را می‌راند — هر ارائه‌دهنده‌ای کل تول‌ست <code>browser_*</code> را مجانی می‌گیرد.</p>
+<p>ارائه‌دهندهٔ فعال با <code>browser.cloud_provider</code> در <code>config.yaml</code> انتخاب می‌شود؛ دیسپچرِ <code>tools/browser_tool.py</code> یک lookup خالصِ رجیستری است و هیچ شرطِ مخصوصِ ارائه‌دهنده ندارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> کشف</h2>
+<p>هرمس بک‌اندهای مرورگر را در سه جا اسکن می‌کند:</p>
+<ol>
+<li><strong>همراه</strong> — <code>&lt;repo&gt;/plugins/browser/&lt;name&gt;/</code> (به‌طور خودکار با <code>kind: backend</code> بارگیری می‌شود)</li>
+<li><strong>کاربر</strong> — <code>~/.hermes/plugins/browser/&lt;name&gt;/</code> (با <code>plugins.enabled</code> یا <code>hermes plugins enable &lt;name&gt;</code> فعال می‌شود)</li>
+<li><strong>Pip</strong> — بسته‌هایی که نقطهٔ ورود <code>hermes_agent.plugins</code> اعلام می‌کنند</li>
+</ol>
+<p><code>register(ctx)</code> هر پلاگین <code>ctx.register_browser_provider(...)</code> را صدا می‌زند که نمونه را در رجیستری <code>agent/browser_registry.py</code> می‌گذارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> ساختار پوشه</h2>
+<pre dir="ltr"><code>plugins/browser/my-backend/
+├── __init__.py     # نقطهٔ ورود register()
+├── provider.py     # زیرکلاس BrowserProvider
+└── plugin.yaml     # مانیفست با kind: backend و provides_browser_providers</code></pre>
+<p><code>plugin.yaml</code>:</p>
+<pre dir="ltr"><code>name: browser-my-backend
+version: 1.0.0
+description: "My cloud browser backend. Requires MY_BACKEND_API_KEY."
+author: you
+kind: backend
+provides_browser_providers:
+  - my-backend</code></pre>
+<p><code>__init__.py</code>:</p>
+<pre dir="ltr"><code>from plugins.browser.my_backend.provider import MyBackendProvider
+
+
+def register(ctx) -&gt; None:
+    ctx.register_browser_provider(MyBackendProvider())</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> کلاس پایهٔ انتزاعی BrowserProvider (ABC)</h2>
+<p><code>agent.browser_provider.BrowserProvider</code> را پیاده‌سازی کنید. سه متد چرخهٔ حیات به‌علاوهٔ هویت:</p>
+<pre dir="ltr"><code>from agent.browser_provider import BrowserProvider
+
+
+class MyBackendProvider(BrowserProvider):
+    @property
+    def name(self) -&gt; str:
+        return "my-backend"          # مقدار پیکربندی browser.cloud_provider
+
+    @property
+    def display_name(self) -&gt; str:
+        return "My Backend"          # در hermes tools نشان داده می‌شود
+
+    def is_available(self) -&gt; bool:
+        """بررسی ارزانِ فقط — حضور متغیر محیطی، ایمپورت‌شدنی بودن وابستگی.
+        هیچ فراخوانی شبکه‌ای: در زمان ثبت ابزار و در هر بار رندرِ
+        hermes tools اجرا می‌شود."""
+        return bool(os.environ.get("MY_BACKEND_API_KEY"))
+
+    def create_session(self, task_id: str) -&gt; dict:
+        """نشست مرورگر راه دور می‌سازد؛ قرارداد فرادادهٔ نشست را برمی‌گرداند."""
+        session = my_api.create_browser(...)
+        return {
+            "session_name": f"my-backend-{task_id}",  # نام نشست یکتای agent-browser
+            "bb_session_id": session.id,              # شناسهٔ نشست ارائه‌دهنده (برای پاک‌سازی)
+            "cdp_url": session.cdp_ws_url,            # URL وب‌سوکت CDP
+            "features": {"stealth": True},            # پرچم‌های قابلیتی که فعال کرده‌اید
+        }
+
+    def close_session(self, session_id: str) -&gt; bool:
+        """با شناسهٔ نشستِ ارائه‌دهنده خاتمه می‌دهد. در خطا لاگ می‌کند و False
+        برمی‌گرداند — هرگز استثنا پرتاب نمی‌کند تا حلقهٔ پاک‌سازی دیسپچر
+        به حرکتش ادامه دهد."""
+        ...
+
+    def emergency_cleanup(self, session_id: str) -&gt; None:
+        """برچیدن با بهترین تلاش، از هندلرهای atexit/سیگنال. نباید استثنا پرتاب کند."""
+        ...</code></pre>
+<h3>قرارداد فرادادهٔ نشست</h3>
+<p><code>create_session()</code> باید دست‌کم <code>session_name</code>، <code>bb_session_id</code>، <code>cdp_url</code> و <code>features</code> را برگرداند. دو نکتهٔ ظریف که دانستنش می‌ارزد:</p>
+<ul>
+<li><strong><code>bb_session_id</code> نام کلیدی میراثی است</strong> که عیناً برای سازگاری با گذشته با <code>tools/browser_tool.py</code> نگه داشته شده — صرف‌نظر از فروشنده، شناسهٔ نشستِ ارائه‌دهندهٔ <em>شما</em> را نگه می‌دارد. نامش را عوض نکنید.</li>
+<li><code>create_session()</code> <strong>می‌تواند استثنا پرتاب کند</strong> — <code>ValueError</code> برای اعتبارنامهٔ غایب، <code>RuntimeError</code> برای شکست‌های شبکه/API. دیسپچر این‌ها را به کاربر می‌رساند. این با <code>close_session</code>/<code>emergency_cleanup</code> فرق دارد که هرگز نباید استثنا پرتاب کنند.</li>
+</ul>
+<p>یک کلید اختیاری <code>external_call_id</code> از صورتحساب گیت‌وی مدیریت‌شده پشتیبانی می‌کند.</p>
+<h3><code>get_setup_schema()</code> — ردیف انتخاب‌گرِ <code>hermes tools</code></h3>
+<p>این را بازنویسی کنید تا به‌عنوان گزینهٔ درجه‌یک در انتخاب‌گر Browser Automation ظاهر شوید، همراه پرامپت‌های کلید API و یک هوک نصب:</p>
+<pre dir="ltr"><code>def get_setup_schema(self) -&gt; dict:
+    return {
+        "name": "My Backend",
+        "badge": "paid",
+        "tag": "Cloud browser with stealth and proxies",
+        "env_vars": [
+            {"key": "MY_BACKEND_API_KEY",
+             "prompt": "My Backend API key",
+             "url": "https://mybackend.example"},
+        ],
+        "post_setup": "agent_browser",   # مطمئن می‌شود Chromium محلی نصب است (خود agent-browser از طریق npx resolve می‌شود)
+    }</code></pre>
+<p>طبق استاندارد پروژه برای بک‌اندهای ابزار: اگر بک‌اندی نتواند از طریق <code>hermes tools</code> انتخاب و پیکربندی شود، تمام نشده — «این متغیر محیطی را دستی ست کنید» یک یکپارچه‌سازی نیست.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> کاربران آن را پیکربندی می‌کنند</h2>
+<pre dir="ltr"><code>browser:
+  cloud_provider: my-backend</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> پیاده‌سازی‌های مرجع</h2>
+<p>سه ارائه‌دهندهٔ همراه زیر <code>plugins/browser/</code> مثال‌های مرجع‌اند، به ترتیب صعودی پیچیدگی: <code>firecrawl</code> (ساده‌ترین)، <code>browser_use</code> و <code>browserbase</code> (پرچم‌های قابلیتِ stealth/پروکسی/keep-alive با پشتیبانِ نرم وقتی قابلیت‌های پولی در دسترس نیستند). نزدیک‌ترین را کپی کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> چک‌لیست</h2>
+<ul>
+<li>☐ <code>name</code> حروف کوچک و پایدار است (مقدار پیکربندی‌ای است که کاربران می‌نویسند)</li>
+<li>☐ <code>is_available()</code> صفر فراخوانی شبکه انجام می‌دهد</li>
+<li>☐ <code>create_session()</code> قرارداد کامل فراداده را برمی‌گرداند (نام کلید <code>bb_session_id</code> دست‌نخورده)</li>
+<li>☐ <code>close_session()</code> / <code>emergency_cleanup()</code> هرگز استثنا پرتاب نمی‌کنند</li>
+<li>☐ <code>get_setup_schema()</code> متغیرهای محیطی شما را نمایان می‌کند تا <code>hermes tools</code> بتواند بک‌اند را پیکربندی کند</li>
+<li>☐ <code>plugin.yaml</code> مقدار <code>kind: backend</code> + <code>provides_browser_providers</code> را اعلام می‌کند</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="acp-internals.html"><span class="dir">→ قبلی</span><span class="ttl">درون‌مایهٔ ACP</span></a>
+  <a class="next" href="browser-supervisor.html"><span class="dir">بعدی ←</span><span class="ttl">ناظر CDP مرورگر</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/browser-provider-plugin" target="_blank" rel="noopener">Browser Provider Plugin</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

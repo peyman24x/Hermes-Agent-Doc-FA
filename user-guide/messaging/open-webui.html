@@ -66,7 +66,7 @@ hermes-agent (سرور API گیت‌وی، پورت 8642)
 <div class="codebox"><pre><code>hermes config set API_SERVER_ENABLED true
 hermes config set API_SERVER_KEY your-secret-key</code></pre></div>
 <p>‏<code>hermes config set</code> فلگ را خودکار به config.yaml و رمز را به ‏<code>~/.hermes/.env</code> مسیریابی می‌کند. اگر گیت‌وی از قبل اجراست ری‌استارتش کنید تا تغییر اعمال شود:</p>
-<div class="codebox"><pre><code>hermes gateway stop && hermes gateway</code></pre></div>
+<div class="codebox"><pre><code>hermes gateway stop &amp;&amp; hermes gateway</code></pre></div>
 
 <h3>۲. شروع گیت‌وی هرمس ایجنت</h3>
 <div class="codebox"><pre><code>hermes gateway</code></pre></div>
@@ -282,8 +282,8 @@ EOF</code></pre>
 </div>
 
 <h3>۲. شروع هر گیت‌وی</h3>
-<div class="codebox"><pre><code>hermes -p alice gateway &
-hermes -p bob gateway &</code></pre></div>
+<div class="codebox"><pre><code>hermes -p alice gateway &amp;
+hermes -p bob gateway &amp;</code></pre></div>
 
 <h3>۳. افزودن اتصال‌ها در Open WebUI</h3>
 <p>در ‏<strong>Admin Settings ← Connections ← OpenAI API ← Manage</strong> به‌ازای هر پروفایل یک اتصال اضافه کنید:</p>

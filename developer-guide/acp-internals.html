@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>درون‌مایهٔ ACP — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/acp-internals" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>درون‌مایهٔ ACP</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>درون‌مایهٔ ACP</h1>
+<p>آداپتور ACP، ایجنتِ همگامِ <code>AIAgent</code> هرمس را در یک سرور ناهمگام JSON-RPC روی stdio می‌پیچد.</p>
+<p>فایل‌های کلیدی پیاده‌سازی:</p>
+<ul>
+<li><code>acp_adapter/entry.py</code></li>
+<li><code>acp_adapter/server.py</code></li>
+<li><code>acp_adapter/session.py</code></li>
+<li><code>acp_adapter/events.py</code></li>
+<li><code>acp_adapter/permissions.py</code></li>
+<li><code>acp_adapter/tools.py</code></li>
+<li><code>acp_adapter/auth.py</code></li>
+</ul>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> جریان راه‌اندازی</h2>
+<pre dir="ltr"><code>hermes acp / hermes-acp / python -m acp_adapter
+  -&gt; acp_adapter.entry.main()
+  -&gt; تجزیهٔ --version / --check / --setup قبل از راه‌اندازی سرور
+  -&gt; بارگذاری ~/.hermes/.env
+  -&gt; پیکربندی لاگ روی stderr
+  -&gt; ساخت HermesACPAgent
+  -&gt; acp.run_agent(agent, use_unstable_protocol=True)</code></pre>
+<p>stdout برای ترابرد JSON-RPC مربوط به ACP رزرو شده است. لاگ‌های خوانا برای انسان به stderr می‌روند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> اجزای اصلی</h2>
+<h3><code>HermesACPAgent</code></h3>
+<p><code>acp_adapter/server.py</code> پروتکل ایجنت ACP را پیاده‌سازی می‌کند.</p>
+<p>مسئولیت‌ها:</p>
+<ul>
+<li>مقداردهی اولیه / احراز هویت</li>
+<li>متدهای نشست <code>new/load/resume/fork/list/cancel</code></li>
+<li>اجرای پرامپت</li>
+<li>تغییر مدل نشست</li>
+<li>اتصال کال‌بک‌های همگام AIAgent به اعلان‌های ناهمگام ACP</li>
+</ul>
+<h3><code>SessionManager</code></h3>
+<p><code>acp_adapter/session.py</code> نشست‌های زندهٔ ACP را ردیابی می‌کند.</p>
+<p>هر نشست این‌ها را ذخیره می‌کند:</p>
+<ul>
+<li><code>session_id</code></li>
+<li><code>agent</code></li>
+<li><code>cwd</code></li>
+<li><code>model</code></li>
+<li><code>history</code></li>
+<li><code>cancel_event</code></li>
+</ul>
+<p>مدیر thread-safe است و از این‌ها پشتیبانی می‌کند:</p>
+<ul>
+<li>ساخت</li>
+<li>دریافت</li>
+<li>حذف</li>
+<li>انشعاب</li>
+<li>فهرست‌کردن</li>
+<li>پاک‌سازی</li>
+<li>به‌روزرسانی‌های cwd</li>
+</ul>
+<h3>پل رویدادها</h3>
+<p><code>acp_adapter/events.py</code> کال‌بک‌های AIAgent را به رویدادهای <code>session_update</code> مربوط به ACP تبدیل می‌کند.</p>
+<p>کال‌بک‌های پل‌شده:</p>
+<ul>
+<li><code>tool_progress_callback</code></li>
+<li><code>thinking_callback</code> (در حال حاضر در پل ACP روی <code>None</code> تنظیم شده است — استدلال به‌جایش از طریق <code>step_callback</code> ارسال می‌شود)</li>
+<li><code>step_callback</code></li>
+</ul>
+<p>چون <code>AIAgent</code> در یک ترد کارگر اجرا می‌شود در حالی که I/O مربوط به ACP روی حلقهٔ رویداد اصلی زندگی می‌کند، پل از این استفاده می‌کند:</p>
+<pre dir="ltr"><code>asyncio.run_coroutine_threadsafe(...)</code></pre>
+<h3>پل مجوزها</h3>
+<p><code>acp_adapter/permissions.py</code> پرامپت‌های تأیید ترمینال خطرناک را به درخواست‌های مجوز ACP تبدیل می‌کند.</p>
+<p>نگاشت:</p>
+<ul>
+<li><code>allow_once</code> ← <code>once</code> در هرمس</li>
+<li><code>allow_always</code> ← <code>always</code> در هرمس</li>
+<li>گزینه‌های رد ← <code>deny</code> در هرمس</li>
+</ul>
+<p>تایم‌اوت‌ها و شکست‌های پل به‌طور پیش‌فرض رد (deny) می‌کنند.</p>
+<h3>کمک‌تابع‌های رندر ابزار</h3>
+<p><code>acp_adapter/tools.py</code> ابزارهای هرمس را به انواع ابزار ACP نگاشت می‌کند و محتوای رو به ویرایشگر می‌سازد.</p>
+<p>مثال‌ها:</p>
+<ul>
+<li><code>patch</code> / <code>write_file</code> ← دیف فایل‌ها</li>
+<li><code>terminal</code> ← متن فرمان شل</li>
+<li><code>read_file</code> / <code>search_files</code> ← پیش‌نمایش‌های متنی</li>
+<li>نتایج بزرگ ← بلوک‌های متنی بریده‌شده برای ایمنی UI</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> چرخهٔ حیات نشست</h2>
+<pre dir="ltr"><code>new_session(cwd)
+  -&gt; ساخت SessionState
+  -&gt; ساخت AIAgent(platform="acp", enabled_toolsets=["hermes-acp"])
+  -&gt; اتصال task_id/session_id به بازنویسی cwd
+
+prompt(..., session_id)
+  -&gt; استخراج متن از بلوک‌های محتوای ACP
+  -&gt; ریست رویداد لغو
+  -&gt; نصب کال‌بک‌ها + پل تأیید
+  -&gt; اجرای AIAgent در ThreadPoolExecutor
+  -&gt; به‌روزرسانی تاریخچهٔ نشست
+  -&gt; ساطع کردن قطعهٔ نهایی پیام ایجنت</code></pre>
+<h3>لغو</h3>
+<p><code>cancel(session_id)</code>:</p>
+<ul>
+<li>رویداد لغو نشست را تنظیم می‌کند</li>
+<li>وقتی موجود باشد، <code>agent.interrupt()</code> را صدا می‌زند</li>
+<li>باعث می‌شود پاسخ پرامپت <code>stop_reason="cancelled"</code> برگرداند</li>
+</ul>
+<h3>انشعاب (fork)</h3>
+<p><code>fork_session()</code> تاریخچهٔ پیام‌ها را به‌صورت deep-copy در یک نشست زندهٔ جدید کپی می‌کند؛ وضعیت گفتگو حفظ می‌شود، در حالی که انشعاب شناسهٔ نشست و cwd مخصوص خودش را می‌گیرد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> رفتار ارائه‌دهنده/احراز هویت</h2>
+<p>ACP مخزن احراز هویت خودش را پیاده‌سازی نمی‌کند.</p>
+<p>به‌جایش از حل‌وفصل‌کنندهٔ زمان اجرای هرمس استفادهٔ مجدد می‌کند:</p>
+<ul>
+<li><code>acp_adapter/auth.py</code></li>
+<li><code>hermes_cli/runtime_provider.py</code></li>
+</ul>
+<p>بنابراین ACP همان ارائه‌دهنده/اعتبارنامه‌های پیکربندی‌شدهٔ فعلی هرمس را اعلام و استفاده می‌کند. همچنین همیشه یک روش احراز هویتِ از نوع راه‌اندازی ترمینالی اعلام می‌کند (<code>hermes-setup</code> با آرگومان‌های <code>--setup</code>) تا کلاینت‌های ACP در اولین اجرا بتوانند قبل از شروع یک نشست عادی ACP، پیکربندی تعاملی مدل/ارائه‌دهندهٔ هرمس را باز کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> اتصال پوشهٔ کاری</h2>
+<p>نشست‌های ACP یک cwd ویرایشگر با خود حمل می‌کنند.</p>
+<p>مدیر نشست آن cwd را از طریق بازنویسی‌های ترمینال/فایلِ در-سطح-تسک به شناسهٔ نشست ACP می‌بندد، تا ابزارهای فایل و ترمینال نسبت به فضای کاری ویرایشگر عمل کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> فراخوانی‌های ابزار هم‌نامِ تکراری</h2>
+<p>پل رویدادها شناسه‌های ابزار را به‌صورت FIFO برای هر نام ابزار ردیابی می‌کند، نه فقط یک شناسه برای هر نام. این برای موارد زیر مهم است:</p>
+<ul>
+<li>فراخوانی‌های هم‌نامِ موازی</li>
+<li>فراخوانی‌های هم‌نامِ تکراری در یک گام</li>
+</ul>
+<p>بدون صف‌های FIFO، رویدادهای تکمیل به فراخوانی ابزار اشتباهی وصل می‌شدند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> بازگردانی کال‌بک تأیید</h2>
+<p>ACP در طول اجرای پرامپت، موقتاً یک کال‌بک تأیید روی ابزار ترمینال نصب می‌کند و بعد از آن، کال‌بک قبلی را بازمی‌گرداند. این کار جلوی می‌دهد که هندلرهای تأییدِ مخصوص نشست ACP برای همیشه به‌صورت سراسری نصب‌شده باقی بمانند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> محدودیت‌های فعلی</h2>
+<ul>
+<li>نشست‌های ACP در <code>~/.hermes/state.db</code> مشترک (SessionDB) ذخیره می‌شوند و پس از ری‌استارت پروسس به‌طور شفاف بازیابی می‌شوند؛ در <code>session_search</code> ظاهر می‌شوند</li>
+<li>بلوک‌های پرامپت غیرمتنی در استخراج متن درخواست، فعلاً نادیده گرفته می‌شوند</li>
+<li>تجربهٔ کاربری مخصوص هر ویرایشگر بسته به پیاده‌سازی کلاینت ACP متفاوت است</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> فایل‌های مرتبط</h2>
+<ul>
+<li><code>tests/acp/</code> — مجموعهٔ تست ACP</li>
+<li><code>toolsets.py</code> — تعریف تول‌ست <code>hermes-acp</code></li>
+<li><code>hermes_cli/main.py</code> — زیرفرمان CLI مربوط به <code>hermes acp</code></li>
+<li><code>pyproject.toml</code> — وابستگی اختیاری <code>[acp]</code> + اسکریپت <code>hermes-acp</code></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="extending-the-cli.html"><span class="dir">→ قبلی</span><span class="ttl">گسترش CLI</span></a>
+  <a class="next" href="browser-provider-plugin.html"><span class="dir">بعدی ←</span><span class="ttl">پلاگین ارائه‌دهندهٔ مرورگر</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/acp-internals" target="_blank" rel="noopener">ACP Internals</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -126,7 +126,7 @@ print(f"Fixed {fixed} files out of {len(matches.get('matches', []))} matches")</
 import json
 
 # Run tests, parse results, and report
-result = terminal("cd /project && python -m pytest --tb=short -q 2>&amp;1", timeout=120)
+result = terminal("cd /project &amp;&amp; python -m pytest --tb=short -q 2>&amp;1", timeout=120)
 output = result.get("output", "")
 
 # Parse test output
@@ -270,7 +270,7 @@ print(json.dumps(report, indent=2))</code></pre>
     </div>
   </li>
 </ol>
-<p><b>تشخیص.</b> وقتی فرزند یک یا چند متغیر ‏HERMES_* غیر-لیست‌سفیدی را دور می‌ریزد هرمس لاگ ‏debug یک‌خطی صادر می‌کند که آنها را نام می‌برد و به دریچهٔ ‏env_passthrough اشاره می‌کند. با لاگ دیباگ اجرا کنید ‏(<code>hermes logs --level DEBUG</code> یا چک ‏<code>~/.hermes/logs/agent.log</code>) و دنبال ‏<code>execute_code: dropped N non-allowlisted HERMES_* var(s)</code> بگردید اگر اسکریپتی طوری رفتار کرد که انگار متغیر ‏HERMES_*</code>ای غایب است.</p>
+<p><b>تشخیص.</b> وقتی فرزند یک یا چند متغیر ‏HERMES_* غیر-لیست‌سفیدی را دور می‌ریزد هرمس لاگ ‏debug یک‌خطی صادر می‌کند که آنها را نام می‌برد و به دریچهٔ ‏env_passthrough اشاره می‌کند. با لاگ دیباگ اجرا کنید ‏(<code>hermes logs --level DEBUG</code> یا چک ‏<code>~/.hermes/logs/agent.log</code>) و دنبال ‏<code>execute_code: dropped N non-allowlisted HERMES_* var(s)</code> بگردید اگر اسکریپتی طوری رفتار کرد که انگار متغیر ‏HERMES_*</code> ای غایب است.</p>
 <p>هرمس اسکریپت و stub ‏RPC تولیدشدهٔ خودکار ‏<code>hermes_tools.py</code> را همیشه داخل یک پوشهٔ staging موقت می‌نویسد که بعد از اجرا پاک می‌شود. در حالت ‏strict اسکریپت آنجا هم <em>اجرا</em> می‌شود؛ در حالت ‏project در پوشهٔ کاری نشست اجرا می‌شود ‏(پوشهٔ staging روی PYTHONPATH می‌ماند تا ایمپورت‌ها همچنان حل شوند). پروسهٔ فرزند در process group خودش اجرا می‌شود تا روی timeout یا وقفه تمیز کشته شود.</p>
 </section>
 

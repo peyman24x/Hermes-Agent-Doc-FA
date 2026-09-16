@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پلاگین ارائه‌دهندهٔ مدل — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/model-provider-plugin" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>پلاگین ارائه‌دهندهٔ مدل</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1>پلاگین ارائه‌دهندهٔ مدل</h1>
+<p>پلاگین‌های ارائه‌دهندهٔ مدل یک بک‌اند استنتاج تعریف می‌کنند — یک نقطهٔ پایانی سازگار با ‎OpenAI، سرور ‎Anthropic Messages، رابط ‎Responses API به سبک ‎Codex یا رابط بومی ‎Bedrock — که ‎Hermes می‌تواند فراخوانی‌های ‎<code>AIAgent</code> را از طریق آن مسیریابی کند. هر ارائه‌دهندهٔ داخلی (‎OpenRouter، Anthropic، GMI، DeepSeek، Nvidia و …) به‌شکل یکی از این پلاگین‌ها عرضه می‌شود. توسعه‌دهندگان شخص ثالث می‌توانند با قرار دادن یک پوشه زیر ‎<code>$HERMES_HOME/plugins/model-providers/</code>، بدون هیچ تغییری در مخزن، ارائه‌دهندهٔ خود را اضافه کنند.</p>
+<div class="callout tip">
+<p class="callout-title">نکته</p>
+<p>پلاگین‌های ارائه‌دهندهٔ مدل سومین نوع <strong>پلاگین ارائه‌دهنده</strong> هستند. انواع دیگر عبارت‌اند از <a href="memory-provider-plugin.html">پلاگین ارائه‌دهندهٔ حافظه</a> (دانش میان‌نشستی) و <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/context-engine-plugin" target="_blank" rel="noopener">پلاگین موتور زمینه</a> (راهبردهای فشرده‌سازی زمینه). هر سه از الگوی یکسان «قرار دادن یک پوشه، تعریف یک پروفایل، بدون ویرایش مخزن» پیروی می‌کنند.</p>
+</div>
+
+<section class="doc-sec">
+<h2 id="how-discovery-works"><span class="secnum">۱</span> نحوهٔ کشف</h2>
+<p>تابع ‎<code>providers/__init__.py._discover_providers()</code> به‌صورت تنبل، نخستین باری اجرا می‌شود که بخشی از کد ‎<code>get_provider_profile()</code> یا ‎<code>list_providers()</code> را فراخوانی کند. ترتیب کشف:</p>
+<ol>
+<li><strong>پلاگین‌های همراه بسته</strong> — ‎<code>&lt;repo&gt;/plugins/model-providers/&lt;name&gt;/</code> — همراه ‎Hermes عرضه می‌شوند</li>
+<li><strong>پلاگین‌های کاربر</strong> — ‎<code>$HERMES_HOME/plugins/model-providers/&lt;name&gt;/</code> — هر پوشه‌ای را می‌توانید قرار دهید؛ برای نشست‌های بعدی به راه‌اندازی مجدد نیازی نیست</li>
+<li><strong>تک‌فایلی قدیمی</strong> — ‎<code>&lt;repo&gt;/providers/&lt;name&gt;.py</code> — سازگاری عقب‌رو برای نصب‌های قابل‌ویرایش خارج از درخت مخزن</li>
+</ol>
+<p><strong>پلاگین‌های کاربر جایگزین پلاگین‌های همراهِ هم‌نام می‌شوند</strong>، زیرا در ‎<code>register_provider()</code> آخرین ثبت برنده است. با قرار دادن پوشهٔ ‎<code>$HERMES_HOME/plugins/model-providers/gmi/</code> می‌توانید پروفایل داخلی ‎GMI را بدون دست‌زدن به مخزن جایگزین کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="directory-structure"><span class="secnum">۲</span> ساختار پوشه</h2>
+<pre dir="ltr"><code>plugins/model-providers/my-provider/
+├── __init__.py       # Calls register_provider(profile) at module-level
+├── plugin.yaml       # kind: model-provider + metadata (optional but recommended)
+└── README.md         # Setup instructions (optional)</code></pre>
+<p>تنها فایل الزامی ‎<code>__init__.py</code> است. ‎<code>hermes plugins</code> برای بررسی مشخصات و ‎<code>PluginManager</code> عمومی برای هدایت پلاگین به بارگذار درست از ‎<code>plugin.yaml</code> استفاده می‌کنند؛ در نبود آن، بارگذار عمومی به یک روش ابتکاری مبتنی بر متن کد منبع متوسل می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="minimal-example--a-simple-api-key-provider"><span class="secnum">۳</span> مثال حداقلی — ارائه‌دهندهٔ ساده با کلید ‎API</h2>
+<pre dir="ltr"><code># plugins/model-providers/acme-inference/__init__.py
+from providers import register_provider
+from providers.base import ProviderProfile
+
+acme = ProviderProfile(
+    name="acme-inference",
+    aliases=("acme",),
+    display_name="Acme Inference",
+    description="Acme — OpenAI-compatible direct API",
+    signup_url="https://acme.example.com/keys",
+    env_vars=("ACME_API_KEY", "ACME_BASE_URL"),
+    base_url="https://api.acme.example.com/v1",
+    auth_type="api_key",
+    default_aux_model="acme-small-fast",
+    fallback_models=(
+        "acme-large-v3",
+        "acme-medium-v3",
+        "acme-small-fast",
+    ),
+)
+
+register_provider(acme)</code></pre>
+<pre dir="ltr"><code># plugins/model-providers/acme-inference/plugin.yaml
+name: acme-inference
+kind: model-provider
+version: 1.0.0
+description: Acme Inference — OpenAI-compatible direct API
+author: Your Name</code></pre>
+<p>همین کافی است. پس از قرار دادن این دو فایل، موارد زیر بدون ویرایش دیگری <strong>به‌صورت خودکار متصل می‌شوند</strong>:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>یکپارچه‌سازی</th><th>محل</th><th>نتیجه</th></tr></thead>
+<tbody>
+<tr><td>تعیین اعتبارنامه</td><td><code>hermes_cli/auth.py</code></td><td>‎<code>PROVIDER_REGISTRY["acme-inference"]</code> از پروفایل پر می‌شود</td></tr>
+<tr><td>پرچم ‎<code>--provider</code> در رابط خط فرمان</td><td><code>hermes_cli/main.py</code></td><td>‎<code>acme-inference</code> را می‌پذیرد</td></tr>
+<tr><td>انتخابگر ‎<code>hermes model</code></td><td><code>hermes_cli/models.py</code></td><td>در ‎<code>CANONICAL_PROVIDERS</code> ظاهر می‌شود؛ فهرست مدل‌ها از ‎<code>{base_url}/models</code> دریافت می‌شود</td></tr>
+<tr><td><code>hermes doctor</code></td><td><code>hermes_cli/doctor.py</code></td><td>بررسی سلامت ‎<code>ACME_API_KEY</code> و آزمون ‎<code>{base_url}/models</code></td></tr>
+<tr><td><code>hermes setup</code></td><td><code>hermes_cli/config.py</code></td><td>‎<code>ACME_API_KEY</code> در ‎<code>OPTIONAL_ENV_VARS</code> و جادوگر راه‌اندازی ظاهر می‌شود</td></tr>
+<tr><td>نگاشت معکوس نشانی</td><td><code>agent/model_metadata.py</code></td><td>نام میزبان ← نام ارائه‌دهنده برای تشخیص خودکار</td></tr>
+<tr><td>مدل کمکی</td><td><code>agent/auxiliary_client.py</code></td><td>از ‎<code>default_aux_model</code> برای فشرده‌سازی / خلاصه‌سازی استفاده می‌کند</td></tr>
+<tr><td>تعیین تنظیمات زمان اجرا</td><td><code>hermes_cli/runtime_provider.py</code></td><td>مقادیر درست ‎<code>base_url</code>، ‎<code>api_key</code> و ‎<code>api_mode</code> را برمی‌گرداند</td></tr>
+<tr><td>لایهٔ انتقال</td><td><code>agent/transports/chat_completions.py</code></td><td>مسیر مبتنی بر پروفایل آرگومان‌های کلیدواژه‌ای را از طریق ‎<code>prepare_messages</code> / ‎<code>build_extra_body</code> / ‎<code>build_api_kwargs_extras</code> تولید می‌کند</td></tr>
+</tbody></table></div>
+</section>
+
+<section class="doc-sec">
+<h2 id="providerprofile-fields"><span class="secnum">۴</span> فیلدهای ‎<code>ProviderProfile</code></h2>
+<p>تعریف کامل در ‎<code>providers/base.py</code> است. کاربردی‌ترین فیلدها:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>فیلد</th><th>نوع</th><th>هدف</th></tr></thead>
+<tbody>
+<tr><td><code>name</code></td><td><code>str</code></td><td>شناسهٔ اصلی — با ‎<code>model.provider</code> در ‎<code>config.yaml</code> و پرچم ‎<code>--provider</code> مطابقت دارد</td></tr>
+<tr><td><code>aliases</code></td><td><code>tuple[str, ...]</code></td><td>نام‌های جایگزینی که ‎<code>get_provider_profile()</code> تشخیص می‌دهد (مثلاً ‎<code>grok</code> ← ‎<code>xai</code>)</td></tr>
+<tr><td><code>api_mode</code></td><td><code>str</code></td><td><code>chat_completions</code> | <code>codex_responses</code> | <code>anthropic_messages</code> | <code>bedrock_converse</code></td></tr>
+<tr><td><code>display_name</code></td><td><code>str</code></td><td>برچسب قابل‌خواندن برای انسان در انتخابگر ‎<code>hermes model</code></td></tr>
+<tr><td><code>description</code></td><td><code>str</code></td><td>زیرعنوان انتخابگر</td></tr>
+<tr><td><code>signup_url</code></td><td><code>str</code></td><td>در راه‌اندازی نخست نمایش داده می‌شود («از اینجا کلید ‎API بگیرید»)</td></tr>
+<tr><td><code>env_vars</code></td><td><code>tuple[str, ...]</code></td><td>متغیرهای محیطی کلید ‎API به‌ترتیب اولویت؛ مدخل پایانی ‎<code>*_BASE_URL</code> برای بازنویسی نشانی پایه توسط کاربر استفاده می‌شود</td></tr>
+<tr><td><code>base_url</code></td><td><code>str</code></td><td>نقطهٔ پایانی پیش‌فرض استنتاج</td></tr>
+<tr><td><code>models_url</code></td><td><code>str</code></td><td>نشانی صریح کاتالوگ (در نبود آن از ‎<code>{base_url}/models</code> استفاده می‌شود)</td></tr>
+<tr><td><code>auth_type</code></td><td><code>str</code></td><td><code>api_key</code> | <code>oauth_device_code</code> | <code>oauth_external</code> | <code>copilot</code> | <code>aws_sdk</code> | <code>external_process</code></td></tr>
+<tr><td><code>fallback_models</code></td><td><code>tuple[str, ...]</code></td><td>فهرست گزینش‌شده‌ای که هنگام شکست دریافت زندهٔ کاتالوگ نمایش داده می‌شود</td></tr>
+<tr><td><code>default_headers</code></td><td><code>dict[str, str]</code></td><td>با هر درخواست ارسال می‌شوند (مثلاً ‎<code>Editor-Version</code> در ‎Copilot)</td></tr>
+<tr><td><code>fixed_temperature</code></td><td><code>Any</code></td><td>‎<code>None</code> = استفاده از مقدار فراخوان؛ مقدار نشانگر ‎<code>OMIT_TEMPERATURE</code> = عدم ارسال پارامتر دما به‌طور کامل (‎Kimi)</td></tr>
+<tr><td><code>default_max_tokens</code></td><td><code>int | None</code></td><td>سقف ‎<code>max_tokens</code> در سطح ارائه‌دهنده (‎Nvidia: 16384)</td></tr>
+<tr><td><code>default_aux_model</code></td><td><code>str</code></td><td>مدل کم‌هزینه برای کارهای کمکی (فشرده‌سازی، بینایی، خلاصه‌سازی)</td></tr>
+</tbody></table></div>
+</section>
+
+<section class="doc-sec">
+<h2 id="overridable-hooks"><span class="secnum">۵</span> هوک‌های قابل‌بازنویسی</h2>
+<p>برای رفتارهای خاص و غیرساده، زیرکلاسی از ‎<code>ProviderProfile</code> بسازید:</p>
+<pre dir="ltr"><code>from typing import Any
+from providers.base import ProviderProfile
+
+class AcmeProfile(ProviderProfile):
+    def prepare_messages(self, messages: list[dict[str, Any]]) -&gt; list[dict[str, Any]]:
+        """Provider-specific message preprocessing. Runs after codex
+        sanitization, before developer-role swap. Default: pass-through."""
+        # Example: Qwen normalizes plain-text content to a list-of-parts
+        # array and injects cache_control; Kimi rewrites tool-call JSON
+        return messages
+
+    def build_extra_body(self, *, session_id=None, **context) -&gt; dict:
+        """Provider-specific extra_body fields merged into the API call.
+        Context includes: session_id, provider_preferences, model, base_url,
+        reasoning_config. Default: empty dict."""
+        # Example: OpenRouter's provider-preferences block,
+        # Gemini's thinking_config translation.
+        return {}
+
+    def build_api_kwargs_extras(self, *, reasoning_config=None, **context):
+        """Returns (extra_body_additions, top_level_kwargs). Needed when some
+        fields go top-level (Kimi's reasoning_effort, OpenRouter's verbosity for
+        adaptive Anthropic models) and some go in extra_body (OpenRouter's
+        reasoning dict). Default: ({}, {})."""
+        return {}, {}
+
+    def fetch_models(self, *, api_key=None, base_url=None, timeout=8.0) -&gt; list[str] | None:
+        """Live catalog fetch. Default hits {models_url or base_url}/models with
+        Bearer auth. Override for: custom auth (Anthropic), no REST endpoint
+        (Bedrock → None), or public/unauthenticated catalogs (OpenRouter)."""
+        return super().fetch_models(api_key=api_key, base_url=base_url, timeout=timeout)</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2 id="hook-reference-examples"><span class="secnum">۶</span> نمونه‌های مرجع هوک</h2>
+<p>برای آشنایی با الگوهای رایج، این پلاگین‌های همراه بسته را ببینید:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>پلاگین</th><th>دلیل بررسی</th></tr></thead>
+<tbody>
+<tr><td><code>plugins/model-providers/openrouter/</code></td><td>تجمیع‌کننده با ترجیحات ارائه‌دهنده و کاتالوگ عمومی مدل</td></tr>
+<tr><td><code>plugins/model-providers/gemini/</code></td><td>تبدیل ‎<code>thinking_config</code> (شکل بومی و شکل تودرتوی سازگار با ‎OpenAI)</td></tr>
+<tr><td><code>plugins/model-providers/kimi-coding/</code></td><td>‎<code>OMIT_TEMPERATURE</code>، ‎<code>extra_body.thinking</code>، ‎<code>reasoning_effort</code> در سطح بالا</td></tr>
+<tr><td><code>plugins/model-providers/qwen-oauth/</code></td><td>نرمال‌سازی پیام، تزریق ‎<code>cache_control</code>، وضوح بالای بینایی‌ـ‌زبان (‎VL)</td></tr>
+<tr><td><code>plugins/model-providers/nous/</code></td><td>برچسب‌های انتساب، «حذف استدلال هنگام غیرفعال بودن»</td></tr>
+<tr><td><code>plugins/model-providers/custom/</code></td><td>رفتارهای خاص ‎<code>num_ctx</code> و ‎<code>think: false</code> در ‎Ollama</td></tr>
+<tr><td><code>plugins/model-providers/bedrock/</code></td><td>‎<code>api_mode="bedrock_converse"</code>؛ ‎<code>fetch_models</code> مقدار ‎<code>None</code> برمی‌گرداند (بدون نقطهٔ پایانی ‎REST)</td></tr>
+</tbody></table></div>
+</section>
+
+<section class="doc-sec">
+<h2 id="user-overrides--replace-a-built-in-without-editing-the-repo"><span class="secnum">۷</span> بازنویسی‌های کاربر — جایگزینی ارائه‌دهندهٔ داخلی بدون ویرایش مخزن</h2>
+<p>فرض کنید می‌خواهید برای آزمایش، ‎<code>gmi</code> را به نقطهٔ پایانی خصوصی محیط پیش‌تولید خود متصل کنید. فایل ‎<code>~/.hermes/plugins/model-providers/gmi/__init__.py</code> را بسازید:</p>
+<pre dir="ltr"><code>from providers import register_provider
+from providers.base import ProviderProfile
+
+register_provider(ProviderProfile(
+    name="gmi",
+    aliases=("gmi-cloud", "gmicloud"),
+    env_vars=("GMI_API_KEY",),
+    base_url="https://gmi-staging.internal.example.com/v1",
+    auth_type="api_key",
+    default_aux_model="google/gemini-3.1-flash-lite-preview",
+))</code></pre>
+<p>در نشست بعدی، ‎<code>get_provider_profile("gmi").base_url</code> نشانی محیط پیش‌تولید را برمی‌گرداند. نه وصله‌ای در مخزن لازم است و نه ساخت مجدد. چون پلاگین‌های کاربر پس از پلاگین‌های همراه کشف می‌شوند، فراخوانی ‎<code>register_provider()</code> کاربر برنده می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="api_mode-selection"><span class="secnum">۸</span> انتخاب ‎<code>api_mode</code></h2>
+<p>چهار مقدار شناخته می‌شوند. ‎Hermes یکی را بر اساس ترتیب زیر انتخاب می‌کند:</p>
+<ol>
+<li>بازنویسی صریح کاربر (‎<code>model.api_mode</code> در ‎<code>config.yaml</code>، در صورت تنظیم)</li>
+<li>توزیع فراخوانی بر اساس مدل در ‎OpenCode (‎<code>opencode_model_api_mode</code> برای ‎Zen و ‎Go)</li>
+<li>تشخیص خودکار از نشانی — پسوند ‎<code>/anthropic</code> ← ‎<code>anthropic_messages</code>، ‎<code>api.openai.com</code> ← ‎<code>codex_responses</code>، ‎<code>api.x.ai</code> ← ‎<code>codex_responses</code>، ‎<code>/coding</code> در دامنه‌های ‎Kimi ← ‎<code>chat_completions</code></li>
+<li><strong>‎<code>api_mode</code> پروفایل</strong> به‌عنوان پشتیبان، وقتی تشخیص نشانی چیزی پیدا نکند</li>
+<li>پیش‌فرض ‎<code>chat_completions</code></li>
+</ol>
+<p>‎<code>profile.api_mode</code> را مطابق پیش‌فرض ارائه‌دهندهٔ خود تنظیم کنید — نقش راهنما دارد. بازنویسی‌های نشانی توسط کاربر همچنان اولویت دارند.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="auth-types"><span class="secnum">۹</span> انواع احراز هویت</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>نوع احراز هویت (‎<code>auth_type</code>)</th><th>معنا</th><th>استفاده‌کنندگان</th></tr></thead>
+<tbody>
+<tr><td><code>api_key</code></td><td>یک متغیر محیطی حامل کلید ثابت ‎API است</td><td>بیشتر ارائه‌دهندگان</td></tr>
+<tr><td><code>oauth_device_code</code></td><td>جریان ‎OAuth با کد دستگاه</td><td>—</td></tr>
+<tr><td><code>oauth_external</code></td><td>کاربر جای دیگری وارد می‌شود؛ توکن‌ها در ‎<code>auth.json</code> قرار می‌گیرند</td><td>‎Anthropic OAuth، MiniMax OAuth، Qwen Portal، Nous Portal</td></tr>
+<tr><td><code>copilot</code></td><td>چرخهٔ تازه‌سازی توکن ‎GitHub Copilot</td><td>فقط پلاگین ‎<code>copilot</code></td></tr>
+<tr><td><code>aws_sdk</code></td><td>زنجیرهٔ اعتبارنامهٔ ‎AWS SDK (نقش ‎IAM، پروفایل، محیط)</td><td>فقط پلاگین ‎<code>bedrock</code></td></tr>
+<tr><td><code>external_process</code></td><td>احراز هویت توسط زیرفرایندی انجام می‌شود که ایجنت اجرا می‌کند</td><td>فقط پلاگین ‎<code>copilot-acp</code></td></tr>
+</tbody></table></div>
+<p>‎<code>auth_type</code> تعیین می‌کند کدام مسیرهای کد با ارائه‌دهندهٔ شما مانند یک «ارائه‌دهندهٔ ساده با کلید ‎API» رفتار کنند — اگر مقدارش ‎<code>api_key</code> نباشد، ‎<code>PluginManager</code> همچنان مانیفست را ثبت می‌کند، اما خودکارسازی سطح رابط خط فرمان ‎Hermes (بررسی‌های ‎<code>doctor</code>، پرچم ‎<code>--provider</code>، واگذاری به جادوگر راه‌اندازی) ممکن است آن را نادیده بگیرد.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="discovery-timing"><span class="secnum">۱۰</span> زمان‌بندی کشف</h2>
+<p>کشف ارائه‌دهنده <strong>تنبل</strong> است — نخستین فراخوانی ‎<code>get_provider_profile()</code> یا ‎<code>list_providers()</code> در فرایند آن را آغاز می‌کند. در عمل، این اتفاق در ابتدای راه‌اندازی رخ می‌دهد (بارگذاری ماژول ‎<code>auth.py</code> بلافاصله ‎<code>PROVIDER_REGISTRY</code> را گسترش می‌دهد). برای اطمینان از بارگذاری پلاگین اجرا کنید:</p>
+<pre dir="ltr"><code>hermes doctor</code></pre>
+<p>پروفایل موفق با ‎<code>auth_type="api_key"</code> در بخش «اتصال ارائه‌دهندگان» (‎Provider Connectivity) همراه با آزمون ‎<code>/models</code> ظاهر می‌شود.</p>
+<p>برای بررسی برنامه‌نویسی‌شده:</p>
+<pre dir="ltr"><code>from providers import list_providers
+for p in list_providers():
+    print(p.name, p.base_url, p.api_mode)</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2 id="testing-your-plugin"><span class="secnum">۱۱</span> آزمایش پلاگین</h2>
+<p>‎<code>HERMES_HOME</code> را به یک پوشهٔ موقت اشاره دهید تا پیکربندی واقعی شما تغییر نکند:</p>
+<pre dir="ltr"><code>export HERMES_HOME=/tmp/hermes-plugin-test
+mkdir -p $HERMES_HOME/plugins/model-providers/my-provider
+cat &gt; $HERMES_HOME/plugins/model-providers/my-provider/__init__.py &lt;&lt;'EOF'
+from providers import register_provider
+from providers.base import ProviderProfile
+register_provider(ProviderProfile(
+    name="my-provider",
+    env_vars=("MY_API_KEY",),
+    base_url="https://api.my-provider.example.com/v1",
+    auth_type="api_key",
+))
+EOF
+
+export MY_API_KEY=your-test-key
+hermes -z "hello" --provider my-provider -m some-model</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2 id="general-pluginmanager-integration"><span class="secnum">۱۲</span> یکپارچه‌سازی با ‎<code>PluginManager</code> عمومی</h2>
+<p>‎<code>PluginManager</code> عمومی (بخشی که ‎<code>hermes plugins</code> با آن کار می‌کند) پلاگین‌های ارائه‌دهندهٔ مدل را <strong>می‌بیند</strong>، اما آن‌ها را وارد نمی‌کند — مالک چرخهٔ حیاتشان ‎<code>providers/__init__.py</code> است. مدیر، مانیفست را برای بررسی مشخصات ثبت و بر اساس ‎<code>kind: model-provider</code> دسته‌بندی می‌کند. وقتی یک پلاگین کاربر بدون برچسب در ‎<code>$HERMES_HOME/plugins/</code> قرار دهید که ‎<code>register_provider</code> را با یک ‎<code>ProviderProfile</code> فراخوانی می‌کند، مدیر با روشی ابتکاری مبتنی بر متن منبع، نوع آن را خودکار به ‎<code>kind: model-provider</code> تبدیل می‌کند — بنابراین حتی بدون ‎<code>plugin.yaml</code> نیز پلاگین به‌درستی هدایت می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="distribute-via-pip"><span class="secnum">۱۳</span> توزیع از طریق ‎pip</h2>
+<p>ارائه‌دهندگان مدل می‌توانند به‌شکل پکیج ‎pip عرضه شوند. در ‎<code>pyproject.toml</code> خود یک نقطهٔ ورود در گروه ‎<code>hermes_agent.plugins</code> تعریف کنید:</p>
+<pre dir="ltr"><code>[project.entry-points."hermes_agent.plugins"]
+acme-inference = "acme_hermes_plugin:register"</code></pre>
+<p>مقصد می‌تواند یکی از این دو باشد:</p>
+<ul>
+<li>یک <strong>شیء قابل‌فراخوانی</strong> (‎<code>module:func</code>) — بدون آرگومان فراخوانی می‌شود؛ باید ‎<code>register_provider(profile)</code> را صدا بزند، یا</li>
+<li>یک <strong>ماژول بدون نام تابع</strong> (‎<code>module</code>) — برای اجرای اثر جانبی ‎<code>register_provider(...)</code> در سطح ماژول وارد می‌شود؛ مشابه قرارداد ‎<code>__init__.py</code> در پلاگین‌های پوشه‌ای.</li>
+</ul>
+<p>‎<code>providers/__init__.py</code> خودش این نقاط ورود را کشف می‌کند — ‎<code>PluginManager</code> عمومی هرگز ثبت ارائه‌دهنده را برای پکیج‌های ‎pip فراخوانی نمی‌کند (مسیر نقاط ورود آن مخصوص پلاگین‌های عمومی با الگوی ‎<code>register(ctx)</code> است و با ‎<code>plugins.enabled</code> کنترل می‌شود)؛ بنابراین رجیستری ارائه‌دهندگان اسکن مستقل خود را انجام می‌دهد. دو قاعده اعمال می‌شود:</p>
+<ul>
+<li><p><strong>فعال‌سازی صریح الزامی است.</strong> همان فهرست مجاز ‎<code>plugins.enabled</code> (و فهرست مسدود ‎<code>plugins.disabled</code>) در ‎<code>config.yaml</code> بر این اسکن حاکم است. پکیج ‎pip هرگز صرفاً به‌دلیل نصب بودن وارد نمی‌شود — کاربران باید نام نقطهٔ ورود را به ‎<code>plugins.enabled</code> اضافه کنند:</p>
+<pre dir="ltr"><code>plugins:
+  enabled:
+    - acme-inference</code></pre>
+</li>
+<li><p><strong>پایین‌ترین اولویت.</strong> پلاگین‌های نقاط ورود <strong>پیش از</strong> پلاگین‌های سیستم فایل کشف می‌شوند؛ چون در ‎<code>register_provider()</code> آخرین ثبت برنده است، پروفایل هم‌نام همراه بسته یا موجود در ‎<code>$HERMES_HOME</code> همیشه جایگزین نمونهٔ نصب‌شده با ‎pip می‌شود. یک پکیج ‎pip می‌تواند ارائه‌دهنده‌ای واقعاً جدید اضافه کند، اما نمی‌تواند نام ارائه‌دهندهٔ رسمی را بی‌سروصدا تصاحب کند.</p></li>
+</ul>
+<p>مقصدهایی که آرگومان می‌خواهند (‎<code>register(ctx)</code> در یک پلاگین عمومی) در اسکن ارائه‌دهنده رد می‌شوند — آن‌ها متعلق به ‎<code>PluginManager</code> هستند. خرابی یک نقطهٔ ورود محدود به همان مورد می‌ماند — در سطح هشدار ثبت و نادیده گرفته می‌شود و هرگز کشف ارائه‌دهندگان دیگر را متوقف نمی‌کند.</p>
+<p>برای راه‌اندازی کامل نقاط ورود، <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins#distribute-via-pip" target="_blank" rel="noopener">ساخت پلاگین هرمس</a> را ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="related-pages"><span class="secnum">۱۴</span> صفحات مرتبط</h2>
+<ul>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/provider-runtime" target="_blank" rel="noopener">زمان اجرای ارائه‌دهنده</a> — ترتیب اولویت تعیین تنظیمات و محل خواندن پروفایل در هر لایه</li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-providers" target="_blank" rel="noopener">افزودن ارائه‌دهندهٔ جدید</a> — چک‌لیست سرتاسری برای بک‌اندهای استنتاج جدید (هم مسیر سریع پلاگین و هم یکپارچه‌سازی کامل رابط خط فرمان/احراز هویت را پوشش می‌دهد)</li>
+<li><a href="memory-provider-plugin.html">پلاگین ارائه‌دهندهٔ حافظه</a></li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/context-engine-plugin" target="_blank" rel="noopener">پلاگین موتور زمینه</a></li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت پلاگین هرمس</a> — نگارش پلاگین عمومی</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="memory-provider-plugin.html"><span class="dir">→ قبلی</span><span class="ttl">پلاگین ارائه‌دهندهٔ حافظه</span></a>
+  <a class="next" href="plugin-llm-access.html"><span class="dir">بعدی ←</span><span class="ttl">دسترسی LLM در پلاگین</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/model-provider-plugin" target="_blank" rel="noopener">Model Provider Plugins</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

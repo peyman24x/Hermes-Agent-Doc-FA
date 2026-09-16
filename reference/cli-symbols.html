@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>راهنمای نمادهای CLI — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/reference/cli-symbols" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>مرجع<span class="sep">/</span><strong>راهنمای نمادهای CLI</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>راهنمای نمادهای CLI</h1>
+<p>رابط‌های ترمینال هرمس با یک زبان دیداری فشرده حرف می‌زنند: نقطه‌ها، فلس‌ها، اسپینرهای بریل و گلیف‌های وضعیت. این صفحه حلقهٔ رمزگشاییِ آن است. <a href="../user-guide/tui.html">TUI</a> را پوشش می‌دهد (که بیشتر این‌ها آنجا رندر می‌شوند) و قطعه‌های مشترک با <a href="../user-guide/cli.html">CLI کلاسیک</a> را هم یادداشت می‌کند.</p>
+
+<div class="callout note">
+  <div class="callout-title">ℹ️ پوسته‌ها می‌توانند بعضی از این‌ها را بازطراحی کنند</div>
+  <p>گلیف‌هایی که پایین برچسب <i>themeable</i> دارند پیش‌فرض‌های برند هستند — یک <a href="../user-guide/features/skins.html">پوسته</a> می‌تواند بازنویسیشان کند (مثلاً <code>tool_prefix</code> و نماد پرامپت). بقیه در رندرکننده ثابت‌اند.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نمادهای رونوشت گفتگو</h2>
+<p>آنچه در جریان گفتگو حین کارِ ایجنت می‌بینید.</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>نماد</th><th>معنا</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>❯</code></td><td>پرامپت ورودی — جایی که تایپ می‌کنید. <i>Themeable</i> (پوسته‌ها نماد پرامپت خودشان را ست می‌کنند).</td></tr>
+    <tr><td><code>●</code></td><td>یک فراخوانی ابزار. گلوله قبل از نام ابزار و آرگومان‌هایش می‌آید.</td></tr>
+    <tr><td><code>┊</code></td><td>ریلِ فعالیت ابزار که کنار خط‌های ابزار نشان داده می‌شود. <i>Themeable</i> (<code>tool_prefix</code>).</td></tr>
+    <tr><td><code>✓</code> / <code>✗</code></td><td>نتیجهٔ ابزار: موفق / ناموفق. به انتهای خطِ ابزارِ تکمیل‌شده می‌چسبد.</td></tr>
+    <tr><td><code>▸</code> / <code>▾</code></td><td>فلسِ بخشِ جمع‌شده / بازشده (استدلال، ابزارها، ساب‌ایجنت‌ها، بخش‌های بنر). برای باز/بسته‌کردن کلیک کنید.</td></tr>
+    <tr><td><code>▍</code></td><td>مکان‌نمای streaming — وقتی مدل هنوز در حال تولید متن است چشمک می‌زند.</td></tr>
+    <tr><td><code>│</code> <code>├─</code> <code>└─</code></td><td>ریل‌های درختی — والد را (یک واگذاری، یک مسیر) به ورودی‌های فرزندش وصل می‌کنند؛ <code>└─</code> فرزندِ آخر را علامت می‌زند.</td></tr>
+    <tr><td><code>◈</code></td><td>رویداد خط زمانی فقط‌نمایشی (اعلان‌های نشست که درون‌خطی رندر می‌شوند، نه پیام‌های کاربر).</td></tr>
+    <tr><td><code>◇</code></td><td>یک بلوک ارجاعِ تزریق‌شده، مثل <code>◇ Reference 1/2 — &lt;label&gt;</code>.</td></tr>
+    <tr><td><code>↳</code></td><td>پرامپت چسبان — پیام کاربری که ایجنت الان رویش کار می‌کند را تکرار می‌کند.</td></tr>
+    <tr><td><code>☐</code> / <code>☑</code> / <code>•</code></td><td>آیتم‌های چک‌لیست مارک‌داون (باز / انجام‌شده) و گلوله‌های لیست ساده.</td></tr>
+    <tr><td><code>▶</code></td><td>خلاصهٔ <code>&lt;details&gt;</code> جمع‌شده داخل مارک‌داون رندرشده.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> نمادهای نوار وضعیت</h2>
+<p>خطِ تنها در پایین TUI. قطعه‌ها فقط وقتی مربوط باشند ظاهر می‌شوند و روی ترمینال‌های باریک اول از همه حذف می‌شوند.</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>نماد</th><th>معنا</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>⠋⠙⠹…</code> (الگوهای بریل)</td><td>اسپینر مشغولی. فاز استدلال و فاز ابزار مجموعه‌انیمیشن‌های بریل متفاوتی استفاده می‌کنند.</td></tr>
+    <tr><td><code>⚕ 🌀 🤔 ✨ 🍵 🔮</code></td><td>فریم‌های سبک نشانگرِ مشغولیِ <code>emoji</code> ‏(<code>/indicator emoji</code>). سبک پیش‌فرض به‌جایش چهره‌های کائوموجی می‌چرخاند.</td></tr>
+    <tr><td><code>| / - \</code></td><td>فریم‌های سبک نشانگر مشغولیِ <code>ascii</code>.</td></tr>
+    <tr><td><code>⏱</code></td><td>زمان سپری‌شدهٔ per-prompt حین اجرای نوبت، مثل <code>⏱ 12s/3m 45s</code> (زمان نوبت / زمان نشست).</td></tr>
+    <tr><td><code>⏲</code></td><td>همان تایمر، بعد از تکمیل نوبت منجمد می‌شود.</td></tr>
+    <tr><td><code>cmp N</code></td><td>نشست N بار خودکار فشرده شده است.</td></tr>
+    <tr><td><code>▶ N</code></td><td>‏N وظیفهٔ <code>/background</code> الان در حال اجراست.</td></tr>
+    <tr><td><code>⚠ YOLO</code></td><td>حالت YOLO روشن است (تأیید خودکار). در بنر شروع هم نشان داده می‌شود.</td></tr>
+    <tr><td><code>⛓ N</code></td><td>‏N ساب‌ایجنت الان فعال‌اند.</td></tr>
+    <tr><td><code>↩ resumes when subagent finishes</code></td><td>اطمینان‌بخشی که وقتی شما بی‌کارید ولی کار واگذارشده هنوز در جریان است نشان داده می‌شود — نتیجه خودش برمی‌گردد.</td></tr>
+    <tr><td><code>● REC</code></td><td>حالت صوتی در حال ضبط است.</td></tr>
+    <tr><td><code>◉ STT</code></td><td>ضبط صدا متوقف شده؛ تبدیل گفتار به متن در حال انجام است.</td></tr>
+    <tr><td><code>◉ focus</code></td><td>نمای Focus روشن است (خروجی کمتر). پین شده تا روی ترمینال باریک هرگز حذف نشود.</td></tr>
+    <tr><td><code>♥</code></td><td>فلش محبت — هرمس متوجه شد باهاش مهربان بوده‌اید.</td></tr>
+    <tr><td><code>⚡</code> / <code>🔋</code></td><td>نشانگر باتری (اختیاری): به برق وصل است / روی باتری، همراه درصد.</td></tr>
+    <tr><td><code>N bg</code></td><td>‏N فرایند ترمینالِ پس‌زمینه در این نشست ردیابی می‌شود.</td></tr>
+    <tr><td><code>N live sessions</code></td><td>نشست‌های TUI بازِ این فرایند — برای باز کردن سوییچر نشست کلیک کنید.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> اعلان‌ها</h2>
+<p>اعلان‌های کوتاه‌عمرِ نوار وضعیت گلیف ابتدایی خودشان را دارند که با شدت تعیین می‌شود:</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>نماد</th><th>معنا</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>✓</code></td><td>اعلان موفقیت.</td></tr>
+    <tr><td><code>•</code></td><td>اعلان اطلاع‌رسانی.</td></tr>
+    <tr><td><code>⚠</code></td><td>هشدار (برای هشدارهای اعتبار هم استفاده می‌شود).</td></tr>
+    <tr><td><code>✕</code></td><td>اعلان خطا.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پرامپت‌های تأیید و تصدیق</h2>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>نماد</th><th>معنا</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>⚠ approval required</code></td><td>ابزاری می‌خواهد چیزی اجرا کند که به «بله»ی صریح شما نیاز دارد (پنل حاشیه‌دار با پیش‌نمایش فرمان).</td></tr>
+    <tr><td><code>⚠</code> / <code>?</code></td><td>عنوان دیالوگ تأیید: اقدام خطرناک / پرسش عادی.</td></tr>
+    <tr><td><code>🔐</code></td><td>پرامپت رمز sudo (ورودی ماسک می‌شود).</td></tr>
+    <tr><td><code>🔑</code></td><td>پرامپت ورودی اعتبارنامه/رمز (ورودی ماسک می‌شود).</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> لایهٔ ساب‌ایجنت‌ها (<code>/agents</code>)</h2>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>نماد</th><th>معنا</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>●</code></td><td>ساب‌ایجنت در حال اجرا.</td></tr>
+    <tr><td><code>○</code></td><td>در صف.</td></tr>
+    <tr><td><code>✓</code></td><td>تکمیل‌شده.</td></tr>
+    <tr><td><code>■</code></td><td>قطع‌شده.</td></tr>
+    <tr><td><code>✗</code></td><td>ناموفق.</td></tr>
+    <tr><td><code>⌛</code></td><td>تایم‌اوت شد.</td></tr>
+    <tr><td><code>⚠</code></td><td>خطادار.</td></tr>
+    <tr><td><code>⚡N</code></td><td>‏N ایجنت فعال در یک ردیف تجمیعی.</td></tr>
+    <tr><td><code>▁▂▃▄▅▆▇█</code></td><td>اسپارک‌لاین فعالیت — حجم رویدادهای اخیر به‌ازای هر شاخه.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> سوییچر نشست (<code>Ctrl+X</code>)</h2>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>نماد</th><th>معنا</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>✓</code></td><td>نشست بی‌کار.</td></tr>
+    <tr><td><code>…</code></td><td>در حال شروع.</td></tr>
+    <tr><td><code>?</code></td><td>منتظر ورودی.</td></tr>
+    <tr><td><code>▶</code></td><td>در حال کار.</td></tr>
+    <tr><td><code>✎ draft</code></td><td>نوار نوشتن آن نشست یک پیش‌نویسِ ارسال‌نشده دارد.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> انتخاب‌گرها و هاب‌ها</h2>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>نماد</th><th>معنا</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>▸</code></td><td>ردیف انتخاب فعلی (انتخاب‌گر مدل و امثالش).</td></tr>
+    <tr><td><code>*</code></td><td>مدل / ارائه‌دهندهٔ فعال فعلی.</td></tr>
+    <tr><td><code>●</code> / <code>○</code></td><td>ارائه‌دهندهٔ احرازشده / احرازنشده (انتخاب‌گر مدل)؛ حالت پیش‌فرض وضعیت پلاگین (هاب پلاگین‌ها).</td></tr>
+    <tr><td><code>✓</code> / <code>✗</code></td><td>پلاگین فعال / غیرفعال (هاب پلاگین‌ها).</td></tr>
+    <tr><td><code>↑ N more</code> / <code>↓ N more</code></td><td>ردیف‌های بیشتر بالای/پایین پنجرهٔ دیدِ یک لیست.</td></tr>
+    <tr><td><code>┃</code></td><td>بندانگشتی اسکرول‌بار روی لایه‌های اسکرول‌پذیر.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> اهداف</h2>
+<p>اعلان‌های چرخهٔ حیات هدف (از <a href="../user-guide/features/goals.html">اهداف</a>) با وضعیتشان شروع می‌شوند:</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>نماد</th><th>معنا</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>✓</code></td><td>هدف تکمیل شد.</td></tr>
+    <tr><td><code>↻</code></td><td>هدف ادامه دارد — یک تکرار دیگر زمان‌بندی شد.</td></tr>
+    <tr><td><code>⏸</code></td><td>هدف متوقف شد.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> ببینید همچنین</h2>
+<ul>
+  <li><a href="../user-guide/tui.html">رابط ترمینال مدرن (TUI)</a> — خط وضعیت، حالت‌های جزئیات، سبک‌های نشانگر مشغولی</li>
+  <li><a href="../user-guide/cli.html">رابط خط فرمان (CLI)</a> — کلیدترکیب‌ها و فرمان‌های اسلش مشترک</li>
+  <li><a href="../user-guide/features/skins.html">پوسته‌ها و تم‌ها</a> — کدام گلیف‌ها و رنگ‌ها را می‌توانید شخصی‌سازی کنید</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="automation-blueprints-catalog.html"><span class="dir">→ قبلی</span><span class="ttl">کاتالوگ نقشه‌های اتوماسیون</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">(آخرین صفحهٔ گروه)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/reference/cli-symbols" target="_blank" rel="noopener">CLI Symbols Glossary</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

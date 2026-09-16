@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مشارکت در پروژه — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/contributing" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>مشارکت در پروژه</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>مشارکت در پروژه</h1>
+<p>از مشارکت شما در Hermes Agent متشکریم! این راهنما راه‌اندازی محیط توسعه، شناخت کدبیس و ادغام‌شدن PR شما را پوشش می‌دهد.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> اولویت‌های مشارکت</h2>
+<p>مشارکت‌ها را به این ترتیب ارزش‌گذاری می‌کنیم:</p>
+<ol>
+<li><strong>رفع باگ</strong> — کرش‌ها، رفتار نادرست، از دست رفتن داده</li>
+<li><strong>سازگاری چندپلتفرمی</strong> — macOS، توزیع‌های مختلف لینوکس، WSL2</li>
+<li><strong>سخت‌سازی امنیتی</strong> — تزریق شل، تزریق پرامپت، پیمایش مسیر (path traversal)</li>
+<li><strong>کارایی و استواری</strong> — منطق تلاش مجدد، مدیریت خطا، افت تدریجیِ کنترل‌شده (graceful degradation)</li>
+<li><strong>مهارت‌های جدید</strong> — آن‌هایی که به‌طور گسترده مفیدند (نگاه کنید به <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/creating-skills" target="_blank" rel="noopener">ساخت مهارت</a>)</li>
+<li><strong>ابزارهای جدید</strong> — به‌ندرت لازم می‌شوند؛ بیشتر قابلیت‌ها باید مهارت باشند</li>
+<li><strong>مستندات</strong> — اصلاحات، شفاف‌سازی‌ها، مثال‌های جدید</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> مسیرهای رایج مشارکت</h2>
+<ul>
+<li>می‌خواهید یک ابزار سفارشی/محلی بدون دست‌کاری هستهٔ هرمس بسازید؟ با <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت پلاگین هرمس</a> شروع کنید</li>
+<li>می‌خواهید یک ابزار هستهٔ داخلی جدید برای خود هرمس بسازید؟ با <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-tools" target="_blank" rel="noopener">افزودن ابزار جدید</a> شروع کنید</li>
+<li>می‌خواهید یک مهارت جدید بسازید؟ با <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/creating-skills" target="_blank" rel="noopener">ساخت مهارت</a> شروع کنید</li>
+<li>می‌خواهید یک ارائه‌دهندهٔ استنتاج جدید بسازید؟ با <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-providers" target="_blank" rel="noopener">افزودن ارائه‌دهندهٔ جدید</a> شروع کنید</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> راه‌اندازی توسعه</h2>
+<h3>پیش‌نیازها</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>پیش‌نیاز</th><th>توضیحات</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Git</strong></td><td>با اکستنشن <code>git-lfs</code> نصب‌شده</td></tr>
+    <tr><td><strong>Python 3.11–3.13</strong></td><td>اگر نباشد uv آن را نصب می‌کند</td></tr>
+    <tr><td><strong>uv</strong></td><td>مدیر بستهٔ سریع پایتون (<a href="https://docs.astral.sh/uv/" target="_blank" rel="noopener">نصب</a>)</td></tr>
+    <tr><td><strong>Node.js 26+</strong></td><td>اختیاری — برای ابزارهای مرورگر و پل WhatsApp لازم است (مطابق engines در <code>package.json</code> ریشه)</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>نصب با نصب‌کنندهٔ استاندارد</h3>
+<p>برای بیشتر مشارکت‌کنندگان، بهترین نقطهٔ شروع توسعه همان مسیری است که کاربران طی می‌کنند: نصب‌کنندهٔ استاندارد را اجرا کنید و سپس داخل مخزنی که کلون می‌کند کار کنید. نصب‌کننده venv هرمس را می‌سازد، فرمان <code>hermes</code> را وصل می‌کند، روش نصب را برای <code>hermes update</code> ثبت می‌کند و پروژهٔ کامل گیت را در <code>$HERMES_HOME/hermes-agent</code> (معمولاً <code>~/.hermes/hermes-agent</code>) کلون می‌کند. این کار محیط توسعهٔ شما را روی همان چیدمانی نگه می‌دارد که CLI، به‌روزرسان، نصب‌کنندهٔ تنبلِ وابستگی‌ها، گیت‌وی و مستندات فرض می‌کنند.</p>
+<pre dir="ltr"><code>curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+cd "${HERMES_HOME:-$HOME/.hermes}/hermes-agent"
+
+# افزودن اکستراهای dev/test روی نصب استاندارد.
+uv pip install -e ".[all,dev]"
+
+# اختیاری: وابستگی‌های ابزارهای مرورگر / سایت مستندات.
+npm install</code></pre>
+<p>بعد از آن، از همان checkout شاخه بسازید و تست‌ها را اجرا کنید:</p>
+<pre dir="ltr"><code>git checkout -b fix/description
+scripts/run_tests.sh</code></pre>
+<p>همچنین می‌توانید یک نمونهٔ کاملاً ایزولهٔ هرمس اجرا کنید (HERMES_HOME یک‌بارمصرف، userData جداگانهٔ Electron و نام اپلیکیشن Electron متمایز برای جلوگیری از قفل تک‌نمونه‌ای):</p>
+<pre dir="ltr"><code>scripts/dev-sandbox.sh python -m hermes_cli.main
+scripts/dev-sandbox.sh --persistent python -m hermes_cli.main desktop  # وضعیت پس از ری‌استارت باقی می‌ماند، ولی در ورک‌تری زندگی می‌کند :)</code></pre>
+<h3>کلون دستی (گزینهٔ جایگزین)</h3>
+<p>از این روش فقط وقتی استفاده کنید که عمداً چیدمان نصبِ مدیریت‌شدهٔ هرمس را نمی‌خواهید (مثلاً یک کلون یک‌بارمصرف داخل کانتینر یا job کاری CI). اگر این‌طور نصب کردید، مطمئن شوید نقطهٔ ورود <code>hermes</code> را از همین venv اجرا می‌کنید؛ اجرای <code>python3 -m hermes_cli.main</code> سیستمی می‌تواند بسته‌های پایتونِ نامرتبط سیستم را بار بگیرد.</p>
+<p>venv را <strong>بیرون</strong> از درخت سورسِ کلون‌شده بسازید. venvی که داخل پوشه‌ای که ایجنت در آن کار می‌کند زندگی کند، می‌تواند با یک فرمانِ مسیر-نسبی که ایجنت روی checkout خودش اجرا می‌کند (<code>rm -rf venv</code>، <code>uv venv venv</code> و...) پاک شود و این بی‌سروصدا رانتایمِ در حال اجرا را وسط نشست نابود می‌کند. نگه‌داشتن آن بیرون از درخت یعنی هیچ مسیر نسبی از فضای کاری به آن نمی‌رسد.</p>
+<pre dir="ltr"><code>git clone https://github.com/NousResearch/hermes-agent.git
+cd hermes-agent
+
+# ساخت venv با Python 3.11، بیرون از درخت سورس
+uv venv ~/.hermes/venvs/hermes-dev --python 3.11
+export VIRTUAL_ENV="$HOME/.hermes/venvs/hermes-dev"
+export PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# نصب با همهٔ اکستراها (پیام‌رسانی، کرون، منوهای CLI، ابزارهای توسعه)
+uv pip install -e ".[all,dev]"
+
+# اختیاری: ابزارهای مرورگر
+npm install</code></pre>
+<h3>پیکربندی برای توسعه</h3>
+<pre dir="ltr"><code>mkdir -p ~/.hermes/{cron,sessions,logs,memories,skills}
+cp cli-config.yaml.example ~/.hermes/config.yaml
+touch ~/.hermes/.env
+
+# حداقل یک کلید ارائه‌دهندهٔ LLM اضافه کنید:
+echo 'OPENROUTER_API_KEY=sk-or-v1-your-key' &gt;&gt; ~/.hermes/.env</code></pre>
+<h3>اجرا</h3>
+<pre dir="ltr"><code># نصب‌کنندهٔ استاندارد از قبل `hermes` را روی PATH گذاشته است.
+hermes doctor
+hermes chat -q "Hello"</code></pre>
+<p>اگر از کلون دستی استفاده کرده‌اید، <code>./hermes</code> را از checkout اجرا کنید یا venv این کلون را صریحاً symlink کنید:</p>
+<pre dir="ltr"><code>mkdir -p ~/.local/bin
+ln -sf "$(pwd)/venv/bin/hermes" ~/.local/bin/hermes</code></pre>
+<h3>اجرای تست‌ها</h3>
+<pre dir="ltr"><code>scripts/run_tests.sh</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> سبک کد</h2>
+<ul>
+<li><strong>PEP 8</strong> با استثناهای عملی (بدون اعمال سخت‌گیرانهٔ طول خط)</li>
+<li><strong>کامنت‌ها</strong>: فقط وقتی که نیتِ غیربدیهی، موازنه‌ها یا خَلق‌وخوهای عجیب API را توضیح می‌دهند</li>
+<li><strong>مدیریت خطا</strong>: اکششن‌های مشخص بگیرید. برای خطاهای غیرمنتظره از <code>logger.warning()</code>/<code>logger.error()</code> با <code>exc_info=True</code> استفاده کنید</li>
+<li><strong>چندپلتفرمی</strong>: هرگز یونیکس را مفروض نگیرید (پایین را ببینید)</li>
+<li><strong>مسیرهای امن از نظر پروفایل</strong>: هرگز <code>~/.hermes</code> را هاردکد نکنید — برای مسیرهای کد از <code>get_hermes_home()</code> در <code>hermes_constants</code> و برای پیام‌های رو به کاربر از <code>display_hermes_home()</code> استفاده کنید. قواعد کامل را در <a href="https://github.com/NousResearch/hermes-agent/blob/main/AGENTS.md#profiles-multi-instance-support" target="_blank" rel="noopener">AGENTS.md</a> ببینید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> سازگاری چندپلتفرمی</h2>
+<p>نگاه کنید به <strong><a href="../getting-started/platform-support.html">پشتیبانی پلتفرم‌ها</a></strong>. ویندوز بومی برای فرمان‌های شل از Git Bash (از <a href="https://git-scm.com/download/win" target="_blank" rel="noopener">Git for Windows</a>) استفاده می‌کند. چند قابلیت به پریمیتیوهای هستهٔ POSIX نیاز دارند و گیت‌شده‌اند: پنل ترمینال PTY تعبیه‌شده در داشبورد (تب <code>/chat</code>) به یک PTY سیستمی POSIX نیاز دارد (لینوکس، macOS یا WSL2). اگر توسعهٔ سنگین ویندوزی انجام می‌دهید، قبل از push لینت Windows-footgun (<code>scripts/check-windows-footguns.py</code>) را اجرا کنید.</p>
+<p>وقتی کد مشارکت می‌دهید، این قواعد را در نظر داشته باشید:</p>
+<ul>
+<li><strong>ارجاعِ بدون گارد به <code>signal.SIGKILL</code> اضافه نکنید.</strong> این ثابت روی ویندوز تعریف نشده است. یا از <code>gateway.status.terminate_pid(pid, force=True)</code> عبور دهید (پریمیتیو متمرکزی که روی ویندوز <code>taskkill /T /F</code> و روی POSIX سیگنال SIGKILL را اجرا می‌کند)، یا با <code>getattr(signal, "SIGKILL", signal.SIGTERM)</code> پشتیبان بسازید.</li>
+<li><strong>در پروب‌های <code>os.kill(pid, 0)</code> علاوه بر <code>ProcessLookupError</code>، <code>OSError</code> را هم بگیرید.</strong> ویندوز برای PIDِ از-قبل-رفته به‌جای <code>ProcessLookupError</code> خطای <code>OSError</code> می‌دهد (WinError 87 با پیام «parameter is incorrect»).</li>
+<li><strong>ترمینال را به معناشناسی POSIX مجبور نکنید.</strong> <code>os.setsid</code>، <code>os.killpg</code>، <code>os.getpgid</code> و <code>os.fork</code> همگی روی ویندوز خطا می‌دهند — آن‌ها را با <code>if sys.platform != "win32":</code> یا <code>if os.name != "nt":</code> گیت کنید.</li>
+<li><strong>فایل‌ها را با <code>encoding="utf-8"</code> صریح باز کنید.</strong> پیش‌فرض پایتون روی ویندوز همان locale سیستم است (اغلب cp1252) که روی متن غیرلاتین به‌هم می‌ریزد یا کرش می‌کند.</li>
+<li><strong>از <code>pathlib.Path</code> / <code>os.path.join</code> استفاده کنید — هرگز دستی با <code>/</code> رشته‌ها را به هم نچسبانید.</strong> این موضوع برای رشته‌هایی که سیستم‌عامل به ما برمی‌گرداند کمتر، و برای رشته‌هایی که خودمان می‌سازیم و به ساب‌پروسس می‌دهیم بیشتر اهمیت دارد.</li>
+</ul>
+<p>الگوهای کلیدی:</p>
+<h3>۱. انکودینگ فایل</h3>
+<p>بعضی محیط‌ها ممکن است فایل‌های <code>.env</code> را با انکودینگ‌های غیر-UTF-8 ذخیره کنند:</p>
+<pre dir="ltr"><code>try:
+    load_dotenv(env_path)
+except UnicodeDecodeError:
+    load_dotenv(env_path, encoding="latin-1")</code></pre>
+<h3>۲. مدیریت پروسس</h3>
+<p><code>os.setsid()</code>، <code>os.killpg()</code> و مدیریت سیگنال بین پلتفرم‌ها فرق دارند:</p>
+<pre dir="ltr"><code>import platform
+if platform.system() != "Windows":
+    kwargs["preexec_fn"] = os.setsid</code></pre>
+<h3>۳. جداکننده‌های مسیر</h3>
+<p>به‌جای چسباندن رشته‌ها با <code>/</code> از <code>pathlib.Path</code> استفاده کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> ملاحظات امنیتی</h2>
+<p>هرمس دسترسی ترمینال دارد. امنیت مهم است.</p>
+<h3>محافظت‌های موجود</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>لایه</th><th>پیاده‌سازی</th></tr></thead>
+  <tbody>
+    <tr><td><strong>پایپ‌کردن رمز sudo</strong></td><td>از <code>shlex.quote()</code> برای جلوگیری از تزریق شل استفاده می‌کند</td></tr>
+    <tr><td><strong>تشخیص فرمان خطرناک</strong></td><td>الگوهای regex در <code>tools/approval.py</code> همراه با جریان تأیید کاربر</td></tr>
+    <tr><td><strong>تزریق پرامپت در کرون</strong></td><td>اسکنر، الگوهای بازنویسی دستورالعمل را مسدود می‌کند</td></tr>
+    <tr><td><strong>فهرست ممنوع نوشتن</strong></td><td>مسیرهای محافظت‌شده با <code>os.path.realpath()</code> resolve می‌شوند تا دورزدن با symlink ممکن نشود</td></tr>
+    <tr><td><strong>گارد مهارت‌ها</strong></td><td>اسکنر امنیتی برای مهارت‌های نصب‌شده از هاب</td></tr>
+    <tr><td><strong>سندباکس اجرای کد</strong></td><td>پروسس فرزند بدون کلیدهای API اجرا می‌شود</td></tr>
+    <tr><td><strong>سخت‌سازی کانتینر</strong></td><td>Docker: حذف همهٔ قابلیت‌ها (capabilities)، بدون ارتقای سطح دسترسی، محدودیت PID</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>مشارکت در کدهای حساس امنیتی</h3>
+<ul>
+<li>هنگام درون‌ریزی ورودی کاربر در فرمان‌های شل، همیشه از <code>shlex.quote()</code> استفاده کنید</li>
+<li>قبل از بررسی‌های کنترل دسترسی، symlinkها را با <code>os.path.realpath()</code> resolve کنید</li>
+<li>رمزها را لاگ نکنید</li>
+<li>دور اجرای ابزار، اکششن‌های کلی بگیرید</li>
+<li>اگر تغییر شما به مسیر فایل یا پروسس‌ها دست می‌زند، روی همهٔ پلتفرم‌ها تست کنید</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> فرایند Pull Request</h2>
+<h3>نام‌گذاری شاخه</h3>
+<pre dir="ltr"><code>fix/description        # رفع باگ
+feat/description       # قابلیت‌های جدید
+docs/description       # مستندات
+test/description       # تست‌ها
+refactor/description   # بازآرایی کد</code></pre>
+<h3>قبل از ارسال</h3>
+<ol>
+<li><strong>تست‌ها را اجرا کنید</strong>: <code>scripts/run_tests.sh</code> برای هم‌سانی با CI. از <code>python -m pytest ...</code> مستقیم فقط وقتی استفاده کنید که wrapper در دسترس نباشد یا عمداً بیرون از wrapper دیباگ می‌کنید.</li>
+<li><strong>دستی تست کنید</strong>: <code>hermes</code> را اجرا کنید و مسیر کدی را که تغییر داده‌اید امتحان کنید</li>
+<li><strong>اثر چندپلتفرمی را بررسی کنید</strong>: macOS، لینوکس، WSL2 و ویندوز بومی را در نظر بگیرید. اگر به I/O فایل، مدیریت پروسس، مدیریت ترمینال، ساب‌پروسس‌ها یا سیگنال‌ها دست می‌زنید، <code>scripts/check-windows-footguns.py</code> را اجرا کنید.</li>
+<li><strong>PRها را متمرکز نگه دارید</strong>: در هر PR فقط یک تغییر منطقی</li>
+</ol>
+<h3>توضیحات PR</h3>
+<p>این‌ها را بگنجانید:</p>
+<ul>
+<li><strong>چه چیزی</strong> تغییر کرده و <strong>چرا</strong></li>
+<li><strong>چطور تستش کنید</strong></li>
+<li><strong>روی چه پلتفرم‌هایی</strong> تست کرده‌اید</li>
+<li>ارجاع به هر ایشوی مرتبط</li>
+</ul>
+<h3>پیام‌های کامیت</h3>
+<p>ما از <a href="https://www.conventionalcommits.org/" target="_blank" rel="noopener">Conventional Commits</a> استفاده می‌کنیم:</p>
+<pre dir="ltr"><code>&lt;type&gt;(&lt;scope&gt;): &lt;description&gt;</code></pre>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نوع</th><th>کاربرد</th></tr></thead>
+  <tbody>
+    <tr><td><code>fix</code></td><td>رفع باگ</td></tr>
+    <tr><td><code>feat</code></td><td>قابلیت‌های جدید</td></tr>
+    <tr><td><code>docs</code></td><td>مستندات</td></tr>
+    <tr><td><code>test</code></td><td>تست‌ها</td></tr>
+    <tr><td><code>refactor</code></td><td>بازآرایی کد</td></tr>
+    <tr><td><code>chore</code></td><td>بیلد، CI، به‌روزرسانی وابستگی‌ها</td></tr>
+  </tbody>
+</table>
+</div>
+<p>اسکوپ‌ها: <code>cli</code>، <code>gateway</code>، <code>tools</code>، <code>skills</code>، <code>agent</code>، <code>install</code>، <code>whatsapp</code>، <code>security</code></p>
+<p>مثال‌ها:</p>
+<pre dir="ltr"><code>fix(cli): prevent crash in save_config_value when model is a string
+feat(gateway): add WhatsApp multi-user session isolation
+fix(security): prevent shell injection in sudo password piping</code></pre>
+<h3>چک‌لیست‌های بازبینیِ محلیِ مخزن: <code>.agents/checks/*.md</code></h3>
+<p>پروژه‌هایی که روی هرمس ساخته شده‌اند (یا توسط هرمس بازبینی می‌شوند) می‌توانند چک‌لیست‌های بازبین را داخل مخزن و زیر <code>.agents/checks/</code> نگه دارند. هر فایل یک چک‌لیست متمرکز و مارک‌داونِ ساده است که ایجنت قبل از بازبینیِ تغییری که به همان حوزه می‌خورد، بارگذاری می‌کند:</p>
+<pre dir="ltr"><code>.agents/
+  checks/
+    security.md        # مثلاً: «diff را برای درون‌ریزی شل grep کن؛ چک کن فراخوانی‌های subprocess آرگومان‌ها را quote کنند»
+    migrations.md      # مثلاً: «هر تغییر اسکیما با یک backfill و یک یادداشت بازگشت (Rollback) همراه است»
+    public-api.md      # مثلاً: «امضاهای صادرشده تغییر کرده‌اند؟ برای بازبینی semver علامت بزن»</code></pre>
+<p>قراردادهایی که این‌ها را خوب کار می‌کنند:</p>
+<ul>
+<li><strong>یک نگرانی در هر فایل</strong>، با نامِ همان نگرانی. فایل‌های کوچک کامل خوانده می‌شوند؛ یک <code>checklist.md</code> یکپارچه فقط تندخوانی می‌شود.</li>
+<li><strong>چک‌ها را به‌شکل اقدامِ قابل راستی‌آزمایی بنویسید</strong> («X را اجرا کن و Y را تأیید کن»)، نه آرزو («کد باید امن باشد»). </li>
+<li><strong>محرک را در بالای فایل بگویید</strong> — چک‌لیست به کدام مسیرها یا نوع تغییرها مربوط است — تا ایجنت (یا انسان) بتواند به‌شکل ارزان از کنار موارد بی‌ربط عبور کند.</li>
+<li>آن‌ها را کنار کدی که از آن محافظت می‌کنند در کنترل نسخه نگه دارید: با کدبیس تکامل می‌یابند و PRای که قواعد را تغییر دهد، چک‌لیست را هم در همان دیف تغییر می‌دهد.</li>
+</ul>
+<p>وقتی از هرمس می‌خواهید PRای را در مخزنی که <code>.agents/checks/</code> دارد بازبینی کند، به او بگویید (یا با یک مهارت به او یاد بدهید) اول چک‌لیست‌های مربوط را بخواند و بر اساس آن‌ها گزارش بدهد. این کار به ایجنت‌های بازبین همان معیارِ مخصوص پروژه را می‌دهد که پرامپت‌های بازبینی عمومی از دستشان می‌رود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> گزارش مشکل</h2>
+<ul>
+<li>از <a href="https://github.com/NousResearch/hermes-agent/issues" target="_blank" rel="noopener">GitHub Issues</a> استفاده کنید</li>
+<li>این‌ها را بگنجانید: سیستم‌عامل، نسخهٔ پایتون، نسخهٔ هرمس (<code>hermes --version</code>)، traceback کامل خطا</li>
+<li>گام‌های بازتولید را بگنجانید</li>
+<li>پیش از ساختن موارد تکراری، ایشوهای موجود را بررسی کنید</li>
+<li>برای آسیب‌پذیری‌های امنیتی، لطفاً به‌صورت خصوصی گزارش دهید</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> جامعه</h2>
+<ul>
+<li><strong>Discord</strong>: <a href="https://discord.gg/NousResearch" target="_blank" rel="noopener">discord.gg/NousResearch</a></li>
+<li><strong>GitHub Discussions</strong>: برای پیشنهادهای طراحی و بحث‌های معماری</li>
+<li><strong>Skills Hub</strong>: مهارت‌های تخصصی بارگذاری کنید و با جامعه به اشتراک بگذارید</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> مجوز</h2>
+<p>با مشارکت شما، می‌پذیرید که مشارکت‌هایتان تحت <a href="https://github.com/NousResearch/hermes-agent/blob/main/LICENSE" target="_blank" rel="noopener">مجوز MIT</a> منتشر شوند.</p>
+</section>
+
+<div class="pager">
+  <span class="off prev"><span class="dir">→ قبلی</span><span class="ttl">(اولین صفحهٔ گروه)</span></span>
+  <a class="next" href="architecture.html"><span class="dir">بعدی ←</span><span class="ttl">معماری</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/contributing" target="_blank" rel="noopener">Contributing</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

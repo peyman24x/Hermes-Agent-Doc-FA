@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ذخیره‌سازی نشست — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/session-storage" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>ذخیره‌سازی نشست</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>ذخیره‌سازی نشست</h1>
+<p>Hermes Agent از یک پایگاه دادهٔ SQLite (<code>~/.hermes/state.db</code>) برای ماندگارکردن فرادادهٔ نشست، تاریخچهٔ کامل پیام‌ها و پیکربندی مدل در نشست‌های CLI و گیت‌وی استفاده می‌کند. این روش جایگزین رویکرد پیشینِ فایل JSONL جداگانه برای هر نشست شده است.</p>
+<p>فایل منبع: <code>hermes_state.py</code></p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نمای کلی معماری</h2>
+<pre dir="ltr"><code>~/.hermes/state.db (SQLite, WAL mode)
+├── sessions              — فرادادهٔ نشست، شمارش توکن، صورتحساب
+├── messages              — تاریخچهٔ کامل پیام‌ها برای هر نشست
+├── session_model_usage   — ردیف‌های انتساب مصرف به تفکیک مدل/تسک
+├── messages_fts          — جدول مجازی FTS5 (content + tool_name + tool_calls)
+├── messages_fts_trigram  — جدول مجازی FTS5 با توکنایزر تری‌گرام (CJK / جستجوی زیررشته)
+├── messages_fts_cjk      — جدول مجازی FTS5 با توکنایزر cjk_unicode61
+├── state_meta            — جدول فرادادهٔ کلید/مقدار
+├── gateway_routing       — فرادادهٔ مسیریابی گیت‌وی
+├── compression_locks     — قفل‌گذاری فشرده‌سازی بین‌پروسسی
+├── async_delegations     — دفتر ثبت واگذاری‌های ناهمگام
+└── schema_version        — جدول تک‌ردیفی برای ردیابی وضعیت مهاجرت</code></pre>
+<p>تصمیم‌های کلیدی طراحی:</p>
+<ul>
+<li><strong>حالت WAL</strong> برای خواننده‌های همزمان + یک نویسنده (چندپلتفرمیِ گیت‌وی)</li>
+<li><strong>جدول مجازی FTS5</strong> برای جستجوی سریع متنی روی همهٔ پیام‌های نشست‌ها</li>
+<li><strong>تبار نشست</strong> از طریق زنجیره‌های <code>parent_session_id</code> (تقسیم‌های ناشی از فشرده‌سازی)</li>
+<li><strong>برچسب‌گذاری منبع</strong> (<code>cli</code>، <code>telegram</code>، <code>discord</code> و...) برای فیلترکردن پلتفرم</li>
+<li>اجرای دسته‌ای و ترایکتوری‌های RL اینجا ذخیره نمی‌شوند (سیستم‌های جدایی هستند)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> طرح‌وارهٔ SQLite</h2>
+<h3>جدول <code>sessions</code></h3>
+<p>خلاصه‌شده — فهرست کامل ستون‌های فعلی را در <code>SCHEMA_SQL</code> داخل <code>hermes_state.py</code> ببینید (که ستون‌های فرادادهٔ مسیریابی گیت‌وی مثل <code>session_key</code>، <code>chat_id</code>، <code>chat_type</code>، <code>thread_id</code>، <code>display_name</code>، <code>origin_json</code>، <code>expiry_finalized</code>، فیلدهای فضای کاری <code>cwd</code> / <code>git_branch</code> / <code>git_repo_root</code>، فیلدهای تحویل دست‌به‌دست و شکست فشرده‌سازی، <code>profile_name</code>، <code>rewind_count</code>، <code>archived</code> و <code>pinned</code> را هم شامل می‌شود):</p>
+<pre dir="ltr"><code>CREATE TABLE IF NOT EXISTS sessions (
+    id TEXT PRIMARY KEY,
+    source TEXT NOT NULL,
+    user_id TEXT,
+    model TEXT,
+    model_config TEXT,
+    system_prompt TEXT,
+    parent_session_id TEXT,
+    started_at REAL NOT NULL,
+    ended_at REAL,
+    end_reason TEXT,
+    message_count INTEGER DEFAULT 0,
+    tool_call_count INTEGER DEFAULT 0,
+    input_tokens INTEGER DEFAULT 0,
+    output_tokens INTEGER DEFAULT 0,
+    cache_read_tokens INTEGER DEFAULT 0,
+    cache_write_tokens INTEGER DEFAULT 0,
+    reasoning_tokens INTEGER DEFAULT 0,
+    billing_provider TEXT,
+    billing_base_url TEXT,
+    billing_mode TEXT,
+    estimated_cost_usd REAL,
+    actual_cost_usd REAL,
+    cost_status TEXT,
+    cost_source TEXT,
+    pricing_version TEXT,
+    title TEXT,
+    api_call_count INTEGER DEFAULT 0,
+    -- ... ستون‌های اضافی گیت‌وی/فضای کاری/تحویل دست‌به‌دست/فشرده‌سازی ...
+    FOREIGN KEY (parent_session_id) REFERENCES sessions(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_sessions_source ON sessions(source);
+CREATE INDEX IF NOT EXISTS idx_sessions_parent ON sessions(parent_session_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_started ON sessions(started_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sessions_title_unique
+    ON sessions(title) WHERE title IS NOT NULL;</code></pre>
+<h3>جدول <code>messages</code></h3>
+<p>خلاصه‌شده — طرح‌وارهٔ کامل شامل <code>effect_disposition</code>، <code>platform_message_id</code>، <code>observed</code>، <code>active</code>، <code>compacted</code>، <code>api_content</code>، <code>display_kind</code> و <code>display_metadata</code> هم هست:</p>
+<pre dir="ltr"><code>CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL REFERENCES sessions(id),
+    role TEXT NOT NULL,
+    content TEXT,
+    tool_call_id TEXT,
+    tool_calls TEXT,
+    tool_name TEXT,
+    timestamp REAL NOT NULL,
+    token_count INTEGER,
+    finish_reason TEXT,
+    reasoning TEXT,
+    reasoning_content TEXT,
+    reasoning_details TEXT,
+    codex_reasoning_items TEXT,
+    codex_message_items TEXT
+    -- ... ستون‌های اضافی نمایش/فشرده‌سازی ...
+);
+
+CREATE INDEX IF NOT EXISTS idx_messages_session ON messages(session_id, timestamp);
+CREATE INDEX IF NOT EXISTS idx_messages_session_id ON messages(session_id, id);</code></pre>
+<p>نکته‌ها:</p>
+<ul>
+<li><code>tool_calls</code> به‌صورت رشتهٔ JSON ذخیره می‌شود (فهرست سریال‌شدهٔ اشیای فراخوانی ابزار)</li>
+<li><code>reasoning_details</code>، <code>codex_reasoning_items</code> و <code>codex_message_items</code> به‌صورت رشتهٔ JSON ذخیره می‌شوند</li>
+<li><code>reasoning</code> متن خام استدلال را برای ارائه‌دهنده‌هایی که آن را ارائه می‌کنند ذخیره می‌کند</li>
+<li><code>api_content</code> یک سایدکار با وفاداری بایتی است: دقیقاً همان رشتهٔ محتوایی که برای این پیام به API فرستاده شده، وقتی با <code>content</code> فرق دارد (تزریق‌های زودگذر حافظه/پلاگین، بازنویسی‌های پایدار). این فیلد بایت‌های روی سیم را برای بازپخشِ پایدار از نظر کش پرامپت حفظ می‌کند — همان‌طور که فرستاده شده ذخیره می‌شود، به‌جز سروگیت‌های تنها که sqlite3 نمی‌تواند آن‌ها را bind کند و حلقهٔ گفتگو به‌هرحال از هر بار ارسالی پاک‌شان می‌کند. <code>NULL</code> یعنی <code>content</code> عیناً همان‌طور که بود فرستاده شده است.</li>
+<li>مهرهای زمانی اعداد اعشاری یونیکس‌اپوک هستند (<code>time.time()</code>)</li>
+</ul>
+<h3>جستجوی تمام‌متن FTS5</h3>
+<pre dir="ltr"><code>CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5(
+    content,
+    tool_name,
+    tool_calls,
+    content='messages',
+    content_rowid='id'
+);</code></pre>
+<p>جدول FTS5 از طریق سه تریگر که روی INSERT، UPDATE و DELETE جدول <code>messages</code> فعال می‌شوند، همگام نگه داشته می‌شود. تریگرهای فعلی روی نشانگرهای <code>fts_rebuild_high_water</code> / <code>fts_rebuild_progress</code> در <code>state_meta</code> گیت شده‌اند (تا بازسازی FTS در پس‌زمینه بتواند بدون اندیس‌گذاری دوباره پیش برود) و هر سه ستون اندیس‌شده را پوشش می‌دهند — SQL دقیق را در <code>SCHEMA_SQL</code> داخل <code>hermes_state.py</code> ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> نسخهٔ طرح‌واره و مهاجرت‌ها</h2>
+<p>نسخهٔ فعلی طرح‌واره: <strong>۲۳</strong></p>
+<p>جدول <code>schema_version</code> یک عدد صحیح واحد ذخیره می‌کند. افزودن ستون‌های ساده به‌شکل اعلانی توسط <code>_reconcile_columns()</code> مدیریت می‌شود (که ستون‌های موجود را با <code>SCHEMA_SQL</code> مقایسه می‌کند و هر کدام را که نبود ADD می‌کند). زنجیرهٔ مبتنی بر نسخه برای مهاجرت‌های داده و تغییرهای اندیس/FTS رزرو شده که به‌شکل اعلانی قابل بیان نیستند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نسخه</th><th>تغییر</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>طرح‌وارهٔ اولیه (<code>sessions</code>، <code>messages</code>، FTS5)</td></tr>
+    <tr><td>2</td><td>افزودن ستون <code>finish_reason</code> به <code>messages</code></td></tr>
+    <tr><td>3</td><td>افزودن ستون <code>title</code> به <code>sessions</code></td></tr>
+    <tr><td>4</td><td>افزودن اندیس یکتا روی <code>title</code> (NULL مجاز است، غیر NULL باید یکتا باشد)</td></tr>
+    <tr><td>5</td><td>افزودن ستون‌های صورتحساب: <code>cache_read_tokens</code>، <code>cache_write_tokens</code>، <code>reasoning_tokens</code>، <code>billing_provider</code>، <code>billing_base_url</code>، <code>billing_mode</code>، <code>estimated_cost_usd</code>، <code>actual_cost_usd</code>، <code>cost_status</code>، <code>cost_source</code>، <code>pricing_version</code></td></tr>
+    <tr><td>6</td><td>افزودن ستون‌های استدلال به <code>messages</code>: <code>reasoning</code>، <code>reasoning_details</code>، <code>codex_reasoning_items</code></td></tr>
+    <tr><td>7</td><td>افزودن ستون <code>reasoning_content</code> به <code>messages</code></td></tr>
+    <tr><td>8</td><td>افزودن ستون <code>api_call_count</code> به <code>sessions</code></td></tr>
+    <tr><td>9</td><td>افزودن ستون <code>codex_message_items</code> به <code>messages</code> برای بازپخش شناسه/فاز پیام در Codex Responses</td></tr>
+    <tr><td>10</td><td>افزودن جدول مجازی <code>messages_fts_trigram</code> (توکنایزر تری‌گرام برای CJK / جستجوی زیررشته) و پرکردن ردیف‌های موجود</td></tr>
+    <tr><td>11</td><td>اندیس‌گذاری مجدد <code>messages_fts</code> و <code>messages_fts_trigram</code> برای پوشش <code>tool_name</code> + <code>tool_calls</code> و تغییر از محتوای خارجی به حالت درون‌خطی؛ حذف تریگرهای قدیمی و پرکردن تک‌تک ردیف‌های پیام</td></tr>
+    <tr><td>16</td><td>برچسب‌گذاری ردیف‌های ساب‌ایجنتِ واگذارشده در <code>model_config</code> (<code>$._delegate_from</code>) تا انتخابگرهای نشست پس از یتیم‌شدن بر اثر حذف والد، تمیز بمانند</td></tr>
+    <tr><td>18</td><td>تجمیع فرادادهٔ گیت‌وی — پرکردن <code>display_name</code> / <code>origin_json</code> / <code>expiry_finalized</code> از <code>sessions.json</code></td></tr>
+    <tr><td>20</td><td>انتساب مصرف به تفکیک مدل — مقداردهی اولیهٔ ردیف‌های <code>session_model_usage</code> از جمع‌های تجمعی تاریخی هر نشست</td></tr>
+    <tr><td>22</td><td>انتساب مصرف در بُعد تسک — بازسازی <code>session_model_usage</code> به‌طوری که ستون <code>task</code> در PRIMARY KEY شرکت کند</td></tr>
+    <tr><td>23</td><td>بازطراحی ذخیره‌سازی FTS — جداول FTS با محتوای خارجی که جایگزین نسخه‌های حالت درون‌خطیِ v11 می‌شوند (گذار اختیاری برای پایگاه‌های دادهٔ موجود)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>نسخه‌هایی که در بالا فهرست نشده‌اند، افزودن ستونِ اعلانی بوده‌اند که توسط <code>_reconcile_columns()</code> مدیریت می‌شوند (فقط افزایش شمارهٔ نسخه، بدون مهاجرت داده).</p>
+<p>افزودن ستون‌های اعلانی از <code>ALTER TABLE ADD COLUMN</code> داخل try/except استفاده می‌کند تا حالت موجودبودنِ ستون مدیریت شود (idempotent). شمارهٔ نسخه بعد از هر بلوک مهاجرت موفق یک واحد بالا می‌رود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مدیریت تداخل نوشتن</h2>
+<p>چندین پروسس هرمس (گیت‌وی + نشست‌های CLI + ایجنت‌های ورک‌تری) یک <code>state.db</code> مشترک دارند. کلاس <code>SessionDB</code> تداخل نوشتن را این‌طور مدیریت می‌کند:</p>
+<ul>
+<li><strong>تایم‌اوت کوتاه SQLite</strong> (۱ ثانیه) به‌جای پیش‌فرض ۳۰ ثانیه‌ای</li>
+<li><strong>تلاش مجدد در سطح برنامه</strong> با جیتر تصادفی (۲۰ تا ۱۵۰ میلی‌ثانیه، حداکثر ۱۵ تلاش)</li>
+<li>تراکنش‌های <strong>BEGIN IMMEDIATE</strong> برای آشکارسازی تداخل قفل در شروع تراکنش</li>
+<li><strong>چک‌پوینت‌های دوره‌ای WAL</strong> برای هر ۵۰ نوشتار موفق (حالت PASSIVE)</li>
+</ul>
+<p>این کار از «اثر کاروان» جلوگیری می‌کند؛ جایی که backoff قطعیِ داخلی SQLite باعث می‌شود همهٔ نویسنده‌های رقیب در همان بازه‌ها تلاش مجدد کنند.</p>
+<pre dir="ltr"><code>_WRITE_MAX_RETRIES = 15
+_WRITE_RETRY_MIN_S = 0.020   # 20ms
+_WRITE_RETRY_MAX_S = 0.150   # 150ms
+_CHECKPOINT_EVERY_N_WRITES = 50</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> عملیات‌های رایج</h2>
+<h3>مقداردهی اولیه</h3>
+<pre dir="ltr"><code>from hermes_state import SessionDB
+
+db = SessionDB()                           # پیش‌فرض: ~/.hermes/state.db
+db = SessionDB(db_path=Path("/tmp/test.db"))  # مسیر سفارشی</code></pre>
+<h3>ساخت و مدیریت نشست‌ها</h3>
+<pre dir="ltr"><code># ساخت یک نشست جدید
+db.create_session(
+    session_id="sess_abc123",
+    source="cli",
+    model="anthropic/claude-sonnet-4.6",
+    user_id="user_1",
+    parent_session_id=None,  # یا شناسهٔ نشست قبلی برای تبار
+)
+
+# پایان‌دادن به یک نشست
+db.end_session("sess_abc123", end_reason="user_exit")
+
+# بازگشایی یک نشست (پاک‌کردن ended_at/end_reason)
+db.reopen_session("sess_abc123")</code></pre>
+<h3>ذخیرهٔ پیام‌ها</h3>
+<pre dir="ltr"><code>msg_id = db.append_message(
+    session_id="sess_abc123",
+    role="assistant",
+    content="Here's the answer...",
+    tool_calls=[{"id": "call_1", "function": {"name": "terminal", "arguments": "{}"}}],
+    token_count=150,
+    finish_reason="stop",
+    reasoning="Let me think about this...",
+)</code></pre>
+<h3>بازیابی پیام‌ها</h3>
+<pre dir="ltr"><code># پیام‌های خام با همهٔ فراداده
+messages = db.get_messages("sess_abc123")
+
+# قالب گفتگوی OpenAI (برای بازپخش API)
+conversation = db.get_messages_as_conversation("sess_abc123")
+# خروجی: [{"role": "user", "content": "..."}, {"role": "assistant", ...}]</code></pre>
+<h3>عنوان‌های نشست</h3>
+<pre dir="ltr"><code># تنظیم عنوان (باید بین عنوان‌های غیر NULL یکتا باشد)
+db.set_session_title("sess_abc123", "Fix Docker Build")
+
+# یافتن با عنوان (جدیدترین در تبار را برمی‌گرداند)
+session_id = db.resolve_session_by_title("Fix Docker Build")
+
+# تولید خودکار عنوان بعدی در تبار
+next_title = db.get_next_title_in_lineage("Fix Docker Build")
+# خروجی: "Fix Docker Build #2"</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> جستجوی تمام‌متن</h2>
+<p>متد <code>search_messages()</code> نحو کوئری FTS5 را با پاک‌سازی خودکار ورودی کاربر پشتیبانی می‌کند.</p>
+<h3>جستجوی پایه</h3>
+<pre dir="ltr"><code>results = db.search_messages("docker deployment")</code></pre>
+<h3>نحو کوئری FTS5</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نحو</th><th>مثال</th><th>معنی</th></tr></thead>
+  <tbody>
+    <tr><td>کلیدواژه‌ها</td><td><code>docker deployment</code></td><td>هر دو اصطلاح (AND ضمنی)</td></tr>
+    <tr><td>عبارت گیومه‌دار</td><td><code>"exact phrase"</code></td><td>تطابق دقیق عبارت</td></tr>
+    <tr><td>OR بولی</td><td><code>docker OR kubernetes</code></td><td>هر یک از اصطلاح‌ها</td></tr>
+    <tr><td>NOT بولی</td><td><code>python NOT java</code></td><td>مستثناکردن اصطلاح</td></tr>
+    <tr><td>پیشوند</td><td><code>deploy*</code></td><td>تطابق پیشوندی</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>جستجوی فیلترشده</h3>
+<pre dir="ltr"><code># جستجو فقط در نشست‌های CLI
+results = db.search_messages("error", source_filter=["cli"])
+
+# مستثناکردن نشست‌های گیت‌وی
+results = db.search_messages("bug", exclude_sources=["telegram", "discord"])
+
+# جستجو فقط در پیام‌های کاربر
+results = db.search_messages("help", role_filter=["user"])</code></pre>
+<h3>قالب نتایج جستجو</h3>
+<p>هر نتیجه شامل این‌هاست:</p>
+<ul>
+<li><code>id</code>، <code>session_id</code>، <code>role</code>، <code>timestamp</code></li>
+<li><code>snippet</code> — قطعهٔ تولیدشده توسط FTS5 با نشانگرهای <code>&gt;&gt;&gt;match&lt;&lt;&lt;</code></li>
+<li><code>context</code> — یک پیام قبل و بعد از مورد منطبق (محتوا به ۲۰۰ کاراکتر بریده می‌شود)</li>
+<li><code>source</code>، <code>model</code>، <code>session_started</code> — از نشست والد</li>
+</ul>
+<p>متد <code>_sanitize_fts5_query()</code> حالت‌های مرزی را مدیریت می‌کند:</p>
+<ul>
+<li>گیومه‌های جفت‌نشده و نویسه‌های خاص را حذف می‌کند</li>
+<li>اصطلاح‌های خط‌تیکه‌دار را داخل گیومه می‌گذارد (<code>chat-send</code> ← <code>"chat-send"</code>)</li>
+<li>عملگرهای بولی سرگردان را حذف می‌کند (<code>hello AND</code> ← <code>hello</code>)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> تبار نشست‌ها</h2>
+<p>نشست‌ها می‌توانند از طریق <code>parent_session_id</code> زنجیره بسازند. این اتفاق وقتی می‌افتد که فشرده‌سازی زمینه، تقسیم نشست را در گیت‌وی فعال کند.</p>
+<h3>کوئری: یافتن تبار نشست</h3>
+<pre dir="ltr"><code>-- یافتن همهٔ نیاکان یک نشست
+WITH RECURSIVE lineage AS (
+    SELECT * FROM sessions WHERE id = ?
+    UNION ALL
+    SELECT s.* FROM sessions s
+    JOIN lineage l ON s.id = l.parent_session_id
+)
+SELECT id, title, started_at, parent_session_id FROM lineage;
+
+-- یافتن همهٔ نسل‌های یک نشست
+WITH RECURSIVE descendants AS (
+    SELECT * FROM sessions WHERE id = ?
+    UNION ALL
+    SELECT s.* FROM sessions s
+    JOIN descendants d ON s.parent_session_id = d.id
+)
+SELECT id, title, started_at FROM descendants;</code></pre>
+<h3>کوئری: نشست‌های اخیر با پیش‌نمایش</h3>
+<pre dir="ltr"><code>SELECT s.*,
+    COALESCE(
+        (SELECT SUBSTR(m.content, 1, 63)
+         FROM messages m
+         WHERE m.session_id = s.id AND m.role = 'user' AND m.content IS NOT NULL
+         ORDER BY m.timestamp, m.id LIMIT 1),
+        ''
+    ) AS preview,
+    COALESCE(
+        (SELECT MAX(m2.timestamp) FROM messages m2 WHERE m2.session_id = s.id),
+        s.started_at
+    ) AS last_active
+FROM sessions s
+ORDER BY s.started_at DESC
+LIMIT 20;</code></pre>
+<h3>کوئری: آمار مصرف توکن</h3>
+<pre dir="ltr"><code>-- کل توکن‌ها به تفکیک مدل
+SELECT model,
+       COUNT(*) as session_count,
+       SUM(input_tokens) as total_input,
+       SUM(output_tokens) as total_output,
+       SUM(estimated_cost_usd) as total_cost
+FROM sessions
+WHERE model IS NOT NULL
+GROUP BY model
+ORDER BY total_cost DESC;
+
+-- نشست‌های با بیشترین مصرف توکن
+SELECT id, title, model, input_tokens + output_tokens AS total_tokens,
+       estimated_cost_usd
+FROM sessions
+ORDER BY total_tokens DESC
+LIMIT 10;</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> برون‌بری و پاک‌سازی</h2>
+<pre dir="ltr"><code># برون‌بری یک نشست منفرد با پیام‌ها
+data = db.export_session("sess_abc123")
+
+# برون‌بری همهٔ نشست‌ها (با پیام‌ها) به‌شکل فهرستی از دیکشنری‌ها
+all_data = db.export_all(source="cli")
+
+# حذف نشست‌های قدیمی (فقط نشست‌های پایان‌یافته)
+deleted_count = db.prune_sessions(older_than_days=90)
+deleted_count = db.prune_sessions(older_than_days=30, source="telegram")
+
+# پاک‌کردن پیام‌ها اما نگه‌داشتن رکورد نشست
+db.clear_messages("sess_abc123")
+
+# حذف نشست و همهٔ پیام‌ها
+db.delete_session("sess_abc123")</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> محل پایگاه داده</h2>
+<p>مسیر پیش‌فرض: <code>~/.hermes/state.db</code></p>
+<p>این مسیر از <code>hermes_constants.get_hermes_home()</code> به دست می‌آید که به‌طور پیش‌فرض به <code>~/.hermes/</code> یا مقدار متغیر محیطی <code>HERMES_HOME</code> حل می‌شود.</p>
+<p>فایل پایگاه داده، فایل WAL (<code>state.db-wal</code>) و فایل حافظهٔ مشترک (<code>state.db-shm</code>) همگی در همان پوشه ساخته می‌شوند.</p>
+</section>
+
+<div class="pager">
+  <a href="gateway-internals.html"><span class="dir">→ قبلی</span><span class="ttl">درون‌مایهٔ گیت‌وی</span></a>
+  <a class="next" href="provider-runtime.html"><span class="dir">بعدی ←</span><span class="ttl">زمان اجرای ارائه‌دهنده</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/session-storage" target="_blank" rel="noopener">Session Storage</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

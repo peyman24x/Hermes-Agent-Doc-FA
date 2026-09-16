@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>توسعهٔ TUI و دسکتاپ در Worktree — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/worktree-ui-dev" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>توسعهٔ TUI و دسکتاپ در Worktree</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>توسعهٔ TUI و دسکتاپ در Worktree</h1>
+<p>هستهٔ پایتون از هر <a href="../user-guide/git-worktrees.html">گیت‌ورک‌تری</a> بی‌دردسر اجرا می‌شود — کافی است <code>cd</code> کنید و <code>hermes</code> همین‌طور کار می‌کند. اما دو سطح TypeScript این‌طور نیستند: <code>ui-tui/</code> و <code>apps/desktop/</code> هرکدام به <code>node_modules</code> پرشده نیاز دارند و یک <code>npm ci</code> تازه به‌ازای هر ورک‌تری، هم کند است و هم برای هر شاخه‌ای که چک‌اوت کرده‌اید گیگابایت‌ها تکرار می‌سازد.</p>
+
+<p>‏<code>htui</code> و <code>hgui</code> دو هلپر شل هستند که همین شکاف را می‌بندند. هرکدام سطحِ مربوطه را <b>از ورک‌تری فعلی</b> اجرا می‌کنند ولی <code>node_modules</code> را از یک چک‌اوت مرجع قرض می‌گیرند — تا یک شاخهٔ یک‌بارمصرف به‌جای نصب، فقط یک سیم‌لینک هزینه داشته باشد.</p>
+
+<p>این‌ها ابزارهای راحتیِ توسعه‌دهنده‌اند، نه فرمان‌های ارسالی با محصول. آن‌ها را در <code>~/.zshrc</code> بگذارید و مسیرها را به سلیقهٔ خودتان تنظیم کنید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> مدل مشترک‌سازی وابستگی‌ها</h2>
+<p>یک چک‌اوت، <b>چک‌اوت وابستگی‌ها</b> است — تنها جایی که واقعاً <code>npm install</code> اجرا می‌کنید. هر ورک‌تری دیگر به آن لینک می‌شود و فقط وقتی لاک‌فایلش واگرا شد محلی نصب می‌کند (شاخه‌ای که یک وابستگی را ارتقا داده نباید بی‌سروصدا روی پکیج‌های قدیمی اجرا شود).</p>
+
+<pre dir="ltr"><code>flowchart TD
+    A[htui / hgui in a worktree] --&gt; B{package-lock.json&lt;br/&gt;matches deps checkout?}
+    B -- yes --&gt; C[symlink node_modules&lt;br/&gt;from deps checkout]
+    B -- no --&gt; D[local npm ci&lt;br/&gt;in this worktree]
+    C --&gt; E[launch surface]
+    D --&gt; E
+</code></pre>
+
+<p>دو متغیر محیطی چک‌اوت مرجع را نام‌گذاری می‌کنند:</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>متغیر</th><th>معنا</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>HERMES_MAIN_CHECKOUT</code></td><td>چک‌اوت وابستگی‌ها — جایی که <code>node_modules</code> واقعاً زندگی می‌کند و <code>.venv/bin/python</code> آن بک‌اند را اجرا می‌کند.</td></tr>
+    <tr><td><code>HERMES_GUI_DEPS_CHECKOUT</code></td><td>جای وابستگی‌های دسکتاپ (<code>apps/desktop/node_modules</code>). پیش‌فرضش <code>HERMES_MAIN_CHECKOUT</code> است؛ فقط اگر وابستگی‌های دسکتاپ را جای دیگری نگه می‌دارید بازنویسیش کنید.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>هیچ‌کدام توسط خود هرمس خوانده نمی‌شوند — مخصوص همین هلپرها هستند. متغیرهایی که هرمس <i>واقعاً</i> می‌خواند در <a href="https://hermes-agent.nousresearch.com/docs/reference/environment-variables" target="_blank" rel="noopener">متغیرهای محیطی</a> پوشش داده شده‌اند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> ‏<code>htui</code> — اجرای TUI از ورک‌تری</h2>
+<p>‏TUI مبتنی بر Ink از قبل مسیر توسعه دارد: <code>hermes --tui --dev</code> به‌جای باندلِ ازپیش‌ساخته، سورس‌های TypeScript را با <code>tsx</code> اجرا می‌کند. <code>htui</code> یک خطِ راحت روی همین است که اجرا را به <code>ui-tui/</code> ورک‌تری فعلی هم اشاره می‌دهد:</p>
+
+<pre dir="ltr"><code>htui() {
+  local root
+  root="$(_hermes_root)" || { echo "htui: not in a Hermes checkout" &gt;&amp;2; return 1; }
+  ( cd "$root" &amp;&amp; PYTHONPATH="$root" \
+      "$HERMES_MAIN_CHECKOUT/.venv/bin/python" -m hermes_cli.main --tui --dev "$@" )
+}
+</code></pre>
+
+<p>‏<code>--dev</code> از سورس کامپایل می‌کند، پس وقتی لاک‌فایلِ ریشه بخواند <code>ui-tui/node_modules</code> را از <code>HERMES_MAIN_CHECKOUT</code> لینک می‌کند و در غیر این صورت محلی نصب می‌کند (بخش <a href="#shared-helpers">هلپرهای <code>_hermes_root</code> و لینک‌سازی</a> را ببینید).</p>
+
+<div class="callout warn">
+  <div class="callout-title">⚠️ ‏<code>--dev</code> و <code>HERMES_TUI_DIR</code> با هم جمع نمی‌شوند</div>
+  <p>‏<code>HERMES_TUI_DIR</code> هرمس را به یک باندلِ <i>ازپیش‌ساخته</i> اشاره می‌دهد (Nix، پکیج‌های سیستمی) که سورسی برای hot-reload ندارد. اگر در شل‌تان ست باشد، <code>hermes --tui --dev</code> با خطا خارج می‌شود. قبل از <code>htui</code> دستور <code>unset HERMES_TUI_DIR</code> را اجرا کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> ‏<code>hgui</code> — اپلیکیشن دسکتاپ از ورک‌تری</h2>
+<p>اپلیکیشن دسکتاپ سنگین‌تر است: به <code>node_modules</code> هم در ریشهٔ مخزن و هم در <code>apps/desktop/</code> نیاز دارد، یک سرور توسعهٔ Vite با پورت ثابت <code>5174</code> و یک بک‌اند پایتون. <code>hgui</code> همهٔ این‌ها را برای ورک‌تری فعلی سیم‌کشی می‌کند:</p>
+
+<pre dir="ltr"><code>hgui() {
+  local root deps desktop
+  root="$(_hermes_root)" || { echo "hgui: not in a Hermes checkout" &gt;&amp;2; return 1; }
+  deps="${HERMES_GUI_DEPS_CHECKOUT:-$HERMES_MAIN_CHECKOUT}"
+  desktop="$root/apps/desktop"
+
+  # اگر لاک‌ها بخوانند از چک‌اوت وابستگی‌ها قرض بگیر؛ وگرنه محلی نصب کن.
+  if cmp -s "$root/package-lock.json" "$deps/package-lock.json"; then
+    _hermes_link_deps "$desktop" "$deps/apps/desktop"
+    _hermes_link_deps "$root" "$deps"
+  else
+    ( cd "$root" &amp;&amp; npm ci ) || return 1
+  fi
+
+  # Vite روی 5174 قفل است — نشست کهنه‌ی hgui دیگری را بیرون بینداز.
+  lsof -t -i:5174 &gt;/dev/null 2&gt;&amp;1 &amp;&amp; killport 5174
+
+  # الکترون معمولاً Ctrl+C را بدون جمع‌کردن بک‌اندهای زودگذرش زنده می‌ماند.
+  trap '_hermes_gui_cleanup "$root"' INT TERM EXIT
+
+  ( cd "$desktop"
+    export PATH="$root/node_modules/.bin:$PATH"
+    HERMES_DESKTOP_HERMES_ROOT="$root" \
+    HERMES_DESKTOP_PYTHON="$HERMES_MAIN_CHECKOUT/.venv/bin/python" \
+    HERMES_DESKTOP_IGNORE_EXISTING=1 \
+    HERMES_DESKTOP_CWD="$root" \
+    npm run dev )
+}
+</code></pre>
+
+<p>متغیرهای محیطی دسکتاپی که ست می‌کند همگی دسته‌های واقعیِ حل بک‌اند هستند:</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>متغیر</th><th>نقش در <code>hgui</code></th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>HERMES_DESKTOP_HERMES_ROOT</code></td><td>بک‌اند را از <b>همین ورک‌تری</b> اجرا می‌کند، نه <code>hermes</code> بسته‌بندی‌شده یا روی <code>PATH</code>.</td></tr>
+    <tr><td><code>HERMES_DESKTOP_PYTHON</code></td><td>venv چک‌اوت وابستگی‌ها را دوباره‌کاری نمی‌کند و همان را استفاده می‌کند.</td></tr>
+    <tr><td><code>HERMES_DESKTOP_IGNORE_EXISTING</code></td><td>هر <code>hermes</code> روی <code>PATH</code> را نادیده می‌گیرد تا روی ورک‌تری سایه نیندازد.</td></tr>
+    <tr><td><code>HERMES_DESKTOP_CWD</code></td><td>گفتگوی دسکتاپ را با ریشهٔ ورک‌تری باز می‌کند.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>دو دام که <code>hgui</code> هندل می‌کند و یک <code>npm run dev</code> خام نه:</p>
+
+<ul>
+  <li><b>پورت <code>5174</code> ثابت است.</b> دومین <code>hgui</code> با سرور Vite اولی تصادم می‌کند؛ هلپر اول نشستِ کهنه را می‌کشد.</li>
+  <li><b>فرزندان یتیم.</b> الکترون اغلب <code>Ctrl+C</code> را از داخل <code>concurrently</code> زنده می‌گذرد و بک‌اند زودگذرِ <code>dashboard --port 0</code> یا فرایند Vite را جمع نمی‌کند. تلهٔ <code>EXIT</code>/<code>INT</code>/<code>TERM</code> یک پاک‌سازی اجرا می‌کند که پوستهٔ الکترون، شنوندهٔ <code>:5174</code> و هر داشبوردِ <code>--port 0</code> که ساخته را خاتمه می‌دهد.</li>
+</ul>
+</section>
+
+<section class="doc-sec" id="shared-helpers">
+<h2><span class="secnum">۴</span> هلپرهای مشترک</h2>
+<p>هر دو تابع، چک‌اوت دربرگیرنده را پیدا و وابستگی‌ها را یک‌شکل لینک می‌کنند:</p>
+
+<pre dir="ltr"><code># ورک‌تری دربرگیرنده، با تأیید اینکه چک‌اوت واقعی هرمس است.
+_hermes_root() {
+  local root
+  root="$(git rev-parse --show-toplevel 2&gt;/dev/null)" || return 1
+  [[ -f "$root/hermes_cli/main.py" &amp;&amp; -d "$root/ui-tui" ]] &amp;&amp; print -r "$root"
+}
+
+# سیم‌لینک node_modules از چک‌اوت وابستگی‌ها — هرگز روی یک درخت موجود نمی‌گذارد.
+_hermes_link_deps() {
+  local target="${1%/}" source="${2%/}"
+  [[ -d "$source/node_modules" ]] || return 1
+  [[ -e "$target/node_modules" ]] || ln -s "$source/node_modules" "$target/node_modules"
+}
+
+# جمع‌کردن بک‌اندهای زودگذری که الکترون موقع خروج جا می‌گذارد.
+_hermes_gui_cleanup() {
+  local root="$1"
+  [[ -n "$root" ]] &amp;&amp; pkill -TERM -f "${root}/apps/desktop/node_modules/electron" 2&gt;/dev/null
+  lsof -t -i:5174 &gt;/dev/null 2&gt;&amp;1 &amp;&amp; killport 5174
+  pgrep -f 'hermes_cli\.main.*dashboard.*--port 0' 2&gt;/dev/null | xargs -r kill -TERM 2&gt;/dev/null
+}
+</code></pre>
+
+<p>‏<code>killport</code> یک هلپر کوچک خودتان است (<code>lsof -ti:$1 | xargs kill</code>)؛ معادلِ موردعلاقهٔ خودتان را جایگزین کنید.</p>
+
+<div class="callout note">
+  <div class="callout-title">ℹ️ چرا فقط وقتی لاک‌ها بخوانند لینک می‌کنیم</div>
+  <p>سیم‌لینک به یک <code>node_modules</code> واگرا از بی‌نصبی هم بدتر است — ورک‌تری روی پکیج‌هایی بیلد می‌شد که لاک‌فایل خودش هرگز اعلامشان نکرده بود. مقایسهٔ بایت‌به‌بایت <code>package-lock.json</code> همان گاردِ ارزان و دقیق است: لاک یکسان ⇐ قرض گرفتن امن است؛ لاک متفاوت ⇐ <code>npm ci</code> محلی. Vite پیش از اعمال <code>server.fs.allow</code> سیم‌لینک‌ها را به مسیر واقعی باز می‌کند؛ به همین دلیل <code>apps/desktop/vite.config.ts</code> مکان واقعی <code>node_modules</code> را سفید می‌کند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> ببینید همچنین</h2>
+<ul>
+  <li><a href="../user-guide/git-worktrees.html">گیت‌ورک‌تری‌ها</a> — مدل ایزوله‌سازی که این هلپرها رویش ساخته شده‌اند</li>
+  <li><a href="../user-guide/tui.html">رابط ترمینال مدرن (TUI)</a> — ‏<code>hermes --tui --dev</code> و مسیر باندل ازپیش‌ساختهٔ <code>HERMES_TUI_DIR</code></li>
+  <li><a href="../user-guide/desktop.html">اپلیکیشن دسکتاپ</a> — بیلد از سورس و نردبان حل بک‌اند</li>
+  <li><a href="https://github.com/NousResearch/hermes-agent/blob/main/apps/desktop/README.md" target="_blank" rel="noopener">‏<code>apps/desktop/README.md</code></a> — سرور توسعه، اسکریپت سندباکس و بسته‌بندی</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/reference/environment-variables" target="_blank" rel="noopener">متغیرهای محیطی</a> — همهٔ متغیرهای <code>HERMES_*</code> که هرمس می‌خواند</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="web-search-provider-plugin.html"><span class="dir">→ قبلی</span><span class="ttl">پلاگین جستجوی وب</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">(آخرین صفحهٔ گروه)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/worktree-ui-dev" target="_blank" rel="noopener">TUI &amp; Desktop from Worktrees</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

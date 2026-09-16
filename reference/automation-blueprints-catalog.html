@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>کاتالوگ نقشه‌های اتوماسیون — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/reference/automation-blueprints-catalog" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>مرجع<span class="sep">/</span><strong>کاتالوگ نقشه‌های اتوماسیون</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>کاتالوگ نقشه‌های اتوماسیون</h1>
+<p>نقشه‌های اتوماسیون (Blueprints) اتوماسیون‌های آمادهٔ اجرا هستند. یکی را بردارید، چند فیلد را پر کنید و هرمس آن را به‌عنوان یک کار cron زمان‌بندی می‌کند — بدون نیاز به نوشتن دستور cron.</p>
+
+<p>هر نقشه از <b>همهٔ سطوح</b> قابل استفاده است:</p>
+
+<ul>
+  <li><b>داشبورد / اپلیکیشن دسکتاپ</b> — صفحهٔ Cron را باز کنید، به تب <b>Blueprints</b> بروید، فرم را پر کنید و روی <i>Schedule it</i> بزنید.</li>
+  <li><b>CLI، TUI و پیام‌رسان‌ها</b> — بنویسید <code>/blueprint &lt;name&gt;</code> (مثلاً <code>/blueprint morning-brief</code>)؛ هرمس چیزهایی را که لازم دارد یکی‌یکی از شما می‌پرسد و بعد زمان‌بندی می‌کند. تطبیق نام بخشنده است — پیشوند یا املای نزدیک هم پذیرفته می‌شود. کاربران حرفه‌ای می‌توانند از answering صرف‌نظر کنند و مقادیر را درون‌خطی بدهند: <code>/blueprint morning-brief time=08:00</code>.</li>
+  <li><b>اپلیکیشن دسکتاپ</b> — روی هر نقشه <b>Send to App</b> بزنید تا با فرمانِ ازپیش‌بارگذاری‌شده در نوار نوشتن باز شود.</li>
+</ul>
+
+<p>نقشه‌ها هرگز بی‌سروصدا چیزی زمان‌بندی نمی‌کنند — همیشه قبل از ساخته‌شدن کار، تأیید می‌گیرید. کارهای ساخته‌شده را هر وقت خواستید با <code>/cron</code> مدیریت کنید.</p>
+
+<div class="callout note">
+  <div class="callout-title">ℹ️</div>
+  <p>فهرست کامل نقشه‌ها در سایت رسمی به‌صورت ویجت تعاملی نمایش داده می‌شود و از خود مستندات بارگذاری می‌گردد؛ برای مرور زندهٔ کاتالوگ، بخش <a href="https://hermes-agent.nousresearch.com/docs/reference/automation-blueprints-catalog" target="_blank" rel="noopener">Automation Blueprints Catalog</a> در مستندات رسمی را ببینید.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نوشتن نقشهٔ خودتان</h2>
+<p>یک نقشه چیزی نیست جز یک مهارت با یک بلوک <code>metadata.hermes.blueprint</code> در frontmatter فایل <code>SKILL.md</code> آن. اسکیمای اسلات‌ها و روش انتشار را در <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/creating-skills" target="_blank" rel="noopener">ساخت مهارت‌ها ← نقشه‌های اتوماسیون</a> ببینید.</p>
+</section>
+
+<div class="pager">
+  <a href="faq.html"><span class="dir">→ قبلی</span><span class="ttl">سؤالات متداول و عیب‌یابی</span></a>
+  <a class="next" href="cli-symbols.html"><span class="dir">بعدی ←</span><span class="ttl">راهنمای نمادهای CLI</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/reference/automation-blueprints-catalog" target="_blank" rel="noopener">Automation Blueprints Catalog</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>افزودن ابزار جدید — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-tools" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>افزودن ابزار جدید</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>افزودن ابزار جدید</h1>
+<p>قبل از نوشتن ابزار، از خودتان بپرسید: <strong>آیا این نباید به‌جایش یک <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/creating-skills" target="_blank" rel="noopener">مهارت</a> باشد؟</strong></p>
+<div class="callout warn">
+  <div class="callout-title">⚠️ فقط ابزارهای هستهٔ داخلی</div>
+  <p>این صفحه برای افزودن یک <strong>ابزار داخلی هرمس</strong> به خود مخزن است. اگر ابزار شخصی، محلیِ پروژه یا سفارشیِ دیگری می‌خواهید بدون دست‌کاری هستهٔ هرمس، به‌جایش از مسیر پلاگین استفاده کنید:</p>
+  <ul>
+  <li><a href="../user-guide/features/plugins.html">پلاگین‌ها</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت پلاگین هرمس</a></li>
+  </ul>
+  <p>برای بیشتر ساخت ابزار سفارشی، پلاگین‌ها انتخاب پیش‌فرض‌اند. فقط وقتی این صفحه را دنبال کنید که صریحاً می‌خواهید یک ابزار داخلی جدید در <code>tools/</code> و <code>toolsets.py</code> عرضه کنید.</p>
+</div>
+<p>وقتی قابلیت را می‌توان با دستورالعمل + فرمان‌های شل + ابزارهای موجود بیان کرد، آن را یک <strong>مهارت</strong> بسازید (جستجوی arXiv، گردش‌کارهای git، مدیریت Docker، پردازش PDF).</p>
+<p>وقتی به یکپارچه‌سازی سرتاسری با کلیدهای API، منطق پردازش سفارشی، کار با دادهٔ باینری یا استریمینگ نیاز دارد، آن را یک <strong>ابزار</strong> بسازید (اتوماسیون مرورگر، TTS، تحلیل بینایی).</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نمای کلی</h2>
+<p>افزودن یک ابزار <strong>۲ فایل</strong> را درگیر می‌کند:</p>
+<ol>
+<li><strong><code>tools/your_tool.py</code></strong> — هندلر، طرح‌واره، تابع بررسی و فراخوانی <code>registry.register()</code></li>
+<li><strong><code>toolsets.py</code></strong> — افزودن نام ابزار به <code>_HERMES_CORE_TOOLS</code> (یا یک تول‌ست مشخص)</li>
+</ol>
+<p>هر فایل <code>tools/*.py</code> که فراخوانی <code>registry.register()</code> در سطح بالای آن باشد، هنگام راه‌اندازی به‌طور خودکار کشف می‌شود — نیازی به فهرست ایمپورت دستی نیست.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: ساخت فایل ابزار داخلی</h2>
+<p>هر فایل ابزار همین ساختار را دارد:</p>
+<pre dir="ltr"><code># tools/weather_tool.py
+"""Weather Tool -- look up current weather for a location."""
+
+import json
+import os
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+# --- بررسی در دسترس بودن ---
+
+def check_weather_requirements() -&gt; bool:
+    """Return True if the tool's dependencies are available."""
+    return bool(os.getenv("WEATHER_API_KEY"))
+
+
+# --- هندلر ---
+
+def weather_tool(location: str, units: str = "metric") -&gt; str:
+    """Fetch weather for a location. Returns JSON string."""
+    api_key = os.getenv("WEATHER_API_KEY")
+    if not api_key:
+        return json.dumps({"error": "WEATHER_API_KEY not configured"})
+    try:
+        # ... فراخوانی API هوا ...
+        return json.dumps({"location": location, "temp": 22, "units": units})
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+# --- طرح‌واره ---
+
+WEATHER_SCHEMA = {
+    "name": "weather",
+    "description": "Get current weather for a location.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "location": {
+                "type": "string",
+                "description": "City name or coordinates (e.g. 'London' or '51.5,-0.1')"
+            },
+            "units": {
+                "type": "string",
+                "enum": ["metric", "imperial"],
+                "description": "Temperature units (default: metric)",
+                "default": "metric"
+            }
+        },
+        "required": ["location"]
+    }
+}
+
+
+# --- ثبت ---
+
+from tools.registry import registry
+
+registry.register(
+    name="weather",
+    toolset="weather",
+    schema=WEATHER_SCHEMA,
+    handler=lambda args, **kw: weather_tool(
+        location=args.get("location", ""),
+        units=args.get("units", "metric")),
+    check_fn=check_weather_requirements,
+    requires_env=["WEATHER_API_KEY"],
+)</code></pre>
+<h3>قواعد کلیدی</h3>
+<div class="callout caution">
+  <div class="callout-title">⛔ مهم</div>
+  <ul>
+  <li>هندلرها <strong>باید</strong> یک رشتهٔ JSON برگردانند (با <code>json.dumps()</code>)، هرگز دیکشنری خام نه</li>
+  <li>خطاها <strong>باید</strong> به‌صورت <code>{"error": "message"}</code> برگردند، هرگز به‌شکل اکششن پرتاب نشوند</li>
+  <li><code>check_fn</code> هنگام ساختن تعریف ابزارها صدا زده می‌شود — اگر <code>False</code> برگرداند، ابزار بی‌سروصدا حذف می‌شود</li>
+  <li><code>handler</code> مقدار <code>(args: dict, **kwargs)</code> می‌گیرد که در آن <code>args</code> آرگومان‌های فراخوانی ابزارِ LLM است</li>
+  </ul>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: افزودن ابزار داخلی به یک تول‌ست</h2>
+<p>در <code>toolsets.py</code> نام ابزار را اضافه کنید:</p>
+<pre dir="ltr"><code># اگر باید روی همهٔ پلتفرم‌ها (CLI + پیام‌رسانی) در دسترس باشد:
+_HERMES_CORE_TOOLS = [
+    ...
+    "weather",  # &lt;-- اینجا اضافه کنید
+]
+
+# یا یک تول‌ست مستقل جدید بسازید:
+"weather": {
+    "description": "Weather lookup tools",
+    "tools": ["weather"],
+    "includes": []
+},</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> <del>گام ۳: افزودن ایمپورت برای کشف</del> (دیگر لازم نیست)</h2>
+<p>ماژول‌های ابزار که فراخوانی <code>registry.register()</code> در سطح بالایشان باشد، توسط <code>discover_builtin_tools()</code> در <code>tools/registry.py</code> به‌طور خودکار کشف می‌شوند. فهرست ایمپورت دستی برای نگه‌داری وجود ندارد — فقط فایلتان را در <code>tools/</code> بسازید و هنگام راه‌اندازی برداشته می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> هندلرهای ناهمگام (async)</h2>
+<p>اگر هندلرتان به کد ناهمگام نیاز دارد، آن را با <code>is_async=True</code> علامت بزنید:</p>
+<pre dir="ltr"><code>async def weather_tool_async(location: str) -&gt; str:
+    async with aiohttp.ClientSession() as session:
+        ...
+    return json.dumps(result)
+
+registry.register(
+    name="weather",
+    toolset="weather",
+    schema=WEATHER_SCHEMA,
+    handler=lambda args, **kw: weather_tool_async(args.get("location", "")),
+    check_fn=check_weather_requirements,
+    is_async=True,  # رجیستری خودش _run_async() را صدا می‌زند
+)</code></pre>
+<p>رجیستری پل‌زدن ناهمگام را به‌طور شفاف انجام می‌دهد — شما هرگز خودتان <code>asyncio.run()</code> را صدا نمی‌زنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> هندلرهایی که به task_id نیاز دارند</h2>
+<p>ابزارهایی که وضعیت مخصوص هر نشست را مدیریت می‌کنند، <code>task_id</code> را از طریق <code>**kwargs</code> می‌گیرند:</p>
+<pre dir="ltr"><code>def _handle_weather(args, **kw):
+    task_id = kw.get("task_id")
+    return weather_tool(args.get("location", ""), task_id=task_id)
+
+registry.register(
+    name="weather",
+    ...
+    handler=_handle_weather,
+)</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> ابزارهای رهگیری‌شده در حلقهٔ ایجنت</h2>
+<p>برخی ابزارها (<code>todo</code>، <code>memory</code>، <code>session_search</code>، <code>delegate_task</code>) به وضعیت ایجنتِ مخصوص هر نشست نیاز دارند. این‌ها قبل از رسیدن به رجیستری، توسط <code>run_agent.py</code> رهگیری می‌شوند. رجیستری همچنان طرح‌واره‌هایشان را نگه می‌دارد، اما اگر رهگیری دور زده شود، <code>dispatch()</code> یک خطای پشتیبان برمی‌گرداند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> اختیاری: یکپارچه‌سازی با جادوگر راه‌اندازی</h2>
+<p>اگر ابزارتان به کلید API نیاز دارد، آن را به <code>hermes_cli/config.py</code> اضافه کنید:</p>
+<pre dir="ltr"><code>OPTIONAL_ENV_VARS = {
+    ...
+    "WEATHER_API_KEY": {
+        "description": "Weather API key for weather lookup",
+        "prompt": "Weather API key",
+        "url": "https://weatherapi.com/",
+        "tools": ["weather"],
+        "password": True,
+    },
+}</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> چک‌لیست</h2>
+<ul>
+<li>☐ فایل ابزار با هندلر، طرح‌واره، تابع بررسی و ثبت ساخته شده است</li>
+<li>☐ به تول‌ست مناسب در <code>toolsets.py</code> اضافه شده است</li>
+<li>☐ مطمئن شده‌اید که این واقعاً باید ابزار داخلی/هسته باشد، نه پلاگین</li>
+<li>☐ هندلر رشتهٔ JSON برمی‌گرداند و خطاها به‌صورت <code>{"error": "..."}</code> برمی‌گردند</li>
+<li>☐ اختیاری: کلید API به <code>OPTIONAL_ENV_VARS</code> در <code>hermes_cli/config.py</code> اضافه شده است</li>
+<li>☐ اختیاری: به <code>toolset_distributions.py</code> برای پردازش دسته‌ای اضافه شده است</li>
+<li>☐ با <code>hermes chat -q "Use the weather tool for London"</code> تست شده است</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="provider-runtime.html"><span class="dir">→ قبلی</span><span class="ttl">زمان اجرای ارائه‌دهنده</span></a>
+  <a class="next" href="adding-providers.html"><span class="dir">بعدی ←</span><span class="ttl">افزودن ارائه‌دهندهٔ جدید</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-tools" target="_blank" rel="noopener">Adding Tools</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

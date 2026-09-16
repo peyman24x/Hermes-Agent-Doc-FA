@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استفاده از حالت صوتی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/use-voice-mode-with-hermes" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>استفاده از حالت صوتی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>استفاده از حالت صوتی</h1>
+<p>این راهنما همراهِ عملیِ <a href="../user-guide/features/voice-mode.html">مرجع قابلیت حالت صوتی</a> است.</p>
+<p>اگر صفحهٔ قابلیت توضیح می‌دهد حالت صوتی چه‌کارهایی می‌کند، این راهنما نشان می‌دهد چطور واقعاً خوب از آن استفاده کنید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><a href="../integrations/nous-portal.html">Nous Portal</a> هم LLM و هم TTS را با یک OAuth پوشش می‌دهد — حالت صوتی سرتاسری کار می‌کند بدون هیچ اعتبارنامهٔ اضافه.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> حالت صوتی برای چه چیزی مناسب است</h2>
+<p>حالت صوتی مخصوصاً وقتی مفید است که:</p>
+<ul>
+<li>گردش‌کار CLI بدون‌دست می‌خواهید</li>
+<li>پاسخ‌های گفتاری در تلگرام یا دیسکورد می‌خواهید</li>
+<li>می‌خواهید هرمس برای گفتگوی زنده در یک کانال صوتی دیسکورد بنشیند</li>
+<li>وقتی راه می‌روید به‌جای تایپ‌کردن، ثبت سریع ایده، دیباگ یا رفت‌وبرگشت می‌خواهید</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> راه‌اندازی حالت صوتی‌تان را انتخاب کنید</h2>
+<p>در هرمس واقعاً سه تجربهٔ صوتی متفاوت وجود دارد.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>حالت</th><th>بهترین کاربرد</th><th>پلتفرم</th></tr></thead>
+<tbody>
+<tr><td>حلقهٔ میکروفون تعاملی</td><td>استفادهٔ شخصی بدون‌دست هنگام کدنویسی یا تحقیق</td><td>CLI</td></tr>
+<tr><td>پاسخ‌های صوتی در چت</td><td>پاسخ‌های گفتاری در کنار پیام‌رسانی عادی</td><td>تلگرام، دیسکورد</td></tr>
+<tr><td>بات کانال صوتی زنده</td><td>گفتگوی زندهٔ گروهی یا شخصی در یک VC</td><td>کانال‌های صوتی دیسکورد</td></tr>
+</tbody>
+</table>
+</div>
+<p>یک مسیر خوب:</p>
+<ol>
+<li>اول متن را راه بیندازید</li>
+<li>دوم پاسخ‌های صوتی را فعال کنید</li>
+<li>آخر — اگر تجربهٔ کامل را می‌خواهید — سراغ کانال‌های صوتی دیسکورد بروید</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۱: اول مطمئن شوید هرمس عادی کار می‌کند</h2>
+<p>قبل از دست‌زدن به حالت صوتی، مطمئن شوید که:</p>
+<ul>
+<li>هرمس بالا می‌آید</li>
+<li>ارائه‌دهندهٔ شما پیکربندی شده</li>
+<li>ایجنت می‌تواند به پرامپت‌های متنی به‌طور عادی جواب بدهد</li>
+</ul>
+<pre dir="ltr"><code>hermes</code></pre>
+<p>چیزی ساده بپرسید:</p>
+<pre dir="ltr"><code>What tools do you have available?</code></pre>
+<p>اگر این هنوز محکم نیست، اول حالت متنی را درست کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۲: اکستراهای درست را نصب کنید</h2>
+<h3>میکروفون و پخش CLI</h3>
+<pre dir="ltr"><code>cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[voice]"</code></pre>
+<h3>پلتفرم‌های پیام‌رسانی</h3>
+<pre dir="ltr"><code>cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[messaging]"</code></pre>
+<h3>TTS پریمیوم ElevenLabs</h3>
+<pre dir="ltr"><code>cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[tts-premium]"</code></pre>
+<h3>NeuTTS محلی (اختیاری)</h3>
+<pre dir="ltr"><code>python -m pip install -U neutts[all]</code></pre>
+<h3>همه‌چیز</h3>
+<pre dir="ltr"><code>cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[all]"</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۳: نصب وابستگی‌های سیستمی</h2>
+<h3>macOS</h3>
+<pre dir="ltr"><code>brew install portaudio ffmpeg opus
+brew install espeak-ng</code></pre>
+<h3>Ubuntu / Debian</h3>
+<pre dir="ltr"><code>sudo apt install portaudio19-dev ffmpeg libopus0
+sudo apt install espeak-ng</code></pre>
+<p>چرا این‌ها مهم‌اند:</p>
+<ul>
+<li><code>portaudio</code> ← ورودی میکروفون / پخش برای حالت صوتی CLI</li>
+<li><code>ffmpeg</code> ← تبدیل صوت برای TTS و تحویل پیام‌رسانی</li>
+<li><code>opus</code> ← پشتیبانی کدک صوتی دیسکورد</li>
+<li><code>espeak-ng</code> ← بک‌اند phonemizer برای NeuTTS</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۴: انتخاب ارائه‌دهندگان STT و TTS</h2>
+<p>هرمس هم پشتهٔ گفتار محلی و هم ابری را پشتیبانی می‌کند.</p>
+<h3>ساده‌ترین / ارزان‌ترین راه‌اندازی</h3>
+<p>از STT محلی و Edge TTS رایگان استفاده کنید:</p>
+<ul>
+<li>ارائه‌دهندهٔ STT: <code>local</code></li>
+<li>ارائه‌دهندهٔ TTS: <code>edge</code></li>
+</ul>
+<p>این معمولاً بهترین نقطهٔ شروع است.</p>
+<h3>نمونهٔ فایل محیطی</h3>
+<p>به <code>~/.hermes/.env</code> اضافه کنید:</p>
+<pre dir="ltr"><code># گزینه‌های STT ابری (local به کلید نیازی ندارد)
+GROQ_API_KEY=***
+VOICE_TOOLS_OPENAI_KEY=***
+
+# TTS پریمیوم (اختیاری)
+ELEVENLABS_API_KEY=***</code></pre>
+<h3>توصیه‌های ارائه‌دهنده</h3>
+<h4>تبدیل گفتار به متن</h4>
+<ul>
+<li><code>local</code> ← بهترین پیش‌فرض برای حریم خصوصی و استفادهٔ بدون‌هزینه</li>
+<li><code>groq</code> ← رونویسی ابری بسیار سریع</li>
+<li><code>openai</code> ← پشتیبان پولی خوب</li>
+</ul>
+<h4>تبدیل متن به گفتار</h4>
+<ul>
+<li><code>edge</code> ← رایگان و برای بیشتر کاربران کافی</li>
+<li><code>neutts</code> ← TTS محلی/روی‌دستگاه رایگان</li>
+<li><code>elevenlabs</code> ← بهترین کیفیت</li>
+<li><code>openai</code> ← حدوسط خوب</li>
+<li><code>mistral</code> ← چندزبانه، Opus بومی</li>
+</ul>
+<h3>اگر از <code>hermes setup</code> استفاده می‌کنید</h3>
+<p>اگر در جادوگر راه‌اندازی NeuTTS را انتخاب کنید، هرمس چک می‌کند <code>neutts</code> از قبل نصب هست یا نه. اگر نباشد، جادوگر به شما می‌گوید NeuTTS به پکیج پایتونیِ <code>neutts</code> و پکیج سیستمیِ <code>espeak-ng</code> نیاز دارد، پیشنهاد می‌دهد خودش نصب‌شان کند، <code>espeak-ng</code> را با مدیر پکیج پلتفرم‌تان نصب می‌کند و بعد این را اجرا می‌کند:</p>
+<pre dir="ltr"><code>python -m pip install -U neutts[all]</code></pre>
+<p>اگر آن نصب را رد کنید یا شکست بخورد، جادوگر به Edge TTS برمی‌گردد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> گام ۵: پیکربندی پیشنهادی</h2>
+<pre dir="ltr"><code>voice:
+  record_key: "ctrl+b"
+  submit_mode: "direct"  # در TUI: direct | draft
+  max_recording_seconds: 120
+  auto_tts: false
+  beep_enabled: true
+  silence_threshold: 200
+  silence_duration: 3.0
+
+stt:
+  provider: "local"
+  local:
+    model: "base"
+
+tts:
+  provider: "edge"
+  edge:
+    voice: "en-US-AriaNeural"</code></pre>
+<p>این یک پیش‌فرض محافظه‌کارانهٔ خوب برای بیشتر آدم‌هاست.</p>
+<p>در TUI، <code>voice.submit_mode</code> کنترل می‌کند بعد از رونویسی چه اتفاقی بیفتد:</p>
+<ul>
+<li><code>direct</code> (پیش‌فرض) رونویسی را بلافاصله ارسال می‌کند.</li>
+<li><code>draft</code> رونویسی را در ادیتور می‌گذارد تا قبل از زدن Enter بتوانید ویرایش یا لغوش کنید.</li>
+</ul>
+<p>برای پیش‌نویس‌های صوتیِ قابل‌ویرایش، این را ست کنید:</p>
+<pre dir="ltr"><code>voice:
+  submit_mode: "draft"</code></pre>
+<p>اگر به‌جایش TTS محلی می‌خواهید، بلوک <code>tts</code> را به این تغییر دهید:</p>
+<pre dir="ltr"><code>tts:
+  provider: "neutts"
+  neutts:
+    ref_audio: ''
+    ref_text: ''
+    model: neuphonic/neutts-air-q4-gguf
+    device: cpu</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> حالت استفاده ۱: حالت صوتی CLI</h2>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> روشنش کنید</h2>
+<p>هرمس را اجرا کنید:</p>
+<pre dir="ltr"><code>hermes</code></pre>
+<p>داخل CLI:</p>
+<pre dir="ltr"><code>/voice on</code></pre>
+<h3>گردش ضبط</h3>
+<p>کلید پیش‌فرض:</p>
+<ul>
+<li><code>Ctrl+B</code></li>
+</ul>
+<p>گردش‌کار:</p>
+<ol>
+<li><code>Ctrl+B</code> را بزنید</li>
+<li>حرف بزنید</li>
+<li>صبر کنید تشخیص سکوت ضبط را خودکار متوقف کند</li>
+<li>هرمس رونویسی می‌کند و پاسخ می‌دهد</li>
+<li>اگر TTS روشن باشد، جواب را با صدا می‌گوید</li>
+<li>حلقه می‌تواند برای استفادهٔ پیوسته خودکار از نو شروع شود</li>
+</ol>
+<h3>فرمان‌های مفید</h3>
+<pre dir="ltr"><code>/voice
+/voice on
+/voice off
+/voice tts
+/voice status</code></pre>
+<h3>گردش‌کارهای خوب CLI</h3>
+<h4>دیباگ سرِپایی</h4>
+<p>بگویید:</p>
+<pre dir="ltr"><code>I keep getting a docker permission error. Help me debug it.</code></pre>
+<p>بعد بدون‌دست ادامه دهید:</p>
+<ul>
+<li>«خطای آخر را دوباره بخوان»</li>
+<li>«علت ریشه را با اصطلاحات ساده‌تر توضیح بده»</li>
+<li>«حالا فیکس دقیق را بده»</li>
+</ul>
+<h4>تحقیق / طوفان فکری</h4>
+<p>عالی برای:</p>
+<ul>
+<li>راه رفتن هنگام فکر کردن</li>
+<li>املا کردن ایده‌های نیمه‌شکل</li>
+<li>خواستن از هرمس که افکارتان را بلادرنگ ساختار بدهد</li>
+</ul>
+<h4>دسترس‌پذیری / نشست‌های کم‌تایپ</h4>
+<p>اگر تایپ‌کردن ناخوشایند است، حالت صوتی یکی از سریع‌ترین راه‌ها برای ماندن در حلقهٔ کامل هرمس است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> تنظیم رفتار CLI</h2>
+<h3>آستانهٔ سکوت</h3>
+<p>اگر هرمس خیلی تند شروع/متوقف می‌شود، تنظیمش کنید:</p>
+<pre dir="ltr"><code>voice:
+  silence_threshold: 250</code></pre>
+<p>آستانهٔ بالاتر = حساسیت کمتر.</p>
+<h3>مدت سکوت</h3>
+<p>اگر بین جمله‌ها زیادی مکث می‌کنید، بیشترش کنید:</p>
+<pre dir="ltr"><code>voice:
+  silence_duration: 4.0</code></pre>
+<h3>کلید ضبط</h3>
+<p>اگر <code>Ctrl+B</code> با ترمینال یا عادت‌های tmux شما تداخل دارد:</p>
+<pre dir="ltr"><code>voice:
+  record_key: "ctrl+space"</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> حالت استفاده ۲: پاسخ‌های صوتی در تلگرام یا دیسکورد</h2>
+<p>این حالت ساده‌تر از کانال‌های صوتی کامل است.</p>
+<p>هرمس یک بات چت عادی می‌ماند ولی می‌تواند پاسخ‌ها را با صدا بگوید.</p>
+<h3>اجرای گیت‌وی</h3>
+<pre dir="ltr"><code>hermes gateway</code></pre>
+<h3>روشن‌کردن پاسخ‌های صوتی</h3>
+<p>داخل تلگرام یا دیسکورد:</p>
+<pre dir="ltr"><code>/voice on</code></pre>
+<p>یا</p>
+<pre dir="ltr"><code>/voice tts</code></pre>
+<h3>حالت‌ها</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>حالت</th><th>معنی</th></tr></thead>
+<tbody>
+<tr><td><code>off</code></td><td>فقط متن</td></tr>
+<tr><td><code>voice_only</code></td><td>فقط وقتی کاربر پیام صوتی فرستاده حرف می‌زند</td></tr>
+<tr><td><code>all</code></td><td>هر پاسخی را با صدا می‌گوید</td></tr>
+</tbody>
+</table>
+</div>
+<h3>کی از کدام حالت استفاده کنیم</h3>
+<ul>
+<li><code>/voice on</code> اگر پاسخ گفتاری فقط برای پیام‌های شروع‌شده با صدا می‌خواهید</li>
+<li><code>/voice tts</code> اگر همهٔ وقت یک دستیار کاملاً گفتاری می‌خواهید</li>
+</ul>
+<h3>گردش‌کارهای خوب پیام‌رسانی</h3>
+<h4>دستیار تلگرام روی گوشی‌تان</h4>
+<p>استفاده کنید وقتی:</p>
+<ul>
+<li>از سیستم‌تان دورید</li>
+<li>می‌خواهید پیام صوتی بفرستید و جواب‌های گفتاری سریع بگیرید</li>
+<li>می‌خواهید هرمس مثل یک دستیار تحقیق یا عملیات قابل‌حمل عمل کند</li>
+</ul>
+<h4>DMهای دیسکورد با خروجی گفتاری</h4>
+<p>مفید وقتی تعامل خصوصی بدون رفتار منشنِ کانال سرور می‌خواهید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> حالت استفاده ۳: کانال‌های صوتی دیسکورد</h2>
+<p>این پیشرفته‌ترین حالت است.</p>
+<p>هرمس به یک VC دیسکورد می‌رود، به گفتار کاربر گوش می‌دهد، آن را رونویسی می‌کند، خط لولهٔ عادی ایجنت را اجرا می‌کند و پاسخ‌ها را داخل کانال با صدا برمی‌گرداند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> مجوزهای موردنیاز دیسکورد</h2>
+<p>علاوه بر راه‌اندازی عادی بات متنی، مطمئن شوید بات این‌ها را دارد:</p>
+<ul>
+<li><code>Connect</code></li>
+<li><code>Speak</code></li>
+<li>ترجیحاً <code>Use Voice Activity</code></li>
+</ul>
+<p>همچنین intent های ممتاز را در Developer Portal فعال کنید:</p>
+<ul>
+<li><code>Presence Intent</code></li>
+<li><code>Server Members Intent</code></li>
+<li><code>Message Content Intent</code></li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> عضویت و خروج</h2>
+<p>در یک کانال متنی دیسکورد که بات حاضر است:</p>
+<pre dir="ltr"><code>/voice join
+/voice leave
+/voice status</code></pre>
+<h3>وقتی عضو شد چه اتفاقی می‌افتد</h3>
+<ul>
+<li>کاربران در VC حرف می‌زنند</li>
+<li>هرمس مرزهای گفتار را تشخیص می‌دهد</li>
+<li>رونوشت‌ها در کانال متنی مرتبط پست می‌شوند</li>
+<li>هرمس با متن و صدا پاسخ می‌دهد</li>
+<li>کانال متنی همان جایی است که <code>/voice join</code> در آن صادر شده</li>
+</ul>
+<h3>بهترین شیوه‌ها برای استفاده از VC دیسکورد</h3>
+<ul>
+<li><code>DISCORD_ALLOWED_USERS</code> را محدود نگه دارید</li>
+<li>اول از یک کانال مخصوص بات/تست استفاده کنید</li>
+<li>قبل از امتحان‌کردن حالت VC مطمئن شوید STT و TTS در حالت صوتیِ چت متنیِ عادی کار می‌کنند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> توصیه‌های کیفیت صدا</h2>
+<h3>راه‌اندازی با بهترین کیفیت</h3>
+<ul>
+<li>STT: <code>large-v3</code> محلی یا <code>whisper-large-v3</code> روی Groq</li>
+<li>TTS: ElevenLabs</li>
+</ul>
+<h3>راه‌اندازی با بهترین سرعت / راحتی</h3>
+<ul>
+<li>STT: <code>base</code> محلی یا Groq</li>
+<li>TTS: Edge</li>
+</ul>
+<h3>راه‌اندازی کاملاً بدون‌هزینه</h3>
+<ul>
+<li>STT: محلی</li>
+<li>TTS: Edge</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> خرابی‌های رایج</h2>
+<h3>«دستگاه صوتی پیدا نشد»</h3>
+<p><code>portaudio</code> را نصب کنید.</p>
+<h3>«بات می‌رود داخل ولی چیزی نمی‌شنود»</h3>
+<p>چک کنید:</p>
+<ul>
+<li>شناسهٔ کاربر دیسکوردتان در <code>DISCORD_ALLOWED_USERS</code> باشد</li>
+<li>میوت نباشید</li>
+<li>intent های ممتاز فعال باشند</li>
+<li>بات مجوزهای Connect/Speak داشته باشد</li>
+</ul>
+<h3>«رونویسی می‌کند ولی حرف نمی‌زند»</h3>
+<p>چک کنید:</p>
+<ul>
+<li>پیکربندی ارائه‌دهندهٔ TTS</li>
+<li>کلید API / سهمیهٔ ElevenLabs یا OpenAI</li>
+<li>نصب <code>ffmpeg</code> برای مسیرهای تبدیل Edge</li>
+</ul>
+<h3>«Whisper خروجی نامفهوم می‌دهد»</h3>
+<p>امتحان کنید:</p>
+<ul>
+<li>محیط ساکت‌تر</li>
+<li><code>silence_threshold</code> بالاتر</li>
+<li>ارائه‌دهنده/مدل STT متفاوت</li>
+<li>گفته‌های کوتاه‌تر و واضح‌تر</li>
+</ul>
+<h3>«در DMها کار می‌کند ولی در کانال‌های سرور نه»</h3>
+<p>این اغلب سیاست منشن است.</p>
+<p>به‌طور پیش‌فرض، بات در کانال‌های متنی سرور دیسکورد به یک <code>@mention</code> نیاز دارد مگر اینکه چیز دیگری پیکربندی شده باشد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۷</span> راه‌اندازی پیشنهادی هفتهٔ اول</h2>
+<p>اگر کوتاه‌ترین مسیر تا موفقیت را می‌خواهید:</p>
+<ol>
+<li>هرمس متنی را راه بیندازید</li>
+<li><code>hermes setup tts</code> را اجرا کنید تا پشتیبانی صوتی فعال شود</li>
+<li>از حالت صوتی CLI با STT محلی + Edge TTS استفاده کنید</li>
+<li>بعد <code>/voice on</code> را در تلگرام یا دیسکورد فعال کنید</li>
+<li>فقط بعد از آن، حالت VC دیسکورد را امتحان کنید</li>
+</ol>
+<p>این توالی سطح دیباگ را کوچک نگه می‌دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۸</span> برای مطالعهٔ بعدی</h2>
+<ul>
+<li><a href="../user-guide/features/voice-mode.html">مرجع قابلیت حالت صوتی</a></li>
+<li><a href="../user-guide/messaging/index.html">گیت‌وی پیام‌رسان</a></li>
+<li><a href="../user-guide/messaging/discord.html">راه‌اندازی دیسکورد</a></li>
+<li><a href="../user-guide/messaging/telegram.html">راه‌اندازی تلگرام</a></li>
+<li><a href="../user-guide/configuration.html">پیکربندی</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="use-mcp-with-hermes.html"><span class="dir">→ قبلی</span><span class="ttl">استفاده از MCP با هرمس</span></a>
+  <a class="next" href="use-soul-with-hermes.html"><span class="dir">بعدی ←</span><span class="ttl">استفاده از SOUL.md</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/use-voice-mode-with-hermes" target="_blank" rel="noopener">Use Voice Mode with Hermes</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

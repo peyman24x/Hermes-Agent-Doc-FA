@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پلاگین موتور زمینه — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/context-engine-plugin" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>پلاگین موتور زمینه</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>پلاگین موتور زمینه</h1>
+<p>پلاگین‌های موتور زمینه به‌جای <code>ContextCompressor</code> داخلی، راهبرد جایگزینی برای مدیریت زمینهٔ گفتگو فراهم می‌کنند. برای مثال، موتوری از نوع Lossless Context Management (LCM) که به‌جای خلاصه‌سازیِ همراه با افت اطلاعات، یک DAG دانشی می‌سازد.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چگونه کار می‌کند</h2>
+<p>مدیریت زمینهٔ ایجنت بر پایهٔ کلاس انتزاعی <code>ContextEngine</code> (<code>agent/context_engine.py</code>) ساخته شده است. <code>ContextCompressor</code> داخلی پیاده‌سازی پیش‌فرض است. موتورهای پلاگینی باید همین رابط را پیاده‌سازی کنند.</p>
+<p>در هر لحظه فقط <strong>یک</strong> موتور زمینه می‌تواند فعال باشد. انتخابِ موتور از طریق پیکربندی انجام می‌شود:</p>
+<pre dir="ltr"><code># config.yaml
+context:
+  engine: "compressor"    # پیش‌فرض داخلی
+  engine: "lcm"           # موتور پلاگینی با نام "lcm" را فعال می‌کند</code></pre>
+<p>موتورهای پلاگینی <strong>هرگز به‌طور خودکار فعال نمی‌شوند</strong> — کاربر باید صریحاً مقدار <code>context.engine</code> را روی نام پلاگین تنظیم کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> ساختار پوشه‌ها</h2>
+<p>هر موتور زمینه در <code>plugins/context_engine/&lt;name&gt;/</code> قرار دارد:</p>
+<pre dir="ltr"><code>plugins/context_engine/lcm/
+├── __init__.py      # کلاس فرزند ContextEngine را صادر می‌کند
+├── plugin.yaml      # فراداده (نام، توضیحات، نسخه)
+└── ...              # هر ماژول دیگری که موتور شما به آن نیاز دارد</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> کلاس انتزاعی ContextEngine</h2>
+<p>موتور شما باید این متدهای <strong>الزامی</strong> را پیاده‌سازی کند:</p>
+<pre dir="ltr"><code>from agent.context_engine import ContextEngine
+
+class LCMEngine(ContextEngine):
+
+    @property
+    def name(self) -&gt; str:
+        """Short identifier, e.g. 'lcm'. Must match config.yaml value."""
+        return "lcm"
+
+    def update_from_response(self, usage: dict) -&gt; None:
+        """Called after every LLM call with the usage dict.
+
+        Update self.last_prompt_tokens, self.last_completion_tokens,
+        self.last_total_tokens from the response.
+        """
+
+    def should_compress(self, prompt_tokens: int = None) -&gt; bool:
+        """Return True if compaction should fire this turn."""
+
+    def compress(self, messages: list, current_tokens: int = None,
+                 focus_topic: str = None) -&gt; list:
+        """Compact the message list and return a new (possibly shorter) list.
+
+        The returned list must be a valid OpenAI-format message sequence.
+
+        ``focus_topic`` is an optional topic string from manual
+        ``/compress &lt;focus&gt;``; engines that support guided compression should
+        prioritise preserving information related to it, others may ignore it.
+        """</code></pre>
+<h3>خصیصه‌های کلاسی که موتور شما باید نگه دارد</h3>
+<p>ایجنت این‌ها را مستقیماً برای نمایش و لاگ‌برداری می‌خواند:</p>
+<pre dir="ltr"><code>last_prompt_tokens: int = 0
+last_completion_tokens: int = 0
+last_total_tokens: int = 0
+threshold_tokens: int = 0        # زمانی که فشرده‌سازی فعال می‌شود
+context_length: int = 0          # پنجرهٔ کامل زمینهٔ مدل
+compression_count: int = 0       # چند بار compress() اجرا شده است</code></pre>
+<h3>متدهای اختیاری</h3>
+<p>این‌ها در ABC پیش‌فرض‌های منطقی دارند. در صورت نیاز بازنویسی‌شان کنید:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>متد</th><th>پیش‌فرض</th><th>چه زمانی بازنویسی کنید</th></tr></thead>
+  <tbody>
+    <tr><td><code>on_session_start(session_id, **kwargs)</code></td><td>بدون عملیات (no-op)</td><td>باید وضعیت ذخیره‌شده (DAG، پایگاه داده) را بارگذاری کنید</td></tr>
+    <tr><td><code>on_session_end(session_id, messages)</code></td><td>بدون عملیات</td><td>باید وضعیت را ذخیره (flush) و اتصال‌ها را ببندید</td></tr>
+    <tr><td><code>on_session_reset()</code></td><td>شمارنده‌های توکن را بازنشانی می‌کند</td><td>وضعیتِ مخصوص هر نشست برای پاک‌کردن دارید</td></tr>
+    <tr><td><code>update_model(model, context_length, ...)</code></td><td><code>context_length</code> و آستانه را به‌روزرسانی می‌کند</td><td>هنگام تعویض مدل باید بودجه‌ها را دوباره محاسبه کنید</td></tr>
+    <tr><td><code>get_tool_schemas()</code></td><td><code>[]</code> برمی‌گرداند</td><td>موتور شما ابزارهای قابل‌فراخوانی توسط ایجنت فراهم می‌کند (مثل <code>lcm_grep</code>)</td></tr>
+    <tr><td><code>handle_tool_call(name, args, **kwargs)</code></td><td>JSON خطا برمی‌گرداند</td><td>هندلر ابزار پیاده‌سازی می‌کنید</td></tr>
+    <tr><td><code>should_compress_preflight(messages)</code></td><td><code>False</code> برمی‌گرداند</td><td>می‌توانید برآوردی ارزان پیش از فراخوانی API انجام دهید</td></tr>
+    <tr><td><code>get_status()</code></td><td>دیکشنری استاندارد توکن/آستانه</td><td>معیارهای سفارشی برای نمایش دارید</td></tr>
+    <tr><td><code>select_context(request_messages, *, conversation_messages, incoming_message, budget_tokens)</code></td><td><code>None</code> برمی‌گرداند (بدون عملیات)</td><td>شما انتخاب/مسیریابی می‌کنید که چه زمینه‌ای وارد <strong>این</strong> درخواست شود (بازیابی، مسیریابی موضوعی) — نگاه کنید به بخش پایین</td></tr>
+    <tr><td><code>on_turn_complete(messages, usage=None, **kwargs)</code></td><td>بدون عملیات</td><td>نوبتِ تمام‌شده را درون‌ریزی/ایندکس/مشاهده می‌کنید — نگاه کنید به بخش پایین</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> انتخاب و مشاهدهٔ زمینه در هر نوبت</h2>
+<p><code>compress()</code> به این مسئله پاسخ می‌دهد: «زمینه خیلی طولانی است ← کوتاهش کن». دو هوکِ اختیاری با پیش‌فرضِ بدون‌عملیات، محورِ جداگانهٔ <em>انتخاب / مشاهده</em> را پوشش می‌دهند تا دیگر موتور مجبور نباشد <code>should_compress()</code> را <code>True</code> کند و <code>compress()</code> را به‌عنوان کال‌بکِ هر نوبت به کار بگیرد:</p>
+<pre dir="ltr"><code>def select_context(self, request_messages, *, conversation_messages=None,
+                   incoming_message=None, budget_tokens=0):
+    """Choose/replace the context for THIS request, before dispatch.
+
+    Return a new message list to use for this one provider call (retrieval,
+    topic routing, role/branch switching), or None to leave it unchanged.
+    Request-only: the persisted conversation history is never mutated.
+    """
+
+def on_turn_complete(self, messages, usage=None, **kwargs):
+    """Observe a finished turn after the assistant/tool loop completes.
+
+    Receives a shallow copy of the finalized transcript plus the turn's
+    canonical usage dict (or None if no provider response was reached), so the
+    engine can ingest/index/summarize for the next select_context(). The return
+    value is ignored.
+    """</code></pre>
+<p>قرارداد:</p>
+<ul>
+<li><strong>به‌طور پیش‌فرض بدون عملیات و fail-open.</strong> هر دو به‌طور پیش‌فرض <code>return None</code> انجام می‌دهند. هوکِ غایب، یک استثنا یا مقدار بازگشتی نامعتبر، درخواست را دست‌نخورده باقی می‌گذارد — پس موتوری که خراب می‌شود هرگز بدتر از نصب‌نکردن آن نیست. میزبان همچنین برای پیش‌فرضِ به‌ارث‌رسیدهٔ ABC بررسی هویتی انجام می‌دهد و آن را کاملاً رد می‌کند، بنابراین موتورهایی که آن را پیاده‌سازی نکرده‌اند (از جمله فشرده‌سازِ داخلی) هیچ کارِ به‌ازای-هر-درخواستی انجام نمی‌دهند.</li>
+<li><strong><code>select_context()</code> فقط مختص درخواست است.</strong> فهرست بازگشتی، پیام‌ها را فقط برای یک فراخوانی ارائه‌دهنده جایگزین می‌کند؛ تاریخچهٔ ذخیره‌شده هرگز نوشته نمی‌شود. بازگرداندن <code>None</code>، <code>[]</code>، چیزی غیر از فهرست، یا فهرستی شامل آیتم‌های غیر دیکشنری، همگی به‌شکل fail-open به درخواستِ دست‌نخورده برمی‌گردند.</li>
+<li><strong>ترتیب / پایداری کش.</strong> این هوک <strong>قبل از</strong> کنترل کش پرامپت و همهٔ پاک‌سازهای درخواست اجرا می‌شود، بنابراین (الف) جایگزین‌شده همچنان همان اعتبارسنجیِ هر درخواست دیگر را پشت سر می‌گذارد، و (ب) پیش‌فرضِ بدون‌عملیات درخواست را بایت‌به‌بایت یکسان نگه می‌دارد — رفتار کش پرامپت برای موتورهای غیرپیاده‌ساز تغییر نمی‌کند. موتوری که فهرست را جایگزین می‌کند فقط پیشوند کشِ خودش را تغییر می‌دهد. به‌ازای هر درخواستِ ارائه‌دهنده ارزیابی می‌شود (در تلاش‌های مجدد دوباره اجرا می‌شود).</li>
+<li><strong><code>on_turn_complete()</code></strong> فقط مشاهدهٔ پس از نوبت است؛ <code>messages</code> را فقط‌خواندنی در نظر بگیرید. <strong>پوشش آن best-effort است:</strong> از نقطهٔ استانداردِ نهایی‌سازی نوبت صدا زده می‌شود. برخی مسیرهای بازگشتِ زودهنگامِ غیرعادی در حلقه (مثلاً مسدودشدن به‌واسطهٔ سیاست محتوایی یا شکست نهایی ارائه‌دهنده) ذخیره‌سازی کرده و برمی‌گردند بدون آنکه از مسیر نهایی‌سازی عبور کنند، بنابراین در حال حاضر این هوک را صادر نمی‌کنند — آن را مشاهده‌ای best-effort برای نوبت‌های کامل‌شده بدانید، نه کال‌بکی تضمین‌شده برای هر خروج زودهنگام. یکپارچه‌سازی همهٔ مسیرهای پایانی پشت یک نقطهٔ نهایی‌سازی واحد، کار جداگانه‌ای برای آینده است.</li>
+</ul>
+<h3>چه زمانی از این هوک‌ها استفاده کنیم — و چه زمانی نه</h3>
+<ul>
+<li><strong>فقط وقتی <code>select_context()</code> را پیاده‌سازی کنید که موتور شما باید زمینهٔ هر درخواست را <em>جایگزین</em> کند</strong> — انتخابِ تقویت‌شده با بازیابی، مسیریابی موضوعی/شاخه‌ای، تعویض نقش. این تنها فعلِ دارای توانِ جابه‌جاییِ پیام‌های ورودی به یک درخواست است: هوک پلاگینیِ <code>pre_llm_call</code> طبق طراحی مستند، فقط تزریقی است (به پیام کاربر می‌افزاید و هرگز فهرست را بازنویسی نمی‌کند تا پیشوند کش پرامپت حفظ شود). اگر جایگزینی لازم ندارید، آن را پیاده‌سازی نکنید.</li>
+<li><strong>اگر پلاگین شما فقط مشاهده/درون‌ریزی پس از نوبت می‌خواهد</strong> (ایندکس‌گذاری، هم‌گام‌سازی حافظه، تحلیل)، به‌جای موتور زمینه یک <strong>ارائه‌دهندهٔ حافظه</strong> پیاده‌سازی کنید (<code>sync_turn()</code> — نگاه کنید به <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/memory-provider-plugin" target="_blank" rel="noopener">پلاگین ارائه‌دهندهٔ حافظه</a>). یک موتور زمینه، مالکیت سیاست فشرده‌سازی نشست را در دست می‌گیرد؛ یک ارائه‌دهندهٔ حافظه نوبت‌ها را بدون مالکیت چیزی مشاهده می‌کند. <code>on_turn_complete()</code> به‌عنوان قرینهٔ مشاهده برای موتورهایی وجود دارد که <em>از قبل</em> به <code>select_context()</code> نیاز دارند — تا همان مؤلفه بتواند از نوبتی که تازه مسیریابی کرده بیاموزد — نه به‌عنوان یک کال‌بکِ همه‌منظورهٔ نوبت.</li>
+<li><strong>تأثیر یک <code>select_context()</code> واقعی بر کش پرامپت.</strong> انتخابی که بدون عملیات نباشد، به‌طور طبیعی پیشوند کش پرامپت را در نوبت‌هایی که انتخاب را تغییر می‌دهد عوض می‌کند — پیشوند آن درخواست دیگر با پیشوند کش‌شدهٔ ارائه‌دهنده مطابقت ندارد، پس آن نوبت‌ها به‌جای خواندن کش، آن را بازنویسی می‌کنند. موتورها باید <strong>وقتی چیزی تغییر نکرده، انتخابی پایدار</strong> برگردانند (همان شیء یا فهرستی برابر)، و فقط وقتی تصمیم مسیریابی واقعاً متفاوت است زمینه را بازشکل دهند؛ انتخابی که در هر نوبت به‌هم می‌ریزد، بی‌سروصدا در هر نوبت از استفادهٔ مجدد کش چشم‌پوشی می‌کند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> ابزارهای موتور</h2>
+<p>موتورهای زمینه می‌توانند ابزارهایی را در معرض دید بگذارند که ایجنت مستقیماً فراخوانی‌شان کند. طرح‌واره‌ها (schema) را از <code>get_tool_schemas()</code> برگردانید و فراخوانی‌های ابزار را در <code>handle_tool_call()</code> مدیریت کنید:</p>
+<pre dir="ltr"><code>def get_tool_schemas(self):
+    return [{
+        "name": "lcm_grep",
+        "description": "Search the context knowledge graph",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Search query"}
+            },
+            "required": ["query"],
+        },
+    }]
+
+def handle_tool_call(self, name, args, **kwargs):
+    if name == "lcm_grep":
+        results = self._search_dag(args["query"])
+        return json.dumps({"results": results})
+    return json.dumps({"error": f"Unknown tool: {name}"})</code></pre>
+<p>ابزارهای موتور در زمان راه‌اندازی به فهرست ابزارهای ایجنت تزریق می‌شوند و به‌طور خودکار مسیریابی می‌شوند — نیازی به ثبت در رجیستری نیست.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> ثبت موتور</h2>
+<h3>از طریق پوشه (توصیه‌شده)</h3>
+<p>موتور خود را در <code>plugins/context_engine/&lt;name&gt;/</code> قرار دهید. <code>__init__.py</code> باید یک کلاس فرزند <code>ContextEngine</code> را صادر کند. سیستم کشف، به‌طور خودکار آن را پیدا و نمونه‌سازی می‌کند.</p>
+<h3>از طریق سیستم عمومی پلاگین</h3>
+<p>یک پلاگین عمومی هم می‌تواند یک موتور زمینه ثبت کند:</p>
+<pre dir="ltr"><code>def register(ctx):
+    engine = LCMEngine(context_length=200000)
+    ctx.register_context_engine(engine)</code></pre>
+<p>فقط یک موتور قابل ثبت است. پلاگین دومی که بخواهد ثبت کند با یک هشدار رد می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> چرخهٔ حیات</h2>
+<pre dir="ltr"><code>1. Engine instantiated (plugin load or directory discovery)
+2. on_session_start() — conversation begins
+3. update_from_response() — after each API call
+4. should_compress() — checked each turn
+5. compress() — called when should_compress() returns True
+6. on_session_end() — session boundary (CLI exit, /reset, gateway expiry)</code></pre>
+<p><code>on_session_reset()</code> هنگام <code>/new</code> یا <code>/reset</code> صدا زده می‌شود تا وضعیتِ مخصوص هر نشست، بدون خاموشی کامل پاک شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> پیکربندی</h2>
+<p>کاربران موتور شما را از طریق <code>hermes plugins</code> ← Provider Plugins ← Context Engine انتخاب می‌کنند، یا با ویرایش <code>config.yaml</code>:</p>
+<pre dir="ltr"><code>context:
+  engine: "lcm"   # باید با خصوصیت name موتور شما مطابقت داشته باشد</code></pre>
+<p>بلوک پیکربندی <code>compression</code> (<code>compression.threshold</code>، <code>compression.protect_last_n</code> و...) مخصوص <code>ContextCompressor</code> داخلی است، با یک استثنای صریح: <code>compression.model_thresholds</code> (بازنویسی‌های آستانه به‌ازای هر مدل) بخشی از قرارداد موتور زمینه است. میزبان نگاشتِ حل‌شده را <em>قبل از</em> فراخوانی اولیهٔ <code>update_model()</code> به <code>engine.model_thresholds</code> می‌دهد و <code>update_model()</code> کلاس پایه آن را اعمال می‌کند (تطبیق طولانی‌ترین زیررشته، با بازگشت به آستانهٔ پیکربندی‌شدهٔ موتور). موتورهایی که <code>update_model()</code> را بازنویسی می‌کنند مالک سیاست فشرده‌سازی خودشان هستند و می‌توانند این نگاشت را رعایت کنند یا نادیده بگیرند — برای استفادهٔ مجدد از همان منطق حل‌سازی: <code>from agent.context_compressor import resolve_model_threshold</code>. برای بقیهٔ موارد، موتور شما در صورت نیاز باید قالب پیکربندی خودش را تعریف کند و هنگام مقداردهی اولیه از <code>config.yaml</code> بخواند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> تست</h2>
+<pre dir="ltr"><code>from agent.context_engine import ContextEngine
+
+def test_engine_satisfies_abc():
+    engine = YourEngine(context_length=200000)
+    assert isinstance(engine, ContextEngine)
+    assert engine.name == "your-name"
+
+def test_compress_returns_valid_messages():
+    engine = YourEngine(context_length=200000)
+    msgs = [{"role": "user", "content": "hello"}]
+    result = engine.compress(msgs)
+    assert isinstance(result, list)
+    assert all("role" in m for m in result)</code></pre>
+<p>مجموعهٔ کامل تست‌های قرارداد ABC را در <code>tests/agent/test_context_engine.py</code> ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> ایمنی نخ</h2>
+<p>وقتی <code>compression.context_timeout_seconds &gt; 0</code> باشد (پیش‌فرض)، هرمس کل گذرِ فشرده‌سازی — شامل <code>compress()</code> موتور شما و کال‌بک‌های مرزی، و <code>on_pre_compress</code> / <code>on_session_switch</code> هر ارائه‌دهندهٔ حافظه — را روی یک نخ دیمونِ استخری با محدودیت زمانی از سمت میزبان اجرا می‌کند. بنابراین موتور شما باید این را مفروض بگیرد:</p>
+<ul>
+<li>فراخوانی‌ها ممکن است روی نخِ استخریِ دلخواهی برسند. به قرابت نخ (thread affinity) یا وضعیت <code>threading.local</code> مشترک با نخ گفتگو تکیه نکنید.</li>
+<li>فهرست پیامی که دریافت می‌کنید یک اسنپ‌شاتِ عمیقِ خصوصی است؛ تغییر درجای آن مجاز است (قرارداد قدیمی)، اما این تغییر فقط در صورت کامیت‌شدنِ گذر دیده می‌شود. پس از انقضای زمانِ میزبان، کاری که هنوز در حال اجراست دور ریخته می‌شود — هرگز بیرون از کامیت، در وضعیت خارجی/مانا منتشر نکنید.</li>
+<li>گذرهای نشست‌های <em>مختلف</em> می‌توانند هم‌زمان روی نخ‌های خواهرِ استخر اجرا شوند؛ یک نمونهٔ واحد موتور/ارائه‌دهنده که بین نشست‌ها مشترک است باید thread-safe باشد.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> همچنین ببینید</h2>
+<ul>
+<li><a href="context-compression-and-caching.html">فشرده‌سازی و کش زمینه</a> — فشرده‌ساز داخلی چگونه کار می‌کند</li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/memory-provider-plugin" target="_blank" rel="noopener">پلاگین ارائه‌دهندهٔ حافظه</a> — سیستم پلاگینیِ تک‌انتخابیِ مشابه برای حافظه</li>
+<li><a href="../user-guide/features/plugins.html">پلاگین‌ها</a> — نمای کلی سیستم پلاگین</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="codebase-ownership.html"><span class="dir">→ قبلی</span><span class="ttl">نقشهٔ مالکیت کدبیس</span></a>
+  <a class="next" href="cron-internals.html"><span class="dir">بعدی ←</span><span class="ttl">درون‌مایهٔ Cron</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/context-engine-plugin" target="_blank" rel="noopener">Context Engine Plugin</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

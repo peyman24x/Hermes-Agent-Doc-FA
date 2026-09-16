@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پلاگین تولید تصویر — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/image-gen-provider-plugin" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>پلاگین تولید تصویر</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>پلاگین تولید تصویر</h1>
+<p>پلاگین‌های تولید تصویر بک‌اندی را ثبت می‌کنند که به هر فراخوانی ابزار <code>image_generate</code> سرویس می‌دهد — DALL·E، gpt-image، Grok، Flux، Imagen، Stable Diffusion، fal، Replicate، یک سامانهٔ محلی ComfyUI، هر چیزی. ارائه‌دهندگان داخلی (OpenAI، OpenAI-Codex، xAI، FAL، Krea، DeepInfra، OpenRouter) همگی به‌شکل پلاگین عرضه می‌شوند. می‌توانید یک ارائه‌دهندهٔ جدید اضافه کنید یا یکی از موارد همراه را بازنویسی کنید، فقط با قرار دادن یک پوشه در <code>plugins/image_gen/&lt;name&gt;/</code>.</p>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p>تولید تصویر یکی از چند <strong>پلاگین بک‌اندی</strong> است که Hermes پشتیبانی می‌کند. بقیه (با ABCهای تخصصی‌تر) عبارت‌اند از <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/memory-provider-plugin" target="_blank" rel="noopener">پلاگین ارائه‌دهندهٔ حافظه</a>، <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/context-engine-plugin" target="_blank" rel="noopener">پلاگین موتور زمینه</a> و <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/model-provider-plugin" target="_blank" rel="noopener">پلاگین ارائه‌دهندهٔ مدل</a>. پلاگین‌های عمومی ابزار/هوک/CLI در <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت پلاگین هرمس</a> توضیح داده شده‌اند.</p>
+</div>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نحوهٔ کشف</h2>
+<p>هرمس بک‌اندهای تولید تصویر را در سه جا اسکن می‌کند:</p>
+<ol>
+<li><strong>همراه بسته</strong> — <code>&lt;repo&gt;/plugins/image_gen/&lt;name&gt;/</code> (به‌طور خودکار با <code>kind: backend</code> بارگذاری می‌شود، همیشه در دسترس)</li>
+<li><strong>کاربر</strong> — <code>~/.hermes/plugins/image_gen/&lt;name&gt;/</code> (با انتخاب از طریق <code>plugins.enabled</code>)</li>
+<li><strong>Pip</strong> — پکیج‌هایی که یک نقطهٔ ورودی <code>hermes_agent.plugins</code> اعلام می‌کنند</li>
+</ol>
+<p>تابع <code>register(ctx)</code> هر پلاگین <code>ctx.register_image_gen_provider(...)</code> را صدا می‌زند — این کار آن را در رجیستریِ <code>agent/image_gen_registry.py</code> قرار می‌دهد. ارائه‌دهندهٔ فعال با <code>image_gen.provider</code> در <code>config.yaml</code> انتخاب می‌شود؛ <code>hermes tools</code> کاربر را قدم‌به‌قدم برای انتخاب راهنمایی می‌کند.</p>
+<p>رَپِر ابزار <code>image_generate</code> از رجیستری ارائه‌دهندهٔ فعال را می‌گیرد و فراخوانی را به آنجا می‌فرستد. اگر هیچ ارائه‌دهنده‌ای ثبت نشده باشد، ابزار یک خطای راهنما نشان می‌دهد که به <code>hermes tools</code> اشاره می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> ساختار پوشه</h2>
+<pre dir="ltr"><code>plugins/image_gen/my-backend/
+├── __init__.py      # زیرکلاس ImageGenProvider + register()
+└── plugin.yaml      # مانیفست با kind: backend</code></pre>
+<p>یک پلاگین همراه بسته در همین نقطه کامل است. پلاگین‌های کاربر در <code>~/.hermes/plugins/image_gen/&lt;name&gt;/</code> باید به <code>plugins.enabled</code> در <code>config.yaml</code> اضافه شوند (یا <code>hermes plugins enable &lt;name&gt;</code> را اجرا کنید).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> کلاس انتزاعی ImageGenProvider</h2>
+<p>زیرکلاسی از <code>agent.image_gen_provider.ImageGenProvider</code> بسازید. تنها اعضای الزامی، پراپرتی <code>name</code> و متد <code>generate()</code> هستند — بقیه پیش‌فرض‌های منطقی دارند:</p>
+<pre dir="ltr"><code># plugins/image_gen/my-backend/__init__.py
+from typing import Any, Dict, List, Optional
+import os
+
+from agent.image_gen_provider import (
+    DEFAULT_ASPECT_RATIO,
+    ImageGenProvider,
+    error_response,
+    normalize_reference_images,
+    resolve_aspect_ratio,
+    save_b64_image,
+    success_response,
+)
+
+
+class MyBackendImageGenProvider(ImageGenProvider):
+    @property
+    def name(self) -&gt; str:
+        # شناسهٔ پایدار برای استفاده در کانفیگ image_gen.provider. حروف کوچک، بدون فاصله.
+        return "my-backend"
+
+    @property
+    def display_name(self) -&gt; str:
+        # برچسب انسانی که در `hermes tools` نشان داده می‌شود. اگر حذف شود به‌طور پیش‌فرض name.title() است.
+        return "My Backend"
+
+    def is_available(self) -&gt; bool:
+        # اگر اعتبارنامه‌ها یا وابستگی‌ها غایب‌اند False برگردانید.
+        # گیتِ در دسترس‌بودن ابزار پیش از dispatch این را صدا می‌زند.
+        if not os.environ.get("MY_BACKEND_API_KEY"):
+            return False
+        try:
+            import my_backend_sdk  # noqa: F401
+        except ImportError:
+            return False
+        return True
+
+    def list_models(self) -&gt; List[Dict[str, Any]]:
+        # کاتالوگی که در انتخابگر مدل `hermes tools` نمایش داده می‌شود.
+        return [
+            {
+                "id": "my-model-fast",
+                "display": "My Model (Fast)",
+                "speed": "~5s",
+                "strengths": "Quick iteration",
+                "price": "$0.01/image",
+            },
+            {
+                "id": "my-model-hq",
+                "display": "My Model (HQ)",
+                "speed": "~30s",
+                "strengths": "Highest fidelity",
+                "price": "$0.04/image",
+            },
+        ]
+
+    def default_model(self) -&gt; Optional[str]:
+        return "my-model-fast"
+
+    def get_setup_schema(self) -&gt; Dict[str, Any]:
+        # متادیتا برای انتخابگر `hermes tools` — کلیدهایی که هنگام راه‌اندازی پرسیده می‌شوند.
+        return {
+            "name": "My Backend",
+            "badge": "paid",        # اختیاری؛ به‌شکل برچسب کوتاه در انتخابگر نمایش داده می‌شود
+            "tag": "One-line description shown under the name",
+            "env_vars": [
+                {
+                    "key": "MY_BACKEND_API_KEY",
+                    "prompt": "My Backend API key",
+                    "url": "https://my-backend.example.com/api-keys",
+                },
+            ],
+        }
+
+    def capabilities(self) -&gt; Dict[str, Any]:
+        # اعلام کنید که این بک‌اند از image-to-image / ویرایش پشتیبانی می‌کند یا نه.
+        # لایهٔ ابزار این را در اسکیمای داینامیک نشان می‌دهد تا مدل بداند
+        # چه زمانی `image_url` پردازش می‌شود. پیش‌فرض (اگر این را
+        # نیاورید) فقط-متنی است: {"modalities": ["text"], "max_reference_images": 0}.
+        return {"modalities": ["text", "image"], "max_reference_images": 4}
+
+    def generate(
+        self,
+        prompt: str,
+        aspect_ratio: str = DEFAULT_ASPECT_RATIO,
+        *,
+        image_url: Optional[str] = None,
+        reference_image_urls: Optional[List[str]] = None,
+        **kwargs: Any,
+    ) -&gt; Dict[str, Any]:
+        prompt = (prompt or "").strip()
+        aspect_ratio = resolve_aspect_ratio(aspect_ratio)
+
+        if not prompt:
+            return error_response(
+                error="Prompt is required",
+                error_type="invalid_input",
+                provider=self.name,
+                prompt="",
+                aspect_ratio=aspect_ratio,
+            )
+
+        # مسیریابی: اگر image_url (یا reference_image_urls) تنظیم شده باشد، فراخوانی
+        # یک درخواست image-to-image / ویرایش است؛ در غیر این صورت text-to-image.
+        # مسیر طی‌شده را از طریق فیلد `modality` در success_response گزارش کنید.
+        sources = []
+        if image_url:
+            sources.append(image_url)
+        sources.extend(normalize_reference_images(reference_image_urls) or [])
+        modality = "image" if sources else "text"
+
+        # ترتیب اولویت انتخاب مدل: متغیر محیطی → کانفیگ → پیش‌فرض. تابع کمکی
+        # _resolve_model() در پلاگین داخلی openai یک مرجع خوب است.
+        model_id = kwargs.get("model") or self.default_model() or "my-model-fast"
+
+        try:
+            import my_backend_sdk
+            client = my_backend_sdk.Client(api_key=os.environ["MY_BACKEND_API_KEY"])
+            if modality == "image":
+                result = client.edit(
+                    prompt=prompt,
+                    model=model_id,
+                    image_urls=sources,
+                )
+            else:
+                result = client.generate(
+                    prompt=prompt,
+                    model=model_id,
+                    aspect_ratio=aspect_ratio,
+                )
+
+            # دو شکل پشتیبانی می‌شود:
+            #   - رشتهٔ URL: آن را به‌عنوان `image` برگردانید
+            #   - دادهٔ base64: با save_b64_image() زیر $HERMES_HOME/cache/images/ ذخیره کنید
+            if result.get("image_b64"):
+                path = save_b64_image(
+                    result["image_b64"],
+                    prefix=self.name,
+                    extension="png",
+                )
+                image = str(path)
+            else:
+                image = result["image_url"]
+
+            return success_response(
+                image=image,
+                model=model_id,
+                prompt=prompt,
+                aspect_ratio=aspect_ratio,
+                provider=self.name,
+                modality=modality,
+            )
+        except Exception as exc:
+            return error_response(
+                error=str(exc),
+                error_type=type(exc).__name__,
+                provider=self.name,
+                model=model_id,
+                prompt=prompt,
+                aspect_ratio=aspect_ratio,
+            )
+
+
+def register(ctx) -&gt; None:
+    """نقطهٔ ورود پلاگین — یک‌بار در زمان بارگذاری صدا زده می‌شود."""
+    ctx.register_image_gen_provider(MyBackendImageGenProvider())</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> plugin.yaml</h2>
+<pre dir="ltr"><code>name: my-backend
+version: 1.0.0
+description: My image backend — text-to-image via My Backend SDK
+author: Your Name
+kind: backend
+requires_env:
+  - MY_BACKEND_API_KEY</code></pre>
+<p><code>kind: backend</code> همان چیزی است که پلاگین را به مسیر ثبتِ تولید تصویر هدایت می‌کند. <code>requires_env</code> هنگام <code>hermes plugins install</code> از کاربر پرسیده می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> مرجع کلاس انتزاعی</h2>
+<p>قرارداد کامل در <code>agent/image_gen_provider.py</code> است. متدهایی که معمولاً بازنویسی می‌کنید:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>عضو</th><th>الزامی</th><th>پیش‌فرض</th><th>هدف</th></tr></thead>
+  <tbody>
+    <tr><td><code>name</code></td><td>✅</td><td>—</td><td>شناسهٔ پایدار استفاده‌شده در کانفیگ <code>image_gen.provider</code></td></tr>
+    <tr><td><code>display_name</code></td><td>—</td><td><code>name.title()</code></td><td>برچسب نمایش‌داده‌شده در <code>hermes tools</code></td></tr>
+    <tr><td><code>is_available()</code></td><td>—</td><td><code>True</code></td><td>گیت برای نبود اعتبارنامه/وابستگی</td></tr>
+    <tr><td><code>list_models()</code></td><td>—</td><td><code>[]</code></td><td>کاتالوگ برای انتخابگر مدلِ <code>hermes tools</code></td></tr>
+    <tr><td><code>default_model()</code></td><td>—</td><td>اولین مورد از <code>list_models()</code></td><td>پشتیبان وقتی هیچ مدلی پیکربندی نشده</td></tr>
+    <tr><td><code>get_setup_schema()</code></td><td>—</td><td>حداقلی</td><td>متادیتای انتخابگر + پرامپت‌های متغیر محیطی</td></tr>
+    <tr><td><code>generate(prompt, aspect_ratio, **kwargs)</code></td><td>✅</td><td>—</td><td>خودِ فراخوانی</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> قالب پاسخ</h2>
+<p><code>generate()</code> باید دیکشنری‌ای برگرداند که با <code>success_response()</code> یا <code>error_response()</code> ساخته شده باشد. هر دو در <code>agent/image_gen_provider.py</code> توضیح داده شده‌اند.</p>
+<p><strong>موفقیت:</strong></p>
+<pre dir="ltr"><code>success_response(
+    image=&lt;url-or-absolute-path&gt;,
+    model=&lt;model-id&gt;,
+    prompt=&lt;echoed-prompt&gt;,
+    aspect_ratio="landscape" | "square" | "portrait",
+    provider=&lt;your-provider-name&gt;,
+    extra={...},  # فیلدهای اختیاری مخصوص بک‌اند
+)</code></pre>
+<p><strong>خطا:</strong></p>
+<pre dir="ltr"><code>error_response(
+    error="human-readable message",
+    error_type="provider_error" | "invalid_input" | "&lt;exception class name&gt;",
+    provider=&lt;your-provider-name&gt;,
+    model=&lt;model-id&gt;,
+    prompt=&lt;prompt&gt;,
+    aspect_ratio=&lt;resolved aspect&gt;,
+)</code></pre>
+<p>رَپِر ابزار دیکشنری را JSON-سری می‌کند و به LLM می‌دهد. خطاها به‌عنوان نتیجهٔ ابزار به سطح می‌آیند؛ این LLM است که تصمیم می‌گیرد چگونه آن‌ها را به کاربر توضیح دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> مدیریت خروجی base64 در برابر URL</h2>
+<p>بعضی بک‌اندها URL تصویر برمی‌گردانند (fal، Replicate)؛ بعضی دیگر payloadهای base64 (gpt-image-2 از OpenAI). برای حالت base64 از <code>save_b64_image()</code> استفاده کنید — این تابع در <code>$HERMES_HOME/cache/images/&lt;prefix&gt;_&lt;timestamp&gt;_&lt;uuid&gt;.&lt;ext&gt;</code> می‌نویسد و <code>Path</code> مطلق برمی‌گرداند. آن مسیر را (به‌شکل <code>str</code>) به‌عنوان <code>image=</code> در <code>success_response()</code> بدهید. تحویل گیت‌وی (حباب عکس تلگرام، پیوست دیسکورد) هم URLها و هم مسیرهای مطلق را می‌شناسد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> بازنویسی‌های کاربر</h2>
+<p>یک پلاگین کاربر در <code>~/.hermes/plugins/image_gen/&lt;name&gt;/</code> با همان پراپرتی <code>name</code>ِ یک پلاگین همراه بیندازید و با <code>hermes plugins enable &lt;name&gt;</code> فعالش کنید — رجیستری last-writer-wins است، پس نسخهٔ شما جای داخلی را می‌گیرد. برای نشانه‌کردن پلاگین <code>openai</code> به یک پروکسی خصوصی، یا جای‌گذاری یک کاتالوگ مدل سفارشی مفید است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> تست</h2>
+<pre dir="ltr"><code>export HERMES_HOME=/tmp/hermes-imggen-test
+mkdir -p $HERMES_HOME/plugins/image_gen/my-backend
+# …__init__.py و plugin.yaml را در آن پوشه کپی کنید…
+
+export MY_BACKEND_API_KEY=your-test-key
+hermes plugins enable my-backend
+
+# آن را به‌عنوان ارائه‌دهندهٔ فعال انتخاب کنید
+echo "image_gen:" &gt;&gt; $HERMES_HOME/config.yaml
+echo "  provider: my-backend" &gt;&gt; $HERMES_HOME/config.yaml
+
+# امتحانش کنید
+hermes -z "Generate an image of a corgi in a spacesuit"</code></pre>
+<p>یا به‌شکل تعاملی: <code>hermes tools</code> ← «Image Generation» ← انتخاب <code>my-backend</code> ← در صورت درخواست، کلید API را وارد کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> پیاده‌سازی‌های مرجع</h2>
+<ul>
+<li><strong><code>plugins/image_gen/openai/__init__.py</code></strong> — gpt-image-2 در سه سطح low/medium/high به‌شکل سه شناسهٔ مدل مجازی که یک مدل API را با پارامترهای <code>quality</code> متفاوت به اشتراک می‌گذارند. نمونهٔ خوبی از مدل‌های سطح‌بندی‌شده زیر یک بک‌اند + زنجیرهٔ اولویت config.yaml.</li>
+<li><strong><code>plugins/image_gen/xai/__init__.py</code></strong> — Grok Imagine از طریق xAI. شکلی متفاوت (خروجی URL، کاتالوگ ساده‌تر).</li>
+<li><strong><code>plugins/image_gen/openai-codex/__init__.py</code></strong> — نوع Responses API به سبک Codex که SDK اوپن‌ای‌آی را با یک URL پایهٔ مسیریابی متفاوت بازاستفاده می‌کند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> توزیع از طریق pip</h2>
+<pre dir="ltr"><code># pyproject.toml
+[project.entry-points."hermes_agent.plugins"]
+my-backend-imggen = "my_backend_imggen_package"</code></pre>
+<p><code>my_backend_imggen_package</code> باید یک تابع <code>register</code> سطح‌بالا در معرض بگذارد. برای راه‌اندازی کامل، <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins#distribute-via-pip" target="_blank" rel="noopener">توزیع از طریق pip</a> را در راهنمای عمومی پلاگین ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> صفحات مرتبط</h2>
+<ul>
+<li><a href="../user-guide/features/image-generation.html">تولید تصویر</a> — مستندات قابلیت از دید کاربر</li>
+<li><a href="../user-guide/features/plugins.html">نگاه کلی پلاگین‌ها</a> — همهٔ انواع پلاگین در یک نگاه</li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت پلاگین هرمس</a> — راهنمای عمومی ابزارها/هوک‌ها/دستورهای اسلش</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="egress-internals.html"><span class="dir">→ قبلی</span><span class="ttl">درون‌مایهٔ پروکسی خروجی</span></a>
+  <a class="next" href="memory-provider-plugin.html"><span class="dir">بعدی ←</span><span class="ttl">پلاگین ارائه‌دهندهٔ حافظه</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/image-gen-provider-plugin" target="_blank" rel="noopener">Image Generation Provider Plugins</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

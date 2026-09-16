@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ساخت پرامپت سیستمی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/prompt-assembly" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>ساخت پرامپت سیستمی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>ساخت پرامپت سیستمی</h1>
+<p>هرمس عمداً این دو را جدا می‌کند:</p>
+<ul>
+<li><strong>وضعیت پرامپت سیستمیِ کش‌شده</strong></li>
+<li><strong>افزودنی‌های زودگذرِ زمان فراخوانی API</strong></li>
+</ul>
+<p>این یکی از مهم‌ترین انتخاب‌های طراحی در پروژه است، چون روی این‌ها اثر می‌گذارد:</p>
+<ul>
+<li>مصرف توکن</li>
+<li>اثربخشی کش پرامپت</li>
+<li>پیوستگی نشست</li>
+<li>درستی حافظه</li>
+</ul>
+<p>فایل‌های اصلی:</p>
+<ul>
+<li><code>run_agent.py</code></li>
+<li><code>agent/prompt_builder.py</code></li>
+<li><code>tools/memory_tool.py</code></li>
+</ul>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> لایه‌های پرامپت سیستمیِ کش‌شده</h2>
+<p>پرامپت سیستمیِ کش‌شده به‌شکل سه طبقهٔ مرتب مونتاژ می‌شود (نگاه کنید به <code>agent/system_prompt.py</code>):</p>
+<ol>
+<li><strong>stable</strong> — هویت (<code>SOUL.md</code> یا پشتیبان)، راهنمای ابزار/مدل، پرامپت مهارت‌ها، راهنماهای محیط، راهنماهای پلتفرم</li>
+<li><strong>context</strong> — <code>system_message</code> ارائه‌شده از سمت فراخوان، به‌علاوهٔ فایل‌های زمینهٔ پروژه (<code>.hermes.md</code> / <code>AGENTS.md</code> / <code>CLAUDE.md</code> / <code>.cursorrules</code>)</li>
+<li><strong>volatile</strong> — اسنپ‌شات حافظهٔ داخلی (<code>MEMORY.md</code>)، اسنپ‌شات پروفایل کاربر (<code>USER.md</code>)، بلوک ارائه‌دهندهٔ حافظهٔ خارجی، خط زمان/نشست/مدل/ارائه‌دهنده</li>
+</ol>
+<p>پرامپت سیستمی نهایی سپس به این صورت به هم می‌پیوندد: <code>stable</code> → <code>context</code> → <code>volatile</code>.</p>
+<p>این ترتیب برای بحث‌های تقدم اهمیت دارد:</p>
+<ul>
+<li>مهارت‌ها بخشی از طبقهٔ <strong>stable</strong> هستند</li>
+<li>اسنپ‌شات‌های حافظه/پروفایل بخشی از طبقهٔ <strong>volatile</strong> هستند</li>
+<li>هر دو همچنان در پرامپت سیستمیِ کش‌شده‌اند (به‌شکل overlayهای موردیِ وسط نوبت تزریق نمی‌شوند)</li>
+</ul>
+<p>وقتی <code>skip_context_files</code> تنظیم شده باشد (مثلاً در واگذاری به ساب‌ایجنت)، SOUL.md بارگذاری نمی‌شود و به‌جای آن <code>DEFAULT_AGENT_IDENTITY</code> هاردکدشده استفاده می‌شود.</p>
+<h3>مثال عینی: پرامپت سیستمیِ مونتاژشده</h3>
+<p>این نمای ساده‌شده‌ای از شکل پرامپت سیستمی نهایی وقتی همهٔ لایه‌ها حاضرند است (کامنت‌ها منبع هر بخش را نشان می‌دهند):</p>
+<pre dir="ltr"><code># Layer 1: Agent Identity (from ~/.hermes/SOUL.md)
+You are Hermes, an AI assistant created by Nous Research.
+You are an expert software engineer and researcher.
+You value correctness, clarity, and efficiency.
+...
+
+# Layer 2: Tool-aware behavior guidance
+You have persistent memory across sessions. Save durable facts using
+the memory tool: user preferences, environment details, tool quirks,
+and stable conventions. Memory is injected into every turn, so keep
+it compact and focused on facts that will still matter later.
+...
+When the user references something from a past conversation or you
+suspect relevant cross-session context exists, use session_search
+to recall it before asking them to repeat themselves.
+
+# Tool-use enforcement (for GPT/Codex models only)
+You MUST use your tools to take action — do not describe what you
+would do or plan to do without actually doing it.
+...
+
+# Layer 3: Honcho static block (when active)
+[Honcho personality/context data]
+
+# Layer 4: Optional system message (from config or API)
+[User-configured system message override]
+
+# Layer 5: Frozen MEMORY snapshot
+## Persistent Memory
+- User prefers Python 3.12, uses pyproject.toml
+- Default editor is nvim
+- Working on project "atlas" in ~/code/atlas
+- Timezone: US/Pacific
+
+# Layer 6: Frozen USER profile snapshot
+## User Profile
+- Name: Alice
+- GitHub: alice-dev
+
+# Layer 7: Skills index
+## Skills (mandatory)
+Before replying, scan the skills below. If one clearly matches
+your task, load it with skill_view(name) and follow its instructions.
+...
+&lt;available_skills&gt;
+  software-development:
+    - code-review: Structured code review workflow
+    - test-driven-development: TDD methodology
+  research:
+    - arxiv: Search and summarize arXiv papers
+&lt;/available_skills&gt;
+
+# Layer 8: Context files (from project directory)
+# Project Context
+The following project context files have been loaded and should be followed:
+
+## AGENTS.md
+This is the atlas project. Use pytest for testing. The main
+entry point is src/atlas/main.py. Always run `make lint` before
+committing.
+
+# Layer 9: Timestamp + session
+Current time: 2026-03-30T14:30:00-07:00
+Session: abc123
+
+# Layer 10: Platform hint
+You are a CLI AI Agent. Try not to use markdown but simple text
+renderable inside a terminal.</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> سفارشی‌سازی راهنماهای پلتفرم</h2>
+<p>راهنمای پلتفرم (لایهٔ ۱۰ در بالا) راهنمای هر-سطحی است که هرمس برای Telegram، WhatsApp، Slack، CLI و سایر پلتفرم‌ها تزریق می‌کند — مثلاً «روی ترمینال هستی، از Markdown استفاده نکن». پیش‌فرض‌های داخلی در <code>PLATFORM_HINTS</code> (<code>agent/system_prompt.py</code>) زندگی می‌کنند؛ پلتفرم‌های ارائه‌شده توسط پلاگین، راهنمای خودشان را از طریق رجیستری پلتفرم عرضه می‌کنند.</p>
+<p>یک مدیر می‌تواند راهنمای یک پلتفرمِ واحد را از <code>config.yaml</code> و از طریق کلید سطح‌بالای <code>platform_hints</code> الحاق یا جایگزین کند، بدون دست زدن به پلتفرم دیگر:</p>
+<pre dir="ltr"><code>platform_hints:
+  whatsapp:
+    append: &gt;
+      When tabular output would be useful, invoke the table_formatting
+      skill instead of emitting a Markdown table.
+  slack:
+    replace: "You are on Slack. Keep responses tight and avoid wide tables."
+  telegram: "Prefer short messages; split long answers."   # خلاصه‌نویسی = append</code></pre>
+<ul>
+<li><code>append</code> — راهنمای داخلی را نگه می‌دارد و متن اضافی را بعد از آن می‌نشیند.</li>
+<li><code>replace</code> — راهنمای داخلی را کاملاً جایگزین می‌کند.</li>
+<li>یک رشتهٔ خام — خلاصه‌نویسیِ <code>append</code> است.</li>
+<li>وقتی هر دو حاضر باشند، <code>replace</code> بر <code>append</code> می‌چربد.</li>
+<li>ورودی بدشکل به‌شکل دفاعی نادیده گرفته می‌شود و به پیش‌فرض دست‌نخورده برمی‌گردد؛ پس یک مقدار بدِ پیکربندی هرگز نمی‌تواند ساخت پرامپت را بشکند یا بین پلتفرم‌ها نشت کند.</li>
+</ul>
+<p>override هنگام ساخته‌شدن پرامپت سیستمی resolve می‌شود (شروع نشست، و دوباره هنگام compaction چون پرامپت را بازسازی می‌کند). برای یک پیکربندی ثابت، راهنمای بایت-پایداری تولید می‌کند؛ پس در طبقهٔ <strong>stable</strong> کنار راهنمای داخلی می‌نشیند و کش پرامپت را نمی‌شکند — این یک جهشِ زندهٔ وسط-نشستِ پرامپت منجمد نیست.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> SOUL.md چطور در پرامپت ظاهر می‌شود</h2>
+<p><code>SOUL.md</code> در <code>~/.hermes/SOUL.md</code> زندگی می‌کند و نقش هویت ایجنت را دارد — همان بخش نخستِ پرامپت سیستمی. منطق بارگذاری در <code>prompt_builder.py</code> این‌طور کار می‌کند:</p>
+<pre dir="ltr"><code># از agent/prompt_builder.py (ساده‌شده)
+def load_soul_md() -&gt; Optional[str]:
+    soul_path = get_hermes_home() / "SOUL.md"
+    if not soul_path.exists():
+        return None
+    content = soul_path.read_text(encoding="utf-8").strip()
+    content = _scan_context_content(content, "SOUL.md")  # اسکن امنیتی
+    content = _truncate_content(content, "SOUL.md")       # سقف با پنجرهٔ زمینهٔ مدل مقیاس می‌یابد (کف 20k)؛ override پیکربندی برنده است
+    return content</code></pre>
+<p>وقتی <code>load_soul_md()</code> محتوا برگرداند، جای <code>DEFAULT_AGENT_IDENTITY</code> هاردکدشده را می‌گیرد. سپس تابع <code>build_context_files_prompt()</code> با <code>skip_soul=True</code> فراخوانی می‌شود تا SOUL.md دوبار ظاهر نشود (یک‌بار به‌عنوان هویت، یک‌بار به‌عنوان فایل زمینه).</p>
+<p>اگر <code>SOUL.md</code> وجود نداشته باشد، سیستم به این پشتیبان می‌رود:</p>
+<pre dir="ltr"><code>You are Hermes Agent, an intelligent AI assistant created by Nous Research.
+You are helpful, knowledgeable, and direct. You assist users with a wide
+range of tasks including answering questions, writing and editing code,
+analyzing information, creative work, and executing actions via your tools.
+You communicate clearly, admit uncertainty when appropriate, and prioritize
+being genuinely useful over being verbose unless otherwise directed below.
+Be targeted and efficient in your exploration and investigations.</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> فایل‌های زمینه چطور تزریق می‌شوند</h2>
+<p><code>build_context_files_prompt()</code> از یک <strong>سیستم اولویت</strong> استفاده می‌کند — فقط یک نوع زمینهٔ پروژه بارگذاری می‌شود (اولین تطابق برنده است):</p>
+<pre dir="ltr"><code># از agent/prompt_builder.py (ساده‌شده)
+def build_context_files_prompt(cwd=None, skip_soul=False):
+    cwd_path = Path(cwd).resolve()
+
+    # اولویت: اولین تطابق برنده است — فقط «یک» زمینهٔ پروژه بارگذاری می‌شود
+    project_context = (
+        _load_hermes_md(cwd_path)       # 1. .hermes.md / HERMES.md (تا ریشهٔ گیت بالا می‌رود)
+        or _load_agents_md(cwd_path)    # 2. AGENTS.md (فقط cwd)
+        or _load_claude_md(cwd_path)    # 3. CLAUDE.md (فقط cwd)
+        or _load_cursorrules(cwd_path)  # 4. .cursorrules / .cursor/rules/*.mdc
+    )
+
+    sections = []
+    if project_context:
+        sections.append(project_context)
+
+    # SOUL.md از HERMES_HOME (مستقل از زمینهٔ پروژه)
+    if not skip_soul:
+        soul_content = load_soul_md()
+        if soul_content:
+            sections.append(soul_content)
+
+    if not sections:
+        return ""
+
+    return (
+        "# Project Context\n\n"
+        "The following project context files have been loaded "
+        "and should be followed:\n\n"
+        + "\n".join(sections)
+    )</code></pre>
+<h3>جزئیات کشف فایل زمینه</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>اولویت</th><th>فایل‌ها</th><th>دامنهٔ جستجو</th><th>نکات</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><code>.hermes.md</code>، <code>HERMES.md</code></td><td>از CWD تا ریشهٔ گیت</td><td>پیکربندی بومیِ پروژهٔ هرمس</td></tr>
+    <tr><td>2</td><td><code>AGENTS.md</code></td><td>فقط CWD</td><td>فایل رایج دستورالعمل ایجنت</td></tr>
+    <tr><td>3</td><td><code>CLAUDE.md</code></td><td>فقط CWD</td><td>سازگاری با Claude Code</td></tr>
+    <tr><td>4</td><td><code>.cursorrules</code>، <code>.cursor/rules/*.mdc</code></td><td>فقط CWD</td><td>سازگاری با Cursor</td></tr>
+  </tbody>
+</table>
+</div>
+<p>همهٔ فایل‌های زمینه:</p>
+<ul>
+<li><strong>اسکن امنیتی می‌شوند</strong> — برای الگوهای تزریق پرامپت بررسی می‌شوند (یونیکد نامرئی، «ignore previous instructions»، تلاش برای بیرون‌کشی اعتبارنامه)</li>
+<li><strong>بریده می‌شوند</strong> — به سقف <code>context_file_max_chars</code> کاراکتر با تقسیم 70/20 سر/دُم و یک نشانگر برش. سقف با پنجرهٔ زمینهٔ مدل مقیاس می‌یابد (کف ۲۰٬۰۰۰ کاراکتر، سقف ۵۰۰ هزار)؛ مقدار صریح <code>context_file_max_chars</code> در <code>config.yaml</code> همیشه برنده است.</li>
+<li><strong>frontmatter یامل حذف می‌شود</strong> — frontmatter فایل <code>.hermes.md</code> برداشته می‌شود (برای overrideهای پیکربندی آینده رزرو شده)</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> لایه‌های فقط-زمان-فراخوانی-API</h2>
+<p>این‌ها عمداً به‌عنوان بخشی از پرامپت سیستمیِ کش‌شده ماندگار نمی‌شوند:</p>
+<ul>
+<li><code>ephemeral_system_prompt</code></li>
+<li>پیام‌های prefill</li>
+<li>overlayهای زمینهٔ نشستِ مشتق از گیت‌وی</li>
+<li>یادآوری Honcho/خارجیِ نوبت‌های بعدی که در پیام user نوبت جاری تزریق می‌شود</li>
+</ul>
+<p>زمینهٔ پلاگین <code>pre_llm_call</code> هم در همین مسیرِ زمان-فراخوانی-API می‌نشیند: به <strong>پیام user</strong> نوبت جاری اضافه می‌شود، نه اینکه در پرامپت سیستمیِ کش‌شده نوشته شود. وقتی چند پلاگین زمینه برمی‌گردانند، هرمس آن بلوک‌های زمینه را به هم می‌چسباند (نگاه کنید به <a href="../user-guide/features/hooks.html#pre_llm_call">هوک‌ها ← <code>pre_llm_call</code></a>).</p>
+<p>این جداسازی پیشوند پایدار را برای کش، پایدار نگه می‌دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> اسنپ‌شات‌های حافظه</h2>
+<p>حافظهٔ محلی و داده‌های پروفایل کاربر در طبقهٔ <strong>volatile</strong> پرامپت سیستمی ثبت می‌شوند. نوشتن‌های وسط نشست، وضعیت دیسک را به‌روز می‌کنند ولی پرامپت سیستمیِ کش‌شدهٔ از قبل ساخته‌شده را دست‌کاری نمی‌کنند تا زمانی که یک مسیر بازسازی اجرا شود (نشست جدید، یا جریان صریح ابطال/بازسازی مثل بازسازیِ برخاسته از فشرده‌سازی).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> فایل‌های زمینه</h2>
+<p><code>agent/prompt_builder.py</code> فایل‌های زمینهٔ پروژه را با یک <strong>سیستم اولویت</strong> اسکن و پاک‌سازی می‌کند — فقط یک نوع بارگذاری می‌شود (اولین تطابق برنده است):</p>
+<ol>
+<li><code>.hermes.md</code> / <code>HERMES.md</code> (تا ریشهٔ گیت بالا می‌رود)</li>
+<li><code>AGENTS.md</code> (CWD هنگام شروع؛ زیرپوشه‌ها به‌تدریج در طول نشست از طریق <code>agent/subdirectory_hints.py</code> کشف می‌شوند)</li>
+<li><code>CLAUDE.md</code> (فقط CWD)</li>
+<li><code>.cursorrules</code> / <code>.cursor/rules/*.mdc</code> (فقط CWD)</li>
+</ol>
+<p><code>SOUL.md</code> برای جایگاه هویت، جداگانه از طریق <code>load_soul_md()</code> بارگذاری می‌شود. وقتی با موفقیت بارگذاری شود، <code>build_context_files_prompt(skip_soul=True)</code> جلوی دوبار ظاهرشدنش را می‌گیرد.</p>
+<p>فایل‌های بلند قبل از تزریق بریده می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> شاخص مهارت‌ها</h2>
+<p>سیستم مهارت‌ها وقتی ابزارهای مهارتی در دسترس باشد، یک شاخص فشردهٔ مهارت‌ها به پرامپت اضافه می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> سطوح مجاز سفارشی‌سازی پرامپت</h2>
+<p>بیشتر کاربران باید <code>agent/prompt_builder.py</code> را کدِ پیاده‌سازی بدانند، نه یک سطح پیکربندی. مسیر پشتیبانی‌شدهٔ سفارشی‌سازی، تغییر ورودی‌های پرامپتی است که هرمس از قبل بارگذاری می‌کند، نه ویرایش درجای قالب‌های پایتون.</p>
+<h3>اول از این سطوح استفاده کنید</h3>
+<ul>
+<li><code>~/.hermes/SOUL.md</code> — بلوک هویت پیش‌فرض داخلی را با پرسونای ایجنت و رفتار دائمی خودتان جایگزین کنید.</li>
+<li><code>~/.hermes/MEMORY.md</code> و <code>~/.hermes/USER.md</code> — واقعیت‌های پایدار بین‌نشستی و داده‌های پروفایل کاربر را فراهم کنید که باید در نشست‌های جدید اسنپ‌شات شوند.</li>
+<li>فایل‌های زمینهٔ پروژه مثل <code>.hermes.md</code>، <code>HERMES.md</code>، <code>AGENTS.md</code>، <code>CLAUDE.md</code> یا <code>.cursorrules</code> — قواعد کاری مخصوص مخزن را تزریق کنید.</li>
+<li>مهارت‌ها — گردش‌کارها و مراجعِ استفاده‌پذیر مجدد را بدون ویرایش کد اصلی پرامپت بسته‌بندی کنید.</li>
+<li>پیکربندی اختیاری پرامپت سیستمی / overrideهای API — متن دستورالعمل مخصوص استقرار را بدون فورک‌کردن هرمس اضافه کنید.</li>
+<li>Overlayهای زودگذر مثل <code>HERMES_EPHEMERAL_SYSTEM_PROMPT</code> یا پیام‌های prefill — راهنماییِ محدود به نوبت اضافه کنید که نباید بخشی از پیشوند پرامپتِ کش‌شده شود.</li>
+</ul>
+<h3>کی به‌جای آن کد را ویرایش کنید</h3>
+<p><code>agent/prompt_builder.py</code> را فقط وقتی ویرایش کنید که عمداً یک فورک را نگه می‌دارید یا در حال مشارکتِ تغییر رفتار به بالادست هستید. آن فایل لوله‌کشی پرامپت، مرزهای کش و ترتیب تزریق را برای هر نشست مونتاژ می‌کند. ویرایش مستقیم آن، تغییر محصولِ سراسری است نه سفارشی‌سازی پرامپتِ هر کاربر.</p>
+<p>به بیان دیگر:</p>
+<ul>
+<li>اگر هویت متفاوتی برای دستیار می‌خواهید، <code>SOUL.md</code> را ویرایش کنید</li>
+<li>اگر قواعد متفاوتی برای مخزن می‌خواهید، فایل‌های زمینهٔ پروژه را ویرایش کنید</li>
+<li>اگر رویه‌های عملیاتیِ استفاده‌پذیر مجدد می‌خواهید، مهارت اضافه کنید یا تغییر دهید</li>
+<li>اگر می‌خواهید نحوهٔ ساخت پرامپت هرمس برای همه تغییر کند، پایتون را تغییر دهید و با آن مثل یک مشارکت کدی رفتار کنید</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> چرا ساخت پرامپت این‌طور تقسیم شده</h2>
+<p>معماری عمداً برای این‌ها بهینه شده است:</p>
+<ul>
+<li>حفظ کش پرامپت سمت ارائه‌دهنده</li>
+<li>پرهیز از دست‌کاری غیرضروری تاریخچه</li>
+<li>نگه‌داشتن معناشناسی حافظه در حد فهم‌پذیری</li>
+<li>اجازه به گیت‌وی/ACP/CLI برای افزودن زمینه، بدون آلوده‌کردن وضعیت پایدار پرامپت</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> مستندات مرتبط</h2>
+<ul>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/context-compression-and-caching" target="_blank" rel="noopener">فشرده‌سازی و کش پرامپت</a></li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/session-storage" target="_blank" rel="noopener">ذخیره‌سازی نشست</a></li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/gateway-internals" target="_blank" rel="noopener">درون‌مایهٔ گیت‌وی</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="agent-loop.html"><span class="dir">→ قبلی</span><span class="ttl">حلقهٔ ایجنت</span></a>
+  <a class="next" href="context-compression-and-caching.html"><span class="dir">بعدی ←</span><span class="ttl">فشرده‌سازی و کش زمینه</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/prompt-assembly" target="_blank" rel="noopener">Prompt Assembly</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

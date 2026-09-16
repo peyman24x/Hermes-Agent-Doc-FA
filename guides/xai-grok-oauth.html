@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>xAI Grok OAuth (SuperGrok) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/xai-grok-oauth" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>xAI Grok OAuth (SuperGrok)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>xAI Grok OAuth (SuperGrok)</h1>
+<p>Hermes Agent از xAI Grok از طریق یک جریان ورود OAuth با کد دستگاه (device code) مبتنی بر مرورگر روی <a href="https://accounts.x.ai" target="_blank" rel="noopener">accounts.x.ai</a> پشتیبانی می‌کند؛ یا با <b>اشتراک SuperGrok</b>‏ (<a href="https://x.ai/grok" target="_blank" rel="noopener">grok.com</a>) یا با <b>اشتراک X Premium+</b>‏ (حساب X متصل‌شده). نیازی به ‏<code>XAI_API_KEY</code> نیست — یک‌بار وارد شوید و هرمس نشست شما را در پس‌زمینه به‌طور خودکار تازه می‌کند.</p>
+<p>وقتی با حساب X دارای Premium+ وارد می‌شوید، xAI وضعیت اشتراک را به‌طور خودکار به نشست xAI شما پیوند می‌زند؛ پس جریان OAuth درست مثل مشترکین مستقیم SuperGrok کار می‌کند.</p>
+<p>ترنسپورت همان آداپتور ‏<code>codex_responses</code> را دوباره استفاده می‌کند (xAI نقطهٔ پایانی به سبک Responses عرضه کرده است)، پس استدلال، فراخوانی ابزار، استریم و کش پرامپت بدون هیچ تغییری در آداپتور کار می‌کنند.</p>
+<p>همین توکن bearer OAuth را همهٔ سطوح مستقیم به xAI در هرمس هم دوباره استفاده می‌کنند — TTS، تولید تصویر، تولید ویدیو و رونویسی — پس یک ورود واحد هر چهار مورد را پوشش می‌دهد.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نگاه کلی</h2>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>مورد</th><th>مقدار</th></tr>
+</thead>
+<tbody>
+<tr><td>شناسهٔ ارائه‌دهنده</td><td>‏<code>xai-oauth</code></td></tr>
+<tr><td>نام نمایشی</td><td>‏xAI Grok OAuth (SuperGrok / X Premium+)</td></tr>
+<tr><td>نوع احراز هویت</td><td>‏OAuth 2.0 مرورگری با کد دستگاه</td></tr>
+<tr><td>ترنسپورت</td><td>‏xAI Responses API‏ (‏<code>codex_responses</code>)</td></tr>
+<tr><td>مدل پیش‌فرض</td><td>‏<code>grok-4.6</code></td></tr>
+<tr><td>نقطهٔ پایانی</td><td>‏<code>https://api.x.ai/v1</code></td></tr>
+<tr><td>سرور احراز هویت</td><td>‏<code>https://accounts.x.ai</code></td></tr>
+<tr><td>نیازمند متغیر محیطی</td><td>خیر (‏<code>XAI_API_KEY</code> برای این ارائه‌دهنده <b>استفاده نمی‌شود</b>)</td></tr>
+<tr><td>اشتراک</td><td><a href="https://x.ai/grok" target="_blank" rel="noopener">SuperGrok</a> یا <a href="https://x.com/i/premium_sign_up" target="_blank" rel="noopener">X Premium+</a> — یادداشت پایین را ببینید</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> پیش‌نیازها</h2>
+<ul>
+<li>Python 3.9+‏</li>
+<li>Hermes Agent نصب شده باشد</li>
+<li>یک اشتراک فعال <b>SuperGrok</b> روی حساب xAI شما، <b>یا</b> اشتراک <b>X Premium+</b> روی حساب X که با آن وارد می‌شوید (xAI اشتراک را خودکار پیوند می‌زند)</li>
+<li>مرورگری در دسترس، در هر جایی که بتوانید URL تأیید چاپ‌شده را باز کنید</li>
+</ul>
+<div class="callout warn">
+  <div class="callout-title">⚠️ xAI ممکن است دسترسی OAuth API را بر اساس سطح اشتراک محدود کند</div>
+  <p>بک‌اند xAI فهرست مجاز خودش را روی سطح OAuth API اعمال می‌کند و دیده شده که مشترکین استاندارد SuperGrok را با ‏<code>HTTP 403</code> رد می‌کند (ایشوی <a href="https://github.com/NousResearch/hermes-agent/issues/26847" target="_blank" rel="noopener">#26847</a> را ببینید) با این‌که اشتراک درون‌برنامه‌ای فعال است. اگر ورود OAuth در مرورگر موفق بود ولی استنتاج 403 برگرداند، ‏<code>XAI_API_KEY</code> را ست کنید و به مسیر کلید API بروید (‏<code>provider: xai</code>) — آن سطح امروز مشمول همین محدودسازی نیست.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> شروع سریع</h2>
+<pre dir="ltr"><code># Launch the provider and model picker
+hermes model
+# → Select "xAI Grok OAuth (SuperGrok / X Premium+)" from the provider list
+# → Hermes opens or prints an accounts.x.ai verification URL
+# → Enter the displayed code if prompted, then approve access in the browser
+# → Pick a model (grok-4.6 is at the top)
+# → Start chatting
+
+hermes</code></pre>
+<p>بعد از اولین ورود، اعتبارنامه‌ها زیر ‏<code>~/.hermes/auth.json</code> ذخیره می‌شوند و پیش از انقضا به‌طور خودکار تازه می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> ورود دستی</h2>
+<p>می‌توانید بدون عبور از انتخابگر مدل، ورود را فعال کنید:</p>
+<pre dir="ltr"><code>hermes auth add xai-oauth</code></pre>
+<h3>نشست‌های ریموت / بدون سر</h3>
+<p>روی سرورها، کانتینرها، کنسول‌های فقط-مرورگری (Cloud Shell، Codespaces، EC2 Instance Connect) یا نشست‌های SSH که هرمس نمی‌تواند در آن‌ها مرورگری محلی باز کند، هرمس URL تأیید xAI و کد کاربر را چاپ می‌کند. URL را در هر مرورگری روی لپ‌تاپ خود یا در کنسول ابری باز کنید، اگر پرسید کد را وارد کنید و هرمس تا وقتی xAI ورود را تأیید کند پینگ می‌زند. هیچ تونل SSH یا شنوندهٔ callback محلی لازم نیست.</p>
+<pre dir="ltr"><code>hermes auth add xai-oauth --no-browser
+# Open the printed verification URL in your browser.</code></pre>
+<p>همین جریان کد دستگاه وقتی از داشبورد وب یا اپلیکیشن دسکتاپ وارد می‌شوید هم اعمال می‌شود: هرمس URL تأیید و کد کاربر را نشان می‌دهد، بعد در پس‌زمینه پینگ می‌زند تا وقتی شما دسترسی را تأیید کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> ورود چطور کار می‌کند</h2>
+<ol>
+<li>هرمس از ‏<code>auth.x.ai</code> یک کد دستگاه درخواست می‌کند.</li>
+<li>شما URL تأیید را باز می‌کنید، وارد می‌شوید، اگر پرسید کد نمایش‌داده‌شده را وارد می‌کنید و دسترسی را تأیید می‌کنید.</li>
+<li>هرمس تا تأیید به xAI پینگ می‌زند، بعد توکن‌ها را در ‏<code>~/.hermes/auth.json</code> ذخیره می‌کند.</li>
+<li>از آن به بعد هرمس توکن دسترسی را در پس‌زمینه تازه نگه می‌دارد — شما وارد می‌مانید تا وقتی ‏<code>hermes auth logout xai-oauth</code> را اجرا کنید یا از تنظیمات حساب xAI خود دسترسی را لغو کنید.</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> بررسی وضعیت ورود</h2>
+<pre dir="ltr"><code>hermes doctor</code></pre>
+<p>بخش ‏<code>◆ Auth Providers</code> وضعیت فعلی همهٔ ارائه‌دهندگان را نشان می‌دهد، از جمله ‏<code>xai-oauth</code>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> تغییر مدل</h2>
+<pre dir="ltr"><code>hermes model
+# → Select "xAI Grok OAuth (SuperGrok / X Premium+)"
+# → Pick from the model list (grok-4.6 is pinned to the top)</code></pre>
+<p>یا مدل را مستقیم ست کنید:</p>
+<pre dir="ltr"><code>hermes config set model.default grok-4.6
+hermes config set model.provider xai-oauth</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> مرجع پیکربندی</h2>
+<p>بعد از ورود، ‏<code>~/.hermes/config.yaml</code> شامل این خواهد بود:</p>
+<pre dir="ltr"><code>model:
+  default: grok-4.6
+  provider: xai-oauth
+  base_url: https://api.x.ai/v1</code></pre>
+<h3>نام‌های مستعار ارائه‌دهنده</h3>
+<p>همهٔ موارد زیر به ‏<code>xai-oauth</code> حل می‌شوند:</p>
+<pre dir="ltr"><code>hermes --provider xai-oauth        # canonical
+hermes --provider grok-oauth       # alias
+hermes --provider x-ai-oauth       # alias
+hermes --provider xai-grok-oauth   # alias</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> ابزارهای مستقیم به xAI ‏(TTS / تصویر / ویدیو / رونویسی / جستجوی X)</h2>
+<p>وقتی با OAuth وارد شده باشید، هر ابزار مستقیم به xAI همان توکن bearer را خودکار دوباره استفاده می‌کند — <b>هیچ راه‌اندازی جداگانه‌ای لازم نیست</b> مگر این‌که ترجیح بدهید از کلید API استفاده کنید.</p>
+<p>برای انتخاب بک‌اند هر ابزار:</p>
+<pre dir="ltr"><code>hermes tools
+# → Text-to-Speech       → "xAI TTS"
+# → Image Generation     → "xAI Grok Imagine (image)"
+# → Video Generation     → "xAI Grok Imagine"
+# → X (Twitter) Search   → "xAI Grok OAuth (SuperGrok / X Premium+)"</code></pre>
+<p>اگر توکن‌های OAuth از قبل ذخیره باشند، انتخابگر تأییدش می‌کند و از پرامپت اعتبارنامه می‌پرد. اگر نه OAuth ست باشد نه ‏<code>XAI_API_KEY</code>، انتخابگر منویی با ۳ گزینه می‌دهد: ورود OAuth، چسباندن کلید API، یا رد شدن.</p>
+<div class="callout note">
+  <div class="callout-title">ℹ️ تولید ویدیو به‌صورت پیش‌فرض خاموش است</div>
+  <p>تول‌ست ‏<code>video_gen</code> به‌صورت پیش‌فرض غیرفعال است. قبل از این‌که ایجنت بتواند ‏<code>video_generate</code> را صدا بزند، آن را در ‏<code>hermes tools</code> ← ‏<code>🎬 Video Generation</code> فعال کنید (Space را بزنید). وگرنه ممکن است ایجنت به مهارت همراهِ ComfyUI برگردد که آن هم برای تولید ویدیو تگ شده است.</p>
+</div>
+<div class="callout note">
+  <div class="callout-title">ℹ️ جستجوی X وقتی اعتبارنامهٔ xAI موجود باشد خودکار فعال می‌شود</div>
+  <p>تول‌ست ‏<code>x_search</code> هر وقت اعتبارنامه‌های xAI (توکن OAuth مربوط به SuperGrok / X Premium+ یا ‏<code>XAI_API_KEY</code>) پیکربندی شده باشند خودکار فعال می‌شود. اگر این را نمی‌خواهید، صریحاً از طریق ‏<code>hermes tools</code> ← ‏<code>🐦 X (Twitter) Search</code> (Space را بزنید) غیرفعالش کنید. این ابزار از طریق ‏<code>x_search</code> داخلیِ API Responses در xAI مسیریابی می‌شود — با <b>هر دو</b> کار می‌کند: ورود OAuth مربوط به SuperGrok / X Premium+ یا ‏<code>XAI_API_KEY</code> پولی؛ و وقتی هر دو پیکربندی شده باشند OAuth را ترجیح می‌دهد (به‌جای هزینهٔ API از سهمیهٔ اشتراک شما استفاده می‌کند). وقتی هیچ اعتبارنامهٔ xAI پیکربندی نشده باشد، اسکیمای ابزار از دید مدل پنهان است، فارغ از این‌که تول‌ست فعال باشد یا نه.</p>
+</div>
+<h3>مدل‌ها</h3>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>ابزار</th><th>مدل</th><th>توضیحات</th></tr>
+</thead>
+<tbody>
+<tr><td>گفتگو</td><td>‏<code>grok-4.6</code></td><td>پیش‌فرض؛ همیشه بالای فهرست انتخابگر OAuth</td></tr>
+<tr><td>گفتگو</td><td>‏<code>grok-build-0.1</code></td><td>مدل Grok Build با گرایش کدنویسی</td></tr>
+<tr><td>گفتگو</td><td>‏<code>grok-4.3</code></td><td>نسل قبلی</td></tr>
+<tr><td>گفتگو</td><td>‏<code>grok-4.20-0309-reasoning</code></td><td>گونهٔ استدلالی</td></tr>
+<tr><td>گفتگو</td><td>‏<code>grok-4.20-0309-non-reasoning</code></td><td>گونهٔ غیراستدلالی</td></tr>
+<tr><td>گفتگو</td><td>‏<code>grok-4.20-multi-agent-0309</code></td><td>گونهٔ چندایجنتی</td></tr>
+<tr><td>تصویر</td><td>‏<code>grok-imagine-image</code></td><td>پیش‌فرض؛ حدود ۵ تا ۱۰ ثانیه</td></tr>
+<tr><td>تصویر</td><td>‏<code>grok-imagine-image-2.0</code></td><td>حساس به تایپوگرافی/چیدمان؛ بالاترین کیفیت؛ حدود ۱۰ تا ۲۰ ثانیه</td></tr>
+<tr><td>تصویر</td><td>‏<code>grok-imagine-image-quality</code></td><td>وفاداری بالاتر؛ حدود ۱۰ تا ۲۰ ثانیه</td></tr>
+<tr><td>ویدیو</td><td>‏<code>grok-imagine-video</code></td><td>متن به ویدیو</td></tr>
+<tr><td>ویدیو</td><td>‏<code>grok-imagine-video-1.5-preview</code></td><td>تصویر به ویدیو؛ نام مستعار تاریخ‌دار ‏<code>grok-imagine-video-1.5-2026-05-30</code></td></tr>
+<tr><td>TTS</td><td>(صدای پیش‌فرض)</td><td>نقطهٔ پایانی ‏<code>/v1/tts</code> در xAI</td></tr>
+</tbody>
+</table>
+</div>
+<p>کاتالوگ گفتگو به‌صورت زنده از کش روی‌دیسک ‏<code>models.dev</code> گرفته می‌شود؛ نسخه‌های جدید xAI به‌محض تازه شدن آن کش خودکار ظاهر می‌شوند. ‏<code>grok-4.6</code> همیشه بالای فهرست ثابت است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> متغیرهای محیطی</h2>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>متغیر</th><th>اثر</th></tr>
+</thead>
+<tbody>
+<tr><td>‏<code>XAI_BASE_URL</code></td><td>بازنویسی نقطهٔ پایانی پیش‌فرض ‏<code>https://api.x.ai/v1</code> (به‌ندرت لازم می‌شود).</td></tr>
+</tbody>
+</table>
+</div>
+<p>برای انتخاب xAI به‌عنوان ارائه‌دهندهٔ فعال، ‏<code>model.provider: xai-oauth</code> را در ‏<code>config.yaml</code> ست کنید (برای جریان راهنمادار از ‏<code>hermes setup</code> استفاده کنید) یا برای یک فراخوانی واحد ‏<code>--provider xai-oauth</code> را پاس بدهید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> عیب‌یابی</h2>
+<h3>توکن منقضی شده — ورود دوباره به‌طور خودکار انجام نمی‌شود</h3>
+<p>هرمس توکن را قبل از هر نشست و دوباره به‌صورت واکنشی هنگام 401 تازه می‌کند. اگر تازه‌سازی با ‏<code>invalid_grant</code> شکست بخورد (توکن refresh باطل شده یا حساب چرخش خورده)، هرمس به‌جای کرش کردن، یک پیام re-auth دسته‌بندی‌شده نشان می‌دهد.</p>
+<p>وقتی شکست تازه‌سازی قطعی است (HTTP 4xx، ‏<code>invalid_grant</code>، دسترسی باطل‌شده و غیره)، هرمس توکن refresh را مرده علامت می‌زند و به‌صورت محلی قرنطینه‌اش می‌کند — فراخوانی‌های بعدی از تلاشِ بی‌فایده برای تازه‌سازی می‌پرند به‌جای این‌که همان 401 را مدام تکرار کنند. ایجنت یک پیام واحد «نیاز به احراز هویت دوباره» نشان می‌دهد و تا وقتی دوباره وارد شوید کنار می‌ایستد.</p>
+<p><b>رفع:</b> ‏<code>hermes auth add xai-oauth</code> را دوباره اجرا کنید تا یک ورود تازه شروع شود. قرنطینه در تبادل موفق بعدی پاک می‌شود.</p>
+<h3>مهلت مجوزدهی تمام شده است</h3>
+<p>تأیید کد دستگاه یک بازهٔ انقضای محدود دارد (xAI در پاسخ کد دستگاه ‏<code>expires_in</code> ست می‌کند، معمولاً در حد چند ده دقیقه). اگر ورود را به‌موقع تأیید نکنید، هرمس خطای timeout می‌دهد.</p>
+<p><b>رفع:</b> ‏<code>hermes auth add xai-oauth</code> (یا ‏<code>hermes model</code>) را دوباره اجرا کنید. جریان از نو شروع می‌شود.</p>
+<h3>ورود از سرور ریموت</h3>
+<p>در نشست‌های SSH یا کانتینر، هرمس به‌جای باز کردن مرورگر URL تأیید و کد کاربر را چاپ می‌کند. آن URL را در مرورگری روی لپ‌تاپ خود یا در یک کنسول ابری باز کنید — برای xAI Grok OAuth هیچ port forward از SSH لازم نیست.</p>
+<pre dir="ltr"><code>hermes auth add xai-oauth --no-browser</code></pre>
+<p>برای ارائه‌دهندگان با بازگردانی روی loopback (اسپاتیفای، سرورهای MCP) راهنمای <a href="oauth-over-ssh.html">OAuth روی SSH / میزبان راه‌دور</a> را ببینید.</p>
+<h3>HTTP 403 بعد از ورود موفق (سطح اشتراک / مجوز)</h3>
+<p>OAuth در مرورگر تمام شده، توکن‌ها ذخیره شده‌اند، ولی استنتاج یا تازه‌سازی توکن ‏<code>HTTP 403</code> برمی‌گرداند با پیامی شبیه «The caller does not have permission to execute the specified operation».</p>
+<p>این <b>مشکل توکنِ کهنه نیست</b> — اجرای دوبارهٔ ‏<code>hermes model</code> تغییری نمی‌دهد. دیده شده بک‌اند xAI دسترسی OAuth API را به سطوح خاصی از SuperGrok محدود می‌کند، با این‌که اشتراک درون‌برنامه‌ای فعال است (ایشوی <a href="https://github.com/NousResearch/hermes-agent/issues/26847" target="_blank" rel="noopener">#26847</a>).</p>
+<p><b>رفع:</b> ‏<code>XAI_API_KEY</code> را ست کنید و به مسیر کلید API بروید:</p>
+<pre dir="ltr"><code>export XAI_API_KEY=xai-...
+hermes config set model.provider xai</code></pre>
+<p>یا اگر مسیر OAuth برایتان لازم است، اشتراک‌تان را در <a href="https://x.ai/grok" target="_blank" rel="noopener">x.ai/grok</a> ارتقا دهید.</p>
+<h3>خطای «هیچ اعتبارنامهٔ xAI پیدا نشد» در زمان اجرا</h3>
+<p>مخزن احراز هویت هیچ مدخلی برای ‏<code>xai-oauth</code> ندارد و ‏<code>XAI_API_KEY</code> هم ست نیست. هنوز وارد نشده‌اید یا فایل اعتبارنامه حذف شده است.</p>
+<p><b>رفع:</b> ‏<code>hermes model</code> را اجرا کنید و ارائه‌دهندهٔ xAI Grok OAuth را انتخاب کنید، یا ‏<code>hermes auth add xai-oauth</code> را اجرا کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> خروج</h2>
+<p>برای حذف همهٔ اعتبارنامه‌های ذخیره‌شدهٔ xAI Grok OAuth:</p>
+<pre dir="ltr"><code>hermes auth logout xai-oauth</code></pre>
+<p>این کار هم مدخل OAuth تک‌نمونه‌ای در ‏<code>auth.json</code> و هم ردیف‌های استخر اعتبارنامه برای ‏<code>xai-oauth</code> را پاک می‌کند. اگر فقط می‌خواهید یک مدخل استخر را حذف کنید از ‏<code>hermes auth remove xai-oauth &lt;index|id|label&gt;</code> استفاده کنید (برای دیدن آن‌ها ‏<code>hermes auth list xai-oauth</code> را اجرا کنید).</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> همچنین ببینید</h2>
+<ul>
+<li><a href="oauth-over-ssh.html">OAuth روی SSH / میزبان راه‌دور</a> — تونل‌های SSH برای ارائه‌دهندگان با بازگردانی روی loopback (اسپاتیفای، MCP)؛ xAI از کد دستگاه استفاده می‌کند و به تونل نیازی ندارد</li>
+<li><a href="../integrations/providers.html">مرجع ارائه‌دهندگان مدل</a></li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/reference/environment-variables" target="_blank" rel="noopener">متغیرهای محیطی</a></li>
+<li><a href="../user-guide/configuration.html">پیکربندی</a></li>
+<li><a href="../user-guide/features/tts.html">صدا و TTS</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="webhook-github-pr-review.html"><span class="dir">→ قبلی</span><span class="ttl">کامنت خودکار PR با وب‌هوک</span></a>
+  <span class="off next"><span class="dir">بعدی ←</span><span class="ttl">(آخرین صفحهٔ گروه)</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/xai-grok-oauth" target="_blank" rel="noopener">xAI Grok OAuth (SuperGrok / X Premium+)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

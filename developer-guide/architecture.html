@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>معماری — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/architecture" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>معماری</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>معماری</h1>
+<p>این صفحه نقشهٔ سطح بالای درون‌مایهٔ Hermes Agent است. از آن برای جهت‌یابی در کدبیس استفاده کنید و سپس برای جزئیات پیاده‌سازی به مستندات اختصاصی هر زیرسیستم بروید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نگاه کلی سیستم</h2>
+<pre dir="ltr"><code>┌─────────────────────────────────────────────────────────────────────┐
+│                        Entry Points                                  │
+│                                                                      │
+│  CLI (cli.py)    Gateway (gateway/run.py)    ACP (acp_adapter/)     │
+│  Batch Runner    API Server                  Python Library          │
+└──────────┬──────────────┬───────────────────────┬───────────────────┘
+           │              │                       │
+           ▼              ▼                       ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                     AIAgent (run_agent.py)                          │
+│                                                                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │
+│  │ Prompt       │  │ Provider     │  │ Tool         │               │
+│  │ Builder      │  │ Resolution   │  │ Dispatch     │               │
+│  │ (prompt_     │  │ (runtime_    │  │ (model_      │               │
+│  │  builder.py) │  │  provider.py)│  │  tools.py)   │               │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘               │
+│         │                 │                 │                       │
+│  ┌──────┴───────┐  ┌──────┴───────┐  ┌──────┴───────┐               │
+│  │ Compression  │  │ 3 API Modes  │  │ Tool Registry│               │
+│  │ &amp; Caching    │  │ chat_compl.  │  │ (registry.py)│               │
+│  │              │  │ codex_resp.  │  │ 70+ tools    │               │
+│  │              │  │ anthropic    │  │ 28 toolsets  │               │
+│  └──────────────┘  └──────────────┘  └──────────────┘               │
+└─────────┴─────────────────┴─────────────────┴───────────────────────┘
+           │                                    │
+           ▼                                    ▼
+┌───────────────────┐              ┌──────────────────────┐
+│ Session Storage   │              │ Tool Backends         │
+│ (SQLite + FTS5)   │              │ Terminal (6 backends) │
+│ hermes_state.py   │              │ Browser (5 backends)  │
+│ gateway/session.py│              │ Web (4 backends)      │
+└───────────────────┘              │ MCP (dynamic)         │
+                                   │ File, Vision, etc.    │
+                                   └──────────────────────┘</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> ساختار پوشه‌ها</h2>
+<pre dir="ltr"><code>hermes-agent/
+├── run_agent.py              # AIAgent — حلقهٔ اصلی گفتگو (فایل بزرگ)
+├── cli.py                    # HermesCLI — رابط ترمینال تعاملی (فایل بزرگ)
+├── model_tools.py            # کشف ابزار، جمع‌آوری اسکیما، دیسپچ
+├── toolsets.py               # گروه‌بندی ابزارها و پیش‌فرض‌های پلتفرم
+├── hermes_state.py           # پایگاه دادهٔ SQLite نشست/وضعیت با FTS5
+├── hermes_constants.py       # HERMES_HOME، مسیرهای آگاه از پروفایل
+├── batch_runner.py           # تولید Trajectory دسته‌ای
+│
+├── agent/                    # درون‌مایهٔ ایجنت
+│   ├── prompt_builder.py     # ساخت پرامپت سیستمی
+│   ├── context_engine.py     # ContextEngine ABC (پلاگین‌پذیر)
+│   ├── context_compressor.py # موتور پیش‌فرض — خلاصه‌سازی اتلاف‌دار
+│   ├── prompt_caching.py     # کش پرامپت Anthropic
+│   ├── auxiliary_client.py   # LLM کمکی برای کارهای جانبی (بینایی، خلاصه‌سازی)
+│   ├── model_metadata.py     # طول زمینهٔ مدل‌ها، تخمین توکن
+│   ├── models_dev.py         # یکپارچگی با رجیستری models.dev
+│   ├── anthropic_adapter.py  # تبدیل قالب Anthropic Messages API
+│   ├── display.py            # KawaiiSpinner، قالب‌بندی پیش‌نمایش ابزار
+│   ├── skill_commands.py     # فرمان‌های اسلش مهارت‌ها
+│   ├── memory_manager.py     # هماهنگ‌سازی مدیر حافظه
+│   ├── memory_provider.py    # ABC ارائه‌دهندهٔ حافظه
+│   └── trajectory.py         # کمک‌تابع‌های ذخیرهٔ Trajectory
+│
+├── hermes_cli/               # زیرفرمان‌های CLI و راه‌اندازی
+│   ├── main.py               # نقطهٔ ورود — همهٔ زیرفرمان‌های `hermes` (فایل بزرگ)
+│   ├── config.py             # DEFAULT_CONFIG، OPTIONAL_ENV_VARS، مهاجرت
+│   ├── commands.py           # COMMAND_REGISTRY — تعریف‌های مرکزی فرمان‌های اسلش
+│   ├── auth.py               # PROVIDER_REGISTRY، resolve اعتبارنامه‌ها
+│   ├── runtime_provider.py   # ارائه‌دهنده → api_mode + اعتبارنامه
+│   ├── models.py             # کاتالوگ مدل، فهرست مدل‌های ارائه‌دهنده‌ها
+│   ├── model_switch.py       # منطق فرمان /model (مشترک بین CLI و گیت‌وی)
+│   ├── setup.py              # جادوگر راه‌اندازی تعاملی (فایل بزرگ)
+│   ├── skin_engine.py        # موتور تم CLI
+│   ├── skills_config.py      # hermes skills — فعال/غیرفعال‌سازی به تفکیک پلتفرم
+│   ├── skills_hub.py         # فرمان اسلش /skills
+│   ├── tools_config.py       # hermes tools — فعال/غیرفعال‌سازی به تفکیک پلتفرم
+│   ├── plugins.py            # PluginManager — کشف، بارگذاری، هوک‌ها
+│   ├── callbacks.py          # کال‌بک‌های ترمینال (clarify، sudo، تأیید)
+│   └── gateway.py            # hermes gateway start/stop
+│
+├── tools/                    # پیاده‌سازی ابزارها (هر ابزار یک فایل)
+│   ├── registry.py           # رجیستری مرکزی ابزار
+│   ├── approval.py           # تشخیص فرمان خطرناک
+│   ├── terminal_tool.py      # هماهنگی ترمینال
+│   ├── process_registry.py   # مدیریت پروسس‌های پس‌زمینه
+│   ├── file_tools.py         # read_file، write_file، patch، search_files
+│   ├── web_tools.py          # web_search، web_extract
+│   ├── browser_tool.py       # 10 ابزار اتوماسیون مرورگر
+│   ├── code_execution_tool.py # سندباکس execute_code
+│   ├── delegate_tool.py      # واگذاری ساب‌ایجنت
+│   ├── mcp_tool.py           # کلاینت MCP (فایل بزرگ)
+│   ├── credential_files.py   # گذر اعتبارنامهٔ فایلمحور
+│   ├── env_passthrough.py    # گذر متغیر محیطی برای سندباکس‌ها
+│   ├── ansi_strip.py         # حذف escapeهای ANSI
+│   └── environments/         # بک‌اندهای ترمینال (local، docker، ssh، modal، daytona، singularity)
+│
+├── gateway/                  # گیت‌وی پلتفرم پیام‌رسانی
+│   ├── run.py                # GatewayRunner — دیسپچ پیام (فایل بزرگ)
+│   ├── session.py            # SessionStore — ماندگاری گفتگو
+│   ├── delivery.py           # تحویل پیام خروجی
+│   ├── pairing.py            # مجوز جفت‌سازی DM
+│   ├── hooks.py              # کشف هوک و رخدادهای چرخهٔ حیات
+│   ├── mirror.py             # آینه‌سازی پیام بین نشست‌ها
+│   ├── status.py             # قفل‌های توکن، ردیابی پروسس به تفکیک پروفایل
+│   ├── builtin_hooks/        # نقطهٔ گسترش برای هوک‌های همیشه‌ثبت‌شده (هیچ‌کدام عرضه نمی‌شوند)
+│   └── platforms/            # آداپتورهای داخلی: signal، weixin، bluebubbles،
+│                             #   qqbot، whatsapp_cloud، yuanbao، webhook، api_server
+│
+├── plugins/platforms/        # پلاگین‌های پلتفرمِ همراه: telegram، discord، slack،
+│                             #   whatsapp، matrix، mattermost، email، sms، dingtalk،
+│                             #   feishu، wecom، homeassistant، irc، line، teams،
+│                             #   google_chat، buzz، ntfy، photon، raft، simplex
+│
+├── acp_adapter/              # سرور ACP (VS Code / Zed / JetBrains)
+├── cron/                     # زمان‌بند (jobs.py، scheduler.py)
+├── plugins/memory/           # پلاگین‌های ارائه‌دهندهٔ حافظه
+├── plugins/context_engine/   # پلاگین‌های موتور زمینه
+├── skills/                   # مهارت‌های همراه (همیشه در دسترس)
+├── optional-skills/          # مهارت‌های اختیاری رسمی (نصب صریح)
+├── website/                  # سایت مستندات Docusaurus
+└── tests/                    # مجموعهٔ Pytest (~25,000 تست در ~1,250 فایل)</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> جریان داده</h2>
+<h3>نشست CLI</h3>
+<pre dir="ltr"><code>User input → HermesCLI.process_input()
+  → AIAgent.run_conversation()
+    → prompt_builder.build_system_prompt()
+    → runtime_provider.resolve_runtime_provider()
+    → API call (chat_completions / codex_responses / anthropic_messages)
+    → tool_calls? → model_tools.handle_function_call() → loop
+    → final response → display → save to SessionDB</code></pre>
+<h3>پیام گیت‌وی</h3>
+<pre dir="ltr"><code>Platform event → Adapter.on_message() → MessageEvent
+  → GatewayRunner._handle_message()
+    → authorize user
+    → resolve session key
+    → create AIAgent with session history
+    → AIAgent.run_conversation()
+    → deliver response back through adapter</code></pre>
+<h3>کار کرون</h3>
+<pre dir="ltr"><code>Scheduler tick → load due jobs from jobs.json
+  → create fresh AIAgent (no history)
+  → inject attached skills as context
+  → run job prompt
+  → deliver response to target platform
+  → update job state and next_run</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> ترتیب پیشنهادی مطالعه</h2>
+<p>اگر تازه با کدبیس آشنا شده‌اید:</p>
+<ol>
+<li><strong>همین صفحه</strong> — جهت‌یابی اولیه</li>
+<li><strong><a href="agent-loop.html">درون‌مایهٔ حلقهٔ ایجنت</a></strong> — AIAgent چطور کار می‌کند</li>
+<li><strong><a href="prompt-assembly.html">ساخت پرامپت سیستمی</a></strong> — ساختار پرامپت سیستمی</li>
+<li><strong><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/provider-runtime" target="_blank" rel="noopener">زمان اجرای ارائه‌دهنده</a></strong> — ارائه‌دهنده‌ها چطور انتخاب می‌شوند</li>
+<li><strong><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-providers" target="_blank" rel="noopener">افزودن ارائه‌دهندهٔ جدید</a></strong> — راهنمای عملی افزودن یک ارائه‌دهندهٔ جدید</li>
+<li><strong><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/tools-runtime" target="_blank" rel="noopener">زمان اجرای ابزارها</a></strong> — رجیستری ابزار، دیسپچ، محیط‌ها</li>
+<li><strong><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/session-storage" target="_blank" rel="noopener">ذخیره‌سازی نشست</a></strong> — اسکیمای SQLite، FTS5، تبار نشست</li>
+<li><strong><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/gateway-internals" target="_blank" rel="noopener">درون‌مایهٔ گیت‌وی</a></strong> — گیت‌وی پلتفرم پیام‌رسانی</li>
+<li><strong><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/context-compression-and-caching" target="_blank" rel="noopener">فشرده‌سازی و کش پرامپت</a></strong> — فشرده‌سازی و کش</li>
+<li><strong><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/acp-internals" target="_blank" rel="noopener">درون‌مایهٔ ACP</a></strong> — یکپارچگی با IDE</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> زیرسیستم‌های اصلی</h2>
+<h3>حلقهٔ ایجنت</h3>
+<p>موتور هماهنگ‌سازی همگام (<code>AIAgent</code> در <code>run_agent.py</code>). انتخاب ارائه‌دهنده، ساخت پرامپت، اجرای ابزار، تلاش مجدد، پشتیبان، کال‌بک‌ها، فشرده‌سازی و ماندگاری را مدیریت می‌کند. از سه حالت API برای بک‌اندهای مختلف ارائه‌دهنده پشتیبانی می‌کند.</p>
+<p>→ <a href="agent-loop.html">درون‌مایهٔ حلقهٔ ایجنت</a></p>
+<h3>سیستم پرامپت</h3>
+<p>ساخت و نگهداری پرامپت در طول چرخهٔ حیات گفتگو:</p>
+<ul>
+<li><strong><code>system_prompt.py</code> + <code>prompt_builder.py</code></strong> — طبقات مرتبِ پرامپت سیستمی را مونتاژ می‌کند (<code>stable</code> → <code>context</code> → <code>volatile</code>): هویت/راهنمای ابزار/مهارت‌ها، فایل‌های زمینه، و سپس بلوک‌های حافظه/پروفایل/زمان</li>
+<li><strong><code>prompt_caching.py</code></strong> — نقاط شکست کش Anthropic را برای کش پیشوندی اعمال می‌کند</li>
+<li><strong><code>context_compressor.py</code></strong> — وقتی زمینه از آستانه بگذرد، نوبت‌های میانی گفتگو را خلاصه می‌کند</li>
+</ul>
+<p>→ <a href="prompt-assembly.html">ساخت پرامپت سیستمی</a>، <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/context-compression-and-caching" target="_blank" rel="noopener">فشرده‌سازی و کش پرامپت</a></p>
+<h3>تشخیص ارائه‌دهنده</h3>
+<p>یک resolver مشترکِ زمان اجرا که CLI، گیت‌وی، کرون، ACP و فراخوانی‌های کمکی از آن استفاده می‌کنند. تاپل‌های <code>(provider, model)</code> را به <code>(api_mode, api_key, base_url)</code> نگاشت می‌کند. بیش از ۱۸ ارائه‌دهنده، جریان‌های OAuth، مخازن اعتبارنامه و resolve نام‌های مستعار را مدیریت می‌کند.</p>
+<p>→ <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/provider-runtime" target="_blank" rel="noopener">زمان اجرای ارائه‌دهنده</a></p>
+<h3>سیستم ابزار</h3>
+<p>رجیستری مرکزی ابزار (<code>tools/registry.py</code>) با بیش از ۷۰ ابزار ثبت‌شده در حدود ۲۸ تول‌ست. هر فایل ابزار در زمان import خودش را ثبت می‌کند. رجیستری جمع‌آوری اسکیما، دیسپچ، بررسی دسترس‌پذیری و بسته‌بندی خطا را انجام می‌دهد. ابزارهای ترمینال از ۷ بک‌اند پشتیبانی می‌کنند (local، Docker، SSH، Daytona، Modal، Singularity، Vercel Sandbox).</p>
+<p>→ <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/tools-runtime" target="_blank" rel="noopener">زمان اجرای ابزارها</a></p>
+<h3>ماندگاری نشست</h3>
+<p>ذخیره‌سازی نشست مبتنی بر SQLite با جستجوی تمام‌متن FTS5. نشست‌ها ردیابی تبار دارند (والد/فرزند در میان فشرده‌سازی‌ها)، ایزوله‌سازی به تفکیک پلتفرم و نوشتن اتمیک با مدیریت تنازع دارند.</p>
+<p>→ <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/session-storage" target="_blank" rel="noopener">ذخیره‌سازی نشست</a></p>
+<h3>گیت‌وی پیام‌رسانی</h3>
+<p>پروسس بلندمدت با بیش از ۲۵ آداپتور پلتفرم (داخلی + پلاگین‌های همراه)، مسیریابی یکپارچهٔ نشست، مجوزدهی کاربر (فهرست مجاز + جفت‌سازی DM)، دیسپچ فرمان‌های اسلش، سیستم هوک، تیک کرون و نگهداری پس‌زمینه‌ای.</p>
+<p>→ <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/gateway-internals" target="_blank" rel="noopener">درون‌مایهٔ گیت‌وی</a></p>
+<h3>سیستم پلاگین</h3>
+<p>سه منبع کشف: <code>~/.hermes/plugins/</code> (کاربر)، <code>.hermes/plugins/</code> (پروژه) و entry pointهای pip. پلاگین‌ها ابزارها، هوک‌ها و فرمان‌های CLI را از طریق یک context API ثبت می‌کنند. دو نوع پلاگین تخصصی وجود دارد: ارائه‌دهندگان حافظه (<code>plugins/memory/</code>) و موتورهای زمینه (<code>plugins/context_engine/</code>). هر دو تک‌انتخابی‌اند — در هر لحظه فقط یکی از هر نوع می‌تواند فعال باشد و از طریق <code>hermes plugins</code> یا <code>config.yaml</code> پیکربندی می‌شوند.</p>
+<p>→ <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">راهنمای پلاگین</a>، <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/memory-provider-plugin" target="_blank" rel="noopener">پلاگین ارائه‌دهندهٔ حافظه</a></p>
+<h3>کرون</h3>
+<p>کارهای ایجنتیِ درجه‌یک (نه کارهای شل). کارها در JSON ذخیره می‌شوند، از چند قالب زمان‌بندی پشتیبانی می‌کنند، می‌توانند مهارت و اسکریپت پیوست داشته باشند و به هر پلتفرمی تحویل بدهند.</p>
+<p>→ <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/cron-internals" target="_blank" rel="noopener">درون‌مایهٔ Cron</a></p>
+<h3>یکپارچگی ACP</h3>
+<p>هرمس را برای VS Code، Zed و JetBrains به‌شکل ایجنتی بومیِ ادیتور از طریق stdio/JSON-RPC در دسترس می‌گذارد.</p>
+<p>→ <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/acp-internals" target="_blank" rel="noopener">درون‌مایهٔ ACP</a></p>
+<h3>ترایکتوری‌ها</h3>
+<p>ترایکتوری‌های قالب ShareGPT را از نشست‌های ایجنت برای تولید دادهٔ آموزشی تولید می‌کند.</p>
+<p>→ <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/trajectory-format" target="_blank" rel="noopener">قالب Trajectory</a></p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> اصول طراحی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>اصل</th><th>معنای عملی آن</th></tr></thead>
+  <tbody>
+    <tr><td><strong>پایداری پرامپت</strong></td><td>پرامپت سیستمی وسط گفتگو تغییر نمی‌کند. هیچ جهشِ کش‌شکنی به‌جز اقدام صریح کاربر (<code>/model</code>) وجود ندارد.</td></tr>
+    <tr><td><strong>اجرای قابل‌مشاهده</strong></td><td>هر فراخوانی ابزار از طریق کال‌بک‌ها برای کاربر دیده می‌شود. به‌روزرسانی پیشرفت در CLI (اسپینر) و گیت‌وی (پیام‌های چت).</td></tr>
+    <tr><td><strong>قابل‌وقفه</strong></td><td>فراخوانی‌های API و اجرای ابزار را می‌توان وسط کار با ورودی کاربر یا سیگنال‌ها لغو کرد.</td></tr>
+    <tr><td><strong>هستهٔ مستقل از پلتفرم</strong></td><td>یک کلاس AIAgent به CLI، گیت‌وی، ACP، batch و سرور API سرویس می‌دهد. تفاوت‌های پلتفرم در نقطهٔ ورود زندگی می‌کنند، نه در ایجنت.</td></tr>
+    <tr><td><strong>اتصال سست</strong></td><td>زیرسیستم‌های اختیاری (MCP، پلاگین‌ها، ارائه‌دهندگان حافظه، محیط‌های RL) از الگوهای رجیستری و گیتِ <code>check_fn</code> استفاده می‌کنند، نه وابستگی سخت.</td></tr>
+    <tr><td><strong>ایزوله‌سازی پروفایل</strong></td><td>هر پروفایل (<code>hermes -p &lt;name&gt;</code>) HERMES_HOME، پیکربندی، حافظه، نشست‌ها و PID گیت‌وی مخصوص خودش را دارد. چند پروفایل هم‌زمان اجرا می‌شوند.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> زنجیرهٔ وابستگی فایل‌ها</h2>
+<pre dir="ltr"><code>tools/registry.py  (no deps — imported by all tool files)
+       ↑
+tools/*.py  (each calls registry.register() at import time)
+       ↑
+model_tools.py  (imports tools/registry + triggers tool discovery)
+       ↑
+run_agent.py, cli.py, batch_runner.py, environments/</code></pre>
+<p>این زنجیره یعنی ثبت ابزارها در زمان import اتفاق می‌افتد، قبل از اینکه هر نمونهٔ ایجنتی ساخته شود. هر فایل <code>tools/*.py</code> که فراخوانی سطح‌بالای <code>registry.register()</code> داشته باشد خودکار کشف می‌شود — نیازی به فهرست import دستی نیست.</p>
+</section>
+
+<div class="pager">
+  <a href="contributing.html"><span class="dir">→ قبلی</span><span class="ttl">مشارکت در پروژه</span></a>
+  <a class="next" href="agent-loop.html"><span class="dir">بعدی ←</span><span class="ttl">حلقهٔ ایجنت</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/architecture" target="_blank" rel="noopener">Architecture</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

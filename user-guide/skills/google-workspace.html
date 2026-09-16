@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>گوگل‌ورک‌اسپیس (جیمیل، تقویم…) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/google-workspace" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>گوگل‌ورک‌اسپیس (جیمیل، تقویم…)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>گوگل‌ورک‌اسپیس (جیمیل، تقویم…)</h1>
+<p>یکپارچگی Gmail، Calendar، Drive، Contacts، Sheets و Docs برای Hermes. از OAuth2 با refresh خودکار توکن استفاده می‌کند. وقتی ‏<a href="https://github.com/googleworkspace/cli" target="_blank" rel="noopener">‏CLI ی Google Workspace ‏(<code>gws</code>)</a> در دسترس باشد برای پوشش گسترده‌تر از آن استفاده می‌کند و در غیر این صورت به کتابخانه‌های کلاینت Python ی Google برمی‌گردد.</p>
+<p><b>مسیر مهارت:</b> ‏<code>skills/productivity/google-workspace/</code></p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> راه‌اندازی</h2>
+<p>راه‌اندازی کاملاً ایجنت‌ران است — از هرمس بخواهید Google Workspace را راه‌اندازی کند تا شما را قدم‌به‌قدم همراهی کند. روند کار:</p>
+<ol>
+  <li><b>یک پروژهٔ Google Cloud بسازید</b> و APIهای لازم را فعال کنید ‏(Gmail، Calendar، Drive، Sheets، Docs، People)</li>
+  <li><b>اعتبارنامه‌های OAuth 2.0 بسازید</b> ‏(از نوع Desktop app) و JSON ی client secret را دانلود کنید</li>
+  <li><b>مجوزدهی</b> — هرمس یک auth URL می‌سازد، شما در مرورگر تأیید می‌کنید و URL ی redirect را برمی‌گردانید</li>
+  <li><b>تمام</b> — از این به بعد توکن خودکار refresh می‌شود</li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡 کاربرانِ فقط-ایمیل</div>
+  <p>اگر فقط ایمیل می‌خواهید ‏(بدون Calendar/Drive/Sheets)، به‌جای این مهارت از مهارت <b>himalaya</b> استفاده کنید — با یک Gmail App Password کار می‌کند و ۲ دقیقه بیشتر طول نمی‌کشد. نیازی به پروژهٔ Google Cloud نیست.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> Gmail</h2>
+<h3>جست‌وجو</h3>
+<pre dir="ltr"><code>$GAPI gmail search "is:unread" --max 10
+$GAPI gmail search "from:boss@company.com newer_than:1d"
+$GAPI gmail search "has:attachment filename:pdf newer_than:7d"</code></pre>
+<p>برای هر پیام JSON ای با ‏<code>id</code>، ‏<code>from</code>، ‏<code>subject</code>، ‏<code>date</code>، ‏<code>snippet</code> و ‏<code>labels</code> برمی‌گرداند.</p>
+<h3>خواندن</h3>
+<pre dir="ltr"><code>$GAPI gmail get MESSAGE_ID</code></pre>
+<p>بدنهٔ کامل پیام را به‌صورت متن برمی‌گرداند ‏(plain text را ترجیح می‌دهد، در غیر این صورت به HTML برمی‌گردد).</p>
+<h3>ارسال</h3>
+<pre dir="ltr"><code># ارسال ساده
+$GAPI gmail send --to user@example.com --subject "Hello" --body "Message text"
+
+# ایمیل HTML
+$GAPI gmail send --to user@example.com --subject "Report" \
+  --body "&lt;h1&gt;Q4 Results&lt;/h1&gt;&lt;p&gt;Details here&lt;/p&gt;" --html
+
+# هدر From سفارشی (نام نمایشی + ایمیل)
+$GAPI gmail send --to user@example.com --subject "Hello" \
+  --from '"Research Agent" &lt;user@example.com&gt;' --body "Message text"
+
+# با CC
+$GAPI gmail send --to user@example.com --cc "team@example.com" \
+  --subject "Update" --body "FYI"</code></pre>
+<h3>هدر From سفارشی</h3>
+<p>فلگ ‏<code>--from</code> اجازه می‌دهد نام نمایشی فرستنده را روی ایمیل‌های خروجی سفارشی کنید. وقتی چند ایجنت یک حساب Gmail مشترک دارند ولی می‌خواهید گیرندگان نام‌های متفاوتی ببینند، این کاربرد دارد:</p>
+<pre dir="ltr"><code># ایجنت 1
+$GAPI gmail send --to client@co.com --subject "Research Summary" \
+  --from '"Research Agent" &lt;shared@company.com&gt;' --body "..."
+
+# ایجنت 2  
+$GAPI gmail send --to client@co.com --subject "Code Review" \
+  --from '"Code Assistant" &lt;shared@company.com&gt;' --body "..."</code></pre>
+<p><b>نحوهٔ کار:</b> مقدار ‏<code>--from</code> به‌عنوان هدر ‏<code>From</code> ی RFC 5322 روی پیام MIME ست می‌شود. Gmail سفارشی‌سازی نام نمایشی روی همان آدرس ایمیل احراز-هویت‌شدهٔ خودتان را بدون هیچ پیکربندی اضافه‌ای اجازه می‌دهد. گیرندگان نام نمایشی سفارشی را می‌بینند ‏(مثلاً «Research Agent») در حالی که آدرس ایمیل همان می‌ماند.</p>
+<p><b>مهم:</b> اگر در ‏<code>--from</code> یک <i>آدرس ایمیل متفاوت</i> به کار ببرید ‏(نه حساب احراز-هویت‌شده)، Gmail نیاز دارد آن آدرس به‌عنوان ‏<a href="https://support.google.com/mail/answer/22370" target="_blank" rel="noopener">Send As alias</a> در مسیر Gmail Settings → Accounts → Send mail as پیکربندی شده باشد.</p>
+<p>فلگ ‏<code>--from</code> روی هر دوی ‏<code>send</code> و ‏<code>reply</code> کار می‌کند:</p>
+<pre dir="ltr"><code>$GAPI gmail reply MESSAGE_ID \
+  --from '"Support Bot" &lt;shared@company.com&gt;' --body "We're on it"</code></pre>
+<h3>پاسخ‌دادن</h3>
+<pre dir="ltr"><code>$GAPI gmail reply MESSAGE_ID --body "Thanks, that works for me."</code></pre>
+<p>پاسخ را خودکار در همان رشتهٔ گفتگو قرار می‌دهد ‏(هدرهای ‏<code>In-Reply-To</code> و ‏<code>References</code> را ست می‌کند) و از thread ID پیام اصلی استفاده می‌کند.</p>
+<h3>برچسب‌ها</h3>
+<pre dir="ltr"><code># فهرست همهٔ برچسب‌ها
+$GAPI gmail labels
+
+# افزودن/حذف برچسب‌ها
+$GAPI gmail modify MESSAGE_ID --add-labels LABEL_ID
+$GAPI gmail modify MESSAGE_ID --remove-labels UNREAD</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> Calendar</h2>
+<pre dir="ltr"><code># فهرست رویدادها (پیش‌فرض: 7 روز آینده)
+$GAPI calendar list
+$GAPI calendar list --start 2026-03-01T00:00:00Z --end 2026-03-07T23:59:59Z
+
+# ساخت رویداد (منطقهٔ زمانی الزامی است)
+$GAPI calendar create --summary "Team Standup" \
+  --start 2026-03-01T10:00:00-07:00 --end 2026-03-01T10:30:00-07:00
+
+# با مکان و شرکت‌کنندگان
+$GAPI calendar create --summary "Lunch" \
+  --start 2026-03-01T12:00:00Z --end 2026-03-01T13:00:00Z \
+  --location "Cafe" --attendees "alice@co.com,bob@co.com"
+
+# حذف رویداد
+$GAPI calendar delete EVENT_ID</code></pre>
+<div class="callout warn">
+  <div class="callout-title">⚠️</div>
+  <p>زمان‌های تقویم <b>باید</b> آفست منطقهٔ زمانی داشته باشند ‏(مثلاً ‏<code>-07:00</code>) یا از UTC ‏(‏<code>Z</code>) استفاده کنند. تاریخ-زمان‌های بی‌آفست مثل ‏<code>2026-03-01T10:00:00</code> مبهم‌اند و UTC فرض می‌شوند.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> Drive</h2>
+<pre dir="ltr"><code>$GAPI drive search "quarterly report" --max 10
+$GAPI drive search "mimeType='application/pdf'" --raw-query --max 5</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> Sheets</h2>
+<pre dir="ltr"><code># خواندن یک بازه
+$GAPI sheets get SHEET_ID "Sheet1!A1:D10"
+
+# نوشتن در یک بازه
+$GAPI sheets update SHEET_ID "Sheet1!A1:B2" --values '[["Name","Score"],["Alice","95"]]'
+
+# افزودن ردیف در انتها
+$GAPI sheets append SHEET_ID "Sheet1!A:C" --values '[["new","row","data"]]'</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> Docs</h2>
+<pre dir="ltr"><code>$GAPI docs get DOC_ID</code></pre>
+<p>عنوان سند و کل محتوای متنی‌اش را برمی‌گرداند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> Contacts</h2>
+<pre dir="ltr"><code>$GAPI contacts list --max 20</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> قالب خروجی</h2>
+<p>همهٔ فرمان‌ها JSON برمی‌گردانند. فیلدهای کلیدی به‌ازای هر سرویس:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>فرمان</th><th>فیلدها</th></tr></thead>
+<tbody>
+<tr><td><code>gmail search</code></td><td><code>id</code>، ‏<code>threadId</code>، ‏<code>from</code>، ‏<code>to</code>، ‏<code>subject</code>، ‏<code>date</code>، ‏<code>snippet</code>، ‏<code>labels</code></td></tr>
+<tr><td><code>gmail get</code></td><td><code>id</code>، ‏<code>threadId</code>، ‏<code>from</code>، ‏<code>to</code>، ‏<code>subject</code>، ‏<code>date</code>، ‏<code>labels</code>، ‏<code>body</code></td></tr>
+<tr><td><code>gmail send/reply</code></td><td><code>status</code>، ‏<code>id</code>، ‏<code>threadId</code></td></tr>
+<tr><td><code>calendar list</code></td><td><code>id</code>، ‏<code>summary</code>، ‏<code>start</code>، ‏<code>end</code>، ‏<code>location</code>، ‏<code>description</code>، ‏<code>htmlLink</code></td></tr>
+<tr><td><code>calendar create</code></td><td><code>status</code>، ‏<code>id</code>، ‏<code>summary</code>، ‏<code>htmlLink</code></td></tr>
+<tr><td><code>drive search</code></td><td><code>id</code>، ‏<code>name</code>، ‏<code>mimeType</code>، ‏<code>modifiedTime</code>، ‏<code>webViewLink</code></td></tr>
+<tr><td><code>contacts list</code></td><td><code>name</code>، ‏<code>emails</code>، ‏<code>phones</code></td></tr>
+<tr><td><code>sheets get</code></td><td>آرایهٔ دوبعدی از مقادیر سلول‌ها</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> عیب‌یابی</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مشکل</th><th>راه‌حل</th></tr></thead>
+<tbody>
+<tr><td><code>NOT_AUTHENTICATED</code></td><td>راه‌اندازی را اجرا کنید ‏(از هرمس بخواهید Google Workspace را راه‌اندازی کند)</td></tr>
+<tr><td><code>REFRESH_FAILED</code></td><td>توکن باطل شده — مراحل مجوزدهی را دوباره اجرا کنید</td></tr>
+<tr><td><code>HttpError 403: Insufficient Permission</code></td><td>اسکوپ کم است — دسترسی را باطل و با سرویس‌های درست دوباره مجوزدهی کنید</td></tr>
+<tr><td><code>HttpError 403: Access Not Configured</code></td><td>API در Google Cloud Console فعال نشده است</td></tr>
+<tr><td><code>ModuleNotFoundError</code></td><td>اسکریپت راه‌اندازی را با ‏<code>--install-deps</code> اجرا کنید</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<div class="pager">
+  <a href="../secrets/onepassword.html"><span class="dir">→ قبلی</span><span class="ttl">1Password</span></a>
+  <a class="next" href="../which-file-does-what.html"><span class="dir">بعدی ←</span><span class="ttl">هر فایل چه‌کاری می‌کند؟</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/google-workspace" target="_blank" rel="noopener">Google Workspace — Gmail, Calendar, Drive, Sheets &amp; Docs</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

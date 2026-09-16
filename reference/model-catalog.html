@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>کاتالوگ مدل‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/reference/model-catalog" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>مرجع<span class="sep">/</span><strong>کاتالوگ مدل‌ها</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>کاتالوگ مدل‌ها</h1>
+<p>هرمس فهرست‌های منتخب مدل‌ها را برای <b>OpenRouter</b> و <b>Nous Portal</b> از یک مانیفست JSON که کنار سایت مستندات میزبانی می‌شود می‌گیرد. این‌طوری نگه‌دارنده‌ها می‌توانند فهرست‌های انتخاب‌گر را بدون انتشار یک نسخهٔ جدید <code>hermes-agent</code> به‌روز کنند.</p>
+
+<p>وقتی مانیفست در دسترس نباشد (آفلاین، شبکه بسته، خرابی میزبان)، هرمس بی‌سروصدا به اسنپ‌شات داخل مخزن که همراه CLI منتشر می‌شود برمی‌گردد. مانیفست هرگز انتخاب‌گر را نمی‌شکند — بدترین حالت این است که همان فهرستی را ببینید که با نسخهٔ نصب‌شدهٔ شما باندل شده.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> URL مانیفست زنده</h2>
+<pre dir="ltr"><code>https://hermes-agent.nousresearch.com/docs/api/model-catalog.json
+</code></pre>
+<p>با هر ادغام در <code>main</code> از طریق پایپ‌لاین فعلی GitHub Pages یعنی <code>deploy-site.yml</code> منتشر می‌شود. منبع حقیقت در مخزن، آدرس <code>website/static/api/model-catalog.json</code> است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> اسکیما</h2>
+<pre dir="ltr"><code>{
+  "version": 1,
+  "updated_at": "2026-04-25T22:00:00Z",
+  "metadata": {},
+  "providers": {
+    "openrouter": {
+      "metadata": {},
+      "models": [
+        {"id": "z-ai/glm-5.2",         "description": "default", "default": true},
+        {"id": "moonshotai/kimi-k3",   "description": "recommended", "metadata": {}},
+        {"id": "openai/gpt-5.4",       "description": ""}
+      ]
+    },
+    "nous": {
+      "metadata": {},
+      "models": [
+        {"id": "z-ai/glm-5.2", "default": true},
+        {"id": "anthropic/claude-opus-4.7"},
+        {"id": "moonshotai/kimi-k3"}
+      ]
+    }
+  }
+}
+</code></pre>
+
+<p>توضیح فیلدها:</p>
+
+<ul>
+  <li><b><code>version</code></b> — نسخهٔ صحیحِ اسکیما. اسکیماهای آینده این عدد را بالا می‌برند؛ هرمس مانیفست‌هایی را که نسخه‌شان را نمی‌فهمد رد می‌کند و به اسنپ‌شات هاردکدشده برمی‌گردد.</li>
+  <li><b><code>metadata</code></b> — دیکشنری آزاد در سطح مانیفست، ارائه‌دهنده و مدل. هر کلیدی. هرمس فیلدهای ناشناخته را نادیده می‌گیرد، پس می‌توانید بدون هماهنگی برای تغییر اسکیما، ورودی‌ها را حاشیه‌نویسی کنید (<code>"tier": "paid"</code>، ‏<code>"tags": [...]</code> و…).</li>
+  <li><b><code>description</code></b> — فقط OpenRouter. متن بجِ انتخاب‌گر را تعیین می‌کند (<code>"recommended"</code>، ‏<code>"free"</code>، ‏<code>"default"</code> یا خالی). Nous Portal از این استفاده نمی‌کند — محدودسازی پلن رایگان به‌صورت زنده از نقطهٔ پایانی قیمت‌گذاری Portal تعیین می‌شود.</li>
+  <li><b><code>default</code></b> — دقیقاً یک ورودی به‌ازای هر ارائه‌دهنده می‌تواند <code>"default": true</code> داشته باشد. آن مدل <b>پیش‌فرض بی‌سروصدا</b> است: مدلی که هرمس وقتی کاربر مدل انتخاب نکرده رویش می‌نشیند (کارت تأیید onboarding در GUI، ‏<code>provider</code> پیکربندی‌شده بدون <code>model</code>، ‏<code>model.default</code> خالی). در زمان اجرا فقط از کش خوانده می‌شود (<code>get_default_model_from_cache</code>) تا مسیرهای داغِ حل‌کردن مدل هرگز به شبکه نخورند؛ وقتی مانیفستِ کش‌شده وجود ندارد، هرمس به ثابتِ داخل‌مخزنی <code>PREFERRED_SILENT_DEFAULT_MODEL</code> برمی‌گردد که باید با ورودی برچسب‌دار مطابق باشد. این‌طوری نگه‌دارنده‌ها می‌توانند پیش‌فرض بی‌سروصدا را بدون انتشار نسخه بچرخانند. عمداً یک مدل توانمند و کم‌هزینه است، هرگز گران‌ترین مدل پرچم‌دار.</li>
+  <li><b>قیمت‌گذاری و طول زمینه</b> در مانیفست نیستند. این‌ها در زمان واکشی از APIهای زندهٔ ارائه‌دهنده می‌آیند (نقاط پایانی <code>/v1/models</code>، models.dev).</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> رفتار واکشی</h2>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>چه زمانی</th><th>چه می‌شود</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>/model</code> یا <code>hermes model</code></td><td>اگر کش دیسک کهنه باشد واکشی می‌کند، وگرنه از کش استفاده می‌کند</td></tr>
+    <tr><td>کش دیسک تازه است (&lt; TTL)</td><td>هیچ درخواست شبکه‌ای نمی‌زند</td></tr>
+    <tr><td>شکست شبکه با وجود کش</td><td>بازگشت بی‌سروصدای به کش، یک خط لاگ</td></tr>
+    <tr><td>شکست شبکه بدون کش</td><td>بازگشت بی‌سروصدای به اسنپ‌شات داخل مخزن</td></tr>
+    <tr><td>مانیفست اعتبارسنجی اسکیما را رد کند</td><td>به‌عنوان غیرقابل‌دسترس تلقی می‌شود</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>محل کش: <code>~/.hermes/cache/model_catalog.json</code>.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پیکربندی</h2>
+<pre dir="ltr"><code>model_catalog:
+  enabled: true
+  url: https://hermes-agent.nousresearch.com/docs/api/model-catalog.json
+  ttl_hours: 1
+  providers: {}
+</code></pre>
+
+<p>برای غیرفعال‌کردن کامل واکشی از راه دور و استفادهٔ همیشگی از اسنپ‌شات داخل مخزن، <code>enabled: false</code> بگذارید.</p>
+
+<h3>URLهای بازنویسی به‌ازای هر ارائه‌دهنده</h3>
+<p>اشخاص ثالث می‌توانند فهرست منتخب خودشان را با همین اسکیما خودمیزبان کنند. یک ارائه‌دهنده را به URL سفارشی اشاره دهید:</p>
+
+<pre dir="ltr"><code>model_catalog:
+  providers:
+    openrouter:
+      url: https://example.com/my-openrouter-curation.json
+</code></pre>
+
+<p>مانیفستِ بازنویسی‌کننده فقط لازم است بلاک همان ارائه‌دهنده(هایی) را پر کند که اهمیتش را دارد. بقیهٔ ارائه‌دهندگان همچنان از روی URL اصلی حل می‌شوند.</p>
+
+<h3>پنهان‌کردن ارائه‌دهندگان از انتخاب‌گر</h3>
+<p>‏<code>excluded_providers</code> اجازه می‌دهد ارائه‌دهنده‌های مشخصی را حتی وقتی اعتبارنامهٔ معتبر وجود دارد از انتخاب‌گر <code>/model</code> پنهان کنید. وقتی برای ارائه‌دهنده‌های قدیمی یا آزمایشی اعتبارنامه دارید که نباید در استفادهٔ عادی دیده شوند کاربرد دارد (مثلاً یک توکن Copilot یا OpenRouter قدیمی هنوز داخل <code>auth.json</code> کش‌شده یا کشف‌شده از طریق CLI ی <code>gh</code>).</p>
+
+<pre dir="ltr"><code>model_catalog:
+  excluded_providers:
+    - copilot
+    - openrouter
+    - openai
+</code></pre>
+
+<p>انطباقِ حذف، بدون حساسیت به بزرگی/کوچکی حروف، با هر کلیدی که ارائه‌دهنده می‌تواند زیرش ظاهر شود انجام می‌شود — شناسهٔ هرمس و شناسهٔ models.dev (ارائه‌دهندگان نگاشت‌شدهٔ داخلی)، pid لایهٔ روی‌گذار و اسلاگ هرمسِ حل‌شده (ارائه‌دهندگان overlay) و اسلاگ کانونی (ارائه‌دهندگان کانونی) — پس یک ورودی مثل <code>copilot</code> ارائه‌دهنده را صرف‌نظر از اینکه کدام بخش تولیدش کند پنهان می‌کند. این تنظیم در همهٔ سطوح انتخاب‌گر <code>/model</code> رعایت می‌شود: انتخاب‌گرهای تعاملی/متنی گیت‌وی، انتخاب‌گر TUI و انتخاب‌گر تعاملی <code>hermes model</code> در CLI. فهرست خالی (یا حذف کلید) اثری ندارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> به‌روزرسانی مانیفست</h2>
+<p>نگه‌دارنده‌ها:</p>
+
+<pre dir="ltr"><code># Re-generate from the in-repo hardcoded lists (keeps manifest in sync after
+# editing OPENROUTER_MODELS or _PROVIDER_MODELS["nous"] in hermes_cli/models.py).
+python scripts/build_model_catalog.py
+</code></pre>
+
+<p>بعد نتیجه را با PR به <code>website/static/api/model-catalog.json</code> روی <code>main</code> بفرستید. سایت مستندات با ادغام خودکار منتشر می‌شود و مانیفست جدید ظرف چند دقیقه زنده است.</p>
+
+<p>برای تغییرات ظریف فراداده که جایی در اسنپ‌شات داخل‌مخزنی ندارند، می‌توانید JSON را هم مستقیم دستی ویرایش کنید — اسکریپت مولد یک ابزار راحتی است، نه تنها منبع حقیقت.</p>
+</section>
+
+<div class="pager">
+  <a href="mcp-config-reference.html"><span class="dir">→ قبلی</span><span class="ttl">مرجع پیکربندی MCP</span></a>
+  <a class="next" href="skills-catalog.html"><span class="dir">بعدی ←</span><span class="ttl">کاتالوگ مهارت‌های داخلی</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/reference/model-catalog" target="_blank" rel="noopener">Model Catalog</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

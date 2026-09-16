@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ناظر CDP مرورگر — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/browser-supervisor" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>ناظر CDP مرورگر</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>ناظر CDP مرورگر</h1>
+<p>ناظر CDP دو شکاف دیرینه در ابزارهای مرورگر هرمس را می‌بندد:</p>
+<ol>
+<li><strong>دیالوگ‌های بومی JS</strong> (<code>alert</code>/<code>confirm</code>/<code>prompt</code>/<code>beforeunload</code>) نخِ JS صفحه را مسدود می‌کنند. بدون نظارت، ایجنت راهی برای فهمیدنِ باز بودن دیالوگ ندارد — فراخوانی‌های ابزار بعدی قفل می‌شوند یا خطاهای مبهم می‌پرانند.</li>
+<li><strong>iframeهای میان‌مبدأ (OOPIF)</strong> برای <code>Runtime.evaluate</code> سطح بالا نامرئی‌اند. ایجنت نودهای iframe را در اسنپ‌شات DOM می‌بیند، ولی بدون نشست CDPِ متصل به هدف فرزند، نمی‌تواند داخلشان کلیک کند، تایپ کند یا eval بزند.</li>
+</ol>
+<p>ناظر هر دو را حل می‌کند: نگه‌داشتن یک WebSocket پایدار به نقطهٔ پایانی CDP بک‌اند به‌ازای هر وظیفهٔ مرورگر، آشکارسازی دیالوگ‌های در انتظار و ساختار فریم‌ها در <code>browser_snapshot</code>، و فراهم‌کردن ابزار <code>browser_dialog</code> برای پاسخ‌های صریح.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پشتیبانی بک‌اند</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>بک‌اند</th><th>تشخیص دیالوگ</th><th>پاسخ به دیالوگ</th><th>درخت فریم</th><th><code>Runtime.evaluate</code> روی OOPIF از طریق <code>browser_cdp(frame_id=...)</code></th></tr></thead>
+  <tbody>
+    <tr><td>Chrome محلی (<code>--remote-debugging-port</code>) / <code>/browser connect</code></td><td>✓</td><td>✓ جریان کامل</td><td>✓</td><td>✓</td></tr>
+    <tr><td>Browserbase</td><td>✓ (از طریق پل)</td><td>✓ جریان کامل (از طریق پل)</td><td>✓</td><td>✓</td></tr>
+    <tr><td>Camofox</td><td>✗ بدون CDP (فقط REST)</td><td>✗</td><td>جزئی، از طریق اسنپ‌شات DOM</td><td>✗</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>نکتهٔ Browserbase.</strong> پروکسی CDPِ Browserbase درون خود از Playwright استفاده می‌کند و دیالوگ‌های بومی را در حدود ~۱۰ میلی‌ثانیه به‌طور خودکار می‌بندد، پس <code>Page.handleJavaScriptDialog</code> نمی‌تواند با آن هم‌گام بماند. ناظر یک اسکریپت پل از طریق <code>Page.addScriptToEvaluateOnNewDocument</code> تزریق می‌کند که <code>window.alert</code>/<code>confirm</code>/<code>prompt</code> را با یک XHR همگام به یک میزبان جادویی (<code>hermes-dialog-bridge.invalid</code>) بازنویسی می‌کند. <code>Fetch.enable</code> آن XHRها را پیش از رسیدن به شبکه رهگیری می‌کند — دیالوگ به رخداد <code>Fetch.requestPaused</code> تبدیل می‌شود که ناظر آن را می‌گیرد، و <code>respond_to_dialog</code> از طریق <code>Fetch.fulfillRequest</code> با بدنهٔ JSON ای که اسکریپت تزریق‌شده دیکد می‌کند، پاسخ را کامل می‌کند.</p>
+<p>از دید صفحه، <code>prompt()</code> همچنان رشتهٔ داده‌شده توسط ایجنت را برمی‌گرداند. از دید ایجنت، در هر دو حالت همان API آشنای <code>browser_dialog(action=...)</code> است.</p>
+<p>Camofox پشتیبانی نمی‌شود — سطح CDP ندارد، فقط REST است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> معماری</h2>
+<h3>CDPSupervisor</h3>
+<p>یک <code>asyncio.Task</code> که به‌ازای هر <code>task_id</code> هرمس در یک نخ دیمون پس‌زمینه اجرا می‌شود. یک WebSocket پایدار به نقطهٔ پایانی CDP بک‌اند نگه می‌دارد. این‌ها را نگه می‌دارد:</p>
+<ul>
+<li><strong>صف دیالوگ</strong> — <code>List[PendingDialog]</code> با <code>{id, type, message, default_prompt, session_id, opened_at}</code></li>
+<li><strong>درخت فریم</strong> — <code>Dict[frame_id, FrameInfo]</code> با روابط والد، URL، مبدأ و این‌که نشست فرزند میان‌مبدأ هست یا نه</li>
+<li><strong>نقشهٔ نشست‌ها</strong> — <code>Dict[session_id, SessionInfo]</code> تا ابزارهای تعاملی بتوانند برای عملیات OOPIF به نشستِ متصلِ درست مسیریابی کنند</li>
+<li><strong>خطاهای کنسول اخیر</strong> — بافر حلقوی از ۵۰ مورد آخر برای عیب‌یابی</li>
+</ul>
+<p>هنگام attach، در این‌ها مشترک می‌شود:</p>
+<ul>
+<li><code>Page.enable</code> — <code>javascriptDialogOpening</code>، <code>frameAttached</code>، <code>frameNavigated</code>، <code>frameDetached</code></li>
+<li><code>Runtime.enable</code> — <code>executionContextCreated</code>، <code>consoleAPICalled</code>، <code>exceptionThrown</code></li>
+<li><code>Target.setAutoAttach {autoAttach: true, flatten: true}</code> — اهداف فرزندِ OOPIF را نمایان می‌کند؛ ناظر روی هر کدام <code>Page</code>+<code>Runtime</code> را فعال می‌کند</li>
+</ul>
+<p>دسترسی به وضعیت به‌شکل thread-safe از طریق یک قفل اسنپ‌شات؛ هندلرهای ابزار (sync) اسنپ‌شاتِ منجمدشده را بدون await می‌خوانند.</p>
+<h3>چرخهٔ حیات</h3>
+<ul>
+<li><strong>شروع:</strong> <code>SupervisorRegistry.get_or_start(task_id, cdp_url)</code> — توسط <code>browser_navigate</code>، ساخت نشست Browserbase و <code>/browser connect</code> صدا زده می‌شود. ایدمپوتنت.</li>
+<li><strong>توقف:</strong> برچیدن نشست یا <code>/browser disconnect</code>. تسک asyncio را لغو می‌کند، WebSocket را می‌بندد و وضعیت را دور می‌ریزد.</li>
+<li><strong>اتصال دوباره:</strong> اگر URL ای CDP عوض شود (کاربر به Chrome جدیدی وصل می‌شود)، ناظر قبلی متوقف و ناظر تازه‌ای start می‌شود — وضعیت هرگز میان نقطه‌های پایانی بازاستفاده نمی‌شود.</li>
+</ul>
+<h3>سیاست دیالوگ</h3>
+<p>از طریق <code>config.yaml</code> زیر <code>browser.dialog_policy</code> قابل‌پیکربندی است:</p>
+<ul>
+<li><strong><code>must_respond</code></strong> (پیش‌فرض) — ثبت، نمایش در <code>browser_snapshot</code>، انتظار برای فراخوانی صریح <code>browser_dialog(action=...)</code>. پس از تایم‌اوت ایمنیِ ۳۰۰ ثانیه‌ای بدون پاسخ، خودکار رد و لاگ می‌شود. جلوی گیرکردن ابدیِ ایجنتِ باگ‌دار را می‌گیرد.</li>
+<li><code>auto_dismiss</code> — ثبت و بلافاصله رد می‌کند؛ ایجنت پس از وقوع، از طریق <code>browser_state</code> داخل <code>browser_snapshot</code> آن را می‌بیند.</li>
+<li><code>auto_accept</code> — ثبت و می‌پذیرد (برای <code>beforeunload</code> مفید است که گردش‌کار می‌خواهد به‌شکل تمیز از صفحه خارج شود).</li>
+</ul>
+<p>سیاست به‌ازای هر وظیفه است؛ بازنویسیِ به‌ازای هر دیالوگ وجود ندارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> رابط ایجنت</h2>
+<h3>ابزار <code>browser_dialog</code></h3>
+<pre dir="ltr"><code>browser_dialog(action, prompt_text=None, dialog_id=None)</code></pre>
+<ul>
+<li><code>action="accept"</code> / <code>"dismiss"</code> — به دیالوگ مشخص‌شده یا تنها دیالوگِ در انتظار پاسخ می‌دهد (الزامی)</li>
+<li><code>prompt_text=...</code> — متنی که به دیالوگ <code>prompt()</code> داده می‌شود</li>
+<li><code>dialog_id=...</code> — رفع ابهام وقتی چند دیالوگ در صف است (نادر)</li>
+</ul>
+<p>ابزار فقط پاسخ می‌دهد. ایجنت قبل از فراخوانی، دیالوگ‌های در انتظار را از خروجی <code>browser_snapshot</code> می‌خواند.</p>
+<h3>توسعهٔ <code>browser_snapshot</code></h3>
+<p>وقتی ناظری متصل باشد، سه فیلد اختیاری به خروجی اسنپ‌شاتِ موجود اضافه می‌کند:</p>
+<pre dir="ltr"><code>{
+  "pending_dialogs": [
+    {"id": "d-1", "type": "alert", "message": "Hello", "opened_at": 1650000000.0}
+  ],
+  "recent_dialogs": [
+    {"id": "d-1", "type": "alert", "message": "...", "opened_at": 1650000000.0,
+     "closed_at": 1650000000.1, "closed_by": "remote"}
+  ],
+  "frame_tree": {
+    "top": {"frame_id": "FRAME_A", "url": "https://example.com/", "origin": "https://example.com"},
+    "children": [
+      {"frame_id": "FRAME_B", "url": "about:srcdoc", "is_oopif": false},
+      {"frame_id": "FRAME_C", "url": "https://ads.example.net/", "is_oopif": true, "session_id": "SID_C"}
+    ],
+    "truncated": false
+  }
+}</code></pre>
+<ul>
+<li><strong><code>pending_dialogs</code></strong> — دیالوگ‌هایی که همین حالا نخِ JS صفحه را مسدود کرده‌اند. ایجنت باید برای پاسخ، <code>browser_dialog(action=...)</code> را صدا بزند. روی Browserbase خالی است، چون پروکسی CDP آن‌ها در ~۱۰ میلی‌ثانیه خودکار می‌بندد.</li>
+<li><strong><code>recent_dialogs</code></strong> — بافر حلقوی تا ۲۰ دیالوگِ به‌تازگی بسته‌شده با برچسب <code>closed_by</code>: <code>"agent"</code> (ما پاسخ دادیم)، <code>"auto_policy"</code> (auto_dismiss/auto_accept محلی)، <code>"watchdog"</code> (تایم‌اوت must_respond خورد) یا <code>"remote"</code> (مرورگر/بک‌اند به‌جای ما بست، مثلاً Browserbase). این‌طوری ایجنت‌های روی Browserbase هم همچنان می‌فهمند چه اتفاقی افتاده.</li>
+<li><strong><code>frame_tree</code></strong> — ساختار فریم‌ها شامل فرزندان میان‌مبدأ (OOPIF). سقف ۳۰ مدخل + عمق ۲ برای OOPIF تا اندازهٔ اسنپ‌شات در صفحات پرتبلیغ مهار شود. وقتی به سقف خورده شود <code>truncated: true</code> ظاهر می‌شود؛ ایجنت‌هایی که درخت کامل را می‌خواهند می‌توانند از <code>browser_cdp</code> با <code>Page.getFrameTree</code> استفاده کنند.</li>
+</ul>
+<p>برای هیچ‌کدام از این‌ها سطحِ اسکیمای ابزار جدیدی وجود ندارد — ایجنت همان اسنپ‌شاتی را می‌خواند که از قبل درخواست می‌کند.</p>
+<h3>گیت‌گذاری دسترسی</h3>
+<p>هر دو سطح روی <code>_browser_cdp_check</code> گیت می‌خورند (ناظر فقط وقتی می‌تواند اجرا شود که یک نقطهٔ پایانی CDP در دسترس باشد). در نشست‌های Camofox / بدون بک‌اند، ابزار دیالوگ پنهان می‌شود و اسنپ‌شات فیلدهای جدید را حذف می‌کند — بدون بادکردن اسکیما.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> تعامل با iframeهای میان‌مبدأ</h2>
+<p><code>browser_cdp(frame_id=...)</code> فراخوانی‌های CDP (به‌ویژه <code>Runtime.evaluate</code>) را از طریق WebSocketِ از-قبل-متصلِ ناظر با <code>sessionId</code> فرزندِ OOPIF مسیریابی می‌کند. ایجنت‌ها frame_idها را از <code>browser_snapshot.frame_tree.children[]</code> جاهایی که <code>is_oopif=true</code> است برمی‌دارند و به <code>browser_cdp</code> می‌دهند. برای iframeهای هم‌مبدأ (بدون نشست CDP اختصاصی)، ایجنت به‌جایش از <code>contentWindow</code>/<code>contentDocument</code> در یک <code>Runtime.evaluate</code> سطح بالا استفاده می‌کند — وقتی <code>frame_id</code> متعلق به غیر-OOPIF باشد، ناظر خطایی نمایان می‌کند که به همان پشتیبان اشاره می‌کند.</p>
+<p>روی Browserbase، این تنها مسیر قابل‌اعتماد برای تعامل با iframe است — اتصال‌های CDP بی‌حالتِ (stateless) که به‌ازای هر فراخوانی <code>browser_cdp</code> باز می‌شوند به انقضای URL امضاشده می‌خورند، در حالی که اتصال طولانی‌عمرِ ناظر یک نشست معتبر را نگه می‌دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> چیدمان فایل‌ها</h2>
+<ul>
+<li><code>tools/browser_supervisor.py</code> — <code>CDPSupervisor</code>، <code>SupervisorRegistry</code>، <code>PendingDialog</code>، <code>FrameInfo</code></li>
+<li><code>tools/browser_dialog_tool.py</code> — هندلر ابزار <code>browser_dialog</code></li>
+<li><code>tools/browser_tool.py</code> — هوک شروعِ <code>browser_navigate</code>، ادغامِ <code>browser_snapshot</code>، اتصال دوبارهٔ <code>/browser connect</code>، برچیدنِ <code>_cleanup_browser_session</code></li>
+<li><code>toolsets.py</code> — <code>browser_dialog</code> را در تول‌ست‌های <code>browser</code>، <code>hermes-acp</code>، <code>hermes-api-server</code> و هسته ثبت می‌کند (گیت‌خورده بر در دسترس‌بودن CDP)</li>
+<li><code>hermes_cli/config.py</code> — پیش‌فرض‌های <code>browser.dialog_policy</code> و <code>browser.dialog_timeout_s</code></li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> خارج از محدودهٔ اهداف</h2>
+<ul>
+<li>تشخیص/تعامل برای Camofox (شکاف در بالادست؛ جداگانه پیگیری می‌شود)</li>
+<li>استریم زندهٔ رخدادهای دیالوگ/فریم به کاربر (هوک‌های گیت‌وی لازم دارد)</li>
+<li>ماندگاری تاریخچهٔ دیالوگ میان نشست‌ها (فقط در حافظه)</li>
+<li>سیاست‌های دیالوگ به‌ازای هر iframe (ایجنت می‌تواند این را با <code>dialog_id</code> بیان کند)</li>
+<li>جایگزین‌کردن <code>browser_cdp</code> — به‌عنوان دریچهٔ فرار برای موارد کم‌یاب (کوکی‌ها، viewport، محدودسازی شبکه) سر جایش می‌ماند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> تست</h2>
+<p>تست‌های یونیت (<code>tests/tools/test_browser_supervisor.py</code>) از یک سرور CDP ماکِ asyncio استفاده می‌کنند که به‌اندازهٔ کافی از پروتکل را حرف می‌زند تا همهٔ گذارهای وضعیت را پوشش دهد: attach، enable، navigate، رخدادن دیالوگ، رد دیالوگ، attach/detach فریم، attach هدف فرزند، برچیدن نشست. E2E با بک‌اند واقعی (Browserbase + مرورگر خانوادهٔ Chromium محلی) دستی است — از طریق <code>/browser connect</code> به یک مرورگر زندهٔ خانوادهٔ Chromium وصل شوید و موارد تست دیالوگ/فریم توضیح‌داده‌شده در بالا را اجرا کنید.</p>
+</section>
+
+<div class="pager">
+  <a href="browser-provider-plugin.html"><span class="dir">→ قبلی</span><span class="ttl">پلاگین ارائه‌دهندهٔ مرورگر</span></a>
+  <a class="next" href="codebase-ownership.html"><span class="dir">بعدی ←</span><span class="ttl">نقشهٔ مالکیت کدبیس</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/browser-supervisor" target="_blank" rel="noopener">Browser CDP Supervisor</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حلقهٔ ایجنت — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/agent-loop" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>حلقهٔ ایجنت</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>حلقهٔ ایجنت</h1>
+<p>موتور اصلی هماهنگ‌سازی، کلاس <code>AIAgent</code> در <code>run_agent.py</code> است — فایلی بزرگ که همه‌چیز را از ساخت پرامپت تا دیسپچ ابزار و failover ارائه‌دهنده مدیریت می‌کند.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> مسئولیت‌های اصلی</h2>
+<p><code>AIAgent</code> مسئول این‌هاست:</p>
+<ul>
+<li>ساخت پرامپت سیستمیِ مؤثر و اسکیماهای ابزار از طریق <code>prompt_builder.py</code></li>
+<li>انتخاب ارائه‌دهنده/حالت API درست (chat_completions، codex_responses، anthropic_messages)</li>
+<li>برقراری فراخوانی‌های مدلِ قابل‌وقفه با پشتیبانی از لغو</li>
+<li>اجرای فراخوانی‌های ابزار (به‌صورت ترتیبی یا هم‌زمان از طریق thread pool)</li>
+<li>نگهداری تاریخچهٔ گفتگو در قالب پیام OpenAI</li>
+<li>مدیریت فشرده‌سازی، تلاش مجدد و سوئیچ به مدل پشتیبان</li>
+<li>ردیابی بودجهٔ تکرار میان ایجنت والد و فرزند</li>
+<li>تخلیهٔ حافظهٔ پایدار قبل از از دست رفتن زمینه</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> دو نقطهٔ ورود</h2>
+<pre dir="ltr"><code># رابط ساده — رشتهٔ پاسخ نهایی را برمی‌گرداند
+response = agent.chat("Fix the bug in main.py")
+
+# رابط کامل — دیکشنری شامل پیام‌ها، متادیتا و آمار مصرف برمی‌گرداند
+result = agent.run_conversation(
+    user_message="Fix the bug in main.py",
+    system_message=None,           # در صورت عدم تعیین، خودکار ساخته می‌شود
+    conversation_history=None,      # در صورت عدم تعیین، خودکار از نشست بارگذاری می‌شود
+    task_id="task_abc123"
+)</code></pre>
+<p><code>chat()</code> یک wrapper نازک دور <code>run_conversation()</code> است که فیلد <code>final_response</code> را از دیکشنری نتیجه بیرون می‌کشد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> حالت‌های API</h2>
+<p>هرمس از سه حالت اجرای API پشتیبانی می‌کند که از انتخاب ارائه‌دهنده، آرگومان‌های صریح و هیوریستیک‌های base URL تشخیص داده می‌شوند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>حالت API</th><th>کاربرد</th><th>نوع کلاینت</th></tr></thead>
+  <tbody>
+    <tr><td><code>chat_completions</code></td><td>نقطه‌های پایانی سازگار با OpenAI (OpenRouter، سفارشی، بیشتر ارائه‌دهنده‌ها)</td><td><code>openai.OpenAI</code></td></tr>
+    <tr><td><code>codex_responses</code></td><td>OpenAI Codex / Responses API</td><td><code>openai.OpenAI</code> با قالب Responses</td></tr>
+    <tr><td><code>anthropic_messages</code></td><td>Anthropic Messages API بومی</td><td><code>anthropic.Anthropic</code> از طریق آداپتور</td></tr>
+  </tbody>
+</table>
+</div>
+<p>این حالت تعیین می‌کند پیام‌ها چطور قالب‌بندی شوند، فراخوانی‌های ابزار چطور ساختار بگیرند، پاسخ‌ها چطور پارس شوند و کش/استریم چطور کار کند. هر سه قبل و بعد از فراخوانی‌های API به همان قالب داخلی پیام می‌رسند (دیکشنری‌های <code>role</code>/<code>content</code>/<code>tool_calls</code> به سبک OpenAI).</p>
+<p><strong>ترتیب تشخیص حالت:</strong></p>
+<ol>
+<li>آرگومان سازندهٔ صریح <code>api_mode</code> (بالاترین اولویت)</li>
+<li>تشخیص مخصوص ارائه‌دهنده (مثلاً ارائه‌دهندهٔ <code>anthropic</code> → <code>anthropic_messages</code>)</li>
+<li>هیوریستیک base URL (مثلاً <code>api.anthropic.com</code> → <code>anthropic_messages</code>)</li>
+<li>پیش‌فرض: <code>chat_completions</code></li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> چرخهٔ حیات نوبت</h2>
+<p>هر تکرار از حلقهٔ ایجنت این توالی را دنبال می‌کند:</p>
+<pre dir="ltr"><code>run_conversation()
+  1. Generate task_id if not provided
+  2. Append user message to conversation history
+  3. Build or reuse cached system prompt (prompt_builder.py)
+  4. Check if preflight compression is needed (&gt;50% context)
+  5. Build API messages from conversation history
+     - chat_completions: OpenAI format as-is
+     - codex_responses: convert to Responses API input items
+     - anthropic_messages: convert via anthropic_adapter.py
+  6. Inject ephemeral prompt layers (budget warnings, context pressure)
+  7. Apply prompt caching markers if on Anthropic
+  8. Make interruptible API call (_interruptible_api_call)
+  9. Parse response:
+     - If tool_calls: execute them, append results, loop back to step 5
+     - If text response: persist session, flush memory if needed, return</code></pre>
+<h3>قالب پیام</h3>
+<p>همهٔ پیام‌ها در درون از قالب سازگار با OpenAI استفاده می‌کنند:</p>
+<pre dir="ltr"><code>{"role": "system", "content": "..."}
+{"role": "user", "content": "..."}
+{"role": "assistant", "content": "...", "tool_calls": [...]}
+{"role": "tool", "tool_call_id": "...", "content": "..."}</code></pre>
+<p>محتوای reasoning (از مدل‌هایی که تفکر گسترده را پشتیبانی می‌کنند) در <code>assistant_msg["reasoning"]</code> ذخیره می‌شود و به‌اختیار از طریق <code>reasoning_callback</code> نمایش داده می‌شود.</p>
+<h3>قواعد تناوب پیام‌ها</h3>
+<p>حلقهٔ ایجنت تناوب سخت‌گیرانهٔ نقش پیام‌ها را اعمال می‌کند:</p>
+<ul>
+<li>بعد از پیام سیستمی: <code>User → Assistant → User → Assistant → ...</code></li>
+<li>در حین فراخوانی ابزار: <code>Assistant (with tool_calls) → Tool → Tool → ... → Assistant</code></li>
+<li><strong>هرگز</strong> دو پیام assistant پشت‌سرهم</li>
+<li><strong>هرگز</strong> دو پیام user پشت‌سرهم</li>
+<li><strong>فقط</strong> نقش <code>tool</code> می‌تواند رکوردهای متوالی داشته باشد (نتایج ابزارهای موازی)</li>
+</ul>
+<p>ارائه‌دهنده‌ها این توالی‌ها را اعتبارسنجی می‌کنند و تاریخچه‌های بدشکل را رد خواهند کرد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> فراخوانی‌های API قابل‌وقفه</h2>
+<p>درخواست‌های API در <code>_interruptible_api_call()</code> پیچیده می‌شوند که فراخوانی واقعی HTTP را در یک thread پس‌زمینه اجرا می‌کند و هم‌زمان یک رخداد وقفه را زیر نظر دارد:</p>
+<pre dir="ltr"><code>┌────────────────────────────────────────────────────┐
+│  Main thread                  API thread           │
+│                                                    │
+│   wait on:                     HTTP POST           │
+│    - response ready     ───▶   to provider         │
+│    - interrupt event                               │
+│    - timeout                                       │
+└────────────────────────────────────────────────────┘</code></pre>
+<p>وقتی وقفه رخ می‌دهد (کاربر پیام جدید می‌فرستد، فرمان <code>/stop</code> یا سیگنال):</p>
+<ul>
+<li>thread API رها می‌شود (پاسخ دور انداخته می‌شود)</li>
+<li>ایجنت می‌تواند ورودی جدید را پردازش کند یا به‌شکل تمیز خاموش شود</li>
+<li>هیچ پاسخ ناقصی در تاریخچهٔ گفتگو تزریق نمی‌شود</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> اجرای ابزار</h2>
+<h3>ترتیبی در برابر هم‌زمان</h3>
+<p>وقتی مدل فراخوانی‌های ابزار برمی‌گرداند:</p>
+<ul>
+<li><strong>فراخوانی ابزار تکی</strong> → مستقیم در thread اصلی اجرا می‌شود</li>
+<li><strong>فراخوانی‌های ابزار متعدد</strong> → به‌صورت هم‌زمان از طریق <code>ThreadPoolExecutor</code> اجرا می‌شوند
+<ul>
+<li>استثنا: ابزارهای تعاملی (مثل <code>clarify</code>) اجرای ترتیبی را تحمیل می‌کنند</li>
+<li>نتایج مستقل از ترتیب تکمیل، در ترتیب اصلیِ فراخوانی ابزار دوباره درج می‌شوند</li>
+</ul>
+</li>
+</ul>
+<h3>جریان اجرا</h3>
+<pre dir="ltr"><code>for each tool_call in response.tool_calls:
+    1. Resolve handler from tools/registry.py
+    2. Fire pre_tool_call plugin hook
+    3. Check if dangerous command (tools/approval.py)
+       - If dangerous: invoke approval_callback, wait for user
+    4. Execute handler with args + task_id
+    5. Fire post_tool_call plugin hook
+    6. Append {"role": "tool", "content": result} to history</code></pre>
+<h3>ابزارهای سطح ایجنت</h3>
+<p>بعضی ابزارها <em>قبل</em> از رسیدن به <code>handle_function_call()</code> توسط <code>run_agent.py</code> رهگیری می‌شوند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ابزار</th><th>دلیل رهگیری</th></tr></thead>
+  <tbody>
+    <tr><td><code>todo</code></td><td>خواندن/نوشتن وضعیت وظیفهٔ محلی ایجنت</td></tr>
+    <tr><td><code>memory</code></td><td>نوشتن در فایل‌های حافظهٔ پایدار با محدودیت کاراکتر</td></tr>
+    <tr><td><code>session_search</code></td><td>پرس‌وجوی تاریخچهٔ نشست از طریق پایگاه دادهٔ نشست ایجنت</td></tr>
+    <tr><td><code>delegate_task</code></td><td>ساخت ساب‌ایجنت(ها) با زمینهٔ ایزوله</td></tr>
+  </tbody>
+</table>
+</div>
+<p>این ابزارها وضعیت ایجنت را مستقیماً تغییر می‌دهند و بدون عبور از رجیستری، نتایج ابزارِ سینتتیک برمی‌گردانند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> سطوح کال‌بک</h2>
+<p><code>AIAgent</code> از کال‌بک‌های مخصوص پلتفرم پشتیبانی می‌کند که پیشرفت بی‌درنگ را در CLI، گیت‌وی و یکپارچگی‌های ACP ممکن می‌سازند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>کال‌بک</th><th>زمان اجرا</th><th>استفاده‌کننده</th></tr></thead>
+  <tbody>
+    <tr><td><code>tool_progress_callback</code></td><td>قبل/بعد از هر اجرای ابزار</td><td>اسپینر CLI، پیام‌های پیشرفت گیت‌وی</td></tr>
+    <tr><td><code>thinking_callback</code></td><td>وقتی مدل شروع/پایان تفکر را علامت می‌زند</td><td>نشانگر «thinking...» در CLI</td></tr>
+    <tr><td><code>reasoning_callback</code></td><td>وقتی مدل محتوای reasoning برمی‌گرداند</td><td>نمایش reasoning در CLI، بلوک‌های reasoning در گیت‌وی</td></tr>
+    <tr><td><code>clarify_callback</code></td><td>وقتی ابزار <code>clarify</code> فراخوانی می‌شود</td><td>پرامپت ورودی CLI، پیام تعاملی گیت‌وی</td></tr>
+    <tr><td><code>step_callback</code></td><td>بعد از هر نوبت کامل ایجنت</td><td>ردیابی گام در گیت‌وی، پیشرفت ACP</td></tr>
+    <tr><td><code>stream_delta_callback</code></td><td>هر توکن استریم (وقتی فعال باشد)</td><td>نمایش استریم در CLI</td></tr>
+    <tr><td><code>tool_gen_callback</code></td><td>وقتی فراخوانی ابزار از استریم پارس می‌شود</td><td>پیش‌نمایش ابزار در اسپینر CLI</td></tr>
+    <tr><td><code>status_callback</code></td><td>تغییر وضعیت‌ها (thinking، executing و...)</td><td>به‌روزرسانی‌های وضعیت ACP</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> رفتار بودجه و پشتیبان</h2>
+<h3>بودجهٔ تکرار</h3>
+<p>ایجنت تکرارها را از طریق <code>IterationBudget</code> ردیابی می‌کند:</p>
+<ul>
+<li>پیش‌فرض: ۵۰۰ تکرار (قابل تنظیم از طریق <code>agent.max_turns</code>)</li>
+<li>هر ایجنت بودجهٔ خودش را دارد. ساب‌ایجنت‌ها بودجه‌های مستقلی با سقف <code>delegation.max_iterations</code> (پیش‌فرض ۵۰) می‌گیرند — مجموع تکرارهای والد + ساب‌ایجنت‌ها می‌تواند از سقف والد فراتر رود</li>
+<li>در ۱۰۰٪، ایجنت متوقف می‌شود و خلاصه‌ای از کارِ انجام‌شده برمی‌گرداند</li>
+</ul>
+<h3>مدل پشتیبان</h3>
+<p>وقتی مدل اصلی شکست می‌خورد (محدودیت نرخ 429، خطای سرور 5xx، خطای احراز هویت 401/403):</p>
+<ol>
+<li>فهرست <code>fallback_providers</code> در پیکربندی بررسی می‌شود</li>
+<li>هر پشتیبان به ترتیب امتحان می‌شود</li>
+<li>در صورت موفقیت، گفتگو با ارائه‌دهندهٔ جدید ادامه می‌یابد</li>
+<li>روی 401/403، قبل از failover تلاش برای تازه‌سازی اعتبارنامه انجام می‌شود</li>
+</ol>
+<p>سیستم پشتیبان کارهای کمکی را هم مستقل پوشش می‌دهد — بینایی، فشرده‌سازی و استخراج وب هرکدام زنجیرهٔ پشتیبان خودشان را دارند که از بخش پیکربندی <code>auxiliary.*</code> قابل تنظیم است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> فشرده‌سازی و ماندگاری</h2>
+<h3>چه زمانی فشرده‌سازی فعال می‌شود</h3>
+<ul>
+<li><strong>پیش از فراخوانی API (preflight)</strong>: اگر گفتگو از ۵۰٪ پنجرهٔ زمینهٔ مدل بگذرد</li>
+<li><strong>فشرده‌سازی خودکار گیت‌وی</strong>: اگر گفتگو از ۸۵٪ بگذرد (تهاجمی‌تر، بین نوبت‌ها اجرا می‌شود)</li>
+</ul>
+<h3>در زمان فشرده‌سازی چه اتفاقی می‌افتد</h3>
+<ol>
+<li>اول حافظه روی دیسک تخلیه می‌شود (جلوگیری از از دست رفتن داده)</li>
+<li>نوبت‌های میانی گفتگو در یک خلاصهٔ فشرده جمع می‌شوند</li>
+<li>N پیام آخر دست‌نخورده حفظ می‌شوند (<code>compression.protect_last_n</code>، پیش‌فرض: ۲۰)</li>
+<li>جفت‌پیام‌های فراخوانی ابزار/نتیجه کنار هم نگه داشته می‌شوند (هرگز جدا نمی‌شوند)</li>
+<li>یک شناسهٔ تبار نشست جدید تولید می‌شود (فشرده‌سازی، نشستِ «فرزند» می‌سازد)</li>
+</ol>
+<h3>ماندگاری نشست</h3>
+<p>بعد از هر نوبت:</p>
+<ul>
+<li>پیام‌ها در فروشگاه نشست ذخیره می‌شوند (SQLite از طریق <code>hermes_state.py</code>)</li>
+<li>تغییرات حافظه در <code>MEMORY.md</code> / <code>USER.md</code> تخلیه می‌شوند</li>
+<li>نشست بعداً از طریق <code>/resume</code> یا <code>hermes chat --resume</code> قابل ازسرگیری است</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> فایل‌های سورس کلیدی</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فایل</th><th>کاربرد</th></tr></thead>
+  <tbody>
+    <tr><td><code>run_agent.py</code></td><td>کلاس AIAgent — حلقهٔ کامل ایجنت</td></tr>
+    <tr><td><code>agent/prompt_builder.py</code></td><td>ساخت پرامپت سیستمی از حافظه، مهارت‌ها، فایل‌های زمینه و شخصیت</td></tr>
+    <tr><td><code>agent/context_engine.py</code></td><td>ContextEngine ABC — مدیریت زمینهٔ پلاگین‌پذیر</td></tr>
+    <tr><td><code>agent/context_compressor.py</code></td><td>موتور پیش‌فرض — الگوریتم خلاصه‌سازی اتلاف‌دار</td></tr>
+    <tr><td><code>agent/prompt_caching.py</code></td><td>نشانگرهای کش پرامپت Anthropic و متریک‌های کش</td></tr>
+    <tr><td><code>agent/auxiliary_client.py</code></td><td>کلاینت LLM کمکی برای کارهای جانبی (بینایی، خلاصه‌سازی)</td></tr>
+    <tr><td><code>model_tools.py</code></td><td>جمع‌آوری اسکیمای ابزار، دیسپچ <code>handle_function_call()</code></td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> مستندات مرتبط</h2>
+<ul>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/provider-runtime" target="_blank" rel="noopener">زمان اجرای ارائه‌دهنده</a></li>
+<li><a href="prompt-assembly.html">ساخت پرامپت سیستمی</a></li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/context-compression-and-caching" target="_blank" rel="noopener">فشرده‌سازی و کش پرامپت</a></li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/tools-runtime" target="_blank" rel="noopener">زمان اجرای ابزارها</a></li>
+<li><a href="architecture.html">معماری</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="architecture.html"><span class="dir">→ قبلی</span><span class="ttl">معماری</span></a>
+  <a class="next" href="prompt-assembly.html"><span class="dir">بعدی ←</span><span class="ttl">ساخت پرامپت سیستمی</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/agent-loop" target="_blank" rel="noopener">Agent Loop</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

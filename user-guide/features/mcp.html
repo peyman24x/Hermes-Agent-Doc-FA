@@ -402,7 +402,7 @@ hermes mcp add codex --preset codex</code></pre></div>
 <p>دو رفتار روی هر نتیجهٔ ابزار MCP قبل از دید مدل اعمال می‌شود:</p>
 <ul>
   <li><strong>کاراکترهای TAG یونیکد نامرئی حذف می‌شوند.</strong> کاراکترهای بازهٔ U+E0000–U+E007F در ترمینال‌ها و UIهای چت هیچ رندر نمی‌شوند ولی کاملاً برای مدل مرئی‌اند — یک کلاسیک کانال قاچاق prompt-injection برای سرور مخرب یا آلوده. هرمس آنها را از نتایج ابزار، محتوای منابع و توصیفات ابزار حذف می‌کند. دنباله‌های تگ ایموجی مشروع ‏(پرچم‌های منطقه‌ای مثل 🏴󠁧󠁢󠁳󠁣󠁴󠁿) حفظ می‌شوند.</li>
-  <li><strong>‏<code>_meta</code> فروشنده سطح پیدا می‌کند؛ کلیدهای رزروشدهٔ پروتکل نه.</strong> وقتی سروری mapping ‏<code>_meta</code>ای به نتیجهٔ ابزار الصاق کند ‏(namespace های فروشنده مثل ‏<code>com.example/handoff</code>)، هرمس آن را همراه محتوای نتیجه به مدل می‌دهد. کلیدهای زیر پیشوندهای رزروشدهٔ پروتکل — برچسب ‏<code>modelcontextprotocol</code> یا ‏<code>mcp</code> به‌دنبال‌شده با برچسب دیگر، مثل ‏<code>modelcontextprotocol.io/...</code> یا ‏<code>tools.mcp.com/...</code> — دور ریخته می‌شوند مطابق قواعد نام‌کلید مشخصات MCP. اگر چیزی رو-به-مدل باقی نماند، فیلد _meta کلاً حذف می‌شود.</li>
+  <li><strong>‏<code>_meta</code> فروشنده سطح پیدا می‌کند؛ کلیدهای رزروشدهٔ پروتکل نه.</strong> وقتی سروری mapping ‏<code>_meta</code> ای به نتیجهٔ ابزار الصاق کند ‏(namespace های فروشنده مثل ‏<code>com.example/handoff</code>)، هرمس آن را همراه محتوای نتیجه به مدل می‌دهد. کلیدهای زیر پیشوندهای رزروشدهٔ پروتکل — برچسب ‏<code>modelcontextprotocol</code> یا ‏<code>mcp</code> به‌دنبال‌شده با برچسب دیگر، مثل ‏<code>modelcontextprotocol.io/...</code> یا ‏<code>tools.mcp.com/...</code> — دور ریخته می‌شوند مطابق قواعد نام‌کلید مشخصات MCP. اگر چیزی رو-به-مدل باقی نماند، فیلد _meta کلاً حذف می‌شود.</li>
 </ul>
 </section>
 
@@ -630,7 +630,7 @@ hermes mcp add codex --preset codex</code></pre></div>
 <div class="codebox">
   <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
   <pre><code># تأیید نصب بودن وابستگی‌های MCP (در نصب استاندارد هست)
-cd ~/.hermes/hermes-agent && uv pip install -e ".[mcp]"
+cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[mcp]"
 
 node --version
 npx --version</code></pre>

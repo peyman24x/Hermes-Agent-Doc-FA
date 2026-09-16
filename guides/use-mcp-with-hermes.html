@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استفاده از MCP با هرمس — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/use-mcp-with-hermes" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>استفاده از MCP با هرمس</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>استفاده از MCP با هرمس</h1>
+<p>این راهنما نشان می‌دهد چطور در گردش‌کارهای روزمره واقعاً از MCP با Hermes Agent استفاده کنید.</p>
+<p>اگر صفحهٔ قابلیت توضیح می‌دهد که MCP چیست، این راهنما دربارهٔ این است که چطور سریع و ایمن از آن بهره ببرید.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> چه زمانی از MCP استفاده کنیم؟</h2>
+<p>از MCP استفاده کنید وقتی که:</p>
+<ul>
+<li>ابزاری از قبل به شکل MCP وجود دارد و نمی‌خواهید یک ابزار بومی هرمس بسازید</li>
+<li>می‌خواهید هرمس از طریق یک لایهٔ RPC تمیز روی یک سیستم محلی یا راه‌دور کار کند</li>
+<li>کنترل ریزدانهٔ دسترسی برای هر سرور می‌خواهید</li>
+<li>می‌خواهید بدون دست‌کاری هستهٔ هرمس، هرمس را به APIهای داخلی، پایگاه‌های داده یا سیستم‌های شرکت وصل کنید</li>
+</ul>
+<p>از MCP استفاده نکنید وقتی که:</p>
+<ul>
+<li>یک ابزار داخلی هرمس از قبل کار را خوب انجام می‌دهد</li>
+<li>سرور سطح ابزاری عظیم و خطرناکی در دسترس می‌گذارد و برای فیلترکردنش آماده نیستید</li>
+<li>فقط به یک یکپارچگی خیلی محدود نیاز دارید و یک ابزار بومی ساده‌تر و امن‌تر خواهد بود</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> مدل ذهنی</h2>
+<p>MCP را یک لایهٔ آداپتور تصور کنید:</p>
+<ul>
+<li>هرمس همان ایجنت می‌ماند</li>
+<li>سرورهای MCP ابزار تأمین می‌کنند</li>
+<li>هرمس آن ابزارها را در زمان شروع یا بارگذاری مجدد کشف می‌کند</li>
+<li>مدل می‌تواند مثل ابزارهای عادی از آن‌ها استفاده کند</li>
+<li>شما کنترل می‌کنید چه مقدار از هر سرور دیده شود</li>
+</ul>
+<p>همان بخش آخر مهم است. استفادهٔ خوب از MCP فقط «وصل‌کردن همه‌چیز» نیست؛ «وصل‌کردن چیز درست، با کوچک‌ترین سطحِ مفید» است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۱: نصب پشتیبانی MCP</h2>
+<p>اگر هرمس را با اسکریپت نصب استاندارد نصب کرده‌اید، پشتیبانی MCP از قبل شامل شده است (نصب‌کننده <code>uv pip install -e ".[all]"</code> را اجرا می‌کند).</p>
+<p>اگر بدون اکستراها نصب کرده‌اید و باید MCP را جداگانه اضافه کنید:</p>
+<pre dir="ltr"><code>cd ~/.hermes/hermes-agent
+uv pip install -e ".[mcp]"</code></pre>
+<p>برای سرورهای مبتنی بر npm، مطمئن شوید Node.js و <code>npx</code> در دسترس‌اند.</p>
+<p>برای بسیاری از سرورهای MCP پایتون، <code>uvx</code> پیش‌فرض خوبی است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۲: اول یک سرور اضافه کنید</h2>
+<p>با یک سرورِ تنها و امن شروع کنید.</p>
+<p>مثال: دسترسی فایل‌سیستم فقط به یک پوشهٔ پروژه.</p>
+<pre dir="ltr"><code>mcp_servers:
+  project_fs:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/my-project"]</code></pre>
+<p>بعد هرمس را اجرا کنید:</p>
+<pre dir="ltr"><code>hermes chat</code></pre>
+<p>حالا چیزی مشخص بپرسید:</p>
+<pre dir="ltr"><code>Inspect this project and summarize the repo layout.</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۳: تأیید بارگذاری MCP</h2>
+<p>چند راه برای تأیید MCP دارید:</p>
+<ul>
+<li>بنر/وضعیت هرمس وقتی پیکربندی شده باشد باید یکپارچگی MCP را نشان دهد</li>
+<li>از هرمس بپرسید چه ابزارهایی در دسترس دارد</li>
+<li>بعد از تغییر پیکربندی از <code>/reload-mcp</code> استفاده کنید</li>
+<li>اگر سرور وصل نشد لاگ‌ها را چک کنید</li>
+</ul>
+<p>یک پرامپت آزمایشیِ عملی:</p>
+<pre dir="ltr"><code>Tell me which MCP-backed tools are available right now.</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۴: بلافاصله فیلترکردن را شروع کنید</h2>
+<p>اگر سرور ابزارهای زیادی در دسترس می‌گذارد، کار را به بعد موکول نکنید.</p>
+<h3>مثال: فقط آنچه را می‌خواهید فهرست مجاز کنید</h3>
+<pre dir="ltr"><code>mcp_servers:
+  github:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "***"
+    tools:
+      include: [list_issues, create_issue, search_code]</code></pre>
+<p>این معمولاً بهترین پیش‌فرض برای سیستم‌های حساس است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> WSL2: پل‌زدن هرمس در WSL به Chrome ویندوز</h2>
+<p>این راه‌اندازی عملی است وقتی که:</p>
+<ul>
+<li>هرمس داخل WSL2 اجرا می‌شود</li>
+<li>مرورگری که می‌خواهید کنترل کنید همان Chrome عادی و واردشدهٔ شما روی ویندوز است</li>
+<li><code>/browser connect</code> از WSL دشوار یا ناپایدار است</li>
+</ul>
+<p>در این راه‌اندازی هرمس <b>مستقیم</b> به Chrome وصل نمی‌شود. به‌جای آن:</p>
+<ul>
+<li>هرمس در WSL اجرا می‌شود</li>
+<li>هرمس یک سرور MCP محلیِ stdio راه می‌اندازد</li>
+<li>آن سرور MCP از طریق interop ویندوز (<code>cmd.exe</code> یا <code>powershell.exe</code>) راه‌اندازی می‌شود</li>
+<li>سرور MCP به نشست زندهٔ Chrome ویندوز شما وصل می‌شود</li>
+</ul>
+<p>مدل ذهنی:</p>
+<pre dir="ltr"><code>Hermes (WSL) -&gt; MCP stdio bridge -&gt; Windows Chrome</code></pre>
+<h3>چرا این حالت مفید است</h3>
+<ul>
+<li>پروفایل واقعی مرورگر ویندوز، کوکی‌ها و ورودهایتان را نگه می‌دارید</li>
+<li>هرمس در محیط یونیکسِ پشتیبانی‌شدهٔ خودش (WSL2) می‌ماند</li>
+<li>کنترل مرورگر به‌شکل ابزارهای MCP در دسترس قرار می‌گیرد، به‌جای اتکا به انتقال مرورگرِ هستهٔ هرمس</li>
+</ul>
+<h3>سرور پیشنهادی</h3>
+<p>از <code>chrome-devtools-mcp</code> استفاده کنید.</p>
+<p>اگر Chrome ویندوزتان از قبل دیباگ زندهٔ راه‌دور را از <code>chrome://inspect/#remote-debugging</code> فعال کرده، از WSL این‌طور اضافه‌اش کنید:</p>
+<pre dir="ltr"><code>hermes mcp add chrome-devtools-win --command cmd.exe --args /c npx -y chrome-devtools-mcp@latest --autoConnect --no-usage-statistics</code></pre>
+<p>بعد از ذخیرهٔ سرور:</p>
+<pre dir="ltr"><code>hermes mcp test chrome-devtools-win</code></pre>
+<p>سپس یک نشست تازهٔ هرمس شروع کنید یا اجرا کنید:</p>
+<pre dir="ltr"><code>/reload-mcp</code></pre>
+<h3>پرامپت نمونه</h3>
+<p>بعد از بارگذاری، هرمس می‌تواند مستقیم از ابزارهای مرورگر با پیشوند MCP استفاده کند. مثلاً:</p>
+<pre dir="ltr"><code>调用 MCP 工具 mcp_chrome_devtools_win_list_pages，列出当前浏览器标签页。</code></pre>
+<h3>کجا <code>/browser connect</code> ابزار اشتباهی است</h3>
+<p>اگر هرمس در WSL اجرا شود و Chrome روی ویندوز، <code>/browser connect</code> ممکن است شکست بخورد حتی وقتی Chrome باز و قابل دیباگ است.</p>
+<p>دلایل رایج:</p>
+<ul>
+<li>WSL نمی‌تواند به همان نقطهٔ پایانیِ محلی-میزبانی که Chrome برای ابزارهای ویندوز در دسترس می‌گذارد برسد</li>
+<li>گردش‌کارهای دیباگ زندهٔ جدیدتر Chrome با <code>ws://localhost:9222</code> کلاسیک یکی نیستند</li>
+<li>اتصال به مرورگر از یک کمک‌کنندهٔ سمت ویندوز مثل <code>chrome-devtools-mcp</code> راحت‌تر است</li>
+</ul>
+<p>در این موارد، <code>/browser connect</code> را برای راه‌اندازی‌های هم‌محیط نگه دارید و برای پل‌زدن مرورگر از WSL به ویندوز از MCP استفاده کنید.</p>
+<h3>دام‌های شناخته‌شده</h3>
+<ul>
+<li>وقتی از طریق MCP اجرایی‌های stdio ویندوز را به‌کار می‌برید، هرمس را از یک مسیر سوارشدهٔ ویندوز مثل <code>/mnt/c/Users/&lt;you&gt;</code> یا <code>/mnt/c/workspace/...</code> اجرا کنید.</li>
+<li>اگر هرمس را از <code>/root</code> یا <code>/home/...</code> اجرا کنید، ویندوز ممکن است قبل از شروع سرور MCP هشدار پوشهٔ جاریِ <code>UNC</code> بدهد.</li>
+<li>اگر <code>chrome-devtools-mcp --autoConnect</code> هنگام فهرست‌کردن صفحه‌ها تایم‌اوت شد، تب‌های پس‌زمینه/منجمد Chrome را کم کنید و دوباره تلاش کنید.</li>
+</ul>
+<h3>مثال: فهرست سیاهِ اقدام‌های خطرناک</h3>
+<pre dir="ltr"><code>mcp_servers:
+  stripe:
+    url: "https://mcp.stripe.com"
+    headers:
+      Authorization: "Bearer ***"
+    tools:
+      exclude: [delete_customer, refund_payment]</code></pre>
+<h3>مثال: غیرفعال‌کردن رپرهای ابزاری هم</h3>
+<pre dir="ltr"><code>mcp_servers:
+  docs:
+    url: "https://mcp.docs.example.com"
+    tools:
+      prompts: false
+      resources: false</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> فیلترکردن واقعاً روی چه چیزی اثر می‌گذارد؟</h2>
+<p>در هرمس دو دسته عملکردِ در-دسترس-گذاشته‌شده از MCP وجود دارد:</p>
+<ol>
+<li>ابزارهای MCP بومیِ سرور
+<ul>
+<li>فیلتر با:
+<ul>
+<li><code>tools.include</code></li>
+<li><code>tools.exclude</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>رپرهای ابزاریِ افزودهٔ هرمس
+<ul>
+<li>فیلتر با:
+<ul>
+<li><code>tools.resources</code></li>
+<li><code>tools.prompts</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3>رپرهای ابزاری که ممکن است ببینید</h3>
+<p>منابع (Resources):</p>
+<ul>
+<li><code>list_resources</code></li>
+<li><code>read_resource</code></li>
+</ul>
+<p>پرامپت‌ها (Prompts):</p>
+<ul>
+<li><code>list_prompts</code></li>
+<li><code>get_prompt</code></li>
+</ul>
+<p>این رپرها فقط وقتی ظاهر می‌شوند که:</p>
+<ul>
+<li>پیکربندی‌تان اجازه‌شان بدهد، و</li>
+<li>نشست سرور MCP واقعاً آن قابلیت‌ها را پشتیبانی کند</li>
+</ul>
+<p>پس هرمس وانمود نمی‌کند سروری منبع/پرامپت دارد وقتی ندارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> الگوهای رایج</h2>
+<h3>الگو ۱: دستیار پروژهٔ محلی</h3>
+<p>وقتی می‌خواهید هرمس روی یک فضای کاری محدود استدلال کند، از MCP برای یک سرور فایل‌سیستم یا گیتِ محلیِ مخزن استفاده کنید.</p>
+<pre dir="ltr"><code>mcp_servers:
+  fs:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/project"]
+
+  git:
+    command: "uvx"
+    args: ["mcp-server-git", "--repository", "/home/user/project"]</code></pre>
+<p>پرامپت‌های خوب:</p>
+<pre dir="ltr"><code>Review the project structure and identify where configuration lives.</code></pre>
+<pre dir="ltr"><code>Check the local git state and summarize what changed recently.</code></pre>
+<h3>الگو ۲: سابقهٔ کار بومیِ مخزن با Open Scaffold</h3>
+<p>وقتی می‌خواهید هرمس سابقهٔ پایدارِ کارِ هوش مصنوعی یک مخزن را بخواند — مأموریت، برنامه‌ها، یادداشت‌های شواهد، بسته‌های تحویل دست‌به‌دست و نتایج بازبینی/دروازه — از <a href="https://github.com/graphanov/open-scaffold" target="_blank" rel="noopener">Open Scaffold</a> استفاده کنید. هرمس همان ایجنت می‌ماند؛ Open Scaffold همان سابقهٔ محلیِ مخزن می‌ماند.</p>
+<p>سرور را برای یک مخزنِ اسکافولدشده اضافه کنید:</p>
+<pre dir="ltr"><code>hermes mcp add open_scaffold --command npx --args -y open-scaffold@latest mcp serve --repo /absolute/path/to/repo
+hermes mcp test open_scaffold</code></pre>
+<p>سپس سطحِ در دسترس‌گذاشته‌شده را خواندنی‌محور نگه دارید. در پرامپتِ <code>hermes mcp add</code> گزینهٔ <code>select</code> را انتخاب کنید یا بعداً <code>config.yaml</code> را ویرایش کنید:</p>
+<pre dir="ltr"><code>mcp_servers:
+  open_scaffold:
+    command: "npx"
+    args: ["-y", "open-scaffold@latest", "mcp", "serve", "--repo", "/absolute/path/to/repo"]
+    tools:
+      include:
+        - list_plans
+        - get_plan
+        - get_mission
+        - list_evidence
+        - get_evidence
+        - get_status
+        - search_plans
+        - list_amendments
+        - get_handoff
+        - analyze_loop
+        - gate_loop
+      prompts: false</code></pre>
+<p>پرامپت‌های خوب:</p>
+<pre dir="ltr"><code>Use the Open Scaffold MCP tools to compile the current handoff packet and tell me the next legal action.</code></pre>
+<pre dir="ltr"><code>Inspect the active plans and evidence notes, then say whether this repo is ready for human review or needs another attempt.</code></pre>
+<p>نکات مرزی:</p>
+<ul>
+<li>MCP اسکافولد باز محلی‌محور است و به‌صورت پیش‌فرض فقط‌خواندنی.</li>
+<li>ابزارهای نوشتن آن نیاز دارند سرور با <code>--allow-write</code> شروع شود؛ تا وقتی صریحاً نمی‌خواهید هرمس فایل‌های <code>.osc</code> را تغییر بدهد آن را فعال نکنید.</li>
+<li>Open Scaffold کارها را ثبت و دروازه‌بندی می‌کند؛ به هرمس اجازهٔ merge، انتشار، استقرار یا راه‌انداختن رانتایم نمی‌دهد.</li>
+<li>اگر به اسکیماهای ابزارِ تکرارپذیر نیاز دارید، <code>open-scaffold@&lt;version&gt;</code> را به‌جای <code>@latest</code> پین کنید.</li>
+</ul>
+<h3>الگو ۳: دستیار غربالگری گیت‌هاب</h3>
+<pre dir="ltr"><code>mcp_servers:
+  github:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "***"
+    tools:
+      include: [list_issues, create_issue, update_issue, search_code]
+      prompts: false
+      resources: false</code></pre>
+<p>پرامپت‌های خوب:</p>
+<pre dir="ltr"><code>List open issues about MCP, cluster them by theme, and draft a high-quality issue for the most common bug.</code></pre>
+<pre dir="ltr"><code>Search the repo for uses of _discover_and_register_server and explain how MCP tools are registered.</code></pre>
+<h3>الگو ۴: دستیار API داخلی</h3>
+<pre dir="ltr"><code>mcp_servers:
+  internal_api:
+    url: "https://mcp.internal.example.com"
+    headers:
+      Authorization: "Bearer ***"
+    tools:
+      include: [list_customers, get_customer, list_invoices]
+      resources: false
+      prompts: false</code></pre>
+<p>پرامپت‌های خوب:</p>
+<pre dir="ltr"><code>Look up customer ACME Corp and summarize recent invoice activity.</code></pre>
+<p>این دقیقاً از جاهایی است که یک فهرست مجاز سخت‌گیرانه خیلی بهتر از یک فهرست استثناست.</p>
+<h3>الگو ۴: سرورهای مستندات / دانش</h3>
+<p>بعضی سرورهای MCP پرامپت‌ها یا منابعی در دسترس می‌گذارند که بیشتر شبیه دارایی‌های دانشِ مشترک‌اند تا اقدام مستقیم.</p>
+<pre dir="ltr"><code>mcp_servers:
+  docs:
+    url: "https://mcp.docs.example.com"
+    tools:
+      prompts: true
+      resources: true</code></pre>
+<p>پرامپت‌های خوب:</p>
+<pre dir="ltr"><code>List available MCP resources from the docs server, then read the onboarding guide and summarize it.</code></pre>
+<pre dir="ltr"><code>List prompts exposed by the docs server and tell me which ones would help with incident response.</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> آموزش: راه‌اندازی سرتاسری با فیلترکردن</h2>
+<p>این هم یک توالی عملی.</p>
+<h3>فاز ۱: افزودن MCP گیت‌هاب با فهرست مجاز سخت‌گیرانه</h3>
+<pre dir="ltr"><code>mcp_servers:
+  github:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "***"
+    tools:
+      include: [list_issues, create_issue, search_code]
+      prompts: false
+      resources: false</code></pre>
+<p>هرمس را اجرا کنید و بپرسید:</p>
+<pre dir="ltr"><code>Search the codebase for references to MCP and summarize the main integration points.</code></pre>
+<h3>فاز ۲: فقط وقتی لازم شد گسترش دهید</h3>
+<p>اگر بعداً به‌روزرسانی ایشو هم لازم شد:</p>
+<pre dir="ltr"><code>tools:
+  include: [list_issues, create_issue, update_issue, search_code]</code></pre>
+<p>بعد بارگذاری مجدد کنید:</p>
+<pre dir="ltr"><code>/reload-mcp</code></pre>
+<h3>فاز ۳: افزودن سرور دوم با سیاست متفاوت</h3>
+<pre dir="ltr"><code>mcp_servers:
+  github:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "***"
+    tools:
+      include: [list_issues, create_issue, update_issue, search_code]
+      prompts: false
+      resources: false
+
+  filesystem:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/project"]</code></pre>
+<p>حالا هرمس می‌تواند آن‌ها را ترکیب کند:</p>
+<pre dir="ltr"><code>Inspect the local project files, then create a GitHub issue summarizing the bug you find.</code></pre>
+<p>اینجاست که MCP قدرتمند می‌شود: گردش‌کارهای چندسیستمی بدون تغییر هستهٔ هرمس.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> توصیه‌های استفادهٔ ایمن</h2>
+<h3>برای سیستم‌های خطرناک فهرست مجاز را ترجیح دهید</h3>
+<p>برای هر چیزی که مالی است، روبه‌روی مشتری است یا مخرب:</p>
+<ul>
+<li>از <code>tools.include</code> استفاده کنید</li>
+<li>با کوچک‌ترین مجموعهٔ ممکن شروع کنید</li>
+</ul>
+<h3>ابزارهای کمکی بلااستفاده را غیرفعال کنید</h3>
+<p>اگر نمی‌خواهید مدل منابع/پرامپت‌های فراهم‌شدهٔ سرور را بگردد، خاموششان کنید:</p>
+<pre dir="ltr"><code>tools:
+  resources: false
+  prompts: false</code></pre>
+<h3>دامنهٔ سرورها را باریک نگه دارید</h3>
+<p>مثال‌ها:</p>
+<ul>
+<li>سرور فایل‌سیستم ریشه‌دار روی یک پوشهٔ پروژه، نه کل پوشهٔ خانهٔ شما</li>
+<li>سرور گیت اشاره‌کننده به یک مخزن</li>
+<li>سرور API داخلی با دسترسی ابزاریِ عمدتاً خواندنی به‌صورت پیش‌فرض</li>
+</ul>
+<h3>بعد از تغییر پیکربندی بارگذاری مجدد کنید</h3>
+<pre dir="ltr"><code>/reload-mcp</code></pre>
+<p>این کار را بعد از تغییر این‌ها انجام دهید:</p>
+<ul>
+<li>لیست‌های include/exclude</li>
+<li>پرچم‌های enabled</li>
+<li>کلیدهای resources/prompts</li>
+<li>هدرهای احراز هویت / متغیرهای محیطی</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> عیب‌یابی بر اساس علامت</h2>
+<h3>«سرور وصل می‌شود ولی ابزارهایی که انتظار داشتم غایب‌اند»</h3>
+<p>علت‌های ممکن:</p>
+<ul>
+<li>فیلترشده توسط <code>tools.include</code></li>
+<li>مستثنا شده توسط <code>tools.exclude</code></li>
+<li>رپرهای ابزاری با <code>resources: false</code> یا <code>prompts: false</code> غیرفعال شده‌اند</li>
+<li>سرور واقعاً از منابع/پرامپت‌ها پشتیبانی نمی‌کند</li>
+</ul>
+<h3>«سرور پیکربندی شده ولی چیزی بارگذاری نمی‌شود»</h3>
+<p>چک کنید:</p>
+<ul>
+<li><code>enabled: false</code> در پیکربندی جا نمانده باشد</li>
+<li>فرمان/ران‌تایم موجود باشد (<code>npx</code>، <code>uvx</code> و...)</li>
+<li>نقطهٔ پایانی HTTP در دسترس باشد</li>
+<li>متغیر محیطی احراز هویت یا هدرها درست باشند</li>
+</ul>
+<h3>«چرا ابزارهای کمتری از آنچه سرور MCP اعلام می‌کند می‌بینم؟»</h3>
+<p>چون هرمس حالا به سیاست هر-سروری شما و ثبتِ آگاه-از-قابلیت احترام می‌گذارد. این مورد انتظار است و معمولاً مطلوب.</p>
+<h3>«چطور یک سرور MCP را بدون حذف پیکربندی بردارم؟»</h3>
+<p>از این استفاده کنید:</p>
+<pre dir="ltr"><code>enabled: false</code></pre>
+<p>این پیکربندی را نگه می‌دارد ولی جلوی اتصال و ثبت را می‌گیرد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> راه‌اندازی‌های اولیهٔ MCP پیشنهادی</h2>
+<p>سرورهای خوب برای شروع، برای بیشتر کاربران:</p>
+<ul>
+<li>فایل‌سیستم</li>
+<li>گیت</li>
+<li>GitHub</li>
+<li>سرورهای MCP واکشی / مستندات</li>
+<li>یک API داخلیِ باریک</li>
+</ul>
+<p>سرورهای نامناسب برای شروع:</p>
+<ul>
+<li>سیستم‌های عظیم سازمانی با انبوه اقدام‌های مخرب و بدون هیچ فیلتری</li>
+<li>هر چیزی که به‌اندازهٔ کافی نمی‌شناسیدش تا بتوانید محدودش کنید</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> مستندات مرتبط</h2>
+<ul>
+<li><a href="../user-guide/features/mcp.html">MCP (Model Context Protocol)</a></li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/reference/faq" target="_blank" rel="noopener">سؤالات متداول (FAQ)</a></li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/reference/slash-commands" target="_blank" rel="noopener">فرمان‌های اسلش</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="python-library.html"><span class="dir">→ قبلی</span><span class="ttl">استفاده به‌عنوان کتابخانهٔ پایتون</span></a>
+  <a class="next" href="use-voice-mode-with-hermes.html"><span class="dir">بعدی ←</span><span class="ttl">استفاده از حالت صوتی</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/use-mcp-with-hermes" target="_blank" rel="noopener">Use MCP with Hermes</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

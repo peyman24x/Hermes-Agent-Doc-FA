@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پروکسی iron (تزریق اعتبارنامه) — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/egress/iron-proxy" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>پروکسی iron (تزریق اعتبارنامه)</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>پروکسی iron (تزریق اعتبارنامه)</h1>
+<p>وقتی هرمس ایجنت شما را داخل سندباکس ترمینال Docker اجرا می‌کند، آن سندباکس معمولاً کلیدهای API واقعیِ سرویس‌های بالادستی‌تان ‏(<code>OPENROUTER_API_KEY</code>، ‏<code>OPENAI_API_KEY</code> و…) را در خود نگه می‌دارد. ایجنتی در آن سندباکس که با تزریق پرامپت به دست مهاجم افتاده باشد می‌تواند ‏<code>cat ~/.config/openrouter/auth.json</code> یا ‏<code>printenv | grep -i key</code> را اجرا کند و آن‌ها را به بیرون درز دهد.</p>
+<p>پروکسی خروجی همین را حل می‌کند: سندباکس فقط توکن‌های مات (opaque) پروکسی را نگه می‌دارد، هرگز کلیدهای واقعی را نه. تمام ترافیک خروجی سندباکس از طریق یک دیمن ‏<a href="https://github.com/ironsh/iron-proxy" target="_blank" rel="noopener">iron-proxy</a> محلی ‏(Apache-2.0، Go) روی میزبان مسیریابی می‌شود؛ این دیمن TLS را خاتمه می‌دهد و پیش از ارسال درخواست به بالادست، توکن پروکسی را با اعتبارنامهٔ واقعی عوض می‌کند. اگر سندباکس به خطر بیفتد، مهاجم فقط با توکن‌هایی بیرون می‌رود که تنها پشت <b>مرز پروکسیِ مورد-اعتمادِ پیکربندی‌شده</b> کار می‌کنند — کلید خصوصی CA و صحت نقطهٔ پایانی پروکسی بخشی از همین مرزند. اگر بتوان ترافیک را به زیرساخت پروکسیِ تحت کنترل مهاجم هدایت کرد ‏(مثلاً با یک کلید خصوصی CA دزدیده‌شده یا یک نقطهٔ پایانی پروکسی ربوده‌شده)، تضمین توکن دیگر برقرار نیست.</p>
+<p>در این انتشار، پروکسی خروجی فقط در بک‌اند Docker سیم‌کشی شده است. Modal، Daytona، SSH و Singularity هنوز متغیرهای محیطی پروکسی یا مانت‌های CA دریافت <b>نمی‌کنند</b>.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> این چیست</h2>
+<ul>
+  <li>یک زیرپروسهٔ مدیریت‌شدهٔ ‏<code>iron-proxy</code> روی میزبان که به‌صورت تنبل (lazy) در ‏<code>~/.hermes/bin/iron-proxy</code> نصب می‌شود</li>
+  <li>یک CA محلی در ‏<code>~/.hermes/proxy/ca.crt</code> که سندباکس به آن اعتماد می‌کند تا iron-proxy بتواند TLS را MITM کند و هدرها را بازنویسی کند</li>
+  <li>یک پیکربندی ‏<code>proxy.yaml</code> در ‏<code>~/.hermes/proxy/proxy.yaml</code> که فهرست میزبان‌های بالادستیِ مجاز شما و نگاشت secrets-transform را نگه می‌دارد</li>
+  <li>یک ‏<code>mappings.json</code> که ثبت می‌کند کدام توکن پروکسی متناظر با کدام متغیر محیطیِ واقعی است</li>
+</ul>
+<p>سندباکس ‏<code>HTTPS_PROXY=http://host.docker.internal:9090</code> و ‏<code>HTTP_PROXY=http://host.docker.internal:9091</code> را می‌گیرد و متغیرهای محیطیِ استاندارد ارائه‌دهنده‌ها مثل ‏<code>OPENROUTER_API_KEY</code> به توکن‌های مات پروکسی ست می‌شوند. نام‌های مستعار متناظر ‏<code>HERMES_PROXY_TOKEN_&lt;ENV_NAME&gt;</code> هم برای عیب‌یابی export می‌شوند. SDKهای موجودِ ارائه‌دهنده‌ها نام‌های همیشگی env را می‌خوانند، توکن پروکسی را در ‏<code>Authorization</code> می‌فرستند و ترنسفورم ‏<code>secrets</code> در iron-proxy مقدار واقعی را — که از محیط دیمنِ سمت میزبان گرفته می‌شود — جایگزین می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> این چه چیزی نیست</h2>
+<ul>
+  <li>این همان فرمان ورودیِ ‏<code>hermes proxy</code> <b>نیست</b> که یک ریورس‌پروکسی تجمیع‌کنندهٔ OAuth است. فرمانی متفاوت ‏(<code>hermes egress</code>)، جهتی متفاوت.</li>
+  <li>بین ترمینال محلی شما و ارائه‌دهنده‌ها <b>نمی‌نشیند</b> — فقط بین سندباکس و ارائه‌دهنده‌ها قرار دارد.</li>
+  <li>اعتبارنامه‌ها را برای فراخوانی‌های LLM درون-پروسه‌ایِ پروسهٔ میزبان بازنویسی <b>نمی‌کند</b>. آن‌ها همچنان مستقیم از کلیدهای ‏<code>.env</code> شما استفاده می‌کنند. مدل تهدید، <i>سندباکس</i> است نه میزبان.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> شروع سریع</h2>
+<pre dir="ltr"><code># 1. نصب باینری iron-proxy (نسخهٔ پین‌شده، تأییدشده با SHA-256)
+hermes egress install
+
+# 2. اجرای جادوگر: ساخت CA، ضرب توکن پروکسی برای هر کلید ارائه‌دهنده
+#    در محیط شما، و نوشتن proxy.yaml.
+hermes egress setup
+
+# 3. راه‌اندازی دیمن پروکسی
+hermes egress start
+
+# 4. بررسی وضعیت
+hermes egress status</code></pre>
+<p>‏<code>hermes egress setup</code> کلیدهای ارائه‌دهنده‌ها را از محیط شما پیدا می‌کند. اگر کلیدهایتان فقط در ‏<code>~/.hermes/.env</code> باشند ‏(و در شل export نشده باشند)، setup خودکار آن فایل را می‌خواند — لازم نیست اول آن‌ها را ‏<code>export</code> کنید.</p>
+<p>وقتی بعداً ‏<code>setup</code> را دوباره اجرا می‌کنید ‏(میزبان جدید برای فهرست مجاز، توکن‌های چرخانده‌شده، منبع اعتبارنامهٔ عوض‌شده)، دیمن در حال اجرا را متوقف می‌کند چون پیکربندی‌اش در حافظه نگه‌داری می‌شود، سپس <b>پیشنهاد می‌دهد خودش آن را دوباره راه‌اندازی کند</b> تا تغییر بلافاصله اثر کند. روی tty می‌پرسد؛ ‏<code>--restart</code> بدهید تا همیشه ری‌استارت شود یا ‏<code>--no-restart</code> بدهید تا خاموش بماند. برای اعمال تغییرات در هر زمان دیگر، ‏<code>hermes egress restart</code> همان توقف-سپس-شروعِ تک‌فرمانی است.</p>
+<p>به‌محض اجرا، بک‌اند ترمینال Docker به‌طور خودکار:</p>
+<ul>
+  <li>‏<code>~/.hermes/proxy/ca.crt</code> را در مسیر ‏<code>/etc/ssl/certs/hermes-egress-ca.crt</code> داخل سندباکس مانت می‌کند</li>
+  <li>‏<code>HTTPS_PROXY</code>، ‏<code>HTTP_PROXY</code>، ‏<code>REQUESTS_CA_BUNDLE</code>، ‏<code>SSL_CERT_FILE</code>، ‏<code>CURL_CA_BUNDLE</code>، ‏<code>NODE_EXTRA_CA_CERTS</code> را ست می‌کند تا هر زمان اجرای HTTP رایج از پروکسی عبور کند و به CA اعتماد کند</li>
+  <li>‏<code>NODE_OPTIONS=--use-openssl-ca</code> را ست می‌کند ‏(به هرچه از قبل در ‏<code>docker_env.NODE_OPTIONS</code> دارید اضافه می‌شود) تا Node.js از استور OpenSSL‌ای عبور کند که بقیهٔ متغیرهای باندل CA کنترلش می‌کنند — برای شکاف باقی‌مانده <a href="#nodejs-asymmetric-ca-caveat">نکتهٔ CA نامتقارن در Node.js</a> را در پایین ببینید</li>
+  <li>‏<code>--add-host=host.docker.internal:host-gateway</code> را اضافه می‌کند تا سندباکس بتواند روی لینوکس به پروکسیِ سمت میزبان برسد ‏(Docker Desktop در macOS/Windows خودش این را هندل می‌کند)</li>
+  <li>توکن پروکسی را زیر نام محیطیِ استاندارد ارائه‌دهنده ‏(مثلاً ‏<code>OPENROUTER_API_KEY</code>) به‌علاوهٔ یک نام مستعار تشخیصیِ ‏<code>HERMES_PROXY_TOKEN_&lt;ENV_NAME&gt;</code> به‌ازای هر نگاشت ضرب‌شده export می‌کند</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> پیکربندی</h2>
+<p>پیکربندی کامل در ‏<code>~/.hermes/config.yaml</code> زیر بخش ‏<code>proxy:</code> قرار دارد. پیش‌فرض‌ها درون خود فایل مستند شده‌اند؛ همه‌چیز اختیاری است.</p>
+<pre dir="ltr"><code>proxy:
+  # کلید اصلی. وقتی false باشد این قابلیت کاملاً بی‌اثر است — هیچ
+  # باینری‌ای دانلود نمی‌شود، هیچ مانت docker اضافه نمی‌شود، هیچ
+  # زیرپروسه‌ای start نمی‌شود.
+  enabled: false
+
+  # پورت شنوندهٔ تانل. سندباکس‌ها به http://host.docker.internal:&lt;port&gt; می‌زنند.
+  tunnel_port: 9090
+
+  # دانلود خودکار باینری پین‌شدهٔ iron-proxy در اولین استفاده.
+  auto_install: true
+
+  # جایی که iron-proxy هنگام egress رمزهای واقعیِ بالادستی را از آن‌جا پیدا می‌کند.
+  #   env       — env پروسه (پیش‌فرض). هر چه در لحظهٔ start پروکسی داخل
+  #               ~/.hermes/.env شما باشد منبع حقیقت است.
+  #   bitwarden — در هر ری‌استارت پروکسی دوباره از Bitwarden Secrets Manager
+  #               دریافت می‌شود. چرخش در اپ وب BW بدون دست‌زدن به .env
+  #               منتشر می‌شود. نیازمند `secrets.bitwarden.enabled: true`.
+  credential_source: env
+
+  # وقتی true (پیش‌فرض)، بک‌اند Docker در صورتی که پروکسی فعال ولی در حال
+  # اجرا نباشد، از start کردن سندباکس خودداری می‌کند. برای بازگشت به رویکرد
+  # قدیمیِ «اعتبارنامه‌های واقعی داخل سندباکس» وقتی پروکسی در دسترس نیست،
+  # false بگذارید.
+  enforce_on_docker: true
+
+  # وقتی `credential_source: bitwarden` است ولی توکن دسترسی BWS /
+  # project_id غایب باشد یا fetch ی bws برای ارائه‌دهنده‌های نگاشت‌شده هیچ
+  # مقداری برنگرداند، دیمن به‌طور پیش‌فرض خطا می‌دهد (هم‌راستا با این منطق که
+  # «چرخش خواسته‌ام — بی‌سروصدا از مقادیر کهنهٔ env استفاده نکن»). برای
+  # بازگشت به fallback ی قدیمیِ host-env آن را true بگذارید — برای
+  # مهاجرت‌هایی مناسب است که می‌خواهید کم‌کم به حالت BW بروید ولی هنوز
+  # همهٔ رمزها را سیم‌کشی نکرده‌اید.
+  allow_env_fallback: false
+
+  # فهرست ردِ SSRF برای ترافیک خروجی. برای استفاده از پیش‌فرض امن، آن را
+  # حذف کنید / null بگذارید: loopback (v4 + v6)، link-local (شامل IP های
+  # metadata ابری در 169.254.169.254)، RFC1918، IPv6 ULA، IPv4-mapped-v6،
+  # CGNAT و بازهٔ بنچمارک RFC2544. برای انصراف کامل یک `[]` صریح بگذارید
+  # (فقط در تست‌های hermetic منطقی است).
+  upstream_deny_cidrs: null
+
+  # میزبان‌های بالادستیِ مجازِ اضافی، فراتر از پیش‌فرض‌های همراه.
+  # وایلدکارت (`*.foo.com`) پشتیبانی می‌شود. پیش‌فرض‌ها OpenRouter،
+  # OpenAI، Anthropic، Google، xAI، Mistral، Groq، Together، DeepSeek
+  # و Nous Research را پوشش می‌دهند.
+  extra_allowed_hosts: []</code></pre>
+<h3>میزبان‌های بالادستیِ مجازِ پیش‌فرض</h3>
+<pre dir="ltr"><code>openrouter.ai           *.openrouter.ai
+api.openai.com          api.anthropic.com
+generativelanguage.googleapis.com
+api.x.ai                api.mistral.ai
+api.groq.com            api.together.xyz
+api.deepseek.com        inference.nousresearch.com</code></pre>
+<p>اگر ایجنت شما به بالادستی نیاز دارد که در فهرست نیست — یک نقطهٔ پایانی inference خودمیزبان، یک LLM ابری اضافی، یک سرور MCP — آن را به ‏<code>proxy.extra_allowed_hosts</code> اضافه کنید. وایلدکارتها با نام کامل میزبان مطابقت داده می‌شوند ‏(<code>*.example.com</code> با ‏<code>api.example.com</code> و ‏<code>staging.example.com</code> مطابقت دارد اما با خود ‏<code>example.com</code> نه).</p>
+<h3>CIDRهای ردِ SSRF پیش‌فرض</h3>
+<p>صرف‌نظر از فهرست مجاز اعمال می‌شوند. این بازه‌ها در مرز شبکه توسط iron-proxy رد می‌شوند، پس حملهٔ DNS rebinding از طریق یک نام میزبانِ فهرست-مجاز نمی‌تواند به IMDS یا شبکهٔ داخلی‌تان برسد:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>CIDR</th><th>کاربرد</th></tr></thead>
+<tbody>
+<tr><td><code>127.0.0.0/8</code>، ‏<code>::1/128</code></td><td>Loopback ‏(v4 + v6)</td></tr>
+<tr><td><code>169.254.0.0/16</code>، ‏<code>fe80::/10</code></td><td>Link-local — <b>شامل IMDS ی AWS / GCP / Azure در ‏<code>169.254.169.254</code></b></td></tr>
+<tr><td><code>10.0.0.0/8</code>، ‏<code>172.16.0.0/12</code>، ‏<code>192.168.0.0/16</code></td><td>RFC1918</td></tr>
+<tr><td><code>fc00::/7</code></td><td>IPv6 ULA</td></tr>
+<tr><td><code>::ffff:0:0/96</code></td><td>IPv4-mapped IPv6 — راه دورزدن dual-stack از IMDS را می‌بندد</td></tr>
+<tr><td><code>100.64.0.0/10</code></td><td>CGNAT ی RFC6598 ‏(استفاده‌شده در AWS VPC و شبکه‌های pod ی K8s)</td></tr>
+<tr><td><code>198.18.0.0/15</code></td><td>بازهٔ بنچمارک RFC2544</td></tr>
+</tbody>
+</table>
+</div>
+<p>برای بازنویسی: ‏<code>proxy.upstream_deny_cidrs</code> را به فهرست خودتان ست کنید. برای انصراف کامل ‏(مثلاً برای یک تست hermetic که باید به یک بالادستِ loopback برسد): آن را به فهرست خالی ‏<code>[]</code> ست کنید.</p>
+<h3>سیاست بایند</h3>
+<p>پروکسی هرگز روی ‏<code>0.0.0.0</code> بایند نمی‌شود. بایند پیش‌فرض وابسته به پلتفرم است چون iron-proxy v0.39 فقط از <b>یک بایند واحد به‌ازای هر پروسهٔ دیمن</b> پشتیبانی می‌کند:</p>
+<ul>
+  <li><b>لینوکس:</b> گیت‌وی بریج docker ‏(<code>172.17.0.1:&lt;tunnel_port&gt;</code> به‌طور پیش‌فرض). کانتینرها از طریق ‏<code>host.docker.internal</code> به پروکسی می‌رسند که ‏<code>--add-host=host.docker.internal:host-gateway</code> آن را دقیقاً به همین IP گیت‌وی بریج حل می‌کند — یک بایندِ فقط-loopback از داخل سندباکس‌ها قابل‌دسترس نبود. IP بریج آدرسی روی اینترفیس ‏<code>docker0</code> میزبان است، پس در معرض LAN نیست؛ ولی از سوی کانتینرهای دیگر روی شبکهٔ بریج پیش‌فرض قابل‌دسترس است، هرچند درخواست‌ها همچنان به یک توکن پروکسیِ ضرب‌شده و یک بالادستِ فهرست-مجاز نیاز دارند. اگر بریج docker‌ای شناسایی نشود ‏(docker نصب/روشن نباشد)، بایند با یک هشدار به loopback برمی‌گردد (پشتیبان).</li>
+  <li><b>macOS / Windows Docker Desktop:</b> loopback ‏(<code>127.0.0.1:&lt;tunnel_port&gt;</code>). VPNkit ی Desktop ‏<code>host.docker.internal</code> را به میزبان مسیریابی می‌کند، پس loopback از داخل کانتینرها قابل‌دسترس است و کم‌نفوذترین انتخاب است.</li>
+</ul>
+<p>یک همسایهٔ LAN با یک توکن پروکسی لو-رفته نمی‌تواند از پروکسی استفاده کند — هیچ‌کدام از این دو بایند از شبکهٔ بیرونی قابل‌دسترس نیستند.</p>
+<p>ما همچنین ‏<code>metrics.listen: 127.0.0.1:0</code> را پین می‌کنیم تا سرور metrics داخلیِ دیمن به‌جای ‏<code>:9090</code> پیش‌فرضش یک پورت loopback موقت بگیرد — وگرنه برای همان سوکت با ‏<code>tunnel_port: 9090</code> درگیر می‌شد و دیمن با پیام «address already in use» از start خودداری می‌کرد. توجه کنید پورت موقتِ ‏<code>:0</code> در هر start تصادفی است و هیچ‌جا عرضه نمی‌شود، پس با این پین، metrics عملاً غیرفعال است.</p>
+<p>اگر یک شیم ‏<code>ip</code> خصمانه در ابتدای PATH می‌توانست یک IPv4 غیر-خصوصی را به‌عنوان آدرس بریج تزریق کند ‏(<code>0.0.0.0</code>، یک آدرس عمومی، multicast، link-local و…)، باز هم راه پشتیبانِ loopback اعمال می‌شود — ما هرگز چیزی را بایند نمی‌کنیم که نتوانیم با ‏<code>ipaddress.IPv4Address</code> + چک‌های ‏<code>is_*</code> اعتبارسنجی کنیم.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> طرح‌های احراز هویت پوشش‌داده‌شده</h2>
+<p>ترنسفورم ‏<code>secrets</code> توکن پروکسی را هر جا در یک جایگاه مطابق‌شده ظاهر شود عوض می‌کند — و بیش از ‏<code>Authorization: Bearer</code> را پوشش می‌دهد:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ارائه‌دهنده</th><th>متغیر env</th><th>جای تعویض</th></tr></thead>
+<tbody>
+<tr><td>OpenRouter، OpenAI، Groq، Together، DeepSeek، Mistral، xAI، Nous</td><td><code>*_API_KEY</code></td><td>هدر ‏<code>Authorization</code></td></tr>
+<tr><td>Anthropic بومی</td><td><code>ANTHROPIC_API_KEY</code></td><td>‏<code>x-api-key</code> + ‏<code>Authorization</code></td></tr>
+<tr><td>Azure OpenAI</td><td><code>AZURE_OPENAI_API_KEY</code></td><td>‏<code>api-key</code> + ‏<code>Authorization</code> ‏(<code>*.openai.azure.com</code>، ‏<code>*.cognitiveservices.azure.com</code>، ‏<code>*.services.ai.azure.com</code>)</td></tr>
+<tr><td>Google AI Studio ‏(Gemini)</td><td><code>GEMINI_API_KEY</code> / ‏<code>GOOGLE_API_KEY</code></td><td>هدر ‏<code>x-goog-api-key</code> یا پارامتر کوئری ‏<code>?key=</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>‏<code>GEMINI_API_KEY</code> و ‏<code>GOOGLE_API_KEY</code> یک اعتبارنامهٔ واحد در نظر گرفته می‌شوند: فقط یک توکن پروکسی ضرب می‌شود که زیر <b>هر دو</b> نام به سندباکس تزریق می‌شود، و هر کدام از این دو نام در env ی میزبان شما برای discovery کافی است.</p>
+</section>
+
+<section class="doc-sec" id="uncovered-providers">
+<h2><span class="secnum">۶</span> ارائه‌دهندگان پوشش‌نداده‌شده</h2>
+<p>طرح‌های احراز هویتی که امضای درخواست ‏(request signing) یا OAuth ی ضرب‌شده توسط SDK را درگیر می‌کنند با جایگزینی استاتیک هدر قابل تعویض نیستند — اگر متغیرهای محیطی‌شان حاضر باشند، سندباکس برای آن ارائه‌دهنده‌ها <b>اعتبارنامهٔ واقعی</b> در دست دارد و تضمین ایزولاسیون خروجی برایشان ناقص است:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>متغیر env</th><th>ارائه‌دهنده</th><th>علت</th></tr></thead>
+<tbody>
+<tr><td><code>AWS_ACCESS_KEY_ID</code>، ‏<code>AWS_SECRET_ACCESS_KEY</code></td><td>AWS Bedrock / SageMaker</td><td>درخواست‌های امضاشده با SigV4</td></tr>
+<tr><td><code>GOOGLE_APPLICATION_CREDENTIALS</code></td><td>GCP Vertex AI</td><td>OAuth ی ضرب‌شده از فایل service-account</td></tr>
+</tbody>
+</table>
+</div>
+<p>این متغیرهای env روی اکثر لپ‌تاپ‌های توسعه‌دهنده به‌خاطر ابزارهای نامرتبط ‏(terraform، gcloud، aws CLI، ‏ECR push) حاضرند. در جادوگر و ‏<code>hermes egress status</code> به‌شکل هشدار ظاهر می‌شوند اما هرگز جلوی start شدن پروکسی را نمی‌گیرند. اگر از آن ارائه‌دهنده‌ها در سندباکس‌ها استفاده نمی‌کنید، متغیرها را ‏<code>unset</code> کنید تا هشدار پاک شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> یکپارچگی Bitwarden</h2>
+<p>اگر از قبل Bitwarden Secrets Manager را از طریق ‏<a href="../secrets/bitwarden.html"><code>hermes secrets bitwarden setup</code></a> به کار می‌برید، پروکسی خروجی می‌تواند اعتبارنامه‌های واقعی را به‌جای ‏<code>os.environ</code> از آن‌جا بکشد:</p>
+<pre dir="ltr"><code>hermes egress setup --from-bitwarden</code></pre>
+<p>این کار ‏<code>proxy.credential_source: bitwarden</code> را ست می‌کند و نام‌های env ی ارائه‌دهنده‌ها را از پروژهٔ BW شما کشف می‌کند.</p>
+<h3>معناشناسی چرخش</h3>
+<p>وقتی ‏<code>credential_source: bitwarden</code> باشد، دیمن iron-proxy رمزها را از طریق ‏<code>bws secret list &lt;project_id&gt;</code> <b>در هر start</b> دوباره از BWS می‌گیرد. پس روند چرخش این است:</p>
+<ol>
+  <li>کلیدی را در اپ وب Bitwarden بچرخانید.</li>
+  <li>‏<code>hermes egress stop &amp;&amp; hermes egress start</code> را روی میزبان اجرا کنید.</li>
+  <li>سندباکس‌هایی که بعد از این لحظه start شوند توکن‌های پروکسی را با مقدار جدید عوض می‌کنند.</li>
+</ol>
+<p>هیچ ویرایش ‏<code>.env</code>‌ای لازم نیست. هیچ ری‌استارت Hermes ی روی میزبان لازم نیست. دیمن پروکسی تنها چیزی است که مقدار جدید را لمس می‌کند — پروسهٔ میزبان و ‏<code>os.environ</code> شما دست‌نخورده می‌مانند.</p>
+<h3>شکست پرصدا در start</h3>
+<p>وقتی ‏<code>credential_source: bitwarden</code> باشد، ‏<code>hermes egress start</code> در لایهٔ جادوگر پیش‌چک می‌کند و ‏<code>_build_proxy_subprocess_env</code> هم در لایهٔ دیمن دوباره بررسی می‌کند:</p>
+<ul>
+  <li>متغیر env ی توکن دسترسی BWS مقدار ندارد → از start خودداری می‌شود با راهنمایی برای ‏<code>unset</code> و اجرای دوباره، یا ‏<code>hermes egress setup --no-bitwarden</code> برای بازگشت به حالت env</li>
+  <li>‏<code>secrets.bitwarden.project_id</code> خالی است → از start خودداری می‌شود با راهنمایی برای اجرای ‏<code>hermes secrets bitwarden setup</code></li>
+  <li>‏<code>bws secret list</code> برای یک یا چند ارائه‌دهندهٔ نگاشت‌شده هیچ مقداری برنگرداند → از start خودداری می‌شود و نام‌های غایب را فهرست می‌کند</li>
+</ul>
+<p>این رفتار عمدی است. راه پشتیبانِ env ی میزبان در حالت BW دقیقاً همان باگ کهنگی را دوباره وارد می‌کند که مسیر BW برای شکست‌دادنش ساخته شده ‏(اپراتور BW را برای تضمین چرخش انتخاب کرده؛ راه پشتیبانِ بی‌سروصدا آن تضمین را می‌شکند).</p>
+<p>فلگ پیکربندی ‏<code>proxy.allow_env_fallback: true</code> رفتار قدیمیِ «اگر BWS در دسترس نبود بی‌سروصدا به env ی میزبان برگرد» را برای سناریوهای مهاجرت دوباره فعال می‌کند. وقتی رمزها را یکی‌یکی به BW منتقل می‌کنید و می‌خواهید دیمن با هر مقدار موجود start شود از آن استفاده کنید.</p>
+<h3>تغییر منبع اعتبارنامه</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>از</th><th>به</th><th>فرمان</th></tr></thead>
+<tbody>
+<tr><td>env</td><td>bitwarden</td><td><code>hermes egress setup --from-bitwarden</code></td></tr>
+<tr><td>bitwarden</td><td>env</td><td><code>hermes egress setup --no-bitwarden</code></td></tr>
+</tbody>
+</table>
+</div>
+<p><b>اجرای دوبارهٔ ‏<code>hermes egress setup</code> بدون هیچ‌کدام از این دو فلگ، ‏<code>credential_source</code> موجود را حفظ می‌کند</b> — جادوگر از تنزل بی‌سروصدای شما به env خودداری می‌کند. این مهم است چون وقتی یک‌بار حالت bitwarden را پیکربندی کرده‌اید، تضمین چرخش همان چیزی است که برایش ثبت‌نام کرده‌اید؛ برای تغییرش باید صریح بگویید «دوباره env می‌خواهم».</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> فرمان‌های اسلش</h2>
+<p>درخت زیرفرمان‌های CLI:</p>
+<pre dir="ltr"><code>hermes egress install                  # دانلود باینری پین‌شدهٔ iron-proxy
+hermes egress install --force          # دانلود دوباره حتی اگر نسخهٔ مدیریت‌شده موجود باشد
+
+hermes egress setup                    # جادوگر تعاملی
+hermes egress setup --tunnel-port N    # بازنویسی پورت شنوندهٔ تانل
+hermes egress setup --from-bitwarden   # استفاده از BWS به‌عنوان منبع اعتبارنامه (fail-loud)
+hermes egress setup --no-bitwarden     # بازگشت صریح به حالت env
+hermes egress setup --rotate-tokens    # ضرب توکن تازه برای هر ارائه‌دهنده
+                                       #   (پیش‌فرض: حفظ توکن‌های موجود)
+
+hermes egress start                    # راه‌اندازی دیمن پروکسیِ مدیریت‌شده
+hermes egress stop                     # SIGTERM (سپس SIGKILL پس از 5 ثانیه مهلت)
+hermes egress restart                  # توقف (اگر در حال اجرا) سپس start — لازم وقتی
+                                       #   رمزهای بالادستی عوض می‌شوند (چرخش، ارائه‌دهندهٔ جدید)
+hermes egress reload                   # hot-reload ی مجموعه‌قواعد از proxy.yaml از طریق
+                                       #   API مدیریت — بدون ری‌استارت و بدون قطع‌شدن
+                                       #   اتصال‌ها (ویرایش فهرست مجاز / نگاشت‌ها)
+
+hermes egress status                   # باینری + پیکربندی + pid + وضعیت شنیدن + نگاشت‌ها
+hermes egress status --show-tokens     # چاپ کامل توکن‌های پروکسی
+                                       #   (پیش‌فرض: فقط پیشوند + پسوندِ سانسورشده)
+
+hermes egress disable                  # فلپ کردن proxy.enabled = false
+                                       #   (پروکسی در حال اجرا را متوقف نمی‌کند)
+
+hermes egress config                   # چاپ مسیر proxy.yaml برای دیباگ</code></pre>
+<h3>چرخش توکن</h3>
+<p>به‌طور پیش‌فرض، ‏<code>hermes egress setup</code> توکن‌های پروکسی ارائه‌دهنده‌هایی که از قبل توکن دارند را <b>حفظ می‌کند</b>. افزودن یک ارائه‌دهندهٔ جدید فقط برای همان یکی توکن تازه ضرب می‌کند؛ توکن‌های موجود بدون تغییر می‌مانند. این کار از 401 شدن سندباکس‌های در حال اجرا وقتی جادوگر را دوباره اجرا می‌کنید جلوگیری می‌کند.</p>
+<p>‏<code>--rotate-tokens</code> همهٔ توکن‌ها را می‌چرخاند:</p>
+<pre dir="ltr"><code>hermes egress setup --rotate-tokens</code></pre>
+<p>وقتی هم توکن‌های موجود هست و هم stdin یک tty است، جادوگر تأیید می‌گیرد:</p>
+<pre dir="ltr"><code>⚠  --rotate-tokens will invalidate proxy tokens in every running
+   Hermes sandbox.  They will start 401-ing against upstreams until restarted.
+Type 'rotate' to confirm:</code></pre>
+<p>فراخوانی‌های غیر-tty ‏(CI، اسکریپت‌ها) از پرسش عبور می‌کنند — فلگ عمدی فرض می‌شود. پیش از هر بازنویسی، ‏<code>mappings.json</code> فعلی در یک هم‌مسیرِ برچسب-زمان‌دار کپی می‌شود تا بازیابی دستی ممکن باشد:</p>
+<pre dir="ltr"><code>backup: ~/.hermes/proxy/mappings.json.rotated-20260524T143012</code></pre>
+<p>‏<code>hermes egress setup</code> وقتی پیکربندی یا نگاشت توکن‌ها را بازنویسی می‌کند دیمن در حال اجرا را متوقف می‌کند، چون دیمن YAML قدیمی را در حافظه نگه می‌دارد. بعد از ‏<code>--rotate-tokens</code>:</p>
+<pre dir="ltr"><code>hermes egress start</code></pre>
+<p>کانتینرهایی که از قبل در حال اجرا هستند توکن‌های قدیمی را دارند و برای گرفتن توکن‌های جدید باید ری‌استارت شوند. کانتینرهای persistent ی جدیدِ Docker یک برچسب egress-posture دارند، پس هرمس برای نشست‌های جدید از یک کانتینرِ پیشا-egress یا پیشا-چرخش استفاده مجدد نمی‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> چیدمان پوشهٔ حالت</h2>
+<p>هر چه iron-proxy نگه می‌دارد در ‏<code>~/.hermes/proxy/</code> است:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>مسیر</th><th>مود</th><th>کاربرد</th></tr></thead>
+<tbody>
+<tr><td><code>~/.hermes/proxy/</code> ‏(پوشه)</td><td><code>0o700</code></td><td>فقط متعلق به شما و فقط توسط شما قابل پیمایش</td></tr>
+<tr><td><code>ca.crt</code></td><td><code>0o644</code></td><td>گواهی CA عمومی که داخل سندباکس‌ها توزیع می‌شود</td></tr>
+<tr><td><code>ca.key</code></td><td><code>0o600</code></td><td>کلید امضای CA — هرگز میزبان را ترک نمی‌کند</td></tr>
+<tr><td><code>proxy.yaml</code></td><td><code>0o600</code></td><td>پیکربندی iron-proxy؛ در هر ‏<code>setup</code> بازنویسی می‌شود</td></tr>
+<tr><td><code>mappings.json</code></td><td><code>0o600</code></td><td>توکن پروکسی سندباکس ← متغیر env ی بالادستی</td></tr>
+<tr><td><code>mappings.json.rotated-*</code></td><td><code>0o600</code></td><td>پشتیبان‌های ساخته‌شده توسط ‏<code>--rotate-tokens</code></td></tr>
+<tr><td><code>iron-proxy.pid</code></td><td><code>0o600</code></td><td>PID دیمن در حال اجرا</td></tr>
+<tr><td><code>iron-proxy.nonce</code></td><td><code>0o600</code></td><td>nonce ی هر-start برای دفاع در برابر بازیافت PID</td></tr>
+<tr><td><code>iron-proxy.log</code></td><td><code>0o600</code></td><td>stdout/stderr دیمن — <b>شامل رکوردهای per-request روی v0.39</b></td></tr>
+<tr><td><code>audit.log</code></td><td><code>0o600</code></td><td>برای جریان audit اختصاصیِ per-request در نسخه‌های آیندهٔ باینری رزرو شده؛ از قبل ساخته می‌شود تا وقتی upstream آن را سیم‌کشی کرد قرارداد حریم خصوصی برقرار بماند</td></tr>
+</tbody>
+</table>
+</div>
+<p>کلید خصوصی CA حساس‌ترین فایل است. از اولین بایت با ‏<code>0o600</code> ساخته می‌شود ‏(بدون پنجرهٔ TOCTOU ی umask) و با ‏<code>O_NOFOLLOW</code>، تا مهاجم هم-uid نتواند آن را با یک symlink کاشته‌شده منحرف کند. pidfile، فایل nonce، لاگ دیمن و لاگ audit همین رفتار را دارند.</p>
+<h3 id="logging-on-iron-proxy-v039">ثبت رویداد روی iron-proxy v0.39</h3>
+<p>روی نسخهٔ باینری پین‌شدهٔ فعلی ‏(<b>v0.39.0</b>) iron-proxy <b>همهٔ</b> خروجی — هم تشخیص‌های سطح-دیمن و هم رکوردهای per-request — را در ‏<b><code>~/.hermes/proxy/iron-proxy.log</code></b> می‌نویسد. ساختار ‏<code>config.Log</code> ی v0.39 فیلد جداگانهٔ ‏<code>audit_path</code> ندارد، پس نمی‌توانیم رکوردهای per-request را به یک جریان اختصاصی هدایت کنیم.</p>
+<p>با این حال ‏<code>~/.hermes/proxy/audit.log</code> را با مود ‏<code>0o600</code> و ‏<code>O_NOFOLLOW</code> از قبل می‌سازیم چون:</p>
+<ol>
+  <li>این مسیر را برای bump ی نسخهٔ آینده رزرو می‌کند: وقتی نسخهٔ پین‌شده به نسخه‌ای برود که از ‏<code>log.audit_path</code> پشتیبانی می‌کند، رکوردهای per-request بدون هیچ تغییر پیکربندی از سمت اپراتور شروع به جاری‌شدن در آن می‌کنند. <b>تا آن موقع این فایل ۰ بایت می‌ماند — هنوز ابزار مانیتورینگ، هشداردهی یا جرم‌یابی را به آن اشاره نکنید.</b> امروز برای همه‌چیز از ‏<code>iron-proxy.log</code> استفاده کنید.</li>
+  <li>تضمین 0o600-از-اولین-بایت در برابر روزِ رفعِ باگِ upstream دفاع می‌کند؛ روزی که v0.40+ اگر فایل از قبل موجود نباشد آن را زیر umask پیش‌فرضش می‌سازد.</li>
+</ol>
+<p>تا وقتی آن bump نسخه فرا برسد، ‏<code>iron-proxy.log</code> را برای هر دو مخاطب منبع حقیقت بدانید:</p>
+<ul>
+  <li>رویدادهای سطح-دیمن ‏(بنر startup، خطاهای bind، علت shutdown، خطاهای ترنسفورم). بهره‌برداری + عیب‌یابی.</li>
+  <li>رکوردهای per-request ‏(CONNECT به بالادستِ فهرست-مجاز، شلیک تعویض رمز، ردِ فهرست مجاز). جرم‌یابی + انطباق.</li>
+</ul>
+<p>هر دو فایل در طول ری‌استارت‌ها append می‌شوند. اگر روی میزبان‌های بلندعمر به فضای دیسک اهمیت می‌دهید آن‌ها را با logrotate بچرخانید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> چگونه کار می‌کند</h2>
+<pre dir="ltr"><code>┌──────────────┐                ┌──────────────┐                ┌─────────────┐
+│ Docker       │ CONNECT /     │ iron-proxy    │ HTTPS w/       │ OpenRouter  │
+│ sandbox      ├──────────────▶│ (host:9090)   ├───────────────▶│ / OpenAI /  │
+│              │ HTTP forward  │               │ real API key   │ Anthropic …  │
+│ has:         │ w/ proxy tok  │ mints leaf    │                │             │
+│ - proxy tok  │ in Auth hdr   │ cert from CA  │                │             │
+│ - CA cert    │               │ matches token │                │             │
+│ - HTTPS_PROXY│               │ swaps secret  │                │             │
+└──────────────┘               └──────────────┘                └─────────────┘
+                                       │
+                                       │ daemon + per-request log (combined on v0.39)
+                                       ▼
+                              ~/.hermes/proxy/iron-proxy.log
+                              (~/.hermes/proxy/audit.log reserved for v0.40+ split stream)</code></pre>
+<ol>
+  <li>سندباکس یک درخواست HTTPS می‌زند، مثلاً ‏<code>POST https://openrouter.ai/v1/chat/completions</code> با ‏<code>Authorization: Bearer hermes-proxy-openrouter-…</code> ‏(توکن پروکسی، نه کلید واقعی).</li>
+  <li>چون ‏<code>HTTPS_PROXY</code> ست است، درخواست به‌شکل تانل CONNECT به iron-proxy می‌رود.</li>
+  <li>iron-proxy فهرست مجاز را چک می‌کند. ‏<code>openrouter.ai</code> مجاز است.</li>
+  <li>iron-proxy برای ‏<code>openrouter.ai</code> یک گواهی leaf امضاشده با CA ی ما ضرب می‌کند، اتصال TLS را خاتمه می‌دهد و درخواست را بازرسی می‌کند.</li>
+  <li>ترنسفورم ‏<code>secrets</code> رشتهٔ توکن پروکسی را در هدر ‏<code>Authorization</code> مطابقت می‌دهد و مقدار واقعی ‏<code>OPENROUTER_API_KEY</code> را — گرفته‌شده از محیط خودِ iron-proxy — جایگزین می‌کند.</li>
+  <li>درخواست دوباره رمزنگاری و به OpenRouter ارسال می‌شود.</li>
+  <li>درخواست روی v0.39 در ‏<code>~/.hermes/proxy/iron-proxy.log</code> لاگ می‌شود. وقتی نسخهٔ باینری پین‌شده از جریان دوگانه پشتیبانی کند ‏(v0.40+)، رکوردهای per-request به ‏<code>~/.hermes/proxy/audit.log</code> می‌روند و تشخیص‌های سطح-دیمن در ‏<code>iron-proxy.log</code> می‌مانند. <a href="#logging-on-iron-proxy-v039">ثبت رویداد روی iron-proxy v0.39</a> را ببینید.</li>
+</ol>
+<p>درخواست به میزبانی که در فهرست مجاز نیست ‏(مثلاً ‏<code>https://attacker.example.com/leak?key=...</code>) با HTTP 403 رد می‌شود، پیش از آن که حتی یک بایت میزبان را ترک کند. ردشدن با نام میزبان بالادستی و سندباکس مبدأ در ‏<code>iron-proxy.log</code> ثبت می‌شود.</p>
+<h3>توزیع CA داخل سندباکس</h3>
+<p>وقتی بک‌اند Docker با ‏<code>proxy.enabled: true</code> کانتینری را start می‌کند و دیمن در حال شنیدن است، این آرگومان‌ها را به ‏<code>docker run</code> اضافه می‌کند:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>آرگومان</th><th>کاربرد</th></tr></thead>
+<tbody>
+<tr><td><code>-v ~/.hermes/proxy/ca.crt:/etc/ssl/certs/hermes-egress-ca.crt:ro</code></td><td>مانت فقط-خواندنی CA</td></tr>
+<tr><td><code>-e HTTPS_PROXY=http://host.docker.internal:9090</code></td><td>Python httpx / curl / transport پیش‌فرض go / Node fetch</td></tr>
+<tr><td><code>-e HTTP_PROXY=http://host.docker.internal:9091</code></td><td>curl + wget برای HTTP ساده — شنوندهٔ forward ی HTTP ساده روی ‏<code>tunnel_port + 1</code> است</td></tr>
+<tr><td><code>-e NO_PROXY=127.0.0.1,localhost,::1</code></td><td>سرورهای dev ی loopback داخل سندباکس از پروکسی عبور می‌کنند</td></tr>
+<tr><td><code>-e REQUESTS_CA_BUNDLE=…ca.crt</code></td><td>‏<code>requests</code> ی Python</td></tr>
+<tr><td><code>-e SSL_CERT_FILE=…ca.crt</code></td><td>ماژول ‏<code>ssl</code> ی Python / OpenSSL — استور سیستم را <b>جایگزین</b> می‌کند</td></tr>
+<tr><td><code>-e CURL_CA_BUNDLE=…ca.crt</code></td><td>curl — استور سیستم را <b>جایگزین</b> می‌کند</td></tr>
+<tr><td><code>-e NODE_EXTRA_CA_CERTS=…ca.crt</code></td><td>Node.js — به استور سیستم <b>اضافه</b> می‌کند</td></tr>
+<tr><td><code>-e NODE_OPTIONS="&lt;your value&gt; --use-openssl-ca"</code></td><td>Node.js — عبور از استور OpenSSL ‏(append می‌شود؛ ‏<code>--max-old-space-size</code> و بقیهٔ مقادیر شما حفظ می‌شوند)</td></tr>
+<tr><td><code>-e HERMES_EGRESS_PROXY=1</code></td><td>پرچمی که ایجنت می‌تواند بخواند تا بفهمد در محیط پروکسی-آگاه است</td></tr>
+<tr><td><code>-e OPENROUTER_API_KEY=&lt;proxy-token&gt;</code></td><td>نام‌های env ی استاندارد ارائه‌دهنده توکن پروکسی می‌گیرند تا SDKهای موجود به کار ادامه دهند</td></tr>
+<tr><td><code>-e HERMES_PROXY_TOKEN_&lt;NAME&gt;=…</code></td><td>نام مستعار تشخیصی برای هر نگاشت؛ همان مقدار متغیر env ی استاندارد ارائه‌دهنده</td></tr>
+<tr><td><code>--add-host=host.docker.internal:host-gateway</code></td><td>فقط لینوکس؛ Docker Desktop خودش آن را نگاشت می‌کند</td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="nodejs-asymmetric-ca-caveat">نکتهٔ CA نامتقارن در Node.js</h4>
+<p>‏<code>REQUESTS_CA_BUNDLE</code> / ‏<code>SSL_CERT_FILE</code> / ‏<code>CURL_CA_BUNDLE</code> استور CA سیستم را داخل سندباکس <b>جایگزین</b> می‌کنند. ‏<code>NODE_EXTRA_CA_CERTS</code> به آن <b>اضافه</b> می‌کند. یک پروسهٔ Node.js داخل سندباکس می‌تواند در اصل با باز کردن یک ‏<code>net.Socket</code> خام و شروع TLS handshake خودش از پروکسی عبور کند — استور CA سیستم همچنان به گواهی‌های واقعی بالادستی اعتماد می‌کند، پس درخواست همان‌جا موفق می‌شود که Python / curl در اعتبارسنجی شکست می‌خوردند.</p>
+<p>‏<code>NODE_OPTIONS=--use-openssl-ca</code> به هرچه از قبل در ‏<code>docker_env.NODE_OPTIONS</code> دارید append می‌شود. این کار Node را مجبور می‌کند از استور OpenSSL‌ای عبور کند که ‏<code>SSL_CERT_FILE</code> کنترلش می‌کند و عدم‌تقارن را تنگ‌تر می‌کند. کدی که صریحاً گزینهٔ ‏<code>ca</code> خودش را به ‏<code>tls.connect()</code> یا ‏<code>https.request()</code> پاس می‌دهد را پوشش <b>نمی‌دهد</b>، اما حالت ساده را می‌بندد.</p>
+<p>این یک محدودیت شناخته‌شدهٔ v1 است. برای رفع از سمت upstream ‏<a href="https://github.com/ironsh/iron-proxy/issues" target="_blank" rel="noopener">github.com/ironsh/iron-proxy/issues</a> را دنبال کنید؛ تا آن موقع، کد Node ی غیرمطمئنی که سوکت خام باز می‌کند را در سندباکسی که به ایزولاسیون خروجی‌اش تکیه دارید اجرا نکنید.</p>
+<h3>تزاحم ‏<code>docker_env</code></h3>
+<p>اگر در بلوک پیکربندی ‏<code>docker_env:</code> تان متغیرهای کنترل‌کنندهٔ پروکسی را ست کنید ‏(نادر ولی ممکن)، هرمس وقتی ‏<code>enforce_on_docker: true</code> است از start کردن سندباکس خودداری می‌کند. این هر دو را شامل می‌شود:</p>
+<ul>
+  <li>متغیرهای کنترل egress: ‏<code>HTTPS_PROXY</code>، ‏<code>HTTP_PROXY</code>، ‏<code>NO_PROXY</code>، ‏<code>REQUESTS_CA_BUNDLE</code>، ‏<code>SSL_CERT_FILE</code>، ‏<code>CURL_CA_BUNDLE</code>، ‏<code>NODE_EXTRA_CA_CERTS</code></li>
+  <li>متغیرهای env ی واقعی ارائه‌دهنده‌ها: هر نامی در ‏<code>mappings.json</code> ‏(مثلاً ‏<code>OPENROUTER_API_KEY</code>، ‏<code>OPENAI_API_KEY</code>)</li>
+</ul>
+<p>نمونهٔ خطا:</p>
+<pre dir="ltr"><code>docker_env in config.yaml overrides egress-proxy variables
+['HTTPS_PROXY', 'OPENROUTER_API_KEY']; enforce_on_docker is enabled.
+Remove these keys from docker_env or disable enforce_on_docker to
+opt out of egress isolation.</code></pre>
+<p>با ‏<code>enforce_on_docker: false</code> همین وضعیت به‌شکل هشدار ظاهر می‌شود و مقادیر ‏<code>docker_env</code> شما برنده می‌شوند — برای مهاجرت یا تست مفید است، اما صریحاً از تضمین ایزولاسیون انصراف داده‌اید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> دفاع PID و nonce</h2>
+<p>pidfile دیمن با ‏<code>O_EXCL</code> + ‏<code>O_NOFOLLOW</code> + چک مالکیت نوشته می‌شود. فراخوانی‌های هم‌زمان ‏<code>hermes egress start</code> به یکی از دو سرنوشت می‌رسند:</p>
+<ul>
+  <li>pidfile موجود به یک iron-proxy زنده اشاره می‌کند → start ی دوم با پیام «another start in progress» خودداری می‌کند + راهنمایی برای اجرای ‏<code>hermes egress stop</code></li>
+  <li>pidfile موجود کهنه است ‏(دیمن کرش کرده) → start ی دوم آن را unlink و یک‌بار دوباره تلاش می‌کند</li>
+</ul>
+<p>فراتر از آن، هر ‏<code>start_proxy</code> یک nonce تصادفی تازه در دو جا می‌کارد:</p>
+<ul>
+  <li>‏<code>HERMES_IRON_PROXY_NONCE=&lt;nonce&gt;</code> در env دیمن</li>
+  <li>‏<code>~/.hermes/proxy/iron-proxy.nonce</code> ‏(هم‌مسیر 0o600 ی pidfile)</li>
+</ul>
+<p>وقتی ‏<code>hermes egress stop</code> ‏(یا هر چک دیگرِ ‏<code>_pid_alive</code>) می‌خواهد مطمئن شود یک PID همچنان به دیمنِ <i>خودمان</i> اشاره می‌کند — نه یک پروسهٔ بی‌ربط که بعد از کرش iron-proxy همان PID را گرفته — ‏<code>/proc/&lt;pid&gt;/environ</code> را می‌خواند و دنبال nonce می‌گردد. کپی روی-دیسک است که این کار را در بین فراخوانی‌های CLI ممکن می‌کند ‏(‏<code>_proxy_nonce</code> ی درون-حافظه per-process است و با هر فراخوانی ‏<code>hermes</code> ریست می‌شود).</p>
+<p>اگر چک nonce شکست بخورد، کد به تطبیق basename ی ‏<code>argv[0]</code> با ‏<code>iron-proxy</code> برمی‌گردد. ‏<code>stop_proxy</code> علاوه بر آن، starttime ی ‏<code>/proc/&lt;pid&gt;/stat</code> را قبل از SIGTERM ثبت و بعد از پنجرهٔ ۵ ثانیه‌ای مهلت دوباره تأیید می‌کند — اگر starttime جابه‌جا شده باشد، PID در میانهٔ انتظار بازیافت شده و SIGKILL با یک هشدار مهار می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> مدل امنیتی</h2>
+<p><b>در برابر چه چیزی محافظت می‌کند:</b></p>
+<ul>
+  <li>ایجنت تزریق-پرامپت‌شده در سندباکس Docker که ‏<code>printenv</code> / فایل‌های اعتبارنامه را می‌خواند و کلیدهای واقعی را به بیرون می‌فرستد.</li>
+  <li>وابستگی به‌خطرافتاده در سندباکس که به یک میزبان دلخواه phone home می‌کند — فهرست مجازِ پیش‌فرض-رد مقصدهای ناشناخته را می‌بندد.</li>
+  <li>ایجنتی که نقطه‌های پایانی cloud metadata ‏(‏<code>169.254.169.254</code>) را شماره‌گیری می‌کند — iron-proxy این‌ها را به‌طور پیش‌فرض از طریق ‏<code>upstream_deny_cidrs</code> رد می‌کند، از جمله شکل IPv4-mapped-v6 یعنی ‏<code>::ffff:169.254.169.254</code>.</li>
+  <li>DNS rebinding از طریق یک نام میزبانِ فهرست-مجاز به یک IP خصوصی — CIDRهای رد در زمان اتصال چک می‌شوند نه در زمان فهرست-مجاز.</li>
+  <li>پروسه‌های محلی هم-uid که env ی دیمن iron-proxy را می‌خوانند تا رمزها را بکَنند — فقط نام متغیرهای env ی ارجاع‌شده در نگاشت‌ها forward می‌شود، نه env کامل میزبان.</li>
+  <li>همسایهٔ LAN با یک توکن پروکسی سندباکسِ لو-رفته که سهمیهٔ API شما را می‌سوزاند — پروکسی روی گیت‌وی بریج docker ‏(لینوکس) یا loopback ‏(Docker Desktop) بایند می‌شود، هرگز ‏<code>0.0.0.0</code> نه، پس از شبکهٔ بیرونی قابل‌دسترس نیست.</li>
+</ul>
+<p><b>در برابر چه چیزی محافظت نمی‌کند:</b></p>
+<ul>
+  <li>یک پروسهٔ میزبان به‌خطرافتاده. اگر خود پروسهٔ ایجنت به خطر بیفتد، کلیدهای واقعی در ‏<code>~/.hermes/.env</code> ی میزبان به هر حال لو می‌روند. این یک قابلیت دفاع-در-عمق برای به‌خطرافتادنِ <i>سندباکس</i> است نه میزبان.</li>
+  <li><b>از دست رفتن خودِ مرز پروکسیِ مورد-اعتماد.</b> تضمین تعویض-توکن فرض می‌کند سندباکس به گواهی CA مانت‌شده ‏(‏<code>/etc/ssl/certs/hermes-egress-ca.crt</code>) اعتماد کند و ترافیک واقعاً به iron-proxy ی <i>خودمان</i> برسد. اگر کلید خصوصی CA دزدیده شود یا خروجی سندباکس به زیرساخت پروکسیِ تحت کنترل مهاجم هدایت شود، یک مهاجم میانجی می‌تواند گواهی leaf معتبر ارائه کند و توکن‌های پروکسی دیگر مرزِ معناداری نیستند ‏(cf. ‏<a href="https://attack.mitre.org/techniques/T1588/004/" target="_blank" rel="noopener">MITRE ATT&amp;CK T1588.004</a> — مواد گواهی TLS به‌دست‌آمده که AiTM را ممکن می‌کند). پس کلید CA ‏(‏<code>0600</code>، فقط-میزبان) و نقطهٔ پایانی پروکسی را متناسب با آن محافظت کنید.</li>
+  <li>پروسه‌های سندباکس که با سوکت خام از ‏<code>HTTPS_PROXY</code> عبور می‌کنند. پروکسی نمی‌تواند چیزی را رهگیری کند که به سمتش مسیریابی نمی‌شود. Node.js تا حدی با ‏<code>NODE_OPTIONS=--use-openssl-ca</code> تعدیل می‌شود ‏(نکتهٔ بالا را ببینید).</li>
+  <li>فایل‌های اعتبارنامه‌ای که صریحاً داخل Docker مانت شده‌اند ‏(‏<code>terminal.credential_files</code> یا مانت‌های ثبت‌شده توسط مهارت‌ها). Egress از متغیرهای env ی ارائه‌دهنده‌ها محافظت می‌کند؛ فایل‌های مانت‌شدهٔ دلخواه را بازرسی نمی‌کند. اعتبارنامه‌های واقعی ارائه‌دهنده را داخل یک سندباکسِ egress-اجباری مانت نکنید.</li>
+  <li>درزدادن داده از طریق میزبان‌های فهرست-مجاز. اگر ‏<code>api.openai.com</code> مجاز باشد، ایجنت می‌تواند دادهٔ exfil را در بدنهٔ درخواست به آن میزبان بگنجاند. لاگ دیمن ثبت می‌کند که درخواستی رخ داده ولی جلویش را نمی‌گیرد.</li>
+  <li>ارائه‌دهندگان پوشش‌نداده‌شده ‏(AWS Bedrock SigV4، OAuth ی service-account ی GCP Vertex). متغیرهای env ی‌شان در سندباکس می‌مانند؛ اگر آن‌ها را فعال کنید، آن اعتبارنامه‌ها کلاً از پروکسی عبور می‌کنند. <a href="#uncovered-providers">ارائه‌دهندگان پوشش‌نداده‌شده</a> را ببینید.</li>
+  <li>صفرکردن رمزهای درون-حافظهٔ iron-proxy. باینری Go اعتبارنامه‌های واقعیِ تعویض‌شده را در حافظهٔ پروسه نگه می‌دارد؛ یک core-dump یا خواندن ‏<code>/proc/&lt;pid&gt;/mem</code> توسط مهاجم هم-uid آن‌ها را آشکار می‌کند. خارج از محدودهٔ این لایه است.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> حالت‌های شکست</h2>
+<ul>
+  <li><b>باینری نصب نیست، ‏<code>auto_install: true</code></b> — اولین ‏<code>hermes egress setup</code> یا ‏<code>hermes egress start</code> آن را دانلود می‌کند. با SHA-256 در برابر ‏<code>checksums.txt</code> ی upstream تأیید می‌شود.</li>
+  <li><b>باینری نصب نیست، ‏<code>auto_install: false</code></b> — ‏<code>start</code> با پیام واضحی که به نصب دستی اشاره می‌کند شکست می‌خورد.</li>
+  <li><b>‏<code>enabled: true</code> ولی پروکسی در حال اجرا نیست</b> — با ‏<code>enforce_on_docker: true</code> ‏(پیش‌فرض)، ساخت سندباکس Docker با خطای توضیحی از start خودداری می‌کند. با ‏<code>enforce_on_docker: false</code>، به خروج مستقیم با اعتبارنامه‌های واقعی برمی‌گردد و هشدار لاگ می‌کند.</li>
+  <li><b>تزاحم پورت</b> — iron-proxy فوراً خارج می‌شود؛ ‏<code>hermes egress start</code> ‌۲۰ خط آخر لاگ را گزارش و با exit غیرصفر شکست می‌خورد.</li>
+  <li><b>میزبان بالادستی رد شد</b> — سندباکس از پروکسی HTTP 403 با بدنه‌ای که توضیح می‌دهد کدام میزبان مجاز نبود می‌گیرد. ایجنت خطا را می‌بیند و گزارشش می‌کند.</li>
+  <li><b>درخواست IP ی cloud metadata ‏(169.254.169.254)</b> — صرف‌نظر از فهرست مجاز توسط ‏<code>upstream_deny_cidrs</code> رد می‌شود.</li>
+  <li><b>‏<code>docker_env</code> با متغیر کنترل‌کنندهٔ پروکسی تزاحم دارد ‏(enforce روشن)</b> — ساخت سندباکس با نام کلیدهای متزاحم از start خودداری می‌کند.</li>
+  <li><b>‏<code>docker_forward_env</code> می‌خواهد کلید ارائه‌دهندهٔ محافظت‌شده‌ای را forward کند ‏(enforce روشن)</b> — ساخت سندباکس خودداری می‌کند؛ کلید را از ‏<code>docker_forward_env</code> حذف کنید یا با ‏<code>proxy.enforce_on_docker: false</code> انصراف دهید.</li>
+  <li><b>‏<code>docker_extra_args</code> کنترل‌های env/شبکهٔ پروکسی را بازنویسی می‌کند ‏(enforce روشن)</b> — ساخت سندباکس خودداری می‌کند؛ آرگومان‌های ‏<code>-e HTTPS_PROXY=...</code>، ‏<code>--env-file</code> یا ‏<code>--network</code> ی کاربر بعد از آرگومان‌های تولیدشده توسط Hermes اجرا می‌شوند و می‌توانند از egress عبور کنند.</li>
+  <li><b>توکن دسترسی BWS در ‏<code>credential_source: bitwarden</code> غایب است</b> — ‏<code>hermes egress start</code> با ‏<code>--no-bitwarden</code> به‌عنوان راهنمای بازیابی خودداری می‌کند.</li>
+  <li><b>iron-proxy ظرف ۵ ثانیه بایند نمی‌شود</b> — پروسه کشته می‌شود، pidfile حذف می‌شود و خطا پورت + انتهای ‏<code>iron-proxy.log</code> را نام می‌برد.</li>
+  <li><b>فراخوانی‌های هم‌زمان ‏<code>hermes egress start</code></b> — فراخوانی دوم اگر دیمنِ اول بالا باشد با پیام «another start in progress» خودداری می‌کند؛ وگرنه pidfile کهنه را حذف و ادامه می‌دهد.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> عیب‌یابی</h2>
+<h3>«ردِ شروع: BWS_ACCESS_TOKEN تنظیم نشده است»</h3>
+<p>‏<code>credential_source: bitwarden</code> را فعال کرده‌اید ولی متغیر env ی توکن دسترسی در شل شما نیست. یکی از این دو:</p>
+<pre dir="ltr"><code>export BWS_ACCESS_TOKEN=…   # یک‌باره
+hermes egress start</code></pre>
+<p>یا آن را به ‏<code>~/.hermes/.env</code> منتقل کنید. یا به حالت env برگردید:</p>
+<pre dir="ltr"><code>hermes egress setup --no-bitwarden</code></pre>
+<h3>«iron-proxy بلافاصله خارج شد»</h3>
+<p>به ۲۰ خط آخر ‏<code>~/.hermes/proxy/iron-proxy.log</code> نگاه کنید. علت‌های رایج:</p>
+<ul>
+  <li>پورت از قبل در استفاده است → ‏<code>proxy.tunnel_port</code> را عوض کنید یا هر چیز دیگری که 9090 را در اختیار دارد بکشید</li>
+  <li>‏<code>proxy.yaml</code> نامعتبر است → برای بازتولید ‏<code>hermes egress setup</code> را اجرا کنید</li>
+  <li>مجوزهای گواهی/کلید CA غلط است → ‏<code>chmod 0o600 ~/.hermes/proxy/ca.key</code></li>
+</ul>
+<h3>«iron-proxy ظرف ۵ ثانیه روی ‏<code>&lt;bind-host&gt;:9090</code> بایند نشد»</h3>
+<p>دیمن start شده ولی هرگز شنونده را بایند نکرده. معمولاً یعنی باینری گیر کرده یا در startup کار پرهزینه‌ای انجام می‌دهد. ‏<code>~/.hermes/proxy/iron-proxy.log</code> را چک کنید. پروسهٔ یتیم خودکار کشته و pidfile پاک می‌شود، پس کافی است ‏<code>hermes egress start</code> را دوباره اجرا کنید.</p>
+<h3>تایم‌اوت سندباکس در اتصال به پروکسی ‏(لینوکس)</h3>
+<p>کانتینر ‏<code>host.docker.internal</code> را به گیت‌وی بریج docker حل می‌کند و پروکسی هم آن‌جا بایند است، اما یک فایروال میزبانی ‏(معمولاً ‏<code>ufw</code> با INPUT ی پیش‌فرض-رد) ترافیک کانتینر→میزبان روی ‏<code>docker0</code> را می‌اندازد. از داخل یک کانتینر بررسی کنید:</p>
+<pre dir="ltr"><code>docker run --rm --add-host host.docker.internal:host-gateway busybox \
+  nc -zv -w 3 host.docker.internal 9090</code></pre>
+<p>اگر این تایم‌اوت شد در حالی که ‏<code>hermes egress status</code> حالت ‏<code>listening</code> را نشان می‌دهد، ساب‌نت بریج را در فایروالتان مجاز کنید، مثلاً برای ufw:</p>
+<pre dir="ltr"><code>sudo ufw allow in on docker0 to any port 9090 proto tcp
+sudo ufw allow in on docker0 to any port 9091 proto tcp</code></pre>
+<p>(‏9091 = شنوندهٔ forward ی HTTP ساده روی ‏<code>tunnel_port + 1</code>.)</p>
+<h3>سندباکس HTTP 403 از پروکسی می‌بیند</h3>
+<p>ایجنت داخل سندباکس تلاش کرده به میزبانی بزند که در ‏<code>proxy.extra_allowed_hosts</code> نیست. بدنهٔ 403 توضیح می‌دهد کدام میزبان است. اگر می‌خواهید مجازش کنید، به پیکربندی اضافه کنید:</p>
+<pre dir="ltr"><code>proxy:
+  extra_allowed_hosts:
+    - api.example.com
+    - "*.staging.example.com"</code></pre>
+<p>سپس ‏<code>hermes egress setup</code> ‏(برای بازتولید ‏<code>proxy.yaml</code>) و ‏<code>hermes egress stop &amp;&amp; hermes egress start</code>.</p>
+<h3>سندباکس خطاهای تأیید SSL می‌بیند</h3>
+<p>یا CA داخل سندباکس مانت نشده ‏(نادر؛ بک‌اند docker وقتی ‏<code>proxy.enabled: true</code> است این را خودکار انجام می‌دهد)، یا کلاینت HTTP ی ایمیج شما از یک متغیر env غیراستاندارد می‌خواند.</p>
+<pre dir="ltr"><code># داخل سندباکس:
+cat /etc/ssl/certs/hermes-egress-ca.crt | head -1
+# باید چاپ کند: -----BEGIN CERTIFICATE-----
+env | grep -E "^(REQUESTS|CURL|SSL|NODE).*CA"
+# باید هر چهار متغیر env ی باندل CA را فهرست کند که به /etc/ssl/certs/hermes-egress-ca.crt اشاره می‌کنند</code></pre>
+<p>اگر گواهی آن‌جا نیست، چک کنید که ‏<code>proxy.enabled: true</code> <b>و</b> ‏<code>hermes egress status</code> حالت ‏<code>Listening yes</code> را نشان دهد. اگر متغیرهای env غایب‌اند، ممکن است ایمیج سندباکس entrypoint ی در حال اجرا داشته باشد که آن‌ها را حذف می‌کند — پیکربندی ‏<code>docker_env</code> تان را چک کنید.</p>
+<h3>سندباکس HTTP 401 از بالادست‌ها می‌بیند</h3>
+<p>دو علت رایج:</p>
+<ol>
+  <li><b>توکن-کچل شدن در re-setup.</b> ‏<code>hermes egress setup --rotate-tokens</code> را اجرا کرده‌اید ‏(یا توکن‌ها را به روش دیگری چرخانده‌اید) و سندباکس‌های در حال اجرا هنوز توکن‌های قدیمی را دارند. سندباکس‌ها را ری‌استارت کنید.</li>
+  <li><b>شکست بی‌سروصدای refresh ی Bitwarden.</b> با رفتار fail-loud جدید نباید رخ دهد، اما اگر ‏<code>proxy.allow_env_fallback: true</code> را ست کرده باشید ممکن است دیمن با مقادیر کهنهٔ env شروع شده باشد. محیط دیمن ‏(‏<code>/proc/&lt;iron-proxy-pid&gt;/environ</code>) را برای ‏<code>OPENROUTER_API_KEY</code> ی مورد انتظار و امثال آن چک کنید.</li>
+</ol>
+<h3>«Address in use» پس از مرگ پروسهٔ والد</h3>
+<p>پروسهٔ والد Hermes در طول ‏<code>hermes egress start</code> مرده ‏(Ctrl-C حین پروب شنیدن، OOM، panic). منطق رفع‌اشکالِ جدید pidfile را بلافاصله بعد از ‏<code>Popen</code> می‌نویسد پس یتیم قابل بازیابی است:</p>
+<pre dir="ltr"><code>hermes egress stop   # یتیم را از طریق pidfile پیدا و می‌کشد
+hermes egress start</code></pre>
+<p>اگر ‏<code>hermes egress stop</code> می‌گوید «iron-proxy was not running» ولی هنوز دیمن را در ‏<code>ps</code> می‌بینید، pidfile از هم گسیخته است. بازیابی دستی:</p>
+<pre dir="ltr"><code>pkill -TERM iron-proxy
+rm -f ~/.hermes/proxy/iron-proxy.pid ~/.hermes/proxy/iron-proxy.nonce
+hermes egress start</code></pre>
+<h3>بازرسی رفتار هر-درخواست</h3>
+<p>روی نسخهٔ باینری پین‌شده ‏(<b>v0.39</b>) هم رویدادهای سطح-دیمن و هم رکوردهای per-request در ‏<code>~/.hermes/proxy/iron-proxy.log</code> می‌روند. فرمت، JSON ی خط-جدا شده است. برای یک بالادست مشخص grep بزنید:</p>
+<pre dir="ltr"><code>grep '"upstream":"openrouter.ai"' ~/.hermes/proxy/iron-proxy.log | tail -20</code></pre>
+<p>یا زنده تماشا کنید:</p>
+<pre dir="ltr"><code>tail -f ~/.hermes/proxy/iron-proxy.log | jq</code></pre>
+<p>وقتی نسخهٔ پین‌شده به v0.40+ برود ‏(که ‏<code>log.audit_path</code> را اضافه می‌کند)، رکوردهای per-request به ‏<code>~/.hermes/proxy/audit.log</code> می‌روند و ‏<code>iron-proxy.log</code> فقط رویدادهای سطح-دیمن را نگه می‌دارد. تا آن bump، ‏<code>audit.log</code> یک placeholder ی خالی است ‏(با ‏<code>0o600</code> از قبل ساخته می‌شود تا دیمنِ آینده مجوزهای سفت به ارث ببرد) — ابزار logrotate / مانیتورینگ تان را امروز به ‏<code>iron-proxy.log</code> سیم‌کشی کنید و برای افزودن ‏<code>audit.log</code> بعد از bump نسخه برنامه بگذارید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> محدودیت‌ها (v1)</h2>
+<ul>
+  <li>فقط بک‌اند Docker. سیم‌کشی Modal، Daytona و SSH در PRهای جداگانه خواهد آمد.</li>
+  <li>ارائه‌دهنده‌هایی با احراز هویت امضامحور ‏(AWS SigV4، OAuth ی service-account ی GCP) کلاً از پروکسی عبور می‌کنند — <a href="#uncovered-providers">ارائه‌دهندگان پوشش‌نداده‌شده</a> را ببینید. ارائه‌دهنده‌های هدر-توکنی ‏(bearer، ‏<code>x-api-key</code>، ‏<code>api-key</code>، ‏<code>x-goog-api-key</code>) همه پوشش داده می‌شوند.</li>
+  <li>باینری بومی Windows ی در upstream موجود نیست. روی Linux / macOS / WSL اجرا کنید.</li>
+  <li>CA در اولین تولید یک گواهی self-signed ی ۱۰ ساله است. چرخش نیاز به ‏<code>openssl genrsa ...</code> ی دستی دارد ‏(یا منتظر ادامه‌ای بمانید که ‏<code>hermes egress rotate-ca</code> را اضافه کند).</li>
+  <li>اجرای دوبارهٔ setup بعد از بازنویسی پیکربندی یا نگاشت‌ها دیمن در حال اجرا را متوقف می‌کند؛ ری‌استارت کنید ‏(یا برای تغییرات فقط-قواعد از ‏<code>hermes egress reload</code>) و بعد از چرخش توکن، سندباکس‌های در حال اجرا را هم ری‌استارت کنید.</li>
+  <li>صفرکردن رمزهای درون-حافظهٔ iron-proxy به upstream وابسته است. مهاجمان هم-uid با دسترسی خواندن ‏<code>/proc/&lt;pid&gt;/mem</code> می‌توانند رمزهای تعویض‌شده را از حافظهٔ دیمن بخوانند.</li>
+  <li>iron-proxy v0.39 فقط از <b>یک بایند واحد به‌ازای هر دیمن</b> پشتیبانی می‌کند ‏(ما روی لینوکس گیت‌وی بریج docker و روی Docker Desktop لوپ‌بک را بایند می‌کنیم) و رکوردهای دیمن + per-request را در یک جریان لاگ واحد ترکیب می‌کند. وقتی upstream ‏<code>proxy.http_listens</code> ‏(جمع) و ‏<code>log.audit_path</code> را اضافه کند، یک bump نسخه می‌تواند multi-bind و جریان audit اختصاصی را سیم‌کشی کند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> همچنین ببینید</h2>
+<ul>
+  <li>پروژهٔ upstream: ‏<a href="https://github.com/ironsh/iron-proxy" target="_blank" rel="noopener">github.com/ironsh/iron-proxy</a></li>
+  <li>مستندات upstream: ‏<a href="https://docs.iron.sh/" target="_blank" rel="noopener">docs.iron.sh</a></li>
+  <li>یکپارچگی Bitwarden: ‏<a href="../secrets/bitwarden.html"><code>hermes secrets bitwarden</code></a></li>
+  <li>بک‌اند ترمینال Docker ی Hermes: ‏<a href="../docker.html">داکر</a></li>
+  <li>مرجع توسعه‌دهنده / مشارکت‌کننده: ‏<a href="https://hermes-agent.nousresearch.com/docs/developer-guide/egress-internals" target="_blank" rel="noopener">درون‌مایهٔ پروکسی خروجی</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="../egress.html"><span class="dir">→ قبلی</span><span class="ttl">پروکسی خروجی ‏(Egress)</span></a>
+  <a class="next" href="../import-from-other-agents.html"><span class="dir">بعدی ←</span><span class="ttl">درون‌ریزی از ایجنت‌های دیگر</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/egress/iron-proxy" target="_blank" rel="noopener">Egress credential-injection proxy (iron-proxy)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

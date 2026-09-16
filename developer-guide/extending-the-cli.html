@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>گسترش CLI — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/extending-the-cli" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>گسترش CLI</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>گسترش CLI</h1>
+<p>هرمس روی <code>HermesCLI</code> هوک‌های گسترشِ محافظت‌شده ارائه می‌دهد تا CLIهای پوششی بتوانند بدون بازنویسی متد <code>run()</code>ِ بیش از ۱۰۰۰ خط، ویجت، کلیدمیان‌بر و سفارشی‌سازی چیدمان اضافه کنند. این کار افزونهٔ شما را از تغییرهای داخلی جدا نگه می‌دارد.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> نقاط گسترش</h2>
+<p>پنج نقطهٔ گسترش (extension seam) در دسترس است:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>هوک</th><th>هدف</th><th>چه زمانی بازنویسی کنید…</th></tr></thead>
+  <tbody>
+    <tr><td><code>_get_extra_tui_widgets()</code></td><td>تزریق ویجت به چیدمان</td><td>وقتی به یک عنصر UI پایدار نیاز دارید (پنل، خط وضعیت، مینی‌پلیر)</td></tr>
+    <tr><td><code>_register_extra_tui_keybindings(kb, *, input_area)</code></td><td>افزودن کلیدهای میان‌بر</td><td>وقتی به کلیدمیان‌بر نیاز دارید (بازوکردن پنل‌ها، کنترل پخش، میان‌برهای مودال)</td></tr>
+    <tr><td><code>_build_tui_layout_children(**widgets)</code></td><td>کنترل کامل بر ترتیب ویجت‌ها</td><td>وقتی باید ویجت‌های موجود را جابه‌جا یا درون‌هم بپیچید (به‌ندرت)</td></tr>
+    <tr><td><code>process_command()</code></td><td>افزودن فرمان‌های اسلش سفارشی</td><td>وقتی به پردازش <code>/mycommand</code> نیاز دارید (هوک از قبل موجود)</td></tr>
+    <tr><td><code>_build_tui_style_dict()</code></td><td>استایل‌های سفارشی prompt_toolkit</td><td>وقتی به رنگ‌ها یا استایل‌بندی سفارشی نیاز دارید (هوک از قبل موجود)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>سه‌تای اول هوک‌های محافظت‌شدهٔ جدیدند. دو‌تای آخر از قبل وجود داشتند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> شروع سریع: یک CLI پوششی</h2>
+<pre dir="ltr"><code>#!/usr/bin/env python3
+"""my_cli.py — Example wrapper CLI that extends Hermes."""
+
+from cli import HermesCLI
+from prompt_toolkit.layout import FormattedTextControl, Window
+from prompt_toolkit.filters import Condition
+
+
+class MyCLI(HermesCLI):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._panel_visible = False
+
+    def _get_extra_tui_widgets(self):
+        """Add a toggleable info panel above the status bar."""
+        cli_ref = self
+        return [
+            Window(
+                FormattedTextControl(lambda: "📊 My custom panel content"),
+                height=1,
+                filter=Condition(lambda: cli_ref._panel_visible),
+            ),
+        ]
+
+    def _register_extra_tui_keybindings(self, kb, *, input_area):
+        """F2 toggles the custom panel."""
+        cli_ref = self
+
+        @kb.add("f2")
+        def _toggle_panel(event):
+            cli_ref._panel_visible = not cli_ref._panel_visible
+
+    def process_command(self, cmd: str) -&gt; bool:
+        """Add a /panel slash command."""
+        if cmd.strip().lower() == "/panel":
+            self._panel_visible = not self._panel_visible
+            state = "visible" if self._panel_visible else "hidden"
+            print(f"Panel is now {state}")
+            return True
+        return super().process_command(cmd)
+
+
+if __name__ == "__main__":
+    cli = MyCLI()
+    cli.run()</code></pre>
+<p>اجرا:</p>
+<pre dir="ltr"><code>cd ~/.hermes/hermes-agent
+source .venv/bin/activate
+python my_cli.py</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> مرجع هوک‌ها</h2>
+<h3><code>_get_extra_tui_widgets()</code></h3>
+<p>فهرستی از ویجت‌های prompt_toolkit برمی‌گرداند تا در چیدمان TUI درج شوند. ویجت‌ها <strong>بین فاصله‌انداز و نوار وضعیت</strong> ظاهر می‌شوند — بالای ناحیهٔ ورودی اما پایین خروجی اصلی.</p>
+<pre dir="ltr"><code>def _get_extra_tui_widgets(self) -&gt; list:
+    return []  # پیش‌فرض: بدون ویجت اضافه</code></pre>
+<p>هر ویجت باید یک کانتینر prompt_toolkit باشد (مثلاً <code>Window</code>، <code>ConditionalContainer</code>، <code>HSplit</code>). برای قابل‌روشن‌وخاموش‌شدن ویجت‌ها از <code>ConditionalContainer</code> یا <code>filter=Condition(...)</code> استفاده کنید.</p>
+<pre dir="ltr"><code>from prompt_toolkit.layout import ConditionalContainer, Window, FormattedTextControl
+from prompt_toolkit.filters import Condition
+
+def _get_extra_tui_widgets(self):
+    return [
+        ConditionalContainer(
+            Window(FormattedTextControl("Status: connected"), height=1),
+            filter=Condition(lambda: self._show_status),
+        ),
+    ]</code></pre>
+<h3><code>_register_extra_tui_keybindings(kb, *, input_area)</code></h3>
+<p>بعد از آن‌که هرمس کلیدهای میان‌بر خودش را ثبت کرد و قبل از ساخته‌شدن چیدمان، فراخوانی می‌شود. کلیدهای میان‌برتان را به <code>kb</code> اضافه کنید.</p>
+<pre dir="ltr"><code>def _register_extra_tui_keybindings(self, kb, *, input_area):
+    pass  # پیش‌فرض: بدون کلیدمیان‌بر اضافه</code></pre>
+<p>پارامترها:</p>
+<ul>
+<li><strong><code>kb</code></strong> — نمونهٔ <code>KeyBindings</code> برای اپلیکیشن prompt_toolkit</li>
+<li><strong><code>input_area</code></strong> — ویجت اصلی <code>TextArea</code>، اگر لازم باشد ورودی کاربر را بخوانید یا دست‌کاری کنید</li>
+</ul>
+<pre dir="ltr"><code>def _register_extra_tui_keybindings(self, kb, *, input_area):
+    cli_ref = self
+
+    @kb.add("f3")
+    def _clear_input(event):
+        input_area.text = ""
+
+    @kb.add("f4")
+    def _insert_template(event):
+        input_area.text = "/search "</code></pre>
+<p><strong>از تداخل با کلیدهای میان‌بر داخلی خودداری کنید</strong>: <code>Enter</code> (ارسال)، <code>Escape Enter</code> (خط جدید)، <code>Ctrl-C</code> (وقفه)، <code>Ctrl-D</code> (خروج)، <code>Tab</code> (پذیرش پیشنهاد خودکار). کلیدهای F2 به بالا و ترکیب‌های Ctrl عموماً امن‌اند.</p>
+<h3><code>_build_tui_layout_children(**widgets)</code></h3>
+<p>فقط وقتی این را بازنویسی کنید که به کنترل کامل بر ترتیب ویجت‌ها نیاز دارید. بیشتر گسترش‌ها باید به‌جایش از <code>_get_extra_tui_widgets()</code> استفاده کنند.</p>
+<pre dir="ltr"><code>def _build_tui_layout_children(self, *, sudo_widget, secret_widget,
+    approval_widget, clarify_widget, model_picker_widget=None,
+    spinner_widget=None, spacer, status_bar, input_rule_top,
+    image_bar, input_area, input_rule_bot, voice_status_bar,
+    completions_menu) -&gt; list:</code></pre>
+<p>پیاده‌سازی پیش‌فرض این را برمی‌گرداند (هر ویجتِ <code>None</code> فیلتر می‌شود):</p>
+<pre dir="ltr"><code>[
+    Window(height=0),       # لنگر
+    sudo_widget,            # پرامپت رمز sudo (شرطی)
+    secret_widget,          # پرامپت ورودی رمز (شرطی)
+    approval_widget,        # تأیید فرمان خطرناک (شرطی)
+    clarify_widget,         # رابط پرسش شفاف‌سازی (شرطی)
+    model_picker_widget,    # پوشش انتخابگر مدل (شرطی)
+    spinner_widget,         # اسپینر فکر کردن (شرطی)
+    spacer,                 # فضای عمودی باقی‌مانده را پر می‌کند
+    *self._get_extra_tui_widgets(),  # ویجت‌های شما اینجا قرار می‌گیرند
+    status_bar,             # خط وضعیت مدل/توکن/زمینه
+    input_rule_top,         # ─── حاشیهٔ بالای ورودی
+    image_bar,              # نشانگر تصاویر پیوست‌شده
+    input_area,             # ورودی متنی کاربر
+    input_rule_bot,         # ─── حاشیهٔ پایین ورودی
+    voice_status_bar,       # وضعیت حالت صوتی (شرطی)
+    completions_menu,       # منوی کشویی تکمیل خودکار
+]</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> نمودار چیدمان</h2>
+<p>چیدمان پیش‌فرض از بالا به پایین:</p>
+<ol>
+<li><strong>ناحیهٔ خروجی</strong> — تاریخچهٔ گفتگوی اسکرول‌شونده</li>
+<li><strong>فاصله‌انداز</strong></li>
+<li><strong>ویجت‌های اضافه</strong> — از <code>_get_extra_tui_widgets()</code></li>
+<li><strong>نوار وضعیت</strong> — مدل، درصد زمینه، زمان سپری‌شده</li>
+<li><strong>نوار تصویر</strong> — تعداد تصاویر پیوست‌شده</li>
+<li><strong>ناحیهٔ ورودی</strong> — پرامپت کاربر</li>
+<li><strong>وضعیت صدا</strong> — نشانگر ضبط</li>
+<li><strong>منوی تکمیل‌ها</strong> — پیشنهادهای تکمیل خودکار</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> نکته‌ها</h2>
+<ul>
+<li><strong>نمایش را بی‌اعتبار کنید</strong> بعد از تغییر وضعیت: برای راه‌اندازی بازترسیم prompt_toolkit، <code>self._invalidate()</code> را صدا بزنید.</li>
+<li><strong>دسترسی به وضعیت ایجنت</strong>: <code>self.agent</code>، <code>self.model</code> و <code>self.conversation_history</code> همگی در دسترس‌اند.</li>
+<li><strong>استایل‌های سفارشی</strong>: <code>_build_tui_style_dict()</code> را بازنویسی کنید و ورودی‌هایی برای کلاس‌های استایل سفارشی‌تان اضافه کنید.</li>
+<li><strong>فرمان‌های اسلش</strong>: <code>process_command()</code> را بازنویسی کنید، فرمان‌های خودتان را پردازش کنید و برای بقیهٔ موارد <code>super().process_command(cmd)</code> را صدا بزنید.</li>
+<li><strong><code>run()</code> را بازنویسی نکنید</strong> مگر آن‌که واقعاً ضروری باشد — هوک‌های گسترش دقیقاً برای اجتناب از همان جفت‌شدگی وجود دارند.</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="creating-skills.html"><span class="dir">→ قبلی</span><span class="ttl">ساخت مهارت</span></a>
+  <a class="next" href="acp-internals.html"><span class="dir">بعدی ←</span><span class="ttl">درون‌مایهٔ ACP</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/extending-the-cli" target="_blank" rel="noopener">Extending the CLI</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

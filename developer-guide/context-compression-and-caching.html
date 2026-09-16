@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>فشرده‌سازی و کش زمینه — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/context-compression-and-caching" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>فشرده‌سازی و کش زمینه</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>فشرده‌سازی و کش زمینه</h1>
+<p>Hermes Agent از یک سامانهٔ فشرده‌سازی دوگانه و کش پرامپت Anthropic برای مدیریت بهینهٔ مصرف پنجرهٔ زمینه در گفتگوهای طولانی استفاده می‌کند.</p>
+<p>فایل‌های منبع: <code>agent/context_engine.py</code> (ABC)، <code>agent/context_compressor.py</code> (موتور پیش‌فرض)، <code>agent/prompt_caching.py</code>، <code>gateway/run.py</code> (بهداشت نشست)، <code>run_agent.py</code> (جستجو برای <code>_compress_context</code>)</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> موتور زمینهٔ قابل‌تعویض</h2>
+<p>مدیریت زمینه بر پایهٔ ABC به نام <code>ContextEngine</code> (<code>agent/context_engine.py</code>) ساخته شده است. <code>ContextCompressor</code> داخلی پیاده‌سازی پیش‌فرض است، اما پلاگین‌ها می‌توانند آن را با موتورهای جایگزین (مثلاً Lossless Context Management) عوض کنند.</p>
+<pre dir="ltr"><code>context:
+  engine: "compressor"    # پیش‌فرض — خلاصه‌سازیِ با اتلافِ داخلی
+  engine: "lcm"           # مثال — پلاگینی که زمینهٔ بدون اتلاف فراهم می‌کند</code></pre>
+<p>موتور مسئول این کارها است:</p>
+<ul>
+<li>تصمیم‌گیری دربارهٔ زمان فعال‌شدن فشرده‌سازی (<code>should_compress()</code>)</li>
+<li>انجام فشرده‌سازی (<code>compress()</code>)</li>
+<li>در صورت نیاز در اختیار گذاشتن ابزارهایی که ایجنت می‌تواند فراخوانی کند (مثلاً <code>lcm_grep</code>)</li>
+<li>پیگیری مصرف توکن از پاسخ‌های API</li>
+</ul>
+<p>انتخاب موتور از طریق <code>context.engine</code> در <code>config.yaml</code> و بر اساس پیکربندی انجام می‌شود. ترتیب حل‌شدن:</p>
+<ol>
+<li>بررسی پوشهٔ <code>plugins/context_engine/&lt;name&gt;/</code></li>
+<li>بررسی سامانهٔ عمومی پلاگین (<code>register_context_engine()</code>)</li>
+<li>بازگشت به <code>ContextCompressor</code> داخلی</li>
+</ol>
+<p>موتورهای پلاگینی <strong>هرگز به‌طور خودکار فعال نمی‌شوند</strong> — کاربر باید صریحاً <code>context.engine</code> را روی نام پلاگین تنظیم کند. مقدار پیش‌فرض <code>"compressor"</code> همیشه از موتور داخلی استفاده می‌کند.</p>
+<p>پیکربندی از طریق <code>hermes plugins</code> و سپس Provider Plugins و Context Engine، یا با ویرایش مستقیم <code>config.yaml</code>.</p>
+<p>برای ساخت پلاگین موتور زمینه، به <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/context-engine-plugin" target="_blank" rel="noopener">پلاگین موتور زمینه</a> نگاه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> سامانهٔ فشرده‌سازی دوگانه</h2>
+<p>هرمس دو لایهٔ فشرده‌سازی جداگانه دارد که مستقل از هم کار می‌کنند:</p>
+<pre dir="ltr"><code>                     ┌──────────────────────────┐
+  Incoming message   │   Gateway Session Hygiene │  Fires at 85% of context
+  ─────────────────► │   (pre-agent, rough est.) │  Safety net for large sessions
+                     └─────────────┬────────────┘
+                                   │
+                                   ▼
+                     ┌──────────────────────────┐
+                     │   Agent ContextCompressor │  Fires at 50% of context (default)
+                     │   (in-loop, real tokens)  │  Normal context management
+                     └──────────────────────────┘</code></pre>
+<h3>۱. بهداشت نشست گیت‌وی (آستانهٔ ۸۵٪)</h3>
+<p>در <code>gateway/run.py</code> قرار دارد (جستجو برای <code>Session hygiene: auto-compress</code>). این یک <strong>تور ایمنی</strong> است که قبل از پردازش پیام توسط ایجنت اجرا می‌شود. وقتی نشست‌ها بین نوبت‌ها بیش از حد بزرگ شوند (مثلاً انباشت یک‌شبه در Telegram/Discord) از خطاهای API جلوگیری می‌کند.</p>
+<ul>
+<li><strong>آستانه</strong>: ثابت روی ۸۵٪ طول زمینهٔ مدل</li>
+<li><strong>منبع توکن</strong>: ترجیحاً توکن‌های واقعیِ گزارش‌شده از API در نوبت آخر؛ در غیر این صورت بازگشت به تخمین تقریبی مبتنی بر کاراکتر (<code>estimate_messages_tokens_rough</code>)</li>
+<li><strong>فعال‌شدن</strong>: فقط وقتی <code>len(history) &gt;= 4</code> باشد و فشرده‌سازی فعال باشد</li>
+<li><strong>هدف</strong>: گرفتن نشست‌هایی که از فشرده‌ساز خودِ ایجنت فرار کرده‌اند</li>
+</ul>
+<p>آستانهٔ بهداشت گیت‌وی عمداً بالاتر از فشرده‌ساز ایجنت گذاشته شده است. تنظیم آن روی ۵۰٪ (مثل خود ایجنت) باعث فشرده‌سازی زودهنگام در هر نوبت از نشست‌های طولانی گیت‌وی می‌شد.</p>
+<h3>۲. ContextCompressor ایجنت (آستانهٔ ۵۰٪، قابل‌پیکربندی)</h3>
+<p>در <code>agent/context_compressor.py</code> قرار دارد. این <strong>سامانهٔ اصلی فشرده‌سازی</strong> است که داخل حلقهٔ ابزار ایجنت اجرا می‌شود و به شمارش‌های دقیق توکنِ گزارش‌شده از API دسترسی دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> پیکربندی</h2>
+<p>همهٔ تنظیمات فشرده‌سازی از <code>config.yaml</code> و زیر کلید <code>compression</code> خوانده می‌شوند:</p>
+<pre dir="ltr"><code>compression:
+  enabled: true              # فعال/غیرفعال کردن فشرده‌سازی (پیش‌فرض: true)
+  threshold: 0.50            # کسری از پنجرهٔ زمینه (پیش‌فرض: 0.50 = 50%)
+  # model_thresholds:        # بازنویسی آستانه به‌ازای هر مدل (تطبیق زیررشته،
+  #   "glm-5.2": 0.40        # کلید بلندتر برنده است). بخش «بازنویسی آستانهٔ
+  #   "claude-sonnet": 0.35  # به‌ازای هر مدل» را در پایین ببینید.
+  target_ratio: 0.20         # چه کسری از آستانه به‌عنوان دُم نگه داشته شود (پیش‌فرض: 0.20)
+  tail_mode: legacy          # سیاست نگه‌داری دُم: legacy | lean (پیش‌فرض: legacy)
+  protect_last_n: 20         # حداقل پیام‌های محافظت‌شدهٔ دُم (پیش‌فرض: 20)
+  min_tail_user_messages: 1  # پیام‌های واقعی کاربر که در دُم تضمین می‌شوند (پیش‌فرض: 1)
+  codex_gpt55_autoraise: true  # gpt-5.5 روی Codex OAuth: بالا بردن ماشه تا 85% (پیش‌فرض: true)
+  codex_gpt55_autoraise_notice: true  # نمایش اعلان یک‌بارهٔ افزایش خودکار (پیش‌فرض: true)
+  codex_app_server_auto: native  # native|hermes|off برای فشرده‌سازی رشتهٔ Codex app-server
+  codex_responses_native: false  # gpt-5.6 روی OpenAI/Codex مستقیم: فشرده‌سازی سمت سرور (داوطلبانه)
+  codex_responses_compact_threshold: 200000  # ماشهٔ فشرده‌سازی سمت سرور (توکن‌های ورودی)
+  in_place: true             # فشرده‌سازی روی همان شناسهٔ نشست، بدون چرخش (پیش‌فرض: true)
+
+# مدل/ارائه‌دهندهٔ خلاصه‌سازی زیر auxiliary پیکربندی می‌شود:
+auxiliary:
+  compression:
+    model: null              # بازنویسی مدل برای خلاصه‌ها (پیش‌فرض: تشخیص خودکار)
+    provider: auto           # ارائه‌دهنده: "auto"، "openrouter"، "nous"، "main" و غیره
+    base_url: null           # نقطهٔ پایانی سفارشی سازگار با OpenAI</code></pre>
+<h3>جزئیات پارامترها</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>پارامتر</th><th>پیش‌فرض</th><th>بازه</th><th>توضیحات</th></tr></thead>
+  <tbody>
+    <tr><td><code>threshold</code></td><td><code>0.50</code></td><td>0.0-1.0</td><td>فشرده‌سازی وقتی فعال می‌شود که توکن‌های پرامپت ≥ <code>threshold × context_length</code> باشد</td></tr>
+    <tr><td><code>model_thresholds</code></td><td><code>{}</code></td><td>map</td><td>بازنویسی‌های <code>threshold</code> به‌ازای هر مدل. کلیدها به‌صورت زیررشته با نام مدل تطبیق داده می‌شوند (طولانی‌ترین تطبیق برنده است). کف زمینهٔ کوچک همچنان روی آن اعمال می‌شود (پایین را ببینید)</td></tr>
+    <tr><td><code>target_ratio</code></td><td><code>0.20</code></td><td>0.10-0.80</td><td>بودجهٔ توکنِ محافظت از دُم را کنترل می‌کند: <code>threshold_tokens × target_ratio</code> (فقط در حالت legacy — حالت <code>lean</code> از محدودکنندهٔ خودش استفاده می‌کند)</td></tr>
+    <tr><td><code>tail_mode</code></td><td><code>legacy</code></td><td><code>legacy</code>، <code>lean</code></td><td>سیاست نگه‌داری دُم. حالت <code>legacy</code> دُمی هم‌اندازهٔ <code>target_ratio</code> را به‌صورت عیناً (تحت‌اللفظی) نگه می‌دارد (روی مدل‌های با پنجرهٔ بزرگ حدود 100K توکن یا بیشتر). حالت <code>lean</code> دُمی محدودشده به اندازهٔ <code>2.5% × context window</code> نگه می‌دارد (کف 10K، سقف 25K) و به‌جای آن پیوستگی را در خلاصه حمل می‌کند: چکیده‌های تکه‌تکه‌شده‌ای که شناسه‌ها را حفظ می‌کنند از ناحیهٔ فشرده‌شده، یک فهرست لنگرِ استخراج‌شدهٔ ماشینی (شماره‌های PR، SHAها، مسیرها، رشته‌های خطا — با regex، هرگز بازگویی نمی‌شوند)، هر پیام واقعی کاربر به‌صورت عیناً نقل‌شده (با بودجهٔ جدید-به-قدیم)، و یک اشاره‌گر بازیابی <code>session_search</code> تا ایجنت بتواند به هر چیز خلاصه‌شده دوباره دسترسی پیدا کند. نتیجه روی نشست‌های واقعی 500K توکنی: حدود 49K نگه‌داشته‌شده در مقابل حدود 162K، با بازیابیِ بالاتر وقتی با سازوکار بازیابی همراه باشد (به <code>evals/compaction/results/</code> نگاه کنید). هزینه‌اش چند فراخوانی اضافهٔ خلاصه‌ساز در مرز فشرده‌سازی است. نتایج قدیمی ابزار داخل دُمِ lean به استاب‌های یک‌خطیِ حامل اشاره‌گر بازیابی تنزل می‌یابند</td></tr>
+    <tr><td><code>protect_last_n</code></td><td><code>20</code></td><td>≥1</td><td>حداقل تعداد پیام‌های اخیر که همیشه حفظ می‌شوند</td></tr>
+    <tr><td><code>min_tail_user_messages</code></td><td><code>1</code></td><td>≥1</td><td>حداقل تعداد پیام‌های واقعی (قابل‌اقدام) کاربر که تضمین می‌شود در دُمِ فشرده‌نشده باقی بماند. <code>1</code> = همان لنگرِ تک‌پیامِ آخرِ کاربرِ موجود (پیش‌فرضِ حفظ رفتار). مثلاً به <code>3</code> بالا ببرید تا 3 نوبت آخرِ واقعی کاربر عیناً حفظ شود، حتی وقتی خروجی‌های حجیم ابزار بودجهٔ توکن دُم را پر کرده‌اند. اکوهای خالی پلتفرم، پیام‌های تحویل دست‌به‌دستِ فشرده‌سازی و ردیف‌های ادامهٔ ساختگی هرگز در N شمرده نمی‌شوند. این تضمین بر بودجهٔ توکن دُم غلبه دارد — وقتی لنگر برش را عقب بکشد، دُم ممکن است از بودجه فراتر رود</td></tr>
+    <tr><td><code>protect_first_n</code></td><td><code>3</code></td><td>(هاردکد)</td><td>پرامپت سیستمی + اولین تبادل همیشه حفظ می‌شوند</td></tr>
+    <tr><td><code>idle_compact_after_seconds</code></td><td><code>0</code></td><td>≥0 ثانیه</td><td>داوطلبانه: وقتی نشست پس از این تعداد ثانیه بیکاری از سر گرفته شود، از همان ابتدا فشرده‌سازی کن (0 = غیرفعال). وقتی زمینه ≤ <code>threshold × target_ratio</code> باشد رد می‌شود؛ گاردهای cooldown/anti-thrash/قفل را رعایت می‌کند</td></tr>
+    <tr><td><code>codex_gpt55_autoraise</code></td><td><code>true</code></td><td>bool</td><td>بالا بردن ماشه تا 85% برای gpt-5.5 در مسیر ChatGPT Codex OAuth (پایین را ببینید). برای حفظ <code>threshold</code> سراسری، <code>false</code> بگذارید</td></tr>
+    <tr><td><code>codex_gpt55_autoraise_notice</code></td><td><code>true</code></td><td>bool</td><td>نمایش اعلان یک‌بارهٔ افزایش خودکار Codex gpt-5.5. برای حفظ افزایش خودکار 85% ولی حذف بنر، <code>false</code> بگذارید</td></tr>
+    <tr><td><code>codex_app_server_auto</code></td><td><code>native</code></td><td><code>native</code>، <code>hermes</code>، <code>off</code></td><td>حالت فشرده‌سازی رشته برای نشست‌های Codex app-server (پایین را ببینید)</td></tr>
+    <tr><td><code>codex_responses_native</code></td><td><code>false</code></td><td>bool</td><td>فعال‌کردن فشرده‌سازی سمت سرور OpenAI روی Responses API. فقط برای مدل‌های خانوادهٔ gpt-5.6 روی OpenAI API مستقیم یا اشتراک ChatGPT Codex درگیر می‌شود (پایین را ببینید)</td></tr>
+    <tr><td><code>codex_responses_compact_threshold</code></td><td><code>200000</code></td><td>≥1 توکن</td><td>ماشهٔ فشرده‌سازی سمت سرور بر حسب توکن ورودی. هنگام درخواست زیر آستانهٔ فشرده‌سازی محلی محدود می‌شود تا سرور اول فشرده‌سازی کند</td></tr>
+    <tr><td><code>in_place</code></td><td><code>true</code></td><td>bool</td><td>فشرده‌سازی روی همان شناسهٔ نشست به‌جای چرخش به شناسهٔ جدید (پایین را ببینید)</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>فشرده‌سازی درجا (شناسهٔ نشست یکتا و پایدار)</h3>
+<p>با <code>compression.in_place: true</code> (پیش‌فرض)، هر فشرده‌سازی <strong>فهرست زندهٔ پیام‌ها را روی همان شناسهٔ نشست بازنویسی می‌کند</strong>: پرامپت سیستمی از نو ساخته می‌شود، بخش میانیِ خلاصه‌شده جایگزین می‌شود و نوبت‌های پیش از فشرده‌سازی زیر همان شناسه به‌صورت نرم آرشیو می‌شوند (<code>active=0, compacted=1</code> در ذخیره‌ساز نشست) — همچنان از طریق <code>session_search</code> قابل‌جستجو و قابل‌بازیابی است و هرگز حذف نمی‌شود. هیچ زنجیرهٔ <code>parent_session_id</code> و هیچ شماره‌گذاری مجددِ <code>name #N</code> وجود ندارد؛ یک گفتگو در تمام عمر خود یک شناسهٔ بادوام نگه می‌دارد. این کار خوشهٔ باگ‌های چرخش نشست را از بین برد (از دست رفتن وضعیت <code>/goal</code>، نشست‌های بی‌سرپرست، شکاف‌های جستجو در مرزها).</p>
+<p>مصرف‌کنندگان به‌جای دیف‌کردن شناسه‌های نشست، خود حالت را مشاهده می‌کنند:</p>
+<ul>
+<li>رویداد <code>session:compress</code> شامل <code>in_place: true/false</code> و <code>old_session_id</code> است (در حالت درجا رشتهٔ خالی، چون شناسهٔ قدیمی وجود ندارد).</li>
+<li>گیت‌وی مبنای مدیریت رونوشت گفتگو را از فلگِ مستقل از چرخشِ ایجنت یعنی <code>_last_compaction_in_place</code> می‌گیرد، نه از دیفِ تغییر شناسه.</li>
+</ul>
+<p>برای بازگرداندن مسیر قدیمیِ چرخشی <code>in_place: false</code> بگذارید؛ در آن حالت هر فشرده‌سازی یک شناسهٔ نشست جدید ثبت می‌کند که از طریق <code>parent_session_id</code> به شناسهٔ قبلی پیوند دارد.</p>
+<h3>بازنویسی آستانه به‌ازای هر مدل</h3>
+<p><code>compression.model_thresholds</code> اجازه می‌دهد فشرده‌سازی را بسته به مدل فعال در نقاط متفاوتی فعال کنید — وقتی بین مدل‌هایی با پنجره‌های زمینهٔ بسیار متفاوت جابه‌جا می‌شوید مفید است (مثلاً مدل با زمینهٔ ۱ میلیون توکنی می‌تواند دیرتر فشرده کند، در حالی که مدل ۱۲۸ هزار توکنی باید زودتر فشرده کند):</p>
+<pre dir="ltr"><code>compression:
+  threshold: 0.50
+  model_thresholds:
+    "glm-5.2": 0.40
+    "glm-5.2-1M": 0.25
+    "claude-sonnet": 0.35</code></pre>
+<p>قواعد حل‌شدن:</p>
+<ul>
+<li>کلیدها بر اساس <strong>تطبیق زیررشته</strong> با نام مدل مقایسه می‌شوند؛ <strong>کلیدِ تطبیق‌یافتهٔ بلندتر برنده است</strong> (برای مدل <code>glm-5.2-1M</code>، کلید <code>glm-5.2-1M</code> بر <code>glm-5.2</code> غلبه می‌کند).</li>
+<li>وقتی هیچ کلیدی تطبیق نکند (یا نقشه خالی باشد)، <code>threshold</code> سراسری اعمال می‌شود.</li>
+<li>بازنویسی با هر تغییر مدل از طریق <code>/model</code> دوباره حل می‌شود؛ رفتن به مدلی بدون کلیدِ تطبیقی به <code>threshold</code> سراسری برمی‌گردد.</li>
+<li><strong>کف زمینهٔ کوچک همچنان روی بازنویسی‌ها اعمال می‌شود</strong> (فقط به بالا): مدل‌هایی با پنجرهٔ زمینهٔ کمتر از ۵۱۲K در <code>0.75</code> کف‌گذاری می‌شوند؛ پس بازنویسیِ زیر کف به <code>0.75</code> بالا برده می‌شود، در حالی که بازنویسیِ بالای آن (مثلاً <code>0.80</code>) برنده است.</li>
+</ul>
+<p>موتورهای زمینهٔ پلاگینی می‌توانند همان منطق حل‌شدن را از طریق <code>from agent.context_compressor import resolve_model_threshold</code> بازاستفاده کنند؛ موتورهایی که <code>update_model()</code> را بازنویسی می‌کنند، سیاست فشرده‌سازی خودشان را دارند و ممکن است این نقشه را نادیده بگیرند.</p>
+<h3>افزایش خودکار آستانه برای gpt-5.5 در Codex</h3>
+<p>بک‌اند ChatGPT Codex OAuth پنجرهٔ زمینهٔ gpt-5.5 را سخت به <strong>۲۷۲K</strong> محدود می‌کند (همین اسلاگ روی API مستقیم OpenAI و OpenRouter مقدار ۱.۰۵M و روی GitHub Copilot مقدار ۴۰۰K را نشان می‌دهد). با ماشهٔ پیش‌فرض ۵۰٪، فشرده‌سازی در حدود ۱۳۶K فعال می‌شد — نصف پنجره‌ای که مدل واقعاً می‌تواند استفاده کند. وقتی مسیر فعال Codex OAuth باشد (<code>provider: openai-codex</code>) و مدل gpt-5.5 باشد، هرمس ماشه را به <strong>۸۵٪</strong> (حدود ۲۳۱K) بالا می‌برد و اعلانی همراه با فرمان انصراف نشان می‌دهد. این اعلان برای هر پروفایل یک‌بار نشان داده می‌شود — یک نشانگر زیر <code>$HERMES_HOME</code> (به نام <code>.codex_gpt55_autoraise_notice</code>) ثبت می‌کند که اجرا شده است، تا راه‌اندازی‌های مکرر ایجنت/نشست (مثلاً هر پیام ورودی گیت‌وی) دوباره صادرش نکنند؛ اگر بعدها آستانهٔ افزایش‌یافته تغییر کند، یک‌بار دیگر اعلان می‌دهد. فقط همین مسیر مشخص تحت تأثیر است؛ gpt-5.5 روی هر ارائه‌دهندهٔ دیگر، <code>threshold</code> سراسری شما را نگه می‌دارد. برای برگشتن به مقدار سراسری:</p>
+<pre dir="ltr"><code>hermes config set compression.codex_gpt55_autoraise false</code></pre>
+<p>برای حفظ افزایش خودکار ۸۵٪ ولی پنهان‌کردن فقط اعلان یک‌باره:</p>
+<pre dir="ltr"><code>hermes config set compression.codex_gpt55_autoraise_notice false</code></pre>
+<h3>واریانت‌های <code>-900k</code> با زمینهٔ بزرگ در Codex (داوطلبانه)</h3>
+<p>بک‌اند ChatGPT Codex برای خانواده‌های gpt-5.4 و gpt-5.6 (Sol/Terra/Luna) پنجرهٔ ۲۷۲K را <em>اعلام</em> می‌کند، اما در واقع حدود ۹۱۱K توکن ورودی را برای حساب‌های اشتراکی ChatGPT می‌پذیرد (راستی‌آزمایی‌شدهٔ زنده در اوت ۲۰۲۶). هرمس برای اسلاگ‌های پایه همان <strong>۲۷۲K اعلام‌شده را پیش‌فرض نگه می‌دارد</strong> — پنجرهٔ بزرگ‌تر یعنی توکن بیشتر در هر درخواست و سوختن بسیار سریع‌ترِ سهمیهٔ اشتراک؛ پس پنجرهٔ بزرگ کاملاً داوطلبانه است.</p>
+<p>برای استفاده از پنجرهٔ بزرگ، واریانت صریح <code>-900k</code> را در <code>/model</code> انتخاب کنید (مثلاً <code>gpt-5.6-sol-900k</code>، <code>gpt-5.6-terra-900k</code>، <code>gpt-5.6-luna-900k</code>، <code>gpt-5.4-900k</code>). این‌ها نام‌های مستعار سمت هرمس هستند: پسوند قبل از ارسال شناسهٔ مدل به بک‌اند حذف می‌شود و حسابداری قیمت/مصرف آن‌ها را مثل مدل پایه می‌بیند. اسلاگ‌هایی که واقعاً ۲۷۲K را اعمال می‌کنند (gpt-5.5، gpt-5.4-mini) واریانت <code>-900k</code> ندارند.</p>
+<p>آستانه‌های فشرده‌سازی تابع پنجره‌اند: اسلاگ‌های پایه (۲۷۲K) همان <strong>افزایش خودکار ۸۵٪</strong> توضیح‌داده‌شدهٔ بالا را می‌گیرند، در حالی که واریانت‌های <code>-900k</code> مقدار سراسری <code>compression.threshold</code> شما را نگه می‌دارند (پیش‌فرض ۵۰٪، حدود ۴۵۰K) — افزایش خودکار برای جلوگیری از هدررفت یک پنجرهٔ کوچک است، چیزی که پنجرهٔ ۹۰۰K به آن نیاز ندارد.</p>
+<h3>فشرده‌سازی رشتهٔ Codex app-server</h3>
+<p>نشست‌های Codex app-server (<code>api_mode: codex_app_server</code> — زمان اجرای CLI/ایجنتِ codex) با همهٔ مسیرهای دیگر فرق دارند: ایجنت codex مالک زمینهٔ رشتهٔ پشتیبان است، پس خلاصه‌ساز کمکیِ هرمس نمی‌تواند آن را کوچک کند — بازنویسی آینهٔ محلیِ رونوشت، رشتهٔ واقعی را تا یک ریست کامل زمینه بدون‌مرز رشد می‌گذارد. برای این زمان اجرا، فشرده‌سازی به‌جای آن از سازوکار خود app-server عبور می‌کند:</p>
+<ul>
+<li>فشرده‌سازی دستی (<code>/compress</code>) از app-server می‌خواهد رشته را فشرده کند (<code>thread/compact/start</code>) و منتظر کامل‌شدن نوبت فشرده‌سازی می‌ماند.</li>
+<li>فشرده‌سازی خودکار با <code>compression.codex_app_server_auto</code> کنترل می‌شود: مقدار پیش‌فرض <code>native</code> اجازه می‌دهد خود app-server تصمیم بگیرد چه زمانی فشرده کند و هرمس رویدادهای فشرده‌سازیِ حاصل را ثبت می‌کند (شمارنده‌های فشرده‌سازی، رویدادهای نشست). مقدار <code>hermes</code> را بگذارید تا آستانهٔ فشرده‌سازی هرمس، فشرده‌سازی app-server را آغاز کند، یا <code>off</code> تا فشرده‌سازی خودکارِ آغازشده توسط هرمس کاملاً غیرفعال شود (codex همچنان می‌تواند به‌صورت بومی فشرده کند).</li>
+</ul>
+<p>رونوشت محلی هرمس روی این زمان اجرا هرگز بازنویسی نمی‌شود — state.db مرز فشرده‌سازی را ثبت می‌کند در حالی که رونوشتِ قابل‌مشاهده دست‌نخورده می‌ماند. همهٔ مسیرهای دیگر (از جمله نشست‌های چت Codex OAuth) از فشرده‌ساز خلاصهٔ هرمس استفاده می‌کنند.</p>
+<h3>فشرده‌سازی بومی Responses (gpt-5.6 روی OpenAI مستقیم / اشتراک Codex)</h3>
+<p>Responses API در OpenAI از فشرده‌سازی سمت سرور پشتیبانی می‌کند: وقتی درخواست شامل <code>context_management: [{type: "compaction", compact_threshold: N}]</code> باشد و ورودی رندرشده از N توکن عبور کند، سرور زمینهٔ قدیمی‌تر را به یک آیتم خروجی رمزنگاری‌شده و غیرقابل‌خواندن به نام <code>compaction</code> هرس می‌کند. هرمس آن آیتم را به sidecar پخشِ موجودِ پیام دستیار اضافه می‌کند و در نوبت‌های بعدی برمی‌گرداند تا جایگزین تاریخچهٔ هرس‌شده باشد — بازیابی بلندمدت بدون گذر خلاصه‌سازی سمت کلاینت، و سازگار با ZDR (<code>store: false</code>، بدون <code>previous_response_id</code>).</p>
+<p>با <code>compression.codex_responses_native: true</code> فعالش کنید. این گیت عمداً باریک است و در هر درخواست دوباره بررسی می‌شود:</p>
+<ul>
+<li><strong>مدل‌ها:</strong> فقط خانوادهٔ gpt-5.6. مدل‌های دیگر وقتی این فیلد حاضر باشد سمت سرور خطا می‌دهند (gpt-5.1/5.2 یا HTTP 500 برمی‌گردانند یا استریم را قفل می‌کنند — هیچ ردِ ساختاریافته‌ای برای سوییچ به مسیر جایگزین وجود ندارد، راستی‌آزمایی‌شدهٔ زنده در اوت ۲۰۲۶).</li>
+<li><strong>مسیرها:</strong> فقط <code>api.openai.com</code> (کلید OpenAI API) یا بک‌اند ChatGPT Codex (OAuth اشتراک Codex). xAI، GitHub/Copilot، OpenRouter، رله‌ها و سرورهای محلی هرگز این فیلد را نمی‌بینند.</li>
+</ul>
+<p>همهٔ چیزهای دیگر دربارهٔ فشرده‌سازی بدون تغییر می‌ماند: فشرده‌ساز محلی به‌عنوان مالک پشتیبان مسلح می‌ماند (آستانهٔ بومی حدود ۸K توکن زیر ماشهٔ محلی محدود می‌شود تا سرور اول فشرده‌سازی کند)، و یک ردِ ساختاریافتهٔ ارائه‌دهنده نسبت به این فیلد، فشرده‌سازی بومی را برای آن نشست غیرفعال می‌کند و درخواست را بدون آن دوباره امتحان می‌کند. تغییر نشست به مدل یا مسیری که واجد شرایط نیست، به‌سادگی ارسال فیلد را متوقف می‌کند — چک‌پوینت‌های ثبت‌شده با گارد موجودِ بین-صادرکننده هنگام تغییر نقطهٔ پایانی از پخش حذف می‌شوند.</p>
+<h3>مقادیر محاسبه‌شده (برای مدلی با زمینهٔ ۲۰۰K در تنظیمات پیش‌فرض)</h3>
+<pre dir="ltr"><code>context_length       = 200,000
+threshold_tokens     = 200,000 × 0.50 = 100,000
+tail_token_budget    = 100,000 × 0.20 = 20,000
+max_summary_tokens   = min(200,000 × 0.05, 12,000) = 10,000</code></pre>
+<div class="callout note">
+  <div class="callout-title">ℹ️ آستانه از پنجرهٔ زمینهٔ مدل اصلی (MAIN) مشتق می‌شود</div>
+  <p><code>threshold_tokens</code> همیشه <code>threshold × context_length</code> است، که در آن <code>context_length</code> پنجرهٔ زمینهٔ <strong>مدل اصلی ایجنت</strong> است — هرگز مدل کمکی/خلاصه‌ساز. روی مدلی با ۲۶۲٬۱۴۴ توکن در پیش‌فرض <code>0.50</code>، آستانه برابر <code>262,144 × 0.50 = 131,072</code> است. نزدیک‌بودن این عدد به «زمینهٔ ۱۲۸K» رایج، تصادفِ درصدها است، نه نشانهٔ این‌که پنجرهٔ مدل کمکی ماشه باشد. پنجرهٔ زمینهٔ مدل کمکی موضوع جداگانه‌ای است — هشدار «طول زمینهٔ مدل خلاصه‌ساز» را در پایین ببینید تا بدانید این پنجره بر این تأثیر می‌گذارد که آیا اصلاً خلاصه‌ای تولید می‌شود، نه این‌که فشرده‌سازی کِی فعال شود.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> الگوریتم فشرده‌سازی</h2>
+<p>متد <code>ContextCompressor.compress()</code> از یک الگوریتم ۴فازی پیروی می‌کند:</p>
+<h3>فاز ۱: هرس نتایج قدیمی ابزار (ارزان، بدون فراخوانی LLM)</h3>
+<p>نتایج قدیمی ابزار (بیش از ۲۰۰ کاراکتر) بیرون از دُمِ محافظت‌شده با این جایگزین می‌شوند:</p>
+<pre dir="ltr"><code>[Old tool output cleared to save context space]</code></pre>
+<p>این یک گذر اولیهٔ ارزان است که از خروجی‌های پرحجم ابزار (محتوای فایل‌ها، خروجی ترمینال، نتایج جستجو) توکن‌های قابل‌توجهی ذخیره می‌کند.</p>
+<h3>فاز ۲: تعیین مرزها</h3>
+<pre dir="ltr"><code>┌─────────────────────────────────────────────────────────────┐
+│  Message list                                               │
+│                                                             │
+│  [0..2]  ← protect_first_n (system + first exchange)        │
+│  [3..N]  ← middle turns → SUMMARIZED                        │
+│  [N..end] ← tail (by token budget OR protect_last_n)        │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<p>محافظت از دُم <strong>مبتنی بر بودجهٔ توکن</strong> است: از انتهای فهرست به عقب می‌رود و توکن‌ها را آن‌قدر جمع می‌کند تا بودجه تمام شود. اگر بودجه پیام‌های کمتری را پوشش دهد، به شمار ثابت <code>protect_last_n</code> برمی‌گردد.</p>
+<p>مرزها طوری هم‌تراز می‌شوند که گروه‌های tool_call/tool_result از هم نپاشند. متد <code>_align_boundary_backward()</code> از نتایج متوالی ابزار عبور می‌کند تا به پیام دستیارِ والد برسد و گروه‌ها سالم بمانند.</p>
+<h3>فاز ۳: تولید خلاصهٔ ساختاریافته</h3>
+<div class="callout warn">
+  <div class="callout-title">⚠️ طول زمینهٔ مدل خلاصه‌ساز</div>
+  <p>مدل خلاصه‌ساز باید پنجرهٔ زمینه‌ای <strong>دست‌کم هم‌اندازهٔ</strong> مدل اصلی ایجنت داشته باشد. کل بخش میانی در یک فراخوانی <code>call_llm(task="compression")</code> به مدل خلاصه‌ساز فرستاده می‌شود. اگر زمینهٔ مدل خلاصه‌ساز کوچک‌تر باشد، API خطای طول زمینه برمی‌گرداند — <code>_generate_summary()</code> آن را می‌گیرد، هشدار لاگ می‌کند و <code>None</code> برمی‌گرداند. فشرده‌ساز سپس نوبت‌های میانی را <strong>بدون خلاصه</strong> حذف می‌کند و زمینهٔ گفتگو بی‌سروصدا از دست می‌رود. این رایج‌ترین علت افت کیفیت فشرده‌سازی است.</p>
+</div>
+<p>نوبت‌های میانی با LLM کمکی و یک قالب ساختاریافته خلاصه می‌شوند:</p>
+<pre dir="ltr"><code>## Goal
+[What the user is trying to accomplish]
+
+## Constraints &amp; Preferences
+[User preferences, coding style, constraints, important decisions]
+
+## Progress
+### Done
+[Completed work — specific file paths, commands run, results]
+### In Progress
+[Work currently underway]
+### Blocked
+[Any blockers or issues encountered]
+
+## Key Decisions
+[Important technical decisions and why]
+
+## Relevant Files
+[Files read, modified, or created — with brief note on each]
+
+## Next Steps
+[What needs to happen next]
+
+## Critical Context
+[Specific values, error messages, configuration details]</code></pre>
+<p>بودجهٔ خلاصه با حجم محتوایی که فشرده می‌شود مقیاس می‌گیرد:</p>
+<ul>
+<li>فرمول: <code>content_tokens × 0.20</code> (ثابت <code>_SUMMARY_RATIO</code>)</li>
+<li>حداقل: ۲٬۰۰۰ توکن</li>
+<li>حداکثر: <code>min(context_length × 0.05, 12,000)</code> توکن</li>
+</ul>
+<h3>فاز ۴: سرهم‌بندی پیام‌های فشرده‌شده</h3>
+<p>فهرست پیام‌های فشرده‌شده چنین است:</p>
+<ol>
+<li>پیام‌های سر (با یادداشتی که در اولین فشرده‌سازی به پرامپت سیستمی اضافه می‌شود)</li>
+<li>پیام خلاصه (نقش طوری انتخاب می‌شود که نقضِ نقش‌های یکسانِ متوالی پیش نیاید)</li>
+<li>پیام‌های دُم (بدون تغییر)</li>
+</ol>
+<p>جفت‌های بی‌قرینهٔ tool_call/tool_result با <code>_sanitize_tool_pairs()</code> پاک‌سازی می‌شوند:</p>
+<ul>
+<li>نتایج ابزاری که به فراخوانی‌های حذف‌شده ارجاع می‌دهند ← حذف می‌شوند</li>
+<li>فراخوانی‌هایی که نتایجشان حذف شده ← یک استابِ نتیجه تزریق می‌شود</li>
+</ul>
+<h3>فشرده‌سازی مجدد تکراری</h3>
+<p>در فشرده‌سازی‌های بعدی، خلاصهٔ قبلی همراه با دستورالعملِ <strong>به‌روزرسانی</strong> آن به LLM داده می‌شود، نه خلاصه‌کردن از صفر. این کار اطلاعات را در چندین فشرده‌سازی حفظ می‌کند — موارد از «در حال انجام» به «انجام‌شده» منتقل می‌شوند، پیشرفت جدید اضافه می‌شود و اطلاعات منسوخ حذف می‌شود.</p>
+<p>فیلد <code>_previous_summary</code> روی نمونهٔ فشرده‌ساز، متن آخرین خلاصه را برای همین منظور نگه می‌دارد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> مثال قبل/بعد</h2>
+<h3>قبل از فشرده‌سازی (۴۵ پیام، حدود ۹۵K توکن)</h3>
+<pre dir="ltr"><code>[0] system:    "You are a helpful assistant..." (system prompt)
+[1] user:      "Help me set up a FastAPI project"
+[2] assistant: &lt;tool_call&gt; terminal: mkdir project &lt;/tool_call&gt;
+[3] tool:      "directory created"
+[4] assistant: &lt;tool_call&gt; write_file: main.py &lt;/tool_call&gt;
+[5] tool:      "file written (2.3KB)"
+    ... 30 more turns of file editing, testing, debugging ...
+[38] assistant: &lt;tool_call&gt; terminal: pytest &lt;/tool_call&gt;
+[39] tool:      "8 passed, 2 failed\n..."  (5KB output)
+[40] user:      "Fix the failing tests"
+[41] assistant: &lt;tool_call&gt; read_file: tests/test_api.py &lt;/tool_call&gt;
+[42] tool:      "import pytest\n..."  (3KB)
+[43] assistant: "I see the issue with the test fixtures..."
+[44] user:      "Great, also add error handling"</code></pre>
+<h3>بعد از فشرده‌سازی (۲۵ پیام، حدود ۴۵K توکن)</h3>
+<pre dir="ltr"><code>[0] system:    "You are a helpful assistant...
+               [Note: Some earlier conversation turns have been compacted...]"
+[1] user:      "Help me set up a FastAPI project"
+[2] assistant: "[CONTEXT COMPACTION] Earlier turns were compacted...
+
+               ## Goal
+               Set up a FastAPI project with tests and error handling
+
+               ## Progress
+               ### Done
+               - Created project structure: main.py, tests/, requirements.txt
+               - Implemented 5 API endpoints in main.py
+               - Wrote 10 test cases in tests/test_api.py
+               - 8/10 tests passing
+
+               ### In Progress
+               - Fixing 2 failing tests (test_create_user, test_delete_user)
+
+               ## Relevant Files
+               - main.py — FastAPI app with 5 endpoints
+               - tests/test_api.py — 10 test cases
+               - requirements.txt — fastapi, pytest, httpx
+
+               ## Next Steps
+               - Fix failing test fixtures
+               - Add error handling"
+[3] user:      "Fix the failing tests"
+[4] assistant: &lt;tool_call&gt; read_file: tests/test_api.py &lt;/tool_call&gt;
+[5] tool:      "import pytest\n..."
+[6] assistant: "I see the issue with the test fixtures..."
+[7] user:      "Great, also add error handling"</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> کش پرامپت (Anthropic)</h2>
+<p>منبع: <code>agent/prompt_caching.py</code></p>
+<p>با کش‌کردن پیشوند گفتگو، هزینهٔ توکن‌های ورودی را در گفتگوهای چندنوبتی حدود ۷۵٪ کاهش می‌دهد. از نقاط شکست (breakpoint)‌های <code>cache_control</code> در Anthropic استفاده می‌کند.</p>
+<h3>راهبرد: system_and_3</h3>
+<p>Anthropic حداکثر ۴ نقطهٔ شکست <code>cache_control</code> در هر درخواست اجازه می‌دهد. هرمس از راهبرد «system_and_3» استفاده می‌کند:</p>
+<pre dir="ltr"><code>Breakpoint 1: System prompt           (stable across all turns)
+Breakpoint 2: 3rd-to-last non-system message  ─┐
+Breakpoint 3: 2nd-to-last non-system message   ├─ Rolling window
+Breakpoint 4: Last non-system message          ─┘</code></pre>
+<h3>چطور کار می‌کند</h3>
+<p><code>apply_anthropic_cache_control()</code> از پیام‌ها کپی عمیق می‌گیرد و نشانگرهای <code>cache_control</code> تزریق می‌کند:</p>
+<pre dir="ltr"><code># قالب نشانگر کش
+marker = {"type": "ephemeral"}
+# یا برای TTL یک‌ساعته:
+marker = {"type": "ephemeral", "ttl": "1h"}</code></pre>
+<p>نشانگر بسته به نوع محتوا به شکل متفاوتی اعمال می‌شود:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>نوع محتوا</th><th>محل قرارگیری نشانگر</th></tr></thead>
+  <tbody>
+    <tr><td>محتوای رشته‌ای</td><td>به <code>[{"type": "text", "text": ..., "cache_control": ...}]</code> تبدیل می‌شود</td></tr>
+    <tr><td>محتوای لیستی</td><td>به دیکشنریِ آخرین عنصر اضافه می‌شود</td></tr>
+    <tr><td>None/خالی</td><td>به‌صورت <code>msg["cache_control"]</code> اضافه می‌شود</td></tr>
+    <tr><td>پیام‌های ابزار</td><td>به‌صورت <code>msg["cache_control"]</code> اضافه می‌شود (فقط Anthropic بومی)</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>الگوهای طراحی هماهنگ با کش</h3>
+<ol>
+<li><strong>پرامپت سیستمی پایدار</strong>: پرامپت سیستمی نقطهٔ شکست ۱ است و در همهٔ نوبت‌ها کش می‌شود. از تغییر دادن آن در میانهٔ گفتگو بپرهیزید (فشرده‌سازی فقط در اولین فشرده‌سازی یادداشتی اضافه می‌کند).</li>
+<li><strong>ترتیب پیام‌ها مهم است</strong>: برخورد با کش نیازمند تطبیق پیشوند است. اضافه‌ یا حذف‌کردن پیام در میانه، کشِ همهٔ چیزهای بعد از آن را باطل می‌کند.</li>
+<li><strong>تعامل فشرده‌سازی و کش</strong>: بعد از فشرده‌سازی، کشِ ناحیهٔ فشرده‌شده باطل می‌شود ولی کشِ پرامپت سیستمی باقی می‌ماند. پنجرهٔ لغزان ۳پیامی ظرف ۱ تا ۲ نوبت کش‌کردن را دوباره برقرار می‌کند.</li>
+<li><strong>انتخاب TTL</strong>: پیش‌فرض <code>5m</code> (۵ دقیقه) است. برای نشست‌های طولانی که کاربر بین نوبت‌ها وقفه می‌اندازد از <code>1h</code> استفاده کنید.</li>
+<li><strong>هویت مدل بخشی از کلید کش است</strong>: کش‌های سمت ارائه‌دهنده به مدل (و حساب/کلید API)ِ سرویس‌کنندهٔ درخواست محدود هستند. هر تغییر مدل در میانهٔ گفتگو — تغییر صریح با <code>/model</code>، پشتیبان‌رفتن مدل اصلی، یا چرخش استخر اعتبارنامه‌ها به حسابی دیگر — یعنی درخواست بعدی هیچ برخورد کشی ندارد و کل گفتگو را با قیمت بی‌تخفیفِ ورودی دوباره می‌خواند. این ذاتیِ نحوهٔ کار کش‌های ارائه‌دهنده است و هرمس نمی‌تواند از آن بگریزد؛ به همین دلیل مستندات رو به کاربر برای <code>/model</code>، ارائه‌دهندگان پشتیبان و استخرهای اعتبارنامه هشدار هزینه دارند. قابلیتی اضافه نکنید که مدل یا اعتبارنامه‌ها را بی‌سروصدا در میانهٔ نشست عوض کند.</li>
+</ol>
+<h3>فعال‌کردن کش پرامپت</h3>
+<p>کش پرامپت به‌طور خودکار وقتی فعال می‌شود که:</p>
+<ul>
+<li>مدل، یک مدل Claude از Anthropic باشد (از روی نام مدل تشخیص داده می‌شود)</li>
+<li>ارائه‌دهنده از <code>cache_control</code> پشتیبانی کند (API بومی Anthropic یا OpenRouter)</li>
+</ul>
+<pre dir="ltr"><code># config.yaml — TTL قابل پیکربندی است (باید "5m" یا "1h" باشد)
+prompt_caching:
+  cache_ttl: "5m"</code></pre>
+<p>CLI وضعیت کش را هنگام راه‌اندازی نشان می‌دهد:</p>
+<pre dir="ltr"><code>💾 Prompt caching: ENABLED (Claude via OpenRouter, 5m TTL)</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> هشدارهای فشار زمینه</h2>
+<p>هشدارهای میانیِ فشار زمینه حذف شده‌اند (به بلوک بودجهٔ تکرار در <code>run_agent.py</code> نگاه کنید که این یادداشت دارد: <code>"No intermediate pressure warnings — they caused models to 'give up' prematurely on complex tasks"</code>). فشرده‌سازی وقتی فعال می‌شود که توکن‌های پرامپت به <code>compression.threshold</code> پیکربندی‌شده (پیش‌فرض ۵۰٪) برسند، بدون هیچ گام هشدار قبلی؛ بهداشت نشست گیت‌وی هم به‌عنوان تور ایمنی ثانویه در ۸۵٪ پنجرهٔ زمینهٔ مدل فعال می‌شود.</p>
+</section>
+
+<div class="pager">
+  <a href="prompt-assembly.html"><span class="dir">→ قبلی</span><span class="ttl">ساخت پرامپت سیستمی</span></a>
+  <a class="next" href="gateway-internals.html"><span class="dir">بعدی ←</span><span class="ttl">درون‌مایهٔ گیت‌وی</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/context-compression-and-caching" target="_blank" rel="noopener">Context Compression and Caching</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>افزودن ارائه‌دهندهٔ جدید — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-providers" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>افزودن ارائه‌دهندهٔ جدید</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>افزودن ارائه‌دهندهٔ جدید</h1>
+<p>هرمس از هم‌اکنون می‌تواند با هر نقطهٔ پایانی سازگار با OpenAI از مسیر ارائه‌دهندهٔ سفارشی (custom provider) گفتگو کند. مگر اینکه بخواهید برای آن سرویس تجربهٔ کاربری درجه‌یک داشته باشید، ارائه‌دهندهٔ (provider) داخلی جدید اضافه نکنید:</p>
+<ul>
+<li>احراز هویت یا تازه‌سازی توکن مخصوص همان ارائه‌دهنده</li>
+<li>کاتالوگ منتخب مدل‌ها</li>
+<li>موارد منوی setup / <code>hermes model</code></li>
+<li>نام‌های مستعار ارائه‌دهنده برای سینتکس <code>provider:model</code></li>
+<li>شکل API غیر-OpenAI که به آداپتور (adapter) نیاز دارد</li>
+</ul>
+<p>اگر ارائه‌دهنده فقط «یک base URL سازگار با OpenAI به‌علاوهٔ یک کلید API» دیگر باشد، شاید یک ارائه‌دهندهٔ سفارشیِ نام‌دار کافی باشد.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> مدل ذهنی</h2>
+<p>یک ارائه‌دهندهٔ داخلی باید در چند لایه هم‌راستا شود:</p>
+<ol>
+<li><code>hermes_cli/auth.py</code> تعیین می‌کند اعتبارنامه‌ها چطور پیدا می‌شوند.</li>
+<li><code>hermes_cli/runtime_provider.py</code> آن را به دادهٔ زمان اجرا تبدیل می‌کند:
+<ul>
+<li><code>provider</code></li>
+<li><code>api_mode</code></li>
+<li><code>base_url</code></li>
+<li><code>api_key</code></li>
+<li><code>source</code></li>
+</ul>
+</li>
+<li><code>run_agent.py</code> از <code>api_mode</code> برای تصمیم‌گیری دربارهٔ نحوهٔ ساخته‌شدن و ارسال درخواست‌ها استفاده می‌کند.</li>
+<li><code>hermes_cli/models.py</code> و <code>hermes_cli/main.py</code> باعث می‌شوند ارائه‌دهنده در CLI دیده شود. (<code>hermes_cli/setup.py</code> به‌طور خودکار به <code>main.py</code> واگذار می‌کند — آنجا نیازی به تغییر نیست.)</li>
+<li><code>agent/auxiliary_client.py</code> و <code>agent/model_metadata.py</code> کارکرد کارهای جانبی و بودجه‌بندی توکن را حفظ می‌کنند.</li>
+</ol>
+<p>مهم‌ترین انتزاع، <code>api_mode</code> است.</p>
+<ul>
+<li>بیشتر ارائه‌دهنده‌ها از <code>chat_completions</code> استفاده می‌کنند.</li>
+<li>Codex و Meta Model API‏ (<code>api.meta.ai</code> — Muse Spark) از <code>codex_responses</code> استفاده می‌کنند (برای کش پرامپت (prompt caching) به‌طور خودکار <code>prompt_cache_retention: 24h</code> را می‌فرستد؛ <code>api.meta.ai</code> فقط روی <code>/v1/responses</code> به ۹۳ تا ۹۹٪ hit کش می‌رسد).</li>
+<li>Anthropic از <code>anthropic_messages</code> استفاده می‌کند.</li>
+<li>پروتکل جدید غیر-OpenAI معمولاً یعنی افزودن یک آداپتور جدید و یک شاخهٔ جدید <code>api_mode</code>.</li>
+</ul>
+<h3>قالب سیمی فراخوانی ابزار (tool-call wire format)</h3>
+<p>هرمس تاریخچهٔ گفتگو را به‌صورت داخلی در شکل chat-completions خودِ OpenAI ذخیره می‌کند؛ بنابراین <code>convert_messages</code> / <code>convert_tools</code> در ترنسپورت <code>chat_completions</code>‏ (<code>agent/transports/chat_completions.py</code>) تقریباً هویتی‌اند و هر ترنسپورت دیگری آن شکل را <em>به</em> پروتکل بومی خودش تبدیل می‌کند. مرجع اصلی برای این شکل — تعریف‌های <code>tools</code> با <code>parameters</code> از نوع JSON-schema، رکوردهای <code>tool_calls</code> دستیار با <code>function.arguments</code> رشته‌ای‌شده، و پیام‌های نتیجهٔ <code>role: "tool"</code> کلیدخورده با <code>tool_call_id</code> — <a href="https://platform.openai.com/docs/api-reference/chat/create" target="_blank" rel="noopener">مرجع API چت کامپلیشنز OpenAI</a> است. وقتی یک آداپتور بومی می‌نویسید، آن صفحه سمت ورودیِ تبدیل شما را تعریف می‌کند و مستندات ارائه‌دهندهٔ شما سمت خروجی را.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> اول مسیر پیاده‌سازی را انتخاب کنید</h2>
+<h3>مسیر A — ارائه‌دهندهٔ سازگار با OpenAI</h3>
+<p>وقتی از این مسیر استفاده کنید که ارائه‌دهنده درخواست‌های استاندارد به سبک chat-completions را می‌پذیرد.</p>
+<p>کارهای معمول:</p>
+<ul>
+<li>افزودن متادیتای احراز هویت</li>
+<li>افزودن کاتالوگ مدل‌ها / نام‌های مستعار</li>
+<li>افزودن resolve زمان اجرا</li>
+<li>افزودن سیم‌کشی منوی CLI</li>
+<li>افزودن پیش‌فرض‌های مدل کمکی (aux)</li>
+<li>افزودن تست‌ها و مستندات کاربری</li>
+</ul>
+<p>معمولاً به آداپتور یا <code>api_mode</code> جدید نیازی ندارید.</p>
+<h3>مسیر B — ارائه‌دهندهٔ بومی</h3>
+<p>وقتی از این مسیر استفاده کنید که ارائه‌دهنده مثل OpenAI chat completions رفتار نمی‌کند.</p>
+<p>نمونه‌های موجود در مخزن امروز:</p>
+<ul>
+<li><code>codex_responses</code>‏ (OpenAI Codex، xAI Grok و Meta Muse Spark از طریق <code>api.meta.ai</code> — مورد آخر به‌طور خودکار <code>prompt_cache_retention: 24h</code> را می‌فرستد)</li>
+<li><code>anthropic_messages</code></li>
+</ul>
+<p>این مسیر همه‌چیزِ مسیر A را به‌علاوهٔ این‌ها شامل می‌شود:</p>
+<ul>
+<li>یک آداپتور ارائه‌دهنده در <code>agent/</code></li>
+<li>شاخه‌های <code>run_agent.py</code> برای ساخت درخواست، dispatch، استخراج usage، مدیریت اینتراپت و نرمال‌سازی پاسخ</li>
+<li>تست‌های آداپتور</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> چک‌لیست فایل‌ها</h2>
+<h3>لازم برای هر ارائه‌دهندهٔ داخلی</h3>
+<ol>
+<li><code>hermes_cli/auth.py</code></li>
+<li><code>hermes_cli/models.py</code></li>
+<li><code>hermes_cli/runtime_provider.py</code></li>
+<li><code>hermes_cli/main.py</code></li>
+<li><code>agent/auxiliary_client.py</code></li>
+<li><code>agent/model_metadata.py</code></li>
+<li>تست‌ها</li>
+<li>مستندات رو به کاربر زیر <code>website/docs/</code></li>
+</ol>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><code>hermes_cli/setup.py</code> <strong>نیازی</strong> به تغییر ندارد. جادوگر setup، انتخاب ارائه‌دهنده/مدل را به <code>select_provider_and_model()</code> در <code>main.py</code> واگذار می‌کند — هر ارائه‌دهنده‌ای که آنجا اضافه شود به‌طور خودکار در <code>hermes setup</code> در دسترس است.</p>
+</div>
+<h3>موارد اضافی برای ارائه‌دهنده‌های بومی / غیر-OpenAI</h3>
+<ol start="10">
+<li><code>agent/&lt;provider&gt;_adapter.py</code></li>
+<li><code>run_agent.py</code></li>
+<li><code>pyproject.toml</code> اگر SDK ارائه‌دهنده لازم باشد</li>
+</ol>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> مسیر سریع: ارائه‌دهنده‌های ساده با کلید API</h2>
+<p>اگر ارائه‌دهندهٔ شما فقط یک نقطهٔ پایانی سازگار با OpenAI است که با یک کلید API واحد احراز هویت می‌شود، لازم نیست سراغ <code>auth.py</code>، ‏<code>runtime_provider.py</code>، ‏<code>main.py</code> یا هیچ‌کدام از فایل‌های چک‌لیست کاملِ پایین بروید.</p>
+<p>تنها چیزی که لازم دارید:</p>
+<ol>
+<li>یک پوشهٔ پلاگین زیر <code>plugins/model-providers/&lt;your-provider&gt;/</code> شامل:
+<ul>
+<li><code>__init__.py</code> — در سطح ماژول ‏<code>register_provider(profile)</code> را صدا می‌زند</li>
+<li><code>plugin.yaml</code> — مانیفست (name، kind: model-provider، version، description)</li>
+</ul>
+</li>
+<li>همین. پلاگین‌های ارائه‌دهنده دفعهٔ اول که چیزی ‏<code>get_provider_profile()</code> یا ‏<code>list_providers()</code> را صدا بزند به‌طور خودکار بارگذاری می‌شوند — هم پلاگین‌های همراه مخزن (این ریپو) و هم پلاگین‌های کاربر در <code>$HERMES_HOME/plugins/model-providers/</code> برداشته می‌شوند.</li>
+</ol>
+<p>وقتی پلاگینی اضافه می‌کنید و آن ‏<code>register_provider()</code> را صدا می‌زند، این‌ها به‌طور خودکار وصل می‌شوند:</p>
+<ol>
+<li>رکورد <code>PROVIDER_REGISTRY</code> در <code>auth.py</code>‏ (resolve اعتبارنامه، جستجوی متغیر محیطی)</li>
+<li><code>api_mode</code> روی <code>chat_completions</code> تنظیم می‌شود</li>
+<li><code>base_url</code> از کانفیگ یا متغیر محیطی اعلام‌شده گرفته می‌شود</li>
+<li><code>env_vars</code>‌ها به ترتیب اولویت برای کلید API بررسی می‌شوند</li>
+<li>فهرست <code>fallback_models</code> برای ارائه‌دهنده ثبت می‌شود</li>
+<li>پرچم <code>--provider</code> در CLI شناسهٔ ارائه‌دهنده را می‌پذیرد</li>
+<li>منوی <code>hermes model</code> ارائه‌دهنده را شامل می‌شود</li>
+<li>جادوگر <code>hermes setup</code> به‌طور خودکار به <code>main.py</code> واگذار می‌کند</li>
+<li>سینتکس مستعار <code>provider:model</code> کار می‌کند</li>
+<li>resolver زمان اجرا ‏<code>base_url</code> و ‏<code>api_key</code> درست را برمی‌گرداند</li>
+<li>پرچم <code>--provider &lt;name&gt;</code> در CLI شناسهٔ ارائه‌دهنده را می‌پذیرد</li>
+<li>فعال‌سازی مدل پشتیبان می‌تواند به‌شکل تمیز به ارائه‌دهنده سوئیچ کند</li>
+</ol>
+<p>پلاگین‌های کاربر در <code>$HERMES_HOME/plugins/model-providers/&lt;name&gt;/</code> پلاگین‌های هم‌نامِ همراه را بازنویسی می‌کنند (در <code>register_provider()</code> آخرین نویسنده برنده است) — پس اشخاص ثالث می‌توانند بدون دست‌کاری مخزن، هر پروفایل داخلی را monkey-patch یا جایگزین کنند.</p>
+<p>‏<code>plugins/model-providers/nvidia/</code> یا ‏<code>plugins/model-providers/gmi/</code> را به‌عنوان الگو ببینید، و برای مرجع فیلدها، اصطلاحات هوک (hook) و مثال‌های سرتاسری، <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/model-provider-plugin" target="_blank" rel="noopener">راهنمای کامل پلاگین ارائه‌دهندهٔ مدل</a> را بخوانید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> مسیر کامل: ارائه‌دهنده‌های OAuth و پیچیده</h2>
+<p>وقتی ارائه‌دهندهٔ شما به هرکدام از این‌ها نیاز دارد، از چک‌لیست کامل پایین استفاده کنید:</p>
+<ul>
+<li>OAuth یا تازه‌سازی توکن (Nous Portal، Codex، Qwen Portal، Copilot)</li>
+<li>شکل API غیر-OpenAI که آداپتور جدید می‌خواهد (Anthropic Messages، Codex Responses)</li>
+<li>تشخیص نقطهٔ پایانی سفارشی یا کاوش چندمنطقه‌ای (z.ai، Kimi)</li>
+<li>کاتالوگ ایستای منتخب مدل‌ها یا واکشی زندهٔ <code>/models</code></li>
+<li>موارد منوی <code>hermes model</code> مخصوص ارائه‌دهنده با جریان‌های احراز هویت اختصاصی</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۱: انتخاب یک شناسهٔ مرجع واحد برای ارائه‌دهنده</h2>
+<p>یک شناسهٔ (id) واحد برای ارائه‌دهنده انتخاب کنید و همه‌جا از همان استفاده کنید.</p>
+<p>نمونه‌هایی از مخزن:</p>
+<ul>
+<li><code>openai-codex</code></li>
+<li><code>kimi-coding</code></li>
+<li><code>minimax-cn</code></li>
+</ul>
+<p>همان شناسه باید در این‌ها ظاهر شود:</p>
+<ul>
+<li><code>PROVIDER_REGISTRY</code> در <code>hermes_cli/auth.py</code></li>
+<li><code>_PROVIDER_LABELS</code> در <code>hermes_cli/models.py</code></li>
+<li><code>_PROVIDER_ALIASES</code> در هر دوی <code>hermes_cli/auth.py</code> و <code>hermes_cli/models.py</code></li>
+<li>گزینه‌های <code>--provider</code> در CLI در <code>hermes_cli/main.py</code></li>
+<li>شاخه‌های setup / انتخاب مدل</li>
+<li>پیش‌فرض‌های مدل کمکی</li>
+<li>تست‌ها</li>
+</ul>
+<p>اگر شناسه بین آن فایل‌ها فرق کند، ارائه‌دهنده نیمه‌وصل حس می‌شود: احراز هویت شاید کار کند ولی <code>/model</code>، ‏setup یا resolve زمان اجرا بی‌سروصدا آن را از دست می‌دهد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> گام ۲: افزودن متادیتای احراز هویت در <code>hermes_cli/auth.py</code></h2>
+<p>برای ارائه‌دهنده‌های کلید-API، یک رکورد <code>ProviderConfig</code> به <code>PROVIDER_REGISTRY</code> اضافه کنید با:</p>
+<ul>
+<li><code>id</code></li>
+<li><code>name</code></li>
+<li><code>auth_type="api_key"</code></li>
+<li><code>inference_base_url</code></li>
+<li><code>api_key_env_vars</code></li>
+<li>اختیاری: <code>base_url_env_var</code></li>
+</ul>
+<p>همچنین نام‌های مستعار را به <code>_PROVIDER_ALIASES</code> اضافه کنید.</p>
+<p>ارائه‌دهنده‌های موجود را الگو قرار دهید:</p>
+<ul>
+<li>مسیر سادهٔ کلید API: Z.AI، MiniMax</li>
+<li>مسیر کلید API با تشخیص نقطهٔ پایانی: Kimi، Z.AI</li>
+<li>resolve بومی توکن: Anthropic</li>
+<li>مسیر OAuth / auth-store: Nous، OpenAI Codex</li>
+</ul>
+<p>سؤال‌هایی که اینجا باید پاسخ دهید:</p>
+<ul>
+<li>هرمس باید چه متغیرهای محیطی را بررسی کند و با چه ترتیب اولویتی؟</li>
+<li>آیا ارائه‌دهنده به بازنویسی base URL نیاز دارد؟</li>
+<li>آیا به کاوش نقطهٔ پایانی یا تازه‌سازی توکن نیاز دارد؟</li>
+<li>وقتی اعتبارنامه‌ها موجود نیستند، خطای احراز هویت چه بگوید؟</li>
+</ul>
+<p>اگر ارائه‌دهنده چیزی بیش از «پیدا کردن یک کلید API» لازم دارد، به‌جای هل‌دادن منطق به شاخه‌های بی‌ربط، یک credential resolver مخصوص اضافه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> گام ۳: افزودن کاتالوگ مدل و نام‌های مستعار در <code>hermes_cli/models.py</code></h2>
+<p>کاتالوگ ارائه‌دهنده را به‌روز کنید تا ارائه‌دهنده در منوها و در سینتکس <code>provider:model</code> کار کند.</p>
+<p>ویرایش‌های معمول:</p>
+<ul>
+<li><code>_PROVIDER_MODELS</code></li>
+<li><code>_PROVIDER_LABELS</code></li>
+<li><code>_PROVIDER_ALIASES</code></li>
+<li>ترتیب نمایش ارائه‌دهنده‌ها داخل <code>list_available_providers()</code></li>
+<li><code>provider_model_ids()</code> اگر ارائه‌دهنده واکشی زندهٔ <code>/models</code> را پشتیبانی کند</li>
+</ul>
+<p>اگر ارائه‌دهنده فهرست مدل زنده می‌دهد، اول همان را در اولویت بگذارید و <code>_PROVIDER_MODELS</code> را به‌عنوان پشتیبان ایستا نگه دارید.</p>
+<p>همین فایل است که ورودی‌هایی مثل این‌ها را کارا می‌کند:</p>
+<pre dir="ltr"><code>anthropic:claude-sonnet-4-6
+kimi:model-name</code></pre>
+<p>اگر نام‌های مستعار اینجا نباشند، ممکن است ارائه‌دهنده درست احراز هویت شود ولی در پارس <code>/model</code> همچنان شکست بخورد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> گام ۴: resolve دادهٔ زمان اجرا در <code>hermes_cli/runtime_provider.py</code></h2>
+<p>‏<code>resolve_runtime_provider()</code> مسیر مشترکی است که CLI، گیت‌وی (gateway)، کرون، ACP و کلاینت‌های کمکی از آن استفاده می‌کنند.</p>
+<p>شاخه‌ای اضافه کنید که دست‌کم دیکشنری زیر را برگرداند:</p>
+<pre dir="ltr"><code>{
+    "provider": "your-provider",
+    "api_mode": "chat_completions",  # یا حالت بومی خودتان
+    "base_url": "https://...",
+    "api_key": "...",
+    "source": "env|portal|auth-store|explicit",
+    "requested_provider": requested_provider,
+}</code></pre>
+<p>اگر ارائه‌دهنده سازگار با OpenAI است، <code>api_mode</code> معمولاً باید <code>chat_completions</code> بماند.</p>
+<p>مراقب اولویت کلید API باشید. هرمس از قبل منطقی دارد که جلوی لو رفتن کلید OpenRouter به نقاط پایانیِ بی‌ربط را می‌گیرد. ارائه‌دهندهٔ جدید هم باید به همان‌اندازه صریح باشد که کدام کلید به کدام base URL می‌رود.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> گام ۵: سیم‌کشی CLI در <code>hermes_cli/main.py</code></h2>
+<p>ارائه‌دهنده تا وقتی در جریان تعاملی <code>hermes model</code> ظاهر نشود، کشف‌شدنی نیست.</p>
+<p>این‌ها را در <code>hermes_cli/main.py</code> به‌روز کنید:</p>
+<ul>
+<li>دیکشنری <code>provider_labels</code></li>
+<li>فهرست <code>providers</code> در <code>select_provider_and_model()</code></li>
+<li>dispatch ارائه‌دهنده‏ (<code>if selected_provider == ...</code>)</li>
+<li>گزینه‌های آرگومان <code>--provider</code></li>
+<li>گزینه‌های login/logout اگر ارائه‌دهنده آن جریان‌ها را پشتیبانی می‌کند</li>
+<li>تابع <code>_model_flow_&lt;provider&gt;()</code>، یا استفادهٔ دوباره از <code>_model_flow_api_key_provider()</code> اگر جا بگیرد</li>
+</ul>
+<div class="callout tip">
+  <div class="callout-title">💡</div>
+  <p><code>hermes_cli/setup.py</code> نیازی به تغییر ندارد — این فایل <code>select_provider_and_model()</code> را از <code>main.py</code> صدا می‌زند، پس ارائه‌دهندهٔ جدید شما هم در <code>hermes model</code> و هم در <code>hermes setup</code> به‌طور خودکار ظاهر می‌شود.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۱</span> گام ۶: سرپا نگه‌داشتن فراخوانی‌های کمکی</h2>
+<p>اینجا دو فایل مهم‌اند:</p>
+<h3><code>agent/auxiliary_client.py</code></h3>
+<p>اگر این یک ارائه‌دهندهٔ مستقیم کلید-API است، یک مدل کمکیِ پیش‌فرضِ ارزان/سریع به <code>_API_KEY_PROVIDER_AUX_MODELS</code> اضافه کنید.</p>
+<p>کارهای کمکی شامل چیزهایی مثل این‌اند:</p>
+<ul>
+<li>خلاصه‌سازی تصویر (vision)</li>
+<li>خلاصه‌سازی استخراج از وب</li>
+<li>خلاصه‌سازی فشرده‌سازی زمینه (context)</li>
+<li>خلاصه‌سازی جستجوی نشست (session)</li>
+<li>تخلیهٔ حافظه</li>
+</ul>
+<p>اگر ارائه‌دهنده پیش‌فرض کمکیِ معقول نداشته باشد، کارهای جانبی ممکن است بد fallback کنند یا بی‌خبر از یک مدل اصلیِ گران استفاده کنند.</p>
+<h3><code>agent/model_metadata.py</code></h3>
+<p>طول زمینهٔ مدل‌های ارائه‌دهنده را اضافه کنید تا بودجه‌بندی توکن، آستانه‌های فشرده‌سازی و محدودیت‌ها عقلانی بمانند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> گام ۷: اگر ارائه‌دهنده بومی است، آداپتور و پشتیبانی <code>run_agent.py</code> را اضافه کنید</h2>
+<p>اگر ارائه‌دهنده chat completions ساده نیست، منطق مخصوص ارائه‌دهنده را در <code>agent/&lt;provider&gt;_adapter.py</code> ایزوله کنید.</p>
+<p>‏<code>run_agent.py</code> را متمرکز روی orchestration نگه دارید. این فایل باید helperهای آداپتور را صدا بزند، نه اینکه payloadهای ارائه‌دهنده را این‌ور و آن‌ورِ فایل به‌صورت دستی بسازد.</p>
+<p>یک ارائه‌دهندهٔ بومی معمولاً در این جاها کار می‌خواهد:</p>
+<h3>فایل آداپتور جدید</h3>
+<p>مسئولیت‌های معمول:</p>
+<ul>
+<li>ساخت SDK / کلاینت HTTP</li>
+<li>resolve کردن توکن‌ها</li>
+<li>تبدیل پیام‌های گفتگوی به سبک OpenAI به فرمت درخواست ارائه‌دهنده</li>
+<li>تبدیل طرح‌واره‌های ابزار در صورت نیاز</li>
+<li>نرمال‌سازی پاسخ‌های ارائه‌دهنده به آنچه <code>run_agent.py</code> انتظار دارد</li>
+<li>استخراج داده‌های usage و finish-reason</li>
+</ul>
+<h3><code>run_agent.py</code></h3>
+<p>دنبال <code>api_mode</code> بگردید و هر نقطهٔ سوئیچ را ممیزی کنید. دست‌کم این‌ها را بررسی کنید:</p>
+<ul>
+<li><code>__init__</code> ‏<code>api_mode</code> جدید را انتخاب می‌کند</li>
+<li>ساخت کلاینت برای ارائه‌دهنده کار می‌کند</li>
+<li><code>_build_api_kwargs()</code> می‌داند درخواست‌ها را چطور فرمت کند</li>
+<li><code>_interruptible_api_call()</code> به فراخوانی کلاینتِ درست dispatch می‌کند</li>
+<li>مسیرهای اینتراپت / بازسازی کلاینت کار می‌کنند</li>
+<li>اعتبارسنجی پاسخ، شکل ارائه‌دهنده را می‌پذیرد</li>
+<li>استخراج finish-reason درست است</li>
+<li>استخراج مصرف توکن درست است</li>
+<li>فعال‌سازی مدل پشتیبان می‌تواند تمیز به ارائه‌دهندهٔ جدید سوئیچ کند</li>
+<li>مسیرهای تولید خلاصه و تخلیهٔ حافظه همچنان کار می‌کنند</li>
+</ul>
+<p>همچنین در <code>run_agent.py</code> دنبال <code>self.client.</code> بگردید. هر مسیر کدی که فرض کند کلاینت استاندارد OpenAI وجود دارد، وقتی ارائه‌دهندهٔ بومی از آبجکت کلاینت متفاوتی استفاده کند یا <code>self.client = None</code> باشد، ممکن است بشکند.</p>
+<h3>کش پرامپت و فیلدهای درخواست مخصوص ارائه‌دهنده</h3>
+<p>کش پرامپت و تنظیمات مخصوص ارائه‌دهنده به‌راحتی پسرفت می‌کنند.</p>
+<p>نمونه‌های موجود در مخزن:</p>
+<ul>
+<li>Anthropic مسیر بومی کش پرامپت دارد</li>
+<li>OpenRouter فیلدهای provider-routing می‌گیرد</li>
+<li>هر ارائه‌دهنده‌ای نباید همهٔ گزینه‌های سمت درخواست را بگیرد</li>
+</ul>
+<p>وقتی ارائه‌دهندهٔ بومی اضافه می‌کنید، دوباره چک کنید که هرمس فقط فیلدهایی را می‌فرستد که آن ارائه‌دهنده واقعاً می‌فهمد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> گام ۸: تست‌ها</h2>
+<p>دست‌کم تست‌هایی که سیم‌کشی ارائه‌دهنده را محافظت می‌کنند را به‌روز کنید.</p>
+<p>جاهای رایج:</p>
+<ul>
+<li><code>tests/hermes_cli/test_runtime_provider_resolution.py</code></li>
+<li><code>tests/cli/test_cli_provider_resolution.py</code></li>
+<li><code>tests/hermes_cli/test_model_switch_custom_providers.py</code>‏ (و فایل‌های مجاور <code>tests/hermes_cli/test_model_switch_*.py</code>)</li>
+<li><code>tests/hermes_cli/test_setup_model_provider.py</code></li>
+<li><code>tests/run_agent/test_provider_parity.py</code></li>
+<li><code>tests/run_agent/test_run_agent.py</code></li>
+<li><code>tests/test_&lt;provider&gt;_adapter.py</code> برای ارائه‌دهندهٔ بومی</li>
+</ul>
+<p>برای مثال‌های فقط-مستنداتی، مجموعهٔ دقیق فایل‌ها ممکن است فرق کند. نکته پوشش این‌هاست:</p>
+<ul>
+<li>resolve احراز هویت</li>
+<li>منوی CLI / انتخاب ارائه‌دهنده</li>
+<li>resolve ارائه‌دهنده در زمان اجرا</li>
+<li>مسیر اجرای ایجنت</li>
+<li>پارس <code>provider:model</code></li>
+<li>هر تبدیل پیام مخصوص آداپتور</li>
+</ul>
+<p>تست‌های هدفمند را اجرا کنید (یا از <code>scripts/run_tests.sh</code> استفاده کنید که هر فایل را در ساب‌پروسس خودش اجرا می‌کند):</p>
+<pre dir="ltr"><code>source venv/bin/activate
+python -m pytest tests/hermes_cli/test_runtime_provider_resolution.py tests/cli/test_cli_provider_resolution.py tests/hermes_cli/test_setup_model_provider.py tests/run_agent/test_provider_parity.py -q</code></pre>
+<p>برای تغییرهای عمیق‌تر، قبل از push کل مجموعه را اجرا کنید:</p>
+<pre dir="ltr"><code>source venv/bin/activate
+python -m pytest tests/ -n0 -q</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۴</span> گام ۹: راستی‌آزمایی زنده</h2>
+<p>بعد از تست‌ها، یک تست دود واقعی اجرا کنید.</p>
+<pre dir="ltr"><code>source venv/bin/activate
+python -m hermes_cli.main chat -q "Say hello" --provider your-provider --model your-model</code></pre>
+<p>اگر منوها را تغییر داده‌اید، جریان‌های تعاملی را هم تست کنید:</p>
+<pre dir="ltr"><code>source venv/bin/activate
+python -m hermes_cli.main model
+python -m hermes_cli.main setup</code></pre>
+<p>برای ارائه‌دهنده‌های بومی، دست‌کم یک فراخوانی ابزار (tool call) را هم راستی‌آزمایی کنید، نه فقط یک پاسخ متنی ساده.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۵</span> گام ۱۰: به‌روزرسانی مستندات رو به کاربر</h2>
+<p>اگر قرار است ارائه‌دهنده به‌عنوان گزینهٔ درجه‌یک عرضه شود، مستندات کاربری را هم به‌روز کنید:</p>
+<ul>
+<li><code>website/docs/getting-started/quickstart.md</code></li>
+<li><code>website/docs/user-guide/configuration.md</code></li>
+<li><code>website/docs/reference/environment-variables.md</code></li>
+</ul>
+<p>یک توسعه‌دهنده می‌تواند ارائه‌دهنده را بی‌نقص سیم‌کشی کند و همچنان کاربران را جایی بگذارد که متغیرهای محیطی لازم یا جریان setup را پیدا نمی‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۶</span> چک‌لیست ارائه‌دهندهٔ سازگار با OpenAI</h2>
+<p>اگر ارائه‌دهنده chat completions استاندارد است، از این استفاده کنید.</p>
+<ul>
+<li>☐ <code>ProviderConfig</code> در <code>hermes_cli/auth.py</code> اضافه شده است</li>
+<li>☐ نام‌های مستعار در <code>hermes_cli/auth.py</code> و <code>hermes_cli/models.py</code> اضافه شده‌اند</li>
+<li>☐ کاتالوگ مدل در <code>hermes_cli/models.py</code> اضافه شده است</li>
+<li>☐ شاخهٔ زمان اجرا در <code>hermes_cli/runtime_provider.py</code> اضافه شده است</li>
+<li>☐ سیم‌کشی CLI در <code>hermes_cli/main.py</code> اضافه شده است (setup.py به‌طور خودکار به ارث می‌برد)</li>
+<li>☐ مدل کمکی در <code>agent/auxiliary_client.py</code> اضافه شده است</li>
+<li>☐ طول زمینه‌ها در <code>agent/model_metadata.py</code> اضافه شده است</li>
+<li>☐ تست‌های زمان اجرا / CLI به‌روز شده‌اند</li>
+<li>☐ مستندات کاربری به‌روز شده است</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۷</span> چک‌لیست ارائه‌دهندهٔ بومی</h2>
+<p>وقتی ارائه‌دهنده به مسیر پروتکل جدید نیاز دارد، از این استفاده کنید.</p>
+<ul>
+<li>☐ همه‌چیز در چک‌لیست سازگار با OpenAI</li>
+<li>☐ آداپتور در <code>agent/&lt;provider&gt;_adapter.py</code> اضافه شده است</li>
+<li>☐ <code>api_mode</code> جدید در <code>run_agent.py</code> پشتیبانی شده است</li>
+<li>☐ مسیر اینتراپت / بازسازی کار می‌کند</li>
+<li>☐ استخراج usage و finish-reason کار می‌کند</li>
+<li>☐ مسیر پشتیبان کار می‌کند</li>
+<li>☐ تست‌های آداپتور اضافه شده‌اند</li>
+<li>☐ تست دود زنده پاس می‌شود</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۸</span> دام‌های رایج</h2>
+<h3>۱. اضافه‌کردن ارائه‌دهنده به احراز هویت، ولی نه به پارس مدل</h3>
+<p>نتیجه این می‌شود که اعتبارنامه‌ها درست resolve می‌شوند ولی ورودی‌های <code>/model</code> و <code>provider:model</code> شکست می‌خورند.</p>
+<h3>۲. فراموش‌کردن اینکه <code>config["model"]</code> می‌تواند رشته یا دیکشنری باشد</h3>
+<p>بسیاری از کدهای انتخاب ارائه‌دهنده باید هر دو شکل را نرمال کنند.</p>
+<h3>۳. فرض‌کردن اینکه ارائه‌دهندهٔ داخلی الزامی است</h3>
+<p>اگر سرویس فقط سازگار با OpenAI است، شاید یک ارائه‌دهندهٔ سفارشی از قبل مسئلهٔ کاربر را با نگه‌داری کمتر حل کند.</p>
+<h3>۴. فراموش‌کردن مسیرهای کمکی</h3>
+<p>مسیر اصلی چت می‌تواند کار کند درحالی‌که خلاصه‌سازی، تخلیهٔ حافظه یا helperهای vision شکست می‌خورند، چون مسیریابی aux هرگز به‌روز نشده است.</p>
+<h3>۵. شاخه‌های ارائه‌دهندهٔ بومی که در <code>run_agent.py</code> پنهان‌اند</h3>
+<p>دنبال <code>api_mode</code> و <code>self.client.</code> بگردید. فرض نکنید مسیر درخواستِ بدیهی تنها مسیر است.</p>
+<h3>۶. فرستادن تنظیمات مخصوص OpenRouter به ارائه‌دهنده‌های دیگر</h3>
+<p>فیلدهایی مثل provider routing فقط به ارائه‌دهنده‌هایی تعلق دارند که از آن‌ها پشتیبانی می‌کنند.</p>
+<h3>۷. به‌روزرسانی <code>hermes model</code> ولی نه <code>hermes setup</code></h3>
+<p>هر دو جریان باید ارائه‌دهنده را بشناسند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۹</span> هدف‌های جستجوی خوب هنگام پیاده‌سازی</h2>
+<p>اگر دنبال همهٔ جاهایی هستید که ارائه‌دهنده به آن‌ها دست می‌زند، این نمادها را جستجو کنید:</p>
+<ul>
+<li><code>PROVIDER_REGISTRY</code></li>
+<li><code>_PROVIDER_ALIASES</code></li>
+<li><code>_PROVIDER_MODELS</code></li>
+<li><code>resolve_runtime_provider</code></li>
+<li><code>_model_flow_</code></li>
+<li><code>select_provider_and_model</code></li>
+<li><code>api_mode</code></li>
+<li><code>_API_KEY_PROVIDER_AUX_MODELS</code></li>
+<li><code>self.client.</code></li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲۰</span> مستندات مرتبط</h2>
+<ul>
+<li><a href="provider-runtime.html">زمان اجرای ارائه‌دهنده</a></li>
+<li><a href="architecture.html">معماری</a></li>
+<li><a href="contributing.html">مشارکت در پروژه</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="adding-tools.html"><span class="dir">→ قبلی</span><span class="ttl">افزودن ابزار جدید</span></a>
+  <a class="next" href="adding-platform-adapters.html"><span class="dir">بعدی ←</span><span class="ttl">افزودن آداپتور پلتفرم</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/adding-providers" target="_blank" rel="noopener">Adding Providers</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

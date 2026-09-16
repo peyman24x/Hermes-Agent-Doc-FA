@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اجرا با Nous Portal — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/run-hermes-with-nous-portal" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>اجرا با Nous Portal</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>اجرا با Nous Portal</h1>
+<p>این راهنما شما را قدم‌به‌قدم برای اجرای Hermes Agent روی اشتراکِ <a href="https://portal.nousresearch.com" target="_blank" rel="noopener">Nous Portal</a> همراهی می‌کند — از ثبت‌نام تا تأیید اینکه هر ابزار درست مسیریابی می‌شود. اگر فقط نگاه کلی دربارهٔ این‌که Portal چیست و اشتراک چه چیزهایی دارد می‌خواهید، <a href="../integrations/nous-portal.html">صفحهٔ یکپارچگی Nous Portal</a> را ببینید. این صفحه، سناریوی گام‌به‌گام انجام کار است.</p>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+<li>Hermes Agent نصب شده باشد (<a href="../getting-started/quickstart.html">شروع سریع</a>)</li>
+<li>یک مرورگر وب روی ماشینی که راه‌اندازی می‌کنید (یا port forwarding با SSH — به <a href="oauth-over-ssh.html">OAuth روی SSH / میزبان راهن</a> نگاهی بیندازید)</li>
+<li>حدود ۵ دقیقه</li>
+</ul>
+<p>به این‌ها <b>نیاز ندارید</b>: کلید OpenAI، کلید Anthropic، حساب Firecrawl، حساب FAL، حساب Browser Use یا هر اعتبارنامهٔ دیگری مختص یک فروشنده خاص. این دقیقاً فلسفهٔ ماجرا است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۲</span> گام ۱: گرفتن اشتراک</h2>
+<p><a href="https://portal.nousresearch.com/manage-subscription" target="_blank" rel="noopener">portal.nousresearch.com/manage-subscription</a> را باز کنید، ثبت‌نام کنید و یک پلن انتخاب کنید.</p>
+<p>از قبل اشتراک دارید؟ به گام ۲ بروید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۳</span> گام ۲: اجرای راه‌اندازی یک‌باره</h2>
+<pre dir="ltr"><code>hermes setup --portal</code></pre>
+<p>این تنها فرمان پنج کار انجام می‌دهد:</p>
+<ol>
+<li>مرورگر شما را برای ورود OAuth به portal.nousresearch.com باز می‌کند</li>
+<li>توکن refresh را در <code>~/.hermes/auth.json</code> ذخیره می‌کند</li>
+<li><code>model.provider: nous</code> را در <code>~/.hermes/config.yaml</code> تنظیم می‌کند</li>
+<li>یک مدل ایجنتی پیش‌فرض انتخاب می‌کند (<code>anthropic/claude-sonnet-4.6</code> یا مشابه آن)</li>
+<li>گیت‌وی ابزار را برای جستجوی وب، تولید تصویر، TTS و اتوماسیون مرورگر روشن می‌کند</li>
+</ol>
+<p>وقتی تمام شد، به ترمینال‌تان برمی‌گردید و آمادهٔ چت هستید.</p>
+<h3>اگر با SSH به یک سرور وصل هستم چه؟</h3>
+<p>OAuth به مرورگر نیاز دارد، اما callback از نوع loopback روی ماشینی اجرا می‌شود که هرمس روی آن در حال اجراست. دو گزینه دارید:</p>
+<pre dir="ltr"><code># گزینهٔ A: port forwarding با SSH (پیشنهادی)
+ssh -N -L 8642:127.0.0.1:8642 user@remote-host    # در یک ترمینال محلی
+hermes setup --portal                              # روی ماشین راه‌دور، URL چاپ‌شده را در مرورگر محلی‌تان باز کنید
+
+# گزینهٔ B: ورود با device-code (از Cloud Shell، Codespaces و EC2 Instance Connect کار می‌کند)
+hermes auth add nous --type oauth
+# سپس برای متصل‌کردن ارائه‌دهنده + گیت‌وی، دوباره hermes setup --portal را اجرا کنید</code></pre>
+<p>برای راهنمای کامل شامل زنجیره‌های ProxyJump، mosh/tmux و نکات ریز ControlMaster، به <a href="oauth-over-ssh.html">OAuth روی SSH / میزبان راهن</a> نگاهی بیندازید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۴</span> گام ۳: تأیید اینکه کار کرد</h2>
+<pre dir="ltr"><code>hermes portal info</code></pre>
+<p>باید این را ببینید:</p>
+<pre dir="ltr"><code>  Nous Portal
+  ───────────
+  Auth:    ✓ logged in
+  Portal:  https://portal.nousresearch.com
+  Model:   ✓ using Nous as inference provider
+
+  Tool Gateway
+  ────────────
+  Web search &amp; extract  via Nous Portal
+  Image generation      via Nous Portal
+  Text-to-speech        via Nous Portal
+  Browser automation    via Nous Portal</code></pre>
+<p>اگر هر خطی چیزی غیر از «via Nous Portal» نشان داد یا خط auth گفت «not logged in»، مستقیم به بخش <a href="#troubleshooting">عیب‌یابی</a> در پایین صفحه بروید.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۵</span> گام ۴: اجرای اولین گفتگو</h2>
+<pre dir="ltr"><code>hermes chat</code></pre>
+<p>چیزی امتحان کنید که هم مدل و هم گیت‌وی ابزار را درگیر کند:</p>
+<pre dir="ltr"><code>Hey, search the web for "Hermes Agent release notes" and summarize the top 3 hits.</code></pre>
+<p>باید ببینید هرمس <code>web_search</code> را فراخوانی می‌کند (با پشتوانهٔ Firecrawl، از طریق گیت‌وی) و با یک خلاصه پاسخ می‌دهد. اگر جستجو اجرا شود و پاسخ منطقی باشد، کار تمام است — Portal سرتاسر سیم‌کشی شده است.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۶</span> گام ۵: مدل واقعاً مورد نظرتان را انتخاب کنید</h2>
+<p><code>hermes setup --portal</code> در زمان راه‌اندازی اجازه می‌دهد مدلی انتخاب کنید، اما فلسفهٔ کل اشتراک دسترسی به کاتالوگ کامل است — هر وقت خواستید در میانهٔ نشست با <code>/model</code> عوضش کنید:</p>
+<pre dir="ltr"><code>/model anthropic/claude-sonnet-4.6     # بهترین مدل ایجنتی همه‌کاره
+/model openai/gpt-5.4                  # استدلال قوی + فراخوانی ابزار
+/model google/gemini-2.5-pro           # پنجرهٔ زمینهٔ عظیم
+/model deepseek/deepseek-v3.2          # کدزن به‌صرفه
+/model anthropic/claude-opus-4.6       # سنگین‌وزن برای مسائل سخت</code></pre>
+<p>یا انتخاب‌گر (picker) را باز کنید و مرور کنید:</p>
+<pre dir="ltr"><code>/model</code></pre>
+<p>پیش‌فرض دیگری را برای همیشه انتخاب کنید:</p>
+<pre dir="ltr"><code># در ترمینال‌تان، خارج از هر نشستی
+hermes config set model.default anthropic/claude-sonnet-4.6</code></pre>
+<h3>برای کار ایجنتی Hermes-4 را انتخاب نکنید</h3>
+<p>Hermes-4-70B و Hermes-4-405B روی Portal با تخفیف‌های سنگین موجودند، اما آن‌ها <b>مدل‌های چت/استدلال</b> هستند، نه مدل‌های تنظیم‌شده برای فراخوانی ابزار. در حلقه‌های چندمرحله‌ای ایجنت به مشکل می‌خورند. آن‌ها را برای کارهای گفتگو/پژوهش از طریق <a href="../user-guide/features/subscription-proxy.html">پروکسی اشتراک</a> از ابزارهای غیرایجنتی استفاده کنید. برای خودِ Hermes Agent، به همان مدل‌های ایجنتی مرزیِ بالا وفادار بمانید.</p>
+<p><a href="https://portal.nousresearch.com/info" target="_blank" rel="noopener">صفحهٔ info</a> خود Portal هم همین هشدار را دارد — این راهنمای رسمی Nous است، نه صرفاً نظر سمت هرمس.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۷</span> گام ۶ (اختیاری): سفارشی‌سازی مسیریابی گیت‌وی ابزار</h2>
+<p>فعال‌سازی گیت‌وی برای هر ابزار اختیاری است، نه همه‌یا‌هیچ. اگر از قبل حساب Browserbase دارید و می‌خواهید هم‌زمان که جستجوی وب و تولید تصویر را از مسیر Nous می‌فرستید، از همان ادامه دهید، این پشتیبانی می‌شود:</p>
+<pre dir="ltr"><code>hermes tools
+# → جستجوی وب        → "Nous Subscription"     (پیشنهادی)
+# → تولید تصویر      → "Nous Subscription"     (پیشنهادی)
+# → مرورگر           → "Browserbase"           (کلید فعلی شما)
+# → TTS              → "Nous Subscription"     (پیشنهادی)</code></pre>
+<p>این ردیف‌ها حتی قبل از ورود به Nous Portal در <code>hermes tools</code> دیده می‌شوند — اگر بدون نشست فعال «Nous Subscription» را انتخاب کنید، هرمس ورود به Portal را درجا انجام می‌دهد (بدون تغییر ارائه‌دهندهٔ استنتاج یا بقیهٔ ابزارهای‌تان).</p>
+<p>ترکیب‌تان را با این تأیید کنید:</p>
+<pre dir="ltr"><code>hermes portal tools</code></pre>
+<p>مسیریابیِ هر ابزار را جداگانه می‌بینید — <code>via Nous Portal</code> برای آن‌هایی که از مسیر اشتراک می‌روند، و نام شریک (<code>browserbase</code>، <code>firecrawl</code> و…) برای آن‌هایی که از کلیدهای خودتان استفاده می‌کنند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۸</span> گام ۷ (اختیاری): فعال‌کردن حالت صوتی</h2>
+<p>چون گیت‌وی ابزار شامل TTS مربوط به OpenAI است، <a href="../user-guide/features/voice-mode.html">حالت صوتی</a> بدون کلید جداگانهٔ OpenAI کار می‌کند:</p>
+<pre dir="ltr"><code>hermes setup tts
+# → برای TTS گزینهٔ "Nous Subscription" را انتخاب کنید
+# → یک بک‌اند speech-to-text انتخاب کنید (faster-whisper محلی رایگان است، بدون نیاز به راه‌اندازی)</code></pre>
+<p>بعد در هر نشست روی پلتفرم پیام‌رسانی (تلگرام، دیسکورد، سیگنال و…) یک پیام صوتی بفرستید و هرمس آن را پیاده‌سازی می‌کند، پاسخ می‌دهد و با صدای سنتزشده جواب می‌دهد — همه روی اشتراک Portal‌تان.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۹</span> گام ۸ (اختیاری): کرون و گردش‌کارهای همیشه‌روشن</h2>
+<p>اشتراک Portal برای <a href="../user-guide/features/cron.html">کارهای کرون</a> و <a href="../user-guide/features/batch-processing.html">پردازش گروهی</a> هم به همان شکلی که برای چت تعاملی کار می‌کند، کار می‌کند — توکن refresh از نوع OAuth به‌طور خودکار دوباره استفاده می‌شود. تنظیم اضافی لازم نیست؛ فقط کارهای کرون را زمان‌بندی کنید و صورت‌حسابشان به اشتراک‌تان می‌رود.</p>
+<pre dir="ltr"><code>hermes cron create "0 9 * * *" \
+  "Search the web for top AI news and summarize the 5 most important stories" \
+  --name "Daily AI news"</code></pre>
+<p>کار کرون بدون حضور شما اجرا می‌شود و مدل + جستجوی وب + خلاصه‌سازی را همگی از طریق اشتراک Portal‌تان فراخوانی می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۰</span> پروفایل‌ها و راه‌اندازی‌های چندکاربره</h2>
+<p>اگر از <a href="../user-guide/profiles.html">پروفایل‌های هرمس</a> استفاده می‌کنید (مثلاً یک پیکربندی جدا برای هر پروژه)، توکن refresh مربوط به Portal به‌طور خودکار از طریق یک مخزن توکن مشترک بین همهٔ پروفایل‌ها به اشتراک گذاشته می‌شود. روی هر پروفیلی یک‌بار وارد شوید و بقیه خودکار آن را برمی‌دارند.</p>
+<p>برای راه‌اندازی‌های تیمی که چند آدم یک ماشین را به اشتراک می‌گذارند، هر فرد حساب Portal خودش را دارد → هر پوشهٔ خانه <code>~/.hermes/auth.json</code> خودش را دارد → هیچ اشتراک توکنی بین کاربران نیست. این همان مرز درست است.</p>
+</section>
+
+<section class="doc-sec" id="troubleshooting">
+<h2><span class="secnum">۱۱</span> عیب‌یابی</h2>
+<h3><code>hermes portal info</code> بعد از <code>hermes setup --portal</code> می‌گوید «not logged in»</h3>
+<p>جریان OAuth کامل نشده است. دوباره اجرایش کنید:</p>
+<pre dir="ltr"><code>hermes portal</code></pre>
+<p>اگر مرورگرتان باز نمی‌شود یا callback شکست می‌خورد، احتمالاً روی یک میزبان راه‌دور/بدون‌سر (headless) هستید — برای راه‌حل‌های port forwarding به <a href="oauth-over-ssh.html">OAuth روی SSH</a> نگاهی بیندازید.</p>
+<h3>«Model: currently openrouter» (یا ارائه‌دهندهٔ دیگری) به‌جای «using Nous as inference provider»</h3>
+<p>پیکربندی محلی‌تان جابه‌جا شده است. OAuth کار کرده ولی <code>model.provider</code> هنوز به ارائه‌دهندهٔ دیگری اشاره می‌کند. راه‌حل:</p>
+<pre dir="ltr"><code>hermes config set model.provider nous</code></pre>
+<p>یا به‌صورت تعاملی:</p>
+<pre dir="ltr"><code>hermes model
+# Nous Portal را انتخاب کنید</code></pre>
+<p>با <code>hermes portal info</code> دوباره تأیید کنید.</p>
+<h3>ابزارهای گیت‌وی ابزار به‌جای «via Nous Portal» نام شریک را نشان می‌دهند</h3>
+<p>پیکربندیِ هر-ابزار روی گیت‌وی اولویت دارد. اجرا کنید:</p>
+<pre dir="ltr"><code>hermes tools
+# برای هر ابزاری که می‌خواهید از گیت‌وی برود "Nous Subscription" را انتخاب کنید</code></pre>
+<p>بعضی کاربران عمداً ترکیبی استفاده می‌کنند — مثلاً وب را از مسیر Nous می‌فرستند ولی برای مرورگر از کلید Browserbase خودشان استفاده می‌کنند. اگر عمدی است، دست نزنید. اگر نه، همین فرمان درستش می‌کند.</p>
+<h3>«Re-authentication required» در میانهٔ نشست</h3>
+<p>توکن refresh مربوط به Portal شما باطل شده است (تغییر رمز، لغو دستی، انقضای نشست). توکن حالا به‌طور محلی قرنطینه شده تا هرمس بی‌نهایت آن را دوباره استفاده نکند. فقط دوباره وارد شوید:</p>
+<pre dir="ltr"><code>hermes auth add nous</code></pre>
+<p>قرنطینه با ورود مجددِ موفق خودکار پاک می‌شود.</p>
+<h3>مدل مورد نظرم در انتخاب‌گر <code>/model</code> نیست</h3>
+<p>کاتالوگ Portal بر فهرست مدل‌های OpenRouter (بیش از ۳۰۰ مدل) به‌علاوهٔ مدل‌هایی که از طریق ارائه‌دهندگان اختصاصی یا ثانویه سرویس می‌شوند تکیه دارد. اگر مدلی غایب است، اسلاگِ OpenRouter‌سبک را مستقیم تایپ کنید:</p>
+<pre dir="ltr"><code>/model anthropic/claude-opus-4.6
+/model openai/o1-2025-12-17</code></pre>
+<p>اگر مدلی واقعاً در دسترس نیست، <a href="https://github.com/NousResearch/hermes-agent/issues" target="_blank" rel="noopener">یک ایشو باز کنید</a> — بیشتر خلأها پیکربندی مسیریابی‌ای هستند که می‌توانیم به‌روزرسانی کنیم.</p>
+<h3>صورت‌حساب در حساب Portal‌ام ظاهر نمی‌شود</h3>
+<p><code>hermes portal info</code> می‌گوید واقعاً از مسیر Portal می‌روید یا از ارائه‌دهندهٔ دیگری. علت‌های رایج:</p>
+<ul>
+<li><code>model.provider</code> روی <code>openrouter</code>/<code>anthropic</code>/غیره تنظیم شده به‌جای <code>nous</code></li>
+<li>شکست در refresh فرایند OAuth که باعث شده به ارائه‌دهندهٔ پیکربندی‌شدهٔ دیگری برگردد</li>
+<li>چند پروفایل هرمس دارید و اشتباهی از پروفایل دیگری استفاده می‌کنید (<code>hermes profile list</code> را چک کنید)</li>
+</ul>
+<h3>لغو دسترسی و شروع از صفر</h3>
+<pre dir="ltr"><code>hermes auth logout nous       # توکن refresh محلی را پاک می‌کند
+# سپس دوباره setup را اجرا کنید یا اشتراک را از رابط وب Portal حذف کنید</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۲</span> آنچه به دست می‌آورید، به زبان اعداد</h2>
+<div class="table-wrap">
+<table>
+<tr><th>بدون Portal</th><th>با Portal</th></tr>
+<tr><td>۱× کلید OpenRouter / Anthropic / OpenAI در <code>.env</code></td><td>۱× توکن refresh از نوع OAuth، بدون کلید در <code>.env</code></td></tr>
+<tr><td>۱× کلید Firecrawl برای وب</td><td>وب از مسیر گیت‌وی</td></tr>
+<tr><td>۱× کلید FAL برای تولید تصویر</td><td>تولید تصویر از مسیر گیت‌وی</td></tr>
+<tr><td>۱× کلید Browser Use / Browserbase برای مرورگر</td><td>مرورگر از مسیر گیت‌وی</td></tr>
+<tr><td>۱× کلید OpenAI برای TTS / حالت صوتی</td><td>TTS از مسیر گیت‌وی</td></tr>
+<tr><td>۵ داشبورد جداگانه، شارژ حساب و صورت‌حساب‌های جداگانه</td><td>۱ اشتراک، ۱ صورت‌حساب</td></tr>
+<tr><td>بین ماشین‌ها: بازتولید هر ۵ کلید</td><td>بین ماشین‌ها: یک‌بار OAuth مجدد</td></tr>
+</table>
+</div>
+<p>معامله همین است. اگر به‌هرحال بیش از دو مورد از این بک‌اندها را استفاده می‌کنید، اشتراک هزینهٔ خودش را درمی‌آورد.</p>
+</section>
+
+<section class="doc-sec">
+<h2><span class="secnum">۱۳</span> همچنین ببینید</h2>
+<ul>
+<li><b><a href="../integrations/nous-portal.html">صفحهٔ یکپارچگی Nous Portal</a></b> — نگاه کلی به آنچه در اشتراک هست</li>
+<li><b><a href="../user-guide/features/tool-gateway.html">گیت‌وی ابزار</a></b> — جزئیات کامل هر ابزارِ مسیریابی‌شده از گیت‌وی</li>
+<li><b><a href="../user-guide/features/subscription-proxy.html">پروکسی اشتراک</a></b> — استفاده از اشتراک Portal از ابزارهای غیرهرمسی</li>
+<li><b><a href="../user-guide/features/voice-mode.html">حالت صوتی</a></b> — راه‌اندازی گفتگوهای صوتی روی اشتراک Portal</li>
+<li><b><a href="oauth-over-ssh.html">OAuth روی SSH</a></b> — الگوهای ورود راه‌دور / بدون‌سر</li>
+<li><b><a href="../user-guide/profiles.html">پروفایل‌ها</a></b> — به‌اشتراک‌گذاری یک ورود Portal بین چند پیکربندی هرمس</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="pipe-script-output.html"><span class="dir">→ قبلی</span><span class="ttl">ارسال خروجی اسکریپت به پیام‌رسان‌ها</span></a>
+  <a class="next" href="run-nemotron-3-ultra-free.html"><span class="dir">بعدی ←</span><span class="ttl">اجرای Nemotron 3 Ultra رایگان</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/run-hermes-with-nous-portal" target="_blank" rel="noopener">Run Hermes Agent with Nous Portal</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -223,7 +223,7 @@ hermes chat --provider anthropic  # reads Claude Code credential files automatic
   <p>بعضی پروکسی‌های اجتماعی قدیمی‌تر از جریان تبادل api.github.com/copilot_internal/v2/token استفاده می‌کنند. آن نقطهٔ پایانی برای بعضی انواع حساب در دسترس نیست ‏(404 برمی‌گرداند). بنابراین هرمس احراز هویت مستقیم-با-توکن را مسیر اصلی نگه می‌دارد و برای مقاومت به refresh پویای credential و retry متکی است.</p>
 </div>
 <p><b>مسیریابی API:</b> مدل‌های GPT-5+ ‏(به‌جز gpt-5-mini) خودکار از Responses API استفاده می‌کنند. همهٔ مدل‌های دیگر ‏(GPT-4o، ‏Claude، ‏Gemini و...) از Chat Completions. مدل‌ها از کاتالوگ زندهٔ Copilot خودکار تشخیص داده می‌شوند.</p>
-<p><b>copilot-acp — بک‌اند عامل ACP ی Copilot.</b>Copilot CLI محلی را به‌صورت زیرفرایند اجرا می‌کند:</p>
+<p><b>copilot-acp — بک‌اند عامل ACP ی Copilot.</b> Copilot CLI محلی را به‌صورت زیرفرایند اجرا می‌کند:</p>
 <pre dir="ltr"><code>hermes chat --provider copilot-acp --model copilot-acp
 # Requires the GitHub Copilot CLI in PATH and an existing `copilot login` session</code></pre>
 <p><b>پیکربندی دائمی:</b></p>
@@ -603,7 +603,7 @@ OLLAMA_CONTEXT_LENGTH=64000 ollama serve
 # Option 2: For systemd-managed Ollama
 sudo systemctl edit ollama.service
 # Add: Environment="OLLAMA_CONTEXT_LENGTH=64000"
-# Then: sudo systemctl daemon-reload && sudo systemctl restart ollama
+# Then: sudo systemctl daemon-reload &amp;&amp; sudo systemctl restart ollama
 
 # Option 3: Bake it into a custom model (persistent per-model)
 echo -e "FROM qwen2.5-coder:32b\nPARAMETER num_ctx 64000" > Modelfile
@@ -675,7 +675,7 @@ python -m sglang.launch_server \
 <h3 id="llama-cpp">llama.cpp / llama-server — استنتاج CPU و Metal</h3>
 <p><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp</a> مدل‌های کوانتیزه‌شده را روی CPU، ‏Apple Silicon ‏(Metal) و GPU های مصرفی اجرا می‌کند. بهترین گزینه برای: اجرای مدل بدون GPU ی مرکز داده، کاربران Mac، استقرار edge.</p>
 <pre dir="ltr"><code># Build and start llama-server
-cmake -B build && cmake --build build --config Release
+cmake -B build &amp;&amp; cmake --build build --config Release
 ./build/bin/llama-server \
   --jinja -fa \
   -c 64000 \
@@ -785,7 +785,7 @@ curl http://$(hostname).local:11434/v1/models</code></pre>
 </tbody>
 </table>
 </div>
-<p><b>Ollama روی ویندوز ‏(با جزئیات):</b>Ollama به‌عنوان یک سرویس ویندوز اجرا می‌شود. برای ست کردن OLLAMA_HOST:</p>
+<p><b>Ollama روی ویندوز ‏(با جزئیات):</b> Ollama به‌عنوان یک سرویس ویندوز اجرا می‌شود. برای ست کردن OLLAMA_HOST:</p>
 <ol>
   <li>‏System Properties ← Environment Variables را باز کنید</li>
   <li>یک <b>متغیر System</b> جدید اضافه کنید: OLLAMA_HOST = 0.0.0.0</li>

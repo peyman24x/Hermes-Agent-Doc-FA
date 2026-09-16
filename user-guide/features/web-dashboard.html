@@ -88,7 +88,7 @@ hermes dashboard --no-open</code></pre>
 <p>نصب پیش‌فرض ‏hermes-agent پشتهٔ HTTP یا helper ‏PTY را حمل نمی‌کند — آن‌ها extras اختیاری‌اند. <strong>داشبورد وب</strong> به FastAPI و Uvicorn نیاز دارد ‏(extra ‏<code>web</code>). تب <strong>Chat</strong> هم برای spawn کردن TUI جاسازی‌شده پشت شبه‌ترمینال به ‏<code>ptyprocess</code> نیاز دارد ‏(extra ‏<code>pty</code> روی POSIX). هر دو را نصب کنید:</p>
 <div class="codebox">
   <div class="code-head"><span class="code-lang">bash</span><button class="copy-btn">کپی</button></div>
-  <pre><code>cd ~/.hermes/hermes-agent && uv pip install -e ".[web,pty]"</code></pre>
+  <pre><code>cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[web,pty]"</code></pre>
 </div>
 <p>‏extra ‏<code>web</code> مقدار FastAPI/Uvicorn را می‌کشد؛ ‏<code>pty</code> مقدار ‏<code>ptyprocess</code> ‏(POSIX) یا ‏<code>pywinpty</code> ‏(ویندوز native — توجه: خود TUI جاسازی‌شده همچنان WSL می‌خواهد) را. ‏<code>cd ~/.hermes/hermes-agent && uv pip install -e ".[all]"</code> هر دو extra را شامل است و ساده‌ترین مسیر است اگر پیام‌رسانی/صوت/و... هم می‌خواهید.</p>
 <p>وقتی ‏<code>hermes dashboard</code> را بدون وابستگی‌ها اجرا کنید می‌گوید چه نصب کنید. اگر فرانت هنوز build نشده و ‏<code>npm</code> موجود باشد، اولین launch خودکار build می‌شود.</p>

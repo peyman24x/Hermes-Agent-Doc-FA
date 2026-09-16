@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>یکپارچه‌سازی برنامه‌پذیر — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/programmatic-integration" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>یکپارچه‌سازی برنامه‌پذیر</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1>یکپارچه‌سازی برنامه‌پذیر</h1>
+<p>هرمس سه پروتکل برای کنترل ایجنت از برنامه‌های خارجی ارائه می‌کند — پلاگین‌های IDE، رابط‌های کاربری سفارشی، خطوط لولهٔ CI و ساب‌ایجنت‌های تعبیه‌شده. گزینه‌ای را انتخاب کنید که با روش انتقال و مصرف‌کنندهٔ شما هماهنگ باشد.</p>
+<div class="table-wrap"><table><thead><tr><th>پروتکل</th><th>انتقال</th><th>مناسب برای</th><th>تعریف‌شده در</th></tr></thead><tbody>
+<tr><td><strong>ACP</strong></td><td>JSON-RPC روی stdio</td><td>کلاینت‌های IDE مانند VS Code، Zed و JetBrains که از قبل از <a href="https://github.com/zed-industries/agent-client-protocol" target="_blank" rel="noopener">پروتکل کلاینت ایجنت</a> پشتیبانی می‌کنند</td><td><code>acp_adapter/</code></td></tr>
+<tr><td><strong>گیت‌وی TUI</strong></td><td>JSON-RPC روی stdio (یا WebSocket)</td><td>میزبان‌های سفارشی که کنترل دقیق نشست‌ها، فرمان‌های اسلش، تأییدها و رویدادهای استریم را می‌خواهند</td><td><code>tui_gateway/server.py</code></td></tr>
+<tr><td><strong>سرور API</strong></td><td>HTTP + رویدادهای ارسالی سرور (Server-Sent Events)</td><td>فرانت‌اندهای سازگار با OpenAI مانند Open WebUI، LobeChat، LibreChat و کلاینت‌های وب مستقل از زبان برنامه‌نویسی</td><td><code>gateway/platforms/api_server.py</code></td></tr>
+</tbody></table></div>
+<p>هر سه همان هستهٔ <code>AIAgent</code> را کنترل می‌کنند. تنها تفاوتشان قالب دادهٔ تبادل‌شده و مجموعهٔ قابلیت‌های در دسترس است.</p>
+<section class="doc-sec"><h2 id="acp-agent-client-protocol"><span class="secnum">۱</span> ACP (پروتکل کلاینت ایجنت)</h2>
+<p><code>hermes acp</code> سرور JSON-RPC روی stdio را با پروتکل ACP راه‌اندازی می‌کند. VS Code (افزونهٔ ACP از Zed Industries)، Zed و هر IDE از JetBrains با پلاگین ACP در محیط عملیاتی از آن استفاده می‌کنند.</p>
+<p>قابلیت‌های ارائه‌شده: ایجاد نشست، ارسال پرامپت، قطعه‌های استریم پیام ایجنت، رویدادهای فراخوانی ابزار، درخواست مجوز، انشعاب نشست، لغو و احراز هویت. خروجی ابزار به بلوک‌های محتوای <code>Diff</code>/<code>ToolCall</code> در ACP تبدیل می‌شود که IDE آن‌ها را می‌فهمد.</p>
+<p>چرخهٔ حیات کامل، پل رویداد و جریان تأیید را در <a href="acp-internals.html">درون‌مایهٔ ACP</a> ببینید.</p>
+<pre dir="ltr"><code>hermes acp                  # serve ACP on stdio
+hermes acp --check          # verify ACP dependencies and adapter imports
+hermes acp --setup          # interactive provider/model setup for ACP terminal auth
+</code></pre>
+</section>
+<section class="doc-sec"><h2 id="tui-gateway-json-rpc"><span class="secnum">۲</span> JSON-RPC گیت‌وی TUI</h2>
+<p><code>tui_gateway/server.py</code> پروتکلی است که TUI مبتنی بر Ink (<code>hermes --tui</code>) و پل PTY تعبیه‌شدهٔ داشبورد با آن ارتباط برقرار می‌کنند. هر میزبان خارجی می‌تواند از همین پروتکل روی stdio (یا WebSocket از طریق <code>tui_gateway/ws.py</code>) استفاده کند.</p>
+<h3 id="method-catalog-selected">فهرست متدها (منتخب)</h3>
+<pre dir="ltr"><code>prompt.submit           prompt.background       session.steer
+session.create          session.list            session.active_list
+session.activate        session.close           session.interrupt
+session.history         session.compress        session.branch
+session.title           session.usage           session.status
+clarify.respond         sudo.respond            secret.respond
+approval.respond        config.set / config.get commands.catalog
+command.resolve         command.dispatch        cli.exec
+reload.mcp              reload.env              process.stop
+delegation.status       subagent.interrupt      subagent.steer
+spawn_tree.save / list / load
+terminal.resize         clipboard.paste         image.attach
+</code></pre>
+<p><code>session.active_list</code>، <code>session.activate</code> و <code>session.close</code> کنترل‌های نشست زندهٔ محلیِ فرایندند که تعویض‌کنندهٔ نشست TUI استفاده می‌کند. برای یافتن رونوشت‌های ذخیره‌شده از <code>session.list</code> / <code>/resume</code> استفاده کنید؛ متدهای نشست فعال فقط برای نشست‌هایی هستند که اکنون در فرایند گیت‌وی TUI بازند.</p>
+<h3 id="rewinding-history-on-promptsubmit">عقب‌بردن تاریخچه در <code>prompt.submit</code></h3>
+<p>عقب‌بردن / ویرایش / تولید دوباره، یک <code>prompt.submit</code> است که پیش از اجرای نوبت جدید بخشی از رونوشت ذخیره‌شده را حذف می‌کند. چون این نوشتن، بازنویسی مخربِ ردیف‌های پایدار نشست است، گیت‌وی تنها وقتی آن را می‌پذیرد که کلاینت قصد خود را اعلام کند:</p>
+<div class="table-wrap"><table><thead><tr><th>پارامتر</th><th>معنا</th></tr></thead><tbody>
+<tr><td><code>truncate_before_user_ordinal</code></td><td>اندیس از صفرِ نوبت کاربر که برش از آن آغاز می‌شود. همه‌چیز از آن نوبت به بعد حذف می‌شود. ردیف‌های صرفاً نمایشی خط زمانی (<code>display_kind</code>) شمرده نمی‌شوند. باید واقعاً عدد صحیح باشد — مقدار بولی JSON با کد <code>4004</code> رد می‌شود.</td></tr>
+<tr><td><code>truncate_before_row_id</code></td><td>شناسهٔ عدد صحیحِ ردیف SQLite (<code>messages.id</code> / <code>row_id</code>) برای نوبت کاربر هدفِ برش. آدرس پایدار ترجیحی است. وقتی هم شمارهٔ ترتیبی و هم شناسهٔ ردیف داده شوند، گیت‌وی تطابقشان را بررسی می‌کند (در صورت عدم تطابق <code>4030</code> برمی‌گرداند). شناسهٔ ردیف ناشناخته/قدیمی با <code>4018</code> رد می‌شود — به شمارهٔ ترتیبی رجوع <strong>نمی‌کند</strong>.</td></tr>
+<tr><td><code>confirm_truncate</code></td><td>هر زمان شمارهٔ ترتیبی، شناسهٔ پیام یا شناسهٔ ردیف ارسال شود لازم است. اعلام می‌کند این ارسال واقعاً عقب‌بردن است، نه ارسال عادی با پارامترهای باقی‌ماندهٔ تصادفی. ارسال آن بدون هدف با کد <code>4004</code> رد می‌شود.</td></tr>
+<tr><td><code>confirm_empty_truncate</code></td><td>وقتی برش رونوشت را خالی می‌کند (شمارهٔ ترتیبی <code>0</code>) علاوه بر مورد قبلی لازم است.</td></tr>
+</tbody></table></div>
+<p>پارامتر برش بدون <code>confirm_truncate</code> با کد <code>4004</code> یا <code>4029</code> رد می‌شود و چیزی نوشته نمی‌شود. میزبان‌هایی که عقب‌بردن را پیاده‌سازی می‌کنند باید همان لحظهٔ درخواست کاربر این پرچم را تنظیم کنند و هرگز پارامترهای برش را بین ارسال‌های عادی در وضعیت نگه ندارند. <code>truncate_before_row_id</code> (از <code>row_id</code> / <code>_row_id</code> هنگام ازسرگیری) را بر شماره‌های ترتیبی ترجیح دهید؛ شمارهٔ ترتیبی را فقط وقتی هنوز شناسهٔ پایدار ندارید، برای سازگاری عقب‌رو / مسیر ردیف خوش‌بینانه نگه دارید.</p>
+<p>در ارسال همراه با برشِ موفق روی نشست پایدار، نتیجهٔ <code>prompt.submit</code> علاوه بر موارد دیگر شامل <code>survivor_user_row_ids</code> است — شناسه‌های تازهٔ ردیف‌های نوبت‌های کاربر باقی‌مانده پس از بازنویسی، به ترتیب شمارهٔ ترتیبیِ کاربران قابل‌مشاهده. بازنویسی، پیشوند نگه‌داشته‌شده را به‌صورت ردیف‌های جدید درج می‌کند؛ بنابراین هر شناسه‌ای که میزبان پیش از عقب‌بردن کش کرده، پس از آن قدیمی است. شناسه‌های کش‌شده را از این فهرست دوباره متصل کنید (ورودی <code>null</code> یعنی آن نوبت شناسهٔ پایدار ندارد — شناسهٔ کش‌شده را حذف کنید)، وگرنه عقب‌بردن بعدی که نوبت قدیمی‌ترِ باقی‌مانده را هدف می‌گیرد با <code>4018</code> رد می‌شود.</p>
+<h3 id="events-streamed-back">رویدادهای استریم برگشتی</h3>
+<p><code>message.delta</code>، <code>message.complete</code>، <code>tool.start</code>، <code>tool.progress</code>، <code>tool.complete</code>، <code>approval.request</code>، <code>clarify.request</code>، <code>sudo.request</code>، <code>sudo.expire</code>، <code>secret.request</code>، <code>secret.expire</code>، <code>gateway.ready</code>، به‌علاوهٔ رویدادهای چرخهٔ حیات نشست و خطا. رویدادهای انقضا همان <code>{ request_id }</code> اصلی را حمل می‌کنند؛ میزبان خارجی باید فقط پرامپت در انتظارِ متناظر را پاک کند.</p>
+<h3 id="pi-style-rpc-mapping">نگاشت RPC به سبک Pi</h3>
+<p>هر فرمان مشخصات RPC در Pi-mono (<a href="https://github.com/NousResearch/hermes-agent/issues/360" target="_blank" rel="noopener">ایشوی شمارهٔ ۳۶۰</a>) معادلی در گیت‌وی TUI دارد:</p>
+<div class="table-wrap"><table><thead><tr><th>فرمان Pi</th><th>معادل هرمس</th></tr></thead><tbody>
+<tr><td><code>prompt</code></td><td><code>prompt.submit</code> (یا <code>session/prompt</code> در ACP)</td></tr>
+<tr><td><code>steer</code></td><td><code>session.steer</code></td></tr>
+<tr><td><code>follow_up</code></td><td><code>prompt.submit</code> در صف پس از نوبت جاری</td></tr>
+<tr><td><code>abort</code></td><td><code>session.interrupt</code></td></tr>
+<tr><td><code>set_model</code></td><td><code>command.dispatch</code> برای <code>/model &lt;provider:model&gt;</code> (میان نشست، پایدار)</td></tr>
+<tr><td><code>compact</code></td><td><code>session.compress</code></td></tr>
+<tr><td><code>get_state</code></td><td><code>session.status</code></td></tr>
+<tr><td><code>get_messages</code></td><td><code>session.history</code></td></tr>
+<tr><td><code>switch_session</code></td><td><code>session.resume</code></td></tr>
+<tr><td><code>fork</code></td><td><code>session.branch</code></td></tr>
+<tr><td><code>ui_request</code> / <code>ui_response</code></td><td><code>clarify.respond</code> / <code>sudo.respond</code> / <code>secret.respond</code> / <code>approval.respond</code></td></tr>
+</tbody></table></div>
+</section>
+<section class="doc-sec"><h2 id="openai-compatible-api-server"><span class="secnum">۳</span> سرور API سازگار با OpenAI</h2>
+<p><code>gateway/platforms/api_server.py</code> هرمس را از طریق HTTP در اختیار هر کلاینتی می‌گذارد که از قبل قالب OpenAI را پشتیبانی می‌کند. برای فرانت‌اند وب، اجراگر CI مبتنی بر <code>curl</code> یا مصرف‌کنندهٔ غیرپایتونی مفید است.</p>
+<p>نقطه‌های پایانی:</p>
+<pre dir="ltr"><code>POST /v1/chat/completions        OpenAI Chat Completions (streaming via SSE)
+POST /v1/responses               OpenAI Responses API (stateful)
+POST /v1/runs                    Start a run, returns run_id (202)
+GET  /v1/runs/{id}               Run status
+GET  /v1/runs/{id}/events        SSE stream of lifecycle events
+POST /v1/runs/{id}/approval      Resolve a pending approval
+POST /v1/runs/{id}/steer         Inject mid-run guidance at the next tool boundary
+POST /v1/runs/{id}/stop          Interrupt the run
+GET  /v1/capabilities            Machine-readable feature flags
+POST /v1/browser-control/register Register a browser controller
+GET  /v1/browser-control/ws       Browser-controller WebSocket
+GET  /v1/models                  Lists hermes-agent
+GET  /api/model/options          Provider-aware picker inventory
+GET  /health, /health/detailed
+</code></pre>
+<p>راه‌اندازی، هدرها (<code>X-Hermes-Session-Id</code>، <code>X-Hermes-Session-Key</code>) و اتصال فرانت‌اند را در <a href="../user-guide/features/api-server.html">سرور API</a> ببینید.</p>
+<p>افزونه‌های مرورگر می‌توانند پروتکل کنترل‌کننده را که پیش‌فرض غیرفعال است صریحاً فعال کنند تا دقیقاً همان نشست مرورگری را کنترل کنند که گفتگوی هرمس را باز کرده است. انتقال‌های API و داشبورد از یک واسط مقید به هویت امنیتی و یک فهرست مجاز صریحِ قابلیت‌ها استفاده می‌کنند؛ <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server#browser-extension-control" target="_blank" rel="noopener">کنترل افزونهٔ مرورگر</a> را ببینید.</p>
+<h3 id="model-catalog-surfaces">رابط‌های فهرست مدل</h3>
+<p>API سازگار با OpenAI عمداً <code>GET /v1/models</code> را حداقلی نگه می‌دارد: این نقطهٔ پایانی سازگاری است که فرانت‌اندها انتظار دارند، نه فهرست کامل انتخابگر ارائه‌دهنده/مدل هرمس.</p>
+<p>اگر لایهٔ کنترل خارجی به ردیف‌های گزینش‌شدهٔ ارائه‌دهندگان هرمس، قیمت‌گذاری هر مدل یا راهنمای قابلیت‌ها نیاز دارد، یکی از رابط‌های انتخابگرِ نیازمند احراز هویت را استفاده کنید:</p>
+<ul><li>REST سرور API: <code>GET /api/model/options</code> با کلید bearer سرور API</li><li>REST بک‌اند داشبورد: <code>GET /api/model/options</code> با <code>X-Hermes-Session-Token</code></li><li>RPC گیت‌وی TUI: <code>model.options</code></li></ul>
+<p>این رابط‌ها سازندهٔ بدنهٔ داده و سیاست بررسی ارائه‌دهندهٔ سفارشی یکسانی دارند:</p>
+<ul><li>بازشدن عادی: فقط ارائه‌دهندهٔ سفارشی فعلی بررسی می‌شود تا نقطه‌های پایانی ذخیره‌شدهٔ آفلاین انتخابگر را معطل نکنند.</li><li>نوسازی صریح (<code>refresh=1</code> یا <code>refresh: true</code>): کش مدل‌های ارائه‌دهنده باطل و همهٔ ارائه‌دهندگان سفارشی ذخیره‌شده بررسی می‌شوند تا فهرست‌های زنده کاملاً دوباره پر شوند.</li></ul>
+<p>برای سازگاری با کلاینت OpenAI از <code>/v1/models</code> استفاده کنید. هنگام ساخت انتخابگر مدلِ آگاه از هرمس، از <code>/api/model/options</code> یا <code>model.options</code> استفاده کنید.</p>
+<p><code>POST /v1/runs/{id}/steer</code> معادل HTTP فرمان <code>/steer</code> هرمس است: نوبت کاربر جدیدی ایجاد نمی‌کند و خروجی دستیارِ در حال تولید را فوراً بازنویسی نمی‌کند. در عوض متن به اجرای زنده افزوده می‌شود و پس از مرز ابزار بعدی برای ایجنت قابل‌مشاهده می‌شود تا بدون دورریختن حلقهٔ جاریِ فراخوانی ابزار مسیرش را اصلاح کند.</p>
+<p><code>/v1/runs/{id}/steer</code> فقط وقتی وضعیت اجرا <code>running</code> باشد پذیرفته می‌شود. اجراهای در صف، متوقف در انتظار تأیید، در حال توقف، لغوشده، شکست‌خورده و تکمیل‌شده <code>409 run_not_accepting_steer</code> برمی‌گردانند؛ حتی اگر سرور هنگام خاموشی مشارکتی هنوز ارجاع‌های داخلی ایجنت را نگه داشته باشد.</p>
+<p>کد <code>200</code> (و رویداد <code>run.steered</code>) یعنی متن <strong>در صف قرار گرفت</strong>، نه اینکه ایجنت آن را مصرف کرده است. اگر هدایت پس از پاسخ نهایی ایجنت برسد — بدون مرز ابزار بعدی برای تحویل — متن تحویل‌نشده به‌صورت <code>pending_steer</code> در رویداد پایانی <code>run.completed</code> و وضعیت اجرا برمی‌گردد تا کلاینت به‌جای ازدست‌دادنش آن را به‌عنوان نوبت کاربر بعدی بازپخش کند.</p>
+</section>
+<section class="doc-sec"><h2 id="which-one-should-i-use"><span class="secnum">۴</span> از کدام استفاده کنم؟</h2>
+<ul><li><strong>پلاگین IDE می‌نویسید و IDE از قبل ACP را پشتیبانی می‌کند</strong> ← ACP. سمت IDE هیچ کار پروتکلی لازم نیست.</li><li><strong>میزبان سفارشی دسکتاپ / وب / TUI می‌نویسید و تمام قابلیت‌های هرمس را می‌خواهید</strong> (فرمان‌های اسلش، تأییدها، درخواست توضیح، چندایجنتی، انشعاب نشست) ← JSON-RPC گیت‌وی TUI.</li><li><strong>فرانت‌اند سازگار با OpenAI، کلاینت HTTP مستقل از زبان یا اتوماسیون مبتنی بر <code>curl</code> می‌خواهید</strong> ← سرور API.</li><li><strong>تعبیهٔ درون‌فرایندی پایتون بدون زیرفرایند می‌خواهید</strong> ← مستقیماً <code>run_agent.AIAgent</code> را ایمپورت کنید. <a href="agent-loop.html">حلقهٔ ایجنت</a> را ببینید.</li></ul>
+</section>
+<section class="doc-sec"><h2 id="model-hot-swapping"><span class="secnum">۵</span> تعویض مدل حین اجرا</h2>
+<p>تعویض مدل در میانهٔ نشست روی تمام رابط‌ها کار می‌کند — پشت صحنه همان فرمان اسلش <code>/model</code> است.</p>
+<ul><li><strong>CLI / TUI:</strong> <code>/model claude-sonnet-4</code> یا <code>/model openrouter:anthropic/claude-sonnet-4.6</code></li><li><strong>RPC گیت‌وی TUI:</strong> <code>command.dispatch</code> با <code>{"command": "/model claude-sonnet-4"}</code></li><li><strong>ACP:</strong> IDE فرمان اسلش را به‌عنوان پرامپت می‌فرستد؛ ایجنت آن را اجرا می‌کند</li><li><strong>سرور API:</strong> فیلد <code>model</code> را در بدنهٔ درخواست بگنجانید</li></ul>
+<p>تعیین مدل با درنظرگرفتن ارائه‌دهنده به‌صورت داخلی انجام می‌شود (نام مدل یکسان، قالب درست را برای هر ارائه‌دهنده‌ای که استفاده می‌کنید انتخاب می‌کند). <code>hermes_cli/model_switch.py</code> را ببینید.</p>
+</section>
+<section class="doc-sec"><h2 id="a-note-on---mode-rpc"><span class="secnum">۶</span> نکته‌ای دربارهٔ <code>--mode rpc</code></h2>
+<p>هرمس پرچم <code>--mode rpc</code> ندارد. سه پروتکل بالا از قبل موارد استفاده را پوشش می‌دهند — ACP برای کلاینت‌های پروتکل IDE، گیت‌وی TUI برای میزبان‌های JSON-RPC روی stdio و سرور API برای HTTP. اگر شکاف واقعی‌ای یافتید که هیچ‌کدام پر نمی‌کنند، با توضیح مصرف‌کنندهٔ مشخصی که می‌سازید یک ایشو باز کنید.</p>
+</section>
+
+<div class="pager">
+  <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener"><span class="dir">→ قبلی</span><span class="ttl">ساخت پلاگین هرمس (نسخهٔ اصلی)</span></a>
+  <a class="next" href="https://hermes-agent.nousresearch.com/docs/developer-guide/secret-source-plugin" target="_blank" rel="noopener"><span class="dir">بعدی ←</span><span class="ttl">پلاگین منبع رمز (نسخهٔ اصلی)</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/programmatic-integration" target="_blank" rel="noopener">Programmatic Integration</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
