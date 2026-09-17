@@ -273,6 +273,7 @@ Off-gateway these keys do nothing. `hermes memory setup` only prompts for them w
 See the [config reference](https://github.com/NousResearch/hermes-agent/blob/main/plugins/memory/honcho/README.md) and [Honcho integration guide](https://docs.honcho.dev/v3/guides/integrations/hermes).
 
 
+---
 
 ### OpenViking
 
@@ -310,7 +311,6 @@ OPENVIKING_ENDPOINT=http://127.0.0.1:1933
 # OPENVIKING_API_KEY=...
 # OPENVIKING_ACCOUNT=default
 # OPENVIKING_USER=default
-# OPENVIKING_AGENT=hermes
 ```
 
 OpenViking server settings live in `ov.conf` (`--config`,
@@ -324,8 +324,26 @@ live in `ovcli.conf` (`OPENVIKING_CLI_CONFIG_FILE` or
 - `viking://` URI scheme for hierarchical knowledge browsing
 
 `OPENVIKING_ACCOUNT` and `OPENVIKING_USER` are used for local/trusted mode.
-`OPENVIKING_AGENT` is Hermes' peer ID in OpenViking for peer-scoped memories.
+Peer identity is optional. By default, Hermes sends no peer ID and writes
+explicit memories to `viking://user/<user>/memories/...`. Setup does not ask
+for a peer ID. For separate assistant context, set
+`memory.openviking.agent: work-assistant` in `config.yaml`.
 
+Existing non-empty peer settings keep their peer-scoped writes and recall.
+This includes `OPENVIKING_AGENT` and `actor_peer_id` or legacy `agent_id` in a
+linked OpenViking config. Existing memories are not moved or deleted.
+With no peer ID, default search covers user memory and existing peer memories
+under the same OpenViking user. Old peer memories remain searchable at their
+existing paths. Ranking and result limits determine which memories are returned.
+Set `memory.openviking.agent: hermes` to restore the old peer-scoped writes.
+Memories written at user scope before this change stay there and remain
+searchable. The setting changes future writes, not existing memory locations.
+
+Hermes sends `User-Agent: openviking-memory-hermes/<version>` on OpenViking
+requests. This standard harness identifier contains no per-user identifier and
+does not add a separate request.
+
+---
 
 ### Mem0
 
@@ -392,6 +410,7 @@ The plugin authenticates with `X-API-Key` and uses the server's `/search` / `/me
 | `user_id` | `hermes-user` | User identifier |
 | `agent_id` | `hermes` | Agent identifier |
 | `rerank` | `false` | Rerank search results for relevance (platform mode only) |
+| `sync_max_chars` | `450` | Per-message character cap applied before each turn is sent for fact extraction, cut at the last sentence boundary. The default fits 512-token embedders (Ollama `bge-small-zh-v1.5`, `all-minilm`); raise it (e.g. `6000`) for 8k-token embedders such as `text-embedding-3-small`, `jina-embeddings-v3` or `bge-m3` |
 
 **OSS supported providers:**
 
@@ -403,6 +422,7 @@ The plugin authenticates with `X-API-Key` and uses the server's `/search` / `/me
 
 **Switching modes:** Re-run `hermes memory setup mem0 --mode <platform|selfhosted|oss>` or edit `mem0.json` directly.
 
+---
 
 ### Hindsight
 
@@ -449,6 +469,7 @@ The setup wizard installs dependencies automatically and only installs what's ne
 
 See [plugin README](https://github.com/NousResearch/hermes-agent/blob/main/plugins/memory/hindsight/README.md) for the full configuration reference.
 
+---
 
 ### Holographic
 
@@ -484,6 +505,7 @@ hermes config set memory.provider holographic
 - `contradict` — automated detection of conflicting facts
 - Trust scoring with asymmetric feedback (+0.05 helpful / -0.10 unhelpful)
 
+---
 
 ### RetainDB
 
@@ -506,6 +528,7 @@ hermes config set memory.provider retaindb
 echo "RETAINDB_API_KEY=your-key" >> ~/.hermes/.env
 ```
 
+---
 
 ### ByteRover
 
@@ -536,10 +559,11 @@ hermes config set memory.provider byterover
 - Knowledge tree stored at `$HERMES_HOME/byterover/` (profile-scoped)
 - SOC2 Type II certified cloud sync (optional)
 
+---
 
 ### Supermemory
 
-Semantic long-term memory with profile recall, semantic search, explicit memory tools, and session-end conversation ingest via the Supermemory graph API.
+Semantic long-term memory with profile recall, semantic search, explicit memory tools, and per-turn conversation capture (one document per session per 4-hour window).
 
 | | |
 |---|---|
@@ -589,17 +613,17 @@ stays local.
 | `profile_frequency` | `50` | Include profile facts on first turn and every N turns |
 | `capture_mode` | `all` | Skip tiny or trivial turns by default |
 | `search_mode` | `hybrid` | Search mode: `hybrid`, `memories`, or `documents` |
-| `api_timeout` | `5.0` | Timeout for SDK and ingest requests |
+| `api_timeout` | `5.0` | Timeout for SDK requests |
 
 **Environment variables:** `SUPERMEMORY_API_KEY` (required), `SUPERMEMORY_BASE_URL` (compatibility fallback when `base_url` is not configured), `SUPERMEMORY_CONTAINER_TAG` (overrides config).
 
-Base URL precedence is `supermemory.json` → `SUPERMEMORY_BASE_URL` → `https://api.supermemory.ai`. SDK operations, setup/status probes, and conversation ingest all use the resolved endpoint.
+Base URL precedence is `supermemory.json` → `SUPERMEMORY_BASE_URL` → `https://api.supermemory.ai`. SDK operations and setup/status probes all use the resolved endpoint.
 
 **Key features:**
 - Automatic context fencing — strips recalled memories from captured turns to prevent recursive memory pollution
-- Full-session ingest — the entire conversation is sent once at session boundaries
-- Session-end conversation ingest (to `/v4/conversations`) for richer profile + graph building in Supermemory
-- End-to-end self-hosted routing — SDK, probe, and conversation-ingest requests use the same configured endpoint
+- Per-turn capture — each completed turn is written as it happens, one document per session per 4-hour window
+- Failed turn writes are retried (at-least-once) on the next turn, session end, `/reset`, or shutdown
+- End-to-end self-hosted routing — SDK and probe requests use the same configured endpoint
 - Profile facts injected on first turn and at configurable intervals
 - **Profile-scoped containers** — use `{identity}` in `container_tag` (e.g. `hermes-{identity}` → `hermes-coder`) to isolate memories per Hermes profile
 - **Multi-container mode** — enable `enable_custom_container_tags` with a `custom_containers` list to let the agent read/write across named containers. Automatic operations stay on the primary container.
@@ -641,6 +665,7 @@ hermes config set memory.provider memori
 hermes memory setup
 ```
 
+---
 
 ## Provider Comparison
 
@@ -668,5 +693,3 @@ Each provider's data is isolated per [profile](/user-guide/profiles):
 ## Building a Memory Provider
 
 See the [Developer Guide: Memory Provider Plugins](/developer-guide/memory-provider-plugin) for how to create your own.
-
-

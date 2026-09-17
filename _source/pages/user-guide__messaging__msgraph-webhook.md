@@ -136,5 +136,3 @@ Status code table:
 - [Register a Microsoft Graph Application](/guides/microsoft-graph-app-registration) — Azure app registration prereq
 - [Environment Variables → Microsoft Graph](/reference/environment-variables#microsoft-graph-teams-meetings) — full env var list
 - [Microsoft Teams bot setup](/user-guide/messaging/teams) — the different platform that lets users chat with Hermes in Teams
-
-

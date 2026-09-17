@@ -177,7 +177,7 @@ platforms: [windows]          # فقط ویندوز</code></pre>
 <p>کاربر می‌تواند از راه‌اندازی عبور کند و مهارت را همچنان بارگیری کند. هرمس هرگز مقدار خامِ رمز را به مدل نشان نمی‌دهد. گیت‌وی و نشست‌های پیام‌رسانی به‌جای جمع‌آوری رمزها درون باند، راهنمای راه‌اندازی محلی نشان می‌دهند.</p>
 <div class="callout tip">
   <div class="callout-title">💡 گذر به سندباکس</div>
-  <p>وقتی مهارت شما بارگیری می‌شود، هر <code>required_environment_variables</code> اعلام‌شده‌ای که ست شده باشد <strong>به‌طور خودکار گذر داده می‌شود</strong> به سندباکس‌های <code>execute_code</code> و <code>terminal</code> — از جمله بک‌اندهای راه دور مثل Docker و Modal. اسکریپت‌های مهارت شما می‌توانند به <code>$TENOR_API_KEY</code> (یا <code>os.environ["TENOR_API_KEY"]</code> در پایتون) دسترسی داشته باشند، بدون آن‌که کاربر لازم باشد چیز اضافه‌ای پیکربندی کند. جزئیات را در <a href="../user-guide/security.html#environment-variable-passthrough">عبور متغیرهای محیطی</a> ببینید.</p>
+  <p>وقتی مهارت شما بارگیری می‌شود، هر <code>required_environment_variables</code> اعلام‌شده‌ای که ست شده باشد <strong>به‌طور خودکار گذر داده می‌شود</strong> به سندباکس‌های <code>execute_code</code> و <code>terminal</code> — از جمله بک‌اندهای راه دور مثل Docker و Modal. اسکریپت‌های مهارت شما می‌توانند به <code>$TENOR_API_KEY</code> (یا <code>os.environ["TENOR_API_KEY"]</code> در پایتون) دسترسی داشته باشند، بدون آن‌که کاربر لازم باشد چیز اضافه‌ای پیکربندی کند. جزئیات را در <a href="https://hermes-agent.nousresearch.com/docs/../user-guide/security#environment-variable-passthrough" target="_blank" rel="noopener">عبور متغیرهای محیطی</a> ببینید.</p>
 </div>
 <p><code>prerequisites.env_vars</code> قدیمی هم به‌عنوان نام مستعار سازگار با گذشته پشتیبانی می‌شود.</p>
 <h3>تنظیمات پیکربندی (config.yaml)</h3>
@@ -257,7 +257,7 @@ platforms: [windows]          # فقط ویندوز</code></pre>
 <h3>اسکریپت‌های کمکی را بگنجانید</h3>
 <p>برای تجزیهٔ XML/JSON یا منطق پیچیده، اسکریپت‌های کمکی را در <code>scripts/</code> بگنجانید — توقع نداشته باشید LLM هر بار پارسر را درون‌خطی بنویسد.</p>
 <h3>تحویل رسانه به‌شکل سند (<code>[[as_document]]</code>)</h3>
-<p>اگر مهارت شما اسکرین‌شات با وضوح بالا، نمودار یا هر تصویری تولید می‌کند که فشرده‌سازی پیش‌نمایشِ اتلافی به آن ضربه می‌زند — دایرکتیوِ واقعیِ <code>[[as_document]]</code> را جایی در پاسخ صادر کنید (معمولاً آخرین خط). گیت‌وی دایرکتیو را حذف می‌کند و هر مسیر رسانهٔ استخراج‌شده در آن پاسخ را به‌جای حباب تصویر درون‌خطی، به‌شکل پیوست فایلِ قابل‌دانلود تحویل می‌دهد. برای معناشناسی کامل به <a href="../user-guide/features/skills.html#skill-output-and-media-delivery">خروجی مهارت و تحویل رسانه</a> نگاه کنید.</p>
+<p>اگر مهارت شما اسکرین‌شات با وضوح بالا، نمودار یا هر تصویری تولید می‌کند که فشرده‌سازی پیش‌نمایشِ اتلافی به آن ضربه می‌زند — دایرکتیوِ واقعیِ <code>[[as_document]]</code> را جایی در پاسخ صادر کنید (معمولاً آخرین خط). گیت‌وی دایرکتیو را حذف می‌کند و هر مسیر رسانهٔ استخراج‌شده در آن پاسخ را به‌جای حباب تصویر درون‌خطی، به‌شکل پیوست فایلِ قابل‌دانلود تحویل می‌دهد. برای معناشناسی کامل به <a href="https://hermes-agent.nousresearch.com/docs/../user-guide/features/skills#skill-output-and-media-delivery" target="_blank" rel="noopener">خروجی مهارت و تحویل رسانه</a> نگاه کنید.</p>
 <h4>ارجاع به اسکریپت‌های همراه از داخل SKILL.md</h4>
 <p>وقتی مهارتی بارگیری می‌شود، پیامِ فعال‌سازی دایرکتوری مطلق مهارت را به‌شکل <code>[Skill directory: /abs/path]</code> نمایان می‌کند و دو توکن قالبی را هم هر جای بدنهٔ SKILL.md جایگزین می‌کند:</p>
 <div class="table-wrap">
@@ -327,7 +327,7 @@ skills:
 </section>
 
 <section class="doc-sec">
-<h2><span class="secnum">۸</span> کارهای کرون پیشنهادی</h2>
+<h2 id="suggested-cron-jobs"><span class="secnum">۸</span> کارهای کرون پیشنهادی</h2>
 <p>هرمس می‌تواند اتوماسیون‌ها را <em>پیشنهاد</em> دهد و بگذارد آن‌ها را با یک لمس بپذیرید، به‌جای آن‌که شما مجبور شوید کارهای کرون را دستی سرهم کنید. هر پیشنهاد، فارغ از منبعش، از یک سطح واحد می‌گذرد — فرمان <code>/suggestions</code>:</p>
 <div class="table-wrap">
 <table>

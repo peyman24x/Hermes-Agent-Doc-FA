@@ -29,5 +29,3 @@ A blueprint is just a skill with a `metadata.hermes.blueprint` block in its
 `SKILL.md` frontmatter. See
 [Creating Skills → Automation Blueprints](../developer-guide/creating-skills.md) for the
 slot schema and how to publish one.
-
-

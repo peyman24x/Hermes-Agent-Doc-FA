@@ -30,6 +30,7 @@ The `curl | bash` installer manages Python, Node, and dependencies itself. The N
 - **Nix with flakes enabled** — [Determinate Nix](https://install.determinate.systems) recommended (enables flakes by default)
 - **API keys** for the services you want to use (at minimum: an OpenRouter or Anthropic key)
 
+---
 
 ## Quick Start (Any Nix User)
 
@@ -73,6 +74,7 @@ hermes setup
 
 </details>
 
+---
 
 ## NixOS Module
 
@@ -217,6 +219,11 @@ To enable container mode, add one line:
 Container mode auto-enables `virtualisation.docker.enable` via `mkDefault`. If you use Podman instead, set `container.backend = "podman"` and `virtualisation.docker.enable = false`.
 :::
 
+:::note Cron on a native install needs a lingering service user
+Scheduled cron jobs are launched in a transient `systemd-run --user --scope` so a gateway restart cannot kill a running job. That needs a systemd user manager for the service uid, which a system service only gets when the uid lingers. With `createUser = true` the module sets `users.users.<user>.linger = true` (nixpkgs ≥ 25.05), orders the gateway after `linger-users.service`, and waits briefly for `/run/user/<uid>/bus` before starting. If you declare the user yourself (`createUser = false`), set `linger = true` on it or run `sudo loginctl enable-linger <user>` once; otherwise cron degrades to unscoped workers (or fails closed under `cron.require_restart_safe_scope: true`).
+:::
+
+---
 
 ## Configuration
 
@@ -347,6 +354,7 @@ Quick reference for the most common things Nix users want to customize:
 | Change state directory | `stateDir` | `"/opt/hermes"` |
 | Set the agent's working directory | `workingDirectory` | `"/home/user/projects"` |
 
+---
 
 ## Secrets Management
 
@@ -409,6 +417,7 @@ For platforms requiring OAuth (e.g., Discord), use `authFile` to seed credential
 
 The file is only copied if `auth.json` doesn't already exist (unless `authFileForceOverwrite = true`). Runtime OAuth token refreshes are written to the state directory and preserved across rebuilds.
 
+---
 
 ## Documents
 
@@ -452,6 +461,7 @@ Each value is a string or a path. A key in either option can contain subdirector
 
 `hermesHomeFiles` needs no `workingDirectory`, because the module owns the `HERMES_HOME` directory. Most users want `hermesHomeFiles`.
 
+---
 
 ## MCP Servers
 
@@ -556,6 +566,7 @@ Some MCP servers can request LLM completions from the agent:
 }
 ```
 
+---
 
 ## Managed Mode
 
@@ -576,6 +587,7 @@ This prevents drift between what Nix declares and what's on disk. Detection uses
 
 Both signals hold the name of the system that manages the install. Thus the refusal names the correct rebuild command. The NixOS module gives `sudo nixos-rebuild switch`. The Home Manager module gives `home-manager switch`.
 
+---
 
 ## Home Manager Module
 
@@ -674,6 +686,7 @@ hermes --version
 hermes config     # shows the configuration that Nix wrote
 ```
 
+---
 
 ## Container Architecture
 
@@ -733,6 +746,7 @@ If the agent relies on specific packages, consider baking them into a custom ima
 
 The `preStart` script creates a GC root at `${stateDir}/.gc-root` pointing to the current hermes package. This prevents `nix-collect-garbage` from removing the running binary. If the GC root somehow breaks, restarting the service recreates it.
 
+---
 
 ## Plugins
 
@@ -871,6 +885,7 @@ services.hermes-agent.settings.plugins.enabled = [
 A build-time collision check prevents plugin packages from shadowing core hermes dependencies. If a plugin provides a package already in the sealed venv, `nixos-rebuild` fails with a clear error.
 :::
 
+---
 
 ## Development
 
@@ -932,6 +947,7 @@ nix build .#checks.x86_64-linux.config-roundtrip    # merge script preserves use
 
 </details>
 
+---
 
 ## Options Reference
 
@@ -1071,6 +1087,7 @@ replacement.
 | `container.extraOptions` | `listOf str` | `[]` | Extra args passed to `docker create` |
 | `container.hostUsers` | `listOf str` | `[]` | Interactive users who get a `~/.hermes` symlink to the service stateDir and are auto-added to the `hermes` group |
 
+---
 
 ## Directory Layout
 
@@ -1125,6 +1142,7 @@ Same layout, mounted into the container:
 | `/home/hermes` | `${stateDir}/home` | `rw` | Persistent agent home — `pip install --user`, tool caches |
 | `/usr`, `/usr/local`, `/tmp` | (writable layer) | `rw` | `apt`/`pip`/`npm` installs — persists across restarts, lost on recreation |
 
+---
 
 ## Updating
 
@@ -1139,6 +1157,7 @@ home-manager switch                # for the Home Manager module
 
 In container mode, the `current-package` symlink is updated and the agent picks up the new binary on restart. No container recreation, no loss of installed packages.
 
+---
 
 ## Troubleshooting
 
@@ -1209,5 +1228,3 @@ nix-store --query --roots $(docker exec hermes-agent readlink /data/current-pack
 | `no container with name or ID "hermes-agent"` (Podman) | Podman rootful container not visible to regular user | Add passwordless sudo for podman (see [Container Mode](#container-mode) section) |
 | `unable to find user hermes` | Container still starting (entrypoint hasn't created user yet) | Wait a few seconds and retry — the CLI retries automatically |
 | Tool added via `extraPackages` not found in terminal | Requires `nixos-rebuild switch` to update the per-user profile | Rebuild and restart: `nixos-rebuild switch && systemctl restart hermes-agent` |
-
-

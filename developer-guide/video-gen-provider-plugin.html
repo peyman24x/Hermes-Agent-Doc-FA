@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پلاگین تولید ویدیو — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/video-gen-provider-plugin" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>پلاگین تولید ویدیو</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main id="video-generation-provider-plugins">
+<h1 id="building-a-video-generation-provider-plugin">پلاگین تولید ویدیو</h1>
+<p>پلاگین‌های ارائه‌دهندهٔ تولید ویدیو، بک‌اندی ثبت می‌کنند که تمام فراخوانی‌های ابزار <code>video_generate</code> را پاسخ می‌دهد. ارائه‌دهندگان داخلی (xAI، FAL، OpenRouter و DeepInfra) به‌صورت پلاگین عرضه می‌شوند. با قراردادن یک پوشه در <code>plugins/video_gen/&lt;name&gt;/</code>، ارائه‌دهندهٔ جدیدی اضافه کنید یا یکی از ارائه‌دهندگان همراه برنامه را جایگزین کنید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>تولید ویدیو تقریباً خط‌به‌خط از الگوی <a href="image-gen-provider-plugin.html">پلاگین‌های ارائه‌دهندهٔ تولید تصویر</a> پیروی می‌کند — اگر بک‌اند تولید تصویر ساخته‌اید، از قبل با ساختار آن آشنا هستید. تفاوت‌های اصلی عبارت‌اند از متد <code>capabilities()</code> برای اعلام نوع ورودی‌ها، نسبت‌های تصویر و مدت‌زمان‌ها، و یک قرارداد مسیریابی (برای تبدیل تصویر به ویدیو، <code>image_url</code> را بفرستید؛ برای تبدیل متن به ویدیو، آن را حذف کنید — ارائه‌دهنده در داخل خود نقطهٔ پایانی مناسب را انتخاب می‌کند).</p>
+</div>
+<section class="doc-sec">
+<h2 id="the-unified-surface-one-tool-two-modalities"><span class="secnum">۱</span> رابط یکپارچه (یک ابزار، دو نوع ورودی)</h2>
+<p>ابزار <code>video_generate</code> از طریق یک پارامتر، دو نوع ورودی را در دسترس قرار می‌دهد:</p>
+<ul>
+<li><strong>متن به ویدیو</strong> — فقط با <code>prompt</code> فراخوانی کنید. ارائه‌دهنده درخواست را به نقطهٔ پایانی متن‌به‌ویدیوی خود هدایت می‌کند.</li>
+<li><strong>تصویر به ویدیو</strong> — با <code>prompt</code> + <code>image_url</code> فراخوانی کنید. ارائه‌دهنده درخواست را به نقطهٔ پایانی تصویربه‌ویدیوی خود هدایت می‌کند.</li>
+</ul>
+<p>ویرایش و افزایش طول ویدیو عمداً خارج از محدوده‌اند. بیشتر بک‌اندها از آن‌ها پشتیبانی نمی‌کنند و این ناهماهنگی باعث می‌شد توضیحات مختص هر بک‌اند به شرح ابزار ایجنت تحمیل شود.</p>
+</section>
+<section class="doc-sec">
+<h2 id="how-discovery-works"><span class="secnum">۲</span> سازوکار کشف</h2>
+<p>هرمس در سه محل به‌دنبال بک‌اندهای تولید ویدیو می‌گردد:</p>
+<ol>
+<li><strong>همراه برنامه</strong> — <code>&lt;repo&gt;/plugins/video_gen/&lt;name&gt;/</code> (بارگذاری خودکار با <code>kind: backend</code>)</li>
+<li><strong>کاربر</strong> — <code>~/.hermes/plugins/video_gen/&lt;name&gt;/</code> (فعال‌سازی اختیاری از طریق <code>plugins.enabled</code>)</li>
+<li><strong>Pip</strong> — بسته‌هایی که یک نقطهٔ ورود <code>hermes_agent.plugins</code> اعلام می‌کنند</li>
+</ol>
+<p>تابع <code>register(ctx)</code> هر پلاگین، <code>ctx.register_video_gen_provider(...)</code> را فراخوانی می‌کند. ارائه‌دهندهٔ فعال با <code>video_gen.provider</code> در <code>config.yaml</code> انتخاب می‌شود؛ بخش «تولید ویدیو» در <code>hermes tools</code> کاربران را در فرایند انتخاب راهنمایی می‌کند. برخلاف <code>image_generate</code>، هیچ بک‌اند قدیمی در درخت کد وجود ندارد — هر ارائه‌دهنده یک پلاگین است.</p>
+</section>
+<section class="doc-sec">
+<h2 id="directory-structure"><span class="secnum">۳</span> ساختار پوشه</h2>
+<pre dir="ltr"><code>plugins/video_gen/my-backend/
+├── __init__.py      # VideoGenProvider subclass + register()
+└── plugin.yaml      # Manifest with kind: backend
+</code></pre>
+</section>
+<section class="doc-sec">
+<h2 id="the-videogenprovider-abc"><span class="secnum">۴</span> کلاس پایهٔ انتزاعی <code>VideoGenProvider</code></h2>
+<p>از <code>agent.video_gen_provider.VideoGenProvider</code> زیرکلاس بسازید. موارد الزامی: ویژگی <code>name</code> و متد <code>generate()</code>.</p>
+<pre dir="ltr"><code># plugins/video_gen/my-backend/__init__.py
+from typing import Any, Dict, List, Optional
+import os
+
+from agent.video_gen_provider import (
+    VideoGenProvider,
+    error_response,
+    success_response,
+)
+
+
+class MyVideoGenProvider(VideoGenProvider):
+    @property
+    def name(self) -&gt; str:
+        return "my-backend"
+
+    @property
+    def display_name(self) -&gt; str:
+        return "My Backend"
+
+    def is_available(self) -&gt; bool:
+        return bool(os.environ.get("MY_API_KEY"))
+
+    def list_models(self) -&gt; List[Dict[str, Any]]:
+        # Each entry is a model FAMILY — a name the user picks once.
+        # Your provider's generate() routes within the family based on
+        # whether image_url was passed.
+        return [
+            {
+                "id": "fast",
+                "display": "Fast",
+                "speed": "~30s",
+                "strengths": "Cheapest tier",
+                "price": "$0.05/s",
+                "modalities": ["text", "image"],  # advisory
+            },
+        ]
+
+    def default_model(self) -&gt; Optional[str]:
+        return "fast"
+
+    def capabilities(self) -&gt; Dict[str, Any]:
+        return {
+            "modalities": ["text", "image"],
+            "aspect_ratios": ["16:9", "9:16"],
+            "resolutions": ["720p", "1080p"],
+            "min_duration": 1,
+            "max_duration": 10,
+            "supports_audio": False,
+            "supports_negative_prompt": True,
+            "max_reference_images": 0,
+        }
+
+    def get_setup_schema(self) -&gt; Dict[str, Any]:
+        return {
+            "name": "My Backend",
+            "badge": "paid",
+            "tag": "Short description shown in `hermes tools`",
+            "env_vars": [
+                {
+                    "key": "MY_API_KEY",
+                    "prompt": "My Backend API key",
+                    "url": "https://mybackend.example.com/keys",
+                },
+            ],
+        }
+
+    def generate(
+        self,
+        prompt: str,
+        *,
+        model: Optional[str] = None,
+        image_url: Optional[str] = None,
+        reference_image_urls: Optional[List[str]] = None,
+        duration: Optional[int] = None,
+        aspect_ratio: str = "16:9",
+        resolution: str = "720p",
+        negative_prompt: Optional[str] = None,
+        audio: Optional[bool] = None,
+        seed: Optional[int] = None,
+        **kwargs: Any,  # always ignore unknown kwargs for forward-compat
+    ) -&gt; Dict[str, Any]:
+        # ROUTE: image_url presence picks the endpoint.
+        if image_url:
+            endpoint = "my-backend/image-to-video"
+            modality_used = "image"
+        else:
+            endpoint = "my-backend/text-to-video"
+            modality_used = "text"
+
+        # ... call your API ...
+
+        return success_response(
+            video="https://your-cdn/output.mp4",
+            model=model or "fast",
+            prompt=prompt,
+            modality=modality_used,
+            aspect_ratio=aspect_ratio,
+            duration=duration or 5,
+            provider=self.name,
+        )
+
+
+def register(ctx) -&gt; None:
+    ctx.register_video_gen_provider(MyVideoGenProvider())
+</code></pre>
+</section>
+<section class="doc-sec">
+<h2 id="the-plugin-manifest"><span class="secnum">۵</span> مانیفست پلاگین</h2>
+<pre dir="ltr"><code># plugins/video_gen/my-backend/plugin.yaml
+name: my-backend
+version: 1.0.0
+description: "My video generation backend"
+author: Your Name
+kind: backend
+requires_env:
+  - MY_API_KEY
+</code></pre>
+</section>
+<section class="doc-sec">
+<h2 id="the-video_generate-schema"><span class="secnum">۶</span> طرح‌وارهٔ <code>video_generate</code></h2>
+<p>ابزار برای همهٔ بک‌اندها یک طرح‌وارهٔ واحد ارائه می‌کند. ارائه‌دهندگان پارامترهایی را که پشتیبانی نمی‌کنند نادیده می‌گیرند.</p>
+<div class="table-wrap"><table><thead><tr><th>پارامتر</th><th>کارکرد</th></tr></thead><tbody>
+<tr><td><code>prompt</code></td><td>دستور متنی (الزامی)</td></tr>
+<tr><td><code>image_url</code></td><td>وقتی تنظیم شود: تصویر به ویدیو؛ وقتی حذف شود: متن به ویدیو</td></tr>
+<tr><td><code>reference_image_urls</code></td><td>تصاویر مرجع سبک/شخصیت (وابسته به ارائه‌دهنده)</td></tr>
+<tr><td><code>duration</code></td><td>ثانیه — ارائه‌دهنده مقدار را به محدودهٔ مجاز محدود می‌کند</td></tr>
+<tr><td><code>aspect_ratio</code></td><td><code>"16:9"</code>، <code>"9:16"</code>، <code>"1:1"</code>، ... — ارائه‌دهنده مقدار را به محدودهٔ مجاز محدود می‌کند</td></tr>
+<tr><td><code>resolution</code></td><td><code>"480p"</code> / <code>"540p"</code> / <code>"720p"</code> / <code>"1080p"</code> — ارائه‌دهنده مقدار را به محدودهٔ مجاز محدود می‌کند</td></tr>
+<tr><td><code>negative_prompt</code></td><td>محتوایی که باید از آن پرهیز شود (فقط Pixverse/Kling)</td></tr>
+<tr><td><code>audio</code></td><td>صدای بومی (ردهٔ قیمت‌گذاری Veo3 / Pixverse)</td></tr>
+<tr><td><code>seed</code></td><td>بازتولیدپذیری</td></tr>
+<tr><td><code>model</code></td><td>جایگزینی مدل/خانوادهٔ فعال</td></tr>
+</tbody></table></div>
+<p>متد <code>capabilities()</code> ارائه‌دهنده اعلام می‌کند کدام‌یک از این پارامترها اعمال می‌شوند. ایجنت قابلیت‌های بک‌اند فعال را در شرح ابزار می‌بیند؛ این شرح هنگام تغییر بک‌اند توسط کاربر از طریق <code>hermes tools</code> به‌صورت پویا بازسازی می‌شود.</p>
+</section>
+<section class="doc-sec">
+<h2 id="model-families-and-endpoint-routing-the-fal-pattern"><span class="secnum">۷</span> خانواده‌های مدل و مسیریابی نقطهٔ پایانی (الگوی FAL)</h2>
+<p>وقتی بک‌اند شما برای هر «مدل» چند نقطهٔ پایانی دارد — مانند FAL که در آن هر خانواده (Veo 3.1، Pixverse v6 و Kling O3) هم نشانی <code>/text-to-video</code> دارد و هم <code>/image-to-video</code> — هر <strong>خانواده</strong> را با یک ورودی در فهرست مدل‌ها نمایش دهید. متد <code>generate()</code> شما بر اساس ارسال‌شدن یا نشدن <code>image_url</code>، نقطهٔ پایانی مناسب را انتخاب می‌کند:</p>
+<pre dir="ltr"><code>FAMILIES = {
+    "veo3.1": {
+        "text_endpoint": "fal-ai/veo3.1",
+        "image_endpoint": "fal-ai/veo3.1/image-to-video",
+        # ... family-specific capability flags ...
+    },
+}
+
+def generate(self, prompt, *, image_url=None, model=None, **kwargs):
+    family_id, family = _resolve_family(model)
+    endpoint = family["image_endpoint"] if image_url else family["text_endpoint"]
+    # ... build payload from family's declared capability flags, call endpoint ...
+</code></pre>
+<p>کاربر یک‌بار <code>veo3.1</code> را در <code>hermes tools</code> انتخاب می‌کند. ایجنت هرگز درگیر نقطه‌های پایانی نمی‌شود — فقط <code>image_url</code> را می‌فرستد (یا نمی‌فرستد).</p>
+</section>
+<section class="doc-sec">
+<h2 id="selection-precedence"><span class="secnum">۸</span> ترتیب اولویت انتخاب</h2>
+<p>برای تنظیمات مدل در هر نمونه (به <code>plugins/video_gen/fal/__init__.py</code> مراجعه کنید):</p>
+<ol>
+<li>آرگومان کلیدواژه‌ای <code>model=</code> از فراخوانی ابزار</li>
+<li>متغیر محیطی <code>&lt;PROVIDER&gt;_VIDEO_MODEL</code></li>
+<li><code>video_gen.&lt;provider&gt;.model</code> در <code>config.yaml</code></li>
+<li><code>video_gen.model</code> در <code>config.yaml</code> (وقتی یکی از شناسه‌های شما باشد)</li>
+<li><code>default_model()</code> ارائه‌دهنده</li>
+</ol>
+</section>
+<section class="doc-sec">
+<h2 id="response-shape"><span class="secnum">۹</span> ساختار پاسخ</h2>
+<p><code>success_response()</code> و <code>error_response()</code> ساختار دیکشنری‌ای را تولید می‌کنند که همهٔ بک‌اندها برمی‌گردانند. از آن‌ها استفاده کنید — دیکشنری را دستی نسازید.</p>
+<p>کلیدهای موفقیت: <code>success</code>، <code>video</code> (نشانی اینترنتی یا مسیر مطلق)، <code>model</code>، <code>prompt</code>، <code>modality</code> (<code>"text"</code> یا <code>"image"</code>)، <code>aspect_ratio</code>، <code>duration</code>، <code>provider</code>، به‌علاوهٔ <code>extra</code>.</p>
+<p>کلیدهای خطا: <code>success</code>، <code>video</code> (<code>None</code>)، <code>error</code>، <code>error_type</code>، <code>model</code>، <code>prompt</code>، <code>aspect_ratio</code>، <code>provider</code>.</p>
+</section>
+<section class="doc-sec">
+<h2 id="where-to-save-artifacts"><span class="secnum">۱۰</span> محل ذخیرهٔ فایل‌های خروجی</h2>
+<p>اگر بک‌اند شما base64 برمی‌گرداند، برای نوشتن آن در <code>$HERMES_HOME/cache/videos/</code> از <code>save_b64_video()</code> استفاده کنید. برای بایت‌های خام حاصل از دریافت HTTP بعدی، از <code>save_bytes_video()</code> استفاده کنید. در غیر این صورت، نشانی اینترنتی سرویس بالادستی را مستقیماً برگردانید — گیت‌وی هنگام تحویل، نشانی‌های راه‌دور را پردازش می‌کند.</p>
+</section>
+<section class="doc-sec">
+<h2 id="testing"><span class="secnum">۱۱</span> آزمون</h2>
+<p>یک آزمون اولیه (smoke test) در <code>tests/plugins/video_gen/test_&lt;name&gt;_plugin.py</code> قرار دهید. آزمون‌های xAI و FAL این الگو را نشان می‌دهند — ثبت ارائه‌دهنده، بررسی فهرست مدل‌ها، آزمودن مسیریابی هم با <code>image_url</code> و هم بدون آن، و اطمینان از بازگشت پاسخ‌های خطای مناسب هنگام نبود اطلاعات احراز هویت.</p>
+</section>
+<div class="pager">
+  <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/trajectory-format" target="_blank" rel="noopener"><span class="dir">→ قبلی</span><span class="ttl">قالب Trajectory (نسخهٔ اصلی)</span></a>
+  <a class="next" href="web-search-provider-plugin.html"><span class="dir">بعدی ←</span><span class="ttl">پلاگین جستجوی وب</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/video-gen-provider-plugin" target="_blank" rel="noopener">Video Generation Provider Plugins</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

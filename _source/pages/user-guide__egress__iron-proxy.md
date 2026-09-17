@@ -570,5 +570,3 @@ When the pinned version moves to v0.40+ (which adds `log.audit_path`), per-reque
 - Bitwarden integration: [`hermes secrets bitwarden`](../secrets/bitwarden)
 - Hermes Docker terminal backend: [Docker](../docker)
 - Developer / contributor reference: [Egress proxy internals](../../developer-guide/egress-internals)
-
-

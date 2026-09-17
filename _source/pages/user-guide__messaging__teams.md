@@ -18,6 +18,7 @@ Need meeting summaries from Microsoft Graph events rather than normal bot conver
 
 Teams delivers @mentions as regular messages with `<at>BotName</at>` tags, which Hermes strips automatically before processing.
 
+---
 
 For source or local installs, include the Teams extra so the bundled adapter can
 import the Microsoft Teams SDK:
@@ -43,6 +44,7 @@ To verify your login and find your own AAD object ID (needed for `TEAMS_ALLOWED_
 teams status --verbose
 ```
 
+---
 
 ## Step 2: Expose the Webhook Port
 
@@ -67,6 +69,7 @@ The public tunnel URL uses HTTPS, but Hermes' local webhook listener uses plain 
 
 For production, point your bot's endpoint at your server's public domain instead (see [Production Deployment](#production-deployment)).
 
+---
 
 ## Step 3: Create the Bot
 
@@ -78,6 +81,7 @@ teams app create \
 
 The CLI outputs your `CLIENT_ID`, `CLIENT_SECRET`, and `TENANT_ID`, plus an install link for Step 6. Save the client secret — it won't be shown again.
 
+---
 
 ## Step 4: Configure Environment Variables
 
@@ -94,6 +98,7 @@ TEAMS_TENANT_ID=<your-tenant-id>
 TEAMS_ALLOWED_USERS=<your-aad-object-id>
 ```
 
+---
 
 ## Step 5: Start the Gateway
 
@@ -133,6 +138,7 @@ Look for:
 [teams] Webhook server listening on * (all interfaces, IPv4+IPv6):3978/api/messages
 ```
 
+---
 
 ## Step 6: Install the App in Teams
 
@@ -142,6 +148,7 @@ teams app get <teamsAppId> --install-link
 
 Open the printed link in your browser — it opens directly in the Teams client. After installing, send a direct message to your bot — it's ready.
 
+---
 
 ## Configuration Reference
 
@@ -173,6 +180,7 @@ platforms:
       port: 3978
 ```
 
+---
 
 ## Features
 
@@ -218,6 +226,7 @@ platforms:
 
 If the `teams_pipeline` plugin is **not** enabled, these settings are inert — they only wire up when the pipeline runtime binds to the Graph webhook ingress.
 
+---
 
 ## Production Deployment
 
@@ -237,6 +246,7 @@ teams app update --id <teamsAppId> --endpoint "https://your-domain.com/api/messa
 
 Make sure the public HTTPS endpoint is reachable from the internet and uses a valid TLS certificate. Teams rejects self-signed certificates. Keep the Hermes listener behind the proxy; port `3978` does not serve HTTPS itself.
 
+---
 
 ## Troubleshooting
 
@@ -254,6 +264,7 @@ Make sure the public HTTPS endpoint is reachable from the internet and uses a va
 | Teams shows "This bot is not responding" | The webhook returned an error. Check `docker logs hermes` / `hermes gateway status -l` for tracebacks |
 | `[teams] Failed to connect` in logs | The SDK failed to authenticate. Double-check your credentials and that the tenant ID matches the account you used in `teams login` |
 
+---
 
 ## Security
 
@@ -271,5 +282,3 @@ Treat `TEAMS_CLIENT_SECRET` like a password — rotate it periodically via the A
 
 - [Teams Meetings](/user-guide/messaging/teams-meetings)
 - [Operate the Teams Meeting Pipeline](/guides/operate-teams-meeting-pipeline)
-
-

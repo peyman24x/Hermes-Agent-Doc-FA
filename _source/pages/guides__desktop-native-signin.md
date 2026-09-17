@@ -8,8 +8,10 @@ ways:
 
 1. **Native sign-in (RFC 8252)** — the app opens your **real system browser**,
    you approve in the browser you already trust, and the app receives tokens it
-   stores in your OS keychain. **No embedded webview, no browser session
-   cookies.** This is the default whenever the gateway supports it.
+   stores as owner-only files in its user-data directory (optionally encrypted
+   with your OS keychain — Settings → Gateway). **No embedded webview, no
+   browser session cookies.** This is the default whenever the gateway
+   supports it.
 2. **Embedded sign-in (legacy fallback)** — the app opens a small in-app
    browser window and captures the gateway's session cookie. Used automatically
    when the gateway is an older build that doesn't advertise native sign-in.
@@ -33,9 +35,10 @@ For Hermes specifically, native sign-in means:
   Firefox / Edge — whatever you use — with your logins, extensions, and
   passkeys intact.
 - **No session cookies.** The app holds an OAuth **access token** (short-lived)
-  and **refresh token**, encrypted at rest via your OS keychain (Electron
-  `safeStorage`). REST calls and WebSocket tickets are authenticated with an
-  `Authorization: Bearer` header, not a cookie jar.
+  and **refresh token**, stored as owner-only files — encrypted at rest via
+  your OS keychain (Electron `safeStorage`) when the opt-in keychain toggle in
+  Settings → Gateway is on. REST calls and WebSocket tickets are authenticated
+  with an `Authorization: Bearer` header, not a cookie jar.
 
 ## How it works
 
@@ -49,7 +52,7 @@ Desktop app                Gateway (/auth/native/*)          Nous Portal (IDP)
    │ ◄─ 302 127.0.0.1/cb?code=… ─┘
    │ 4. POST /auth/native/token (code + PKCE verifier)
    │ ◄─ 5. { access_token, refresh_token, expires_at } ───────┘
-   │ 6. store in OS keychain; use Bearer for REST + WS tickets
+   │ 6. store in local token store; use Bearer for REST + WS tickets
 ```
 
 The gateway **brokers** the flow: it is the authorization server *to the
@@ -84,11 +87,11 @@ tool blocks the loopback listener, or you close the browser tab — the app
   every REST call and when minting a WebSocket ticket.
 - **Refresh token**: longer-lived, rotating. When the access token is near
   expiry the app calls `/auth/native/refresh` to rotate both tokens, then
-  updates the keychain.
+  updates its token store.
 - **Terminal expiry**: if the refresh token is dead (expired / revoked /
   reuse-detected), the app clears its stored tokens and prompts a fresh
   sign-in.
-- **Sign out**: clears both the native tokens (keychain) and any legacy session
+- **Sign out**: clears both the stored native tokens and any legacy session
   cookie for that gateway.
 
 ## For gateway operators
@@ -116,5 +119,3 @@ The relevant endpoints (all public, pre-auth bootstrap, same as the existing
 - [OAuth over SSH / Remote Hosts](./oauth-over-ssh.md) — the loopback-callback
   pattern for provider/MCP OAuth on remote machines.
 - [Run Hermes with Nous Portal](./run-hermes-with-nous-portal.md)
-
-

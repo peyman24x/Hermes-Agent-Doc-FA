@@ -51,5 +51,3 @@ If the agent saved your name to memory, the save worked — check with the `memo
 - [Persistent Memory](/user-guide/features/memory) — MEMORY.md, USER.md, the `memory` tool, capacity limits, `write_approval`
 - [Personality & SOUL.md](/user-guide/features/personality) — SOUL.md content guidance, `/personality` presets, the prompt stack
 - [Context Files](/user-guide/features/context-files) — AGENTS.md, `.hermes.md`, progressive discovery, security scanning
-
-

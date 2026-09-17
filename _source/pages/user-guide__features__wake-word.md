@@ -97,7 +97,8 @@ cd ~/.hermes/hermes-agent && uv pip install -e ".[wake]"
 /wake off       # stop listening
 ```
 
-In the desktop app, click the ear icon in the composer.
+In the desktop app, hover the microphone in the composer and click the ear
+that fans out of it. The ear is solid when the wake word is listening.
 
 The toggle IS the setting: turning the wake word on or off — via `/wake` or the
 desktop ear button — also writes `wake_word.enabled` to `~/.hermes/config.yaml`,
@@ -300,7 +301,8 @@ proves the *renderer* has mic access — the wake listener runs in the Python
 *backend*, which needs its own grant. Without it, CoreAudio hands the backend a
 "working" stream that only ever delivers silence, so the ear shows listening
 but the phrase never fires. Hermes detects this (`/wake status` shows
-"mic delivers only silence"; the desktop ear tooltip carries the same hint).
+"mic delivers only silence"; the desktop's folded voice menu carries the same
+hint on its trigger).
 Fix: System Settings → Privacy & Security → Microphone → enable the Hermes
 backend (it may appear as your terminal, `python`, or Hermes), then toggle the
 wake word off and on.
@@ -335,5 +337,3 @@ hermes config set wake_word.input_device null
   recording and reclaims it once the turn ends, so it won't fight voice capture.
 - **Privacy.** Hotword detection is local. Set `sensitivity` higher if you get
   false triggers, lower if it misses you.
-
-

@@ -197,5 +197,3 @@ requires implementing `UpstreamAdapter` in
 `adapters/__init__.py`. Providers that aren't OpenAI-compatible at the
 protocol level (Anthropic Messages API, for example) would need a
 transformation layer, which is out of scope for the current shape.
-
-

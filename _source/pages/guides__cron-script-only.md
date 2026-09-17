@@ -241,5 +241,3 @@ For critical system-health watchdogs that must fire *even when the gateway is do
 - [Scheduled Tasks (Cron) reference](/user-guide/features/cron) — full schedule syntax, lifecycle, delivery routing.
 - [Webhook Subscriptions](/user-guide/messaging/webhooks) — fire-and-forget HTTP entry points for external schedulers.
 - [Gateway Internals](/developer-guide/gateway-internals) — delivery-router internals.
-
-

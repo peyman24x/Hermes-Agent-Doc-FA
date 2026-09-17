@@ -290,5 +290,3 @@ Use this before changing the deployment:
 
 - [Teams Meetings setup](/user-guide/messaging/teams-meetings)
 - [Microsoft Teams bot setup](/user-guide/messaging/teams)
-
-

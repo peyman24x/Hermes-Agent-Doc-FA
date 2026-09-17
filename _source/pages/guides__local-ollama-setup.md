@@ -2,6 +2,14 @@
 
 # Run Hermes Locally with Ollama — Zero API Cost
 
+:::tip Desktop users: there's a one-click path
+On the Hermes desktop app, **Settings → Providers → Local Models** installs
+and manages a local llama.cpp server for you — model downloads, memory
+fitting, and context sizing included. See [Local Models](/user-guide/local-models).
+This guide is for manual setup: Ollama specifically, CLI-first workflows,
+or servers you want to run yourself.
+:::
+
 ## The Problem
 
 Cloud LLM APIs charge per token. A heavy coding session can cost $5–20. For personal projects, learning, or privacy-sensitive work, that adds up — and you're sending every conversation to a third party.
@@ -324,5 +332,3 @@ Your only cost is electricity — roughly $0.01–0.05 per session depending on 
 - **Speed on large responses** — cloud inference is faster than CPU-only local for long generations
 
 The sweet spot: use local for everyday tasks, set up a cloud fallback for the hard stuff.
-
-

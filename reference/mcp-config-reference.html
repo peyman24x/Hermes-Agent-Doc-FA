@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مرجع پیکربندی MCP — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/reference/mcp-config-reference" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>مرجع<span class="sep">/</span><strong>مرجع پیکربندی MCP</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1 id="mcp-config-reference">مرجع پیکربندی MCP</h1>
+
+<p>این صفحه، مرجع فشردهٔ همراه مستندات اصلی MCP است.</p>
+<p>برای راهنمایی مفهومی، این صفحات را ببینید:</p>
+<ul>
+<li><a href="../user-guide/features/mcp.html">MCP (پروتکل زمینهٔ مدل)</a></li>
+<li><a href="../guides/use-mcp-with-hermes.html">استفاده از MCP با هرمس</a></li>
+</ul>
+<section class="doc-sec">
+<h2 id="root-config-shape"><span class="secnum">۱</span> ساختار پیکربندی ریشه</h2>
+<pre dir="ltr"><code>mcp_servers:
+  &lt;server_name&gt;:
+    command: "..."      # stdio servers
+    args: []
+    env: {}
+
+    # OR
+    url: "..."          # HTTP servers
+    headers: {}
+
+    # Optional HTTP/SSE TLS settings:
+    ssl_verify: true                # bool or path to a CA bundle (PEM)
+    client_cert: "/path/to/cert.pem"  # mTLS client certificate (see below)
+    # client_key: "/path/to/key.pem"  # optional, when key lives in a separate file
+
+    enabled: true
+    timeout: 120
+    connect_timeout: 60
+    supports_parallel_tool_calls: false
+    tools:
+      include: []
+      exclude: []
+      resources: true
+      prompts: true
+</code></pre>
+</section>
+<section class="doc-sec">
+<h2 id="server-keys"><span class="secnum">۲</span> کلیدهای سرور</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>کلید</th><th>نوع</th><th>کاربرد در</th><th>معنا</th></tr></thead>
+<tbody>
+<tr><td><code>command</code></td><td>رشته</td><td><code>stdio</code></td><td>فایل اجرایی برای راه‌اندازی</td></tr>
+<tr><td><code>args</code></td><td>فهرست</td><td><code>stdio</code></td><td>آرگومان‌های زیرفرایند</td></tr>
+<tr><td><code>env</code></td><td>نگاشت</td><td><code>stdio</code></td><td>محیطی که به زیرفرایند داده می‌شود</td></tr>
+<tr><td><code>url</code></td><td>رشته</td><td>HTTP</td><td>نقطهٔ پایانی MCP از راه دور</td></tr>
+<tr><td><code>headers</code></td><td>نگاشت</td><td>HTTP</td><td>سرآیندهای درخواست‌های سرور از راه دور</td></tr>
+<tr><td><code>ssl_verify</code></td><td>بولی یا رشته</td><td>HTTP</td><td>اعتبارسنجی TLS. مقدار <code>true</code> (پیش‌فرض) از مراجع صدور گواهی سیستم استفاده می‌کند؛ <code>false</code> اعتبارسنجی را غیرفعال می‌کند (ناامن است)؛ یا می‌توان مسیر رشته‌ای به بستهٔ سفارشی گواهی‌های CA با قالب PEM داد.</td></tr>
+<tr><td><code>client_cert</code></td><td>رشته یا فهرست</td><td>HTTP</td><td>گواهی کلاینت mTLS. رشته = مسیر فایل PEM شامل گواهی و کلید. فهرست <code>[cert, key]</code> = فایل‌های جداگانه. فهرست <code>[cert, key, password]</code> = کلید رمزگذاری‌شده.</td></tr>
+<tr><td><code>client_key</code></td><td>رشته</td><td>HTTP</td><td>مسیر کلید خصوصی کلاینت، وقتی <code>client_cert</code> رشته است و کلید در فایلی جداگانه قرار دارد</td></tr>
+<tr><td><code>enabled</code></td><td>بولی</td><td>هر دو</td><td>وقتی مقدار آن <code>false</code> باشد، سرور به‌کلی نادیده گرفته می‌شود</td></tr>
+<tr><td><code>timeout</code></td><td>عدد</td><td>هر دو</td><td>مهلت فراخوانی ابزار بر حسب ثانیه (پیش‌فرض: <code>300</code>)</td></tr>
+<tr><td><code>connect_timeout</code></td><td>عدد</td><td>هر دو</td><td>مهلت اتصال اولیه بر حسب ثانیه (پیش‌فرض: <code>60</code>)</td></tr>
+<tr><td><code>protocol</code></td><td>رشته</td><td>هر دو</td><td>مذاکره برای تعیین نسل پروتکل: <code>auto</code> (پیش‌فرض — ابتدا دست‌دهی قدیمی <code>initialize</code>؛ اگر سرور به‌دلیل پشتیبانی انحصاری از پروتکل مدرن آن را رد کند، به کاوش بدون حالت <code>server/discover</code> مربوط به نسخهٔ <code>2026-07-28</code> برمی‌گردد)، <code>stateless</code> (ابتدا کاوش <code>server/discover</code>؛ یک تلاش مجدد با روش قدیمی)، یا <code>legacy</code> (فقط دست‌دهی، بدون روش پشتیبان)</td></tr>
+<tr><td><code>supports_parallel_tool_calls</code></td><td>بولی</td><td>هر دو</td><td>اجازهٔ اجرای هم‌زمان ابزارهای این سرور</td></tr>
+<tr><td><code>skip_preflight</code></td><td>بولی</td><td>HTTP</td><td>ردکردن کاوش نوع محتوا با رویکرد تشخیص سریع خطا، برای نقاط پایانی معتبر Streamable HTTP که پاسخ HEAD/GET آن‌ها نوع محتوای غیر MCP دارد (پیش‌فرض: <code>false</code>)</td></tr>
+<tr><td><code>transport</code></td><td>رشته</td><td>HTTP</td><td>برای استفاده از انتقال SSE به‌جای Streamable HTTP، آن را روی <code>sse</code> بگذارید</td></tr>
+<tr><td><code>keepalive_interval</code></td><td>عدد</td><td>هر دو</td><td>فاصلهٔ زمانی پینگ بررسی زنده‌بودن، بر حسب ثانیه (پیش‌فرض: <code>180</code>، با حداقل ۵ ثانیه). برای سرورهایی که نشست‌های بیکار را زود پاک‌سازی می‌کنند، این مقدار را کمتر از زمان اعتبار (TTL) نشست سرور قرار دهید.</td></tr>
+<tr><td><code>lazy</code></td><td>بولی</td><td>هر دو</td><td>هنگام شروع، ابزارهای سرور را از کش اسکیمای روی دیسک ثبت می‌کند و فقط هنگام نخستین فراخوانی ابزار، سرور را راه‌اندازی می‌کند یا به آن متصل می‌شود (پیش‌فرض: <code>false</code>). برای پرشدن کش به یک اتصال زندهٔ قبلی نیاز دارد؛ اگر ورودی کش موجود نباشد یا کهنه باشد، به اتصال معمولِ فوری برمی‌گردد. تا نخستین استفاده، نماهای وضعیت، سرور را با وضعیت <code>lazy</code> و تعداد ابزارهای کش‌شدهٔ آن نشان می‌دهند.</td></tr>
+<tr><td><code>idle_timeout_seconds</code></td><td>عدد</td><td><code>stdio</code></td><td>راه‌اندازی مجدد اختیاری سرور <code>stdio</code> پس از مدت بیکاری (<code>0</code> آن را غیرفعال می‌کند). می‌تواند زیر نگاشت <code>lifecycle:</code> هم قرار بگیرد.</td></tr>
+<tr><td><code>max_lifetime_seconds</code></td><td>عدد</td><td><code>stdio</code></td><td>راه‌اندازی مجدد اختیاری سرور <code>stdio</code> پس از گذشت طول عمر تعیین‌شده (<code>0</code> آن را غیرفعال می‌کند). می‌تواند زیر نگاشت <code>lifecycle:</code> هم قرار بگیرد.</td></tr>
+<tr><td><code>tools</code></td><td>نگاشت</td><td>هر دو</td><td>فیلترکردن و سیاست ابزارهای کمکی</td></tr>
+<tr><td><code>auth</code></td><td>رشته</td><td>HTTP</td><td>روش احراز هویت. برای فعال‌کردن OAuth 2.1 همراه با PKCE، مقدار <code>oauth</code> را تنظیم کنید.</td></tr>
+<tr><td><code>sampling</code></td><td>نگاشت</td><td>هر دو</td><td>سیاست درخواست‌های LLM که سرور آغاز می‌کند (راهنمای MCP را ببینید)</td></tr>
+<tr><td><code>elicitation</code></td><td>نگاشت</td><td>هر دو</td><td>درخواست‌های دریافت ورودی از کاربر که سرور آغاز می‌کند. شامل <code>enabled</code> (پیش‌فرض <code>true</code>) و <code>timeout</code> بر حسب ثانیه (پیش‌فرض <code>300</code>). درخواست‌های حالت فرم از رابط تأیید عبور می‌کنند؛ حالت URL رد می‌شود (راهنمای MCP را ببینید).</td></tr>
+<tr><td><code>trust</code></td><td>رشته</td><td>هر دو</td><td>سطح اعتماد: <code>full</code> (پیش‌فرض) یا <code>untrusted</code>. در سرور <code>untrusted</code>، هر فراخوانی ابزاری که قابلیت نوشتن دارد (هر ابزاری بدون حاشیه‌نویسی <code>readOnlyHint: true</code>) پیش از اجرا به تأیید کاربر از طریق رابط استاندارد تأیید نیاز دارد. <code>readOnlyHint</code> یک <em>راهنما</em> است که سرور ارائه می‌کند — سرور دروغ‌گو در بدترین حالت می‌تواند تأیید ابزارهایی را که فقط‌خواندنی معرفی می‌کند دور بزند، اما هرگز دسترسی بیشتری به دست نمی‌آورد — بنابراین هر سروری را که کاملاً تحت کنترل شما نیست، <code>untrusted</code> علامت بزنید. همین راهنما تعیین می‌کند که آیا پس از انقضای نشست انتقال در میانهٔ فراخوانی، آن فراخوانی به‌طور شفاف دوباره تلاش شود یا نه: فقط ابزارهای دارای <code>readOnlyHint: true</code> دوباره اجرا می‌شوند؛ ابزارهای بدون حاشیه‌نویسی (با قابلیت نوشتن) خطای <code>outcome_uncertain</code> برمی‌گردانند — در سرور Streamable HTTP که نشست‌های بیکار را منقضی می‌کند، این یعنی نخستین فراخوانی بدون حاشیه‌نویسی پس از یک دورهٔ بیکاری ممکن است شکست بخورد و پیش از فراخوانی دوباره باید نتیجه‌اش بررسی شود. مقادیر ناشناخته مانند <code>untrusted</code> در نظر گرفته می‌شوند (در صورت خطا، دسترسی بسته می‌ماند).</td></tr>
+</tbody></table></div>
+</section>
+<section class="doc-sec">
+<h2 id="environment-variable-references"><span class="secnum">۳</span> ارجاع به متغیرهای محیطی</h2>
+<p>مقادیر رشته‌ای در هر جای ورودی سرور (<code>env</code>، <code>headers</code>، <code>args</code>، <code>url</code> و…) می‌توانند با <code>${VAR}</code> یا شکل SecretRef به سبک Cursor یعنی <code>${env:VAR}</code> به متغیرهای محیطی ارجاع بدهند — هر دو به همان متغیر تبدیل می‌شوند؛ بنابراین قطعه‌پیکربندی‌های MCP که از پیکربندی‌های Cursor / Claude کپی شده‌اند، بدون تغییر کار می‌کنند:</p>
+<pre dir="ltr"><code>mcp_servers:
+  github:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "${env:GITHUB_TOKEN}"   # same as "${GITHUB_TOKEN}"
+</code></pre>
+<p>مقادیر از محدودهٔ رمزهای پروفایل فعال به دست می‌آیند (در صورت نبود، به محیط فرایند بازمی‌گردند)، پس رمز را در <code>~/.hermes/.env</code> قرار دهید. متغیری که تنظیم نشده باشد، همان عبارت جای‌نگهدار خود را بدون تغییر حفظ می‌کند.</p>
+<h3 id="context-variables">متغیرهای زمینه</h3>
+<p>علاوه بر متغیرهای محیطی، متغیرهای زمینه به سبک Cursor هم جای‌گذاری می‌شوند (نام‌ها به بزرگی و کوچکی حروف حساس‌اند):</p>
+<div class="table-wrap"><table>
+<thead><tr><th>متغیر</th><th>مقدار جایگزین</th></tr></thead>
+<tbody>
+<tr><td><code>${userHome}</code></td><td>پوشهٔ خانهٔ کاربر فعلی</td></tr>
+<tr><td><code>${workspaceFolder}</code></td><td>ریشهٔ فضای کاری نشست (دایرکتوری کاری فعلی ترمینال نشست، اگر مشخص باشد؛ وگرنه دایرکتوری کاری فعلی فرایند)</td></tr>
+<tr><td><code>${workspaceFolderBasename}</code></td><td>نام پایهٔ <code>${workspaceFolder}</code></td></tr>
+<tr><td><code>${pathSeparator}</code> / <code>${/}</code></td><td>جداکنندهٔ مسیر سیستم‌عامل (<code>os.sep</code>)</td></tr>
+</tbody></table></div>
+<pre dir="ltr"><code>mcp_servers:
+  filesystem:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "${workspaceFolder}"]
+    env:
+      CACHE_DIR: "${userHome}${/}.cache${/}mcp"
+</code></pre>
+<p>هر ارجاع دیگر به شکل <code>${...}</code> به جستجوی متغیر محیطیِ توضیح‌داده‌شده در بالا سپرده می‌شود.</p>
+</section>
+<section class="doc-sec">
+<h2 id="tools-policy-keys"><span class="secnum">۴</span> کلیدهای سیاست <code>tools</code></h2>
+<div class="table-wrap"><table>
+<thead><tr><th>کلید</th><th>نوع</th><th>معنا</th></tr></thead>
+<tbody>
+<tr><td><code>include</code></td><td>رشته یا فهرست</td><td>فهرست مجاز ابزارهای بومی MCP سرور. ورودی‌ها می‌توانند نام‌های دقیق یا الگوهای گلوب به سبک <code>fnmatch</code> باشند (<code>*_radar_*</code>، <code>get_zones_*</code>).</td></tr>
+<tr><td><code>exclude</code></td><td>رشته یا فهرست</td><td>فهرست مسدود ابزارهای بومی MCP سرور. قواعد نام دقیق / گلوب آن مانند <code>include</code> است.</td></tr>
+<tr><td><code>resources</code></td><td>بولی‌مانند</td><td>فعال/غیرفعال‌کردن <code>list_resources</code> + <code>read_resource</code></td></tr>
+<tr><td><code>prompts</code></td><td>بولی‌مانند</td><td>فعال/غیرفعال‌کردن <code>list_prompts</code> + <code>get_prompt</code></td></tr>
+</tbody></table></div>
+</section>
+<section class="doc-sec">
+<h2 id="filtering-semantics"><span class="secnum">۵</span> قواعد فیلترکردن</h2>
+<h3 id="include"><code>include</code></h3>
+<p>اگر <code>include</code> تنظیم شود، فقط همان ابزارهای بومی MCP سرور ثبت می‌شوند.</p>
+<pre dir="ltr"><code>tools:
+  include: [create_issue, list_issues]
+</code></pre>
+<h3 id="exclude"><code>exclude</code></h3>
+<p>اگر <code>exclude</code> تنظیم شود و <code>include</code> تنظیم نشده باشد، همهٔ ابزارهای بومی MCP سرور به‌جز نام‌های مشخص‌شده ثبت می‌شوند.</p>
+<pre dir="ltr"><code>tools:
+  exclude: [delete_customer]
+</code></pre>
+<h3 id="precedence">اولویت</h3>
+<p>اگر هر دو تنظیم شوند، <code>include</code> اولویت دارد.</p>
+<pre dir="ltr"><code>tools:
+  include: [create_issue]
+  exclude: [create_issue, delete_issue]
+</code></pre>
+<p>نتیجه:</p>
+<ul><li><code>create_issue</code> همچنان مجاز است.</li><li><code>delete_issue</code> نادیده گرفته می‌شود، چون <code>include</code> اولویت دارد.</li></ul>
+</section>
+<section class="doc-sec">
+<h2 id="utility-tool-policy"><span class="secnum">۶</span> سیاست ابزارهای کمکی</h2>
+<p>هرمس ممکن است این پوشش‌های کمکی را برای هر سرور MCP ثبت کند:</p>
+<p>منابع:</p>
+<ul><li><code>list_resources</code></li><li><code>read_resource</code></li></ul>
+<p>پرامپت‌ها:</p>
+<ul><li><code>list_prompts</code></li><li><code>get_prompt</code></li></ul>
+<h3 id="disable-resources">غیرفعال‌کردن منابع</h3>
+<pre dir="ltr"><code>tools:
+  resources: false
+</code></pre>
+<h3 id="disable-prompts">غیرفعال‌کردن پرامپت‌ها</h3>
+<pre dir="ltr"><code>tools:
+  prompts: false
+</code></pre>
+<h3 id="capability-aware-registration">ثبت متناسب با قابلیت‌ها</h3>
+<p>حتی با وجود <code>resources: true</code> یا <code>prompts: true</code>، هرمس فقط زمانی آن ابزارهای کمکی را ثبت می‌کند که نشست MCP واقعاً قابلیت مربوط را در اختیار بگذارد.</p>
+<p>بنابراین این وضعیت طبیعی است:</p>
+<ul><li>پرامپت‌ها را فعال می‌کنید؛</li><li>اما هیچ ابزار کمکی پرامپتی ظاهر نمی‌شود؛</li><li>چون سرور از پرامپت‌ها پشتیبانی نمی‌کند.</li></ul>
+</section>
+<section class="doc-sec">
+<h2 id="enabled-false"><span class="secnum">۷</span> <code>enabled: false</code></h2>
+<pre dir="ltr"><code>mcp_servers:
+  legacy:
+    url: "https://mcp.legacy.internal"
+    enabled: false
+</code></pre>
+<p>رفتار:</p>
+<ul><li>هیچ تلاشی برای اتصال انجام نمی‌شود.</li><li>هیچ کشفی انجام نمی‌شود.</li><li>هیچ ابزاری ثبت نمی‌شود.</li><li>پیکربندی برای استفادهٔ دوباره در آینده در جای خود باقی می‌ماند.</li></ul>
+</section>
+<section class="doc-sec">
+<h2 id="empty-result-behavior"><span class="secnum">۸</span> رفتار در صورت خالی‌بودن نتیجه</h2>
+<p>اگر فیلترکردن همهٔ ابزارهای بومی سرور را حذف کند و هیچ ابزار کمکی هم ثبت نشود، هرمس برای آن سرور یک تول‌ست خالی MCP در زمان اجرا ایجاد نمی‌کند.</p>
+</section>
+<section class="doc-sec">
+<h2 id="example-configs"><span class="secnum">۹</span> نمونه‌های پیکربندی</h2>
+<h3 id="safe-github-allowlist">فهرست مجاز ایمن برای GitHub</h3>
+<pre dir="ltr"><code>mcp_servers:
+  github:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "***"
+    tools:
+      include: [list_issues, create_issue, update_issue, search_code]
+      resources: false
+      prompts: false
+</code></pre>
+<h3 id="stripe-blacklist">فهرست مسدود Stripe</h3>
+<pre dir="ltr"><code>mcp_servers:
+  stripe:
+    url: "https://mcp.stripe.com"
+    headers:
+      Authorization: "Bearer ***"
+    tools:
+      exclude: [delete_customer, refund_payment]
+</code></pre>
+<h3 id="resource-only-docs-server">سرور مستندات فقط‌منبعی</h3>
+<pre dir="ltr"><code>mcp_servers:
+  docs:
+    url: "https://mcp.docs.example.com"
+    tools:
+      include: []
+      resources: true
+      prompts: false
+</code></pre>
+<h3 id="tls-client-certificate-mtls">گواهی کلاینت TLS (mTLS)</h3>
+<p>برای سرورهای HTTP/SSE که به گواهی کلاینت نیاز دارند، <code>client_cert</code> (و در صورت نیاز <code>client_key</code>) را تنظیم کنید:</p>
+<pre dir="ltr"><code>mcp_servers:
+  # Combined cert + key in a single PEM file
+  internal_api:
+    url: "https://mcp.internal.example.com/mcp"
+    client_cert: "~/secrets/mcp-client.pem"
+
+  # Separate cert and key files
+  partner_api:
+    url: "https://mcp.partner.example.com/mcp"
+    client_cert: "~/secrets/client.crt"
+    client_key: "~/secrets/client.key"
+
+  # Encrypted key with a passphrase (3-element list form)
+  bank_api:
+    url: "https://mcp.bank.example.com/mcp"
+    client_cert: ["~/secrets/client.crt", "~/secrets/client.key", "my-passphrase"]
+
+  # Custom CA bundle (private CA / self-signed server)
+  lab_api:
+    url: "https://mcp.lab.local/mcp"
+    ssl_verify: "~/secrets/lab-ca.pem"
+    client_cert: "~/secrets/lab-client.pem"
+</code></pre>
+<p>نکات:</p>
+<ul>
+<li>مسیرها از بسط <code>~</code> پشتیبانی می‌کنند. اگر فایل‌ها موجود نباشند، اتصال بلافاصله با پیام خطایی مربوط به همان سرور شکست می‌خورد.</li>
+<li><code>ssl_verify: false</code> اعتبارسنجی گواهی سرور را به‌کلی غیرفعال می‌کند. از این گزینه برای سرویس‌های واقعی استفاده نکنید.</li>
+<li>روی هر دو روش انتقال Streamable HTTP و SSE کار می‌کند.</li>
+</ul>
+</section>
+<section class="doc-sec">
+<h2 id="reloading-config"><span class="secnum">۱۰</span> بارگذاری مجدد پیکربندی</h2>
+<p>پس از تغییر پیکربندی MCP، سرورها را با این فرمان دوباره بارگذاری کنید:</p>
+<pre dir="ltr"><code>/reload-mcp
+</code></pre>
+</section>
+<section class="doc-sec">
+<h2 id="tool-naming"><span class="secnum">۱۱</span> نام‌گذاری ابزارها</h2>
+<p>نام ابزارهای بومی MCP سرور به این شکل درمی‌آید:</p>
+<pre dir="ltr"><code>mcp__&lt;server&gt;__&lt;tool&gt;
+</code></pre>
+<p>نمونه‌ها:</p>
+<ul><li><code>mcp__github__create_issue</code></li><li><code>mcp__filesystem__read_file</code></li><li><code>mcp__my_api__query_data</code></li></ul>
+<p>ابزارهای کمکی هم از همین الگوی پیشوندگذاری پیروی می‌کنند:</p>
+<ul><li><code>mcp__&lt;server&gt;__list_resources</code></li><li><code>mcp__&lt;server&gt;__read_resource</code></li><li><code>mcp__&lt;server&gt;__list_prompts</code></li><li><code>mcp__&lt;server&gt;__get_prompt</code></li></ul>
+<p>جداکنندهٔ دو زیرخطی (<code>mcp__…__…</code>) با قرارداد مورد استفادهٔ Claude Code، Codex و OpenCode مطابقت دارد و حتی وقتی هر یک از دو جزء شامل زیرخط باشد، مرز سرور/ابزار را بدون ابهام مشخص می‌کند.</p>
+<h3 id="name-sanitization">پاک‌سازی نام‌ها</h3>
+<p>در نام سرور و نام ابزار، هر نویسه‌ای که حرف، رقم یا زیرخط نباشد (خط تیره، نقطه، فاصله و غیره)، پیش از ثبت با زیرخط جایگزین می‌شود. این کار تضمین می‌کند نام ابزارها شناسه‌های معتبری برای APIهای فراخوانی تابع در LLM باشند.</p>
+<p>برای نمونه، سروری با نام <code>my-api</code> که ابزاری به نام <code>list-items.v2</code> ارائه می‌کند، به این نام تبدیل می‌شود:</p>
+<pre dir="ltr"><code>mcp__my_api__list_items_v2
+</code></pre>
+<p>هنگام نوشتن فیلترهای <code>include</code> / <code>exclude</code> این نکته را در نظر بگیرید — از نام <strong>اصلی</strong> ابزار MCP (با خط تیره/نقطه) استفاده کنید، نه نسخهٔ پاک‌سازی‌شده.</p>
+</section>
+<section class="doc-sec">
+<h2 id="oauth-21-authentication"><span class="secnum">۱۲</span> احراز هویت OAuth 2.1</h2>
+<p>برای سرورهای HTTP که به OAuth نیاز دارند، در ورودی سرور <code>auth: oauth</code> را تنظیم کنید:</p>
+<pre dir="ltr"><code>mcp_servers:
+  protected_api:
+    url: "https://mcp.example.com/mcp"
+    auth: oauth
+</code></pre>
+<p>رفتار:</p>
+<ul>
+<li>هرمس از جریان OAuth 2.1 PKCE در SDK مربوط به MCP استفاده می‌کند (کشف فراداده، معرفی کلاینت، مبادلهٔ توکن و نوسازی).</li>
+<li>در نخستین اتصال، پنجرهٔ مرورگر برای اعطای مجوز باز می‌شود.</li>
+<li>توکن‌ها در <code>~/.hermes/mcp-tokens/&lt;server&gt;.json</code> ذخیرهٔ پایدار می‌شوند (پروفایل نام‌دار از <code>~/.hermes/profiles/&lt;name&gt;/mcp-tokens/</code> استفاده می‌کند) و در نشست‌های بعدی دوباره به کار می‌روند.</li>
+<li>نوسازی توکن خودکار است؛ اعطای مجوز دوباره فقط وقتی انجام می‌شود که نوسازی شکست بخورد.</li>
+<li>فقط برای انتقال HTTP/StreamableHTTP کاربرد دارد (سرورهای مبتنی بر <code>url</code>).</li>
+<li>در یک <a href="../user-guide/multi-profile-gateways.html">گیت‌وی چندپروفایلیِ مالتی‌پلکس‌شده</a>، اتصال OAuth هرگز میان پروفایل‌ها مشترک نیست: هر پروفایل با توکن خودش احراز هویت می‌کند و اتصال خودش را باز می‌کند، حتی اگر ورودی‌های <code>mcp_servers</code> یکسان باشند.</li>
+</ul>
+<h3 id="device-code-login-rfc-8628">ورود با کد دستگاه (RFC 8628)</h3>
+<p>برای سرور اعطای مجوزی که <code>device_authorization_endpoint</code> را اعلام می‌کند، از ترمینالی روی دستگاهی که هرمس را اجرا می‌کند، صریحاً روش اعطای مجوز دستگاه را انتخاب کنید:</p>
+<pre dir="ltr"><code>hermes mcp login protected_api --flow device
+</code></pre>
+<p>URL تأییدِ چاپ‌شده را روی هر دستگاهی باز کنید و کد کاربرِ نمایش‌داده‌شده را وارد کنید. هرمس برای دریافت تأیید به‌صورت دوره‌ای وضعیت را بررسی می‌کند، <code>authorization_pending</code> و <code>slow_down</code> را رعایت می‌کند و در صورت رد یا انقضا متوقف می‌شود. هیچ مرورگری اجرا نمی‌شود و نیازی به شنوندهٔ بازگشت نیست. <code>oauth.timeout</code> انتظار برای تأیید را محدود می‌کند (پیش‌فرض ۳۰۰ ثانیه)؛ طول عمر کد هم محدودیت دیگری برای آن است. اگر فرادادهٔ منبع محافظت‌شدهٔ سرور چند سرور اعطای مجوز را فهرست کند، ورود دستگاه آن‌ها را به‌ترتیب بررسی می‌کند و نخستین سروری را به کار می‌گیرد که صادرکنندهٔ فراداده‌اش با URL اعلام‌شدهٔ آن مطابقت داشته باشد و گرنت <code>device_code</code> را ارائه کند (اگر نخستین سرور فقط از مرورگر پشتیبانی کند، از آن عبور می‌شود)؛ اعتبارسنجی صادرکننده هرگز آسان‌گیرانه‌تر نمی‌شود.</p>
+<p>برای اینکه <code>hermes mcp login</code> و <code>hermes mcp reauth</code> (از جمله <code>reauth --all</code>) از اعطای مجوز دستگاه استفاده کنند، روی سرور <code>oauth.flow: device</code> را تنظیم کنید. <code>login --flow browser</code> این تنظیم را برای یک ورود کنار می‌زند؛ PKCE مرورگری همچنان پیش‌فرض است. فرادادهٔ پشتیبانی‌نشده به‌جای بازگشت بی‌سروصدا به جریانی دیگر، خطایی همراه با راهنمای اقدام ایجاد می‌کند.</p>
+<p>ورود دستگاه هنگام ثبت پویا، گرنت‌های دستگاه و نوسازی را درخواست می‌کند؛ یا از مقادیر پیکربندی‌شدهٔ <code>oauth.client_id</code>، <code>oauth.client_secret</code> و <code>oauth.token_endpoint_auth_method</code> شما استفاده می‌کند. کلاینت ثبت‌شده باید اعطای مجوز دستگاه را مجاز بداند. سند CIMD مرورگر استفاده نمی‌شود. <code>oauth.scope</code> همراه درخواست اعطای مجوز دستگاه ارسال می‌شود؛ <code>oauth.user_agent</code> روی بررسی دوره‌ای توکن هم اعمال می‌شود. توکن‌ها، اطلاعات ثبت و فرادادهٔ صادرکننده در مخزن توکن MCP پروفایل فعال می‌مانند و مسیر فعلی نوسازی در زمان اجرا، پس از راه‌اندازی مجدد دوباره از آن‌ها استفاده می‌کند. گرنت‌های ناموفق دستگاه جای اعتبارنامه‌های قبلاً ذخیره‌شده را نمی‌گیرند.</p>
+<p>ورود اولیهٔ دستگاه فقط از ترمینال ممکن است: بازگشت‌های داشبورد/مرورگر و اتصال‌های مجدد پس‌زمینه، اعطای مجوز دستگاه را شروع نمی‌کنند. فرمان ورود را برای <strong>همان پروفایل و میزبان</strong> گیت‌وی اجرا کنید. گرنت دستگاهِ منقضی‌شده یا ردشده که توکن نوسازی قابل استفاده‌ای ندارد، به ورود صریح دیگری نیاز دارد.</p>
+<h3 id="client-identification-cimd-and-dcr">معرفی کلاینت: CIMD و DCR</h3>
+<p>هرمس خود را با <strong>سند فرادادهٔ شناسهٔ کلاینت</strong> (Client ID Metadata Document یا CIMD) به سرورهای اعطای مجوز معرفی می‌کند؛ سازوکاری که مشخصات MCP نسخهٔ <code>2026-07-28</code> به‌جای ثبت پویای کلاینت پذیرفته است. این سند در <code>https://nousresearch.github.io/hermes-agent/docs/oauth/client-metadata.json</code> منتشر می‌شود و همین URL <em>خودِ</em> <code>client_id</code> است — سرور اعطای مجوز آن را واکشی می‌کند تا نام، نشان و URIهای بازگشت مجاز هرمس را بشناسد. برای هر نصب چیزی ثبت نمی‌شود و هیچ چیز مختص کاربر نیست.</p>
+<p>انتخاب نهایی با سرور اعطای مجوز است: SDK فقط زمانی URL سند را به‌عنوان <code>client_id</code> می‌فرستد که سرور در فراداده‌اش <code>client_id_metadata_document_supported: true</code> را اعلام کند؛ در غیر این صورت، دقیقاً مثل قبل از طریق DCR ثبت می‌کند. DCR در مشخصات MCP منسوخ اعلام شده، اما هنوز تقریباً همهٔ سرورهای مستقر امروزی از آن استفاده می‌کنند.</p>
+<h4 id="callback-ports">پورت‌های بازگشت</h4>
+<p>سند مجموعه‌ای ثابت از URIهای تغییرمسیر لوپ‌بک را اعلام می‌کند و مشخصات ایجاب می‌کند URI تغییرمسیر در درخواست اعطای مجوز، <em>از نظر رشته‌ای دقیقاً</em> با یکی از آن‌ها یکسان باشد — بنابراین جریان CIMD نمی‌تواند از پورت بالای تصادفی که هرمس معمولاً انتخاب می‌کند استفاده کند. به همین دلیل هرمس بازگشت را به یکی از پورت‌های <code>27890</code> تا <code>27894</code> مقید می‌کند.</p>
+<p>این پورت مقید باید پیش از مشخص‌شدن قابلیت‌های سرور انتخاب شود، چون URI تغییرمسیر در آغاز جریان ثابت می‌شود، ولی فرادادهٔ سرور در میانهٔ راه می‌رسد. بنابراین هرمس برای هر جریانی که <em>ممکن است</em> در نهایت از CIMD استفاده کند، پورت را مقید می‌کند و برای بقیه به پورت تصادفی برمی‌گردد:</p>
+<ul>
+<li>سروری که هرمس قبلاً به آن متصل شده و فرادادهٔ کش‌شده‌اش CIMD را اعلام نمی‌کند، همان رفتار همیشگیِ پورت تصادفی را حفظ می‌کند.</li>
+<li>سروری که هرمس هرگز به آن دسترسی نداشته، در نخستین ورود یک پورت مقید می‌گیرد؛ چون این حدس‌زدن تنها راه ممکن برای استفاده از CIMD است.</li>
+<li>هر چیزی که بازگشت را به جای دیگری ببرد نیز باعث بازگشت به پورت تصادفی می‌شود: <code>oauth.client_id</code> ازپیش‌ثبت‌شده، <code>oauth.client_secret</code>، مقدار سفارشی <code>oauth.client_name</code> یا <code>oauth.token_endpoint_auth_method</code>، بازنویسی <code>oauth.redirect_uri</code> یا <code>oauth.redirect_port</code>، ورود آغازشده از داشبورد یا دسکتاپ، وجود ثبت کلاینت روی دیسک، یا اشغال‌بودن هر پنج پورت توسط فرایندهای دیگر.</li>
+</ul>
+<p>هر پورت مقید به‌محض انتخاب رزرو می‌شود و تا رسیدن تغییرمسیر مرورگر نگه داشته می‌شود؛ بنابراین دو ورود هم‌زمان — یک پروفایل دوم یا سروری دیگر در همان فرایند — نمی‌توانند روی یک شنونده بنشینند.</p>
+<h4 id="when-a-server-rejects-the-document">وقتی سرور سند را رد می‌کند</h4>
+<p>اگر سرور سند را واکشی کند و در نقطهٔ پایانی <em>توکن</em> آن را نپذیرد (<code>invalid_client</code>)، هرمس این ردشدن را در لاگ می‌نویسد، آن را در <code>~/.hermes/mcp-tokens/&lt;server&gt;.cimd-off</code> ثبت می‌کند و از آن پس برای آن سرور از DCR استفاده می‌کند.</p>
+<p>سروری که اصلاً نتواند سند را واکشی یا اعتبارسنجی کند، در عوض در نقطهٔ پایانی <em>اعطای مجوز</em> و پیش از هر تغییرمسیر، فرایند را متوقف می‌کند. در آن مرحله هیچ نشانه‌ای وجود ندارد که هرمس بتواند مشاهده کند؛ بنابراین مرورگر خطای کلاینت نامعتبر نشان می‌دهد و مهلت ورود پس از پنج دقیقه تمام می‌شود. پیام پایان مهلت، نام سند را ذکر می‌کند و به <code>cimd: false</code> اشاره می‌کند. اجرای <code>hermes mcp login &lt;server&gt;</code> ردشدن ثبت‌شده را پاک می‌کند تا سند اصلاح‌شده فرصت دیگری پیدا کند.</p>
+<h4 id="optional-per-server-keys">کلیدهای اختیاری به‌ازای هر سرور</h4>
+<pre dir="ltr"><code>mcp_servers:
+  protected_api:
+    url: "https://mcp.example.com/mcp"
+    auth: oauth
+    oauth:
+      client_metadata_url: "https://example.com/my-cimd.json"  # self-hosted document
+      cimd: false                                              # force DCR
+      user_agent: "My-MCP-Client/1.0"                          # token-request User-Agent
+</code></pre>
+<p><code>client_metadata_url</code> باید یک URL از نوع HTTPS دارای مسیر باشد (نه فقط مبدأ؛ بدون قطعهٔ لنگر، اطلاعات کاربر یا بخش‌های <code>.</code>/<code>..</code>) که پاسخ <code>200</code> و <code>Content-Type: application/json</code> را <strong>بدون تغییرمسیر</strong> برگرداند — سرورهای اعطای مجوز هنگام واکشی آن اجازهٔ دنبال‌کردن تغییرمسیرها را ندارند. هرمس همچنان بازگشت خود را به همان بازهٔ <code>27890</code> تا <code>27894</code> مقید می‌کند؛ پس سند خودمیزبان باید هر ده URI لوپ‌بک را اعلام کند (<code>http://127.0.0.1:&lt;port&gt;/callback</code> و <code>http://localhost:&lt;port&gt;/callback</code> برای هر پورت)، و <code>client_id</code> آن باید URL خودش باشد.</p>
+<p><code>user_agent</code>، مقدار پیش‌فرض <code>User-Agent</code> کتابخانهٔ HTTP را <strong>فقط در درخواست‌های نقطهٔ پایانی توکن</strong> (مبادلهٔ کد اعطای مجوز و نوسازی) جایگزین می‌کند — برخی سرورهای اعطای مجوز و دیواره‌های آتش برنامهٔ وب (WAF) مقدار پیش‌فرض <code>python-httpx/...</code> را در آنجا رد می‌کنند. این گزینه هرگز روی ترافیک MCP یا کشف OAuth اعمال نمی‌شود و هیچ سرآیند دیگری برای درخواست توکن قابل پیکربندی نیست. مقادیر خالی یا <code>null</code> نادیده گرفته می‌شوند.</p>
+</section>
+<section class="doc-sec">
+<h2 id="add-to-hermes-link"><span class="secnum">۱۳</span> پیوند افزودن به هرمس</h2>
+<p>ارائه‌دهندگان MCP و مستندات آن‌ها می‌توانند دکمهٔ تک‌کلیکی <strong>«افزودن به هرمس»</strong> ارائه کنند که برنامهٔ دسکتاپ هرمس را با پیکربندی ازپیش‌پرشدهٔ سرور باز می‌کند؛ مشابه طرح <code>cursor://anysphere.cursor-deeplink/mcp/install</code> در Cursor:</p>
+<pre dir="ltr"><code>hermes://mcp/install?name=NAME&amp;config=BASE64
+</code></pre>
+<ul>
+<li><code>name</code> — نام سرور. باید با <code>^[A-Za-z0-9._-]{1,64}$</code> مطابقت داشته باشد.</li>
+<li><code>config</code> — شیء پیکربندی سرور به شکل <strong>JSON کدگذاری‌شده با base64url</strong> (base64 استاندارد هم پذیرفته می‌شود). JSON رمزگشایی‌شده باید شیئی باشد که یا فیلد رشته‌ای <code>url</code> دارد (فقط <code>http://</code>/<code>https://</code>) یا فیلد رشته‌ای <code>command</code>؛ و می‌تواند هر یک از کلیدهای سرورِ مستندشده در بالا را همراه داشته باشد. محموله‌های بیش از ۳۲ کیلوبایت رد می‌شوند.</li>
+</ul>
+<p>نمونه (JavaScript):</p>
+<pre dir="ltr"><code>const config = { url: 'https://mcp.example.com/mcp' }
+const link = `hermes://mcp/install?name=example&amp;config=${btoa(JSON.stringify(config))
+  .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')}`
+</code></pre>
+<p>بازکردن پیوند به‌خودی‌خود هرگز چیزی نصب نمی‌کند: برنامهٔ دسکتاپ کادر تأییدی با نام سرور و کل پیکربندیِ قالب‌بندی‌شده و خوانا نشان می‌دهد (با احتیاط اضافه برای سرورهای مبتنی بر <code>command</code> که یک فرایند محلی اجرا می‌کنند) و کاربر باید صریحاً تأیید کند. نام سرورهای موجود هرگز بازنویسی نمی‌شود — از کاربر خواسته می‌شود نام را تغییر دهد یا لغو کند.</p>
+</section>
+<div class="pager">
+  <a href="toolsets-reference.html"><span class="dir">→ قبلی</span><span class="ttl">مرجع تول‌ست‌ها</span></a>
+  <a class="next" href="model-catalog.html"><span class="dir">بعدی ←</span><span class="ttl">کاتالوگ مدل‌ها</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/reference/mcp-config-reference" target="_blank" rel="noopener">MCP Config Reference</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

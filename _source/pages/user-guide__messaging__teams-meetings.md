@@ -236,5 +236,3 @@ hermes teams-pipeline subscriptions
 
 - [Microsoft Teams bot setup](/user-guide/messaging/teams)
 - [Operate the Teams Meeting Pipeline](/guides/operate-teams-meeting-pipeline)
-
-

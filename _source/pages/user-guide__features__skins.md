@@ -90,8 +90,8 @@ Text strings used throughout the CLI interface.
 |-----|-------------|---------|
 | `agent_name` | Name shown in banner title and status display | `Hermes Agent` |
 | `welcome` | Welcome message shown at CLI startup | `Welcome to Hermes Agent! Type your message or /help for commands.` |
-| `goodbye` | Message shown on exit | `Goodbye! ⚕` |
-| `response_label` | Label on the response box header | ` ⚕ Hermes ` |
+| `goodbye` | Message shown on exit | `Goodbye! ☤` |
+| `response_label` | Label on the response box header | ` ☤ Hermes ` |
 | `prompt_symbol` | Symbol before the user input prompt (bare token, renderers add a trailing space) | `❯` |
 | `help_header` | Header text for the `/help` command output | `(^_^)? Available Commands` |
 
@@ -265,5 +265,3 @@ Hermes Mod respects the `HERMES_HOME` environment variable, so it works with [pr
 - User skins in `~/.hermes/skins/` take precedence over built-in skins with the same name.
 - Skin changes via `/skin` are session-only. To make a skin your permanent default, set it in `config.yaml`.
 - The `banner_logo` and `banner_hero` fields support Rich console markup (e.g., `[bold #FF0000]text[/]`) for colored ASCII art.
-
-

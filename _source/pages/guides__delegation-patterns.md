@@ -6,6 +6,7 @@ Hermes can spawn isolated child agents to work on tasks in parallel. Each subage
 
 For the full feature reference, see [Subagent Delegation](/user-guide/features/delegation).
 
+---
 
 ## When to Delegate
 
@@ -22,6 +23,7 @@ For the full feature reference, see [Subagent Delegation](/user-guide/features/d
 - Quick file edits → do them directly
 - Durable long-running work that must survive session closure or process restart → `cronjob` or `terminal(background=True, notify_on_complete=True)`. Top-level delegation is asynchronous but still process-local.
 
+---
 
 ## Pattern: Parallel Research
 
@@ -57,6 +59,7 @@ delegate_task(tasks=[
 
 All three run concurrently. Each subagent searches the web independently and returns a summary. The parent agent then synthesizes them into a coherent briefing.
 
+---
 
 ## Pattern: Code Review
 
@@ -85,6 +88,7 @@ delegate_task(
 Subagents know **absolutely nothing** about your conversation. They start completely fresh. If you delegate "fix the bug we were discussing," the subagent has no idea what bug you mean. Always pass file paths, error messages, project structure, and constraints explicitly.
 :::
 
+---
 
 ## Pattern: Compare Alternatives
 
@@ -103,6 +107,7 @@ and maintenance overhead. Compare them and recommend one.
 
 Each subagent researches one option independently. Because they're isolated, there's no cross-contamination — each evaluation stands on its own merits. The parent agent gets all three summaries and makes the comparison.
 
+---
 
 ## Pattern: Multi-File Refactoring
 
@@ -141,6 +146,7 @@ delegate_task(tasks=[
 Each subagent gets its own terminal session. They can work on the same project directory without stepping on each other — as long as they're editing different files. If two subagents might touch the same file, handle that file yourself after the parallel work completes.
 :::
 
+---
 
 ## Pattern: Gather Then Analyze
 
@@ -180,22 +186,24 @@ delegate_task(
 
 This is often the most efficient pattern: `execute_code` handles the 10+ sequential tool calls cheaply, then a subagent does the single expensive reasoning task with a clean context.
 
+---
 
 ## Inherited Tool Access
 
 Subagents inherit the parent's enabled toolsets. `delegate_task` does not accept a model-facing `toolsets` parameter, so delegated work cannot grant itself capabilities that the parent does not have. Configure the parent's tools before starting the conversation when a delegated task needs web, terminal, file, or other access. Hermes still strips child-blocked tools such as `clarify`, `memory`, and `send_message`; children keep `execute_code` for programmatic tool calling.
 
+---
 
 ## Constraints
 
-- **Default 3 parallel tasks**: batches default to 3 concurrent subagents (configurable via `delegation.max_concurrent_children` in config.yaml, no hard ceiling, only a floor of 1)
+- **Default 10 parallel tasks**: batches default to 10 concurrent subagents (configurable via `delegation.max_concurrent_children` in config.yaml, no hard ceiling, only a floor of 1)
 - **Nested delegation is opt-in**: leaf subagents (default) cannot call `delegate_task`, `clarify`, `memory`, or `execute_code`. Orchestrator subagents (`role="orchestrator"`) retain `delegate_task` for further delegation, but only when `delegation.max_spawn_depth` is raised above the default of 1 (floor 1, no ceiling); the other three remain blocked. Disable globally via `delegation.orchestrator_enabled: false`.
 
 ### Tuning Concurrency and Depth
 
 | Config | Default | Range | Effect |
 |--------|---------|-------|--------|
-| `max_concurrent_children` | 3 | >=1 | Parallel batch size per `delegate_task` call |
+| `max_concurrent_children` | 10 | >=1 | Parallel batch size per `delegate_task` call |
 | `max_spawn_depth` | 1 | >=1 | How many delegation levels can spawn further |
 
 Example: running 30 parallel workers with nested subagents:
@@ -208,9 +216,10 @@ delegation:
 
 - **Separate terminals** — each subagent gets its own terminal session with separate working directory and state
 - **No conversation history** — subagents see only the `goal` and `context` the parent agent passes when calling `delegate_task`
-- **Default 50 iterations** — set `max_iterations` lower for simple tasks to save cost
+- **Default 250 iterations** — set `delegation.max_iterations` lower in `config.yaml` for fleets of simple tasks to save cost
 - **Not durable** — top-level delegation runs in the background and posts its result back later, but it remains tied to the owning session and Hermes process. Session closure, `/stop`, `/new`, or a process restart can cancel or strand in-progress work. Use `cronjob` or `terminal(background=True, notify_on_complete=True)` for work that must survive those boundaries.
 
+---
 
 ## Tips
 
@@ -222,7 +231,8 @@ delegation:
 
 **Check results.** Subagent summaries are just that — summaries. If a subagent says "fixed the bug and tests pass," verify by running the tests yourself or reading the diff.
 
+**Failures are surfaced.** A subagent that dies (provider error, timeout, crash) is reported with a clean one-line notice — `⚠️ Subagent failed — "your goal": <reason>` — in the CLI delegation tree and as a chat notice on gateway platforms, even when tool progress is turned off. The parent agent also receives the full error in the tool result.
+
+---
 
 *For the complete delegation reference — all parameters, ACP integration, and advanced configuration — see [Subagent Delegation](/user-guide/features/delegation).*
-
-

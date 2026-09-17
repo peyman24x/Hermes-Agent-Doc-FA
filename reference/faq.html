@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سؤالات متداول و عیب‌یابی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/reference/faq" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>مرجع<span class="sep">/</span><strong>سؤالات متداول و عیب‌یابی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1>سؤالات متداول و عیب‌یابی</h1>
+<p>پاسخ‌ها و راه‌حل‌های سریع برای رایج‌ترین پرسش‌ها و مشکلات.</p>
+<hr>
+<section class="doc-sec"><h2 id="frequently-asked-questions"><span class="secnum">۱</span> پرسش‌های متداول</h2>
+<h3 id="what-llm-providers-work-with-hermes">کدام ارائه‌دهندگان مدل زبانی بزرگ با Hermes کار می‌کنند؟</h3>
+<p>Hermes Agent با هر API سازگار با OpenAI کار می‌کند. ارائه‌دهندگان پشتیبانی‌شده عبارت‌اند از:</p>
+<ul>
+<li><strong><a href="https://openrouter.ai/" target="_blank" rel="noopener">OpenRouter</a></strong> — دسترسی به صدها مدل با یک کلید API؛ پیشنهادشده برای انعطاف‌پذیری.</li>
+<li><strong><a href="../integrations/nous-portal.html">Nous Portal</a></strong> — گیت‌وی اشتراکی Nous Research؛ بیش از ۳۰۰ مدل به‌علاوهٔ وب، تصویر، تبدیل متن به گفتار و مرورگر با یک ورود OAuth؛ پیشنهادشده برای تازه‌واردان.</li>
+<li><strong>OpenAI</strong> — مدل‌های GPT-5.4، GPT-5-codex، GPT-4.1، GPT-4o و غیره.</li>
+<li><strong>Anthropic</strong> — مدل‌های Claude از طریق API مستقیم، OAuth با <code>hermes auth add anthropic</code>، OpenRouter یا هر پراکسی سازگار.</li>
+<li><strong>Google</strong> — مدل‌های Gemini از طریق API مستقیم با ارائه‌دهندهٔ <code>gemini</code>، OpenRouter یا پراکسی سازگار.</li>
+<li><strong>z.ai / ZhipuAI</strong> — مدل‌های GLM.</li>
+<li><strong>Kimi / Moonshot AI</strong> — مدل‌های Kimi.</li>
+<li><strong>MiniMax</strong> — نقاط پایانی جهانی و چین.</li>
+<li><strong>مدل‌های محلی</strong> — از طریق <a href="https://ollama.com/" target="_blank" rel="noopener">Ollama</a>، <a href="https://docs.vllm.ai/" target="_blank" rel="noopener">vLLM</a>، <a href="https://github.com/ggerganov/llama.cpp" target="_blank" rel="noopener">llama.cpp</a>، <a href="https://github.com/sgl-project/sglang" target="_blank" rel="noopener">SGLang</a> یا هر سرور سازگار با OpenAI.</li>
+</ul>
+<p>ارائه‌دهنده را با <code>hermes model</code> یا ویرایش <code>~/.hermes/.env</code> تنظیم کنید. برای همهٔ کلیدهای ارائه‌دهندگان، مرجع <a href="https://hermes-agent.nousresearch.com/docs/reference/environment-variables" target="_blank" rel="noopener">متغیرهای محیطی</a> را ببینید.</p>
+<h3 id="does-it-work-on-windowsandroidtermuxmy-plataform">آیا روی Windows، Android، Termux یا پلتفرم من کار می‌کند؟</h3>
+<p>برای جدول کامل دسترس‌پذیری در پلتفرم‌های مختلف، <strong><a href="../getting-started/platform-support.html">پشتیبانی پلتفرم‌ها</a></strong> را ببینید.</p>
+<h3 id="i-run-hermes-in-wsl2-whats-the-best-way-to-control-my-normal-windows-chrome">Hermes را در WSL2 اجرا می‌کنم. بهترین راه کنترل Chrome معمولی من در Windows چیست؟</h3>
+<p>پل MCP را به <code>/browser connect</code> ترجیح دهید.</p>
+<p>الگوی پیشنهادی:</p>
+<ul><li>Hermes را داخل WSL2 اجرا کنید.</li><li>همچنان از Chrome معمولی خود در Windows که به حساب‌هایتان وارد شده است استفاده کنید.</li><li><code>chrome-devtools-mcp</code> را از طریق <code>cmd.exe</code> یا <code>powershell.exe</code> به‌عنوان سرور MCP اضافه کنید.</li><li>بگذارید Hermes از ابزارهای مرورگر MCP حاصل استفاده کند.</li></ul>
+<p>این روش از تلاش برای وادارکردن لایهٔ انتقال مرورگر هستهٔ Hermes به اتصال مستقیم از مرز WSL2/Windows قابل‌اعتمادتر است.</p>
+<p>ببینید:</p>
+<ul><li><a href="https://hermes-agent.nousresearch.com/docs/guides/use-mcp-with-hermes#wsl2-bridge-hermes-in-wsl-to-windows-chrome" target="_blank" rel="noopener">استفاده از MCP با Hermes</a></li><li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/browser#wsl2--windows-chrome-prefer-mcp-over-browser-connect" target="_blank" rel="noopener">اتوماسیون مرورگر</a></li></ul>
+<h3 id="is-my-data-sent-anywhere">آیا داده‌های من به جایی ارسال می‌شود؟</h3>
+<p>فراخوانی‌های API <strong>فقط به ارائه‌دهندهٔ LLM پیکربندی‌شدهٔ شما</strong> می‌روند؛ مثلاً OpenRouter یا نمونهٔ محلی Ollama شما. Hermes Agent هیچ تله‌متری، دادهٔ استفاده یا دادهٔ تحلیلی جمع‌آوری نمی‌کند. گفتگوها، حافظه و مهارت‌های شما به‌صورت محلی در <code>~/.hermes/</code> ذخیره می‌شوند.</p>
+<h3 id="can-i-use-it-offline--with-local-models">آیا می‌توانم آفلاین یا با مدل‌های محلی از آن استفاده کنم؟</h3>
+<p>بله. <code>hermes model</code> را اجرا کنید، گزینهٔ <strong>نقطهٔ پایانی سفارشی (Custom endpoint)</strong> را انتخاب کنید و URL سرورتان را وارد کنید:</p>
+<pre dir="ltr"><code>hermes model
+# Select: Custom endpoint (enter URL manually)
+# API base URL: http://localhost:11434/v1
+# API key: ollama
+# Model name: qwen3.5:27b
+# Context length: 64000   ← Hermes minimum; set this to match your server's actual context window
+</code></pre>
+<p>یا آن را مستقیم در <code>config.yaml</code> پیکربندی کنید:</p>
+<pre dir="ltr"><code>model:
+  default: qwen3.5:27b
+  provider: custom
+  base_url: http://localhost:11434/v1
+</code></pre>
+<p>Hermes نقطهٔ پایانی، ارائه‌دهنده و URL پایه را در <code>config.yaml</code> ذخیره می‌کند تا پس از راه‌اندازی مجدد باقی بمانند. اگر دقیقاً یک مدل روی سرور محلی شما بارگذاری شده باشد، <code>/model custom</code> آن را خودکار تشخیص می‌دهد. همچنین می‌توانید <code>provider: custom</code> را در <code>config.yaml</code> تنظیم کنید؛ این یک ارائه‌دهندهٔ مستقل و کاملاً پشتیبانی‌شده است، نه نام مستعار چیز دیگری.</p>
+<p>این روش با Ollama، vLLM، سرور llama.cpp، SGLang، LocalAI و موارد دیگر کار می‌کند. برای جزئیات، <a href="../user-guide/configuration.html">راهنمای پیکربندی</a> را ببینید.</p>
+<div class="callout tip"><div class="callout-title">نکته — کاربران Ollama</div><p>اگر در Ollama مقدار سفارشی <code>num_ctx</code> تنظیم می‌کنید، مثلاً <code>ollama run --num_ctx 64000</code>، حتماً طول زمینهٔ متناظر را در Hermes هم تنظیم کنید؛ <code>/api/show</code> در Ollama <em>حداکثر</em> زمینهٔ مدل را گزارش می‌دهد، نه مقدار مؤثر <code>num_ctx</code> که شما پیکربندی کرده‌اید.</p></div>
+<div class="callout tip"><div class="callout-title">نکته — پایان مهلت با مدل‌های محلی</div><p>Hermes نقاط پایانی محلی را خودکار تشخیص می‌دهد و مهلت‌های استریم را افزایش می‌دهد؛ مهلت خواندن از ۱۲۰ به ۱۸۰۰ ثانیه می‌رسد و تشخیص استریم متوقف‌شده غیرفعال می‌شود. اگر همچنان با زمینه‌های بسیار بزرگ به پایان مهلت می‌رسید، <code>HERMES_STREAM_READ_TIMEOUT=1800</code> را در <code>.env</code> تنظیم کنید. برای جزئیات، <a href="https://hermes-agent.nousresearch.com/docs/guides/local-llm-on-mac#timeouts" target="_blank" rel="noopener">راهنمای LLM محلی</a> را ببینید.</p></div>
+<h3 id="how-much-does-it-cost">هزینهٔ آن چقدر است؟</h3>
+<p>خود Hermes Agent <strong>رایگان و متن‌باز</strong> است و مجوز MIT دارد. فقط هزینهٔ مصرف API مدل زبانی را به ارائه‌دهندهٔ انتخابی خود می‌پردازید. اجرای مدل‌های محلی کاملاً رایگان است.</p>
+<h3 id="can-multiple-people-use-one-instance">آیا چند نفر می‌توانند از یک نمونه استفاده کنند؟</h3>
+<p>بله. <a href="../user-guide/messaging/index.html">گیت‌وی پیام‌رسانی</a> به چند کاربر اجازه می‌دهد از طریق Telegram، Discord، Slack، WhatsApp یا Home Assistant با یک نمونهٔ Hermes Agent تعامل کنند. دسترسی با فهرست‌های مجازِ شناسه‌های مشخص کاربران و جفت‌سازی پیام خصوصی کنترل می‌شود؛ در جفت‌سازی، اولین کاربری که پیام می‌دهد دسترسی را در اختیار می‌گیرد.</p>
+<h3 id="whats-the-difference-between-memory-and-skills">تفاوت حافظه و مهارت‌ها چیست؟</h3>
+<ul><li><strong>حافظه</strong>، <strong>واقعیت‌ها</strong> را ذخیره می‌کند؛ چیزهایی که ایجنت دربارهٔ شما، پروژه‌ها و ترجیحاتتان می‌داند. حافظه‌ها بر اساس ارتباط با موضوع، خودکار بازیابی می‌شوند.</li><li><strong>مهارت‌ها</strong>، <strong>رویه‌ها</strong> را ذخیره می‌کنند؛ دستورالعمل‌های گام‌به‌گام انجام کارها. وقتی ایجنت با وظیفه‌ای مشابه روبه‌رو شود، مهارت‌ها فراخوانده می‌شوند.</li></ul>
+<p>هر دو میان نشست‌ها باقی می‌مانند. برای جزئیات، <a href="../user-guide/features/memory.html">حافظه</a> و <a href="../user-guide/features/skills.html">مهارت‌ها</a> را ببینید.</p>
+<h3 id="can-i-use-it-in-my-own-python-project">آیا می‌توانم در پروژهٔ Python خودم از آن استفاده کنم؟</h3>
+<p>بله. کلاس <code>AIAgent</code> را وارد کنید و از Hermes به‌صورت برنامه‌نویسی استفاده کنید:</p>
+<pre dir="ltr"><code>from run_agent import AIAgent
+
+agent = AIAgent(model="anthropic/claude-opus-4.7")
+response = agent.chat("Explain quantum computing briefly")
+</code></pre>
+<p>برای روش کامل استفاده از API، <a href="../user-guide/features/code-execution.html">راهنمای کتابخانهٔ Python</a> را ببینید.</p>
+<hr>
+</section>
+<section class="doc-sec"><h2 id="troubleshooting"><span class="secnum">۲</span> عیب‌یابی</h2>
+<h3 id="installation-issues">مشکلات نصب</h3>
+<h4 id="hermes-command-not-found-after-installation">خطای <code>hermes: command not found</code> پس از نصب</h4>
+<p><strong>علت:</strong> شل شما هنوز <code>PATH</code> به‌روزشده را دوباره بارگذاری نکرده است.</p>
+<p><strong>راه‌حل:</strong></p>
+<pre dir="ltr"><code># Reload your shell profile
+source ~/.bashrc    # bash
+source ~/.zshrc     # zsh
+
+# Or start a new terminal session
+</code></pre>
+<p>اگر هنوز کار نمی‌کند، محل نصب را بررسی کنید:</p>
+<pre dir="ltr"><code>which hermes
+ls ~/.local/bin/hermes
+</code></pre>
+<div class="callout tip"><div class="callout-title">نکته</div><p>نصب‌کننده <code>~/.local/bin</code> را به <code>PATH</code> اضافه می‌کند. اگر پیکربندی شل شما غیراستاندارد است، <code>export PATH="$HOME/.local/bin:$PATH"</code> را دستی اضافه کنید.</p></div>
+<h4 id="python-version-too-old">نسخهٔ Python بیش از حد قدیمی است</h4>
+<p><strong>علت:</strong> Hermes به Python نسخهٔ ۳.۱۱ یا جدیدتر نیاز دارد.</p>
+<p><strong>راه‌حل:</strong></p>
+<pre dir="ltr"><code>python3 --version   # Check current version
+
+# Install a newer Python
+sudo apt install python3.12   # Ubuntu/Debian
+brew install python@3.12      # macOS
+</code></pre>
+<p>نصب‌کننده این موضوع را خودکار مدیریت می‌کند؛ اگر هنگام نصب دستی این خطا را می‌بینید، ابتدا Python را ارتقا دهید.</p>
+<h4 id="terminal-commands-say-node-command-not-found-or-nvm-pyenv-asdf-">فرمان‌های ترمینال خطای <code>node: command not found</code> می‌دهند؛ یا برای <code>nvm</code>، <code>pyenv</code>، <code>asdf</code> و غیره</h4>
+<p><strong>علت:</strong> Hermes با یک‌بار اجرای <code>bash -l</code> هنگام شروع، اسنپ‌شاتی از محیط برای هر نشست می‌سازد. شل ورود bash فایل‌های <code>/etc/profile</code>، <code>~/.bash_profile</code> و <code>~/.profile</code> را می‌خواند، اما <strong><code>~/.bashrc</code> را بارگذاری نمی‌کند</strong>؛ بنابراین ابزارهایی که خود را در آن نصب می‌کنند، مانند <code>nvm</code>، <code>asdf</code>، <code>pyenv</code>، <code>cargo</code> و تعریف‌های سفارشی <code>PATH</code>، در اسنپ‌شات دیده نمی‌شوند. این مشکل بیشتر زمانی رخ می‌دهد که Hermes زیر systemd یا در شلی حداقلی اجرا شود که پروفایل شل تعاملی از قبل در آن بارگذاری نشده است.</p>
+<p><strong>راه‌حل:</strong> Hermes به‌طور پیش‌فرض <code>~/.bashrc</code> را خودکار بارگذاری می‌کند. اگر کافی نیست، مثلاً کاربر zsh هستید و <code>PATH</code> شما در <code>~/.zshrc</code> قرار دارد یا <code>nvm</code> را از فایلی مستقل مقداردهی می‌کنید، فایل‌های اضافی برای بارگذاری را در <code>~/.hermes/config.yaml</code> فهرست کنید:</p>
+<pre dir="ltr"><code>terminal:
+  shell_init_files:
+    - ~/.zshrc                     # zsh users: pulls zsh-managed PATH into the bash snapshot
+    - ~/.nvm/nvm.sh                # direct nvm init (works regardless of shell)
+    - /etc/profile.d/cargo.sh      # system-wide rc files
+  # When this list is set, the default ~/.bashrc auto-source is NOT added —
+  # include it explicitly if you want both:
+  #   - ~/.bashrc
+  #   - ~/.zshrc
+</code></pre>
+<p>فایل‌های ناموجود بی‌سروصدا رد می‌شوند. بارگذاری در bash انجام می‌شود، بنابراین فایل‌های متکی به نحو اختصاصی zsh ممکن است خطا دهند؛ اگر این موضوع نگران‌کننده است، فقط بخش تنظیم <code>PATH</code> را بارگذاری کنید، مثلاً مستقیماً <code>nvm.sh</code> مربوط به nvm را، نه کل فایل rc را.</p>
+<p>مستقل از فایل‌های مقداردهی اولیه، <code>PATH</code> هر فرمان ترمینال با پوشه‌های استاندارد سیستم، مانند <code>/usr/local/bin</code> و <code>/opt/homebrew/bin</code>، پوشه‌های زمان اجرای تحت مدیریت Hermes و در صورت وجود <code>~/.local/bin</code>، یعنی مقصد نصب <code>pip --user</code>، <code>pipx</code> و <code>uv tool</code>، تکمیل می‌شود. این‌ها پس از ورودی‌های خودتان اضافه می‌شوند، پس اولویت‌ها تغییر نمی‌کنند. این رفتار بدون نیاز به پیکربندی، بک‌اندهایی را پوشش می‌دهد که با <code>PATH</code> غیرتعاملی حداقلی شروع شده‌اند؛ از جمله systemd، اجراکننده‌های گرافیکی و بک‌اند SSH راه دور دسکتاپ.</p>
+<p>برای غیرفعال‌کردن بارگذاری خودکار و رعایت صرفِ رفتار شل ورود:</p>
+<pre dir="ltr"><code>terminal:
+  auto_source_bashrc: false
+</code></pre>
+<h4 id="uv-command-not-found">خطای <code>uv: command not found</code></h4>
+<p><strong>علت:</strong> مدیر بستهٔ <code>uv</code> نصب نیست یا در <code>PATH</code> قرار ندارد.</p>
+<p><strong>راه‌حل:</strong></p><pre dir="ltr"><code>curl -LsSf https://astral.sh/uv/install.sh | sh
+source ~/.bashrc
+</code></pre>
+<h4 id="permission-denied-errors-during-install">خطاهای رد دسترسی هنگام نصب</h4>
+<p><strong>علت:</strong> مجوز کافی برای نوشتن در پوشهٔ نصب ندارید.</p>
+<p><strong>راه‌حل:</strong></p><pre dir="ltr"><code># Don't use sudo with the installer — it installs to ~/.local/bin
+# If you previously installed with sudo, clean up:
+sudo rm /usr/local/bin/hermes
+# Then re-run the standard installer
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+</code></pre>
+<hr>
+<h3 id="provider--model-issues">مشکلات ارائه‌دهنده و مدل</h3>
+<h4 id="the-agent-says-hermes-policy-or-hermes-guardrails-refused-my-request">ایجنت می‌گوید «سیاست Hermes» یا «محدودیت‌های حفاظتی Hermes» درخواست من را رد کرده است</h4>
+<p>مدل نمی‌تواند با اطمینان علت رد درخواست را تشخیص دهد. اگر امتناع فقط در متن پاسخ دستیار دیده می‌شود، ادعای آن دربارهٔ وجود سیاست پنهان زمان اجرای Hermes ممکن است توضیحی ساختگی یا محدودیتی باشد که مدل یا ارائه‌دهندهٔ انتخاب‌شده اعمال کرده است.</p>
+<p>اعمال محدودیت در Hermes صریح است: اقدام ابزاری مسدودشده خطایی برمی‌گرداند که فرمان یا مسیر ممنوع را نام می‌برد، و اقدامی که تأیید لازم دارد پرسش تأیید نشان می‌دهد. Hermes این کنترل‌های اجرایی را بی‌سروصدا به لایه‌ای عمومی برای امتناع محتوایی تبدیل نمی‌کند. کنترل‌های سطح ارائه‌دهنده، مانند Amazon Bedrock Guardrails، همچنان در صورت پیکربندی می‌توانند اعمال شوند.</p>
+<p>برای مشخص‌کردن منبع:</p>
+<ol><li><code>/status</code> را اجرا کنید تا مدل و ارائه‌دهندهٔ فعال را تأیید کنید.</li><li>بررسی کنید آیا امتناع شامل خطای واقعی ابزار Hermes یا پرسش تأیید است. اگر فقط متن است، نسبت‌دادن علت توسط مدل را شاهدی از زمان اجرا تلقی نکنید.</li><li>در نشستی تازه با مدل یا ارائه‌دهندهٔ پیکربندی‌شدهٔ دیگری دوباره امتحان کنید. امتناعی که با تغییر مدل عوض می‌شود، رفتار مدل یا ارائه‌دهنده است، نه کنترل اجرایی Hermes.</li><li>اگر خطای صریح ابزار ظاهر شد، هنگام گزارش مشکل متن دقیق آن را بیاورید.</li></ol>
+<p>برای کنترل‌های اجرایی مستندشدهٔ Hermes، <a href="../user-guide/security.html">امنیت</a> و برای پیکربندی ارائه‌دهندگان، <a href="../integrations/providers.html">ارائه‌دهندگان</a> را ببینید.</p>
+<h4 id="model-only-shows-one-provider--cant-switch-providers"><code>/model</code> فقط یک ارائه‌دهنده نشان می‌دهد یا نمی‌توان ارائه‌دهنده را عوض کرد</h4>
+<p><strong>علت:</strong> <code>/model</code> در نشست گفتگو فقط می‌تواند میان ارائه‌دهندگانی جابه‌جا شود که <strong>قبلاً پیکربندی کرده‌اید</strong>. اگر فقط OpenRouter را راه‌اندازی کرده‌اید، همین تنها گزینهٔ قابل نمایش است.</p>
+<p><strong>راه‌حل:</strong> از نشست خارج شوید و برای افزودن ارائه‌دهندگان جدید، <code>hermes model</code> را از ترمینال اجرا کنید:</p>
+<pre dir="ltr"><code># Exit the Hermes chat session first (Ctrl+C or /quit)
+
+# Run the full provider setup wizard
+hermes model
+
+# This lets you: add providers, run OAuth, enter API keys, configure endpoints
+</code></pre>
+<p>پس از افزودن ارائه‌دهندهٔ جدید با <code>hermes model</code>، نشست گفتگوی تازه‌ای شروع کنید؛ اکنون <code>/model</code> همهٔ ارائه‌دهندگان پیکربندی‌شده را نشان می‌دهد.</p>
+<div class="callout tip"><div class="callout-title">نکته — مرجع سریع</div><div class="table-wrap"><table><thead><tr><th>می‌خواهید چه کنید؟</th><th>استفاده کنید</th></tr></thead><tbody><tr><td>افزودن ارائه‌دهندهٔ جدید</td><td><code>hermes model</code> از ترمینال</td></tr><tr><td>واردکردن یا تغییر کلیدهای API</td><td><code>hermes model</code> از ترمینال</td></tr><tr><td>تغییر مدل در میانهٔ نشست</td><td><code>/model &lt;name&gt;</code> داخل نشست</td></tr><tr><td>تغییر به ارائه‌دهندهٔ پیکربندی‌شدهٔ دیگر</td><td><code>/model provider:model</code> داخل نشست</td></tr></tbody></table></div></div>
+<h4 id="api-key-not-working">کلید API کار نمی‌کند</h4>
+<p><strong>علت:</strong> کلید وجود ندارد، منقضی شده، نادرست تنظیم شده یا متعلق به ارائه‌دهندهٔ دیگری است.</p>
+<p><strong>راه‌حل:</strong></p><pre dir="ltr"><code># Check your configuration
+hermes config show
+
+# Re-configure your provider
+hermes model
+
+# Or set directly
+hermes config set OPENROUTER_API_KEY sk-or-v1-xxxxxxxxxxxx
+</code></pre>
+<div class="callout warn"><div class="callout-title">هشدار</div><p>مطمئن شوید کلید با ارائه‌دهنده مطابقت دارد. کلید OpenAI با OpenRouter کار نمی‌کند و برعکس. <code>~/.hermes/.env</code> را برای ورودی‌های متعارض بررسی کنید.</p></div>
+<h4 id="model-not-available--model-not-found">مدل در دسترس نیست یا پیدا نمی‌شود</h4>
+<p><strong>علت:</strong> شناسهٔ مدل نادرست است یا مدل نزد ارائه‌دهندهٔ شما در دسترس نیست.</p>
+<p><strong>راه‌حل:</strong></p><pre dir="ltr"><code># List available models for your provider
+hermes model
+
+# Set a valid model
+hermes config set model.default anthropic/claude-opus-4.7
+
+# Or specify per-session
+hermes chat --model openrouter/meta-llama/llama-3.1-70b-instruct
+</code></pre>
+<h4 id="rate-limiting-429-errors">محدودیت نرخ؛ خطاهای ۴۲۹</h4>
+<p><strong>علت:</strong> از محدودیت نرخ ارائه‌دهندهٔ خود عبور کرده‌اید.</p>
+<p><strong>راه‌حل:</strong> کمی صبر کنید و دوباره تلاش کنید. برای استفادهٔ مداوم، این گزینه‌ها را در نظر بگیرید:</p>
+<ul><li>ارتقای طرح اشتراک ارائه‌دهنده.</li><li>تغییر به مدل یا ارائه‌دهنده‌ای دیگر.</li><li>استفاده از <code>hermes chat --provider &lt;alternative&gt;</code> برای مسیریابی به بک‌اندی دیگر.</li></ul>
+<h4 id="context-length-exceeded">عبور از طول زمینه</h4>
+<p><strong>علت:</strong> گفتگو برای پنجرهٔ زمینهٔ مدل بیش از حد طولانی شده یا Hermes طول زمینهٔ مدل را نادرست تشخیص داده است.</p>
+<p><strong>راه‌حل:</strong></p><pre dir="ltr"><code># Compress the current session
+/compress
+
+# Or start a fresh session
+hermes chat
+
+# Use a model with a larger context window
+hermes chat --model openrouter/google/gemini-3-flash-preview
+</code></pre>
+<p>اگر این اتفاق در اولین گفتگوی طولانی رخ می‌دهد، ممکن است طول زمینهٔ مدل در Hermes نادرست باشد. مقدار تشخیص‌داده‌شده را بررسی کنید:</p>
+<p>به خط آغازین CLI نگاه کنید؛ طول زمینهٔ تشخیص‌داده‌شده را نشان می‌دهد، مثلاً <code>Context limit: 128000 tokens</code>. همچنین می‌توانید در طول نشست با <code>/usage</code> آن را بررسی کنید.</p>
+<p><strong>سرورهای محلی مانند llama.cpp و Ollama که به‌جای خطا ساکت می‌شوند:</strong> وقتی ارائه‌دهنده درخواستی را به‌دلیل بزرگی بیش از حد رد می‌کند، Hermes گفتگو را فشرده و درخواست را بازسازی می‌کند. پیش از تلاش مجدد، Hermes اندازهٔ درخواست بازسازی‌شدهٔ <em>کامل</em>، شامل پرامپت سیستمی، اسکیماهای ابزار و پیام‌ها را دوباره می‌سنجد و اگر هنوز از آستانه بیشتر باشد، دورهای محدود دیگری از فشرده‌سازی اجرا می‌کند. اگر درخواست همچنان جا نشود، نوبت با پیام <code>Context length exceeded: compression could not reduce the rebuilt request below the safe threshold</code> پایان می‌یابد، به‌جای آنکه درخواست بزرگی ارسال شود که llama.cpp آن را بی‌سروصدا کوتاه کند؛ این حالت در لاگ سرور با <code>stop processing: n_tokens = 65535, truncated = 1</code> دیده می‌شود. اگر با آن پیام روبه‌رو شدید، راه‌حل تقریباً همیشه همان <code>context_length</code> پیکربندی‌شدهٔ بالاست: آن را با مقدار واقعی <code>-c</code> یا <code>--ctx-size</code> سرور یکسان کنید.</p>
+<p>برای اصلاح تشخیص زمینه، مقدار آن را صریح تنظیم کنید:</p>
+<pre dir="ltr"><code># In ~/.hermes/config.yaml
+model:
+  default: your-model-name
+  context_length: 131072  # your model's actual context window
+</code></pre>
+<p>یا برای نقاط پایانی سفارشی، آن را به‌ازای هر مدل در ورودی ارائه‌دهنده اضافه کنید:</p>
+<pre dir="ltr"><code>providers:
+  my-server:
+    api: "http://localhost:11434/v1"
+    models:
+      qwen3.5:27b:
+        context_length: 64000
+</code></pre>
+<p>پیکربندی‌های قدیمی از فهرست قدیمی <code>custom_providers:</code> استفاده می‌کنند؛ این قالب همچنان پشتیبانی می‌شود و خودکار به <code>providers:</code> مهاجرت می‌کند.</p>
+<p>برای نحوهٔ تشخیص خودکار و همهٔ گزینه‌های بازنویسی، <a href="https://hermes-agent.nousresearch.com/docs/integrations/providers#context-length-detection" target="_blank" rel="noopener">تشخیص طول زمینه</a> را ببینید.</p>
+<hr>
+<h3 id="terminal-issues">مشکلات ترمینال</h3>
+<h4 id="command-blocked-as-dangerous">فرمان به‌عنوان خطرناک مسدود شده است</h4>
+<p><strong>علت:</strong> Hermes فرمانی بالقوه مخرب، مانند <code>rm -rf</code> یا <code>DROP TABLE</code>، تشخیص داده است. این یک قابلیت ایمنی است.</p>
+<p><strong>راه‌حل:</strong> هنگام نمایش پرسش تأیید، فرمان را بررسی کنید و برای تأیید <code>y</code> وارد کنید. همچنین می‌توانید:</p>
+<ul><li>از ایجنت بخواهید جایگزین امن‌تری استفاده کند.</li><li>فهرست کامل الگوهای خطرناک را در <a href="../user-guide/security.html">مستندات امنیت</a> ببینید.</li></ul>
+<div class="callout tip"><div class="callout-title">نکته</div><p>این رفتار عمدی است؛ Hermes هرگز فرمان‌های مخرب را بی‌سروصدا اجرا نمی‌کند. پرسش تأیید دقیقاً نشان می‌دهد چه چیزی اجرا خواهد شد.</p></div>
+<h4 id="sudo-not-working-via-messaging-gateway"><code>sudo</code> از طریق گیت‌وی پیام‌رسانی کار نمی‌کند</h4>
+<p><strong>علت:</strong> گیت‌وی پیام‌رسانی بدون ترمینال تعاملی اجرا می‌شود، بنابراین <code>sudo</code> نمی‌تواند گذرواژه درخواست کند.</p>
+<p><strong>راه‌حل:</strong></p>
+<ul><li>در پیام‌رسانی از <code>sudo</code> پرهیز کنید؛ از ایجنت بخواهید جایگزین پیدا کند.</li><li>اگر ناچار به استفاده از <code>sudo</code> هستید، در <code>/etc/sudoers</code> اجرای بدون گذرواژه را برای فرمان‌های مشخص تنظیم کنید.</li><li>یا برای کارهای مدیریتی به رابط ترمینال بروید: <code>hermes chat</code>.</li></ul>
+<h4 id="docker-backend-not-connecting">بک‌اند Docker وصل نمی‌شود</h4>
+<p><strong>علت:</strong> سرویس Docker در حال اجرا نیست یا کاربر مجوز لازم ندارد.</p>
+<p><strong>راه‌حل:</strong></p><pre dir="ltr"><code># Check Docker is running
+docker info
+
+# Add your user to the docker group
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Verify
+docker run hello-world
+</code></pre>
+<hr>
+<h3 id="messaging-issues">مشکلات پیام‌رسانی</h3>
+<h4 id="bot-not-responding-to-messages">بات به پیام‌ها پاسخ نمی‌دهد</h4>
+<p><strong>علت:</strong> بات اجرا نمی‌شود، مجاز نیست یا کاربر شما در فهرست مجاز قرار ندارد.</p>
+<p><strong>راه‌حل:</strong></p><pre dir="ltr"><code># Check if the gateway is running
+hermes gateway status
+
+# Start the gateway
+hermes gateway start
+
+# Check logs for errors
+cat ~/.hermes/logs/gateway.log | tail -50
+</code></pre>
+<h4 id="messages-not-delivering">پیام‌ها تحویل داده نمی‌شوند</h4>
+<p><strong>علت:</strong> مشکلات شبکه، انقضای توکن بات یا پیکربندی نادرست وب‌هوک پلتفرم.</p>
+<p><strong>راه‌حل:</strong></p>
+<ul><li>با <code>hermes gateway setup</code> معتبر بودن توکن بات را بررسی کنید.</li><li>لاگ‌های گیت‌وی را بررسی کنید: <code>cat ~/.hermes/logs/gateway.log | tail -50</code>.</li><li>برای پلتفرم‌های مبتنی بر وب‌هوک، مانند Slack و WhatsApp، مطمئن شوید سرور شما از اینترنت عمومی قابل دسترسی است.</li></ul>
+<h4 id="allowlist-confusion--who-can-talk-to-the-bot">ابهام در فهرست مجاز؛ چه کسی می‌تواند با بات صحبت کند؟</h4>
+<p><strong>علت:</strong> حالت مجوزدهی تعیین می‌کند چه کسی دسترسی داشته باشد.</p>
+<p><strong>راه‌حل:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>حالت</th><th>روش کار</th></tr></thead><tbody><tr><td><strong>فهرست مجاز</strong></td><td>فقط شناسه‌های کاربری فهرست‌شده در پیکربندی می‌توانند تعامل کنند.</td></tr><tr><td><strong>جفت‌سازی پیام خصوصی</strong></td><td>اولین کاربری که پیام خصوصی می‌دهد دسترسی انحصاری را در اختیار می‌گیرد.</td></tr><tr><td><strong>باز</strong></td><td>هرکسی می‌تواند تعامل کند؛ برای محیط عملیاتی توصیه نمی‌شود.</td></tr></tbody></table></div>
+<p>این حالت را در <code>~/.hermes/config.yaml</code> زیر تنظیمات گیت‌وی خود پیکربندی کنید. <a href="../user-guide/messaging/index.html">مستندات پیام‌رسانی</a> را ببینید.</p>
+<h4 id="gateway-wont-start">گیت‌وی شروع نمی‌شود</h4>
+<p><strong>علت:</strong> وابستگی‌های نصب‌نشده، تداخل پورت‌ها یا توکن‌های نادرست پیکربندی‌شده.</p>
+<p><strong>راه‌حل:</strong></p><pre dir="ltr"><code># Install core messaging gateway dependencies
+cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[messaging]"  # Telegram, Discord, Slack, and shared gateway deps
+
+# Check for port conflicts
+lsof -i :8080
+
+# Verify configuration
+hermes config show
+</code></pre>
+<h4 id="wsl-gateway-keeps-disconnecting-or-hermes-gateway-start-fails">WSL: گیت‌وی مدام قطع می‌شود یا <code>hermes gateway start</code> شکست می‌خورد</h4>
+<p><strong>علت:</strong> پشتیبانی systemd در WSL قابل‌اعتماد نیست. بسیاری از نصب‌های WSL2، systemd فعال ندارند و حتی در صورت فعال‌بودن، ممکن است سرویس‌ها پس از راه‌اندازی مجدد WSL یا خاموش‌شدن هنگام بی‌کاری Windows باقی نمانند.</p>
+<p><strong>راه‌حل:</strong> به‌جای سرویس systemd، از حالت پیش‌زمینه استفاده کنید:</p>
+<pre dir="ltr"><code># Option 1: Direct foreground (simplest)
+hermes gateway run
+
+# Option 2: Persistent via tmux (survives terminal close)
+tmux new -s hermes 'hermes gateway run'
+# Reattach later: tmux attach -t hermes
+
+# Option 3: Background via nohup
+nohup hermes gateway run &gt; ~/.hermes/logs/gateway.log 2&gt;&amp;1 &amp;
+</code></pre>
+<p>اگر بااین‌حال می‌خواهید systemd را امتحان کنید، مطمئن شوید فعال است:</p>
+<ol><li><code>/etc/wsl.conf</code> را باز کنید؛ اگر وجود ندارد آن را بسازید.</li><li>این را اضافه کنید:<pre dir="ltr"><code>   [boot]
+   systemd=true
+</code></pre></li><li>از PowerShell اجرا کنید: <code>wsl --shutdown</code>.</li><li>ترمینال WSL خود را دوباره باز کنید.</li><li>بررسی کنید: <code>systemctl is-system-running</code> باید <code>running</code> یا <code>degraded</code> نشان دهد.</li></ol>
+<div class="callout tip"><div class="callout-title">نکته — شروع خودکار هنگام بوت Windows</div><p>برای شروع خودکار قابل‌اعتماد، از زمان‌بند وظایف Windows استفاده کنید تا هنگام ورود، WSL و گیت‌وی را اجرا کند:</p><ol><li>وظیفه‌ای بسازید که <code>wsl -d Ubuntu -- bash -lc 'hermes gateway run'</code> را اجرا کند.</li><li>محرک آن را روی ورود کاربر تنظیم کنید.</li></ol></div>
+<h4 id="macos-nodejs--ffmpeg--other-tools-not-found-by-gateway">macOS: گیت‌وی، Node.js یا ffmpeg یا ابزارهای دیگر را پیدا نمی‌کند</h4>
+<p><strong>علت:</strong> سرویس‌های launchd یک <code>PATH</code> حداقلی، یعنی <code>/usr/bin:/bin:/usr/sbin:/sbin</code>، به ارث می‌برند که Homebrew، nvm، cargo و پوشه‌های ابزارهای نصب‌شده توسط کاربر را شامل نمی‌شود. این موضوع معمولاً پل WhatsApp را با <code>node not found</code> یا رونویسی صدا را با <code>ffmpeg not found</code> مختل می‌کند.</p>
+<p><strong>راه‌حل:</strong> گیت‌وی هنگام اجرای <code>hermes gateway install</code>، مقدار <code>PATH</code> شل شما را ثبت می‌کند. اگر پس از راه‌اندازی گیت‌وی ابزارهایی نصب کرده‌اید، نصب را دوباره اجرا کنید تا <code>PATH</code> به‌روز ثبت شود:</p>
+<pre dir="ltr"><code>hermes gateway install    # Re-snapshots your current PATH
+hermes gateway start      # Detects the updated plist and reloads
+</code></pre>
+<p>می‌توانید بررسی کنید که فایل plist، مقدار درست <code>PATH</code> را دارد:</p>
+<pre dir="ltr"><code>/usr/libexec/PlistBuddy -c "Print :EnvironmentVariables:PATH" \
+  ~/Library/LaunchAgents/ai.hermes.gateway.plist
+</code></pre>
+<hr>
+<h3 id="performance-issues">مشکلات عملکرد</h3>
+<h4 id="slow-responses">پاسخ‌های کند</h4>
+<p><strong>علت:</strong> مدل بزرگ، سرور API دور یا پرامپت سیستمی سنگین با ابزارهای فراوان.</p>
+<p><strong>راه‌حل:</strong></p>
+<ul><li>مدلی سریع‌تر یا کوچک‌تر امتحان کنید: <code>hermes chat --model openrouter/meta-llama/llama-3.1-8b-instruct</code>.</li><li>تول‌ست‌های فعال را کاهش دهید: <code>hermes chat -t "terminal"</code>.</li><li>تأخیر شبکه تا ارائه‌دهنده را بررسی کنید.</li><li>برای مدل‌های محلی، مطمئن شوید VRAM کافی روی GPU دارید.</li></ul>
+<h4 id="high-token-usage">مصرف زیاد توکن</h4>
+<p><strong>علت:</strong> گفتگوهای طولانی، پرامپت‌های سیستمی پرحجم یا فراخوانی‌های زیاد ابزار که زمینه را انباشته می‌کنند.</p>
+<p><strong>راه‌حل:</strong></p><pre dir="ltr"><code># See exactly what the fixed prompt costs — breakdown by block
+# (system prompt, skills index, memory, tool schemas). Runs offline.
+hermes prompt-size
+
+# Compress the conversation to reduce tokens
+/compress
+
+# Check session token usage
+/usage
+</code></pre>
+<p>اگر پیش از تایپ هر چیزی مقدار پایه زیاد به نظر می‌رسد، این همان بودجهٔ ثابت پرامپت است؛ پرامپت سیستمی به‌علاوهٔ اسکیماهای ابزار که در هر فراخوانی ارسال می‌شوند. <a href="https://hermes-agent.nousresearch.com/docs/reference/cli-commands#hermes-prompt-size" target="_blank" rel="noopener"><code>hermes prompt-size</code></a> را برای اندازه‌گیری اجرا کنید، سپس آن را کاهش دهید: تول‌ست‌های استفاده‌نشده را با <code>hermes tools</code> غیرفعال کنید و مهارت‌های غیرضروری را با <code>hermes skills</code> حذف یا غیرفعال کنید.</p>
+<div class="callout tip"><div class="callout-title">نکته</div><p>در نشست‌های طولانی مرتب از <code>/compress</code> استفاده کنید. این فرمان تاریخچهٔ گفتگو را خلاصه می‌کند و ضمن حفظ زمینه، مصرف توکن را به‌طور چشمگیری کاهش می‌دهد.</p></div>
+<h4 id="session-getting-too-long">نشست بیش از حد طولانی شده است</h4>
+<p><strong>علت:</strong> گفتگوهای طولانی پیام‌ها و خروجی ابزارها را انباشته می‌کنند و به محدودیت زمینه نزدیک می‌شوند.</p>
+<p><strong>راه‌حل:</strong></p><pre dir="ltr"><code># Compress current session (preserves key context)
+/compress
+
+# Start a new session with a reference to the old one
+hermes chat
+
+# Resume a specific session later if needed
+hermes chat --continue
+</code></pre>
+<hr>
+<h3 id="mcp-issues">مشکلات MCP</h3>
+<h4 id="mcp-server-not-connecting">سرور MCP وصل نمی‌شود</h4>
+<p><strong>علت:</strong> فایل اجرایی سرور پیدا نمی‌شود، مسیر فرمان نادرست است یا محیط زمان اجرا نصب نیست.</p>
+<p><strong>راه‌حل:</strong></p><pre dir="ltr"><code># Ensure MCP dependencies are installed (already included in standard install)
+cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[mcp]"
+
+# For npm-based servers, ensure Node.js is available
+node --version
+npx --version
+
+# Test the server manually
+npx -y @modelcontextprotocol/server-filesystem /tmp
+</code></pre>
+<p>پیکربندی MCP خود را در <code>~/.hermes/config.yaml</code> بررسی کنید:</p>
+<pre dir="ltr"><code>mcp_servers:
+  filesystem:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/docs"]
+</code></pre>
+<h4 id="tools-not-showing-up-from-mcp-server">ابزارهای سرور MCP نمایش داده نمی‌شوند</h4>
+<p><strong>علت:</strong> سرور شروع شده اما کشف ابزار شکست خورده، ابزارها با پیکربندی فیلتر شده‌اند یا سرور از قابلیت MCP مورد انتظار شما پشتیبانی نمی‌کند.</p>
+<p><strong>راه‌حل:</strong></p>
+<ul><li>لاگ‌های گیت‌وی یا ایجنت را برای خطاهای اتصال MCP بررسی کنید.</li><li>مطمئن شوید سرور به متد RPC با نام <code>tools/list</code> پاسخ می‌دهد.</li><li>تنظیمات <code>tools.include</code>، <code>tools.exclude</code>، <code>tools.resources</code>، <code>tools.prompts</code> و <code>enabled</code> را زیر همان سرور بررسی کنید.</li><li>به یاد داشته باشید ابزارهای کمکی منابع و پرامپت‌ها فقط زمانی ثبت می‌شوند که نشست واقعاً از این قابلیت‌ها پشتیبانی کند.</li><li>پس از تغییر پیکربندی از <code>/reload-mcp</code> استفاده کنید.</li></ul>
+<pre dir="ltr"><code># Verify MCP servers are configured
+hermes config show | grep -A 12 mcp_servers
+
+# Restart Hermes or reload MCP after config changes
+hermes chat
+</code></pre>
+<p>همچنین ببینید:</p>
+<ul><li><a href="../user-guide/features/mcp.html">MCP؛ پروتکل زمینهٔ مدل</a></li><li><a href="../guides/use-mcp-with-hermes.html">استفاده از MCP با Hermes</a></li><li><a href="mcp-config-reference.html">مرجع پیکربندی MCP</a></li></ul>
+<h4 id="mcp-timeout-errors">خطاهای پایان مهلت MCP</h4>
+<p><strong>علت:</strong> پاسخ‌گویی سرور MCP بیش از حد طول می‌کشد یا هنگام اجرا از کار افتاده است.</p>
+<p><strong>راه‌حل:</strong></p>
+<ul><li>در صورت پشتیبانی، مهلت را در پیکربندی سرور MCP افزایش دهید.</li><li>بررسی کنید آیا فرایند سرور MCP هنوز اجرا می‌شود.</li><li>برای سرورهای MCP راه دور با HTTP، اتصال شبکه را بررسی کنید.</li></ul>
+<div class="callout warn"><div class="callout-title">هشدار</div><p>اگر سرور MCP در میانهٔ درخواست از کار بیفتد، Hermes پایان مهلت گزارش می‌کند. برای تشخیص علت اصلی، لاگ‌های خود سرور را بررسی کنید، نه فقط لاگ‌های Hermes را.</p></div>
+<hr>
+</section>
+<section class="doc-sec"><h2 id="profiles"><span class="secnum">۳</span> پروفایل‌ها</h2>
+<h3 id="how-do-profiles-differ-from-just-setting-hermes_home">پروفایل‌ها چه تفاوتی با صرفاً تنظیم HERMES_HOME دارند؟</h3>
+<p>پروفایل‌ها لایه‌ای مدیریت‌شده روی <code>HERMES_HOME</code> هستند. <em>می‌توانید</em> پیش از هر فرمان، <code>HERMES_HOME=/some/path</code> را دستی تنظیم کنید، اما پروفایل‌ها همهٔ کارهای زیرساختی را برایتان انجام می‌دهند: ساخت ساختار پوشه‌ها، تولید نام‌های مستعار شل مانند <code>hermes-work</code>، ثبت پروفایل فعال در <code>~/.hermes/active_profile</code> و همگام‌سازی خودکار به‌روزرسانی مهارت‌ها در همهٔ پروفایل‌ها. همچنین با تکمیل خودکار Tab یکپارچه‌اند، پس لازم نیست مسیرها را حفظ کنید.</p>
+<h3 id="can-two-profiles-share-the-same-bot-token">آیا دو پروفایل می‌توانند توکن بات یکسان داشته باشند؟</h3>
+<p>خیر. هر پلتفرم پیام‌رسانی، مانند Telegram و Discord، به دسترسی انحصاری به توکن بات نیاز دارد. اگر دو پروفایل هم‌زمان از یک توکن استفاده کنند، گیت‌وی دوم نمی‌تواند وصل شود. برای هر پروفایل یک بات جدا بسازید؛ در Telegram برای ساخت بات‌های بیشتر با <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a> گفتگو کنید.</p>
+<h3 id="do-profiles-share-memory-or-sessions">آیا پروفایل‌ها حافظه یا نشست‌ها را به اشتراک می‌گذارند؟</h3>
+<p>خیر. هر پروفایل مخزن حافظه، پایگاه دادهٔ نشست و پوشهٔ مهارت‌های خودش را دارد و کاملاً ایزوله است. اگر می‌خواهید پروفایل جدیدی را با حافظه‌ها و نشست‌های موجود شروع کنید، با <code>hermes profile create newname --clone-all</code> همه‌چیز را از پروفایل فعلی کپی کنید یا <code>--clone-from &lt;profile&gt;</code> را اضافه کنید تا از پروفایل مبدأ مشخصی کپی شود.</p>
+<p>همین جداسازی دلیل دیگری است که هرگز نباید دو ایجنت را روی <em>یک</em> پروفایل یا پوشهٔ خانگی Hermes اجرا کنید: هر دو خودکار در حافظه می‌نویسند و هرکدام در شروع نشست، نوشته‌های دیگری را بارگذاری می‌کند؛ بنابراین وضعیت ذخیره‌شدهٔ آن‌ها با هر نشست افت می‌کند. برای هر پروفایل یک ایجنت داشته باشید؛ برای حافظهٔ واقعاً مشترک میان ایجنت‌ها از <a href="../user-guide/features/memory-providers.html">ارائه‌دهندهٔ حافظهٔ خارجی</a> استفاده کنید.</p>
+<h3 id="what-happens-when-i-run-hermes-update">وقتی <code>hermes update</code> را اجرا می‌کنم چه می‌شود؟</h3>
+<p><code>hermes update</code> آخرین کد را دریافت و وابستگی‌ها را <strong>یک‌بار</strong>، نه به‌ازای هر پروفایل، دوباره نصب می‌کند. سپس مهارت‌های به‌روزشده را خودکار در همهٔ پروفایل‌ها همگام می‌کند. کافی است <code>hermes update</code> را یک‌بار اجرا کنید؛ همهٔ پروفایل‌های ماشین را پوشش می‌دهد.</p>
+<h3 id="how-many-profiles-can-i-run">چند پروفایل می‌توانم اجرا کنم؟</h3>
+<p>محدودیت ثابتی وجود ندارد. هر پروفایل فقط یک پوشه در <code>~/.hermes/profiles/</code> است. محدودیت عملی به فضای دیسک و تعداد گیت‌وی‌های هم‌زمانی بستگی دارد که سیستم شما تحمل می‌کند؛ هر گیت‌وی یک فرایند سبک Python است. اجرای ده‌ها پروفایل مشکلی ندارد؛ هر پروفایل بی‌کار هیچ منبعی مصرف نمی‌کند.</p>
+<hr>
+</section>
+<section class="doc-sec"><h2 id="workflows--patterns"><span class="secnum">۴</span> گردش‌کارها و الگوها</h2>
+<h3 id="using-different-models-for-different-tasks-multi-model-workflows">استفاده از مدل‌های مختلف برای وظایف مختلف؛ گردش‌کارهای چندمدلی</h3>
+<p><strong>سناریو:</strong> از GPT-5.4 برای کار روزمره استفاده می‌کنید، اما Gemini یا Grok محتوای بهتری برای شبکه‌های اجتماعی می‌نویسد. تغییر دستی مدل در هر بار خسته‌کننده است.</p>
+<p><strong>راه‌حل: پیکربندی واگذاری.</strong> Hermes می‌تواند ساب‌ایجنت‌ها را خودکار به مدل دیگری مسیریابی کند. این تنظیم را در <code>~/.hermes/config.yaml</code> قرار دهید:</p>
+<pre dir="ltr"><code>delegation:
+  model: "google/gemini-3-flash-preview"   # subagents use this model
+  provider: "openrouter"                    # provider for subagents
+</code></pre>
+<p>اکنون وقتی به Hermes می‌گویید «یک رشته‌توییت دربارهٔ X برایم بنویس» و یک ساب‌ایجنت <code>delegate_task</code> ایجاد می‌کند، آن ساب‌ایجنت به‌جای مدل اصلی شما روی Gemini اجرا می‌شود. گفتگوی اصلی شما روی GPT-5.4 باقی می‌ماند.</p>
+<p>می‌توانید در پرامپت هم صریح بگویید: <em>«وظیفهٔ نوشتن پست‌های شبکه‌های اجتماعی دربارهٔ عرضهٔ محصولمان را واگذار کن. برای نوشتن متن اصلی از ساب‌ایجنتت استفاده کن.»</em> ایجنت از <code>delegate_task</code> استفاده می‌کند که پیکربندی واگذاری را خودکار دریافت می‌کند.</p>
+<p>برای تغییر موردی مدل بدون واگذاری، در CLI از <code>/model</code> استفاده کنید:</p>
+<pre dir="ltr"><code>/model google/gemini-3-flash-preview    # switch for this session
+# ... write your content ...
+/model openai/gpt-5.4                   # switch back
+</code></pre>
+<div class="callout warn"><div class="callout-title">هشدار</div><p>هر تغییر با <code>/model</code> کش پرامپت را بازنشانی می‌کند؛ کلید کش شامل مدل است، بنابراین اولین پیام پس از هر تغییر، کل گفتگو را با هزینهٔ کامل ورودی دوباره می‌خواند. در نشست‌های طولانی، واگذاری را ترجیح دهید، چون ساب‌ایجنت‌ها زمینهٔ تازهٔ خودشان را دارند، یا به‌جای جابه‌جایی مکرر رفت‌وبرگشتی نشست جدیدی شروع کنید.</p></div>
+<p>برای اطلاعات بیشتر دربارهٔ روش واگذاری، <a href="../user-guide/features/delegation.html">واگذاری به ساب‌ایجنت</a> را ببینید.</p>
+<h3 id="running-multiple-agents-on-one-whatsapp-number-per-chat-binding">اجرای چند ایجنت روی یک شمارهٔ WhatsApp؛ اتصال به‌ازای هر گفتگو</h3>
+<p><strong>سناریو:</strong> در OpenClaw چند ایجنت مستقل داشتید که به گفتگوهای مشخص WhatsApp متصل بودند؛ یکی برای گروه فهرست خرید خانواده و دیگری برای گفتگوی خصوصی. آیا Hermes این کار را انجام می‌دهد؟</p>
+<p><strong>محدودیت فعلی:</strong> هر پروفایل Hermes به شماره یا نشست WhatsApp خودش نیاز دارد. نمی‌توانید چند پروفایل را به گفتگوهای مختلف یک شمارهٔ WhatsApp متصل کنید؛ پل WhatsApp یعنی Baileys از یک نشست احرازهویت‌شده به‌ازای هر شماره استفاده می‌کند.</p>
+<p><strong>راه‌های جایگزین:</strong></p>
+<ol><li><strong>از یک پروفایل با تغییر شخصیت استفاده کنید.</strong> فایل‌های زمینهٔ متفاوت <code>AGENTS.md</code> بسازید یا برای تغییر رفتار به‌ازای هر گفتگو از فرمان <code>/personality</code> استفاده کنید. ایجنت می‌بیند در کدام گفتگو قرار دارد و می‌تواند خود را تطبیق دهد.</li><li><strong>برای وظایف تخصصی از کارهای کرون استفاده کنید.</strong> برای پیگیری فهرست خرید، کار کرونی تنظیم کنید که گفتگوی مشخصی را پایش و فهرست را مدیریت کند؛ نیازی به ایجنت جداگانه نیست.</li><li><strong>از شماره‌های جدا استفاده کنید.</strong> اگر ایجنت‌های واقعاً مستقل نیاز دارید، هر پروفایل را با شمارهٔ WhatsApp خودش جفت کنید. شماره‌های مجازی سرویس‌هایی مانند Google Voice برای این کار مناسب‌اند.</li><li><strong>به‌جای آن از Telegram یا Discord استفاده کنید.</strong> این پلتفرم‌ها اتصال به‌ازای هر گفتگو را طبیعی‌تر پشتیبانی می‌کنند؛ هر گروه Telegram یا کانال Discord نشست خودش را دارد و می‌توانید روی یک حساب، چند توکن بات، یکی برای هر پروفایل، اجرا کنید.</li></ol>
+<p>برای جزئیات بیشتر، <a href="../user-guide/profiles.html">پروفایل‌ها</a> و <a href="../user-guide/messaging/whatsapp.html">راه‌اندازی WhatsApp</a> را ببینید.</p>
+<h3 id="controlling-what-shows-up-in-telegram-hiding-logs-and-reasoning">کنترل آنچه در Telegram نمایش داده می‌شود؛ پنهان‌کردن لاگ‌ها و استدلال</h3>
+<p><strong>سناریو:</strong> در Telegram به‌جای فقط خروجی نهایی، لاگ‌های اجرای گیت‌وی، استدلال Hermes و جزئیات فراخوانی ابزارها را می‌بینید.</p>
+<p><strong>راه‌حل:</strong> تنظیم <code>display.tool_progress</code> در <code>config.yaml</code> میزان نمایش فعالیت ابزار را کنترل می‌کند:</p>
+<pre dir="ltr"><code>display:
+  tool_progress: "off"   # options: off, new, all, verbose
+</code></pre>
+<ul><li><strong><code>off</code></strong> — فقط پاسخ نهایی؛ بدون فراخوانی ابزار، استدلال یا لاگ.</li><li><strong><code>new</code></strong> — فراخوانی‌های جدید ابزار را هنگام وقوع، به‌صورت خلاصه‌های یک‌خطی نشان می‌دهد.</li><li><strong><code>all</code></strong> — همهٔ فعالیت ابزار، از جمله نتایج، را نشان می‌دهد.</li><li><strong><code>verbose</code></strong> — جزئیات کامل، از جمله آرگومان‌ها و خروجی ابزارها.</li></ul>
+<p>برای پلتفرم‌های پیام‌رسانی معمولاً <code>off</code> یا <code>new</code> مناسب است. پس از ویرایش <code>config.yaml</code>، گیت‌وی را دوباره راه‌اندازی کنید تا تغییرات اعمال شوند.</p>
+<p>همچنین در صورت فعال‌بودن فرمان <code>/verbose</code> می‌توانید این وضعیت را به‌ازای هر نشست تغییر دهید:</p>
+<pre dir="ltr"><code>display:
+  tool_progress_command: true   # enables /verbose in the gateway
+</code></pre>
+<h3 id="managing-skills-on-telegram-slash-command-limit">مدیریت مهارت‌ها در Telegram؛ محدودیت فرمان‌های اسلش</h3>
+<p><strong>سناریو:</strong> Telegram محدودیت ۱۰۰ فرمان اسلش دارد و مهارت‌های شما از آن عبور می‌کنند. می‌خواهید مهارت‌های غیرضروری در Telegram را غیرفعال کنید، اما به نظر می‌رسد تنظیمات <code>hermes skills config</code> اثر نمی‌کنند.</p>
+<p><strong>راه‌حل:</strong> برای غیرفعال‌کردن مهارت‌ها به‌ازای هر پلتفرم از <code>hermes skills config</code> استفاده کنید. این فرمان در <code>config.yaml</code> می‌نویسد:</p>
+<pre dir="ltr"><code>skills:
+  disabled: []                    # globally disabled skills
+  platform_disabled:
+    telegram: [skill-a, skill-b]  # disabled only on telegram
+</code></pre>
+<p>پس از این تغییر، <strong>گیت‌وی را دوباره راه‌اندازی کنید</strong>؛ با <code>hermes gateway restart</code> یا توقف فرایند و اجرای دوباره. منوی فرمان‌های بات Telegram هنگام شروع بازسازی می‌شود.</p>
+<div class="callout tip"><div class="callout-title">نکته</div><p>توضیحات بسیار بلند مهارت‌ها در منوی Telegram به ۴۰ نویسه کوتاه می‌شوند تا محدودیت اندازهٔ دادهٔ ارسالی رعایت شود. اگر مهارت‌ها ظاهر نمی‌شوند، ممکن است مشکل از اندازهٔ کل دادهٔ ارسالی باشد، نه محدودیت تعداد ۱۰۰ فرمان؛ غیرفعال‌کردن مهارت‌های استفاده‌نشده به هر دو کمک می‌کند.</p></div>
+<h3 id="shared-thread-sessions-multiple-users-one-conversation">نشست‌های مشترک رشته‌گفتگو؛ چند کاربر، یک گفتگو</h3>
+<p><strong>سناریو:</strong> رشته‌گفتگویی در Telegram یا Discord دارید که چند نفر بات را در آن منشن می‌کنند. می‌خواهید همهٔ منشن‌های آن رشته بخشی از یک گفتگوی مشترک باشند، نه نشست‌های جداگانه برای هر کاربر.</p>
+<p><strong>رفتار فعلی:</strong> Hermes در بیشتر پلتفرم‌ها نشست‌ها را با کلید شناسهٔ کاربر می‌سازد، بنابراین هر فرد زمینهٔ گفتگوی خودش را دارد. این طراحی برای حفظ حریم خصوصی و جداسازی زمینه است.</p>
+<p><strong>راه‌های جایگزین:</strong></p>
+<ol><li><strong>از Slack استفاده کنید.</strong> نشست‌های Slack بر اساس رشته‌گفتگو کلیدگذاری می‌شوند، نه کاربر. چند کاربر در یک رشته، گفتگوی واحدی دارند؛ دقیقاً همان رفتاری که توصیف می‌کنید. این مناسب‌ترین گزینه است.</li><li><strong>از گفتگوی گروهی با یک کاربر فعال استفاده کنید.</strong> اگر یک نفر «اپراتور» مشخصی باشد که پرسش‌ها را منتقل می‌کند، نشست یکپارچه می‌ماند. دیگران می‌توانند گفتگو را بخوانند.</li><li><strong>از کانال Discord استفاده کنید.</strong> نشست‌های Discord بر اساس کانال کلیدگذاری می‌شوند، پس همهٔ کاربران یک کانال زمینهٔ مشترک دارند. برای گفتگوی مشترک، کانال اختصاصی در نظر بگیرید.</li></ol>
+<h3 id="exporting-hermes-to-another-machine">انتقال Hermes به ماشین دیگر</h3>
+<p><strong>سناریو:</strong> روی یک ماشین مهارت‌ها، کارهای کرون و حافظه‌هایی ساخته‌اید و می‌خواهید همه‌چیز را به یک سیستم Linux اختصاصی جدید منتقل کنید.</p>
+<p><strong>راه‌حل:</strong></p>
+<ol><li>Hermes Agent را روی ماشین جدید نصب کنید:<pre dir="ltr"><code>   curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+</code></pre></li><li>روی <strong>ماشین مبدأ</strong> پشتیبان کامل بسازید:<pre dir="ltr"><code>   hermes backup
+</code></pre><p>این کار از کل پوشهٔ <code>~/.hermes/</code> شامل پیکربندی، کلیدهای API، حافظه‌ها، مهارت‌ها، نشست‌ها و پروفایل‌ها، فایل zip می‌سازد و آن را در پوشهٔ خانگی شما با نام <code>~/hermes-backup-&lt;timestamp&gt;.zip</code> ذخیره می‌کند.</p></li><li>فایل zip را به ماشین جدید کپی و وارد کنید:<pre dir="ltr"><code>   # On the source machine
+   scp ~/hermes-backup-&lt;timestamp&gt;.zip newmachine:~/
+
+   # On the new machine
+   hermes import ~/hermes-backup-&lt;timestamp&gt;.zip
+</code></pre></li><li>روی ماشین جدید، <code>hermes setup</code> را اجرا کنید تا کارکرد کلیدهای API و پیکربندی ارائه‌دهنده را بررسی کنید.</li></ol>
+<h3 id="moving-a-single-profile-to-another-machine">انتقال یک پروفایل به ماشین دیگر</h3>
+<p><strong>سناریو:</strong> می‌خواهید یک پروفایل مشخص را منتقل یا به اشتراک بگذارید، نه کل نصب را.</p>
+<pre dir="ltr"><code># On the source machine
+hermes profile export work ./work-backup.tar.gz
+
+# Copy the file to the target machine, then:
+hermes profile import ./work-backup.tar.gz work
+</code></pre>
+<p>پروفایل واردشده همهٔ پیکربندی، حافظه‌ها، نشست‌ها و مهارت‌های موجود در خروجی را خواهد داشت. اگر تنظیمات ماشین جدید متفاوت باشد، ممکن است لازم شود مسیرها را به‌روز کنید یا نزد ارائه‌دهندگان دوباره احراز هویت کنید.</p>
+<h3 id="hermes-backup-vs-hermes-profile-export">مقایسهٔ <code>hermes backup</code> و <code>hermes profile export</code></h3>
+<div class="table-wrap"><table><thead><tr><th>ویژگی</th><th><code>hermes backup</code></th><th><code>hermes profile export</code></th></tr></thead><tbody><tr><td><strong>کاربرد</strong></td><td><strong>مهاجرت کامل ماشین</strong></td><td><strong>انتقال یا اشتراک‌گذاری پروفایلی مشخص</strong></td></tr><tr><td><strong>دامنه</strong></td><td>سراسری؛ کل پوشهٔ <code>~/.hermes</code></td><td>محلی؛ پوشهٔ یک پروفایل</td></tr><tr><td><strong>محتویات</strong></td><td>همهٔ پروفایل‌ها، پیکربندی سراسری، کلیدهای API و نشست‌ها</td><td>یک پروفایل: <code>SOUL.md</code>، حافظه‌ها، نشست‌ها و مهارت‌ها</td></tr><tr><td><strong>اعتبارنامه‌ها</strong></td><td><strong>شامل می‌شوند</strong>؛ <code>.env</code> و <code>auth.json</code></td><td><strong>حذف می‌شوند</strong> تا اشتراک‌گذاری امن باشد.</td></tr><tr><td><strong>قالب</strong></td><td><code>.zip</code></td><td><code>.tar.gz</code></td></tr></tbody></table></div>
+<p><strong>روش جایگزین دستی با rsync:</strong> اگر ترجیح می‌دهید فایل‌ها را مستقیم کپی کنید، مخزن کد را مستثنا کنید:</p>
+<pre dir="ltr"><code>rsync -av --exclude='hermes-agent' ~/.hermes/ newmachine:~/.hermes/
+</code></pre>
+<div class="callout tip"><div class="callout-title">نکته</div><p><code>hermes backup</code> حتی هنگام اجرای فعال Hermes، اسنپ‌شاتی سازگار تولید می‌کند. آرشیو بازیابی‌شده فایل‌های زمان اجرای مختص ماشین، مانند <code>gateway.pid</code> و <code>cron.pid</code>، را شامل نمی‌شود.</p></div>
+<h3 id="permission-denied-when-reloading-shell-after-install">خطای رد دسترسی هنگام بارگذاری دوبارهٔ شل پس از نصب</h3>
+<p><strong>سناریو:</strong> پس از اجرای نصب‌کنندهٔ Hermes، فرمان <code>source ~/.zshrc</code> خطای رد دسترسی می‌دهد.</p>
+<p><strong>علت:</strong> این معمولاً زمانی رخ می‌دهد که مجوزهای فایل <code>~/.zshrc</code> یا <code>~/.bashrc</code> نادرست باشند یا نصب‌کننده نتوانسته باشد به‌درستی در آن بنویسد. این مشکل اختصاصی Hermes نیست؛ مسئلهٔ مجوز فایل پیکربندی شل است.</p>
+<p><strong>راه‌حل:</strong></p><pre dir="ltr"><code># Check permissions
+ls -la ~/.zshrc
+
+# Fix if needed (should be -rw-r--r-- or 644)
+chmod 644 ~/.zshrc
+
+# Then reload
+source ~/.zshrc
+
+# Or just open a new terminal window — it picks up PATH changes automatically
+</code></pre>
+<p>اگر نصب‌کننده خط <code>PATH</code> را اضافه کرده اما مجوزها نادرست‌اند، می‌توانید آن را دستی اضافه کنید:</p>
+<pre dir="ltr"><code>echo 'export PATH="$HOME/.local/bin:$PATH"' &gt;&gt; ~/.zshrc
+</code></pre>
+<h3 id="error-400-on-first-agent-run">خطای ۴۰۰ در اولین اجرای ایجنت</h3>
+<p><strong>سناریو:</strong> راه‌اندازی بدون مشکل تمام می‌شود، اما اولین تلاش برای گفتگو با HTTP 400 شکست می‌خورد.</p>
+<p><strong>علت:</strong> معمولاً نام مدل مطابقت ندارد؛ مدل پیکربندی‌شده نزد ارائه‌دهندهٔ شما وجود ندارد یا کلید API به آن دسترسی ندارد.</p>
+<p><strong>راه‌حل:</strong></p><pre dir="ltr"><code># Check what model and provider are configured
+hermes config show | head -20
+
+# Re-run model selection
+hermes model
+
+# Or test with a known-good model
+hermes chat -q "hello" --model anthropic/claude-opus-4.7
+</code></pre>
+<p>اگر از OpenRouter استفاده می‌کنید، مطمئن شوید کلید API شما اعتبار مالی دارد. خطای ۴۰۰ از OpenRouter اغلب یعنی مدل به طرح پولی نیاز دارد یا شناسهٔ مدل اشتباه تایپی دارد.</p>
+<hr>
+</section>
+<section class="doc-sec"><h2 id="still-stuck"><span class="secnum">۵</span> هنوز مشکل حل نشده است؟</h2>
+<p>اگر مشکل شما در این صفحه پوشش داده نشده است:</p>
+<ol><li><strong>مسائل موجود را جستجو کنید:</strong> <a href="https://github.com/NousResearch/hermes-agent/issues" target="_blank" rel="noopener">مسائل GitHub</a>.</li><li><strong>از جامعهٔ کاربران بپرسید:</strong> <a href="https://discord.gg/nousresearch" target="_blank" rel="noopener">Discord مربوط به Nous Research</a>.</li><li><strong>گزارش باگ ثبت کنید:</strong> سیستم‌عامل، نسخهٔ Python با <code>python3 --version</code>، نسخهٔ Hermes با <code>hermes --version</code> و متن کامل پیام خطا را ذکر کنید.</li></ol>
+<hr>
+
+</section>
+<div class="pager">
+<a href="https://hermes-agent.nousresearch.com/docs/reference/optional-skills-catalog" target="_blank" rel="noopener"><span class="dir">→ قبلی</span><span class="ttl">کاتالوگ مهارت‌های اختیاری</span></a>
+<a class="next" href="automation-blueprints-catalog.html"><span class="dir">بعدی ←</span><span class="ttl">کاتالوگ نقشه‌های اتوماسیون</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/reference/faq" target="_blank" rel="noopener">FAQ &amp; Troubleshooting</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

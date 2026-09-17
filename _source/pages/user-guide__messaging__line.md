@@ -18,6 +18,7 @@ LINE is the dominant messaging app in Japan, Taiwan, and Thailand. If your users
 
 Inbound text, images, audio, video, files, stickers, and locations are all handled. Outbound text uses the **free reply token first** (single-use, ~60s window) and falls back to the metered Push API when the token has expired.
 
+---
 
 ## Step 1: Create a LINE Messaging API channel
 
@@ -27,6 +28,7 @@ Inbound text, images, audio, video, files, stickers, and locations are all handl
 4. From the **Messaging API** tab, scroll to **Channel access token (long-lived)** and click **Issue**. Copy the token.
 5. In the **Messaging API** tab, also disable **Auto-reply messages** and **Greeting messages** so they don't fight your bot's replies.
 
+---
 
 ## Step 2: Expose the webhook port
 
@@ -47,6 +49,7 @@ devtunnel host hermes-line
 
 Copy the `https://...` URL — you'll set it as the webhook URL below. **Leave the tunnel running** while testing. For production, set up a fixed Cloudflare named tunnel so the webhook URL doesn't change on restart.
 
+---
 
 ## Step 3: Configure Hermes
 
@@ -77,6 +80,7 @@ gateway:
 
 That's enough — the bundled-plugin scan in `gateway/config.py` automatically picks up `plugins/platforms/line/`. No `Platform.LINE` enum edit, no `_create_adapter` registration.
 
+---
 
 ## Step 4: Set the webhook URL
 
@@ -87,6 +91,7 @@ Back in the LINE console:
 3. Click **Verify**. LINE pings the URL; you should see a 200.
 4. Toggle **Use webhook** to **On**.
 
+---
 
 ## Step 5: Run the gateway
 
@@ -102,6 +107,7 @@ LINE: webhook listening on * (all interfaces, IPv4+IPv6):8646/line/webhook (publ
 
 Add the bot as a friend from the LINE app (scan the QR in the channel's **Messaging API** tab) and send it a message.
 
+---
 
 ## Slow LLM responses
 
@@ -134,6 +140,7 @@ display:
       tool_progress: off
 ```
 
+---
 
 ## Cron / notification delivery
 
@@ -143,6 +150,7 @@ LINE_HOME_CHANNEL=Uxxxxxxxxxxxxxxxxxxxx     # default delivery target
 
 Cron jobs with `deliver: line` route to `LINE_HOME_CHANNEL`. The adapter ships a standalone Push-only sender so cron jobs work even when cron runs in a separate process from the gateway.
 
+---
 
 ## Environment variable reference
 
@@ -163,7 +171,9 @@ Cron jobs with `deliver: line` route to `LINE_HOME_CHANNEL`. The adapter ships a
 | `LINE_BUTTON_LABEL` | no | "Get answer" | Button label |
 | `LINE_DELIVERED_TEXT` | no | "Already replied ✅" | Reply when an already-delivered button is tapped again |
 | `LINE_INTERRUPTED_TEXT` | no | "Run was interrupted before completion." | Reply when a `/stop` orphan button is tapped |
+| `LINE_EXPIRED_TEXT` | no | "That request has expired — send your message again." | Reply when a button whose cached answer is gone is tapped |
 
+---
 
 ## Troubleshooting
 
@@ -177,6 +187,7 @@ Cron jobs with `deliver: line` route to `LINE_HOME_CHANNEL`. The adapter ships a
 
 **"already in use by another profile".** The same channel access token is bound to another running Hermes profile. Stop the other gateway or use a separate channel.
 
+---
 
 ## Limitations
 
@@ -184,5 +195,3 @@ Cron jobs with `deliver: line` route to `LINE_HOME_CHANNEL`. The adapter ships a
 * **No native message editing.** LINE has no edit-message API — streaming responses always send fresh bubbles, never edit prior ones.
 * **No Markdown rendering.** Bold (`**`), italics (`*`), code fences, and headings render as literal characters. The adapter strips them before sending; URLs are preserved (`[label](url)` becomes `label (url)`).
 * **Loading indicator is DM-only.** LINE rejects the chat/loading API for groups and rooms, so the typing indicator only shows in 1:1 chats.
-
-

@@ -6,6 +6,7 @@ Skills are on-demand knowledge documents that teach Hermes how to handle specifi
 
 For the full technical reference, see [Skills System](/user-guide/features/skills).
 
+---
 
 ## Finding Skills
 
@@ -49,6 +50,7 @@ Official optional skills (heavier or niche skills not active by default) are ava
 /skills search blockchain
 ```
 
+---
 
 ## Using a Skill
 
@@ -76,6 +78,7 @@ Skills use a token-efficient loading pattern. The agent doesn't load everything 
 
 This means skills don't cost tokens until they're actually used.
 
+---
 
 ## Installing from the Hub
 
@@ -112,6 +115,7 @@ hermes skills list | grep arxiv
 /skills search arxiv
 ```
 
+---
 
 ## Plugin-Provided Skills
 
@@ -129,6 +133,7 @@ Plugin skills are **not** listed in the system prompt and don't appear in `skill
 
 For how to ship skills in your own plugin, see [Build a Hermes Plugin → Bundle skills](/developer-guide/plugins#bundle-skills).
 
+---
 
 ## Configuring Skill Settings
 
@@ -156,6 +161,7 @@ hermes skills config gif-search
 hermes config get skills.config --json
 ```
 
+---
 
 ## Creating Your Own Skill
 
@@ -170,6 +176,7 @@ mkdir -p ~/.hermes/skills/my-category/my-skill
 ### 2. Write SKILL.md
 
 ```markdown title="~/.hermes/skills/my-category/my-skill/SKILL.md"
+---
 name: my-skill
 description: Brief description of what this skill does
 version: 1.0.0
@@ -177,6 +184,7 @@ metadata:
   hermes:
     tags: [my-tag, automation]
     category: my-category
+---
 
 # My Skill
 
@@ -232,6 +240,7 @@ The skill appears automatically — no registration needed. Drop it in `~/.herme
 The agent can also create and update skills itself using `skill_manage`. After solving a complex problem, Hermes may offer to save the approach as a skill for next time.
 :::
 
+---
 
 ## Per-Platform Skill Management
 
@@ -243,6 +252,7 @@ hermes skills
 
 This opens an interactive TUI where you can enable or disable skills per platform (CLI, Telegram, Discord, etc.). Useful when you want certain skills only available in specific contexts — for example, keeping development skills off Telegram.
 
+---
 
 ## Skills vs Memory
 
@@ -259,6 +269,7 @@ Both are persistent across sessions, but they serve different purposes:
 
 **Rule of thumb:** If you'd put it in a reference document, it's a skill. If you'd put it on a sticky note, it's memory.
 
+---
 
 ## Tips
 
@@ -270,7 +281,6 @@ Both are persistent across sessions, but they serve different purposes:
 
 **Update skills when they go stale.** If you use a skill and hit issues not covered by it, tell Hermes to update the skill with what you learned. Skills that aren't maintained become liabilities.
 
+---
 
 *For the complete skills reference — frontmatter fields, conditional activation, external directories, and more — see [Skills System](/user-guide/features/skills).*
-
-

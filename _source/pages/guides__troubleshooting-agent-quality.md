@@ -126,6 +126,7 @@ If a compressed-away detail matters, ask the agent to search for it (`session_se
 
 See [Context Compression](/user-guide/configuration#context-compression) for the full settings reference and [Auto-Lineage on Compression](/user-guide/sessions#auto-lineage-on-compression) for how titled sessions chain.
 
+---
 
 ## Quick reference
 
@@ -138,5 +139,3 @@ See [Context Compression](/user-guide/configuration#context-compression) for the
 | Forgot last week's discussion | ask it to `session_search` | Memory is bounded, curated facts only |
 | Lost a specific ability | `/skills`, `/tools list` | Skill or toolset not loaded this session |
 | Lost old detail after long session | `/usage`, `/context` | Compression summarized older history |
-
-

@@ -8,6 +8,7 @@ Hermes connects to SMS through the [Twilio](https://www.twilio.com/) API. People
 The SMS gateway shares credentials with the optional [telephony skill](/reference/skills-catalog). If you've already set up Twilio for voice calls or one-off SMS, the gateway works with the same `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_PHONE_NUMBER`.
 :::
 
+---
 
 ## Prerequisites
 
@@ -16,6 +17,7 @@ The SMS gateway shares credentials with the optional [telephony skill](/referenc
 - **A publicly accessible server** — Twilio sends webhooks to your server when SMS arrives
 - **aiohttp** — `cd ~/.hermes/hermes-agent && uv pip install -e ".[sms]"`
 
+---
 
 ## Step 1: Get Your Twilio Credentials
 
@@ -23,6 +25,7 @@ The SMS gateway shares credentials with the optional [telephony skill](/referenc
 2. Copy your **Account SID** and **Auth Token** from the dashboard
 3. Go to **Phone Numbers → Manage → Active Numbers** — note your phone number in E.164 format (e.g., `+15551234567`)
 
+---
 
 ## Step 2: Configure Hermes
 
@@ -50,6 +53,7 @@ SMS_ALLOWED_USERS=+15559876543,+15551112222
 SMS_HOME_CHANNEL=+15559876543
 ```
 
+---
 
 ## Step 3: Configure Twilio Webhook
 
@@ -88,6 +92,7 @@ The webhook port defaults to `8080`. Override with:
 SMS_WEBHOOK_PORT=3000
 ```
 
+---
 
 ## Step 4: Start the Gateway
 
@@ -105,6 +110,7 @@ If you see `Refusing to start: SMS_WEBHOOK_URL is required`, set `SMS_WEBHOOK_UR
 
 Text your Twilio number — Hermes will respond via SMS.
 
+---
 
 ## Environment Variables
 
@@ -122,6 +128,7 @@ Text your Twilio number — Hermes will respond via SMS.
 | `SMS_HOME_CHANNEL` | No | Phone number for cron job / notification delivery |
 | `SMS_HOME_CHANNEL_NAME` | No | Display name for the home channel (default: `Home`) |
 
+---
 
 ## SMS-Specific Behavior
 
@@ -130,6 +137,7 @@ Text your Twilio number — Hermes will respond via SMS.
 - **Echo prevention** — Messages from your own Twilio number are ignored to prevent loops
 - **Phone number redaction** — Phone numbers are redacted in logs for privacy
 
+---
 
 ## Security
 
@@ -162,6 +170,7 @@ SMS_ALLOW_ALL_USERS=true
 SMS has no built-in encryption. Don't use SMS for sensitive operations unless you understand the security implications. For sensitive use cases, prefer Signal or Telegram.
 :::
 
+---
 
 ## Troubleshooting
 
@@ -187,5 +196,3 @@ SMS_WEBHOOK_PORT=3001
 ```
 
 Update the webhook URL in Twilio Console to match.
-
-

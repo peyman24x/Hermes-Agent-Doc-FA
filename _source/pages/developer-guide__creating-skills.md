@@ -40,6 +40,7 @@ skills/
 ## SKILL.md Format
 
 ```markdown
+---
 name: my-skill
 description: Brief description (shown in skill search results)
 version: 1.0.0
@@ -71,6 +72,7 @@ required_environment_variables:          # Optional — env vars the skill needs
     prompt: "Enter your API key"
     help: "Get one at https://example.com"
     required_for: "API access"
+---
 
 # Skill Title
 
@@ -430,5 +432,3 @@ Hermes can now consume third-party skills from multiple external discovery model
 - well-known endpoints served from `/.well-known/skills/index.json`
 
 If you want your skills to be discoverable without a GitHub-specific installer, consider serving them from a well-known endpoint in addition to publishing them in a repo or marketplace.
-
-

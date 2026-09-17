@@ -184,5 +184,3 @@ All commands return JSON. Key fields per service:
 | `HttpError 403: Insufficient Permission` | Missing scope — revoke and re-authorize with the right services |
 | `HttpError 403: Access Not Configured` | API not enabled in Google Cloud Console |
 | `ModuleNotFoundError` | Run setup script with `--install-deps` |
-
-

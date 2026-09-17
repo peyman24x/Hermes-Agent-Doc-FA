@@ -4,6 +4,7 @@
 
 Hermes Agent maintains support for many platforms and distribution methods, but we can't support every possible install method.
 
+---
 
 ## Tier 1
 
@@ -16,6 +17,7 @@ We strive to never break installations and updates for these. Issues & regressio
 | **Linux / [WSL2](../user-guide/windows-wsl-quickstart.md)** (x86_64, aarch64) | [`install.sh`](./installation.md#linux--macos--wsl2--android-termux)                                                           | We test on the latest Ubuntu and WSL2. If your distro has glibc, systemd, and follows the Filesystem Hierarchy Standard, it's likely to work pretty well. |
 | [**Docker Container**](../user-guide/docker.md#quick-start) (x86_64, aarch64) | [`docker pull`](../user-guide/docker.md#quick-start)                                                                           | Docker installs do not support `hermes update`. Updating is done by running a new image.                                                                  |
 
+---
 
 ## Tier 2
 
@@ -42,5 +44,3 @@ PRs to fix them will _not_ be accepted, and any code that keeps compatibility wi
 - installs via `brew` (`brew install hermes-agent`)
 
 If you are using an unsupported distribution method, please read the [the installation guide](./installation.md) to learn how to switch to a supported one.
-
-

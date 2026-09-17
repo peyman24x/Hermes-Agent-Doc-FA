@@ -467,5 +467,3 @@ That progression keeps the debugging surface small.
 - [Discord setup](/user-guide/messaging/discord)
 - [Telegram setup](/user-guide/messaging/telegram)
 - [Configuration](/user-guide/configuration)
-
-

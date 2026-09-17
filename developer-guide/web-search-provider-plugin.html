@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پلاگین جستجوی وب — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/web-search-provider-plugin" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>پلاگین جستجوی وب</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main id="web-search-provider-plugins">
+<h1 id="building-a-web-search-provider-plugin">پلاگین جستجوی وب</h1>
+<p>پلاگین‌های ارائه‌دهندهٔ جستجوی وب، بک‌اندی ثبت می‌کنند که فراخوانی‌های ابزارهای <code>web_search</code>، <code>web_extract</code> و (به‌صورت اختیاری) خزش عمیق را پاسخ می‌دهد. ارائه‌دهندگان داخلی — Firecrawl، SearXNG، Tavily، Perplexity، Exa، Parallel، Keenable، Brave Search (ردهٔ رایگان)، xAI و DDGS — همگی به‌صورت پلاگین در <code>plugins/web/&lt;name&gt;/</code> عرضه می‌شوند. با قراردادن یک پوشه در کنار آن‌ها می‌توانید ارائه‌دهندهٔ جدیدی اضافه کنید یا یکی از ارائه‌دهندگان همراه برنامه را جایگزین کنید.</p>
+<div class="callout tip">
+  <div class="callout-title">💡 نکته</div>
+  <p>جستجوی وب یکی از چند نوع <strong>پلاگین بک‌اند</strong> است که هرمس پشتیبانی می‌کند. انواع دیگر (با کلاس‌های پایهٔ انتزاعی مخصوص خود) عبارت‌اند از <a href="image-gen-provider-plugin.html">پلاگین‌های ارائه‌دهندهٔ تولید تصویر</a>، <a href="video-gen-provider-plugin.html">پلاگین‌های ارائه‌دهندهٔ تولید ویدیو</a>، <a href="memory-provider-plugin.html">پلاگین‌های ارائه‌دهندهٔ حافظه</a>، <a href="context-engine-plugin.html">پلاگین‌های موتور زمینه</a> و <a href="model-provider-plugin.html">پلاگین‌های ارائه‌دهندهٔ مدل</a>. پلاگین‌های عمومی ابزار/هوک/CLI در <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت پلاگین هرمس</a> پوشش داده شده‌اند.</p>
+</div>
+<section class="doc-sec">
+<h2 id="how-discovery-works"><span class="secnum">۱</span> سازوکار کشف</h2>
+<p>هرمس در سه محل به‌دنبال بک‌اندهای جستجوی وب می‌گردد:</p>
+<ol>
+<li><strong>همراه برنامه</strong> — <code>&lt;repo&gt;/plugins/web/&lt;name&gt;/</code> (بارگذاری خودکار با <code>kind: backend</code>، همیشه در دسترس)</li>
+<li><strong>کاربر</strong> — <code>~/.hermes/plugins/web/&lt;name&gt;/</code> (فعال‌سازی اختیاری از طریق <code>plugins.enabled</code> یا <code>hermes plugins enable &lt;name&gt;</code>)</li>
+<li><strong>Pip</strong> — بسته‌هایی که یک نقطهٔ ورود <code>hermes_agent.plugins</code> اعلام می‌کنند</li>
+</ol>
+<p>تابع <code>register(ctx)</code> هر پلاگین، <code>ctx.register_web_search_provider(...)</code> را فراخوانی می‌کند — این کار نمونه را در رجیستریِ <code>agent/web_search_registry.py</code> قرار می‌دهد. ارائه‌دهندهٔ فعال هر قابلیت از طریق پیکربندی انتخاب می‌شود:</p>
+<div class="table-wrap"><table><thead><tr><th>قابلیت</th><th>کلید پیکربندی</th><th>گزینهٔ پشتیبان</th></tr></thead><tbody>
+<tr><td><code>web_search</code></td><td><code>web.search_backend</code></td><td><code>web.backend</code></td></tr>
+<tr><td><code>web_extract</code></td><td><code>web.extract_backend</code></td><td><code>web.backend</code></td></tr>
+<tr><td>حالت‌های خزش عمیق درون <code>web_extract</code></td><td><code>web.extract_backend</code></td><td><code>web.backend</code></td></tr>
+</tbody></table></div>
+<p>وقتی هیچ‌یک از دو کلید تنظیم نشده باشد، هرمس بک‌اند را از روی کلید API یا نشانی اینترنتی موجود در محیط به‌طور خودکار تشخیص می‌دهد. <code>hermes tools</code> کاربران را در فرایند انتخاب راهنمایی می‌کند.</p>
+</section>
+<section class="doc-sec">
+<h2 id="directory-structure"><span class="secnum">۲</span> ساختار پوشه</h2>
+<pre dir="ltr"><code>plugins/web/my-backend/
+├── __init__.py     # register() entry point
+├── provider.py     # WebSearchProvider subclass
+└── plugin.yaml     # Manifest with kind: backend and provides_web_providers
+</code></pre>
+<p><code>brave_free/</code> و <code>ddgs/</code> کوچک‌ترین نمونه‌های مرجع در درخت کد هستند — <code>brave_free</code> برای ارائه‌دهنده‌ای صرفاً جستجوگر که دسترسی به آن نیازمند کلید API است، و <code>ddgs</code> برای ارائه‌دهنده‌ای بدون کلید که SDK خود را هنگام نیاز نصب می‌کند.</p>
+</section>
+<section class="doc-sec">
+<h2 id="the-websearchprovider-abc"><span class="secnum">۳</span> کلاس پایهٔ انتزاعی <code>WebSearchProvider</code></h2>
+<p>از <code>agent.web_search_provider.WebSearchProvider</code> زیرکلاس بسازید. تنها اعضای الزامی <code>name</code>، <code>is_available()</code> و هرکدام از <code>search()</code> / <code>extract()</code> هستند که پیاده‌سازی می‌کنید. (خزش عمیق متد جداگانه‌ای نیست — یکی از حالت‌های <code>extract()</code> است.)</p>
+<pre dir="ltr"><code># plugins/web/my-backend/provider.py
+from __future__ import annotations
+
+import os
+from typing import Any, Dict, List
+
+from agent.web_search_provider import WebSearchProvider
+
+
+class MyBackendWebSearchProvider(WebSearchProvider):
+    """Minimal search-only provider against the My Backend HTTP API."""
+
+    @property
+    def name(self) -&gt; str:
+        # Stable id used in web.search_backend / web.extract_backend / web.backend
+        # config keys. Lowercase, no spaces; hyphens permitted.
+        return "my-backend"
+
+    @property
+    def display_name(self) -&gt; str:
+        # Human label shown in `hermes tools`. Defaults to `name`.
+        return "My Backend"
+
+    def is_available(self) -&gt; bool:
+        # Cheap check — env var present, optional dep importable, etc.
+        # MUST NOT make network calls (runs on every `hermes tools` paint).
+        return bool(os.getenv("MY_BACKEND_API_KEY", "").strip())
+
+    def supports_search(self) -&gt; bool:
+        return True
+
+    def supports_extract(self) -&gt; bool:
+        return False
+
+    def search(self, query: str, limit: int = 5) -&gt; Dict[str, Any]:
+        import httpx
+
+        api_key = os.environ["MY_BACKEND_API_KEY"]
+        try:
+            resp = httpx.get(
+                "https://api.example.com/search",
+                params={"q": query, "count": max(1, min(int(limit), 20))},
+                headers={"Authorization": f"Bearer {api_key}"},
+                timeout=15,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+        except httpx.HTTPError as exc:
+            return {"success": False, "error": str(exc)}
+
+        # Response shape is fixed — see "Response shape" below.
+        return {
+            "success": True,
+            "data": {
+                "web": [
+                    {
+                        "title": item.get("title", ""),
+                        "url": item.get("url", ""),
+                        "description": item.get("snippet", ""),
+                        "position": idx + 1,
+                    }
+                    for idx, item in enumerate(data.get("results", []))
+                ],
+            },
+        }
+</code></pre>
+<pre dir="ltr"><code># plugins/web/my-backend/__init__.py
+from plugins.web.my_backend.provider import MyBackendWebSearchProvider
+
+
+def register(ctx) -&gt; None:
+    """Plugin entry point — called once at load time."""
+    ctx.register_web_search_provider(MyBackendWebSearchProvider())
+</code></pre>
+</section>
+<section class="doc-sec">
+<h2 id="pluginyaml"><span class="secnum">۴</span> <code>plugin.yaml</code></h2>
+<pre dir="ltr"><code>name: web-my-backend
+version: 1.0.0
+description: "My Backend web search — Bearer-auth REST API"
+author: Your Name
+kind: backend
+provides_web_providers:
+  - my-backend
+requires_env:
+  - MY_BACKEND_API_KEY
+</code></pre>
+<div class="table-wrap"><table><thead><tr><th>کلید</th><th>هدف</th></tr></thead><tbody>
+<tr><td><code>kind: backend</code></td><td>پلاگین را از مسیر بارگذاری بک‌اند هدایت می‌کند</td></tr>
+<tr><td><code>provides_web_providers</code></td><td>فهرست مقادیر <code>name</code> ارائه‌دهندگانی که این پلاگین ثبت می‌کند — بارگذار از آن استفاده می‌کند تا حتی پیش از اجرای <code>register()</code>، پلاگین را در <code>hermes tools</code> معرفی کند</td></tr>
+<tr><td><code>requires_env</code></td><td>درخواست تعاملی اعتبارنامه هنگام <code>hermes plugins install</code> (برای قالب کامل‌تر، <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins#gate-on-environment-variables" target="_blank" rel="noopener">ساخت پلاگین هرمس</a> را ببینید)</td></tr>
+</tbody></table></div>
+</section>
+<section class="doc-sec">
+<h2 id="abc-reference"><span class="secnum">۵</span> مرجع کلاس پایهٔ انتزاعی</h2>
+<p>قرارداد کامل در <code>agent/web_search_provider.py</code> است. متدهایی که می‌توانید بازنویسی کنید:</p>
+<div class="table-wrap"><table><thead><tr><th>عضو</th><th>الزامی</th><th>پیش‌فرض</th><th>هدف</th></tr></thead><tbody>
+<tr><td><code>name</code></td><td>بله</td><td>—</td><td>شناسهٔ پایدار مورد استفاده در پیکربندی <code>web.*_backend</code></td></tr>
+<tr><td><code>display_name</code></td><td>—</td><td><code>name</code></td><td>برچسب نمایش‌داده‌شده در <code>hermes tools</code></td></tr>
+<tr><td><code>is_available()</code></td><td>بله</td><td>—</td><td>بررسی کم‌هزینهٔ دسترس‌پذیری — متغیرهای محیطی، وابستگی‌های اختیاری</td></tr>
+<tr><td><code>supports_search()</code></td><td>—</td><td><code>True</code></td><td>پرچم قابلیت برای مسیریابی <code>web_search</code></td></tr>
+<tr><td><code>supports_extract()</code></td><td>—</td><td><code>False</code></td><td>پرچم قابلیت برای مسیریابی <code>web_extract</code></td></tr>
+<tr><td><code>search(query, limit)</code></td><td>مشروط</td><td>استثنا ایجاد می‌کند</td><td>وقتی <code>supports_search()</code> مقدار <code>True</code> برگرداند، الزامی است</td></tr>
+<tr><td><code>extract(urls, **kwargs)</code></td><td>مشروط</td><td>استثنا ایجاد می‌کند</td><td>وقتی <code>supports_extract()</code> مقدار <code>True</code> برگرداند، الزامی است</td></tr>
+</tbody></table></div>
+<p>ارائه‌دهندگان می‌توانند چند قابلیت را از یک کلاس واحد اعلام کنند — Firecrawl، Tavily، Perplexity، Keenable، Exa و Parallel همگی جستجو و استخراج را پیاده‌سازی می‌کنند. Brave Search و DDGS صرفاً جستجوگرند؛ SearXNG نیز صرفاً جستجوگر است و روند کاریِ مستندی برای «استفاده از آن در کنار یک ارائه‌دهندهٔ استخراج» دارد.</p>
+</section>
+<section class="doc-sec">
+<h2 id="response-shape"><span class="secnum">۶</span> ساختار پاسخ</h2>
+<p>لایهٔ پوشانندهٔ ابزار، قالب بیرونی ثابتی انتظار دارد تا نیازی به تبدیل قالب پاسخ بک‌اندهای مختلف نداشته باشد.</p>
+<p><strong>موفقیت جستجو:</strong></p>
+<pre dir="ltr"><code>{
+    "success": True,
+    "data": {
+        "web": [
+            {"title": str, "url": str, "description": str, "position": int},
+            ...
+        ],
+    },
+}
+</code></pre>
+<p><strong>موفقیت استخراج:</strong></p>
+<pre dir="ltr"><code>{
+    "success": True,
+    "data": [
+        {
+            "url": str,
+            "title": str,
+            "content": str,
+            "raw_content": str,
+            "metadata": dict,    # optional
+            "error": str,        # optional, only on per-URL failure
+        },
+        ...
+    ],
+}
+</code></pre>
+<p><strong>در صورت شکست هر یک از دو قابلیت:</strong></p>
+<pre dir="ltr"><code>{"success": False, "error": "human-readable message"}
+</code></pre>
+<p>هر دو متد <code>search()</code> و <code>extract()</code> می‌توانند <code>async def</code> باشند — توزیع‌کننده، توابع کوروتین را با <code>inspect.iscoroutinefunction</code> تشخیص می‌دهد و بر همان اساس منتظر نتیجه می‌ماند. پیاده‌سازی‌های همگام که ورودی/خروجی مسدودکننده انجام می‌دهند (HTTP، فراخوانی‌های SDK)، برای بک‌اندهای کوچک مناسب‌اند؛ توزیع‌کننده مدیریت تردها را بر عهده می‌گیرد.</p>
+</section>
+<section class="doc-sec">
+<h2 id="capability-flags"><span class="secnum">۷</span> پرچم‌های قابلیت</h2>
+<p>هرمس بر اساس پرچم‌های <code>supports_*</code>، فراخوانی‌ها را به ارائه‌دهندهٔ مناسب هدایت می‌کند. یک پیکربندی رایج با چند ارائه‌دهنده:</p>
+<pre dir="ltr"><code># ~/.hermes/config.yaml
+web:
+  search_backend: "brave-free"     # search-only, fast, free 2k/mo
+  extract_backend: "firecrawl"     # extract + crawl, paid quota
+</code></pre>
+<p>وقتی <code>web.search_backend</code> یا <code>web.extract_backend</code> تنظیم نشده باشند، هر دو به <code>web.backend</code> رجوع می‌کنند. وقتی آن هم تنظیم نشده باشد، هرمس بر اساس وجود متغیر محیطی، نخستین ارائه‌دهندهٔ در دسترس را که قابلیت درخواستی را پشتیبانی کند انتخاب می‌کند.</p>
+<p>اگر ارائه‌دهندهٔ شما فقط یک قابلیت را پشتیبانی می‌کند، پرچم‌های دیگر را در مقدار پیش‌فرضشان (<code>False</code>) نگه دارید تا رجیستری آن را برای آن ابزار کنار بگذارد — وقتی کاربران از X فقط برای جستجو استفاده می‌کنند و از ایجنت درخواست استخراج دارند، خطاهای گمراه‌کنندهٔ «ارائه‌دهندهٔ X شکست خورد» نمی‌بینند.</p>
+</section>
+<section class="doc-sec">
+<h2 id="how-hermes-wires-it-into-the-tools"><span class="secnum">۸</span> هرمس چگونه آن را به ابزارها متصل می‌کند</h2>
+<p>ابزارهای <code>web_search</code> و <code>web_extract</code> در <code>tools/web_tools.py</code> قرار دارند. هنگام فراخوانی، این مراحل را انجام می‌دهند:</p>
+<ol>
+<li>کلید پیکربندی مربوط را می‌خوانند (<code>web.search_backend</code> برای <code>web_search</code>، <code>web.extract_backend</code> برای <code>web_extract</code>)</li>
+<li>ارائه‌دهنده‌ای با آن <code>name</code> را از رجیستری درخواست می‌کنند</li>
+<li><code>is_available()</code> و پرچم <code>supports_*()</code> متناظر را بررسی می‌کنند</li>
+<li>اجرا را به <code>search()</code> / <code>extract()</code> می‌سپارند (خزش عمیق به‌عنوان یک حالت درون <code>extract()</code> اجرا می‌شود) و اگر متد کوروتین باشد، منتظر نتیجه می‌مانند</li>
+<li>پاسخ را با قالب بیرونی‌اش به JSON سریال‌سازی می‌کنند و به LLM برمی‌گردانند</li>
+</ol>
+<p>خطاها به‌عنوان نتیجهٔ ابزار ارائه می‌شوند؛ LLM تصمیم می‌گیرد چگونه آن‌ها را توضیح دهد. اگر هیچ ارائه‌دهنده‌ای ثبت نشده باشد (یا هیچ‌یک از ارائه‌دهندگان در دسترس از بررسی قابلیت عبور نکند)، ابزار خطای راهنمایی‌کننده‌ای برمی‌گرداند که به <code>hermes tools</code> اشاره دارد.</p>
+</section>
+<section class="doc-sec">
+<h2 id="lazy-installing-optional-dependencies"><span class="secnum">۹</span> نصب وابستگی‌های اختیاری هنگام نیاز</h2>
+<p>اگر ارائه‌دهندهٔ شما یک SDK شخص ثالث را پوشش می‌دهد (مانند DDGS با بستهٔ <code>ddgs</code>)، آن را در سطح بالای ماژول <code>import</code> نکنید. درون <code>is_available()</code> یا <code>search()</code> از <code>tools.lazy_deps.ensure(...)</code> استفاده کنید — هرمس در نخستین استفاده، بسته را با توجه به مجوز <code>security.allow_lazy_installs</code> نصب می‌کند. برای مدل امنیتی، <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins#lazy-install-optional-python-dependencies" target="_blank" rel="noopener">ساخت پلاگین هرمس ← نصب هنگام نیاز</a> را ببینید.</p>
+</section>
+<section class="doc-sec">
+<h2 id="reference-implementations"><span class="secnum">۱۰</span> پیاده‌سازی‌های مرجع</h2>
+<ul>
+<li><strong><code>plugins/web/brave_free/</code></strong> — ارائه‌دهندهٔ HTTP کوچک و صرفاً جستجوگر که دسترسی به آن نیازمند کلید API است. قالب شروع خوبی است.</li>
+<li><strong><code>plugins/web/ddgs/</code></strong> — ارائه‌دهندهٔ بدون کلید که SDK خود را هنگام نیاز نصب می‌کند. الگویی مفید برای بک‌اندهایی که یک بستهٔ پایتون را پوشش می‌دهند.</li>
+<li><strong><code>plugins/web/firecrawl/</code></strong> — ارائه‌دهندهٔ کامل با چند قابلیت (جستجو + استخراج + خزش) و چند حالت قالب خروجی.</li>
+<li><strong><code>plugins/web/searxng/</code></strong> — بک‌اند خودمیزبان، پیکربندی‌شده با نشانی اینترنتی و بدون احراز هویت.</li>
+<li><strong><code>plugins/web/xai/</code></strong> — جستجوی متکی به LLM از طریق ابزار سمت سرور <code>web_search</code> در Grok. نشان می‌دهد چگونه بدون افزودن متغیرهای محیطی جدید، از سازوکار موجود اعتبارنامه‌های OAuth/متغیر محیطی (<code>tools/xai_http.py</code>) دوباره استفاده کنید، و چگونه یک <code>is_available()</code> کم‌هزینه بنویسید که قرارداد عدم استفاده از شبکه را رعایت کند.</li>
+</ul>
+</section>
+<section class="doc-sec">
+<h2 id="distribute-via-pip"><span class="secnum">۱۱</span> توزیع از طریق pip</h2>
+<pre dir="ltr"><code># pyproject.toml
+[project.entry-points."hermes_agent.plugins"]
+my-backend-web = "my_backend_web_package"
+</code></pre>
+<p><code>my_backend_web_package</code> باید یک تابع <code>register</code> در سطح بالا ارائه کند. برای راه‌اندازی کامل، <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins#distribute-via-pip" target="_blank" rel="noopener">توزیع از طریق pip</a> در راهنمای عمومی پلاگین را ببینید.</p>
+</section>
+<section class="doc-sec">
+<h2 id="related-pages"><span class="secnum">۱۲</span> صفحات مرتبط</h2>
+<ul>
+<li><a href="../user-guide/features/web-search.html">جستجوی وب</a> — مستندات قابلیت برای کاربران و پیکربندی هر بک‌اند</li>
+<li><a href="../user-guide/features/plugins.html">نمای کلی پلاگین‌ها</a> — همهٔ انواع پلاگین در یک نگاه</li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت پلاگین هرمس</a> — راهنمای عمومی ابزارها/هوک‌ها/فرمان‌های اسلش</li>
+</ul>
+</section>
+<div class="pager">
+  <a href="video-gen-provider-plugin.html"><span class="dir">→ قبلی</span><span class="ttl">پلاگین تولید ویدیو</span></a>
+  <a class="next" href="worktree-ui-dev.html"><span class="dir">بعدی ←</span><span class="ttl">توسعهٔ TUI و دسکتاپ در Worktree</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/web-search-provider-plugin" target="_blank" rel="noopener">Web Search Provider Plugins</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

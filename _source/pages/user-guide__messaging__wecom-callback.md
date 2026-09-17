@@ -175,5 +175,3 @@ can't reach loopback. Leave `extra.host` unset so the default dual-stack
 bind (all interfaces, IPv4+IPv6) applies, or pin an interface in `config.yaml` (plus
 `allowed_source_cidrs` if exposing directly) or keep loopback and use a tunnel
 such as Cloudflare Tunnel / nginx.
-
-

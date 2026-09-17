@@ -26,6 +26,7 @@ This guide uses **cron jobs** to poll for PRs on a schedule — no server or pub
 If you have a public endpoint available, check out [Automated GitHub PR Comments with Webhooks](./webhook-github-pr-review.md) — GitHub pushes events to Hermes instantly when PRs are opened or updated.
 :::
 
+---
 
 ## Prerequisites
 
@@ -51,6 +52,7 @@ If you have a public endpoint available, check out [Automated GitHub PR Comments
 Use `deliver: "local"` to save reviews to `~/.hermes/cron/output/`. Great for testing before wiring up notifications.
 :::
 
+---
 
 ## Step 1: Verify the Setup
 
@@ -68,6 +70,7 @@ Run: gh pr list --repo NousResearch/hermes-agent --state open --limit 3
 
 You should see a list of open PRs. If this works, you're ready.
 
+---
 
 ## Step 2: Try a Manual Review
 
@@ -87,6 +90,7 @@ Hermes will:
 
 If you're happy with the quality, time to automate it.
 
+---
 
 ## Step 3: Create a Review Skill
 
@@ -99,8 +103,10 @@ mkdir -p ~/.hermes/skills/code-review
 Create `~/.hermes/skills/code-review/SKILL.md`:
 
 ```markdown
+---
 name: code-review
 description: Review pull requests for bugs, security issues, and code quality
+---
 
 # Code Review Guidelines
 
@@ -129,6 +135,7 @@ For each finding:
 
 Verify it loaded — start `hermes` and you should see `code-review` in the skills list at startup.
 
+---
 
 ## Step 4: Teach It Your Conventions
 
@@ -149,6 +156,7 @@ We use React Query for data fetching, never useEffect for API calls.
 
 These memories persist forever — the reviewer will enforce your conventions without being told each time.
 
+---
 
 ## Step 5: Create the Automated Cron Job
 
@@ -196,6 +204,7 @@ hermes cron list
 | `0 9 * * 1` | Weekly Monday morning roundup |
 | `30m` | Every 30 minutes (high-traffic repos) |
 
+---
 
 ## Step 6: Run It On Demand
 
@@ -211,6 +220,7 @@ Or from within a chat session:
 /cron run pr-review
 ```
 
+---
 
 ## Going Further
 
@@ -257,6 +267,7 @@ Format as a clean summary." \
 
 Scale up by adding more repos to the prompt. The agent processes them sequentially — no extra setup needed.
 
+---
 
 ## Troubleshooting
 
@@ -277,6 +288,7 @@ hermes cron list         # Is the job enabled?
 ### Rate limits
 GitHub allows 5,000 API requests/hour for authenticated users. Each PR review uses ~3-5 requests (list + diff + optional comments). Even reviewing 100 PRs/day stays well within limits.
 
+---
 
 ## What's Next?
 
@@ -285,5 +297,3 @@ GitHub allows 5,000 API requests/hour for authenticated users. Each PR review us
 - **[Build a Plugin](/developer-guide/plugins)** — wrap the review logic into a shareable plugin
 - **[Profiles](/user-guide/profiles)** — run a dedicated reviewer profile with its own memory and config
 - **[Fallback Providers](/user-guide/features/fallback-providers)** — ensure reviews run even when one provider is down
-
-

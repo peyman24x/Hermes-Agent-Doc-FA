@@ -34,12 +34,12 @@ The single line at the bottom of the TUI. Segments appear only when relevant and
 | Symbol | Meaning |
 |--------|---------|
 | `⠋⠙⠹…` (braille patterns) | Busy spinner. Thinking and tool phases use different braille animation sets. |
-| `⚕ 🌀 🤔 ✨ 🍵 🔮` | Frames of the `emoji` busy-indicator style (`/indicator emoji`). The default style rotates kaomoji faces instead. |
+| `☤ 🌀 🤔 ✨ 🍵 🔮` | Frames of the `emoji` busy-indicator style (`/indicator emoji`). The default style rotates kaomoji faces instead. |
 | <code>&#124; / - &#92;</code> | Frames of the `ascii` busy-indicator style. |
 | `⏱` | Per-prompt elapsed time while the turn runs, e.g. `⏱ 12s/3m 45s` (turn time / session time). |
 | `⏲` | The same timer, frozen after the turn completes. |
 | `cmp N` | The session has been auto-compressed N times. |
-| `▶ N` | N `/background` tasks currently running. |
+| `▶ N` | N `/bg` tasks currently running. |
 | `⚠ YOLO` | YOLO mode is on (auto-approval). Also shown in the startup banner. |
 | `⛓ N` | N subagents currently active. |
 | `↩ resumes when subagent finishes` | Reassurance shown while you are idle but delegated work is still in flight — the result returns on its own. |
@@ -121,5 +121,3 @@ Goal lifecycle notices (from [goals](../user-guide/features/goals.md)) lead with
 - [TUI](../user-guide/tui.md) — status line, details modes, busy-indicator styles
 - [Classic CLI](../user-guide/cli.md) — shared keybindings and slash commands
 - [Skins & Themes](../user-guide/features/skins.md) — which glyphs and colors you can customize
-
-

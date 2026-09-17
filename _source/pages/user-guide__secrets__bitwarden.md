@@ -155,5 +155,3 @@ Startup warnings now include a `→` remediation line telling you exactly which 
 - **CI/CD** where the existing secrets-injection mechanism (GitHub Actions secrets, Vault, etc.) is already set up — pick one path, not two.
 
 The good case for this is multi-machine fleets, shared dev boxes, gateway VPSes, or any setup where you want centralized rotation and revocation across multiple Hermes installations.
-
-

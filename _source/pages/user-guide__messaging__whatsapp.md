@@ -34,6 +34,7 @@ bot stops working after a WhatsApp update, pull the latest Hermes version and re
 | **Separate bot number** (recommended) | Dedicate a phone number to the bot. People message that number directly. | Clean UX, multiple users, lower ban risk |
 | **Personal self-chat** | Use your own WhatsApp. You message yourself to talk to the agent. | Quick setup, single user, testing |
 
+---
 
 ## Prerequisites
 
@@ -42,6 +43,7 @@ bot stops working after a WhatsApp update, pull the latest Hermes version and re
 
 Unlike older browser-driven bridges, the current Baileys-based bridge does **not** require a local Chromium or Puppeteer dependency stack.
 
+---
 
 ## Step 1: Run the Setup Wizard
 
@@ -70,6 +72,7 @@ If the QR code looks garbled, make sure your terminal is at least 60 columns wid
 Unicode. You can also try a different terminal emulator.
 :::
 
+---
 
 ## Step 2: Getting a Second Phone Number (Bot Mode)
 
@@ -87,6 +90,7 @@ After getting the number:
 2. Register the new number with WhatsApp
 3. Run `hermes whatsapp` and scan the QR code from that WhatsApp account
 
+---
 
 ## Step 3: Configure Hermes
 
@@ -132,6 +136,7 @@ sudo hermes gateway install --system   # Linux only: boot-time system service
 
 The gateway starts the WhatsApp bridge automatically using the saved session.
 
+---
 
 ## Session Persistence
 
@@ -141,6 +146,7 @@ The Baileys bridge saves its session under `~/.hermes/platforms/whatsapp/session
 - The session data includes encryption keys and device credentials
 - **Do not share or commit this session directory** — it grants full access to the WhatsApp account
 
+---
 
 ## Re-pairing
 
@@ -155,6 +161,7 @@ This generates a fresh QR code. Scan it again and the session is re-established.
 handles **temporary** disconnections (network blips, phone going offline briefly) automatically
 with reconnection logic.
 
+---
 
 ## Voice Messages
 
@@ -162,7 +169,7 @@ Hermes supports voice on WhatsApp:
 
 - **Incoming:** Voice messages (`.ogg` opus) are automatically transcribed using the configured STT provider: local `faster-whisper`, Groq Whisper (`GROQ_API_KEY`), or OpenAI Whisper (`VOICE_TOOLS_OPENAI_KEY`)
 - **Outgoing:** TTS responses are sent as MP3 audio file attachments
-- Agent responses are prefixed with "⚕ **Hermes Agent**" by default. You can customize or disable this in `config.yaml`:
+- Agent responses are prefixed with "☤ **Hermes Agent**" by default. You can customize or disable this in `config.yaml`:
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -174,6 +181,7 @@ whatsapp:
 
 When `send_read_receipts` is `true`, the adapter marks policy-accepted inbound messages as read after DM/group/mention filtering passes. Rejected messages (e.g., from non-allowlisted senders) are not marked read. Disabled by default for privacy. Changing this setting automatically restarts the bridge subprocess on the next connection.
 
+---
 
 ## Message Formatting & Delivery
 
@@ -226,6 +234,11 @@ gateway:
 
 Set `text_batch_delay_seconds: 0` to dispatch each message immediately (disables batching).
 
+### Quoted Replies
+
+Replying to (quoting) an earlier message gives the agent the quoted text as context. Quoting an image, voice note, video or document also attaches that file to the turn, so "what is this?" under a quoted image works — whether the attachment came from another person or from the bot itself (a cron-delivered chart, a generated image). WhatsApp only ships a thumbnail stub with a quote, so the file is resolved from the bridge's download cache (inbound media, in-memory for the bridge's lifetime) or from a local index of the bot's own sends (last 1000 messages); quotes of anything older arrive without the attachment.
+
+---
 
 ## Troubleshooting
 
@@ -241,6 +254,7 @@ Set `text_batch_delay_seconds: 0` to dispatch each message immediately (disables
 | **Messages not being received** | Verify `WHATSAPP_ALLOWED_USERS` includes the sender's number (with country code, no `+` or spaces), or set it to `*` to allow everyone. Set `WHATSAPP_DEBUG=true` in `.env` and restart the gateway to see raw message events in `bridge.log`. |
 | **Bot replies to strangers with a pairing code** | Set `whatsapp.unauthorized_dm_behavior: ignore` in `~/.hermes/config.yaml` if you want unauthorized DMs to be silently ignored instead. |
 
+---
 
 ## Security
 
@@ -263,5 +277,3 @@ whatsapp:
 - Use a **dedicated phone number** for the bot to isolate risk from your personal account
 - If you suspect compromise, unlink the device from WhatsApp → Settings → Linked Devices
 - Phone numbers in logs are partially redacted, but review your log retention policy
-
-

@@ -18,6 +18,7 @@ For the full webhook platform reference (all config options, delivery types, dyn
 Webhook payloads contain attacker-controlled data — PR titles, commit messages, and descriptions can contain malicious instructions. When your webhook endpoint is exposed to the internet, run the gateway in a sandboxed environment (Docker, SSH backend). See the [security section](#security-notes) below.
 :::
 
+---
 
 ## Prerequisites
 
@@ -26,6 +27,7 @@ Webhook payloads contain attacker-controlled data — PR titles, commit messages
 - A publicly reachable URL for your Hermes instance (see [Local testing with ngrok](#local-testing-with-ngrok) if running locally)
 - Admin access to the GitHub repository (required to manage webhooks)
 
+---
 
 ## Step 1 — Enable the webhook platform
 
@@ -84,6 +86,7 @@ platforms:
 The GitHub webhook payload includes PR metadata (title, description, branch names, URLs) but **not the diff**. The prompt above instructs the agent to run `gh pr diff` to fetch the actual changes. The default `hermes-webhook` toolset is deliberately constrained (web search/extract, vision, clarify — **no terminal**) because webhook payloads can carry untrusted content. To let this route run `gh`, add a per-route toolset grant: `toolsets: ["terminal", "web"]` on the route config — see [Per-route toolsets](/docs/user-guide/messaging/webhooks#per-route-toolsets).
 :::
 
+---
 
 ## Step 2 — Start the gateway
 
@@ -104,6 +107,7 @@ curl http://localhost:8644/health
 # {"status": "ok", "platform": "webhook"}
 ```
 
+---
 
 ## Step 3 — Register the webhook on GitHub
 
@@ -117,6 +121,7 @@ curl http://localhost:8644/health
 
 GitHub will immediately send a `ping` event to confirm the connection. It is safely ignored — `ping` is not in your `events` list — and returns `{"status": "ignored", "event": "ping"}`. It is only logged at DEBUG level, so it won't appear in the console at the default log level.
 
+---
 
 ## Step 4 — Open a test PR
 
@@ -128,6 +133,7 @@ To follow the agent's progress in real time:
 tail -f "${HERMES_HOME:-$HOME/.hermes}/logs/gateway.log"
 ```
 
+---
 
 ## Local testing with ngrok
 
@@ -167,6 +173,7 @@ tail -f "${HERMES_HOME:-$HOME/.hermes}/logs/gateway.log"
 `hermes webhook test <name>` only works for **dynamic subscriptions** created with `hermes webhook subscribe`. It does not read routes from `config.yaml`.
 :::
 
+---
 
 ## Filtering to specific actions
 
@@ -188,6 +195,7 @@ For high-volume repositories, you can still filter upstream with a GitHub Action
 
 > There is no Jinja2 or conditional template syntax. `{field}` and `{nested.field}` are the only substitutions supported. Anything else is passed verbatim to the agent.
 
+---
 
 ## Using a skill for consistent review style
 
@@ -223,6 +231,7 @@ platforms:
 
 > **Note:** Only the first skill in the list that is found is loaded. Hermes does not stack multiple skills — subsequent entries are ignored.
 
+---
 
 ## Sending responses to Slack or Discord instead
 
@@ -246,6 +255,7 @@ The target platform must also be enabled and connected in the gateway. If `chat_
 
 Valid `deliver` values: `log` · `github_comment` · `telegram` · `discord` · `slack` · `signal` · `sms`
 
+---
 
 ## GitLab support
 
@@ -260,6 +270,7 @@ events:
 
 GitLab payload fields differ from GitHub's — e.g. `{object_attributes.title}` for the MR title and `{object_attributes.iid}` for the MR number. The easiest way to discover the full payload structure is GitLab's **Test** button in your webhook settings, combined with the **Recent Deliveries** log. Alternatively, omit `prompt` from your route config — Hermes will then pass the full payload as formatted JSON directly to the agent, and the agent's response (visible in the gateway log with `deliver: log`) will describe its structure.
 
+---
 
 ## Security notes
 
@@ -269,6 +280,7 @@ GitLab payload fields differ from GitHub's — e.g. `{object_attributes.title}` 
 - **Duplicate deliveries** (webhook retries) are deduplicated via a 1-hour idempotency cache. The cache key is `X-GitHub-Delivery` if present, then `X-Request-ID`, then a millisecond timestamp. When neither delivery ID header is set, retries are **not** deduplicated.
 - **Prompt injection:** PR titles, descriptions, and commit messages are attacker-controlled. Malicious PRs could attempt to manipulate the agent's actions. Run the gateway in a sandboxed environment (Docker, VM) when exposed to the public internet.
 
+---
 
 ## Troubleshooting
 
@@ -285,6 +297,7 @@ GitLab payload fields differ from GitHub's — e.g. `{object_attributes.title}` 
 
 **GitHub's Recent Deliveries tab** (repo → Settings → Webhooks → your webhook) shows the exact request headers, payload, HTTP status, and response body for every delivery. It is the fastest way to diagnose failures without touching your server logs.
 
+---
 
 ## Full config reference
 
@@ -308,6 +321,7 @@ platforms:
           deliver_extra: {}     # repo + pr_number for github_comment; chat_id for others
 ```
 
+---
 
 ## What's Next?
 
@@ -315,5 +329,3 @@ platforms:
 - **[Webhook Reference](/user-guide/messaging/webhooks)** — full config reference for the webhook platform
 - **[Build a Plugin](/developer-guide/plugins)** — package review logic into a shareable plugin
 - **[Profiles](/user-guide/profiles)** — run a dedicated reviewer profile with its own memory and config
-
-

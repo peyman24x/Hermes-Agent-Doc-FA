@@ -175,5 +175,3 @@ Once credentials verify cleanly, continue with:
 - **Outbound delivery** — wire summaries back into a Teams channel or chat.
 
 Those pages land alongside the PRs that add the corresponding runtime. This credentials setup is a standalone prerequisite and is safe to complete in advance.
-
-

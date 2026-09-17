@@ -60,7 +60,7 @@
     - "git push --force*"
     - "*curl*|*sh*"
     - "dd if=* of=/dev/*"</code></pre>
-<p>الگوها glob های <a href="https://docs.python.org/3/library/fnmatch.html" target="_blank" rel="noopener">fnmatch</a> بدون حساسیت به بزرگی و کوچکی حروف‌اند که با کل متن فرمان مقایسه می‌شوند، و مقایسه روی همان گونه‌های نرمال‌شده/رمزگشایی‌شده (deobfuscated) که آشکارساز الگوهای خطرناک استفاده می‌کند اجرا می‌شود؛ پس ترفندهای سادهٔ نقل‌قول از قوانین رد نمی‌شوند. همیشه الگوها را داخل نقل‌قول بگذارید — یک ‏<code>*</code> برهنه در ابتدا خطای parse در YAML می‌دهد. تغییرات بلافاصله اعمال می‌شوند و نیازی به راه‌اندازی دوباره نیست. جزئیات: <a href="../user-guide/security.html#user-defined-deny-rules-approvalsdeny">قوانین رد تعریف‌شده توسط کاربر</a>.</p>
+<p>الگوها glob های <a href="https://docs.python.org/3/library/fnmatch.html" target="_blank" rel="noopener">fnmatch</a> بدون حساسیت به بزرگی و کوچکی حروف‌اند که با کل متن فرمان مقایسه می‌شوند، و مقایسه روی همان گونه‌های نرمال‌شده/رمزگشایی‌شده (deobfuscated) که آشکارساز الگوهای خطرناک استفاده می‌کند اجرا می‌شود؛ پس ترفندهای سادهٔ نقل‌قول از قوانین رد نمی‌شوند. همیشه الگوها را داخل نقل‌قول بگذارید — یک ‏<code>*</code> برهنه در ابتدا خطای parse در YAML می‌دهد. تغییرات بلافاصله اعمال می‌شوند و نیازی به راه‌اندازی دوباره نیست. جزئیات: <a href="https://hermes-agent.nousresearch.com/docs/../user-guide/security#user-defined-deny-rules-approvalsdeny" target="_blank" rel="noopener">قوانین رد تعریف‌شده توسط کاربر</a>.</p>
 <h3>سندباکس کردن نوشتن فایل‌ها</h3>
 <p>‏<code>HERMES_WRITE_SAFE_ROOT</code> نوشتنِ ‏<code>write_file</code> و ‏<code>patch</code> را به پیشوندهای پوشه‌ای که فهرست می‌کنید محدود می‌کند — هر چیز بیرون از آن به‌طور قطعی مسدود می‌شود. چند ریشه روی یونیکس با ‏<code>:</code> جدا می‌شوند:</p>
 <pre dir="ltr"><code>export HERMES_WRITE_SAFE_ROOT=/path/to/project:/home/you/.hermes</code></pre>
@@ -70,7 +70,7 @@
   <p>این را بی‌دقت به ‏<code>~/.hermes/.env</code> اضافه نکنید. اگر فقط یک پوشهٔ پروژه ست کنید، ایجنت نمی‌تواند در ‏<code>~/.hermes/cron/jobs.json</code>، مهارت‌های پروفایل یا سایر وضعیت‌های هرمس بیرون از آن پیشوند بنویسد. خانهٔ هرمس‌تان را هم مثل بالا به‌عنوان ریشهٔ دوم لحاظ کنید.</p>
 </div>
 <h3>انتقال اجرای فرمان از روی میزبان</h3>
-<p>قوی‌ترین ایزوله‌سازی این است که اصلاً فرمان‌ها روی ماشین شما اجرا نشوند. ابزار ترمینال از چند <a href="../user-guide/features/tools.html#terminal-backends">بک‌اند</a> پشتیبانی می‌کند:</p>
+<p>قوی‌ترین ایزوله‌سازی این است که اصلاً فرمان‌ها روی ماشین شما اجرا نشوند. ابزار ترمینال از چند <a href="https://hermes-agent.nousresearch.com/docs/../user-guide/features/tools#terminal-backends" target="_blank" rel="noopener">بک‌اند</a> پشتیبانی می‌کند:</p>
 <div class="table-wrap">
 <table>
 <thead>
@@ -88,9 +88,9 @@
   docker_image: "nikolaik/python-nodejs:python3.11-nodejs20"
   docker_forward_env: []  # Explicit allowlist only; empty keeps secrets out of the container</code></pre>
 <p>هر کانتینر Docker با تنظیمات سخت‌گیرانه اجرا می‌شود — حذف همهٔ قابلیت‌های لینوکس (با یک مجموعهٔ حداقلی بازگردانده‌شده)، ‏<code>no-new-privileges</code>، محدودیت تعداد فرایند و نقاط اتصال tmpfs با حجم محدود. با بک‌اند کانتینری، فرمان‌های مخرب داخل کانتینر نمی‌توانند به میزبان آسیب بزنند؛ به همین دلیل است که چک‌های فرمان خطرناک آنجا نادیده گرفته می‌شوند.</p>
-<p>برای ‏<code>ssh</code> مقدار ‏<code>terminal.backend: ssh</code> را در ‏<code>config.yaml</code> ست کنید و جزئیات میزبان را از طریق ‏<code>TERMINAL_SSH_HOST</code>، ‏<code>TERMINAL_SSH_USER</code> و ‏<code>TERMINAL_SSH_KEY</code> در ‏<code>~/.hermes/.env</code> بدهید. <a href="../user-guide/security.html#network-isolation">ایزوله‌سازی شبکه</a> را ببینید.</p>
+<p>برای ‏<code>ssh</code> مقدار ‏<code>terminal.backend: ssh</code> را در ‏<code>config.yaml</code> ست کنید و جزئیات میزبان را از طریق ‏<code>TERMINAL_SSH_HOST</code>، ‏<code>TERMINAL_SSH_USER</code> و ‏<code>TERMINAL_SSH_KEY</code> در ‏<code>~/.hermes/.env</code> بدهید. <a href="https://hermes-agent.nousresearch.com/docs/../user-guide/security#network-isolation" target="_blank" rel="noopener">ایزوله‌سازی شبکه</a> را ببینید.</p>
 <h3>اگر پیام‌رسان روشن است: فهرست مجاز و جفت‌سازی</h3>
-<p><a href="../user-guide/security.html#user-authorization-gateway">گیت‌وی</a> را روی این ماشین اجرا می‌کنید؟ پیش‌فرض از قبل ردکردن است: اگر هیچ فهرست مجازی پیکربندی نشده و ‏<code>GATEWAY_ALLOW_ALL_USERS</code> ست نشده باشد، <b>همهٔ کاربران رد می‌شوند</b>. آن را صریح نگه دارید:</p>
+<p><a href="https://hermes-agent.nousresearch.com/docs/../user-guide/security#user-authorization-gateway" target="_blank" rel="noopener">گیت‌وی</a> را روی این ماشین اجرا می‌کنید؟ پیش‌فرض از قبل ردکردن است: اگر هیچ فهرست مجازی پیکربندی نشده و ‏<code>GATEWAY_ALLOW_ALL_USERS</code> ست نشده باشد، <b>همهٔ کاربران رد می‌شوند</b>. آن را صریح نگه دارید:</p>
 <pre dir="ltr"><code># ~/.hermes/.env
 TELEGRAM_ALLOWED_USERS=123456789
 GATEWAY_ALLOWED_USERS=123456789</code></pre>
@@ -127,7 +127,7 @@ GATEWAY_ALLOWED_USERS=123456789</code></pre>
 
 <section class="doc-sec">
 <h2><span class="secnum">۴</span> این مدل تهدید چیست — و چه چیزی نیست</h2>
-<p>دربارهٔ این‌که این کنترل‌ها در برابر چه چیزی دفاع می‌کنند واقع‌بین باشید. همان‌طور که راهنمای <a href="../user-guide/security.html#user-defined-deny-rules-approvalsdeny">امنیت</a> می‌گوید:</p>
+<p>دربارهٔ این‌که این کنترل‌ها در برابر چه چیزی دفاع می‌کنند واقع‌بین باشید. همان‌طور که راهنمای <a href="https://hermes-agent.nousresearch.com/docs/../user-guide/security#user-defined-deny-rules-approvalsdeny" target="_blank" rel="noopener">امنیت</a> می‌گوید:</p>
 <blockquote>
 <p>قوانین رد، محافظی در برابر ایجنتی صادق‌اما-اشتباه‌اند؛ همان مدل تهدید آشکارساز الگوهای خطرناک. آن‌ها سندباکسی در برابر فرایندی عمداً خصمانه نیستند — برای آن کار از بک‌اند ایزوله (Docker، Modal) یا محیطی با خروجی محدودشده استفاده کنید.</p>
 </blockquote>

@@ -20,6 +20,7 @@ This page covers the **web dashboard** (`hermes dashboard`) plugin system — `w
 Themes and plugins are independent but synergistic. A theme can stand alone (just a YAML file). A plugin can stand alone (just a tab). Together they let you build a complete visual reskin with custom HUDs — the example `strike-freedom-cockpit` demo (lives in the `hermes-example-plugins` companion repo — see [Combined theme + plugin demo](#combined-theme--plugin-demo) for install steps) does exactly that.
 :::
 
+---
 
 ## Table of contents
 
@@ -49,6 +50,7 @@ Themes and plugins are independent but synergistic. A theme can stand alone (jus
 - [API reference](#api-reference)
 - [Troubleshooting](#troubleshooting)
 
+---
 
 ## Themes
 
@@ -351,6 +353,7 @@ customCSS: |
 
 Refresh the dashboard after creating the file. Switch themes live from the header bar — click the palette icon. Selection persists to `config.yaml` under `dashboard.theme` and is restored on reload.
 
+---
 
 ## Plugins
 
@@ -827,6 +830,7 @@ Plugins have up to **2 seconds** after their script loads to call `register()`. 
 
 If a plugin's script fails to load (404, syntax error, exception during IIFE), the dashboard logs a warning to the browser console and continues without it.
 
+---
 
 ## Combined theme + plugin demo
 
@@ -858,6 +862,7 @@ Open the dashboard, pick **Strike Freedom** from the theme switcher. The cockpit
 
 Read the plugin source (`strike-freedom-cockpit/dashboard/dist/index.js` in the companion repo) to see how it reads CSS vars, guards against older dashboards without slot support, and registers three slots from one bundle.
 
+---
 
 ## API reference
 
@@ -885,6 +890,7 @@ Read the plugin source (`strike-freedom-cockpit/dashboard/dist/index.js` in the 
 | `window.__HERMES_PLUGINS__.register(name, Component)` | function | Register a plugin's main component. |
 | `window.__HERMES_PLUGINS__.registerSlot(name, slot, Component)` | function | Register into a named shell slot. |
 
+---
 
 ## Troubleshooting
 
@@ -915,5 +921,3 @@ The `customCSS` block is capped at 32 KiB per theme. Split large stylesheets acr
 
 **I want to ship a plugin on PyPI.**
 Dashboard plugins are installed by directory layout, not by pip entry point. The cleanest distribution path today is a git repo the user clones into `~/.hermes/plugins/`. A pip-based installer for dashboard plugins is not currently wired up.
-
-

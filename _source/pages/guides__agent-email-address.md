@@ -88,5 +88,3 @@ Email is an unauthenticated inbound channel — anyone can write to the agent's 
 - [Email gateway adapter](../user-guide/messaging/email.md) — chat with Hermes over email instead
 - [Automate with Cron](automate-with-cron.md) — scheduling patterns
 - [Security](../user-guide/security.md) — the wider prompt-injection and credential-handling picture
-
-

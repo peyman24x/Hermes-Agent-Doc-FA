@@ -128,5 +128,3 @@ mode provides the same user-facing pattern locally:
 
 OAuth tokens stay on the user's machine in `auth.json` / `.env`. No hosted
 token storage. No multi-tenant microVM. Same end result.
-
-

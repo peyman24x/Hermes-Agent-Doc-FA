@@ -20,6 +20,7 @@ The command reuses the same credentials and platform adapters that `hermes
 gateway` already uses, so there's no second configuration surface to
 maintain.
 
+---
 
 ## Quick Start
 
@@ -46,6 +47,7 @@ hermes send --list
 hermes send --list telegram
 ```
 
+---
 
 ## Argument Reference
 
@@ -86,6 +88,7 @@ others.
 Exit codes follow the standard Unix convention so your scripts can
 branch on them the same way they would on `curl` or `grep`.
 
+---
 
 ## Message Body Resolution
 
@@ -99,6 +102,7 @@ When stdin is a TTY (no pipe), Hermes does **not** wait for input — you'll
 get a clear usage error instead. This keeps scripts from hanging if they
 accidentally omit the body.
 
+---
 
 ## Real-World Examples
 
@@ -171,6 +175,7 @@ msg_id=$(hermes send --to discord:#ops --json "build started" \
   | jq -r .message_id)
 ```
 
+---
 
 ## Does `hermes send` Need the Gateway Running?
 
@@ -185,6 +190,7 @@ persistent adapter connection (for example, a custom plugin that keeps
 a long-lived WebSocket open). In that case you'll get a clear error
 pointing at the gateway; start it with `hermes gateway start` and retry.
 
+---
 
 ## Listing and Discovering Targets
 
@@ -210,6 +216,7 @@ Human-friendly names (`discord:#ops`, `slack:#engineering`) are resolved
 against this cache at send time, so you don't need to memorize numeric
 IDs.
 
+---
 
 ## Comparison with Other Approaches
 
@@ -226,6 +233,7 @@ no longer fires messages itself). If you need a scheduled run with LLM-generated
 use `cronjob(action='create', prompt=...)` with `deliver='telegram:...'`.
 If you just need to pipe a raw string, reach for `hermes send`.
 
+---
 
 ## Related
 
@@ -235,5 +243,3 @@ If you just need to pipe a raw string, reach for `hermes send`.
   the delivery router that `hermes send` shares with cron delivery.
 - [Messaging Platform Setup](/user-guide/messaging/) —
   one-time configuration for each platform.
-
-

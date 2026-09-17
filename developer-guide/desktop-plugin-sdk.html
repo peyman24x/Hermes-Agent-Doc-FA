@@ -439,7 +439,7 @@ ctx.socket('/events', () =&gt; {
 <h3 id="install-link">توزیع با لینک نصب</h3>
 <p>مخزن پلاگین خودتان را ارسال کنید (نیمهٔ ایجنتی، نیمهٔ دسکتاپ، یا هر دو) و با اسکیم <code>hermes://</code> به آن لینک بدهید — یک anchor ساده در وب‌سایت یا README شما:</p>
 <pre dir="ltr"><code>&lt;a href="hermes://plugin/install?repo=owner/repo&amp;enable=1"&gt;Install in Hermes&lt;/a&gt;</code></pre>
-<p>کاربر یک دیالوگ تأیید می‌گیرد (id مخزن، لینک‌های منبع، پروبِ اینکه مخزن چه چیزی ارسال می‌کند) و قبل از اینکه چیزی نصب شود اجزا را انتخاب می‌کند — deep linkها هرگز خودکار نصب نمی‌کنند. <code>force=1</code> نصب موجود را جایگزین می‌کند؛ بیلدهای dev از <code>hermes-dev://</code> استفاده می‌کنند. مرجع کامل لینک‌ها: <a href="../user-guide/features/plugins.html#one-click-install-links-desktop">لینک‌های نصب یک‌کلیکی</a>.</p>
+<p>کاربر یک دیالوگ تأیید می‌گیرد (id مخزن، لینک‌های منبع، پروبِ اینکه مخزن چه چیزی ارسال می‌کند) و قبل از اینکه چیزی نصب شود اجزا را انتخاب می‌کند — deep linkها هرگز خودکار نصب نمی‌کنند. <code>force=1</code> نصب موجود را جایگزین می‌کند؛ بیلدهای dev از <code>hermes-dev://</code> استفاده می‌کنند. مرجع کامل لینک‌ها: <a href="https://hermes-agent.nousresearch.com/docs/../user-guide/features/plugins#one-click-install-links-desktop" target="_blank" rel="noopener">لینک‌های نصب یک‌کلیکی</a>.</p>
 <h3>سمت پایتون</h3>
 <p>پلاگین‌های دسکتاپ mount بک‌اندِ پلاگینِ داشبورد را دوباره استفاده می‌کنند. بک‌اند را در زیرپوشهٔ <code>dashboard/</code> یک پلاگین معمولی هرمس بگذارید و در یک <code>manifest.json</code> اعلامش کنید:</p>
 <pre dir="ltr"><code>~/.hermes/plugins/&lt;id&gt;/
@@ -458,7 +458,7 @@ async def board():
 @router.post("/action")
 async def action(body: dict):
     return {"ok": True, "received": body}</code></pre>
-<p>مسیرها زیر <code>/api/plugins/&lt;id&gt;/</code> سوار می‌شوند (<code>GET /api/plugins/&lt;id&gt;/board</code> و...). کد بک‌اند داخل پروسس گیت‌وی اجرا می‌شود، بنابراین می‌تواند مستقیماً از کدبیس hermes-agent ایمپورت کند (<code>hermes_state</code>، <code>hermes_cli.config</code> و...). برای مرجع کامل بک‌اند به <a href="../user-guide/features/extending-the-dashboard.html#backend-api-routes">گسترش داشبورد وب ← مسیرهای API بک‌اند</a> نگاه کنید — mount دقیقاً یکسان است.</p>
+<p>مسیرها زیر <code>/api/plugins/&lt;id&gt;/</code> سوار می‌شوند (<code>GET /api/plugins/&lt;id&gt;/board</code> و...). کد بک‌اند داخل پروسس گیت‌وی اجرا می‌شود، بنابراین می‌تواند مستقیماً از کدبیس hermes-agent ایمپورت کند (<code>hermes_state</code>، <code>hermes_cli.config</code> و...). برای مرجع کامل بک‌اند به <a href="https://hermes-agent.nousresearch.com/docs/../user-guide/features/extending-the-dashboard#backend-api-routes" target="_blank" rel="noopener">گسترش داشبورد وب ← مسیرهای API بک‌اند</a> نگاه کنید — mount دقیقاً یکسان است.</p>
 <div class="callout caution">
   <div class="callout-title">⛔ بک‌اند پایتون جداگانه گیت شده است</div>
   <p>فعال‌کردن یک پلاگین در پنل <strong>تنظیمات ← افزونه‌ها</strong> دسکتاپ یک انتخاب سمت renderer است؛ پایتون را import <strong>نمی‌کند</strong>. <code>plugin_api.py</code> یک پلاگین کاربری فقط وقتی import می‌شود که پلاگین در فهرست مجازِ <code>plugins.enabled</code> در <code>config.yaml</code> باشد (و در <code>plugins.disabled</code> نباشد). پلاگین‌های پروژه (<code>./.hermes/</code>) هرگز پایتون را خودکار import نمی‌کنند. این یک مرز امنیتی است، نه یک سهو (GHSA-mcfc-hp25-cjv7).</p>

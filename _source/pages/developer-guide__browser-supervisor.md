@@ -192,5 +192,3 @@ child target attach, session teardown. Real-backend E2E (Browserbase + local
 Chromium-family browser) is manual — exercise via `/browser connect` to a
 live Chromium-family browser and run the dialog/frame test cases described
 above.
-
-

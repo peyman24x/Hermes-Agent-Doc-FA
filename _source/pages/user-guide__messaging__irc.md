@@ -17,9 +17,9 @@ IRC is plain text: there is no voice, image, file, thread, reaction, typing, or 
 
 ## Configure Hermes
 
-You can configure IRC two ways — environment variables (for a quick env-only setup) or the `gateway` block in `~/.hermes/gateway-config.yaml`.
+You can configure IRC two ways — environment variables (for a quick env-only setup) or the `gateway` block in `~/.hermes/config.yaml`.
 
-### Option A — gateway-config.yaml
+### Option A — config.yaml
 
 ```yaml
 gateway:
@@ -78,5 +78,3 @@ Check status with `hermes gateway status` — IRC connection state is reported t
 
 - Long agent replies are automatically split into multiple `PRIVMSG` lines to stay within the IRC line limit (`max_message_length`, default 450 bytes after protocol overhead).
 - The adapter acquires a scoped credential lock per server+nick, so two Hermes profiles won't fight over the same IRC identity.
-
-

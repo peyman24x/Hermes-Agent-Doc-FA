@@ -37,7 +37,9 @@ window.HERMES_NAV = [
   { p:"user-guide/skills/google-workspace.html",    t:"گوگل‌ورک‌اسپیس (جیمیل، تقویم…)",    d:1 },
   { p:"user-guide/which-file-does-what.html",       t:"هر فایل چه‌کاری می‌کند؟",           d:1 },
   { p:"user-guide/windows-native.html",             t:"راهنمای ویندوز (بومی)",            d:1 },
-  { p:"user-guide/windows-wsl-quickstart.html",     t:"راهنمای ویندوز (WSL2)",            d:1 }
+  { p:"user-guide/windows-wsl-quickstart.html",     t:"راهنمای ویندوز (WSL2)",            d:1 },
+  { p:"user-guide/egress/network-isolation.html", t:"جداسازی شبکه", d:0 },
+  { p:"user-guide/local-models.html", t:"مدل‌های محلی", d:0 }
 ]},
 { id:"features", cat:"🧠 قابلیت‌های اصلی", pages:[
   { p:"user-guide/features/overview.html",             t:"نگاه کلی قابلیت‌ها",                 d:1 },
@@ -70,7 +72,9 @@ window.HERMES_NAV = [
   { p:"user-guide/features/wake-word.html",            t:"کلمهٔ بیدارباش «هِی هرمس»",           d:1 },
   { p:"user-guide/features/web-dashboard.html",        t:"داشبورد وب",                           d:1 },
   { p:"user-guide/features/web-search.html",           t:"جستجو و استخراج وب",                   d:1 },
-  { p:"user-guide/features/x-search.html",             t:"جستجوی X (توییتر)",                   d:1 }
+  { p:"user-guide/features/x-search.html",             t:"جستجوی X (توییتر)",                   d:1 },
+  { p:"user-guide/features/credential-vault.html", t:"خزانهٔ اعتبارنامه‌ها", d:0 },
+  { p:"user-guide/features/plugin-catalog.html", t:"کاتالوگ افزونه‌ها", d:0 }
 ]},
 { id:"automation", cat:"🤖 اتوماسیون", pages:[
   { p:"user-guide/features/cron.html",            t:"کارهای زمان‌بندی (Cron)",        d:1 },
@@ -80,7 +84,8 @@ window.HERMES_NAV = [
   { p:"user-guide/features/goals.html",           t:"اهداف پایدار",                   d:1 },
   { p:"user-guide/features/code-execution.html",  t:"اجرای کد پایتون",               d:1 },
   { p:"user-guide/features/hooks.html",           t:"هوک‌های چرخهٔ حیات",            d:1 },
-  { p:"user-guide/features/batch-processing.html", t:"پردازش گروهی",                  d:1 }
+  { p:"user-guide/features/batch-processing.html", t:"پردازش گروهی",                  d:1 },
+  { p:"user-guide/features/kanban-multi-gateway.html", t:"کانبان با چند گیت‌وی", d:0 }
 ]},
 { id:"media", cat:"🎬 رسانه و وب", pages:[
   { p:"user-guide/features/voice-mode.html",      t:"حالت صوتی",                       d:1 },
@@ -153,9 +158,9 @@ window.HERMES_NAV = [
   { p:"guides/delegation-patterns.html",           t:"الگوهای واگذاری",                    d:1 },
   { p:"guides/github-pr-review-agent.html",        t:"ایجنت بازبینی PR گیت‌هاب",           d:1 },
   { p:"guides/agent-email-address.html",           t:"ایمیل اختصاصی برای ایجنت",           d:1 },
-  { p:"guides/automation-blueprints.html",         t:"نقشه‌های اتوماسیون",                 d:0 },
-  { p:"guides/aws-bedrock.html",                   t:"AWS Bedrock",                        d:0 },
-  { p:"guides/azure-foundry.html",                 t:"Microsoft Foundry",                  d:0 },
+  { p:"guides/automation-blueprints.html",         t:"نقشه‌های اتوماسیون",                 d:1 },
+  { p:"guides/aws-bedrock.html",                   t:"AWS Bedrock",                        d:1 },
+  { p:"guides/azure-foundry.html",                 t:"Microsoft Foundry",                  d:1 },
   { p:"guides/cron-script-only.html",              t:"Cron فقط با اسکریپت (بدون LLM)",    d:1 },
   { p:"guides/cron-troubleshooting.html",          t:"عیب‌یابی Cron",                      d:1 },
   { p:"guides/desktop-native-signin.html",         t:"ورود بومی دسکتاپ (RFC 8252)",        d:1 },
@@ -204,13 +209,28 @@ window.HERMES_NAV = [
   { p:"developer-guide/plugin-llm-access.html",      t:"دسترسی LLM در پلاگین",                   d:1 },
   { p:"developer-guide/plugins.html",               t:"ساخت پلاگین هرمس",                        d:0 },
   { p:"developer-guide/programmatic-integration.html", t:"یکپارچه‌سازی برنامه‌پذیر",             d:1 },
-  { p:"developer-guide/secret-source-plugin.html",   t:"پلاگین منبع رمز",                        d:0 },
+  { p:"developer-guide/secret-source-plugin.html",   t:"پلاگین منبع رمز",                        d:1 },
   { p:"developer-guide/subagent-lifecycle-api.html", t:"API چرخهٔ حیات ساب‌ایجنت",               d:1 },
-  { p:"developer-guide/tools-runtime.html",          t:"زمان اجرای ابزارها",                      d:0 },
-  { p:"developer-guide/trajectory-format.html",      t:"قالب Trajectory",                         d:0 },
-  { p:"developer-guide/video-gen-provider-plugin.html", t:"پلاگین تولید ویدیو",                   d:0 },
-  { p:"developer-guide/web-search-provider-plugin.html", t:"پلاگین جستجوی وب",                   d:0 },
-  { p:"developer-guide/worktree-ui-dev.html",        t:"توسعهٔ TUI و دسکتاپ در Worktree",        d:1 }
+  { p:"developer-guide/tools-runtime.html",          t:"زمان اجرای ابزارها",                      d:1 },
+  { p:"developer-guide/trajectory-format.html",      t:"قالب Trajectory",                         d:1 },
+  { p:"developer-guide/video-gen-provider-plugin.html", t:"پلاگین تولید ویدیو",                   d:1 },
+  { p:"developer-guide/web-search-provider-plugin.html", t:"پلاگین جستجوی وب",                   d:1 },
+  { p:"developer-guide/worktree-ui-dev.html",        t:"توسعهٔ TUI و دسکتاپ در Worktree",        d:1 },
+  { p:"developer-guide/billing-lifecycle.html", t:"چرخهٔ حیات صورتحساب", d:0 },
+  { p:"developer-guide/chronos-managed-cron-contract.html", t:"قرارداد Cron مدیریت‌شدهٔ Chronos", d:0 },
+  { p:"developer-guide/cli-internals.html", t:"ساختار داخلی CLI", d:0 },
+  { p:"developer-guide/completion-backlog-delivery.html", t:"تحویل پاسخ‌های تکمیل‌شدهٔ معوق", d:0 },
+  { p:"developer-guide/gateway-monitoring.html", t:"پایش گیت‌وی", d:0 },
+  { p:"developer-guide/gateway-session-lifecycle.html", t:"چرخهٔ حیات نشست گیت‌وی", d:0 },
+  { p:"developer-guide/micro-compaction.html", t:"فشرده‌سازی خرد", d:0 },
+  { p:"developer-guide/middleware.html", t:"میان‌افزار", d:0 },
+  { p:"developer-guide/multiplexing-gateway.html", t:"گیت‌وی چندگانه‌ساز", d:0 },
+  { p:"developer-guide/observer-hooks.html", t:"هوک‌های ناظر", d:0 },
+  { p:"developer-guide/relay-connector-contract.html", t:"قرارداد اتصال‌دهندهٔ Relay", d:0 },
+  { p:"developer-guide/relay-shared-metrics.html", t:"معیارهای مشترک Relay", d:0 },
+  { p:"developer-guide/state-db-recovery.html", t:"بازیابی پایگاه دادهٔ وضعیت", d:0 },
+  { p:"developer-guide/streaming-tts.html", t:"تبدیل جریانی متن به گفتار", d:0 },
+  { p:"developer-guide/terminal-environment-plugin.html", t:"افزونهٔ محیط ترمینال", d:0 }
 ]},
 { id:"reference", cat:"📖 مرجع", pages:[
   { p:"reference/cli-commands.html",              t:"فرمان‌های CLI",                       d:0 },
@@ -219,11 +239,11 @@ window.HERMES_NAV = [
   { p:"reference/environment-variables.html",     t:"متغیرهای محیطی",                       d:0 },
   { p:"reference/tools-reference.html",           t:"مرجع ابزارها",                         d:0 },
   { p:"reference/toolsets-reference.html",        t:"مرجع تول‌ست‌ها",                        d:1 },
-  { p:"reference/mcp-config-reference.html",      t:"مرجع پیکربندی MCP",                    d:0 },
+  { p:"reference/mcp-config-reference.html",      t:"مرجع پیکربندی MCP",                    d:1 },
   { p:"reference/model-catalog.html",             t:"کاتالوگ مدل‌ها",                        d:1 },
-  { p:"reference/skills-catalog.html",            t:"کاتالوگ مهارت‌های داخلی",              d:0 },
+  { p:"reference/skills-catalog.html",            t:"کاتالوگ مهارت‌های داخلی",              d:1 },
   { p:"reference/optional-skills-catalog.html",   t:"کاتالوگ مهارت‌های اختیاری",            d:0 },
-  { p:"reference/faq.html",                       t:"سؤالات متداول و عیب‌یابی",             d:0 },
+  { p:"reference/faq.html",                       t:"سؤالات متداول و عیب‌یابی",             d:1 },
   { p:"reference/automation-blueprints-catalog.html", t:"کاتالوگ نقشه‌های اتوماسیون",        d:1 },
   { p:"reference/cli-symbols.html",               t:"راهنمای نمادهای CLI",                  d:1 }
 ]},

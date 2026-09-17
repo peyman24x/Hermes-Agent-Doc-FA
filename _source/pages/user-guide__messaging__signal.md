@@ -10,6 +10,7 @@ Signal is the most privacy-focused mainstream messenger — end-to-end encrypted
 The Signal adapter uses `httpx` (already a core Hermes dependency) for all communication. No additional Python packages are required. You just need signal-cli installed externally.
 :::
 
+---
 
 ## Prerequisites
 
@@ -35,6 +36,7 @@ sudo ln -sf "/opt/signal-cli-${VERSION}/bin/signal-cli" /usr/local/bin/
 signal-cli is **not** in apt or snap repositories. The Linux install above downloads directly from [GitHub releases](https://github.com/AsamK/signal-cli/releases).
 :::
 
+---
 
 ## Step 1: Link Your Signal Account
 
@@ -50,6 +52,7 @@ signal-cli link -n "HermesAgent"
 3. Tap **Link New Device**
 4. Scan the QR code or enter the URI
 
+---
 
 ## Step 2: Start the signal-cli Daemon
 
@@ -69,6 +72,7 @@ curl http://127.0.0.1:8080/api/v1/check
 # Should return: {"versions":{"signal-cli":...}}
 ```
 
+---
 
 ## Step 3: Configure Hermes
 
@@ -111,6 +115,7 @@ hermes gateway install      # Install as a user service
 sudo hermes gateway install --system   # Linux only: boot-time system service
 ```
 
+---
 
 ## Access Control
 
@@ -132,6 +137,7 @@ Group access is controlled by the `SIGNAL_GROUP_ALLOWED_USERS` env var:
 | Set with group IDs | Only listed groups are monitored (e.g., `groupId1,groupId2`). |
 | Set to `*` | The bot responds in any group it's a member of. |
 
+---
 
 ## Features
 
@@ -171,6 +177,10 @@ Signal messages render with **native formatting** instead of literal markdown ch
 
 None of this requires additional config — it ships on by default in recent signal-cli builds. If your `signal-cli` version is too old, Hermes falls back to plaintext delivery and logs a one-time warning.
 
+### Long Messages
+
+Signal caps a single message at **8,000 characters**. Hermes splits longer responses into numbered chunks (`(1/3)`, `(2/3)`, …) automatically instead of truncating them. This applies to every delivery path — live conversation replies, cron job deliveries, `hermes send`, and MCP `send_message` calls — and native formatting (bold, italic, code, spoilers) is preserved across chunk boundaries.
+
 ### Typing Indicators
 
 The bot sends typing indicators while processing messages, refreshing every 8 seconds.
@@ -206,6 +216,7 @@ The adapter monitors the SSE connection and automatically reconnects if:
 - The connection drops (with exponential backoff: 2s → 60s)
 - No activity is detected for 120 seconds (pings signal-cli to verify)
 
+---
 
 ## Troubleshooting
 
@@ -219,6 +230,7 @@ The adapter monitors the SSE connection and automatically reconnects if:
 | **Bot responds to no one** | Configure `SIGNAL_ALLOWED_USERS`, use DM pairing, or explicitly allow all users through gateway policy if you want broader access. |
 | **Duplicate messages** | Ensure only one signal-cli instance is listening on your phone number |
 
+---
 
 ## Security
 
@@ -232,6 +244,7 @@ The adapter monitors the SSE connection and automatically reconnects if:
 - Signal's end-to-end encryption protects message content in transit
 - The signal-cli session data in `~/.local/share/signal-cli/` contains account credentials — protect it like a password
 
+---
 
 ## Environment Variables Reference
 
@@ -243,5 +256,3 @@ The adapter monitors the SSE connection and automatically reconnects if:
 | `SIGNAL_GROUP_ALLOWED_USERS` | No | — | Group IDs to monitor, or `*` for all (omit to disable groups) |
 | `SIGNAL_ALLOW_ALL_USERS` | No | `false` | Allow any user to interact (skip allowlist) |
 | `SIGNAL_HOME_CHANNEL` | No | — | Default delivery target for cron jobs |
-
-

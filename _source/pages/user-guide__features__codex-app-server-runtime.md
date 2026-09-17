@@ -455,5 +455,3 @@ If you find a bug, [open an issue](https://github.com/NousResearch/hermes-agent/
 ```
 
 For implementation details, see [PR #24182](https://github.com/NousResearch/hermes-agent/pull/24182) and the [Codex app-server protocol README](https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md).
-
-

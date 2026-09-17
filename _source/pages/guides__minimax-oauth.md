@@ -220,5 +220,3 @@ hermes auth logout minimax-oauth
 - [Environment Variables](../reference/environment-variables.md)
 - [Configuration](../user-guide/configuration.md)
 - [hermes doctor](../reference/cli-commands.md)
-
-

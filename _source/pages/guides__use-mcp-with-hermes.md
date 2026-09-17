@@ -535,5 +535,3 @@ Not-great first servers:
 - [MCP (Model Context Protocol)](/user-guide/features/mcp)
 - [FAQ](/reference/faq)
 - [Slash Commands](/reference/slash-commands)
-
-

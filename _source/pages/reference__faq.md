@@ -4,6 +4,7 @@
 
 Quick answers and fixes for the most common questions and issues.
 
+---
 
 ## Frequently Asked Questions
 
@@ -110,6 +111,7 @@ response = agent.chat("Explain quantum computing briefly")
 
 See the [Python Library guide](../user-guide/features/code-execution.md) for full API usage.
 
+---
 
 ## Troubleshooting
 
@@ -173,6 +175,8 @@ terminal:
 
 Missing files are skipped silently. Sourcing happens in bash, so files that rely on zsh-only syntax may error — if that's a concern, source just the PATH-setting portion (e.g. nvm's `nvm.sh` directly) rather than the whole rc file.
 
+Independently of the init files, every terminal command's `PATH` is completed with the standard system directories (`/usr/local/bin`, `/opt/homebrew/bin`, …), the Hermes-managed runtime dirs, and `~/.local/bin` when it exists (the `pip --user` / `pipx` / `uv tool` install target) — appended after your own entries, so precedence is unchanged. This covers backends started with a thin non-interactive PATH (systemd, GUI launchers, the Desktop SSH remote backend) without any configuration.
+
 To disable the auto-source behaviour (strict login-shell semantics only):
 
 ```yaml
@@ -203,6 +207,7 @@ sudo rm /usr/local/bin/hermes
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
 ```
 
+---
 
 ### Provider & Model Issues
 
@@ -277,7 +282,7 @@ Make sure the key matches the provider. An OpenAI key won't work with OpenRouter
 hermes model
 
 # Set a valid model
-hermes config set HERMES_MODEL anthropic/claude-opus-4.7
+hermes config set model.default anthropic/claude-opus-4.7
 
 # Or specify per-session
 hermes chat --model openrouter/meta-llama/llama-3.1-70b-instruct
@@ -312,6 +317,8 @@ If this happens on the first long conversation, Hermes may have the wrong contex
 
 Look at the CLI startup line — it shows the detected context length (e.g., `📊 Context limit: 128000 tokens`). You can also check with `/usage` during a session.
 
+**Local servers (llama.cpp, Ollama) that go silent instead of erroring:** when a provider rejects a request as too large, Hermes compacts the conversation and rebuilds the request. Hermes re-measures the *complete* rebuilt request (system prompt + tool schemas + messages) before retrying, and runs further bounded compaction passes if it is still over the threshold. If the request still cannot fit, the turn ends with `Context length exceeded: compression could not reduce the rebuilt request below the safe threshold` rather than sending an oversized request that llama.cpp would silently truncate (`stop processing: n_tokens = 65535, truncated = 1` in the server log). If you hit that message, the fix is almost always the configured `context_length` above: make it match the server's actual `-c` / `--ctx-size`.
+
 To fix context detection, set it explicitly:
 
 ```yaml
@@ -336,6 +343,7 @@ providers:
 
 See [Context Length Detection](../integrations/providers.md#context-length-detection) for how auto-detection works and all override options.
 
+---
 
 ### Terminal Issues
 
@@ -377,6 +385,7 @@ newgrp docker
 docker run hello-world
 ```
 
+---
 
 ### Messaging Issues
 
@@ -488,6 +497,7 @@ You can verify the plist has the correct PATH:
   ~/Library/LaunchAgents/ai.hermes.gateway.plist
 ```
 
+---
 
 ### Performance Issues
 
@@ -540,6 +550,7 @@ hermes chat
 hermes chat --continue
 ```
 
+---
 
 ### MCP Issues
 
@@ -605,6 +616,7 @@ See also:
 If an MCP server crashes mid-request, Hermes will report a timeout. Check the server's own logs (not just Hermes logs) to diagnose the root cause.
 :::
 
+---
 
 ## Profiles
 
@@ -631,6 +643,7 @@ This isolation is also the reason to never run two agents against the *same* pro
 
 There is no hard limit. Each profile is just a directory under `~/.hermes/profiles/`. The practical limit depends on your disk space and how many concurrent gateways your system can handle (each gateway is a lightweight Python process). Running dozens of profiles is fine; each idle profile uses no resources.
 
+---
 
 ## Workflows & Patterns
 
@@ -846,6 +859,7 @@ hermes chat -q "hello" --model anthropic/claude-opus-4.7
 
 If using OpenRouter, make sure your API key has credits. A 400 from OpenRouter often means the model requires a paid plan or the model ID has a typo.
 
+---
 
 ## Still Stuck?
 
@@ -854,5 +868,3 @@ If your issue isn't covered here:
 1. **Search existing issues:** [GitHub Issues](https://github.com/NousResearch/hermes-agent/issues)
 2. **Ask the community:** [Nous Research Discord](https://discord.gg/nousresearch)
 3. **File a bug report:** Include your OS, Python version (`python3 --version`), Hermes version (`hermes --version`), and the full error message
-
-

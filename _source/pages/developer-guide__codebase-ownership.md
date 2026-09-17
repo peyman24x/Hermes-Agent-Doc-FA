@@ -15,7 +15,7 @@ Hermes is a large repository, and most contributions touch exactly one subsystem
 | Plugins system | `plugins/` | [Build a Hermes Plugin](plugins/index.md) |
 | Skills (bundled & optional) | `skills/`, `optional-skills/` | [Creating Skills](creating-skills.md) |
 | Cron / scheduled jobs | `cron/` | [Cron Internals](cron-internals.md) |
-| Session storage | `hermes_state.py` | [Session Storage](session-storage.md) |
+| Session storage | `hermes_state.py`, `hermes_state_*.py` | [Session Storage](session-storage.md) |
 | Browser stack | `tools/browser_tool.py`, `tools/browser_supervisor.py`, `tools/browser_cdp_tool.py` | [Browser Supervisor](browser-supervisor.md) |
 | Egress firewall | `agent/proxy_sources/iron_proxy.py` | [Egress Internals](egress-internals.md) |
 | ACP (IDE integration) | `acp_adapter/` | [ACP Internals](acp-internals.md) |
@@ -29,5 +29,3 @@ A few conventions that fall out of this map:
 - **Changes should stay inside their subsystem.** A plugin that needs to edit core files is a design smell — widen the generic plugin surface instead (see the contribution rubric in the repository's `AGENTS.md`).
 - **Run the mirror test directory for every source directory you touch.** A change to `plugins/platforms/telegram/` needs `tests/plugins/platforms/` green, not just the test file you happened to think of.
 - **When two subsystems are involved, the narrower one owns the change.** Prefer a fix in an adapter or plugin over a branch in the agent core; the core is a narrow waist, and every addition there is paid for on every API call.
-
-

@@ -319,7 +319,16 @@ Each session stores:
 - current conversation history
 - cancel event
 
-The underlying `AIAgent` still uses Hermes' normal persistence/logging paths, but ACP `list/load/resume/fork` are scoped to the currently running ACP server process.
+Conversations are persisted to Hermes' session database and can be listed, loaded,
+resumed, or forked after the ACP server restarts. Opening a new session without a
+prompt keeps it in memory only: model-discovery probes do not create empty history
+rows. A nonempty fork is persisted immediately, and existing session metadata can
+still be updated even when its current history is empty.
+
+Existing empty rows from older versions are not automatically deleted. An open ACP
+row does not prove its client has disconnected. After closing the relevant editor
+sessions, inspect unwanted rows with `hermes sessions show <id>` and remove only
+confirmed unwanted sessions with `hermes sessions delete <id>`.
 
 ## Working directory behavior
 
@@ -392,5 +401,3 @@ or by editing `~/.hermes/.env`. The terminal auth flow (`hermes acp --setup`) ca
 - [ACP Internals](../../developer-guide/acp-internals.md)
 - [Provider Runtime Resolution](../../developer-guide/provider-runtime.md)
 - [Tools Runtime](../../developer-guide/tools-runtime.md)
-
-

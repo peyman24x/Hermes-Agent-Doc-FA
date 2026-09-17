@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قالب مسیرهای گفتگو — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/trajectory-format" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>قالب مسیرهای گفتگو</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1>قالب مسیرهای گفتگو</h1>
+<p>Hermes Agent مسیرهای گفتگو (Trajectory) را در قالب JSONL سازگار با ShareGPT ذخیره می‌کند تا به‌عنوان دادهٔ آموزش، خروجی اشکال‌زدایی و مجموعه‌دادهٔ یادگیری تقویتی استفاده شوند.</p>
+<p>فایل‌های منبع: <code>agent/trajectory.py</code>، <code>agent/session_persistence.py</code> (عبارت <code>_save_trajectory</code> را جستجو کنید)، <code>batch_runner.py</code>.</p>
+<section class="doc-sec"><h2 id="file-naming-convention"><span class="secnum">۱</span> قرارداد نام‌گذاری فایل‌ها</h2>
+<p>مسیرهای گفتگو در فایل‌هایی در پوشهٔ کاری جاری نوشته می‌شوند:</p>
+<div class="table-wrap"><table><thead><tr><th>فایل</th><th>زمان استفاده</th></tr></thead><tbody><tr><td><code>trajectory_samples.jsonl</code></td><td>گفتگوهایی که با موفقیت کامل شده‌اند (<code>completed=True</code>)</td></tr><tr><td><code>failed_trajectories.jsonl</code></td><td>گفتگوهایی که شکست خورده یا قطع شده‌اند (<code>completed=False</code>)</td></tr></tbody></table></div>
+<p>اجراگر دسته‌ای (<code>batch_runner.py</code>) برای هر دسته در فایل خروجی سفارشی (مثلاً <code>batch_001_output.jsonl</code>) با فیلدهای فرادادهٔ اضافی می‌نویسد. می‌توانید نام فایل را با پارامتر <code>filename</code> در <code>save_trajectory()</code> تغییر دهید.</p></section>
+<section class="doc-sec"><h2 id="jsonl-entry-format"><span class="secnum">۲</span> قالب هر رکورد JSONL</h2><p>هر خط فایل یک شیء JSON مستقل است. دو گونه وجود دارد:</p>
+<h3 id="cliinteractive-format-from-_save_trajectory">قالب CLI/تعاملی (از <code>_save_trajectory</code>)</h3><pre dir="ltr"><code>{
+  "conversations": [ ... ],
+  "timestamp": "2026-03-30T14:22:31.456789",
+  "model": "anthropic/claude-sonnet-4.6",
+  "completed": true
+}
+</code></pre>
+<h3 id="batch-runner-format-from-batch_runnerpy">قالب اجراگر دسته‌ای (از <code>batch_runner.py</code>)</h3><pre dir="ltr"><code>{
+  "prompt_index": 42,
+  "conversations": [ ... ],
+  "metadata": { "prompt_source": "gsm8k", "difficulty": "hard" },
+  "completed": true,
+  "partial": false,
+  "api_calls": 7,
+  "toolsets_used": ["code_tools", "file_tools"],
+  "tool_stats": {
+    "terminal": {"count": 3, "success": 3, "failure": 0},
+    "read_file": {"count": 2, "success": 2, "failure": 0},
+    "write_file": {"count": 0, "success": 0, "failure": 0}
+  },
+  "tool_error_counts": {
+    "terminal": 0,
+    "read_file": 0,
+    "write_file": 0
+  }
+}
+</code></pre>
+<p>دیکشنری‌های <code>tool_stats</code> و <code>tool_error_counts</code> نرمال می‌شوند تا <strong>تمام</strong> ابزارهای ممکن (از <code>model_tools.TOOL_TO_TOOLSET_MAP</code>) را با پیش‌فرض صفر دربر گیرند؛ در نتیجه اسکیما برای بارگذاری مجموعه‌دادهٔ HuggingFace در همهٔ رکوردها یکسان می‌ماند.</p></section>
+<section class="doc-sec"><h2 id="conversations-array-sharegpt-format"><span class="secnum">۳</span> آرایهٔ گفتگوها (قالب ShareGPT)</h2><p>آرایهٔ <code>conversations</code> از قرارداد نقش‌های ShareGPT استفاده می‌کند:</p>
+<div class="table-wrap"><table><thead><tr><th>نقش API</th><th><code>from</code> در ShareGPT</th></tr></thead><tbody><tr><td><code>system</code></td><td><code>"system"</code></td></tr><tr><td><code>user</code></td><td><code>"human"</code></td></tr><tr><td><code>assistant</code></td><td><code>"gpt"</code></td></tr><tr><td><code>tool</code></td><td><code>"tool"</code></td></tr></tbody></table></div>
+<h3 id="complete-example">مثال کامل</h3><pre dir="ltr"><code>{
+  "conversations": [
+    {
+      "from": "system",
+      "value": "You are a function calling AI model. You are provided with function signatures within &lt;tools&gt; &lt;/tools&gt; XML tags. You may call one or more functions to assist with the user query. If available tools are not relevant in assisting with user query, just respond in natural conversational language. Don't make assumptions about what values to plug into functions. After calling &amp; executing the functions, you will be provided with function results within &lt;tool_response&gt; &lt;/tool_response&gt; XML tags. Here are the available tools:\n&lt;tools&gt;\n[{\"name\": \"terminal\", \"description\": \"Execute shell commands\", \"parameters\": {\"type\": \"object\", \"properties\": {\"command\": {\"type\": \"string\"}}}, \"required\": null}]\n&lt;/tools&gt;\nFor each function call return a JSON object, with the following pydantic model json schema for each:\n{'title': 'FunctionCall', 'type': 'object', 'properties': {'name': {'title': 'Name', 'type': 'string'}, 'arguments': {'title': 'Arguments', 'type': 'object'}}, 'required': ['name', 'arguments']}\nEach function call should be enclosed within &lt;tool_call&gt; &lt;/tool_call&gt; XML tags.\nExample:\n&lt;tool_call&gt;\n{'name': &lt;function-name&gt;,'arguments': &lt;args-dict&gt;}\n&lt;/tool_call&gt;"
+    },
+    {
+      "from": "human",
+      "value": "What Python version is installed?"
+    },
+    {
+      "from": "gpt",
+      "value": "&lt;think&gt;\nThe user wants to know the Python version. I should run python3 --version.\n&lt;/think&gt;\n&lt;tool_call&gt;\n{\"name\": \"terminal\", \"arguments\": {\"command\": \"python3 --version\"}}\n&lt;/tool_call&gt;"
+    },
+    {
+      "from": "tool",
+      "value": "&lt;tool_response&gt;\n{\"tool_call_id\": \"call_abc123\", \"name\": \"terminal\", \"content\": \"Python 3.11.6\"}\n&lt;/tool_response&gt;"
+    },
+    {
+      "from": "gpt",
+      "value": "&lt;think&gt;\nGot the version. I can now answer the user.\n&lt;/think&gt;\nPython 3.11.6 is installed on this system."
+    }
+  ],
+  "timestamp": "2026-03-30T14:22:31.456789",
+  "model": "anthropic/claude-sonnet-4.6",
+  "completed": true
+}
+</code></pre></section>
+<section class="doc-sec"><h2 id="normalization-rules"><span class="secnum">۴</span> قواعد نرمال‌سازی</h2>
+<h3 id="reasoning-content-markup">نشانه‌گذاری محتوای استدلال</h3><p>مبدل مسیر گفتگو، صرف‌نظر از شیوهٔ تولید اولیهٔ مدل، <strong>تمام</strong> استدلال را در تگ‌های <code>&lt;think&gt;</code> نرمال می‌کند:</p>
+<ol><li><strong>توکن‌های بومی تفکر</strong> (فیلد <code>msg["reasoning"]</code> از ارائه‌دهندگانی مانند Anthropic و سری o شرکت OpenAI): به‌شکل <code>&lt;think&gt;\n{reasoning}\n&lt;/think&gt;\n</code> محصور می‌شوند و پیش از محتوا قرار می‌گیرند.</li><li><strong>XML مربوط به REASONING_SCRATCHPAD</strong> (وقتی تفکر بومی غیرفعال است و مدل با XML تعیین‌شده در پرامپت سیستم استدلال می‌کند): تگ‌های <code>&lt;REASONING_SCRATCHPAD&gt;</code> از طریق <code>convert_scratchpad_to_think()</code> به <code>&lt;think&gt;</code> تبدیل می‌شوند.</li><li><strong>بلوک‌های خالی تفکر:</strong> تضمین می‌شود هر نوبت <code>gpt</code> یک بلوک <code>&lt;think&gt;</code> داشته باشد. اگر استدلالی تولید نشده باشد، بلوک خالی <code>&lt;think&gt;\n&lt;/think&gt;\n</code> درج می‌شود تا قالب دادهٔ آموزشی یکسان بماند.</li></ol>
+<h3 id="tool-call-normalization">نرمال‌سازی فراخوانی ابزار</h3><p>فراخوانی‌های ابزار از قالب API (با <code>tool_call_id</code>، نام تابع و آرگومان‌ها به‌شکل رشتهٔ JSON) به JSON محصور در XML تبدیل می‌شوند:</p><pre dir="ltr"><code>&lt;tool_call&gt;
+{"name": "terminal", "arguments": {"command": "ls -la"}}
+&lt;/tool_call&gt;
+</code></pre>
+<ul><li>آرگومان‌ها از رشته‌های JSON به اشیا برگردانده می‌شوند؛ دوباره کدگذاری نمی‌شوند.</li><li>اگر تجزیهٔ JSON شکست بخورد (نباید رخ دهد، چون در طول گفتگو اعتبارسنجی شده است)، از <code>{}</code> خالی استفاده و هشداری ثبت می‌شود.</li><li>چند فراخوانی ابزار در یک نوبت دستیار، چند بلوک <code>&lt;tool_call&gt;</code> را در یک پیام <code>gpt</code> تولید می‌کند.</li></ul>
+<h3 id="tool-response-normalization">نرمال‌سازی پاسخ ابزار</h3><p>تمام نتایج ابزار که پس از پیام دستیار می‌آیند، در یک نوبت <code>tool</code> با پاسخ‌های JSON محصور در XML گروه‌بندی می‌شوند:</p><pre dir="ltr"><code>&lt;tool_response&gt;
+{"tool_call_id": "call_abc123", "name": "terminal", "content": "output here"}
+&lt;/tool_response&gt;
+</code></pre>
+<ul><li>اگر محتوای ابزار شبیه JSON باشد (با <code>{</code> یا <code>[</code> شروع شود)، تجزیه می‌شود تا فیلد محتوا به‌جای رشته، شیء یا آرایهٔ JSON داشته باشد.</li><li>چند نتیجهٔ ابزار با نویسهٔ خط جدید در یک پیام به هم پیوند داده می‌شوند.</li><li>نام ابزار بر اساس موقعیت با آرایهٔ <code>tool_calls</code> دستیار والد تطبیق داده می‌شود.</li></ul>
+<h3 id="system-message">پیام سیستم</h3><p>پیام سیستم هنگام ذخیره تولید می‌شود و از گفتگو گرفته نمی‌شود. این پیام از الگوی پرامپت فراخوانی تابع Hermes پیروی می‌کند و شامل موارد زیر است:</p><ul><li>مقدمه‌ای برای توضیح پروتکل فراخوانی تابع</li><li>بلوک XML با تگ <code>&lt;tools&gt;</code> شامل تعریف‌های JSON ابزارها</li><li>مرجع اسکیما برای اشیای <code>FunctionCall</code></li><li>مثالی از <code>&lt;tool_call&gt;</code></li></ul><p>تعریف ابزارها شامل <code>name</code>، <code>description</code>، <code>parameters</code> و <code>required</code> است؛ مقدار آخری برای تطابق با قالب مرجع روی <code>null</code> تنظیم می‌شود.</p></section>
+<section class="doc-sec"><h2 id="loading-trajectories"><span class="secnum">۵</span> بارگذاری مسیرهای گفتگو</h2><p>مسیرهای گفتگو JSONL استاندارد هستند؛ آن‌ها را با هر خوانندهٔ JSON-lines بارگذاری کنید:</p><pre dir="ltr"><code>import json
+
+def load_trajectories(path: str):
+    """Load trajectory entries from a JSONL file."""
+    entries = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                entries.append(json.loads(line))
+    return entries
+
+# Filter to successful completions only
+successful = [e for e in load_trajectories("trajectory_samples.jsonl")
+              if e.get("completed")]
+
+# Extract just the conversations for training
+training_data = [e["conversations"] for e in successful]
+</code></pre>
+<h3 id="loading-for-huggingface-datasets">بارگذاری برای مجموعه‌داده‌های HuggingFace</h3><pre dir="ltr"><code>from datasets import load_dataset
+
+ds = load_dataset("json", data_files="trajectory_samples.jsonl")
+</code></pre><p>اسکیمای نرمال‌شدهٔ <code>tool_stats</code> تضمین می‌کند تمام رکوردها ستون‌های یکسان داشته باشند و هنگام بارگذاری مجموعه‌داده، خطای عدم تطابق اسکیمای Arrow رخ ندهد.</p></section>
+<section class="doc-sec"><h2 id="controlling-trajectory-saving"><span class="secnum">۶</span> کنترل ذخیرهٔ مسیر گفتگو</h2><p>ذخیرهٔ مسیر گفتگو کلیدی در سطح <code>run_agent.py</code> یا کتابخانه است؛ CLI با نام <code>hermes</code> کلید پیکربندی یا پرچمی برای آن ارائه نمی‌دهد:</p><pre dir="ltr"><code>python run_agent.py --save_trajectories --query='your question here'
+</code></pre>
+<p>یا به‌شکل برنامه‌نویسی: <code>AIAgent(..., save_trajectories=True)</code> / <code>initialize_agent(..., save_trajectories=True)</code>. هنگام فعال‌بودن، متد <code>_save_trajectory()</code> در پایان هر نوبت گفتگو فراخوانی می‌شود.</p><p>اجراگر دسته‌ای همیشه مسیرهای گفتگو را ذخیره می‌کند؛ هدف اصلی آن همین است.</p><p>اجراگر دسته‌ای نمونه‌هایی را که در هیچ نوبتی استدلال ندارند، خودکار کنار می‌گذارد تا داده‌های آموزشی با نمونه‌های فاقد استدلال آمیخته نشوند.</p></section>
+
+<div class="pager"><a href="tools-runtime.html"><span class="dir">→ قبلی</span><span class="ttl">زمان اجرای ابزارها</span></a><a class="next" href="video-gen-provider-plugin.html"><span class="dir">بعدی ←</span><span class="ttl">افزونهٔ ارائه‌دهندهٔ تولید ویدئو</span></a></div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/trajectory-format" target="_blank" rel="noopener">Trajectory Format</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

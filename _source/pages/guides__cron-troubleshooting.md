@@ -4,6 +4,7 @@
 
 When a cron job isn't behaving as expected, work through these checks in order. Most issues fall into one of four categories: timing, delivery, permissions, or skill loading.
 
+---
 
 ## Jobs Not Firing
 
@@ -35,6 +36,8 @@ Cron jobs are fired by the gateway's background ticker thread, which ticks every
 
 If you're expecting jobs to fire automatically, you need a running gateway (`hermes gateway` for foreground, or `hermes gateway start` for the installed service). For one-off debugging, you can manually trigger a tick with `hermes cron tick`.
 
+**Desktop app:** the desktop's primary backend runs its own ticker, and it ticks **every local profile's** cron store — so jobs on a secondary profile keep firing even while that profile's backend is asleep (the desktop puts idle profile backends to sleep after ~10 minutes). You do not need to keep a profile open for its scheduled jobs to run.
+
 ### Check 4: Check the system clock and timezone
 
 Jobs use the local timezone. If your machine's clock is wrong or in a different timezone than expected, jobs will fire at the wrong times. Verify:
@@ -44,6 +47,7 @@ date
 hermes cron list   # Compare next_run times with local time
 ```
 
+---
 
 ## Delivery Failures
 
@@ -91,6 +95,15 @@ cron:
   wrap_response: false
 ```
 
+### Check 5: Relay-fronted platforms (Hermes Cloud / Team Gateway)
+
+When a platform's credential lives in the relay connector (e.g. Slack or Discord fronted by a Team Gateway) rather than in your local `.env`, the **running gateway's live relay adapter is the only sender** — there is no standalone delivery path.
+
+- Scheduled fires work as long as the gateway is running: its ticker owns relay-fronted delivery.
+- A standalone `hermes cron run <id>` automatically **forwards the run to the gateway** over the api_server (`POST /api/jobs/{id}/run`). This requires the `api_server` platform to be enabled with an `API_SERVER_KEY` (16+ characters). A `--prompt` / `cronjob(action='run', prompt=...)` context is forwarded with it and applies to that single fire only.
+- If the gateway is not reachable, the run fails with a "relay-fronted … start the gateway" error instead of the misleading `platform 'slack' not configured/enabled`. Start the gateway and retry.
+
+---
 
 ## Skill Loading Failures
 
@@ -122,6 +135,7 @@ When using multiple skills, they load in order. If Skill A depends on context fr
 
 In this example, `context-skill` loads before `target-skill`.
 
+---
 
 ## Job Errors and Failures
 
@@ -170,6 +184,7 @@ ls -la ~/.hermes/cron/jobs.json
 chmod 600 ~/.hermes/cron/jobs.json   # Your user should own it
 ```
 
+---
 
 ## Performance Issues
 
@@ -185,6 +200,7 @@ The scheduler executes jobs sequentially within each tick. If multiple jobs are 
 
 Scripts that dump megabytes of output will slow down the agent and may hit token limits. Filter/summarize at the script level — emit only what the agent needs to reason about.
 
+---
 
 ## Diagnostic Commands
 
@@ -196,6 +212,7 @@ hermes logs                         # View recent Hermes logs
 hermes skills list                  # Verify installed skills
 ```
 
+---
 
 ## Getting More Help
 
@@ -209,7 +226,6 @@ If you've worked through this guide and the issue persists:
    - What you expected vs. what happened
    - Relevant error messages from the logs
 
+---
 
 *For the complete cron reference, see [Automate Anything with Cron](/guides/automate-with-cron) and [Scheduled Tasks (Cron)](/user-guide/features/cron).*
-
-

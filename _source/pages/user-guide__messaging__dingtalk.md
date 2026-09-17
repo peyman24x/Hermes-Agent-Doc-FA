@@ -277,5 +277,3 @@ For more information on securing your Hermes Agent deployment, see the [Security
 - **Message deduplication**: The adapter deduplicates messages with a 5-minute window to prevent processing the same message twice.
 - **Auto-reconnection**: If the stream connection drops, the adapter automatically reconnects with exponential backoff.
 - **Message length limit**: Responses are capped at 20,000 characters per message. Longer responses are truncated.
-
-

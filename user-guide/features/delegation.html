@@ -172,7 +172,7 @@ delegation:
   provider: "openrouter"             # optional: route children to a different provider</code></pre>
 </div>
 <p>ترتیب حل: ‏<code>delegation.base_url</code> ‏(نقطهٔ پایانی مستقیم) اولویت دارد، بعد <code>delegation.provider</code> ‏(بستهٔ کامل اعتبارنامه از طریق سیستم ارائه‌دهندهٔ runtime)، و وقتی هیچ‌کدام ست نباشند فرزندان ارائه‌دهنده و اعتبارنامهٔ والد را به ارث می‌برند؛ ‏<code>delegation.model</code> در همهٔ حالات اعمال می‌شود و وقتی خالی باشد فرزندان مدل والد را به ارث می‌برند.</p>
-<p>توجه کنید این پین سراسری است: ‏<code>delegate_task</code> پارامتر مدل per-task ندارد، پس همهٔ فرزندان یک دسته روی مدل واگذاریِ پیکربندی‌شده اجرا می‌شوند. برای زیرتسک‌های حساس-به-کیفیت که مدل قوی‌تری لازم دارند یا <code>delegation.model</code> را برای آن نشست unset بگذارید یا تسک را به <a href="kanban.html#per-task-model-override">برد کانبان</a> بدهید که بازنویسی مدل per-task دارد.</p>
+<p>توجه کنید این پین سراسری است: ‏<code>delegate_task</code> پارامتر مدل per-task ندارد، پس همهٔ فرزندان یک دسته روی مدل واگذاریِ پیکربندی‌شده اجرا می‌شوند. برای زیرتسک‌های حساس-به-کیفیت که مدل قوی‌تری لازم دارند یا <code>delegation.model</code> را برای آن نشست unset بگذارید یا تسک را به <a href="https://hermes-agent.nousresearch.com/docs/kanban#per-task-model-override" target="_blank" rel="noopener">برد کانبان</a> بدهید که بازنویسی مدل per-task دارد.</p>
 </section>
 
 <section class="doc-sec">
@@ -243,7 +243,7 @@ delegation:
   <li>کنترل‌های kill و pause — لغو یک زیرایجنت مشخص وسط کار بدون قطع خواهربرادرهایش</li>
   <li>بازبینی پس‌رویدادی: مرور تاریخچهٔ نوبت-به-نوبت هر زیرایجنت حتی بعد از برگشتن به والد</li>
 </ul>
-<p>CLI کلاسیک <code>/agents</code> را فقط به‌صورت خلاصهٔ متنی چاپ می‌کند؛ TUI جایی است که overlay می‌درخشد. بخش <a href="../tui.html#slash-commands">TUI — دستورات اسلش</a> را ببینید.</p>
+<p>CLI کلاسیک <code>/agents</code> را فقط به‌صورت خلاصهٔ متنی چاپ می‌کند؛ TUI جایی است که overlay می‌درخشد. بخش <a href="https://hermes-agent.nousresearch.com/docs/../tui#slash-commands" target="_blank" rel="noopener">TUI — دستورات اسلش</a> را ببینید.</p>
 <p>روی CLI کلاسیک و همهٔ پلتفرم‌های گیت‌وی ‏(تلگرام، دیسکورد، اسلک و…)، ‏<code>/agents</code> همچنین <b>واگذاری‌های پس‌زمینه با فعالیت زندهٔ هر-فرزند</b> را فهرست می‌کند که مستقیم از هر فرزند درحال‌اجرا نمونه‌برداری شده:</p>
 <div class="codebox"><pre><code>Background delegations: 1 running
 - deleg_ab12cd34 · running · research the delegation stall monitor

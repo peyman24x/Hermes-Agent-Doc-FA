@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>کاتالوگ مهارت‌های داخلی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/reference/skills-catalog" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>مرجع<span class="sep">/</span><strong>کاتالوگ مهارت‌های داخلی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1 id="bundled-skills-catalog">کاتالوگ مهارت‌های داخلی</h1>
+<p>هرمس با کتابخانهٔ بزرگی از مهارت‌های داخلی عرضه می‌شود که هنگام نصب در <code>~/.hermes/skills/</code> کپی می‌شوند. هر مهارت زیر به صفحه‌ای اختصاصی با تعریف کامل، راه‌اندازی و شیوهٔ استفادهٔ آن پیوند دارد.</p>
+<p>هرمس هنگام اجرای <code>hermes update</code> مهارت‌های همراه خود را نیز همگام می‌کند؛ اما مانیفست همگام‌سازی، حذف‌های محلی و ویرایش‌های کاربر را رعایت می‌کند. اگر مهارتی که اینجا فهرست شده در درخت <code>~/.hermes/skills/</code> پروفایل شما نیست، آن مهارت همچنان همراه هرمس عرضه می‌شود؛ آن را با <code>hermes skills reset &lt;name&gt; --restore</code> بازیابی کنید.</p>
+<p>اگر مهارتی در این فهرست نیست اما در مخزن وجود دارد، کاتالوگ با <code>website/scripts/generate-skill-docs.py</code> دوباره تولید می‌شود.</p>
+<section class="doc-sec">
+<h2 id="apple"><span class="secnum">۱</span> محصولات Apple</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>مهارت</th><th>توضیح</th><th>مسیر</th></tr></thead><tbody>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/apple/apple-apple-notes" target="_blank" rel="noopener"><code>apple-notes</code></a></td><td>مدیریت Apple Notes با CLIِ <code>memo</code>: ایجاد، جستجو و ویرایش.</td><td><code>apple/apple-notes</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/apple/apple-apple-reminders" target="_blank" rel="noopener"><code>apple-reminders</code></a></td><td>کار با Apple Reminders از طریق <code>remindctl</code>: افزودن، فهرست‌کردن و علامت‌گذاری به‌عنوان انجام‌شده.</td><td><code>apple/apple-reminders</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/apple/apple-findmy" target="_blank" rel="noopener"><code>findmy</code></a></td><td>ردیابی دستگاه‌های Apple و AirTagها از طریق <code>FindMy.app</code> در macOS.</td><td><code>apple/findmy</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/apple/apple-imessage" target="_blank" rel="noopener"><code>imessage</code></a></td><td>ارسال و دریافت iMessage و SMS از طریق CLIِ <code>imsg</code> در macOS.</td><td><code>apple/imessage</code></td></tr>
+</tbody></table></div>
+</section>
+<section class="doc-sec">
+<h2 id="autonomous-ai-agents"><span class="secnum">۲</span> ایجنت‌های خودمختار هوش مصنوعی</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>مهارت</th><th>توضیح</th><th>مسیر</th></tr></thead><tbody>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code" target="_blank" rel="noopener"><code>claude-code</code></a></td><td>واگذاری کدنویسی به Claude Code CLI (قابلیت‌ها و درخواست‌های ادغام).</td><td><code>autonomous-ai-agents/claude-code</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex" target="_blank" rel="noopener"><code>codex</code></a></td><td>واگذاری کدنویسی به OpenAI Codex CLI (قابلیت‌ها و درخواست‌های ادغام).</td><td><code>autonomous-ai-agents/codex</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-computer-use" target="_blank" rel="noopener"><code>computer-use</code></a></td><td>کنترل دسکتاپ با اولویت کار در پس‌زمینه؛ ارتقا به روش تعاملی در صورت دریافت نشانهٔ نیاز.</td><td><code>autonomous-ai-agents/computer-use</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent" target="_blank" rel="noopener"><code>hermes-agent</code></a></td><td>استفاده، پیکربندی، تنظیم پوسته، گسترش و هماهنگ‌سازی Hermes Agent.</td><td><code>autonomous-ai-agents/hermes-agent</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-opencode" target="_blank" rel="noopener"><code>opencode</code></a></td><td>واگذاری کدنویسی به OpenCode CLI (قابلیت‌ها و بازبینی درخواست‌های ادغام).</td><td><code>autonomous-ai-agents/opencode</code></td></tr>
+</tbody></table></div>
+</section>
+<section class="doc-sec">
+<h2 id="creative"><span class="secnum">۳</span> خلاقیت</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>مهارت</th><th>توضیح</th><th>مسیر</th></tr></thead><tbody>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/creative/creative-architecture-diagram" target="_blank" rel="noopener"><code>architecture-diagram</code></a></td><td>نمودارهای SVG معماری، ابر و زیرساخت با پوستهٔ تیره، در قالب HTML.</td><td><code>creative/architecture-diagram</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/creative/creative-ascii-video" target="_blank" rel="noopener"><code>ascii-video</code></a></td><td>ویدیوی ASCII: تبدیل ویدیو/صدا به MP4/GIF رنگی با نویسه‌های ASCII.</td><td><code>creative/ascii-video</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/creative/creative-baoyu-infographic" target="_blank" rel="noopener"><code>baoyu-infographic</code></a></td><td>اینفوگرافیک: ۲۱ چیدمان × ۲۱ سبک (اطلاع‌نگاشت، بصری‌سازی).</td><td><code>creative/baoyu-infographic</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/creative/creative-claude-design" target="_blank" rel="noopener"><code>claude-design</code></a></td><td>طراحی خروجی‌های HTML موردی (صفحهٔ فرود، مجموعه‌اسلاید و نمونهٔ اولیه).</td><td><code>creative/claude-design</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/creative/creative-design-md" target="_blank" rel="noopener"><code>design-md</code></a></td><td>تألیف، اعتبارسنجی و خروجی‌گرفتن از فایل‌های مشخصات توکن <code>DESIGN.md</code> گوگل.</td><td><code>creative/design-md</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/creative/creative-humanizer" target="_blank" rel="noopener"><code>humanizer</code></a></td><td>انسانی‌ترکردن متن: حذف عبارت‌های کلیشه‌ای هوش مصنوعی و افزودن صدایی واقعی.</td><td><code>creative/humanizer</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/creative/creative-manim-video" target="_blank" rel="noopener"><code>manim-video</code></a></td><td>انیمیشن‌های Manim CE: ویدیوهای ریاضی/الگوریتم به سبک 3Blue1Brown.</td><td><code>creative/manim-video</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/creative/creative-p5js" target="_blank" rel="noopener"><code>p5js</code></a></td><td>طرح‌های p5.js: هنر مولد، سایه‌زن‌ها، آثار تعاملی و سه‌بعدی.</td><td><code>creative/p5js</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/creative/creative-popular-web-designs" target="_blank" rel="noopener"><code>popular-web-designs</code></a></td><td>۵۴ سیستم طراحی واقعی (Stripe، Linear و Vercel) در قالب HTML/CSS.</td><td><code>creative/popular-web-designs</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/creative/creative-songwriting-and-ai-music" target="_blank" rel="noopener"><code>songwriting-and-ai-music</code></a></td><td>فن ترانه‌نویسی و پرامپت‌های موسیقی برای Suno AI.</td><td><code>creative/songwriting-and-ai-music</code></td></tr>
+</tbody></table></div>
+</section>
+<section class="doc-sec">
+<h2 id="devops"><span class="secnum">۴</span> عملیات توسعه (DevOps)</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>مهارت</th><th>توضیح</th><th>مسیر</th></tr></thead><tbody>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/devops/devops-sdlc-review" target="_blank" rel="noopener"><code>sdlc-review</code></a></td><td>بازبینی تحویل‌های دست‌به‌دست Kanban و هدایت نتایج تأییدشده به مسیر مناسب.</td><td><code>devops/sdlc-review</code></td></tr>
+</tbody></table></div>
+</section>
+<section class="doc-sec">
+<h2 id="email"><span class="secnum">۵</span> ایمیل</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>مهارت</th><th>توضیح</th><th>مسیر</th></tr></thead><tbody>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/email/email-email-inbox-triage" target="_blank" rel="noopener"><code>email-inbox-triage</code></a></td><td>رسیدگی اولیه به صندوق ورودی: اولویت‌بندی رشته‌گفتگوها و تهیهٔ امن پیش‌نویس پاسخ‌ها.</td><td><code>email/email-inbox-triage</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/email/email-himalaya" target="_blank" rel="noopener"><code>himalaya</code></a></td><td>CLIِ Himalaya: ایمیل IMAP/SMTP از ترمینال.</td><td><code>email/himalaya</code></td></tr>
+</tbody></table></div>
+</section>
+<section class="doc-sec">
+<h2 id="media"><span class="secnum">۶</span> رسانه</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>مهارت</th><th>توضیح</th><th>مسیر</th></tr></thead><tbody>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/media/media-gif-search" target="_blank" rel="noopener"><code>gif-search</code></a></td><td>جستجو و دانلود GIF از Tenor با <code>curl</code> + <code>jq</code>.</td><td><code>media/gif-search</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/media/media-songsee" target="_blank" rel="noopener"><code>songsee</code></a></td><td>طیف‌نگاره‌ها و ویژگی‌های صوتی (mel، chroma و MFCC) از طریق CLI.</td><td><code>media/songsee</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/media/media-youtube-content" target="_blank" rel="noopener"><code>youtube-content</code></a></td><td>تبدیل متن پیاده‌شدهٔ ویدیوهای YouTube به خلاصه، رشته‌پست و مطلب وبلاگ.</td><td><code>media/youtube-content</code></td></tr>
+</tbody></table></div>
+</section>
+<section class="doc-sec">
+<h2 id="note-taking"><span class="secnum">۷</span> یادداشت‌برداری</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>مهارت</th><th>توضیح</th><th>مسیر</th></tr></thead><tbody>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/note-taking/note-taking-obsidian" target="_blank" rel="noopener"><code>obsidian</code></a></td><td>خواندن، جستجو، ایجاد و ویرایش یادداشت‌ها در مخزن Obsidian.</td><td><code>note-taking/obsidian</code></td></tr>
+</tbody></table></div>
+</section>
+<section class="doc-sec">
+<h2 id="productivity"><span class="secnum">۸</span> بهره‌وری</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>مهارت</th><th>توضیح</th><th>مسیر</th></tr></thead><tbody>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/productivity/productivity-airtable" target="_blank" rel="noopener"><code>airtable</code></a></td><td>APIِ RESTِ Airtable از طریق <code>curl</code>. ایجاد، خواندن، به‌روزرسانی و حذف رکوردها، فیلترها و درج یا به‌روزرسانی.</td><td><code>productivity/airtable</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/productivity/productivity-box" target="_blank" rel="noopener"><code>box</code></a></td><td>مدیریت فایل‌های ابری، اشتراک‌گذاری، جستجو و فراداده با Box.</td><td><code>productivity/box</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/productivity/productivity-document-to-action-items" target="_blank" rel="noopener"><code>document-to-action-items</code></a></td><td>استخراج تعهدات، مهلت‌ها و وظایف از اسناد، همراه با ارجاع به منبع.</td><td><code>productivity/document-to-action-items</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/productivity/productivity-docx" target="_blank" rel="noopener"><code>docx</code></a></td><td>ایجاد، خواندن، ویرایش، قالب‌سازی و بازبینی فایل‌های <code>.docx</code> در Word.</td><td><code>productivity/docx</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/productivity/productivity-google-workspace" target="_blank" rel="noopener"><code>google-workspace</code></a></td><td>کار با Gmail، Calendar، Drive، Docs و Sheets از طریق CLIِ <code>gws</code> یا Python.</td><td><code>productivity/google-workspace</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/productivity/productivity-maps" target="_blank" rel="noopener"><code>maps</code></a></td><td>تبدیل نشانی به مختصات، نقاط مورد علاقه، مسیرها و مناطق زمانی از طریق OpenStreetMap/OSRM.</td><td><code>productivity/maps</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/productivity/productivity-meeting-action-items" target="_blank" rel="noopener"><code>meeting-action-items</code></a></td><td>تبدیل یادداشت‌های جلسه به تصمیم‌ها، مسئولان و تیکت‌ها، همراه با ارجاع به منبع.</td><td><code>productivity/meeting-action-items</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/productivity/productivity-notion" target="_blank" rel="noopener"><code>notion</code></a></td><td>APIِ Notion + CLIِ <code>ntn</code>: صفحه‌ها، پایگاه‌های داده، Markdown و Workers.</td><td><code>productivity/notion</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/productivity/productivity-pdf" target="_blank" rel="noopener"><code>pdf</code></a></td><td>فایل‌های PDF: ایجاد، خواندن، ادغام، پرکردن، بازشناسی نوری نویسه‌ها (OCR) و ویرایش متن.</td><td><code>productivity/pdf</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/productivity/productivity-powerpoint" target="_blank" rel="noopener"><code>powerpoint</code></a></td><td>ایجاد، خواندن و ویرایش مجموعه‌اسلایدهای <code>.pptx</code> با <code>python-pptx</code>.</td><td><code>productivity/powerpoint</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/productivity/productivity-product-price-monitor" target="_blank" rel="noopener"><code>product-price-monitor</code></a></td><td>پایش قیمت محصول، پرواز یا آگهی؛ هشدار هنگام رسیدن به قیمت هدف.</td><td><code>productivity/product-price-monitor</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/productivity/productivity-teams-meeting-pipeline" target="_blank" rel="noopener"><code>teams-meeting-pipeline</code></a></td><td>خلاصه‌های جلسات Teams، اجرای مجدد کارها و اشتراک‌های Graph.</td><td><code>productivity/teams-meeting-pipeline</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/productivity/productivity-weekly-review-planning" target="_blank" rel="noopener"><code>weekly-review-planning</code></a></td><td>بازتنظیم هفتگی: تعهدات، کارهای متوقف‌شده و برنامهٔ هفتهٔ آینده.</td><td><code>productivity/weekly-review-planning</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/productivity/productivity-xlsx" target="_blank" rel="noopener"><code>xlsx</code></a></td><td>ایجاد، خواندن و ویرایش دفترکارهای <code>.xlsx</code> در Excel و فایل‌های CSV.</td><td><code>productivity/xlsx</code></td></tr>
+</tbody></table></div>
+</section>
+<section class="doc-sec">
+<h2 id="research"><span class="secnum">۹</span> پژوهش</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>مهارت</th><th>توضیح</th><th>مسیر</th></tr></thead><tbody>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/research/research-arxiv" target="_blank" rel="noopener"><code>arxiv</code></a></td><td>جستجوی مقاله‌های arXiv بر اساس کلیدواژه، نویسنده، دسته یا شناسه.</td><td><code>research/arxiv</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/research/research-competitor-news-monitor" target="_blank" rel="noopener"><code>competitor-news-monitor</code></a></td><td>پایش شرکت‌های مشخص‌شده برای خبرهای مهم؛ چکیده‌های دارای ارجاع.</td><td><code>research/competitor-news-monitor</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/research/research-grounded-citations" target="_blank" rel="noopener"><code>grounded-citations</code></a></td><td>متکی‌کردن پاسخ‌ها و اسناد به منابع ارجاع‌داده‌شده و قابل راستی‌آزمایی.</td><td><code>research/grounded-citations</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/research/research-llm-wiki" target="_blank" rel="noopener"><code>llm-wiki</code></a></td><td>LLM Wikiِ Karpathy: ساخت و پرس‌وجو از پایگاه دانش Markdown با پیوندهای متقابل.</td><td><code>research/llm-wiki</code></td></tr>
+</tbody></table></div>
+</section>
+<section class="doc-sec">
+<h2 id="social-media"><span class="secnum">۱۰</span> رسانه‌های اجتماعی</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>مهارت</th><th>توضیح</th><th>مسیر</th></tr></thead><tbody>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/social-media/social-media-xurl" target="_blank" rel="noopener"><code>xurl</code></a></td><td>کار با X/Twitter از طریق CLIِ <code>xurl</code>: جستجوی خام پست‌ها، انتشار پست، پیام مستقیم و رسانه.</td><td><code>social-media/xurl</code></td></tr>
+</tbody></table></div>
+</section>
+<section class="doc-sec">
+<h2 id="software-development"><span class="secnum">۱۱</span> توسعهٔ نرم‌افزار</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>مهارت</th><th>توضیح</th><th>مسیر</th></tr></thead><tbody>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/software-development/software-development-codebase-inspection" target="_blank" rel="noopener"><code>codebase-inspection</code></a></td><td>بررسی پایگاه‌های کد با <code>pygount</code>: تعداد خطوط کد، زبان‌ها و نسبت‌ها.</td><td><code>software-development/codebase-inspection</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/software-development/software-development-dogfood" target="_blank" rel="noopener"><code>dogfood</code></a></td><td>تضمین کیفیت اکتشافی برنامه‌های وب: یافتن باگ، گردآوری شواهد و تهیهٔ گزارش.</td><td><code>software-development/dogfood</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/software-development/software-development-github" target="_blank" rel="noopener"><code>github</code></a></td><td>کار با GitHub از طریق CLIِ <code>gh</code>: درخواست‌های ادغام، ایشوها، بازبینی‌ها، مخزن‌ها و احراز هویت.</td><td><code>software-development/github</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/software-development/software-development-hermes-agent-skill-authoring" target="_blank" rel="noopener"><code>hermes-agent-skill-authoring</code></a></td><td>تألیف فایل‌های <code>SKILL.md</code> داخل مخزن: فرادادهٔ آغازین و ساختار.</td><td><code>software-development/hermes-agent-skill-authoring</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/software-development/software-development-inspecting-hermes-desktop-dom" target="_blank" rel="noopener"><code>inspecting-hermes-desktop-dom</code></a></td><td>خواندن DOM/CSS زندهٔ دسکتاپ هرمس از طریق CDP.</td><td><code>software-development/inspecting-hermes-desktop-dom</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/software-development/software-development-node-inspect-debugger" target="_blank" rel="noopener"><code>node-inspect-debugger</code></a></td><td>اشکال‌زدایی Node.js با <code>--inspect</code> + CLIِ Chrome DevTools Protocol.</td><td><code>software-development/node-inspect-debugger</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/software-development/software-development-python-debugpy" target="_blank" rel="noopener"><code>python-debugpy</code></a></td><td>اشکال‌زدایی Python: محیط REPLِ <code>pdb</code> + <code>debugpy</code> از راه دور (DAP).</td><td><code>software-development/python-debugpy</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/software-development/software-development-requesting-code-review" target="_blank" rel="noopener"><code>requesting-code-review</code></a></td><td>بازبینی پیش از کامیت: پویش امنیتی، کنترل‌های کیفیت و اصلاح خودکار.</td><td><code>software-development/requesting-code-review</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/software-development/software-development-simplify-code" target="_blank" rel="noopener"><code>simplify-code</code></a></td><td>پاک‌سازی موازی تغییرات اخیر کد با ۴ ایجنت.</td><td><code>software-development/simplify-code</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/software-development/software-development-spike" target="_blank" rel="noopener"><code>spike</code></a></td><td>آزمایش‌های دورریختنی برای اعتبارسنجی یک ایده پیش از ساخت.</td><td><code>software-development/spike</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/software-development/software-development-systematic-debugging" target="_blank" rel="noopener"><code>systematic-debugging</code></a></td><td>اشکال‌زدایی ریشه‌ای در ۴ مرحله: شناخت باگ‌ها پیش از اصلاح آن‌ها.</td><td><code>software-development/systematic-debugging</code></td></tr>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/software-development/software-development-test-driven-development" target="_blank" rel="noopener"><code>test-driven-development</code></a></td><td>توسعهٔ آزمون‌محور (TDD): الزام چرخهٔ RED-GREEN-REFACTOR و نوشتن آزمون پیش از کد.</td><td><code>software-development/test-driven-development</code></td></tr>
+</tbody></table></div>
+</section>
+<section class="doc-sec">
+<h2 id="web"><span class="secnum">۱۲</span> وب</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>مهارت</th><th>توضیح</th><th>مسیر</th></tr></thead><tbody>
+<tr><td><a href="https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/web/web-blocked-page-recovery" target="_blank" rel="noopener"><code>blocked-page-recovery</code></a></td><td>استفاده هنگام شکست واکشی: خطاهای <code>403</code>/<code>429</code>، دیوار پرداخت، WAF و مانع ضدربات.</td><td><code>web/blocked-page-recovery</code></td></tr>
+</tbody></table></div>
+</section>
+<div class="pager">
+  <a href="model-catalog.html"><span class="dir">→ قبلی</span><span class="ttl">کاتالوگ مدل‌ها</span></a>
+  <a class="next" href="https://hermes-agent.nousresearch.com/docs/reference/optional-skills-catalog" target="_blank" rel="noopener"><span class="dir">بعدی ←</span><span class="ttl">کاتالوگ مهارت‌های اختیاری</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/reference/skills-catalog" target="_blank" rel="noopener">Bundled Skills Catalog</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

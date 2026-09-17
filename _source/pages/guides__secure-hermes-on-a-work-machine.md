@@ -176,5 +176,3 @@ HERMES_WRITE_SAFE_ROOT=/path/to/project:/home/you/.hermes
 - **[Checkpoints & Rollback](/user-guide/checkpoints-and-rollback)** — configuration, store maintenance, and restore workflows
 - **[Tools & Toolsets](/user-guide/features/tools)** — all terminal backends and their configuration
 - **[Configuration](/user-guide/configuration)** — the complete `config.yaml` reference
-
-

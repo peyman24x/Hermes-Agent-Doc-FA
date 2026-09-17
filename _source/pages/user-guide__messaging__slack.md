@@ -21,6 +21,7 @@ the steps below.
 | **Auth tokens needed** | Bot Token (`xoxb-`) + App-Level Token (`xapp-`) |
 | **User identification** | Slack Member IDs (e.g., `U01ABC2DEF3`) |
 
+---
 
 ## Step 1: Create a Slack App
 
@@ -69,6 +70,7 @@ Mode — all at once.
 You'll land on the app's **Basic Information** page. Continue with
 Steps 2–6 below.
 
+---
 
 ## Step 2: Configure Bot Token Scopes
 
@@ -101,8 +103,9 @@ These are the most commonly missed scopes.
 | Scope | Purpose |
 |-------|---------|
 | `groups:read` | List and get info about private channels |
-| `assistant:write` | Render the working-state status line ("is thinking…") next to the bot name while it processes a message. Without this scope the `assistant.threads.setStatus` call fails silently and Slack shows its own rotating generic placeholders instead ("Finding answers…", "Reviewing findings…", …) — Hermes never controls the text. Required for `typing_status_text` to have any visible effect. |
+| `assistant:write` | Render the working-state status line ("is thinking…") next to the bot name while it processes a message. Without this scope the status call (`agents.sessions.setStatus` on slack-sdk 3.44+, `assistant.threads.setStatus` on older SDKs) fails silently and Slack shows its own rotating generic placeholders instead ("Finding answers…", "Reviewing findings…", …) — Hermes never controls the text. Required for `typing_status_text` to have any visible effect. |
 
+---
 
 ## Step 3: Enable Socket Mode
 
@@ -120,6 +123,7 @@ Socket Mode lets the bot connect via WebSocket instead of requiring a public URL
 You can always find or regenerate app-level tokens under **Settings → Basic Information → App-Level Tokens**.
 :::
 
+---
 
 ## Step 4: Subscribe to Events
 
@@ -147,6 +151,7 @@ Without these events, Slack simply never delivers channel messages to the bot.
 :::
 
 
+---
 
 ## Step 5: Enable the Messages Tab
 
@@ -161,6 +166,7 @@ This step enables direct messages to the bot. Without it, users see **"Sending m
 Even with all the correct scopes and event subscriptions, Slack will not allow users to send direct messages to the bot unless the Messages Tab is enabled. This is a Slack platform requirement, not a Hermes configuration issue.
 :::
 
+---
 
 ## Step 6: Install App to Workspace
 
@@ -175,6 +181,7 @@ If you change scopes or event subscriptions later, you **must reinstall the app*
 to take effect. The Install App page will show a banner prompting you to do so.
 :::
 
+---
 
 ## Step 7: Find User IDs for the Allowlist
 
@@ -189,6 +196,7 @@ To find a Member ID:
 
 Member IDs look like `U01ABC2DEF3`. You need your own Member ID at minimum.
 
+---
 
 ## Step 8: Configure Hermes
 
@@ -225,6 +233,7 @@ can spend the entire turn in hidden reasoning and never produce visible assistan
 suppresses those incomplete-turn warnings from the thread and keeps the diagnostics in gateway logs.
 :::
 
+---
 
 ## Step 9: Invite the Bot to Channels
 
@@ -236,6 +245,7 @@ After starting the gateway, you need to **invite the bot** to any channel where 
 
 The bot will **not** automatically join channels. You must invite it to each channel individually.
 
+---
 
 ## Slash Commands
 
@@ -287,7 +297,7 @@ Then in Slack:
 ### Legacy `/hermes <subcommand>` still works
 
 For backward compatibility with older manifests, you can still type
-`/hermes btw run the tests` — Hermes routes it the same way as `/btw
+`/hermes bg run the tests` — Hermes routes it the same way as `/bg
 run the tests`. Free-form questions also work: `/hermes what's the
 weather?` is treated as a regular message.
 
@@ -334,9 +344,12 @@ tool), Slack renders it as **Block Kit buttons** — one tap per option, plus an
 "✏️ Other…" button that switches to free-text mode (your next typed message
 becomes the answer). After a tap, the message updates in place to show who
 answered and what was chosen; further clicks on the same prompt are ignored.
-Button clicks honor the same user authorization as messages, and expired
-prompts (gateway restart, timeout) tell you to re-ask instead of silently
-eating the click. Open-ended clarify questions render as a plain question and
+Button clicks honor the same user authorization as messages. When the prompt
+times out (`agent.clarify_timeout`), the session is reset, or you reply with
+free text instead of tapping a button, the card is rewritten in place without
+its buttons ("⏳ This prompt expired…" or "↩️ Clarification cancelled…"); a
+click on a card orphaned by a gateway restart still tells you to re-ask
+instead of silently eating the click. Open-ended clarify questions render as a plain question and
 accept your next typed reply. No configuration needed — this works regardless
 of the `rich_blocks` setting.
 
@@ -352,6 +365,7 @@ hermes slack manifest --slashes-only > /tmp/slashes.json
 Paste that array into the `features.slash_commands` key of your
 existing manifest.
 
+---
 
 ## How the Bot Responds
 
@@ -367,6 +381,7 @@ Understanding how Hermes behaves in different contexts:
 In channels, always @mention the bot to start a conversation. Once the bot is active in a thread, you can reply in that thread without mentioning it. Outside of threads, messages without @mention are ignored to prevent noise in busy channels.
 :::
 
+---
 
 ## Configuration Options
 
@@ -394,6 +409,12 @@ platforms:
       # Only the first chunk of the first reply is broadcast.
       reply_broadcast: false
 
+      # Control Slack's automatic link-preview cards without changing or
+      # removing clickable links from message text. Omit either key to keep
+      # Slack's default behavior for that preview type.
+      unfurl_links: false
+      unfurl_media: false
+
       # Render agent messages as Slack Block Kit blocks (default: false).
       # When true, the final agent message is sent with structured blocks —
       # section headers, dividers, true nested lists (via rich_text), and
@@ -407,10 +428,12 @@ platforms:
       # Requires rich_blocks: true. Default: false.
       feedback_buttons: false
 
-      # Render live tool calls as Slack-native plan/task cards. This explicit
-      # opt-in activates native progress even when text tool_progress is off.
-      # If Slack rejects the native stream, Hermes keeps one editable text
-      # fallback current for the rest of the turn.
+      # Render live tool calls as Slack-native plan/task cards. Works with
+      # Slack's built-in tool_progress: off default; a tool_progress: off you
+      # write yourself disables cards too. Cards need a thread: an un-threaded
+      # chat shows no tool progress (text progress if you wrote new/all).
+      # Recoverable native API failures keep one
+      # editable text fallback current for the rest of the turn.
       native_task_cards: false
 
       # Suggested prompts pinned at the top of Agent view's Messages tab.
@@ -442,16 +465,20 @@ platforms:
 | `platforms.slack.reply_to_mode` | `"first"` | Threading mode for multi-part messages: `"off"`, `"first"`, or `"all"` |
 | `platforms.slack.extra.reply_in_thread` | `true` | When `false`, channel messages get direct replies instead of threads. Messages inside existing threads still reply in-thread. |
 | `platforms.slack.extra.reply_broadcast` | `false` | When `true`, thread replies are also posted to the main channel. Only the first chunk is broadcast. |
+| `platforms.slack.extra.unfurl_links` | Slack default | Set to `false` to suppress automatic previews for linked web pages while preserving clickable links. When either unfurl key is set, media captions are posted as a separate message *before* the file (Slack's upload API cannot carry unfurl controls), and native draft streaming falls back to edit-based delivery. |
+| `platforms.slack.extra.unfurl_media` | Slack default | Set to `false` to suppress automatic media previews while preserving clickable links. Same caption-ordering and streaming notes as `unfurl_links`. |
 | `platforms.slack.extra.rich_blocks` | `false` | When `true`, agent messages are rendered as [Block Kit](https://docs.slack.dev/block-kit/) blocks (headers, dividers, true nested lists, and native tables). A plain-text fallback is always sent. Tables over Slack's limits fall back to aligned monospace. No app reinstall required — it's a send-side change only. |
 | `platforms.slack.extra.feedback_buttons` | `false` | When `true` with `rich_blocks`, appends Slack-native feedback controls to final replies. |
-| `platforms.slack.extra.native_task_cards` | `false` | When `true`, renders live tool calls as Slack-native plan/task cards. This is an explicit progress opt-in independent of Slack's default `tool_progress: off`; native API failures fall back to one continuously edited text update. |
+| `platforms.slack.extra.native_task_cards` | `false` | When `true`, renders live tool calls as Slack-native plan/task cards. Cards work with Slack's built-in default `tool_progress: off`; an explicitly configured `display.tool_progress: off` (global or `display.platforms.slack`; `/verbose` writes the same key) disables cards too. Cards need a thread: when the card lane is active and the chat has no thread to anchor on (a top-level DM with `reply_in_thread: false`), Hermes shows no tool progress instead of text bubbles, unless you explicitly set `tool_progress: new`/`all`, which falls back to editable text progress there. Recoverable native API failures fall back to one continuously edited text update. |
 | `platforms.slack.extra.suggested_prompts` | `[]` | Up to four `{title, message}` prompts for Agent/Assistant DM entry points; accepts either a list or `{title, prompts}`. |
 | `platforms.slack.extra.assistant_thread_titles` | `true` | When `true`, names Agent/Assistant DM threads from the first user message. |
 | `platforms.slack.extra.allow_bots` | `"none"` | Controls messages from other Slack bots: `"none"` ignores them, `"mentions"` accepts a bot message only when **that message itself** @mentions Hermes, and `"all"` accepts all of them. Use `"mentions"` for the safest bot-to-bot collaboration mode. See [Accepting messages from other bots](#accepting-messages-from-other-bots-allow_bots). |
+| `platforms.slack.extra.api_human_users` | `[]` | Slack user IDs whose **Web-API (user-token) posts count as human**. Such posts carry the posting `app_id` and no `client_msg_id`, so by default they are dropped as app traffic; allowlist your own front-end's users here instead of `allow_bots: all`. See [Treating your own app's user-token posts as human](#treating-your-own-apps-user-token-posts-as-human-api_human_users). |
 | `platforms.slack.extra.cron_continuable_surface` | `"thread"` | Delivery surface for [continuable cron jobs](../features/cron.md#flat-in-channel-continuation-slack). `"thread"` opens a dedicated thread per delivery (default); `"in_channel"` delivers flat into the channel timeline. Pair `in_channel` with `reply_in_thread: false` (and `require_mention: false`) so a plain channel reply continues the job. |
 
 The equivalent environment variable is `SLACK_ALLOW_BOTS=none|mentions|all`.
-When both are set, `platforms.slack.extra.allow_bots` takes precedence. Avoid
+When both are set, the explicit environment variable takes precedence (the same
+env-over-YAML rule as every other setting). Avoid
 `all` when peer bots can answer each other without an explicit mention, because
 their own reply policies can still create loops.
 
@@ -473,7 +500,7 @@ platforms:
 | `platforms.slack.typing_status_text` | `"is thinking..."` | Text of the working-state status line shown while the agent processes a message. Requires the `assistant:write` scope — without it the status call fails silently and Slack renders its own generic placeholder, whatever this is set to. Set `typing_indicator: false` to disable the status line entirely. |
 
 :::note Where the status renders
-The custom status appears in the **footer beneath the reply composer** ("*BotName* is thinking…"), not inline in the message list. The inline "Generating response…" / "Finding answers…" lines Slack shows in the message area while an AI app works are **Slack's own rotating indicators** — `assistant.threads.setStatus` does not control those, and both can appear at the same time.
+The custom status appears in the **footer beneath the reply composer** ("*BotName* is thinking…"), not inline in the message list. The inline "Generating response…" / "Finding answers…" lines Slack shows in the message area while an AI app works are **Slack's own rotating indicators** — the status API (`agents.sessions.setStatus` / `assistant.threads.setStatus`) does not control those, and both can appear at the same time.
 :::
 
 The same key customizes Google Chat's visible working-state marker message
@@ -548,12 +575,26 @@ platforms:
       native_task_cards: true
 ```
 
-- This is an explicit progress opt-in — it works even though Slack's default
-  is `tool_progress: off` (text bubbles spam channels; native cards don't).
+- Cards are the Slack rendering of tool progress. They work with Slack's
+  built-in default `tool_progress: off`. Writing `tool_progress: off` yourself
+  (globally, under `display.platforms.slack`, or by cycling `/verbose` to off)
+  turns cards off as well; `new` or `all` keeps them. A `null` value inherits
+  and is not an "off". Null also allows the existing environment bridge to
+  supply the mode when no YAML layer sets a non-null value. Changes apply
+  when the next turn resolves its display settings.
+- Cards need a thread. With the card lane active, a chat that has no thread to
+  anchor on (a top-level DM under `reply_in_thread: false`) shows no tool
+  progress rather than text bubbles under Slack's default `tool_progress: off`;
+  if you wrote `new` or `all`, that chat gets the editable text progress you
+  asked for. Replies inside an existing thread still get cards.
 - Concurrent calls to the same tool are correlated by real tool-call ID, so
   parallel `web_search` calls each get their own row with the right status.
-- If the native stream can't start or update, Hermes falls back to a single
-  continuously edited text message so progress stays live for the turn.
+- Hermes checks thread eligibility before attempting publication, so a
+  disconnect or timeout cannot turn an unthreaded destination into text fallback.
+- On a supported threaded destination, if the native stream fails for a
+  recoverable reason (API error, rate limit), Hermes falls back to a single continuously edited text message so
+  progress stays live for the turn. A relay egress refusal of the destination
+  is not recoverable and suppresses progress for the turn.
 - The card stream is stopped exactly once when the turn finalizes, including
   on interrupt/disconnect, so no dangling live indicator is left behind.
 
@@ -676,6 +717,38 @@ How `mentions` mode gates:
 `mentions` is the recommended mode for bot-to-bot collaboration: each agent must explicitly summon the other per turn. Avoid `all` unless every peer bot's own reply policy is loop-safe — two bots that answer everything will answer each other forever. Detection covers labeled bot messages (`bot_id`, `subtype: bot_message`), app-originated events, and unlabeled bot *users* (probed via `users.info`), so peer Hermes agents are filtered consistently across workspaces.
 
 For strict multi-bot deployments, pair with `require_mention: true` and `strict_mention: true` — see the smoke-check profile below.
+
+### Treating your own app's user-token posts as human (`api_human_users`)
+
+A message posted through the Web API with a **user token** (`xoxp-`) is
+authored by a real person, but it arrives with the posting `app_id` and no
+`client_msg_id` — the same signature Hermes uses to recognise app posts — so it
+is dropped as bot traffic. This blocks a common pattern: a custom front-end (an
+internal dashboard, a mobile shell, a kiosk) that sends messages to Hermes *as*
+the logged-in user.
+
+`allow_bots: all` would let those posts through, but it opens the door to every
+bot in the channel and weakens the loop protections. Instead, allowlist just
+the people who use your front-end:
+
+```yaml
+platforms:
+  slack:
+    extra:
+      api_human_users: ["U0AAAAAAA", "U0BBBBBBB"]
+```
+
+The equivalent environment variable is `SLACK_API_HUMAN_USERS` (comma-separated).
+
+Scope and safety:
+
+- The allowlist is **users only**. There is deliberately no app-ID variant: a
+  modern bot token (`xoxb-`) posts with the same `user` + `app_id` shape, so
+  trusting an app would also admit its own bot posts and defeat the loop guard.
+- Events carrying `bot_id` or `subtype: bot_message`, or no `user` at all, are
+  always treated as bot posts regardless of the allowlist.
+- The rest of the pipeline is unchanged: mention gating, `allowed_channels`,
+  and `SLACK_ALLOWED_USERS` still apply to the (now human) sender.
 
 ### Reaction Triggers (`reaction_triggers`)
 
@@ -826,6 +899,7 @@ platforms:
       reply_broadcast: false
 ```
 
+---
 
 
 ## Home Channel
@@ -859,6 +933,7 @@ Delivery works even when the cron process isn't co-located with the gateway — 
 
 The agent's `send_message` tool accepts the same target shapes: a channel ID (`C…`/`G…`), a DM conversation (`D…`), or a bare user ID (`U…`/`W…`), which is resolved to the user's DM on every send path — text, media, and interactive prompts alike. `MEDIA:<path>` attachments (images, PDFs, documents) upload as native file shares; when a short message accompanies a single attachment it rides as the file's caption instead of a separate message. Missing files are reported per-file as warnings rather than failing the whole send.
 
+---
 
 ## Multi-Workspace Support
 
@@ -912,6 +987,7 @@ Tokens from this file are merged with any tokens specified via `SLACK_BOT_TOKEN`
 - When a message arrives, Hermes uses the correct workspace-specific client to respond.
 - The primary `bot_user_id` (from the first token) is used for backward compatibility with features that expect a single bot identity.
 
+---
 
 ## Voice Messages
 
@@ -920,6 +996,7 @@ Hermes supports voice on Slack:
 - **Incoming:** Voice/audio messages are automatically transcribed using the configured STT provider: local `faster-whisper`, Groq Whisper (`GROQ_API_KEY`), or OpenAI Whisper (`VOICE_TOOLS_OPENAI_KEY`)
 - **Outgoing:** TTS responses are sent as audio file attachments
 
+---
 
 ## Per-Channel Prompts
 
@@ -963,7 +1040,7 @@ slack:
 
 Notes:
 - The binding matches by channel ID. For threaded messages in a bound channel, the thread inherits the parent channel's binding.
-- The skill is loaded only at session start (new session or after auto-reset). If you change the binding, run `/new` or wait for the session to auto-reset for it to take effect.
+- The skill is loaded only at session start (new session). If you change the binding, run `/new` for it to take effect.
 - Combine with `channel_prompts` for per-channel tone/constraints on top of the skill's instructions.
 
 ## Troubleshooting
@@ -996,6 +1073,7 @@ If the bot isn't working in channels, verify **all** of the following:
 7. ✅ Bot was **invited** to the channel (`/invite @Hermes Agent`)
 8. ✅ You are **@mentioning** the bot in your message
 
+---
 
 ## Security
 
@@ -1009,5 +1087,3 @@ treat them like passwords.
 - Rotate tokens periodically via the Slack app settings
 - Audit who has access to your Hermes config directory
 - Socket Mode means no public endpoint is exposed — one less attack surface
-
-

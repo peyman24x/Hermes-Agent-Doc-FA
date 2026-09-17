@@ -475,7 +475,7 @@ SDK.api.getStatus().then((s) =&gt; console.log("Version:", s.version));
 
 // Recent sessions
 SDK.api.getSessions(10).then((resp) =&gt; console.log(resp.sessions.length));</code></pre>
-<p>فهرست کامل را در بخش <a href="web-dashboard.html#rest-api">داشبورد وب ← REST API</a> ببینید.</p>
+<p>فهرست کامل را در بخش <a href="https://hermes-agent.nousresearch.com/docs/web-dashboard#rest-api" target="_blank" rel="noopener">داشبورد وب ← REST API</a> ببینید.</p>
 </section>
 
 <section class="doc-sec">
@@ -706,7 +706,7 @@ curl http://127.0.0.1:9119/api/dashboard/plugins/rescan</code></pre></div>
 </section>
 
 <section class="doc-sec">
-<h2><span class="secnum">۸</span> دموی ترکیبی تم + پلاگین</h2>
+<h2 id="combined-theme--plugin-demo"><span class="secnum">۸</span> دموی ترکیبی تم + پلاگین</h2>
 <p>پلاگین ‏<a href="https://github.com/NousResearch/hermes-example-plugins/tree/main/strike-freedom-cockpit" target="_blank" rel="noopener">strike-freedom-cockpit</a> ‏(مخزن همراه hermes-example-plugins) یک دموی ریسکین کامل است. یک YAML تم را با یک پلاگین فقط-slot جفت می‌کند تا بدون fork کردن داشبورد یک HUD به سبک کابین تولید کند.</p>
 <p><b>چه چیزی نشان می‌دهد:</b></p>
 <ul>

@@ -297,5 +297,3 @@ When you ask Hermes to review a PR in a repository that has `.agents/checks/`, t
 ## License
 
 By contributing, you agree that your contributions will be licensed under the [MIT License](https://github.com/NousResearch/hermes-agent/blob/main/LICENSE).
-
-

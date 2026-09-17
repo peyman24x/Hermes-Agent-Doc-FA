@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>زمان اجرای ابزارها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/tools-runtime" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>زمان اجرای ابزارها</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1>زمان اجرای ابزارها</h1>
+<p>ابزارهای هرمس توابعی خودثبت‌کننده هستند که در تول‌ست‌ها گروه‌بندی شده و از طریق یک سامانهٔ مرکزی ثبت/ارسال اجرا می‌شوند.</p>
+<p>پرونده‌های اصلی:</p>
+<ul><li><code>tools/registry.py</code></li><li><code>model_tools.py</code></li><li><code>toolsets.py</code></li><li><code>tools/terminal_tool.py</code></li><li><code>tools/environments/*</code></li></ul>
+<section class="doc-sec"><h2 id="tool-registration-model"><span class="secnum">۱</span> مدل ثبت ابزار</h2>
+<p>هر ماژول ابزار هنگام ایمپورت، <code>registry.register(...)</code> را فرامی‌خواند.</p>
+<p><code>model_tools.py</code> مسئول ایمپورت/کشف ماژول‌های ابزار و ساخت فهرست اسکیمایی است که به مدل داده می‌شود.</p>
+<h3 id="how-registryregister-works">روش کار <code>registry.register()</code></h3>
+<p>هر پروندهٔ ابزار در <code>tools/</code> در سطح ماژول <code>registry.register()</code> را فرامی‌خواند تا خود را اعلام کند. امضای تابع چنین است:</p>
+<pre dir="ltr"><code>registry.register(
+    name="terminal",               # Unique tool name (used in API schemas)
+    toolset="terminal",            # Toolset this tool belongs to
+    schema={...},                  # Model-facing schema (description, parameters)
+    handler=handle_terminal,       # The function that executes when the tool is called
+    check_fn=check_terminal,       # Optional: returns True/False for availability
+    requires_env=["SOME_VAR"],     # Optional: env vars needed (for UI display)
+    is_async=False,                # Whether the handler is an async coroutine
+    description="Run commands",    # Optional ToolEntry registry metadata
+    emoji="💻",                    # Emoji for spinner/progress display
+)
+</code></pre>
+<p>هر فراخوانی یک <code>ToolEntry</code> می‌سازد که در دیکشنری تکنمونهٔ <code>ToolRegistry._tools</code> با کلید نام ابزار ذخیره می‌شود. ثبتی که ابزار موجودی از یک تول‌ست <strong>متفاوت</strong> را سایه‌اندازی کند رد می‌شود (با ثبت خطا در لاگ)، مگر آنکه فراخوان <code>override=True</code> بدهد؛ بازنویسی ابزارهای داخلی توسط پلاگین‌ها افزون بر این به موافقت اپراتور یعنی <code>plugins.entries.&lt;plugin_id&gt;.allow_tool_override: true</code> در <code>config.yaml</code> نیاز دارد.</p>
+<p><code>schema["description"]</code> توصیفِ معتبرِ رودررو با مدل است. آرگومان جداگانهٔ <code>description=</code> مقدار <code>ToolEntry.description</code> را پر می‌کند؛ وقتی حذف شود، فرادادهٔ رجیستری به توصیف اسکیما بازمی‌گردد. <code>get_definitions()</code> تعریف تابع OpenAI را از <code>entry.schema</code> می‌سازد و <code>entry.description</code> را در اسکیمایی که <code>description</code> ندارد کپی نمی‌کند. بنابراین <code>description=</code> به‌تنهایی ابزار را برای مدل توصیف نمی‌کند و وقتی دو مقدار متفاوت باشند، مدل مقدار اسکیما را می‌بیند. مگر آنکه مصرف‌کننده‌ای از رجیستری آگاهانه به فرادادهٔ متفاوتی نیاز داشته باشد، توصیف را یک‌بار در خود اسکیما تعریف کنید.</p>
+<h3 id="discovery-discover_builtin_tools">کشف: <code>discover_builtin_tools()</code></h3>
+<p>وقتی <code>model_tools.py</code> ایمپورت می‌شود، <code>discover_builtin_tools()</code> را از <code>tools/registry.py</code> فرامی‌خواند. این تابع همهٔ پرونده‌های <code>tools/*.py</code> را با تحلیل AST اسکن می‌کند تا ماژول‌های دارای فراخوان <code>registry.register()</code> در سطح بالا را بیابد و سپس آن‌ها را ایمپورت می‌کند:</p>
+<pre dir="ltr"><code># tools/registry.py (simplified)
+def discover_builtin_tools(tools_dir=None):
+    tools_path = Path(tools_dir) if tools_dir else Path(__file__).parent
+    for path in sorted(tools_path.glob("*.py")):
+        if path.name in {"__init__.py", "registry.py", "mcp_tool.py"}:
+            continue
+        if _module_registers_tools(path):  # AST check for top-level registry.register()
+            importlib.import_module(f"tools.{path.stem}")
+</code></pre>
+<p>این کشف خودکار یعنی پرونده‌های ابزار جدید خودبه‌خود شناسایی می‌شوند — فهرستی برای نگه‌داری دستی وجود ندارد. بررسی AST فقط فراخوان‌های <code>registry.register()</code> در سطح بالا را می‌یابد (نه فراخوان‌های درون توابع)، بنابراین ماژول‌های کمکیِ موجود در <code>tools/</code> ایمپورت نمی‌شوند.</p>
+<p>هر ایمپورت فراخوانی‌های <code>registry.register()</code> آن ماژول را فعال می‌کند. خطاهای ابزارهای اختیاری (مثلاً نبودن <code>fal_client</code> برای تولید تصویر) گرفته و ثبت می‌شوند — جلوی بارگذاری بقیهٔ ابزارها را نمی‌گیرند.</p>
+<p>پس از کشف ابزارهای هسته، ابزارهای MCP و ابزارهای پلاگین هم کشف می‌شوند:</p>
+<ol>
+<li><strong>ابزارهای MCP</strong> — <code>tools.mcp_tool_discovery.discover_mcp_tools()</code> (که توسط نمای <code>tools.mcp_tool</code> دوباره صادر شده) پیکربندی سرور MCP را می‌خواند و ابزارهای سرورهای بیرونی را ثبت می‌کند.</li>
+<li><strong>ابزارهای پلاگین</strong> — <code>hermes_cli.plugins.discover_plugins()</code> پلاگین‌های کاربر/پروژه/pip را بارگذاری می‌کند که ممکن است ابزارهای بیشتری ثبت کرده باشند.</li>
+</ol>
+</section>
+<section class="doc-sec"><h2 id="tool-availability-checking-check_fn"><span class="secnum">۲</span> بررسی در دسترس بودن ابزار (<code>check_fn</code>)</h2>
+<p>هر ابزار می‌تواند به‌اختیار یک <code>check_fn</code> ارائه کند — فراخوان‌دادی که وقتی ابزار در دسترس است <code>True</code> و در غیر این صورت <code>False</code> برمی‌گرداند. بررسی‌های معمول عبارت‌اند از:</p>
+<ul>
+<li><strong>موجود بودن کلید API</strong> — مثلاً <code>lambda: bool(os.environ.get("SERP_API_KEY"))</code> برای جستجوی وب</li>
+<li><strong>در حال اجرا بودن سرویس</strong> — مثلاً بررسی پیکربندی‌شده بودن سرور Honcho</li>
+<li><strong>نصب بودن باینری</strong> — مثلاً وارسی موجود بودن <code>playwright</code> برای ابزارهای مرورگر</li>
+</ul>
+<p>وقتی <code>registry.get_definitions()</code> فهرست اسکیما را برای مدل می‌سازد، <code>check_fn()</code> هر ابزار را اجرا می‌کند:</p>
+<pre dir="ltr"><code># Simplified from registry.py
+if entry.check_fn:
+    try:
+        available = bool(entry.check_fn())
+    except Exception:
+        available = False   # Exceptions = unavailable
+    if not available:
+        continue            # Skip this tool entirely
+</code></pre>
+<p>رفتارهای کلیدی:</p>
+<ul>
+<li>نتیجهٔ بررسی‌ها <strong>به‌ازای هر فراخوان کش می‌شود</strong> — اگر چند ابزار <code>check_fn</code> یکسانی داشته باشند، فقط یک‌بار اجرا می‌شود.</li>
+<li>استثناهای <code>check_fn()</code> به معنای «در دسترس نیست» تلقی می‌شوند (رفتار ایمن در برابر خطا).</li>
+<li>متد <code>is_toolset_available()</code> بررسی می‌کند آیا <code>check_fn</code> یک تول‌ست موفق می‌شود؛ برای نمایش در رابط کاربری و حل تول‌ست به کار می‌رود.</li>
+</ul>
+</section>
+<section class="doc-sec"><h2 id="toolset-resolution"><span class="secnum">۳</span> حل تول‌ست‌ها</h2>
+<p>تول‌ست‌ها بسته‌های نام‌دار ابزارها هستند. هرمس آن‌ها را از این راه‌ها حل می‌کند:</p>
+<ul>
+<li>فهرست‌های صریح تول‌ست‌های فعال/غیرفعال</li>
+<li>پیش‌تنظیم‌های پلتفرمی (<code>hermes-cli</code>، <code>hermes-telegram</code> و غیره)</li>
+<li>تول‌ست‌های پویای MCP</li>
+<li>مجموعه‌های ویژهٔ منتخب مانند <code>hermes-acp</code></li>
+</ul>
+<h3 id="how-get_tool_definitions-filters-tools">روش فیلتر ابزارها در <code>get_tool_definitions()</code></h3>
+<p>نقطهٔ ورود اصلی <code>model_tools.get_tool_definitions(enabled_toolsets, disabled_toolsets, quiet_mode)</code> است:</p>
+<ol>
+<li><strong>اگر <code>enabled_toolsets</code> داده شده باشد</strong> — فقط ابزارهای آن تول‌ست‌ها گنجانده می‌شوند. هر نام تول‌ست از طریق <code>resolve_toolset()</code> حل می‌شود که تول‌ست‌های ترکیبی را به نام‌های ابزار منفرد باز می‌کند.</li>
+<li><strong>اگر <code>disabled_toolsets</code> داده شده باشد</strong> — از همهٔ تول‌ست‌ها آغاز و تول‌ست‌های غیرفعال از آن کسر می‌شود.</li>
+<li><strong>اگر هیچ‌کدام</strong> — همهٔ تول‌ست‌های شناخته‌شده گنجانده می‌شوند.</li>
+<li><strong>فیلتر رجیستری</strong> — مجموعهٔ نام‌های ابزارِ حل‌شده به <code>registry.get_definitions()</code> داده می‌شود که فیلتر <code>check_fn</code> را اعمال و اسکیماهای قالب OpenAI را برمی‌گرداند.</li>
+<li><strong>وصله‌گذاری پویای اسکیما</strong> — پس از فیلتر، اسکیماهای <code>execute_code</code> و <code>browser_navigate</code> به‌صورت پویا تنظیم می‌شوند تا فقط به ابزارهایی ارجاع دهند که واقعاً از فیلتر گذشته‌اند (از توهم مدل دربارهٔ ابزارهای در دسترس نیست جلوگیری می‌کند).</li>
+</ol>
+<h3 id="legacy-toolset-names">نام‌های قدیمی تول‌ست‌ها</h3>
+<p>نام‌های قدیمی با پسوند <code>_tools</code> (مثل <code>web_tools</code>، <code>terminal_tools</code>) برای سازگاری با گذشته از طریق <code>_LEGACY_TOOLSET_MAP</code> به نام‌های امروزی ابزار نگاشت می‌شوند.</p>
+</section>
+<section class="doc-sec"><h2 id="dispatch"><span class="secnum">۴</span> ارسال (Dispatch)</h2>
+<p>در زمان اجرا، ابزارها از طریق رجیستری مرکزی ارسال می‌شوند، با استثناهای حلقهٔ ایجنت برای برخی ابزارهای سطح ایجنت مانند حافظه/تودو/جستجوی نشست.</p>
+<h3 id="dispatch-flow-model-tool_call--handler-execution">جریان ارسال: <code>tool_call</code> مدل ← اجرای هندلر</h3>
+<p>وقتی مدل یک <code>tool_call</code> برمی‌گرداند، جریان چنین است:</p>
+<pre dir="ltr"><code>Model response with tool_call
+    ↓
+agent loop (`agent/conversation_loop.py`, via `run_agent.py`'s `AIAgent` facade)
+    ↓
+model_tools.handle_function_call(name, args, task_id, user_task)
+    ↓
+[Agent-loop tools?] → handled directly by agent loop (todo, memory, session_search, delegate_task)
+    ↓
+[Plugin pre-hook] → invoke_hook("pre_tool_call", ...)
+    ↓
+registry.dispatch(name, args, **kwargs)
+    ↓
+Look up ToolEntry by name
+    ↓
+[Async handler?] → bridge via _run_async()
+[Sync handler?]  → call directly
+    ↓
+Return result string (or JSON error)
+    ↓
+[Plugin post-hook] → invoke_hook("post_tool_call", ...)
+</code></pre>
+<h3 id="error-wrapping">پیچش خطا</h3>
+<p>تمام اجرای ابزار در دو سطح در مدیریت خطا پیچیده می‌شود:</p>
+<ol>
+<li><strong><code>registry.dispatch()</code></strong> — هر استثنای هندلر را می‌گیرد و <code>{"error": "Tool execution failed: ExceptionType: message"}</code> را به‌صورت JSON برمی‌گرداند.</li>
+<li><strong><code>handle_function_call()</code></strong> — کل ارسال را در یک try/except ثانویه می‌پیچد که <code>{"error": "Error executing tool_name: message"}</code> برمی‌گرداند.</li>
+</ol>
+<p>این تضمین می‌کند مدل همیشه یک رشتهٔ JSON خوش‌ساخت دریافت کند، نه یک استثنای مدیریت‌نشده.</p>
+<h3 id="agent-loop-tools">ابزارهای حلقهٔ ایجنت</h3>
+<p>چهار ابزار پیش از ارسال رجیستری رهگیری می‌شوند، چون به وضعیت سطح ایجنت (TodoStore، MemoryStore و غیره) نیاز دارند:</p>
+<ul>
+<li><code>todo</code> — برنامه‌ریزی/پیگیری وظایف</li>
+<li><code>memory</code> — نوشتن حافظهٔ پایدار</li>
+<li><code>session_search</code> — یادآوری بین‌نشستی</li>
+<li><code>delegate_task</code> — ایجاد نشست‌های ساب‌ایجنت</li>
+</ul>
+<p>اسکیمای این ابزارها همچنان در رجیستری ثبت می‌شود (برای <code>get_tool_definitions</code>)، اما اگر ارسال به‌طرزی به‌طور مستقیم به هندلرهایشان برسد، یک خطای موقتی برمی‌گردانند.</p>
+<h3 id="async-bridging">پل‌زنی ناهمگام</h3>
+<p>وقتی هندلر ابزار ناهمگام (async) باشد، <code>_run_async()</code> آن را به مسیر همگام ارسال پل می‌زند:</p>
+<ul>
+<li><strong>مسیر CLI (بدون حلقهٔ در حال اجرا)</strong> — از یک حلقهٔ رویداد پایدار استفاده می‌کند تا کلاینت‌های ناهمگامِ کش‌شده زنده بمانند</li>
+<li><strong>مسیر گیت‌وی (حلقهٔ در حال اجرا)</strong> — یک نخ یک‌بارمصرف با <code>asyncio.run()</code> برپا می‌کند</li>
+<li><strong>نخ‌های کاری (ابزارهای موازی)</strong> — از حلقه‌های پایدار به‌ازای هر نخ ذخیره‌شده در thread-local storage استفاده می‌کند</li>
+</ul>
+</section>
+<section class="doc-sec"><h2 id="the-dangerous_patterns-approval-flow"><span class="secnum">۵</span> جریان تأیید DANGEROUS_PATTERNS</h2>
+<p>ابزار ترمینال سامانهٔ تأیید فرمان خطرناکِ تعریف‌شده در <code>tools/approval.py</code> را یکپارچه کرده است:</p>
+<ol>
+<li><strong>شناسایی الگو</strong> — <code>DANGEROUS_PATTERNS</code> فهرستی از تاپل‌های <code>(regex, description)</code> است که عملیات مخرب را پوشش می‌دهد:
+  <ul>
+  <li>حذف بازگشتی (<code>rm -rf</code>)</li>
+  <li>قالب‌بندی فایل‌سیستم (<code>mkfs</code>، <code>dd</code>)</li>
+  <li>عملیات مخرب SQL (<code>DROP TABLE</code>، <code>DELETE FROM</code> بدون <code>WHERE</code>)</li>
+  <li>بازنویسی پیکربندی سیستم (<code>&gt; /etc/</code>)</li>
+  <li>دستکاری سرویس‌ها (<code>systemctl stop</code>)</li>
+  <li>اجرای کد از راه دور (<code>curl | sh</code>)</li>
+  <li>بمب فورک، کشتن فرایندها و غیره</li>
+  </ul></li>
+<li><strong>تشخیص</strong> — پیش از اجرای هر فرمان ترمینال، <code>detect_dangerous_command(command)</code> فرمان را با همهٔ الگوها می‌سنجد.</li>
+<li><strong>درخواست تأیید</strong> — اگر تطبیقی یافت شود:
+  <ul>
+  <li><strong>حالت CLI</strong> — یک پرامپت تعاملی از کاربر تأیید، رد یا اجازهٔ دائمی می‌خواهد</li>
+  <li><strong>حالت گیت‌وی</strong> — یک کالبک تأیید ناهمگام درخواست را به پلتفرم پیام‌رسانی می‌فرستد</li>
+  <li><strong>تأیید هوشمند</strong> — به‌صورت اختیاری، یک LLM کمکی می‌تواند فرمان‌های کم‌خطری را که با الگوها تطبیق دارند خودکار تأیید کند (مثلاً <code>rm -rf node_modules/</code> بی‌خطر است ولی با «حذف بازگشتی» تطبیق می‌کند)</li>
+  </ul></li>
+<li><strong>وضعیت نشست</strong> — تأییدها به‌ازای هر نشست پیگیری می‌شوند. پس از تأیید «حذف بازگشتی» برای یک نشست، فرمان‌های بعدی <code>rm -rf</code> دوباره پرسش نمی‌کنند.</li>
+<li><strong>فهرست مجاز دائمی</strong> — گزینهٔ «اجازهٔ دائمی» الگو را در <code>command_allowlist</code> پروندهٔ <code>config.yaml</code> می‌نویسد و در سراسر نشست‌ها پایدار می‌ماند.</li>
+</ol>
+</section>
+<section class="doc-sec"><h2 id="terminalruntime-environments"><span class="secnum">۶</span> محیط‌های ترمینال/اجرا</h2>
+<p>سامانهٔ ترمینال از بک‌اندهای چندگانه پشتیبانی می‌کند:</p>
+<ul>
+<li>local</li>
+<li>docker</li>
+<li>ssh</li>
+<li>singularity</li>
+<li>modal</li>
+<li>daytona</li>
+<li>vercel_sandbox</li>
+</ul>
+<p>همچنین از این‌ها پشتیبانی می‌کند:</p>
+<ul>
+<li>بازنویسی cwd به‌ازای هر وظیفه</li>
+<li>مدیریت فرایندهای پس‌زمینه</li>
+<li>حالت PTY</li>
+<li>کالبک‌های تأیید برای فرمان‌های خطرناک</li>
+</ul>
+<p><code>tools/process_registry_checkpoint.py</code> مالک چک‌پوینت‌های فرایندهای در حال اجرا و پذیرش امنِ PID است. خروجی تکمیل‌شده جداگانه است: <code>tools/process_registry_results.py</code> به‌ازای هر فرایند یک رسید اتمیک و پاک‌سازیشده زیر <code>logs/process-results/</code> پروفایل می‌نویسد. تولیدکننده‌ها نمی‌توانند با بازنویسی چک‌پوینت مشترک PID، نتایج والد دیگری را بازنویسی کنند. رجیستری رسید را پیش از آزادکردن رویداد تکمیلش پایدار می‌کند؛ مکث یک‌بارهٔ (one-shot linger) روی آن رویداد منتظر می‌ماند. متدهای موجود پرس‌وجوی فرایند، اسنپ‌شات‌های نگه‌داشته‌شده را بدون پذیرش PID یا صف‌کردن اعلان‌ها بارگذاری می‌کنند. خواندن‌ها نیازمند نشست پایدارِ درخواست‌کننده یا ادامهٔ فشرده‌سازی آن هستند؛ دانستن صرف یک هندل، خواندن نتیجهٔ نگه‌داشته‌شده را مجاز نمی‌کند. رجیستری این مالک را پیش از راه‌اندازی هر خوانندهٔ خروجی ثبت می‌کند — از جمله روی CLI و فرایندهای بدون اعلان — و زمینهٔ پروفایل تولیدکننده را در نخ‌های خواننده حفظ می‌کند. پاک‌سازی رسید مستقل از انصراف از خروجی زنده اجباری است؛ نگه‌داری با سن و شمار محدود می‌شود.</p>
+</section>
+<section class="doc-sec"><h2 id="concurrency"><span class="secnum">۷</span> هم‌زمانی</h2>
+<p>فراخوانی‌های ابزار بسته به ترکیب ابزارها و الزامات تعاملی، می‌توانند ترتیبی یا هم‌زمان اجرا شوند.</p>
+</section>
+<section class="doc-sec"><h2 id="related-docs"><span class="secnum">۸</span> مستندات مرتبط</h2>
+<ul>
+<li><a href="../reference/toolsets-reference.html">مرجع تول‌ست‌ها</a></li>
+<li><a href="https://hermes-agent.nousresearch.com/docs/reference/tools-reference" target="_blank" rel="noopener">مرجع ابزارهای داخلی (نسخهٔ اصلی)</a></li>
+<li><a href="agent-loop.html">درون‌مایهٔ حلقهٔ ایجنت</a></li>
+<li><a href="acp-internals.html">درون‌مایهٔ ACP</a></li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="subagent-lifecycle-api.html"><span class="dir">→ قبلی</span><span class="ttl">API چرخهٔ حیات ساب‌ایجنت</span></a>
+  <a class="next" href="trajectory-format.html"><span class="dir">بعدی ←</span><span class="ttl">قالب Trajectory</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/tools-runtime" target="_blank" rel="noopener">Tools Runtime</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

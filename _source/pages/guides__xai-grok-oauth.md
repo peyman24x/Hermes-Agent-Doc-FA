@@ -237,5 +237,3 @@ This clears both the singleton OAuth entry in `auth.json` and any credential-poo
 - [Environment Variables](../reference/environment-variables.md)
 - [Configuration](../user-guide/configuration.md)
 - [Voice & TTS](../user-guide/features/tts.md)
-
-

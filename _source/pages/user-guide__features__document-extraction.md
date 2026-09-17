@@ -52,5 +52,3 @@ Detection uses poppler's `pdftotext` for per-page text counts. If poppler is not
 :::tip
 The agent handles the warning on its own — it will offer to render or OCR the missing pages. If you're reading extractions yourself, treat "header with an empty body" as a scanned section, not a missing one.
 :::
-
-

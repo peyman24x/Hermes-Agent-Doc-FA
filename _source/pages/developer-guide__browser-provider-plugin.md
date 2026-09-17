@@ -147,5 +147,3 @@ The three bundled providers under `plugins/browser/` are the canonical examples,
 - [ ] `close_session()` / `emergency_cleanup()` never raise
 - [ ] `get_setup_schema()` exposes your env vars so `hermes tools` can configure the backend
 - [ ] `plugin.yaml` declares `kind: backend` + `provides_browser_providers`
-
-

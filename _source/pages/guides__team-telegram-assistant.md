@@ -14,6 +14,7 @@ A Telegram bot that:
 - **Secure by default** — only approved users can interact, with two authorization methods
 - **Scheduled tasks** — daily standups, health checks, and reminders delivered to a team channel
 
+---
 
 ## Prerequisites
 
@@ -27,6 +28,7 @@ Before starting, make sure you have:
 A $5/month VPS is plenty for running the gateway. Hermes itself is lightweight — the LLM API calls are what cost money, and those happen remotely.
 :::
 
+---
 
 ## Step 1: Create a Telegram Bot
 
@@ -71,6 +73,7 @@ Every Telegram bot starts with **@BotFather** — Telegram's official bot for cr
 Keep your bot token secret. Anyone with the token can control the bot. If it leaks, use `/revoke` in BotFather to generate a new one.
 :::
 
+---
 
 ## Step 2: Configure the Gateway
 
@@ -108,6 +111,7 @@ Your Telegram user ID is a numeric value (not your username). To find it:
 Telegram user IDs are permanent numbers like `123456789`. They're different from your `@username`, which can change. Always use the numeric ID for allowlists.
 :::
 
+---
 
 ## Step 3: Start the Gateway
 
@@ -177,6 +181,7 @@ hermes gateway status
 
 Then send a test message to your bot on Telegram. You should get a response within a few seconds.
 
+---
 
 ## Step 4: Set Up Team Access
 
@@ -241,6 +246,7 @@ DM pairing is ideal for teams because you don't need to restart the gateway when
 - After 5 failed approval attempts, the platform enters a 1-hour lockout
 - All pairing data is stored with `chmod 0600` permissions
 
+---
 
 ## Step 5: Configure the Bot
 
@@ -309,6 +315,7 @@ If your team works on specific projects, create context files so the bot knows y
 Context files are injected into every session's system prompt. Keep them concise — every character counts against your token budget.
 :::
 
+---
 
 ## Step 6: Set Up Scheduled Tasks
 
@@ -353,6 +360,7 @@ hermes cron status        # Check if scheduler is running
 Cron job prompts run in completely fresh sessions with no memory of prior conversations. Make sure each prompt contains **all** the context the agent needs — file paths, URLs, server addresses, and clear instructions.
 :::
 
+---
 
 ## Production Tips
 
@@ -410,6 +418,7 @@ hermes gateway stop && hermes gateway start
 | Pairing data | `~/.hermes/pairing/` |
 | Session history | `~/.hermes/sessions/` |
 
+---
 
 ## Going Further
 
@@ -423,7 +432,6 @@ You've got a working team Telegram assistant. Here are some next steps:
 - **[Personality](/user-guide/features/personality)** — built-in personality presets and custom persona definitions
 - **Add more platforms** — the same gateway can simultaneously run [Discord](/user-guide/messaging/discord), [Slack](/user-guide/messaging/slack), and [WhatsApp](/user-guide/messaging/whatsapp)
 
+---
 
 *Questions or issues? Open an issue on GitHub — contributions are welcome.*
-
-

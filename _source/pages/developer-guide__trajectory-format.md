@@ -5,7 +5,7 @@
 Hermes Agent saves conversation trajectories in ShareGPT-compatible JSONL format
 for use as training data, debugging artifacts, and reinforcement learning datasets.
 
-Source files: `agent/trajectory.py`, `run_agent.py` (search for `_save_trajectory`), `batch_runner.py`
+Source files: `agent/trajectory.py`, `agent/session_persistence.py` (search for `_save_trajectory`), `batch_runner.py`
 
 
 ## File Naming Convention
@@ -232,5 +232,3 @@ The batch runner always saves trajectories (that's its primary purpose).
 
 Samples with zero reasoning across all turns are automatically discarded by the
 batch runner to avoid polluting training data with non-reasoning examples.
-
-

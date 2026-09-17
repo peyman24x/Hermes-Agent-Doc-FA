@@ -270,5 +270,3 @@ That's the deal. If you're using more than two of those backends anyway, the sub
 - **[Voice mode](/user-guide/features/voice-mode)** — Set up voice conversations on the Portal subscription
 - **[OAuth over SSH](/guides/oauth-over-ssh)** — Remote / headless login patterns
 - **[Profiles](/user-guide/profiles)** — Share one Portal login across multiple Hermes configurations
-
-

@@ -15,6 +15,7 @@ Cron jobs run in fresh agent sessions with no memory of your current chat. Promp
 - **One-shot from a script that's already running** (CI step, post-commit hook, deploy script, externally-scheduled monitor): use [`hermes send`](/guides/pipe-script-output) to pipe stdout or a file straight to Telegram / Discord / Slack / etc. without setting up a cron entry.
 :::
 
+---
 
 ## Pattern 1: Website Change Monitor
 
@@ -69,6 +70,11 @@ Set up the cron job:
 For cron monitoring jobs, instruct the agent to respond with only `[SILENT]` when nothing changed. Cron delivery treats `[SILENT]` as the quiet marker, so you only get notified when something actually happens — no spam on quiet hours.
 :::
 
+:::tip Keeping failure notices out of shared channels
+`[SILENT]` only applies to successful runs — when a job hard-fails, the engine posts a `⚠️ Cron 'X' failed…` notice to the job's delivery target. For jobs that deliver into busy shared channels, set `--failure-deliver local` to suppress those notices entirely (run state stays visible in `hermes cron list` and run history), or point failures at an ops channel with `--failure-deliver slack:C_OPS`. Same grammar as `--deliver`; omit it and failures follow `--deliver` as before.
+:::
+
+---
 
 ## Pattern 2: Weekly Report
 
@@ -96,6 +102,7 @@ hermes cron create "0 9 * * 1" \
 
 The `0 9 * * 1` is a standard cron expression: 9:00 AM every Monday.
 
+---
 
 ## Pattern 3: GitHub Repository Watcher
 
@@ -119,6 +126,7 @@ Otherwise, provide a concise summary of the activity." --name "Repo watcher" --d
 Notice how the prompt includes the exact `gh` commands. The cron agent has no conversation history from previous runs — spell everything out. (Persistent memory does load, so durable preferences saved to MEMORY.md carry over, but don't rely on it for job-critical details.)
 :::
 
+---
 
 ## Pattern 4: Data Collection Pipeline
 
@@ -168,6 +176,7 @@ If there's a significant move, explain what happened." \
 
 The script does the mechanical collection; the agent adds the reasoning layer.
 
+---
 
 ## Pattern 5: Multi-Skill Workflow
 
@@ -196,6 +205,7 @@ cronjob(
 
 Skills are loaded in order — `arxiv` first (teaches the agent how to search papers), then `obsidian` (teaches how to write notes). The prompt ties them together.
 
+---
 
 ## Managing Your Jobs
 
@@ -221,6 +231,7 @@ Skills are loaded in order — `arxiv` first (teaches the agent how to search pa
 /cron remove <job_id>
 ```
 
+---
 
 ## Delivery Targets
 
@@ -258,6 +269,7 @@ Things to know:
 - The delivered message is prefixed so the bot knows it came from a scheduled
   job, not from you.
 
+---
 
 ## Tips
 
@@ -271,7 +283,6 @@ Things to know:
 
 **Schedule expressions.** Supported formats: relative delays (`30m`), intervals (`every 2h`), standard cron expressions (`0 9 * * *`), and ISO timestamps (`2025-06-15T09:00:00`). Natural language like `daily at 9am` is not supported — use `0 9 * * *` instead.
 
+---
 
 *For the complete cron reference — all parameters, edge cases, and internals — see [Scheduled Tasks (Cron)](/user-guide/features/cron).*
-
-

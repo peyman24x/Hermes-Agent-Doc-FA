@@ -2,6 +2,14 @@
 
 # Run Local LLMs on Mac
 
+:::tip Desktop users: there's a one-click path
+On the Hermes desktop app, **Settings → Providers → Local Models** installs
+and manages a local llama.cpp server for you — model downloads, memory
+fitting, and context sizing included. See [Local Models](/user-guide/local-models).
+This guide is for manual setup: MLX, custom builds, or servers you want to
+run yourself.
+:::
+
 This guide walks you through running a local LLM server on macOS with an OpenAI-compatible API. You get full privacy, zero API costs, and surprisingly good performance on Apple Silicon.
 
 We cover two backends:
@@ -17,6 +25,7 @@ Both expose an OpenAI-compatible `/v1/chat/completions` endpoint. Hermes works w
 This guide targets Macs with Apple Silicon (M1 and later). Intel Macs will work with llama.cpp but without GPU acceleration — expect significantly slower performance.
 :::
 
+---
 
 ## Choosing a model
 
@@ -31,6 +40,7 @@ For getting started, we recommend **Qwen3.5-9B** — it's a strong reasoning mod
 
 For larger models (27B, 35B), you'll need 32 GB+ of unified memory. The 9B is the sweet spot for 8-16 GB machines.
 
+---
 
 ## Option A: llama.cpp
 
@@ -128,6 +138,7 @@ If you forget the model name, query the models endpoint:
 curl -s http://localhost:8080/v1/models | jq '.data[].id'
 ```
 
+---
 
 ## Option B: MLX via omlx
 
@@ -165,6 +176,7 @@ omlx can serve multiple models simultaneously:
 curl -s http://127.0.0.1:8000/v1/models | jq '.data[].id'
 ```
 
+---
 
 ## Benchmarks: llama.cpp vs MLX
 
@@ -198,6 +210,7 @@ Both backends tested on the same machine (Apple M5 Max, 128 GB unified memory) r
 | Serving multiple models simultaneously | omlx (built-in multi-model support) |
 | Maximum compatibility (Linux too) | llama.cpp |
 
+---
 
 ## Connect to Hermes
 
@@ -209,6 +222,7 @@ hermes model
 
 Select **Custom endpoint** and follow the prompts. It will ask for the base URL and model name — use the values from whichever backend you set up above.
 
+---
 
 ## Timeouts
 
@@ -232,5 +246,3 @@ The stream read timeout is the one most likely to cause issues — it's the sock
 :::tip A silent first turn is usually prefill, not a hang
 Hermes sends its system prompt and tool schemas on every call, so on slower hardware the first turn can involve minutes of silence while the model processes that prompt before generating anything. That's prefill at work, not a stalled session. See [Slow first response (prefill)](./local-ollama-setup.md#slow-first-response-prefill) in the Ollama guide for mitigations like keeping the model loaded and trimming the fixed prompt with `hermes prompt-size`.
 :::
-
-

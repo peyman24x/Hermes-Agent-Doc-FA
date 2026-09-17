@@ -157,5 +157,3 @@ If you only want Hermes to *push* notifications to ntfy (cron summaries, alerts)
 **Connected but no messages** — Check that `NTFY_ALLOWED_USERS` includes the topic name itself. With ntfy's identity model, the topic IS the user; leaving the allowlist empty rejects everything.
 
 **Reconnects every 60s** — The stream keepalive default is 55s; ntfy may have intermittent network issues. The adapter applies exponential backoff (2 → 5 → 10 → 30 → 60s) and resets to 0 once a stream stays alive ≥60s.
-
-

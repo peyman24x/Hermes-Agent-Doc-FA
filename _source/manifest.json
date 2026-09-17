@@ -1,0 +1,2290 @@
+{
+  "schema_version": 1,
+  "snapshot_path": "_source/llms-full.txt",
+  "snapshot_sha256": "7e9b840d86b3d2cf1b78f5ac4a5b2e1f639018b62dcf56dcdad89eaa02249ef2",
+  "baseline_commit": "f1d08c53f62f54901ffe507abc15b2bf25975185",
+  "baseline_snapshot_sha256": "2d98622e4a358df33ffc4b0946500c2eb3cb459be074046d176cf9cc12ba476b",
+  "baseline_section_count": 207,
+  "section_count": 227,
+  "hash_normalization": "UTF-8 source body; LF newlines; outer whitespace stripped; one synthetic dump suffix removed",
+  "translation_status": "Local file existence only; translation freshness has not been reviewed.",
+  "counts": {
+    "added": 20,
+    "changed": 137,
+    "unchanged": 70,
+    "removed": 0
+  },
+  "removed_sources": [],
+  "pages": [
+    {
+      "source_path": "website/docs/developer-guide/acp-internals.md",
+      "extract_path": "_source/pages/developer-guide__acp-internals.md",
+      "canonical_route": "/docs/developer-guide/acp-internals",
+      "local_route": "developer-guide/acp-internals.html",
+      "local_file_exists": true,
+      "source_sha256": "a37697591935d2bd8fda930a16052748d50727b007ae6ab4c28dcff76454f9b2",
+      "previous_source_sha256": "127dcd0ea218ad81f6d39d6fc75d2a8ff3bd7220953504a199f76700e8e7ac99",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/adding-platform-adapters.md",
+      "extract_path": "_source/pages/developer-guide__adding-platform-adapters.md",
+      "canonical_route": "/docs/developer-guide/adding-platform-adapters",
+      "local_route": "developer-guide/adding-platform-adapters.html",
+      "local_file_exists": true,
+      "source_sha256": "cebde13d1b2486c80ca5ff184af3e1f592d9f41a6477e840b70a4ea0e4a81a24",
+      "previous_source_sha256": "c1a2b1c7a39cd0452f1d491d01351644ed2a65bc91877d1fe44f96c8ede9a4aa",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/adding-providers.md",
+      "extract_path": "_source/pages/developer-guide__adding-providers.md",
+      "canonical_route": "/docs/developer-guide/adding-providers",
+      "local_route": "developer-guide/adding-providers.html",
+      "local_file_exists": true,
+      "source_sha256": "4f7c5025cdf7cf40713d6fd46a8e1cd2b2ec413947a2ee6746f3b9bcfb8f851f",
+      "previous_source_sha256": "bb0d75945b0293c72f75001746549b940e1ac365cfb8366e0c29714740cdd533",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/adding-tools.md",
+      "extract_path": "_source/pages/developer-guide__adding-tools.md",
+      "canonical_route": "/docs/developer-guide/adding-tools",
+      "local_route": "developer-guide/adding-tools.html",
+      "local_file_exists": true,
+      "source_sha256": "b7eee2b7f5c47952344cc0b61a58340eb7c3493fa36374d5a8f8d72a0dd94006",
+      "previous_source_sha256": "bae4d8375796c83f19078de0e3245f0eb954f4f706e5687c05ff535c4a581060",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/agent-loop.md",
+      "extract_path": "_source/pages/developer-guide__agent-loop.md",
+      "canonical_route": "/docs/developer-guide/agent-loop",
+      "local_route": "developer-guide/agent-loop.html",
+      "local_file_exists": true,
+      "source_sha256": "1a9d74a3edd9194d2f27ce96f1309e749443523e97d5e91544d30351ecb6bcd2",
+      "previous_source_sha256": "21da43cac3c5ae9330e0ae89b80df6d8d5f538fcbe81f0dfc359f356f8c68d38",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/architecture.md",
+      "extract_path": "_source/pages/developer-guide__architecture.md",
+      "canonical_route": "/docs/developer-guide/architecture",
+      "local_route": "developer-guide/architecture.html",
+      "local_file_exists": true,
+      "source_sha256": "153f50ec403b246d420c207d2c424e6eb51085a526971a4cd82c65c330dfffea",
+      "previous_source_sha256": "f432cfdbd3b46ef548276aa3cc311470ca23b705391124679e4f09dfb995608b",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/billing-lifecycle.md",
+      "extract_path": "_source/pages/developer-guide__billing-lifecycle.md",
+      "canonical_route": "/docs/developer-guide/billing-lifecycle",
+      "local_route": "developer-guide/billing-lifecycle.html",
+      "local_file_exists": false,
+      "source_sha256": "e710595d70307555b8acbc73209223e16ae9ba7a19ba3480163db49dc0921aa6",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/developer-guide/browser-provider-plugin.md",
+      "extract_path": "_source/pages/developer-guide__browser-provider-plugin.md",
+      "canonical_route": "/docs/developer-guide/browser-provider-plugin",
+      "local_route": "developer-guide/browser-provider-plugin.html",
+      "local_file_exists": true,
+      "source_sha256": "fe2aa09faa236d8e394e8f5461130617587489f4587574013915cee03b93113f",
+      "previous_source_sha256": "fe2aa09faa236d8e394e8f5461130617587489f4587574013915cee03b93113f",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/developer-guide/browser-supervisor.md",
+      "extract_path": "_source/pages/developer-guide__browser-supervisor.md",
+      "canonical_route": "/docs/developer-guide/browser-supervisor",
+      "local_route": "developer-guide/browser-supervisor.html",
+      "local_file_exists": true,
+      "source_sha256": "17c0f1d78ceb38c8207657332cf77a8195e5657ecd338cc49c1e839628dab7f2",
+      "previous_source_sha256": "17c0f1d78ceb38c8207657332cf77a8195e5657ecd338cc49c1e839628dab7f2",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/developer-guide/chronos-managed-cron-contract.md",
+      "extract_path": "_source/pages/developer-guide__chronos-managed-cron-contract.md",
+      "canonical_route": "/docs/developer-guide/chronos-managed-cron-contract",
+      "local_route": "developer-guide/chronos-managed-cron-contract.html",
+      "local_file_exists": false,
+      "source_sha256": "74d35eabcdecd27c8451faba821a1ce1ec95688614543fe93eda41adeea61d45",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/developer-guide/cli-internals.md",
+      "extract_path": "_source/pages/developer-guide__cli-internals.md",
+      "canonical_route": "/docs/developer-guide/cli-internals",
+      "local_route": "developer-guide/cli-internals.html",
+      "local_file_exists": false,
+      "source_sha256": "82695304087db779b9a51ca55517ced1ae09520a80e8db4037da34ff5137794a",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/developer-guide/codebase-ownership.md",
+      "extract_path": "_source/pages/developer-guide__codebase-ownership.md",
+      "canonical_route": "/docs/developer-guide/codebase-ownership",
+      "local_route": "developer-guide/codebase-ownership.html",
+      "local_file_exists": true,
+      "source_sha256": "686437c915ca4ecb8557ab02ef5fcb363392d45bd668d4d7be40082ea7e3899b",
+      "previous_source_sha256": "93d4d516b916ef9ce13c51b56ca7269ef8b06e51e75c1b3d0fc9a3b0264767c0",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/completion-backlog-delivery.md",
+      "extract_path": "_source/pages/developer-guide__completion-backlog-delivery.md",
+      "canonical_route": "/docs/developer-guide/completion-backlog-delivery",
+      "local_route": "developer-guide/completion-backlog-delivery.html",
+      "local_file_exists": false,
+      "source_sha256": "1144836416b1d299f3ff4f9dae9301241ed624a39afd1a5f979392b9a387ebd0",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/developer-guide/context-compression-and-caching.md",
+      "extract_path": "_source/pages/developer-guide__context-compression-and-caching.md",
+      "canonical_route": "/docs/developer-guide/context-compression-and-caching",
+      "local_route": "developer-guide/context-compression-and-caching.html",
+      "local_file_exists": true,
+      "source_sha256": "019456901e49068a71467b54df0ffc60b923babc409a2d72dd4be7eeff246d96",
+      "previous_source_sha256": "8da7e8917a220f1a441d87d444224e0d9924ac22f573a96452a827bb473b10e5",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/context-engine-plugin.md",
+      "extract_path": "_source/pages/developer-guide__context-engine-plugin.md",
+      "canonical_route": "/docs/developer-guide/context-engine-plugin",
+      "local_route": "developer-guide/context-engine-plugin.html",
+      "local_file_exists": true,
+      "source_sha256": "d21bc3e13495ae0d8e7c00e39d16d4f26680b9ae9fe7fd1669c5ccf70735f461",
+      "previous_source_sha256": "6e092392f5c21bd0752e3dce407d24d5519b43c9e2dc1cbde26b3cf93308e10b",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/contributing.md",
+      "extract_path": "_source/pages/developer-guide__contributing.md",
+      "canonical_route": "/docs/developer-guide/contributing",
+      "local_route": "developer-guide/contributing.html",
+      "local_file_exists": true,
+      "source_sha256": "a49b6de3144a10a3d1c721fe2a5d04009c58c0e0b834272ba3f3af5ec0545c72",
+      "previous_source_sha256": "a49b6de3144a10a3d1c721fe2a5d04009c58c0e0b834272ba3f3af5ec0545c72",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/developer-guide/creating-skills.md",
+      "extract_path": "_source/pages/developer-guide__creating-skills.md",
+      "canonical_route": "/docs/developer-guide/creating-skills",
+      "local_route": "developer-guide/creating-skills.html",
+      "local_file_exists": true,
+      "source_sha256": "5b30c79762723e219826014ec321c44f99e93aa408872ae907878b7a888015e6",
+      "previous_source_sha256": "5b30c79762723e219826014ec321c44f99e93aa408872ae907878b7a888015e6",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/developer-guide/cron-internals.md",
+      "extract_path": "_source/pages/developer-guide__cron-internals.md",
+      "canonical_route": "/docs/developer-guide/cron-internals",
+      "local_route": "developer-guide/cron-internals.html",
+      "local_file_exists": true,
+      "source_sha256": "b877fd7520ab71a04ece9e851652f2101517f8c3163abe8e4585688e5f93f647",
+      "previous_source_sha256": "47244cab6fd1d6a7d88d7fc24238f6977eb0bd6a8c953eeeea0d13b1fafe5376",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/desktop-plugin-sdk.md",
+      "extract_path": "_source/pages/developer-guide__desktop-plugin-sdk.md",
+      "canonical_route": "/docs/developer-guide/desktop-plugin-sdk",
+      "local_route": "developer-guide/desktop-plugin-sdk.html",
+      "local_file_exists": true,
+      "source_sha256": "dbc02d0e662a7c5b29c17e11c41d6a3be6cc417dd47599c06a6c52b049f924be",
+      "previous_source_sha256": "92e1a0998e3b1c3b419efdf72f2623e5af04941ca5aecb850f06e1228b18dcf2",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/egress-internals.md",
+      "extract_path": "_source/pages/developer-guide__egress-internals.md",
+      "canonical_route": "/docs/developer-guide/egress-internals",
+      "local_route": "developer-guide/egress-internals.html",
+      "local_file_exists": true,
+      "source_sha256": "f2d49595681a318f2e2cda106d9ba6c27823b11c7b7661d397c3edf05a0fc358",
+      "previous_source_sha256": "4c7fe5fd5f5d0166000c2f22cef91d76f1507ee5c1c6ec539524b3673af24e63",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/extending-the-cli.md",
+      "extract_path": "_source/pages/developer-guide__extending-the-cli.md",
+      "canonical_route": "/docs/developer-guide/extending-the-cli",
+      "local_route": "developer-guide/extending-the-cli.html",
+      "local_file_exists": true,
+      "source_sha256": "31f30d51592c3189a124b921c31ed3dc1512ce727d411f84c08971224afc0718",
+      "previous_source_sha256": "80966d75080a35c664c41e80e38a0bed8ac7db56b2ad250080fc267ceb8bc538",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/gateway-internals.md",
+      "extract_path": "_source/pages/developer-guide__gateway-internals.md",
+      "canonical_route": "/docs/developer-guide/gateway-internals",
+      "local_route": "developer-guide/gateway-internals.html",
+      "local_file_exists": true,
+      "source_sha256": "77199ceca26b15709140ade3a28d437c8925dc60f6467aa261e818d97ccd6253",
+      "previous_source_sha256": "6ea8e8533b499cd5c98a63603232c4a95b125adaa45063cd1d58ad4d4886f5b6",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/gateway-monitoring.md",
+      "extract_path": "_source/pages/developer-guide__gateway-monitoring.md",
+      "canonical_route": "/docs/developer-guide/gateway-monitoring",
+      "local_route": "developer-guide/gateway-monitoring.html",
+      "local_file_exists": false,
+      "source_sha256": "249fd2a06f122206ee5d121a4f5216d6ba8dbcfdbad46e2e5a3d804014f18db0",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/developer-guide/gateway-session-lifecycle.md",
+      "extract_path": "_source/pages/developer-guide__gateway-session-lifecycle.md",
+      "canonical_route": "/docs/developer-guide/gateway-session-lifecycle",
+      "local_route": "developer-guide/gateway-session-lifecycle.html",
+      "local_file_exists": false,
+      "source_sha256": "ef6a426e74d7fed9290f711745b112c892370ac43e14367828d3b130e12068a9",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/developer-guide/image-gen-provider-plugin.md",
+      "extract_path": "_source/pages/developer-guide__image-gen-provider-plugin.md",
+      "canonical_route": "/docs/developer-guide/image-gen-provider-plugin",
+      "local_route": "developer-guide/image-gen-provider-plugin.html",
+      "local_file_exists": true,
+      "source_sha256": "ebf70421a8266dcf405349469158d3a2c956128b6020fc1a7837b7c760b9acc3",
+      "previous_source_sha256": "00ec9fb37582987c589659f929c6236c4945e8578f8bf3cb1e968516823a8a97",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/memory-provider-plugin.md",
+      "extract_path": "_source/pages/developer-guide__memory-provider-plugin.md",
+      "canonical_route": "/docs/developer-guide/memory-provider-plugin",
+      "local_route": "developer-guide/memory-provider-plugin.html",
+      "local_file_exists": true,
+      "source_sha256": "9dcf535de7cef7ef178bf98ad95f54f0d19ed7a99237911dd061459e764fbebb",
+      "previous_source_sha256": "211208c5854839702831849b6cb578d5084e39a6b5e3c30f5339b03644f8fcfe",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/micro-compaction.md",
+      "extract_path": "_source/pages/developer-guide__micro-compaction.md",
+      "canonical_route": "/docs/developer-guide/micro-compaction",
+      "local_route": "developer-guide/micro-compaction.html",
+      "local_file_exists": false,
+      "source_sha256": "ab8ae8919b0a9abcd12279a483ccecbf582d24c3317547a20f71690fe7ecf948",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/developer-guide/middleware.md",
+      "extract_path": "_source/pages/developer-guide__middleware.md",
+      "canonical_route": "/docs/developer-guide/middleware",
+      "local_route": "developer-guide/middleware.html",
+      "local_file_exists": false,
+      "source_sha256": "678c8486bea51d37cdd2cd3f62fcdddbe27f3ea42092bb2f94dd0f51356aa901",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/developer-guide/model-provider-plugin.md",
+      "extract_path": "_source/pages/developer-guide__model-provider-plugin.md",
+      "canonical_route": "/docs/developer-guide/model-provider-plugin",
+      "local_route": "developer-guide/model-provider-plugin.html",
+      "local_file_exists": true,
+      "source_sha256": "4f63eeac53ee23a1ff3b111ddec0624b9885bbcf19ab0db4c49c40666a75521c",
+      "previous_source_sha256": "02651c8f6ca8ae169e8734091b884aace50c9a158a3480e7f36116d200fa1b41",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/multiplexing-gateway.md",
+      "extract_path": "_source/pages/developer-guide__multiplexing-gateway.md",
+      "canonical_route": "/docs/developer-guide/multiplexing-gateway",
+      "local_route": "developer-guide/multiplexing-gateway.html",
+      "local_file_exists": false,
+      "source_sha256": "f299af6199a61d9b7275139c7d7216c7a8e35b1e5920b3064261b0d891dd4f6b",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/developer-guide/observer-hooks.md",
+      "extract_path": "_source/pages/developer-guide__observer-hooks.md",
+      "canonical_route": "/docs/developer-guide/observer-hooks",
+      "local_route": "developer-guide/observer-hooks.html",
+      "local_file_exists": false,
+      "source_sha256": "ff85f7ba9eb7590e52b0415f8f365ebb67c32feb6aeaa6f8f5b92add0dc0c35c",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/developer-guide/plugin-llm-access.md",
+      "extract_path": "_source/pages/developer-guide__plugin-llm-access.md",
+      "canonical_route": "/docs/developer-guide/plugin-llm-access",
+      "local_route": "developer-guide/plugin-llm-access.html",
+      "local_file_exists": true,
+      "source_sha256": "5c258cb446387acedd68169010e0e2fb69a2623c99e172cf963c6fd36e3386a3",
+      "previous_source_sha256": "5c258cb446387acedd68169010e0e2fb69a2623c99e172cf963c6fd36e3386a3",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/developer-guide/plugins/index.md",
+      "extract_path": "_source/pages/developer-guide__plugins__index.md",
+      "canonical_route": "/docs/developer-guide/plugins",
+      "local_route": "developer-guide/plugins.html",
+      "local_file_exists": false,
+      "source_sha256": "d74e64dd159650413b1a24663e27090c191d38aaef95620861f84a69be7a429e",
+      "previous_source_sha256": "d40d5e36d951519141e5ab7b3bcffa74f99b9b14607f04b5d7945d666c123f6d",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/programmatic-integration.md",
+      "extract_path": "_source/pages/developer-guide__programmatic-integration.md",
+      "canonical_route": "/docs/developer-guide/programmatic-integration",
+      "local_route": "developer-guide/programmatic-integration.html",
+      "local_file_exists": true,
+      "source_sha256": "97d65f30e10ad4f61d9ec274d95da73b90039b3d27a8e5ab8d3ece925b5d69d9",
+      "previous_source_sha256": "56cbaec1ba02b71255bb7b187ee681d3fc0506457f2ecda0ba6700aedaca6300",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/prompt-assembly.md",
+      "extract_path": "_source/pages/developer-guide__prompt-assembly.md",
+      "canonical_route": "/docs/developer-guide/prompt-assembly",
+      "local_route": "developer-guide/prompt-assembly.html",
+      "local_file_exists": true,
+      "source_sha256": "d186bd3231784d65b40b452e839ab039bf0c6fdd265064fceedc3797c1f9f243",
+      "previous_source_sha256": "33a3485ae69a84cdd9d0450868e7f4f98e6656545f576541d5da3a5a24a57471",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/provider-runtime.md",
+      "extract_path": "_source/pages/developer-guide__provider-runtime.md",
+      "canonical_route": "/docs/developer-guide/provider-runtime",
+      "local_route": "developer-guide/provider-runtime.html",
+      "local_file_exists": true,
+      "source_sha256": "468d00a1e5b8ead79d918a21ccc4e481b2ccc4b5abc93336a4bf147ab1b90a7f",
+      "previous_source_sha256": "86b9a091df692ab5902edbf0ed1e2135c4b51f345d8bcc9dce3584978d4dd8b6",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/relay-connector-contract.md",
+      "extract_path": "_source/pages/developer-guide__relay-connector-contract.md",
+      "canonical_route": "/docs/developer-guide/relay-connector-contract",
+      "local_route": "developer-guide/relay-connector-contract.html",
+      "local_file_exists": false,
+      "source_sha256": "9f4b5e1a5b96bbc178912e8b444de7ebe32acd7f89f4cb7e039f25ac4c04c954",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/developer-guide/relay-shared-metrics.md",
+      "extract_path": "_source/pages/developer-guide__relay-shared-metrics.md",
+      "canonical_route": "/docs/developer-guide/relay-shared-metrics",
+      "local_route": "developer-guide/relay-shared-metrics.html",
+      "local_file_exists": false,
+      "source_sha256": "7e564aae121bd410a272e281dc19694d794278cde7f140f8bb05bfd9686f5375",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/developer-guide/secret-source-plugin.md",
+      "extract_path": "_source/pages/developer-guide__secret-source-plugin.md",
+      "canonical_route": "/docs/developer-guide/secret-source-plugin",
+      "local_route": "developer-guide/secret-source-plugin.html",
+      "local_file_exists": true,
+      "source_sha256": "2143f2edc77f1e854b02880e7db60a664e4eac45a4510463125cf81f131ac8a1",
+      "previous_source_sha256": "437246c01ea936daf8662c6cf644683c42bf6ca2d8f87af75b8554b3fb981267",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/session-storage.md",
+      "extract_path": "_source/pages/developer-guide__session-storage.md",
+      "canonical_route": "/docs/developer-guide/session-storage",
+      "local_route": "developer-guide/session-storage.html",
+      "local_file_exists": true,
+      "source_sha256": "ba29d1f86afa2e5fa026bc7552b7aded52a0fd4babb72d16d0d0a5bfbd2c2b02",
+      "previous_source_sha256": "86d1326ac62ccc778da8adb12c19b324bc00886846ef3f56751c263805413125",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/state-db-recovery.md",
+      "extract_path": "_source/pages/developer-guide__state-db-recovery.md",
+      "canonical_route": "/docs/developer-guide/state-db-recovery",
+      "local_route": "developer-guide/state-db-recovery.html",
+      "local_file_exists": false,
+      "source_sha256": "156a01b86ed46e35a4ddf29681826004b00fb51532800b5f92bc480fcbe8d614",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/developer-guide/streaming-tts.md",
+      "extract_path": "_source/pages/developer-guide__streaming-tts.md",
+      "canonical_route": "/docs/developer-guide/streaming-tts",
+      "local_route": "developer-guide/streaming-tts.html",
+      "local_file_exists": false,
+      "source_sha256": "2e1e55bb96b52c2e40ceaef359638209eb34a5fbf8b947c07c319d145ebe493f",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/developer-guide/subagent-lifecycle-api.md",
+      "extract_path": "_source/pages/developer-guide__subagent-lifecycle-api.md",
+      "canonical_route": "/docs/developer-guide/subagent-lifecycle-api",
+      "local_route": "developer-guide/subagent-lifecycle-api.html",
+      "local_file_exists": true,
+      "source_sha256": "73e5d294f60cdf2720a95071033695f69eb1e0d284ad6a146cbf8c57e12c07b3",
+      "previous_source_sha256": "73e5d294f60cdf2720a95071033695f69eb1e0d284ad6a146cbf8c57e12c07b3",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/developer-guide/terminal-environment-plugin.md",
+      "extract_path": "_source/pages/developer-guide__terminal-environment-plugin.md",
+      "canonical_route": "/docs/developer-guide/terminal-environment-plugin",
+      "local_route": "developer-guide/terminal-environment-plugin.html",
+      "local_file_exists": false,
+      "source_sha256": "e4d9b40d17c7e1cf955c4308f08e36b3f59ea53afa768d456cfb39f5be8d2001",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/developer-guide/tools-runtime.md",
+      "extract_path": "_source/pages/developer-guide__tools-runtime.md",
+      "canonical_route": "/docs/developer-guide/tools-runtime",
+      "local_route": "developer-guide/tools-runtime.html",
+      "local_file_exists": true,
+      "source_sha256": "0c517c17a694beec5465ab9df305cf704b4723c1420e8d4dc5ed443aa95b54c8",
+      "previous_source_sha256": "2e6fdd1d8f2241bbbba6a0da30247cffd906cdcfacb87651973079e33976a3b0",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/trajectory-format.md",
+      "extract_path": "_source/pages/developer-guide__trajectory-format.md",
+      "canonical_route": "/docs/developer-guide/trajectory-format",
+      "local_route": "developer-guide/trajectory-format.html",
+      "local_file_exists": false,
+      "source_sha256": "f55b677030cc7721df8c366c41c5eabf71df3db7c247f8eb134104005659a5b5",
+      "previous_source_sha256": "80bdc653ab9aa2e2e853540180c3206b67539df118cc88fed994b7c9763fa7b0",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/video-gen-provider-plugin.md",
+      "extract_path": "_source/pages/developer-guide__video-gen-provider-plugin.md",
+      "canonical_route": "/docs/developer-guide/video-gen-provider-plugin",
+      "local_route": "developer-guide/video-gen-provider-plugin.html",
+      "local_file_exists": true,
+      "source_sha256": "dc4d22286be442b2ad728d3fa25f17bafb32a1364effcf8d1576909092bf68c0",
+      "previous_source_sha256": "d8fdf149e63200b4c1de4c20788dd3f3e99f1280dd8fbf3b3fb6435bb4ba4ab5",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/web-search-provider-plugin.md",
+      "extract_path": "_source/pages/developer-guide__web-search-provider-plugin.md",
+      "canonical_route": "/docs/developer-guide/web-search-provider-plugin",
+      "local_route": "developer-guide/web-search-provider-plugin.html",
+      "local_file_exists": true,
+      "source_sha256": "8841e2d12150ddab83ddd15a86d723a08bc0369bfee78c794838c2dfb02945fe",
+      "previous_source_sha256": "283a0769011d7a3a641960673e42d3bdd85eae1f9627e1f0a860f30e5f0684e5",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/developer-guide/worktree-ui-dev.md",
+      "extract_path": "_source/pages/developer-guide__worktree-ui-dev.md",
+      "canonical_route": "/docs/developer-guide/worktree-ui-dev",
+      "local_route": "developer-guide/worktree-ui-dev.html",
+      "local_file_exists": true,
+      "source_sha256": "c2aaeb7f654e1da150db4ae899ac962670421b3a4e26553d4e9f4cc581379322",
+      "previous_source_sha256": "da590516eea19c6d16c958550d830068ec7171f3daeffcbb4c0d200a05aa7381",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/getting-started/installation.md",
+      "extract_path": "_source/pages/getting-started__installation.md",
+      "canonical_route": "/docs/getting-started/installation",
+      "local_route": "getting-started/installation.html",
+      "local_file_exists": true,
+      "source_sha256": "89603f1ba3e313ffc5fd894194116e38263c0cb8aae938b8176214e1f994bc70",
+      "previous_source_sha256": "0fcf85c0dab7ea76842a5943ec806fc7bf73ab8fb92f82db6c96ae58e6bcf136",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/getting-started/learning-path.md",
+      "extract_path": "_source/pages/getting-started__learning-path.md",
+      "canonical_route": "/docs/getting-started/learning-path",
+      "local_route": "getting-started/learning-path.html",
+      "local_file_exists": true,
+      "source_sha256": "ddc302507db6065216cc3b52501526e05da89475c8c1cf10ea961c7ec9742226",
+      "previous_source_sha256": "ddc302507db6065216cc3b52501526e05da89475c8c1cf10ea961c7ec9742226",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/getting-started/nix-setup.md",
+      "extract_path": "_source/pages/getting-started__nix-setup.md",
+      "canonical_route": "/docs/getting-started/nix-setup",
+      "local_route": "getting-started/nix-setup.html",
+      "local_file_exists": true,
+      "source_sha256": "b8e0f482cda9eaf7f65753d79101bd23f492c9ba4776523b3fe673e26721f6d4",
+      "previous_source_sha256": "efcb7f7a549fbabccfedd7e2768afefc08ce9af9989178dd4fbaa542baf09db4",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/getting-started/platform-support.md",
+      "extract_path": "_source/pages/getting-started__platform-support.md",
+      "canonical_route": "/docs/getting-started/platform-support",
+      "local_route": "getting-started/platform-support.html",
+      "local_file_exists": true,
+      "source_sha256": "a265d7e201be88b61a859dae0bedafccc394527acd68d127297451ff555be548",
+      "previous_source_sha256": "a265d7e201be88b61a859dae0bedafccc394527acd68d127297451ff555be548",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/getting-started/quickstart.md",
+      "extract_path": "_source/pages/getting-started__quickstart.md",
+      "canonical_route": "/docs/getting-started/quickstart",
+      "local_route": "getting-started/quickstart.html",
+      "local_file_exists": true,
+      "source_sha256": "e5bc8f344273b4fcf3c5c9c84748bbb758d2760f2105e28563a07c75f0a6313f",
+      "previous_source_sha256": "1d0a0f078170359b8743308bd526f236c404cb9772b23e6a3c8a7ec0bd5d93e9",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/getting-started/termux.md",
+      "extract_path": "_source/pages/getting-started__termux.md",
+      "canonical_route": "/docs/getting-started/termux",
+      "local_route": "getting-started/termux.html",
+      "local_file_exists": true,
+      "source_sha256": "673e5974dfdd73d4486709d7bb68da598296b10234edf19ebbb373c4a6084f69",
+      "previous_source_sha256": "1fc0781bb6464f14661e5c0f613dee94488615cd3419057e0eb34c6a0c912511",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/getting-started/updating.md",
+      "extract_path": "_source/pages/getting-started__updating.md",
+      "canonical_route": "/docs/getting-started/updating",
+      "local_route": "getting-started/updating.html",
+      "local_file_exists": true,
+      "source_sha256": "5d2bbee44ed5011960622016757e5083f8323b403feed324fdb27abad3d27c56",
+      "previous_source_sha256": "ea25ed132b140f5cc81418053a5c91e23dd0979890a0e02cedd2533fa36778eb",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/guides/agent-email-address.md",
+      "extract_path": "_source/pages/guides__agent-email-address.md",
+      "canonical_route": "/docs/guides/agent-email-address",
+      "local_route": "guides/agent-email-address.html",
+      "local_file_exists": true,
+      "source_sha256": "d5f82cc4493dca3c407095d3315ec426b9223e7e095ecfd22f15e26988e0eeb4",
+      "previous_source_sha256": "d5f82cc4493dca3c407095d3315ec426b9223e7e095ecfd22f15e26988e0eeb4",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/automate-with-cron.md",
+      "extract_path": "_source/pages/guides__automate-with-cron.md",
+      "canonical_route": "/docs/guides/automate-with-cron",
+      "local_route": "guides/automate-with-cron.html",
+      "local_file_exists": true,
+      "source_sha256": "ced40d4685d8d842f624d02465f0c9d5c85d5c04fe501849bb0f7bc196a5aba5",
+      "previous_source_sha256": "f0b60b18afc3df476d54512118b948cdfac4c8fc0ee0765f116e7b5d7476a3a0",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/guides/automation-blueprints.md",
+      "extract_path": "_source/pages/guides__automation-blueprints.md",
+      "canonical_route": "/docs/guides/automation-blueprints",
+      "local_route": "guides/automation-blueprints.html",
+      "local_file_exists": false,
+      "source_sha256": "0f846acf771eca332928ce0976f521b876e222d04cd1bc97f4e8b90a0558115d",
+      "previous_source_sha256": "0f846acf771eca332928ce0976f521b876e222d04cd1bc97f4e8b90a0558115d",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/aws-bedrock.md",
+      "extract_path": "_source/pages/guides__aws-bedrock.md",
+      "canonical_route": "/docs/guides/aws-bedrock",
+      "local_route": "guides/aws-bedrock.html",
+      "local_file_exists": false,
+      "source_sha256": "216adcacccd22c34d35e466c05c59aecff09bb12ccbb9af6680ceae94b0bfc04",
+      "previous_source_sha256": "cd4f911cb39a4fb781e74bcd3a561a42111e2cecce4ea97d8c92e8fb7cbc11cf",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/guides/azure-foundry.md",
+      "extract_path": "_source/pages/guides__azure-foundry.md",
+      "canonical_route": "/docs/guides/azure-foundry",
+      "local_route": "guides/azure-foundry.html",
+      "local_file_exists": false,
+      "source_sha256": "ca969321dec1dd1db15b5701cda428d057eda52502658dc9d4c973258cef7af8",
+      "previous_source_sha256": "ca969321dec1dd1db15b5701cda428d057eda52502658dc9d4c973258cef7af8",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/cron-script-only.md",
+      "extract_path": "_source/pages/guides__cron-script-only.md",
+      "canonical_route": "/docs/guides/cron-script-only",
+      "local_route": "guides/cron-script-only.html",
+      "local_file_exists": true,
+      "source_sha256": "d4d2d19be7a07a44ed21384894458613f8bea01de10a5d8c982e92973d3e0a6a",
+      "previous_source_sha256": "d4d2d19be7a07a44ed21384894458613f8bea01de10a5d8c982e92973d3e0a6a",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/cron-troubleshooting.md",
+      "extract_path": "_source/pages/guides__cron-troubleshooting.md",
+      "canonical_route": "/docs/guides/cron-troubleshooting",
+      "local_route": "guides/cron-troubleshooting.html",
+      "local_file_exists": true,
+      "source_sha256": "050323bfd8d509c1c5bdaafdb207569136fcecf67c6262b532852f5eb8de1194",
+      "previous_source_sha256": "8e3ba78681fa361fcb8b07198fe4111a9c6bae6ace68d45a216296d482bf9450",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/guides/daily-briefing-bot.md",
+      "extract_path": "_source/pages/guides__daily-briefing-bot.md",
+      "canonical_route": "/docs/guides/daily-briefing-bot",
+      "local_route": "guides/daily-briefing-bot.html",
+      "local_file_exists": true,
+      "source_sha256": "81d71bd13fd38812497fef6198f25952399872c63ddce0c6615c8edcb16a3c57",
+      "previous_source_sha256": "81d71bd13fd38812497fef6198f25952399872c63ddce0c6615c8edcb16a3c57",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/delegation-patterns.md",
+      "extract_path": "_source/pages/guides__delegation-patterns.md",
+      "canonical_route": "/docs/guides/delegation-patterns",
+      "local_route": "guides/delegation-patterns.html",
+      "local_file_exists": true,
+      "source_sha256": "1052939c098b41f2d458060f396179300bc9fed1fcd471fa556a9cc6675b9425",
+      "previous_source_sha256": "f0c7b8fcdfc9565f920d5cf5fb25d39c0ced7b5e88b26d3f9e38737fac2fa91d",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/guides/desktop-native-signin.md",
+      "extract_path": "_source/pages/guides__desktop-native-signin.md",
+      "canonical_route": "/docs/guides/desktop-native-signin",
+      "local_route": "guides/desktop-native-signin.html",
+      "local_file_exists": true,
+      "source_sha256": "17d57d1ea2b716a18de43732d9d99261b4f4117b599c553888008b085c4e19e8",
+      "previous_source_sha256": "0b6a4cd06e50a79b3cdf9a2560a30a92c61172298a6c52f0b6a57ced9fbe6697",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/guides/github-pr-review-agent.md",
+      "extract_path": "_source/pages/guides__github-pr-review-agent.md",
+      "canonical_route": "/docs/guides/github-pr-review-agent",
+      "local_route": "guides/github-pr-review-agent.html",
+      "local_file_exists": true,
+      "source_sha256": "be24df3790b71992fe011f4a8b92eb7f0be54189f0c0334236279e3b63c3686e",
+      "previous_source_sha256": "be24df3790b71992fe011f4a8b92eb7f0be54189f0c0334236279e3b63c3686e",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/google-gemini.md",
+      "extract_path": "_source/pages/guides__google-gemini.md",
+      "canonical_route": "/docs/guides/google-gemini",
+      "local_route": "guides/google-gemini.html",
+      "local_file_exists": true,
+      "source_sha256": "eea0afddf4204800ae672fdbf2d28f50b208fb9c6858b29c4990f9e131739459",
+      "previous_source_sha256": "f145c986840fc0eb67fac0f23a3fe73b6a4c6dd42a48d15d28446db2a42bda6d",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/guides/google-vertex.md",
+      "extract_path": "_source/pages/guides__google-vertex.md",
+      "canonical_route": "/docs/guides/google-vertex",
+      "local_route": "guides/google-vertex.html",
+      "local_file_exists": true,
+      "source_sha256": "20c9a62491c21f736ebe4c247e2c2a8c9fa347a00c82e9af58b97315a07444e0",
+      "previous_source_sha256": "57d0398af970bfc57435e2dab63b3d7f2f33d8420982870ecca45dcc7d3add95",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/guides/local-llm-on-mac.md",
+      "extract_path": "_source/pages/guides__local-llm-on-mac.md",
+      "canonical_route": "/docs/guides/local-llm-on-mac",
+      "local_route": "guides/local-llm-on-mac.html",
+      "local_file_exists": true,
+      "source_sha256": "6df8a0b3485ca2dc47c2a21ce30a3ce1c04009e1df3a6a187129df28d437a4d3",
+      "previous_source_sha256": "84238d97e08ee8512e844b581938456bf37e2328a40e15018f56fa540c3c7775",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/guides/local-ollama-setup.md",
+      "extract_path": "_source/pages/guides__local-ollama-setup.md",
+      "canonical_route": "/docs/guides/local-ollama-setup",
+      "local_route": "guides/local-ollama-setup.html",
+      "local_file_exists": true,
+      "source_sha256": "a411468f2e3e14e17cc16d65123df2de9aed0c428674e06b8cc2c0a0a0fa7ea2",
+      "previous_source_sha256": "ad73b36e3ed50b891f90879d937f18d3076c77f8861ffb88d3e4936cf60949bb",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/guides/manage-hermes-cloud-with-mcp.md",
+      "extract_path": "_source/pages/guides__manage-hermes-cloud-with-mcp.md",
+      "canonical_route": "/docs/guides/manage-hermes-cloud-with-mcp",
+      "local_route": "guides/manage-hermes-cloud-with-mcp.html",
+      "local_file_exists": true,
+      "source_sha256": "e2ead794f586718e73efc0c0abd77b561cdcb7098bf92330a72561e177f704e5",
+      "previous_source_sha256": "e2ead794f586718e73efc0c0abd77b561cdcb7098bf92330a72561e177f704e5",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/microsoft-graph-app-registration.md",
+      "extract_path": "_source/pages/guides__microsoft-graph-app-registration.md",
+      "canonical_route": "/docs/guides/microsoft-graph-app-registration",
+      "local_route": "guides/microsoft-graph-app-registration.html",
+      "local_file_exists": true,
+      "source_sha256": "763f3ff3cabb1e7a5a7bc670b0b5270d36db33a11791631536dc81a2d2b00d93",
+      "previous_source_sha256": "763f3ff3cabb1e7a5a7bc670b0b5270d36db33a11791631536dc81a2d2b00d93",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/migrate-from-openclaw.md",
+      "extract_path": "_source/pages/guides__migrate-from-openclaw.md",
+      "canonical_route": "/docs/guides/migrate-from-openclaw",
+      "local_route": "guides/migrate-from-openclaw.html",
+      "local_file_exists": true,
+      "source_sha256": "e61ceb475c6b2897626728a540d08162d3d59414cb998aef5fd4aca38a5d23ba",
+      "previous_source_sha256": "9d3da237ac85c8cdf7bfbf126a66eb5638b06e8a100148c631e61d7a14d0e790",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/guides/minimax-oauth.md",
+      "extract_path": "_source/pages/guides__minimax-oauth.md",
+      "canonical_route": "/docs/guides/minimax-oauth",
+      "local_route": "guides/minimax-oauth.html",
+      "local_file_exists": true,
+      "source_sha256": "16abb1a73d885ad04611667d3faad87141eee4c9494747b8af59dddf0ea043aa",
+      "previous_source_sha256": "16abb1a73d885ad04611667d3faad87141eee4c9494747b8af59dddf0ea043aa",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/oauth-over-ssh.md",
+      "extract_path": "_source/pages/guides__oauth-over-ssh.md",
+      "canonical_route": "/docs/guides/oauth-over-ssh",
+      "local_route": "guides/oauth-over-ssh.html",
+      "local_file_exists": true,
+      "source_sha256": "0f6ab9cd92100bdf44fc2bcbc5582962160882e0d7ad572f833e699357463a8c",
+      "previous_source_sha256": "d3c1efb2a4d6e13577e3c85bb9d6bc44d76d7a8e5c1b5fde1c736f15f09280db",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/guides/operate-teams-meeting-pipeline.md",
+      "extract_path": "_source/pages/guides__operate-teams-meeting-pipeline.md",
+      "canonical_route": "/docs/guides/operate-teams-meeting-pipeline",
+      "local_route": "guides/operate-teams-meeting-pipeline.html",
+      "local_file_exists": true,
+      "source_sha256": "49419fa989b814ce9e7ce839065f31d4ae8ef4dd03dc2ab0ca1659da23193ec8",
+      "previous_source_sha256": "49419fa989b814ce9e7ce839065f31d4ae8ef4dd03dc2ab0ca1659da23193ec8",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/pipe-script-output.md",
+      "extract_path": "_source/pages/guides__pipe-script-output.md",
+      "canonical_route": "/docs/guides/pipe-script-output",
+      "local_route": "guides/pipe-script-output.html",
+      "local_file_exists": true,
+      "source_sha256": "946088c8d3ba3c67b25d18e5de6049b09a7597cfbbefb064673ba956fc017998",
+      "previous_source_sha256": "946088c8d3ba3c67b25d18e5de6049b09a7597cfbbefb064673ba956fc017998",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/python-library.md",
+      "extract_path": "_source/pages/guides__python-library.md",
+      "canonical_route": "/docs/guides/python-library",
+      "local_route": "guides/python-library.html",
+      "local_file_exists": true,
+      "source_sha256": "36ea17d72771a32abbdefb28750d88f8d2d08d840ec979da38a5997ec9776485",
+      "previous_source_sha256": "36ea17d72771a32abbdefb28750d88f8d2d08d840ec979da38a5997ec9776485",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/run-hermes-with-nous-portal.md",
+      "extract_path": "_source/pages/guides__run-hermes-with-nous-portal.md",
+      "canonical_route": "/docs/guides/run-hermes-with-nous-portal",
+      "local_route": "guides/run-hermes-with-nous-portal.html",
+      "local_file_exists": true,
+      "source_sha256": "371c26c2a621a09160bb821d5c1c10e20184b896bce598fc61e9e8a5af9ac0c1",
+      "previous_source_sha256": "371c26c2a621a09160bb821d5c1c10e20184b896bce598fc61e9e8a5af9ac0c1",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/run-nemotron-3-ultra-free.md",
+      "extract_path": "_source/pages/guides__run-nemotron-3-ultra-free.md",
+      "canonical_route": "/docs/guides/run-nemotron-3-ultra-free",
+      "local_route": "guides/run-nemotron-3-ultra-free.html",
+      "local_file_exists": true,
+      "source_sha256": "c0363e2376cb48734b6fd2e5ed6165c98b592ba8b400d6e541cb7488eaddabdf",
+      "previous_source_sha256": "c0363e2376cb48734b6fd2e5ed6165c98b592ba8b400d6e541cb7488eaddabdf",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/secure-hermes-on-a-work-machine.md",
+      "extract_path": "_source/pages/guides__secure-hermes-on-a-work-machine.md",
+      "canonical_route": "/docs/guides/secure-hermes-on-a-work-machine",
+      "local_route": "guides/secure-hermes-on-a-work-machine.html",
+      "local_file_exists": true,
+      "source_sha256": "8968ac558c70da8d140295825dc89f2cfad929d883af53b01ad6d6e479755fc6",
+      "previous_source_sha256": "8968ac558c70da8d140295825dc89f2cfad929d883af53b01ad6d6e479755fc6",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/team-telegram-assistant.md",
+      "extract_path": "_source/pages/guides__team-telegram-assistant.md",
+      "canonical_route": "/docs/guides/team-telegram-assistant",
+      "local_route": "guides/team-telegram-assistant.html",
+      "local_file_exists": true,
+      "source_sha256": "0afc2102b4b941966aa3974f94402420c6006927df6ac4aa85d2b98129ceb147",
+      "previous_source_sha256": "0afc2102b4b941966aa3974f94402420c6006927df6ac4aa85d2b98129ceb147",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/tips.md",
+      "extract_path": "_source/pages/guides__tips.md",
+      "canonical_route": "/docs/guides/tips",
+      "local_route": "guides/tips.html",
+      "local_file_exists": true,
+      "source_sha256": "3def105d97107cca902d321b3ecec218d0681f194071c5d219ff2e2afbbfbd77",
+      "previous_source_sha256": "8c4e9f94c767f16a9f874c6e8ab5ffe5c87fb7bfd9c40d1258313a90815e7688",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/guides/troubleshooting-agent-quality.md",
+      "extract_path": "_source/pages/guides__troubleshooting-agent-quality.md",
+      "canonical_route": "/docs/guides/troubleshooting-agent-quality",
+      "local_route": "guides/troubleshooting-agent-quality.html",
+      "local_file_exists": true,
+      "source_sha256": "a069776d4e3d49471ef10932c99dc60940e8e06a77b2953e52f09f8145872876",
+      "previous_source_sha256": "a069776d4e3d49471ef10932c99dc60940e8e06a77b2953e52f09f8145872876",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/use-mcp-with-hermes.md",
+      "extract_path": "_source/pages/guides__use-mcp-with-hermes.md",
+      "canonical_route": "/docs/guides/use-mcp-with-hermes",
+      "local_route": "guides/use-mcp-with-hermes.html",
+      "local_file_exists": true,
+      "source_sha256": "c107016f4447df73e33c568a0fafe10b6cfbb83b84b05bb24efa3631ba49f772",
+      "previous_source_sha256": "c107016f4447df73e33c568a0fafe10b6cfbb83b84b05bb24efa3631ba49f772",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/use-soul-with-hermes.md",
+      "extract_path": "_source/pages/guides__use-soul-with-hermes.md",
+      "canonical_route": "/docs/guides/use-soul-with-hermes",
+      "local_route": "guides/use-soul-with-hermes.html",
+      "local_file_exists": true,
+      "source_sha256": "28eefe2bb1f2fa83c557bf16c9e3be7cbb89b9a189cbe638ab1f5807139a9648",
+      "previous_source_sha256": "28eefe2bb1f2fa83c557bf16c9e3be7cbb89b9a189cbe638ab1f5807139a9648",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/use-voice-mode-with-hermes.md",
+      "extract_path": "_source/pages/guides__use-voice-mode-with-hermes.md",
+      "canonical_route": "/docs/guides/use-voice-mode-with-hermes",
+      "local_route": "guides/use-voice-mode-with-hermes.html",
+      "local_file_exists": true,
+      "source_sha256": "20773569ae8d21b4e816dfb7fb57d3b8e6037b49e744372d356d1651dfc7178e",
+      "previous_source_sha256": "20773569ae8d21b4e816dfb7fb57d3b8e6037b49e744372d356d1651dfc7178e",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/webhook-github-pr-review.md",
+      "extract_path": "_source/pages/guides__webhook-github-pr-review.md",
+      "canonical_route": "/docs/guides/webhook-github-pr-review",
+      "local_route": "guides/webhook-github-pr-review.html",
+      "local_file_exists": true,
+      "source_sha256": "8dc65b4baf591211b4bc917f5d499f554c7a442ae2657d7749582a37873e6be6",
+      "previous_source_sha256": "8dc65b4baf591211b4bc917f5d499f554c7a442ae2657d7749582a37873e6be6",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/work-with-skills.md",
+      "extract_path": "_source/pages/guides__work-with-skills.md",
+      "canonical_route": "/docs/guides/work-with-skills",
+      "local_route": "guides/work-with-skills.html",
+      "local_file_exists": true,
+      "source_sha256": "fde30c0e1aa290575619f44df3671fe9c3ab2f910967e7656e7222e75207a888",
+      "previous_source_sha256": "fde30c0e1aa290575619f44df3671fe9c3ab2f910967e7656e7222e75207a888",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/guides/xai-grok-oauth.md",
+      "extract_path": "_source/pages/guides__xai-grok-oauth.md",
+      "canonical_route": "/docs/guides/xai-grok-oauth",
+      "local_route": "guides/xai-grok-oauth.html",
+      "local_file_exists": true,
+      "source_sha256": "e490094b339f6682cfc916ecde0904a31265eae7fb20d12c5827e88c4a17b793",
+      "previous_source_sha256": "e490094b339f6682cfc916ecde0904a31265eae7fb20d12c5827e88c4a17b793",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/integrations/buzz.md",
+      "extract_path": "_source/pages/integrations__buzz.md",
+      "canonical_route": "/docs/integrations/buzz",
+      "local_route": "integrations/buzz.html",
+      "local_file_exists": true,
+      "source_sha256": "a0c0d29c3279f92f6ba93967fceb1d472017ef6f45c2839a03ec30ddbea60d2c",
+      "previous_source_sha256": "a0c0d29c3279f92f6ba93967fceb1d472017ef6f45c2839a03ec30ddbea60d2c",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/integrations/index.md",
+      "extract_path": "_source/pages/integrations__index.md",
+      "canonical_route": "/docs/integrations",
+      "local_route": "integrations/index.html",
+      "local_file_exists": true,
+      "source_sha256": "7e8260a6b69e9643b9725ab9b53c2c202421d393109b6cf9964087bcbfb9c568",
+      "previous_source_sha256": "dbb4a1dc74c0212508c9855243c65cc96839c3f37edfa1f3bdcf6f218e136a2f",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/integrations/nous-portal.md",
+      "extract_path": "_source/pages/integrations__nous-portal.md",
+      "canonical_route": "/docs/integrations/nous-portal",
+      "local_route": "integrations/nous-portal.html",
+      "local_file_exists": true,
+      "source_sha256": "e2445455aac773a0de2ca85f185941ab5e2eb70c7e222bbea52ca474eb7e7110",
+      "previous_source_sha256": "4764548c5b4525758d31176037049624c39227907c931789059ffa1e60f44868",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/integrations/providers.md",
+      "extract_path": "_source/pages/integrations__providers.md",
+      "canonical_route": "/docs/integrations/providers",
+      "local_route": "integrations/providers.html",
+      "local_file_exists": true,
+      "source_sha256": "acaeb0dd9a0b0e9e53da0957bf749ecc5bd235fe158d9bbbc76be2d595295f5c",
+      "previous_source_sha256": "a284a7d374975b315260e02964fe3803bc129563d4b161b20094fa7be001db5d",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/reference/automation-blueprints-catalog.mdx",
+      "extract_path": "_source/pages/reference__automation-blueprints-catalog.mdx.md",
+      "canonical_route": "/docs/reference/automation-blueprints-catalog",
+      "local_route": "reference/automation-blueprints-catalog.html",
+      "local_file_exists": true,
+      "source_sha256": "ce68507330570bc0479ed69e617114de1b7f50ddf985af43a94ed8a5a9935e11",
+      "previous_source_sha256": "ce68507330570bc0479ed69e617114de1b7f50ddf985af43a94ed8a5a9935e11",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/reference/cli-commands.md",
+      "extract_path": "_source/pages/reference__cli-commands.md",
+      "canonical_route": "/docs/reference/cli-commands",
+      "local_route": "reference/cli-commands.html",
+      "local_file_exists": false,
+      "source_sha256": "3369bc2ec6859b657769ec573fee0c8e5a2f594d96b0f6a7fceb778d923676f9",
+      "previous_source_sha256": "fb8c9b9e0943f9109cea408776a00512f5067dd816847be20bd44cf62159fc13",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/reference/cli-symbols.md",
+      "extract_path": "_source/pages/reference__cli-symbols.md",
+      "canonical_route": "/docs/reference/cli-symbols",
+      "local_route": "reference/cli-symbols.html",
+      "local_file_exists": true,
+      "source_sha256": "b86dd4bf6b61649eee937363dcb97e7ff7964f1c3ceb7bef9035f7d90ea8937b",
+      "previous_source_sha256": "b50afc12d78daba5fdf1b11e88a7830cd51bf9d1ccf94a3808934da512e50462",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/reference/environment-variables.md",
+      "extract_path": "_source/pages/reference__environment-variables.md",
+      "canonical_route": "/docs/reference/environment-variables",
+      "local_route": "reference/environment-variables.html",
+      "local_file_exists": false,
+      "source_sha256": "d8ed13a5bb8c0c9176894f0861668903089050c4586435b5a46fa0e6f0d0f209",
+      "previous_source_sha256": "5e95bb0bcefe03678f18a9e8b6c453dbacba5a99ad9dd3f237b495ef274a89a9",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/reference/faq.md",
+      "extract_path": "_source/pages/reference__faq.md",
+      "canonical_route": "/docs/reference/faq",
+      "local_route": "reference/faq.html",
+      "local_file_exists": false,
+      "source_sha256": "ddac56ba4e2b01fa13db5850ada3701c185e8cc0b470bb27e1d61b37ae106c6f",
+      "previous_source_sha256": "6f7ba1d9bd1d6296586a1ca8b2124eaf35844baca29973ba6278dce6162d0edc",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/reference/mcp-config-reference.md",
+      "extract_path": "_source/pages/reference__mcp-config-reference.md",
+      "canonical_route": "/docs/reference/mcp-config-reference",
+      "local_route": "reference/mcp-config-reference.html",
+      "local_file_exists": true,
+      "source_sha256": "cd4d20db2f7efbb2a0cba77256fbfc5b3491a1cd7eb382cfc59eb2cfcbb48ada",
+      "previous_source_sha256": "42fccb28ce4f342bc70aa524d648012209506a87df9779a3259b69a291bc9c45",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/reference/model-catalog.md",
+      "extract_path": "_source/pages/reference__model-catalog.md",
+      "canonical_route": "/docs/reference/model-catalog",
+      "local_route": "reference/model-catalog.html",
+      "local_file_exists": true,
+      "source_sha256": "10cfad7f0ff34ff57cf44e5a6f6bf7e480e79d5cc992ca1099f6542818329b07",
+      "previous_source_sha256": "d394c17a91c5f4e4f5a0b9fceda3563ed16f4c5dea3b695a97395d2a3ba5136f",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/reference/optional-skills-catalog.md",
+      "extract_path": "_source/pages/reference__optional-skills-catalog.md",
+      "canonical_route": "/docs/reference/optional-skills-catalog",
+      "local_route": "reference/optional-skills-catalog.html",
+      "local_file_exists": true,
+      "source_sha256": "2757f32f2b0e83b0fff03b6a9610e23a7d69958b58641edb6ef7d8aa986a38e7",
+      "previous_source_sha256": "e87f631cf3349ec2e71007f9fc76db39f10e1eda583b0af065d9a710e89e23f1",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/reference/profile-commands.md",
+      "extract_path": "_source/pages/reference__profile-commands.md",
+      "canonical_route": "/docs/reference/profile-commands",
+      "local_route": "reference/profile-commands.html",
+      "local_file_exists": true,
+      "source_sha256": "03f05bf72becb518a73412a29af8253565511459e9e9126cef71baf2541c637e",
+      "previous_source_sha256": "c5736fe1c171f99e1b118facb9a295913dfd292e5c149b221a0705db219e3da1",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/reference/skills-catalog.md",
+      "extract_path": "_source/pages/reference__skills-catalog.md",
+      "canonical_route": "/docs/reference/skills-catalog",
+      "local_route": "reference/skills-catalog.html",
+      "local_file_exists": true,
+      "source_sha256": "6b917e398fdb3ee65c795f6cc8162d341f4dd79ee6b1fdfb29c5c3865fcca241",
+      "previous_source_sha256": "0bc084763a65616d69b1ff197fa511b22d13b9b10b9afa7f986201230508be12",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/reference/slash-commands.md",
+      "extract_path": "_source/pages/reference__slash-commands.md",
+      "canonical_route": "/docs/reference/slash-commands",
+      "local_route": "reference/slash-commands.html",
+      "local_file_exists": false,
+      "source_sha256": "8968a8776b3ef60e0874363865e034f77bce6bf7f15274c147688eb2ab148584",
+      "previous_source_sha256": "0cc4a09d6d833aadbffb62dcfab93aad3d88bf2765e24767ce925f4ac42df7ae",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/reference/tools-reference.md",
+      "extract_path": "_source/pages/reference__tools-reference.md",
+      "canonical_route": "/docs/reference/tools-reference",
+      "local_route": "reference/tools-reference.html",
+      "local_file_exists": false,
+      "source_sha256": "d60eac65550ae76ac7420d1fb689f3aa9577ea1379dc79c285483e46aea48491",
+      "previous_source_sha256": "00d3472d517d20dba90eb36dab6b0824c687eac6b102c34f6ba406566a734918",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/reference/toolsets-reference.md",
+      "extract_path": "_source/pages/reference__toolsets-reference.md",
+      "canonical_route": "/docs/reference/toolsets-reference",
+      "local_route": "reference/toolsets-reference.html",
+      "local_file_exists": true,
+      "source_sha256": "2d77341e47b1dce3d2725556435399751c83cec73a11995f67fb23ca38c7a506",
+      "previous_source_sha256": "ae03aa950d7ccbc1d83341173064fef20c1a9ca11157fc0cd03f7ef4c9383fe4",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/bot-mode.md",
+      "extract_path": "_source/pages/user-guide__bot-mode.md",
+      "canonical_route": "/docs/user-guide/bot-mode",
+      "local_route": "user-guide/bot-mode.html",
+      "local_file_exists": true,
+      "source_sha256": "c0c240dae09ea794ea1d6766618b808569249f405769730c6ac690c369c51ce0",
+      "previous_source_sha256": "d307131cbc36ffc344543e13e14fd53ea27cc2687cdad246ebc0ccc96ad51155",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/checkpoints-and-rollback.md",
+      "extract_path": "_source/pages/user-guide__checkpoints-and-rollback.md",
+      "canonical_route": "/docs/user-guide/checkpoints-and-rollback",
+      "local_route": "user-guide/checkpoints-and-rollback.html",
+      "local_file_exists": true,
+      "source_sha256": "355e3b0a92c96cb45ab98aa9f363ca90fcbc94c7fcccaff73c0637853b7595b7",
+      "previous_source_sha256": "4478591f6272e137a095ae6dcf33c10ecc4b5d06c58644f3eaf7c0e1df8d78f7",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/cli.md",
+      "extract_path": "_source/pages/user-guide__cli.md",
+      "canonical_route": "/docs/user-guide/cli",
+      "local_route": "user-guide/cli.html",
+      "local_file_exists": true,
+      "source_sha256": "39b5e3c04041ad19c5e3e5fa74798b60ee58e1e5dc2a248aab8c7a3d625a81fe",
+      "previous_source_sha256": "fb8f0a603759ce8bf503fdee32eede2219fc01f6009b54a3c36ed676791496d6",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/configuration.md",
+      "extract_path": "_source/pages/user-guide__configuration.md",
+      "canonical_route": "/docs/user-guide/configuration",
+      "local_route": "user-guide/configuration.html",
+      "local_file_exists": true,
+      "source_sha256": "e401eff848eb14c510f2667d5688328b344f8bcdd359e6af967349fa48c10e94",
+      "previous_source_sha256": "6165165100a832eead7fe5f2c9a9e1a4e4983924e634e73bfd30f1e7061dd6e8",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/configuring-models.md",
+      "extract_path": "_source/pages/user-guide__configuring-models.md",
+      "canonical_route": "/docs/user-guide/configuring-models",
+      "local_route": "user-guide/configuring-models.html",
+      "local_file_exists": true,
+      "source_sha256": "9a0bea3c8bee7ceda6c772e7289b9faf8f0d14daab930dac3a77cea0acc849dc",
+      "previous_source_sha256": "67d46c89c7f5200f898de3873f904504bfbc0e8ac91d9e0820197617057c045c",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/desktop.md",
+      "extract_path": "_source/pages/user-guide__desktop.md",
+      "canonical_route": "/docs/user-guide/desktop",
+      "local_route": "user-guide/desktop.html",
+      "local_file_exists": true,
+      "source_sha256": "2531b20b9279b73c52bca55aa9429308d81266198281d04969d55a628d4605e5",
+      "previous_source_sha256": "95852229b1d76f0b09f79b74dc7548599dfd44da4ef097842ebb066c251f83b2",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/docker.md",
+      "extract_path": "_source/pages/user-guide__docker.md",
+      "canonical_route": "/docs/user-guide/docker",
+      "local_route": "user-guide/docker.html",
+      "local_file_exists": true,
+      "source_sha256": "a40e9f0d42273dbe5a157729d727488a3b0f644e2b17178dd9be5d7b33ec95a5",
+      "previous_source_sha256": "917b0f329829b1d9aeefb840d5aed4fc1a811830a693d4316b68694654bd12c6",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/egress/index.md",
+      "extract_path": "_source/pages/user-guide__egress__index.md",
+      "canonical_route": "/docs/user-guide/egress",
+      "local_route": "user-guide/egress.html",
+      "local_file_exists": true,
+      "source_sha256": "f5b53309c7c3ef1a45e936c884ef2d0958e323e24ec00f223431849365da18ed",
+      "previous_source_sha256": "f5b53309c7c3ef1a45e936c884ef2d0958e323e24ec00f223431849365da18ed",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/egress/iron-proxy.md",
+      "extract_path": "_source/pages/user-guide__egress__iron-proxy.md",
+      "canonical_route": "/docs/user-guide/egress/iron-proxy",
+      "local_route": "user-guide/egress/iron-proxy.html",
+      "local_file_exists": true,
+      "source_sha256": "06b32b11fdffe7b507cffd171a9ee57ad3eb2e9ef9151452d68102def495f397",
+      "previous_source_sha256": "06b32b11fdffe7b507cffd171a9ee57ad3eb2e9ef9151452d68102def495f397",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/egress/network-isolation.md",
+      "extract_path": "_source/pages/user-guide__egress__network-isolation.md",
+      "canonical_route": "/docs/user-guide/egress/network-isolation",
+      "local_route": "user-guide/egress/network-isolation.html",
+      "local_file_exists": false,
+      "source_sha256": "eaa7715e8c8b6c93bd6593a6242a0978ef66c67415049b5bb2897796052cc151",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/acp.md",
+      "extract_path": "_source/pages/user-guide__features__acp.md",
+      "canonical_route": "/docs/user-guide/features/acp",
+      "local_route": "user-guide/features/acp.html",
+      "local_file_exists": true,
+      "source_sha256": "6d76e8e98bca4b8b736321c6e007aeaa002acba964ffcd710183cfbfbbdb2b2c",
+      "previous_source_sha256": "5c8bbeffe7be44f30c687d3cff0d657d82e5c46f94121b18e924c887ad068d57",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/api-server.md",
+      "extract_path": "_source/pages/user-guide__features__api-server.md",
+      "canonical_route": "/docs/user-guide/features/api-server",
+      "local_route": "user-guide/features/api-server.html",
+      "local_file_exists": true,
+      "source_sha256": "0bcfd31d08faddb62ada512e47f4e96e13d1e346ac9b5126cea8d8e01673b7ac",
+      "previous_source_sha256": "59d8586aade07b09cb597fbc06ee78ecbba0cec715e27c3293a50d08d38904ad",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/batch-processing.md",
+      "extract_path": "_source/pages/user-guide__features__batch-processing.md",
+      "canonical_route": "/docs/user-guide/features/batch-processing",
+      "local_route": "user-guide/features/batch-processing.html",
+      "local_file_exists": true,
+      "source_sha256": "ad35f063ab6374896645542f74bca763dd437049b5993cc7c4edfd0eb138c2bf",
+      "previous_source_sha256": "9404333e0d4c7d676466d3b9bc110270cb68c5096cddadcdae41f0c7a21a6419",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/browser.md",
+      "extract_path": "_source/pages/user-guide__features__browser.md",
+      "canonical_route": "/docs/user-guide/features/browser",
+      "local_route": "user-guide/features/browser.html",
+      "local_file_exists": true,
+      "source_sha256": "4db6bbb3ff5a73ca6d7864184944d269a7c3e16bc6c22c871bd37bbb55831d9a",
+      "previous_source_sha256": "56e29761410e7f98749cfc3caba36e029c4e7fc2cdecdae8d5d945fbf0a638c3",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/built-in-plugins.md",
+      "extract_path": "_source/pages/user-guide__features__built-in-plugins.md",
+      "canonical_route": "/docs/user-guide/features/built-in-plugins",
+      "local_route": "user-guide/features/built-in-plugins.html",
+      "local_file_exists": true,
+      "source_sha256": "6e4981d572c137ada1dd4abbefbe9745abe311b633a0fb3081fa65b76dcf3ebc",
+      "previous_source_sha256": "3da5912551b2335678bc8ea5dd21fddbf19a1b859528e2eb444034542389d0bf",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/code-execution.md",
+      "extract_path": "_source/pages/user-guide__features__code-execution.md",
+      "canonical_route": "/docs/user-guide/features/code-execution",
+      "local_route": "user-guide/features/code-execution.html",
+      "local_file_exists": true,
+      "source_sha256": "5410cd27ff03dae8e0358c2fccd05c5a3b91debb3f93d4e663adcc05d3691f9f",
+      "previous_source_sha256": "bb81afa809b1c455e9fd179de273e9b1edc7095ba110ffe1b83820c6a71f5554",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/codex-app-server-runtime.md",
+      "extract_path": "_source/pages/user-guide__features__codex-app-server-runtime.md",
+      "canonical_route": "/docs/user-guide/features/codex-app-server-runtime",
+      "local_route": "user-guide/features/codex-app-server-runtime.html",
+      "local_file_exists": true,
+      "source_sha256": "cfe011ad12e4978a22ab473df8587257ee875f895a83fcdd846baee8e690ea7e",
+      "previous_source_sha256": "cfe011ad12e4978a22ab473df8587257ee875f895a83fcdd846baee8e690ea7e",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/computer-use.md",
+      "extract_path": "_source/pages/user-guide__features__computer-use.md",
+      "canonical_route": "/docs/user-guide/features/computer-use",
+      "local_route": "user-guide/features/computer-use.html",
+      "local_file_exists": true,
+      "source_sha256": "9ebd305c2906925621f06433d9bef8163c95a84b7a5b07a5dd0cb7a67e0fe78b",
+      "previous_source_sha256": "dce198c6529d008c12b98960b67ff770a53057072b18757a7a527d17cc8c8ab1",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/context-files.md",
+      "extract_path": "_source/pages/user-guide__features__context-files.md",
+      "canonical_route": "/docs/user-guide/features/context-files",
+      "local_route": "user-guide/features/context-files.html",
+      "local_file_exists": true,
+      "source_sha256": "c45ef223b34b4d46cd6843757ad7e7e59e99c0804247c24705b010d008c33094",
+      "previous_source_sha256": "faeecb6227ce68ce04b51d56595a6c6ab85a71f35b313c32b38a53a1f391a09b",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/context-references.md",
+      "extract_path": "_source/pages/user-guide__features__context-references.md",
+      "canonical_route": "/docs/user-guide/features/context-references",
+      "local_route": "user-guide/features/context-references.html",
+      "local_file_exists": true,
+      "source_sha256": "b7206e5a92dd77f25e2ee44ee196eef48f02d66c45a0aa9779cb433b0eeb6214",
+      "previous_source_sha256": "b7206e5a92dd77f25e2ee44ee196eef48f02d66c45a0aa9779cb433b0eeb6214",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/credential-pools.md",
+      "extract_path": "_source/pages/user-guide__features__credential-pools.md",
+      "canonical_route": "/docs/user-guide/features/credential-pools",
+      "local_route": "user-guide/features/credential-pools.html",
+      "local_file_exists": true,
+      "source_sha256": "260ab24b729bc029f3b0c4220427ca6bea19ec4e4dd7ff99562f943ce8882362",
+      "previous_source_sha256": "f53fdd4c53ff067f83c0a2546567b34af0f1951787a852f99e55499c9b29b53d",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/credential-vault.md",
+      "extract_path": "_source/pages/user-guide__features__credential-vault.md",
+      "canonical_route": "/docs/user-guide/features/credential-vault",
+      "local_route": "user-guide/features/credential-vault.html",
+      "local_file_exists": false,
+      "source_sha256": "7fe15dc83decd747f8a617603095880daa287c1b6621cf1707d81865fdbd00a9",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/cron.md",
+      "extract_path": "_source/pages/user-guide__features__cron.md",
+      "canonical_route": "/docs/user-guide/features/cron",
+      "local_route": "user-guide/features/cron.html",
+      "local_file_exists": true,
+      "source_sha256": "cace432cfbd952d8d06415f08416edfcc5aa780b2698b60484c0de60e30c6c8f",
+      "previous_source_sha256": "ac05363dbfc54bf0ab93cd61ac89b7b9ac9685d83975095d6288dbc7346e078e",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/curator.md",
+      "extract_path": "_source/pages/user-guide__features__curator.md",
+      "canonical_route": "/docs/user-guide/features/curator",
+      "local_route": "user-guide/features/curator.html",
+      "local_file_exists": true,
+      "source_sha256": "33aabce5fe7732b7b4d3a59791b2d47cfb484e2c943ea2cb0fcadd21abef6e53",
+      "previous_source_sha256": "89a34d209f9e8d30e401fa0bd99acb3e89dab834c0b6ab37df40966793aad6ff",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/delegation.md",
+      "extract_path": "_source/pages/user-guide__features__delegation.md",
+      "canonical_route": "/docs/user-guide/features/delegation",
+      "local_route": "user-guide/features/delegation.html",
+      "local_file_exists": true,
+      "source_sha256": "0fd991b34b7fadd26108bce3c676ba62fdd1778cca1f7e23a430f4cf135f6b43",
+      "previous_source_sha256": "01bc889002b993a97ef1c4089cf6cd33b30ff25123d911f477a348e500a3e291",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/deliverable-mode.md",
+      "extract_path": "_source/pages/user-guide__features__deliverable-mode.md",
+      "canonical_route": "/docs/user-guide/features/deliverable-mode",
+      "local_route": "user-guide/features/deliverable-mode.html",
+      "local_file_exists": true,
+      "source_sha256": "5756c5ebca82e344c7168bc3c2e9088ce6b0b5ba657eb8d7e3ffe499ab4f1859",
+      "previous_source_sha256": "5756c5ebca82e344c7168bc3c2e9088ce6b0b5ba657eb8d7e3ffe499ab4f1859",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/document-extraction.md",
+      "extract_path": "_source/pages/user-guide__features__document-extraction.md",
+      "canonical_route": "/docs/user-guide/features/document-extraction",
+      "local_route": "user-guide/features/document-extraction.html",
+      "local_file_exists": true,
+      "source_sha256": "7f7475ce98e314a3eaf953160751ed0947f468ff8447dcaa250fbe1e9b574e87",
+      "previous_source_sha256": "7f7475ce98e314a3eaf953160751ed0947f468ff8447dcaa250fbe1e9b574e87",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/extending-the-dashboard.md",
+      "extract_path": "_source/pages/user-guide__features__extending-the-dashboard.md",
+      "canonical_route": "/docs/user-guide/features/extending-the-dashboard",
+      "local_route": "user-guide/features/extending-the-dashboard.html",
+      "local_file_exists": true,
+      "source_sha256": "da70ca33b1c5bc19e89300318e04c220fe61e86a9f8051b5faefc77706697154",
+      "previous_source_sha256": "da70ca33b1c5bc19e89300318e04c220fe61e86a9f8051b5faefc77706697154",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/fallback-providers.md",
+      "extract_path": "_source/pages/user-guide__features__fallback-providers.md",
+      "canonical_route": "/docs/user-guide/features/fallback-providers",
+      "local_route": "user-guide/features/fallback-providers.html",
+      "local_file_exists": true,
+      "source_sha256": "0792c80191cc345b43ab817a16eb44350a3d8dfe006d811c1a62eeba71faa07b",
+      "previous_source_sha256": "c3463a9161be2442eb21c0da2ca47596d311622116ebd49424e754bf563b01af",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/goals.md",
+      "extract_path": "_source/pages/user-guide__features__goals.md",
+      "canonical_route": "/docs/user-guide/features/goals",
+      "local_route": "user-guide/features/goals.html",
+      "local_file_exists": true,
+      "source_sha256": "f7851c32d183de1f296be2afde75ec3fc18501d9cb511af13246ec5441a2d695",
+      "previous_source_sha256": "3679c0fd9f173ba49bc1e953f04e56e74f8337902a67bd20fae291d4b2702328",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/heartbeat.md",
+      "extract_path": "_source/pages/user-guide__features__heartbeat.md",
+      "canonical_route": "/docs/user-guide/features/heartbeat",
+      "local_route": "user-guide/features/heartbeat.html",
+      "local_file_exists": true,
+      "source_sha256": "a4ad69b0b8677bd71fb813a813360e3b8d2960b2cebc49b66ee4f373f94dc68d",
+      "previous_source_sha256": "03cc8c74142e942479f37d938276e88f65d6b3a3a58d9c012f20ddfbe6f62ddc",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/honcho.md",
+      "extract_path": "_source/pages/user-guide__features__honcho.md",
+      "canonical_route": "/docs/user-guide/features/honcho",
+      "local_route": "user-guide/features/honcho.html",
+      "local_file_exists": true,
+      "source_sha256": "f5e6c81d541dbe2b6055ca56336ec406d6be854b0d293b9474789b3ebfd570eb",
+      "previous_source_sha256": "f6e823c7e553688ef64ec0538adec94eda281cbc469b7ce3033e8ad8a5a01b98",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/hooks.md",
+      "extract_path": "_source/pages/user-guide__features__hooks.md",
+      "canonical_route": "/docs/user-guide/features/hooks",
+      "local_route": "user-guide/features/hooks.html",
+      "local_file_exists": true,
+      "source_sha256": "5dd601cd88341ab5110dfce7bbb735f867daa3c893d67ca46c0bbed0918def76",
+      "previous_source_sha256": "8cd755051845344e3b80bdeee43f5c48976ae3ac7a7b3dec0597ea43a10ed246",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/image-generation.md",
+      "extract_path": "_source/pages/user-guide__features__image-generation.md",
+      "canonical_route": "/docs/user-guide/features/image-generation",
+      "local_route": "user-guide/features/image-generation.html",
+      "local_file_exists": true,
+      "source_sha256": "8ec2be1f0088b99fd25db311e5b536bf665e8a61337de36b7c87404a25c2943e",
+      "previous_source_sha256": "1f190642b59a103efe4aaf1d4be891161bf4822336a3aaa366eb2110bb519d5b",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/kanban.md",
+      "extract_path": "_source/pages/user-guide__features__kanban.md",
+      "canonical_route": "/docs/user-guide/features/kanban",
+      "local_route": "user-guide/features/kanban.html",
+      "local_file_exists": true,
+      "source_sha256": "e2d073424a006b0f22051d6f0ce1801d5c3f22e4b4f886fe3e2e00259a0067d4",
+      "previous_source_sha256": "f939a016a158d4815e0433ee778e595a6ee13639c2e10f4b12027f2b40ebfea8",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/kanban-multi-gateway.md",
+      "extract_path": "_source/pages/user-guide__features__kanban-multi-gateway.md",
+      "canonical_route": "/docs/user-guide/features/kanban-multi-gateway",
+      "local_route": "user-guide/features/kanban-multi-gateway.html",
+      "local_file_exists": false,
+      "source_sha256": "ed4cb487cc95d1b287093af1a41b27495f2061dc37ed9a4ac72f30387c5cb991",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/kanban-tutorial.md",
+      "extract_path": "_source/pages/user-guide__features__kanban-tutorial.md",
+      "canonical_route": "/docs/user-guide/features/kanban-tutorial",
+      "local_route": "user-guide/features/kanban-tutorial.html",
+      "local_file_exists": true,
+      "source_sha256": "3541cc16d783b3f7cd82e74f766bd88d04f2d09a8e0f481853eee1a7c842ae7c",
+      "previous_source_sha256": "3541cc16d783b3f7cd82e74f766bd88d04f2d09a8e0f481853eee1a7c842ae7c",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/kanban-worker-lanes.md",
+      "extract_path": "_source/pages/user-guide__features__kanban-worker-lanes.md",
+      "canonical_route": "/docs/user-guide/features/kanban-worker-lanes",
+      "local_route": "user-guide/features/kanban-worker-lanes.html",
+      "local_file_exists": true,
+      "source_sha256": "146d5e026225063e51dc3f01317174cb04560679ca72ee68445a35faf76a8b00",
+      "previous_source_sha256": "5dc0d8c5ff09c298e7e857f5ccb5c20dbe2ca5c3e245351e3eaf4c3318a1f60d",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/loops.md",
+      "extract_path": "_source/pages/user-guide__features__loops.md",
+      "canonical_route": "/docs/user-guide/features/loops",
+      "local_route": "user-guide/features/loops.html",
+      "local_file_exists": true,
+      "source_sha256": "10dcd8f392c5517b8bef54a031931bafdbc9459080275b321d0e539866abf079",
+      "previous_source_sha256": "da7cb297427f7ed7c4285d5c56c799101ac3bc5c49d2a27fc3b364fc19c8d355",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/lsp.md",
+      "extract_path": "_source/pages/user-guide__features__lsp.md",
+      "canonical_route": "/docs/user-guide/features/lsp",
+      "local_route": "user-guide/features/lsp.html",
+      "local_file_exists": true,
+      "source_sha256": "1dc07ba8d536debcb946f6f5755a8ad5f09c50d1e141d7ded18baef5ceca99ef",
+      "previous_source_sha256": "9afab37ef34089b6e9944808003bba7fb64d43ce678785d2ed9c5e6aa4eb3bbe",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/mcp.md",
+      "extract_path": "_source/pages/user-guide__features__mcp.md",
+      "canonical_route": "/docs/user-guide/features/mcp",
+      "local_route": "user-guide/features/mcp.html",
+      "local_file_exists": true,
+      "source_sha256": "497dd3359490c2bf8780468d95366aae9e563cce772d48355c42440e53531254",
+      "previous_source_sha256": "191aea886b24824f7d2f63a5e18587b5b6a6a59e64785ed6c62916e4bde0ff4f",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/memory.md",
+      "extract_path": "_source/pages/user-guide__features__memory.md",
+      "canonical_route": "/docs/user-guide/features/memory",
+      "local_route": "user-guide/features/memory.html",
+      "local_file_exists": true,
+      "source_sha256": "fb45622346f72536c197dcbf81a73d8adfff9edd61e8ce19a1e06751e6d0ef04",
+      "previous_source_sha256": "bb872622981343c227ea83ce78c6d8443d091989c330e26f3c96f505ae40d7f3",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/memory-providers.md",
+      "extract_path": "_source/pages/user-guide__features__memory-providers.md",
+      "canonical_route": "/docs/user-guide/features/memory-providers",
+      "local_route": "user-guide/features/memory-providers.html",
+      "local_file_exists": true,
+      "source_sha256": "04e05c05f31820082903dff3735068de640717a51d72e04aa475308a238d80e0",
+      "previous_source_sha256": "c93fa617f78feaf160d6551216656af8127b443a52e2d77ea4fd0aa9c4839536",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/mixture-of-agents.md",
+      "extract_path": "_source/pages/user-guide__features__mixture-of-agents.md",
+      "canonical_route": "/docs/user-guide/features/mixture-of-agents",
+      "local_route": "user-guide/features/mixture-of-agents.html",
+      "local_file_exists": true,
+      "source_sha256": "2e0f33754fe0b1c9d72ccb3e159d5c4f7f13c39e4e4a137b62ead10bcfa37bc5",
+      "previous_source_sha256": "9147a14ead84b05e7495f4672085b5b48cb174c0256a155e10dfec5a19004f19",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/overview.md",
+      "extract_path": "_source/pages/user-guide__features__overview.md",
+      "canonical_route": "/docs/user-guide/features/overview",
+      "local_route": "user-guide/features/overview.html",
+      "local_file_exists": true,
+      "source_sha256": "7f05d2c90a558a06ffb81b316975fd5bc8e943bb1ae17432d8734a7581d29a1a",
+      "previous_source_sha256": "7f05d2c90a558a06ffb81b316975fd5bc8e943bb1ae17432d8734a7581d29a1a",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/personality.md",
+      "extract_path": "_source/pages/user-guide__features__personality.md",
+      "canonical_route": "/docs/user-guide/features/personality",
+      "local_route": "user-guide/features/personality.html",
+      "local_file_exists": true,
+      "source_sha256": "7b238ead9fa6ab2d6e4b94b1c031d69f6837b17c6c83a2d126696d12e1c90ad9",
+      "previous_source_sha256": "b855f06b567d1e4b3337626844081e3d3bdc7cb62a02ab752757b544eb7630cc",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/pets.md",
+      "extract_path": "_source/pages/user-guide__features__pets.md",
+      "canonical_route": "/docs/user-guide/features/pets",
+      "local_route": "user-guide/features/pets.html",
+      "local_file_exists": true,
+      "source_sha256": "a53d73180c226d3ed209929047e1b35d53119f9eaf6500ebf655b3b8b967a9c3",
+      "previous_source_sha256": "a53d73180c226d3ed209929047e1b35d53119f9eaf6500ebf655b3b8b967a9c3",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/plugin-catalog.md",
+      "extract_path": "_source/pages/user-guide__features__plugin-catalog.md",
+      "canonical_route": "/docs/user-guide/features/plugin-catalog",
+      "local_route": "user-guide/features/plugin-catalog.html",
+      "local_file_exists": false,
+      "source_sha256": "ad721df05a37511fc4d26c31e3fa8fc5d564f3de36c15149a24d7597d1391f8a",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/plugins.md",
+      "extract_path": "_source/pages/user-guide__features__plugins.md",
+      "canonical_route": "/docs/user-guide/features/plugins",
+      "local_route": "user-guide/features/plugins.html",
+      "local_file_exists": true,
+      "source_sha256": "011e13f75f9f9d51429808a7a241f97310ecc0a11c24b10450becba4e4ae06b5",
+      "previous_source_sha256": "4986d992d71dc014e41111d72c426b577143f230bb12afb1c5e0f92d02ce7f62",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/provider-routing.md",
+      "extract_path": "_source/pages/user-guide__features__provider-routing.md",
+      "canonical_route": "/docs/user-guide/features/provider-routing",
+      "local_route": "user-guide/features/provider-routing.html",
+      "local_file_exists": true,
+      "source_sha256": "5ed7f65636bb94c9e342989353432b8b775ed3eeee542edbb46f683bf87fa936",
+      "previous_source_sha256": "ffa621e47b9ef6bfdf622658a89652f2dc58376a04cb8d4659350e46a02783fd",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/skills.md",
+      "extract_path": "_source/pages/user-guide__features__skills.md",
+      "canonical_route": "/docs/user-guide/features/skills",
+      "local_route": "user-guide/features/skills.html",
+      "local_file_exists": true,
+      "source_sha256": "45324e53d703733434aa9bc32a60ee1dcd50c9da6865ebb1172775aa32167cb3",
+      "previous_source_sha256": "e3ad321cda6ac650b09d23f24e5b77733be466a45208f162e65dbb4a675bc29f",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/skins.md",
+      "extract_path": "_source/pages/user-guide__features__skins.md",
+      "canonical_route": "/docs/user-guide/features/skins",
+      "local_route": "user-guide/features/skins.html",
+      "local_file_exists": true,
+      "source_sha256": "a07a4d1b786cbca61aaf1b28adddc17238a4063116dc646b7e0db75bc7454f17",
+      "previous_source_sha256": "4e093a253275dd9b39b3998a5a3906ecf6764e917d7607a82f887600c5fc64b4",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/spotify.md",
+      "extract_path": "_source/pages/user-guide__features__spotify.md",
+      "canonical_route": "/docs/user-guide/features/spotify",
+      "local_route": "user-guide/features/spotify.html",
+      "local_file_exists": true,
+      "source_sha256": "a8d24d9593354505b895640f68ae6810d652343768a150256e623a494dbc5f85",
+      "previous_source_sha256": "a8d24d9593354505b895640f68ae6810d652343768a150256e623a494dbc5f85",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/subscription-proxy.md",
+      "extract_path": "_source/pages/user-guide__features__subscription-proxy.md",
+      "canonical_route": "/docs/user-guide/features/subscription-proxy",
+      "local_route": "user-guide/features/subscription-proxy.html",
+      "local_file_exists": true,
+      "source_sha256": "bcfeb2175c47ed44b91c9faf98a5ea6fe6b8232ded6e4f5813b6de0055c59e33",
+      "previous_source_sha256": "bcfeb2175c47ed44b91c9faf98a5ea6fe6b8232ded6e4f5813b6de0055c59e33",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/tool-gateway.md",
+      "extract_path": "_source/pages/user-guide__features__tool-gateway.md",
+      "canonical_route": "/docs/user-guide/features/tool-gateway",
+      "local_route": "user-guide/features/tool-gateway.html",
+      "local_file_exists": true,
+      "source_sha256": "4d2b0ff628f035b8c4a624402bcc10b1189436191638d66e85009aa2d8020623",
+      "previous_source_sha256": "9268590156659c7d183f492518148324c6026e01575620afcef4ae3ce14f285d",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/tool-search.md",
+      "extract_path": "_source/pages/user-guide__features__tool-search.md",
+      "canonical_route": "/docs/user-guide/features/tool-search",
+      "local_route": "user-guide/features/tool-search.html",
+      "local_file_exists": true,
+      "source_sha256": "cd85b7bf1abfaefcf0910e1eb635e5c618c9a3ac3eec1c3558ce4e08b9d5576a",
+      "previous_source_sha256": "9b0e1bb126c01f7c1aca2b82c9482fe1e105de16378e53b363ec1babcf470644",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/tools.md",
+      "extract_path": "_source/pages/user-guide__features__tools.md",
+      "canonical_route": "/docs/user-guide/features/tools",
+      "local_route": "user-guide/features/tools.html",
+      "local_file_exists": true,
+      "source_sha256": "825090e26aebfb9f1f00a50345e4ae849b90ac9996a3d862fdb3c7965bbd7594",
+      "previous_source_sha256": "6a4e4ab059f929e635e8991dae559e5896aa1ebed468b91966aebf9fbad382a3",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/tts.md",
+      "extract_path": "_source/pages/user-guide__features__tts.md",
+      "canonical_route": "/docs/user-guide/features/tts",
+      "local_route": "user-guide/features/tts.html",
+      "local_file_exists": true,
+      "source_sha256": "dd2431f08bfc968c2817dabb1d33b6375bf04b18737ca2ff1b57059798781bd0",
+      "previous_source_sha256": "0461dbe0c6d6462950de8be074e2180beb4aff2bcd0ad4396a688cc06c95bdef",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/vision.md",
+      "extract_path": "_source/pages/user-guide__features__vision.md",
+      "canonical_route": "/docs/user-guide/features/vision",
+      "local_route": "user-guide/features/vision.html",
+      "local_file_exists": true,
+      "source_sha256": "7afa7d1a207852ad4d8870372b60a3a379ad279966149bbd58818848393a8517",
+      "previous_source_sha256": "b95757aab82e23f98b47e09e56eeedfb4e00f48c791a76bcdb2c9140cf3991b7",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/voice-mode.md",
+      "extract_path": "_source/pages/user-guide__features__voice-mode.md",
+      "canonical_route": "/docs/user-guide/features/voice-mode",
+      "local_route": "user-guide/features/voice-mode.html",
+      "local_file_exists": true,
+      "source_sha256": "7173a2d796971ba6fc8ea1c5e2ce42f62e886e10ea83b478af6eeba5774e4e2d",
+      "previous_source_sha256": "c51380b8739939a848deba6bb0701cc5d86c350626cfd4d1eb3979cabb0ce2ab",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/wake-word.md",
+      "extract_path": "_source/pages/user-guide__features__wake-word.md",
+      "canonical_route": "/docs/user-guide/features/wake-word",
+      "local_route": "user-guide/features/wake-word.html",
+      "local_file_exists": true,
+      "source_sha256": "edfc625e2d99061834f5677dc7383f86bfaa5b695cad3097d1eadd388051b6ba",
+      "previous_source_sha256": "a6381f5e2bd3e667a9223b8a28dad932025ef7306d0446e663f5448546f81655",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/web-dashboard.md",
+      "extract_path": "_source/pages/user-guide__features__web-dashboard.md",
+      "canonical_route": "/docs/user-guide/features/web-dashboard",
+      "local_route": "user-guide/features/web-dashboard.html",
+      "local_file_exists": true,
+      "source_sha256": "a78231dc6fca8c9051c3022f6929266a70d79f1852cb4fe6a1e91fabc63cda44",
+      "previous_source_sha256": "f5c7c6435fc6a1de6d065a54654cca623a3bc0d41d91a0d34aa11b5d4484d2bf",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/web-search.md",
+      "extract_path": "_source/pages/user-guide__features__web-search.md",
+      "canonical_route": "/docs/user-guide/features/web-search",
+      "local_route": "user-guide/features/web-search.html",
+      "local_file_exists": true,
+      "source_sha256": "4f9ff37c27538da14acfd6432c522fc06194dd2836a3532448f8ee500f92990e",
+      "previous_source_sha256": "72c73f7d77c03f4e077273f64fd724630de75e0843e1e59cf3d99b6bac549e54",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/features/x-search.md",
+      "extract_path": "_source/pages/user-guide__features__x-search.md",
+      "canonical_route": "/docs/user-guide/features/x-search",
+      "local_route": "user-guide/features/x-search.html",
+      "local_file_exists": true,
+      "source_sha256": "aeea0237b58e14b6e0592048ec7afa474e48f82adaab8ef9b49e48e8497b0ec2",
+      "previous_source_sha256": "aeea0237b58e14b6e0592048ec7afa474e48f82adaab8ef9b49e48e8497b0ec2",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/git-worktrees.md",
+      "extract_path": "_source/pages/user-guide__git-worktrees.md",
+      "canonical_route": "/docs/user-guide/git-worktrees",
+      "local_route": "user-guide/git-worktrees.html",
+      "local_file_exists": true,
+      "source_sha256": "75908e28b99b6011b3419912f9b9b4ee9f5d6a4f68f166d7c15b71888938227f",
+      "previous_source_sha256": "75908e28b99b6011b3419912f9b9b4ee9f5d6a4f68f166d7c15b71888938227f",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/import-from-other-agents.md",
+      "extract_path": "_source/pages/user-guide__import-from-other-agents.md",
+      "canonical_route": "/docs/user-guide/import-from-other-agents",
+      "local_route": "user-guide/import-from-other-agents.html",
+      "local_file_exists": true,
+      "source_sha256": "aefacb0db75db7511a8162629ab4e3fb9b2ea7c3c7ab4d5a3ef68c76459f26f0",
+      "previous_source_sha256": "94a95c4f51c687e0cd96d1afd377ebafd73a60dfff9bfb7f6820e8b15788e433",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/local-models.md",
+      "extract_path": "_source/pages/user-guide__local-models.md",
+      "canonical_route": "/docs/user-guide/local-models",
+      "local_route": "user-guide/local-models.html",
+      "local_file_exists": false,
+      "source_sha256": "35e4da035c19c607eb4eb4ee5e89d52ace5b899f88bc66b64333d8837fbdf51f",
+      "previous_source_sha256": null,
+      "source_change": "added"
+    },
+    {
+      "source_path": "website/docs/user-guide/managed-scope.md",
+      "extract_path": "_source/pages/user-guide__managed-scope.md",
+      "canonical_route": "/docs/user-guide/managed-scope",
+      "local_route": "user-guide/managed-scope.html",
+      "local_file_exists": true,
+      "source_sha256": "d3702013484f8794cc8be724858be8873c73b9da24899d1af51f0d3e2dcda8df",
+      "previous_source_sha256": "d3702013484f8794cc8be724858be8873c73b9da24899d1af51f0d3e2dcda8df",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/a2a.md",
+      "extract_path": "_source/pages/user-guide__messaging__a2a.md",
+      "canonical_route": "/docs/user-guide/messaging/a2a",
+      "local_route": "user-guide/messaging/a2a.html",
+      "local_file_exists": true,
+      "source_sha256": "2bc9b9a5ac02aa617cde62ed218fb7956443690d37b880875069230553833414",
+      "previous_source_sha256": "0d23234524fce3eeb229d9379a0925f108a15e3aff3a48ac5abc9bf024d02448",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/bluebubbles.md",
+      "extract_path": "_source/pages/user-guide__messaging__bluebubbles.md",
+      "canonical_route": "/docs/user-guide/messaging/bluebubbles",
+      "local_route": "user-guide/messaging/bluebubbles.html",
+      "local_file_exists": true,
+      "source_sha256": "a5bb4304dd1c1f993cfdd5bc3eca7c32dd42b86dba156f72f80014441af4e819",
+      "previous_source_sha256": "a5bb4304dd1c1f993cfdd5bc3eca7c32dd42b86dba156f72f80014441af4e819",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/buzz.md",
+      "extract_path": "_source/pages/user-guide__messaging__buzz.md",
+      "canonical_route": "/docs/user-guide/messaging/buzz",
+      "local_route": "user-guide/messaging/buzz.html",
+      "local_file_exists": true,
+      "source_sha256": "7e366d130c0dd838fc44d09cd423fd301d9b948cb9233158797d5857a48208c9",
+      "previous_source_sha256": "082b5366bcd81c0d7bc9c8c7530939272f39f38430d33fdcc9035bf8188bfc80",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/dingtalk.md",
+      "extract_path": "_source/pages/user-guide__messaging__dingtalk.md",
+      "canonical_route": "/docs/user-guide/messaging/dingtalk",
+      "local_route": "user-guide/messaging/dingtalk.html",
+      "local_file_exists": true,
+      "source_sha256": "7b91fe1dafeae59911c8a07e699e8f1923c52c20f3493213cd9060fc39fbd6f0",
+      "previous_source_sha256": "7b91fe1dafeae59911c8a07e699e8f1923c52c20f3493213cd9060fc39fbd6f0",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/discord.md",
+      "extract_path": "_source/pages/user-guide__messaging__discord.md",
+      "canonical_route": "/docs/user-guide/messaging/discord",
+      "local_route": "user-guide/messaging/discord.html",
+      "local_file_exists": true,
+      "source_sha256": "03403992bcd06b76773623667a17591719e51e5c305f355739b44df9229f4305",
+      "previous_source_sha256": "37df9292dcab137ca0bd1a942fe1e1b45a8404ff76e02a58d28196a5a6f9e82d",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/email.md",
+      "extract_path": "_source/pages/user-guide__messaging__email.md",
+      "canonical_route": "/docs/user-guide/messaging/email",
+      "local_route": "user-guide/messaging/email.html",
+      "local_file_exists": true,
+      "source_sha256": "67115b23427742b5eadc37133b9e0b288e5b900ebb7ec94bf8704a85cd8448d5",
+      "previous_source_sha256": "9238b50109565943959a1bdea2dc67c5c0d7d4376214d39c5a5c143db17f1c08",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/feishu.md",
+      "extract_path": "_source/pages/user-guide__messaging__feishu.md",
+      "canonical_route": "/docs/user-guide/messaging/feishu",
+      "local_route": "user-guide/messaging/feishu.html",
+      "local_file_exists": true,
+      "source_sha256": "e2246d5b97c31120a2bba11d7707101c2f311cb767ab9731e14578052682ab99",
+      "previous_source_sha256": "49e62465981757755ca9db23bf236ce471021f60e319d93bd5e5cdbe57043d69",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/google_chat.md",
+      "extract_path": "_source/pages/user-guide__messaging__google_chat.md",
+      "canonical_route": "/docs/user-guide/messaging/google_chat",
+      "local_route": "user-guide/messaging/google_chat.html",
+      "local_file_exists": true,
+      "source_sha256": "f29a92ed52ff2bc174cfe68ac4a5eaf9616a32b8cac244a870d33c6ea8683720",
+      "previous_source_sha256": "16e0132c1333f15b344750f777ef255d26b9fc095ca49906810c5af2792e09d2",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/homeassistant.md",
+      "extract_path": "_source/pages/user-guide__messaging__homeassistant.md",
+      "canonical_route": "/docs/user-guide/messaging/homeassistant",
+      "local_route": "user-guide/messaging/homeassistant.html",
+      "local_file_exists": true,
+      "source_sha256": "8ee0fcedae7461284121d81207518fee8373bb3b339f4d3a49acf0fe5036fd31",
+      "previous_source_sha256": "8ee0fcedae7461284121d81207518fee8373bb3b339f4d3a49acf0fe5036fd31",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/index.md",
+      "extract_path": "_source/pages/user-guide__messaging__index.md",
+      "canonical_route": "/docs/user-guide/messaging",
+      "local_route": "user-guide/messaging/index.html",
+      "local_file_exists": true,
+      "source_sha256": "8babd5ec5ae22972c1c52e39b70831c069365e9d9a634b476d3358c77f1697f0",
+      "previous_source_sha256": "f2536af1e5f114e5b4edcf5c756f05bc48caa44b20b7a00a54c6a6ef7d3dfa6a",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/irc.md",
+      "extract_path": "_source/pages/user-guide__messaging__irc.md",
+      "canonical_route": "/docs/user-guide/messaging/irc",
+      "local_route": "user-guide/messaging/irc.html",
+      "local_file_exists": true,
+      "source_sha256": "45593f8c0f24d1df0c7e18852129d6d8dfe3d95db9cb2a9c9f0224cd2d355549",
+      "previous_source_sha256": "ac5ed30be3520c76e79bbd1faa264a82432fc998a8a2b311822e0669915ed63c",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/line.md",
+      "extract_path": "_source/pages/user-guide__messaging__line.md",
+      "canonical_route": "/docs/user-guide/messaging/line",
+      "local_route": "user-guide/messaging/line.html",
+      "local_file_exists": true,
+      "source_sha256": "c45a86d9f2b30db3641ce44d15e87d0281b2c4121c2b070a9b7a061e978c9bd0",
+      "previous_source_sha256": "1d6ab5a6edf54aefe1742b5c63c74df5728432981d64c2272bf9ac3d33ecaa4d",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/matrix.md",
+      "extract_path": "_source/pages/user-guide__messaging__matrix.md",
+      "canonical_route": "/docs/user-guide/messaging/matrix",
+      "local_route": "user-guide/messaging/matrix.html",
+      "local_file_exists": true,
+      "source_sha256": "9461b78da1e0ce06412d288a19a7f8a1b918c7eebae9cde0ac22ffd7b4e2ca9c",
+      "previous_source_sha256": "46471364aeeac234433e4fbd5045bc92c5b1c5d56065a88fe38b4e7a0253c820",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/mattermost.md",
+      "extract_path": "_source/pages/user-guide__messaging__mattermost.md",
+      "canonical_route": "/docs/user-guide/messaging/mattermost",
+      "local_route": "user-guide/messaging/mattermost.html",
+      "local_file_exists": true,
+      "source_sha256": "1619f15eb27f45d93e7d211f1d37eadb0278108ed8cdff611b12ed3e5de8012b",
+      "previous_source_sha256": "1619f15eb27f45d93e7d211f1d37eadb0278108ed8cdff611b12ed3e5de8012b",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/msgraph-webhook.md",
+      "extract_path": "_source/pages/user-guide__messaging__msgraph-webhook.md",
+      "canonical_route": "/docs/user-guide/messaging/msgraph-webhook",
+      "local_route": "user-guide/messaging/msgraph-webhook.html",
+      "local_file_exists": true,
+      "source_sha256": "0a5de02bc6327b0cb7f935574efea67f102ab550fcbe92c93b71c32f4331776f",
+      "previous_source_sha256": "0a5de02bc6327b0cb7f935574efea67f102ab550fcbe92c93b71c32f4331776f",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/ntfy.md",
+      "extract_path": "_source/pages/user-guide__messaging__ntfy.md",
+      "canonical_route": "/docs/user-guide/messaging/ntfy",
+      "local_route": "user-guide/messaging/ntfy.html",
+      "local_file_exists": true,
+      "source_sha256": "d61b2489528827542b7b40444588a74e75e5ae165e0f4a17a1fdf387ca334ada",
+      "previous_source_sha256": "d61b2489528827542b7b40444588a74e75e5ae165e0f4a17a1fdf387ca334ada",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/open-webui.md",
+      "extract_path": "_source/pages/user-guide__messaging__open-webui.md",
+      "canonical_route": "/docs/user-guide/messaging/open-webui",
+      "local_route": "user-guide/messaging/open-webui.html",
+      "local_file_exists": true,
+      "source_sha256": "c4f414592a0748491197889b6881fc927f900fe49c26aa5fa0cb52f58d831b99",
+      "previous_source_sha256": "c4f414592a0748491197889b6881fc927f900fe49c26aa5fa0cb52f58d831b99",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/photon.md",
+      "extract_path": "_source/pages/user-guide__messaging__photon.md",
+      "canonical_route": "/docs/user-guide/messaging/photon",
+      "local_route": "user-guide/messaging/photon.html",
+      "local_file_exists": true,
+      "source_sha256": "3022b5778e9dc76f3e9d63aeb35de135e64576f8a9728b8b7fdcdf7f7742fb05",
+      "previous_source_sha256": "dee1718cb43d5c25b65472c9d115ee5eeaec5390c6360969c390966cea31dfde",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/qqbot.md",
+      "extract_path": "_source/pages/user-guide__messaging__qqbot.md",
+      "canonical_route": "/docs/user-guide/messaging/qqbot",
+      "local_route": "user-guide/messaging/qqbot.html",
+      "local_file_exists": true,
+      "source_sha256": "ba54ccd9a542aad071b7bdb1b67e89165f48f76eacfbfb7d9b0b9ade21418bdd",
+      "previous_source_sha256": "ba54ccd9a542aad071b7bdb1b67e89165f48f76eacfbfb7d9b0b9ade21418bdd",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/raft.md",
+      "extract_path": "_source/pages/user-guide__messaging__raft.md",
+      "canonical_route": "/docs/user-guide/messaging/raft",
+      "local_route": "user-guide/messaging/raft.html",
+      "local_file_exists": true,
+      "source_sha256": "6f366ad9ee322b079560039b60378eb76dcb49edd444262209c6a6caef0c0ebf",
+      "previous_source_sha256": "6f366ad9ee322b079560039b60378eb76dcb49edd444262209c6a6caef0c0ebf",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/relay.md",
+      "extract_path": "_source/pages/user-guide__messaging__relay.md",
+      "canonical_route": "/docs/user-guide/messaging/relay",
+      "local_route": "user-guide/messaging/relay.html",
+      "local_file_exists": true,
+      "source_sha256": "bd27c36f9f13b57fe95f93a4de3e43e1718a253f5111e051d59d63bb645eb2e1",
+      "previous_source_sha256": "2492c1c271c082aec1441453676f938dc13db36bf31bf423ec98ed980388a0c3",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/signal.md",
+      "extract_path": "_source/pages/user-guide__messaging__signal.md",
+      "canonical_route": "/docs/user-guide/messaging/signal",
+      "local_route": "user-guide/messaging/signal.html",
+      "local_file_exists": true,
+      "source_sha256": "5647494e530ae0b3466fbe2144a4b0c356f05a68afec2aa4db1a2c663c8caf30",
+      "previous_source_sha256": "aae25f55a7180b4dc9e99a428c120951dec0d446afde040d4caf8ff6ba479f95",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/simplex.md",
+      "extract_path": "_source/pages/user-guide__messaging__simplex.md",
+      "canonical_route": "/docs/user-guide/messaging/simplex",
+      "local_route": "user-guide/messaging/simplex.html",
+      "local_file_exists": true,
+      "source_sha256": "95dab9d07ba2f2b8dbe4548e458c00b3166c5329f870de5b054ad2c8a737c2f9",
+      "previous_source_sha256": "95dab9d07ba2f2b8dbe4548e458c00b3166c5329f870de5b054ad2c8a737c2f9",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/slack.md",
+      "extract_path": "_source/pages/user-guide__messaging__slack.md",
+      "canonical_route": "/docs/user-guide/messaging/slack",
+      "local_route": "user-guide/messaging/slack.html",
+      "local_file_exists": true,
+      "source_sha256": "b3e42e25f7bbce6fcec3725a88590a0bcbff78d2bdb9bb518ccdab9037c783c0",
+      "previous_source_sha256": "e9e81afcef107d1807a6efd82e6f07ae898702d8d465b47985d5ec521628e940",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/sms.md",
+      "extract_path": "_source/pages/user-guide__messaging__sms.md",
+      "canonical_route": "/docs/user-guide/messaging/sms",
+      "local_route": "user-guide/messaging/sms.html",
+      "local_file_exists": true,
+      "source_sha256": "189e1037f0efceede7aad0f0bc1bba6ce18cbde493539d41d19aab7eb17b3250",
+      "previous_source_sha256": "189e1037f0efceede7aad0f0bc1bba6ce18cbde493539d41d19aab7eb17b3250",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/teams.md",
+      "extract_path": "_source/pages/user-guide__messaging__teams.md",
+      "canonical_route": "/docs/user-guide/messaging/teams",
+      "local_route": "user-guide/messaging/teams.html",
+      "local_file_exists": true,
+      "source_sha256": "26900fceba66245528ef230148f02cfbf9c27dff307459fe51f128475a8fa4b0",
+      "previous_source_sha256": "26900fceba66245528ef230148f02cfbf9c27dff307459fe51f128475a8fa4b0",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/teams-meetings.md",
+      "extract_path": "_source/pages/user-guide__messaging__teams-meetings.md",
+      "canonical_route": "/docs/user-guide/messaging/teams-meetings",
+      "local_route": "user-guide/messaging/teams-meetings.html",
+      "local_file_exists": true,
+      "source_sha256": "aa3a47e75a5e60dfb215628237f07d231fa8d8bdf955b06732be86282e71823c",
+      "previous_source_sha256": "aa3a47e75a5e60dfb215628237f07d231fa8d8bdf955b06732be86282e71823c",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/telegram.md",
+      "extract_path": "_source/pages/user-guide__messaging__telegram.md",
+      "canonical_route": "/docs/user-guide/messaging/telegram",
+      "local_route": "user-guide/messaging/telegram.html",
+      "local_file_exists": true,
+      "source_sha256": "1a67ca9014c5125100edf362a6d2892d6c1353b32e5f064d47fc09c617d19a07",
+      "previous_source_sha256": "b22185f8f6d7e5d191f593779912caf5bf01c4680c971201dcf5c98357d443d0",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/webhooks.md",
+      "extract_path": "_source/pages/user-guide__messaging__webhooks.md",
+      "canonical_route": "/docs/user-guide/messaging/webhooks",
+      "local_route": "user-guide/messaging/webhooks.html",
+      "local_file_exists": true,
+      "source_sha256": "1126c02cf106b7925c361696d1348d93819ca37dfa1352c512e8ff28589e094c",
+      "previous_source_sha256": "37f91638137a594ac32b04b15e46614f57b5f43dd37e1370803d411719dab10e",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/wecom.md",
+      "extract_path": "_source/pages/user-guide__messaging__wecom.md",
+      "canonical_route": "/docs/user-guide/messaging/wecom",
+      "local_route": "user-guide/messaging/wecom.html",
+      "local_file_exists": true,
+      "source_sha256": "a59a1a86835f29970e70102ffdc0d769409941e58a186dcf3ebefedb896c4f27",
+      "previous_source_sha256": "b1fc169a506de7eff8c189fa288a71116f58f08d150157a91ded2eb043227209",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/wecom-callback.md",
+      "extract_path": "_source/pages/user-guide__messaging__wecom-callback.md",
+      "canonical_route": "/docs/user-guide/messaging/wecom-callback",
+      "local_route": "user-guide/messaging/wecom-callback.html",
+      "local_file_exists": true,
+      "source_sha256": "abeaf39cfd9cd0dbe3cf82daba792018f272e25d17a08596af0acba45cdd6b35",
+      "previous_source_sha256": "abeaf39cfd9cd0dbe3cf82daba792018f272e25d17a08596af0acba45cdd6b35",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/weixin.md",
+      "extract_path": "_source/pages/user-guide__messaging__weixin.md",
+      "canonical_route": "/docs/user-guide/messaging/weixin",
+      "local_route": "user-guide/messaging/weixin.html",
+      "local_file_exists": true,
+      "source_sha256": "d3b6f52dbcf299ca0a7031078ebf085fd59783aa9fbf2926418bf04ef82e83f4",
+      "previous_source_sha256": "d3b6f52dbcf299ca0a7031078ebf085fd59783aa9fbf2926418bf04ef82e83f4",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/whatsapp.md",
+      "extract_path": "_source/pages/user-guide__messaging__whatsapp.md",
+      "canonical_route": "/docs/user-guide/messaging/whatsapp",
+      "local_route": "user-guide/messaging/whatsapp.html",
+      "local_file_exists": true,
+      "source_sha256": "c47bca09d3d1633bce0c386f98d875f9c675ff4e3d4df95988560d24546252c9",
+      "previous_source_sha256": "9e81fec11e52fc46926e5d44daf4db0ccf93d15620a2f733ee85c1f01314c54d",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/whatsapp-cloud.md",
+      "extract_path": "_source/pages/user-guide__messaging__whatsapp-cloud.md",
+      "canonical_route": "/docs/user-guide/messaging/whatsapp-cloud",
+      "local_route": "user-guide/messaging/whatsapp-cloud.html",
+      "local_file_exists": true,
+      "source_sha256": "f4bf39353b89de58781c7982597798625290169a8a01fce1de547abfd3a2fd25",
+      "previous_source_sha256": "e68907cf2e4c378e00f65f28bc0bf06929cf5d600e42d4dfe6a37e8c5816cba3",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/messaging/yuanbao.md",
+      "extract_path": "_source/pages/user-guide__messaging__yuanbao.md",
+      "canonical_route": "/docs/user-guide/messaging/yuanbao",
+      "local_route": "user-guide/messaging/yuanbao.html",
+      "local_file_exists": true,
+      "source_sha256": "cae7c2160b983270c85e50e7c025677f22960e4be45c186dc674e748631df92e",
+      "previous_source_sha256": "1c7d4d8be1d0d9fa88397c61fa79cfce2b2e8f3544d6c1bd061623b243ffade7",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/multi-connection-desktop.md",
+      "extract_path": "_source/pages/user-guide__multi-connection-desktop.md",
+      "canonical_route": "/docs/user-guide/multi-connection-desktop",
+      "local_route": "user-guide/multi-connection-desktop.html",
+      "local_file_exists": true,
+      "source_sha256": "0e292088c53d8d8dca58cafc4dbf9bb2cfb6bd4aaa443cebaa54d06f10fc3787",
+      "previous_source_sha256": "51a57bcc3ea830d922068e5aa29e6792a4eefa7eb14450827473e93bf5052e5e",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/multi-profile-gateways.md",
+      "extract_path": "_source/pages/user-guide__multi-profile-gateways.md",
+      "canonical_route": "/docs/user-guide/multi-profile-gateways",
+      "local_route": "user-guide/multi-profile-gateways.html",
+      "local_file_exists": true,
+      "source_sha256": "100d862f2273770c2fb0c3b620a5391968b429a3990a5747024fbe7a899e47a9",
+      "previous_source_sha256": "2261948a378fefc5582f675652c6a65770de0520bd12779b9674c5927bdf8fd8",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/profile-distributions.md",
+      "extract_path": "_source/pages/user-guide__profile-distributions.md",
+      "canonical_route": "/docs/user-guide/profile-distributions",
+      "local_route": "user-guide/profile-distributions.html",
+      "local_file_exists": true,
+      "source_sha256": "fabdfad63966db82b9dbf65a5bb4f35f43984cc12829408272b7f597d6f75fae",
+      "previous_source_sha256": "de1c134a843865a25f51e8f89796f5d9017eb815dd5b4a3b7f95c36cf1b41ce8",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/profiles.md",
+      "extract_path": "_source/pages/user-guide__profiles.md",
+      "canonical_route": "/docs/user-guide/profiles",
+      "local_route": "user-guide/profiles.html",
+      "local_file_exists": true,
+      "source_sha256": "176758031aff2cd9e85c73067327128c778b37002b9523a40f0fb0076f3c7b89",
+      "previous_source_sha256": "1c4df14dbd379b3c37609d937999ea52a3cf48cdcd93b5f00ea691801b7e47c7",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/secrets/bitwarden.md",
+      "extract_path": "_source/pages/user-guide__secrets__bitwarden.md",
+      "canonical_route": "/docs/user-guide/secrets/bitwarden",
+      "local_route": "user-guide/secrets/bitwarden.html",
+      "local_file_exists": true,
+      "source_sha256": "7c2bdface252cae0c8fcae0fb015bf17a045af289d853d1c925db017a2448b70",
+      "previous_source_sha256": "7c2bdface252cae0c8fcae0fb015bf17a045af289d853d1c925db017a2448b70",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/secrets/command.md",
+      "extract_path": "_source/pages/user-guide__secrets__command.md",
+      "canonical_route": "/docs/user-guide/secrets/command",
+      "local_route": "user-guide/secrets/command.html",
+      "local_file_exists": true,
+      "source_sha256": "662b4d186d69542fe13a7c5a8ca769ed3615a18eabaf797630188e8ea3c53735",
+      "previous_source_sha256": "662b4d186d69542fe13a7c5a8ca769ed3615a18eabaf797630188e8ea3c53735",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/secrets/index.md",
+      "extract_path": "_source/pages/user-guide__secrets__index.md",
+      "canonical_route": "/docs/user-guide/secrets",
+      "local_route": "user-guide/secrets.html",
+      "local_file_exists": true,
+      "source_sha256": "e40802bba920cd80166d295a705cbec521e0ff49041297536083399f12b8eac3",
+      "previous_source_sha256": "e40802bba920cd80166d295a705cbec521e0ff49041297536083399f12b8eac3",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/secrets/onepassword.md",
+      "extract_path": "_source/pages/user-guide__secrets__onepassword.md",
+      "canonical_route": "/docs/user-guide/secrets/onepassword",
+      "local_route": "user-guide/secrets/onepassword.html",
+      "local_file_exists": true,
+      "source_sha256": "48c78ec9ab9fe5dc50bbfebccd4fb25299c08f91f3a8d9bbe2bb73d703689663",
+      "previous_source_sha256": "d9a7576d3d1e28b3d3c89f59c38071800678cb0b0b705b757eded9edf977203b",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/security.md",
+      "extract_path": "_source/pages/user-guide__security.md",
+      "canonical_route": "/docs/user-guide/security",
+      "local_route": "user-guide/security.html",
+      "local_file_exists": true,
+      "source_sha256": "6f8a64f20f1b84529e1f84ae3b845f0fb01cf106caab45868e7e23c84f0682f2",
+      "previous_source_sha256": "406adb0dcd5a49c3f348d052734a95cec8c4bb4eeb4336ec03a7159a5717fc12",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/sessions.md",
+      "extract_path": "_source/pages/user-guide__sessions.md",
+      "canonical_route": "/docs/user-guide/sessions",
+      "local_route": "user-guide/sessions.html",
+      "local_file_exists": true,
+      "source_sha256": "1fb349ab242f28ea1d8407f484bb7cfc5c52d10d6a2440df850e6aa2802ba397",
+      "previous_source_sha256": "601e0d008ee124aa850067b1f79d3aa829384fb62e3482918df90fd81fcad3c2",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/skills/google-workspace.md",
+      "extract_path": "_source/pages/user-guide__skills__google-workspace.md",
+      "canonical_route": "/docs/user-guide/skills/google-workspace",
+      "local_route": "user-guide/skills/google-workspace.html",
+      "local_file_exists": true,
+      "source_sha256": "3fa9e9f47b37925f9fde2997fd52756e9c917a4eb8d69f6f73b21cf3fed77e0e",
+      "previous_source_sha256": "3fa9e9f47b37925f9fde2997fd52756e9c917a4eb8d69f6f73b21cf3fed77e0e",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/tui.md",
+      "extract_path": "_source/pages/user-guide__tui.md",
+      "canonical_route": "/docs/user-guide/tui",
+      "local_route": "user-guide/tui.html",
+      "local_file_exists": true,
+      "source_sha256": "eaea00e61d4110ad903b8629ccfb5b5c644e605118dae1629d3c00a3cfa3f317",
+      "previous_source_sha256": "907691b320e89a0640d3b29be4f56b2a80ffce0a78f62b5ed4a1fdacfe470001",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/which-file-does-what.md",
+      "extract_path": "_source/pages/user-guide__which-file-does-what.md",
+      "canonical_route": "/docs/user-guide/which-file-does-what",
+      "local_route": "user-guide/which-file-does-what.html",
+      "local_file_exists": true,
+      "source_sha256": "4c30549aff1ab64c1057e88f35c94c77e8e2f70614b6b094a66542d626658557",
+      "previous_source_sha256": "4c30549aff1ab64c1057e88f35c94c77e8e2f70614b6b094a66542d626658557",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-guide/windows-native.md",
+      "extract_path": "_source/pages/user-guide__windows-native.md",
+      "canonical_route": "/docs/user-guide/windows-native",
+      "local_route": "user-guide/windows-native.html",
+      "local_file_exists": true,
+      "source_sha256": "9cb40755d2cbfe98eacea136c88f00f82e8d52a102cf4f577e1af7193774fc79",
+      "previous_source_sha256": "7f4dd5a4de1091a162779a5d32ce0e94ed5c1352a4621c82aeacd8d222eadfab",
+      "source_change": "changed"
+    },
+    {
+      "source_path": "website/docs/user-guide/windows-wsl-quickstart.md",
+      "extract_path": "_source/pages/user-guide__windows-wsl-quickstart.md",
+      "canonical_route": "/docs/user-guide/windows-wsl-quickstart",
+      "local_route": "user-guide/windows-wsl-quickstart.html",
+      "local_file_exists": true,
+      "source_sha256": "4502fc47c0e4a194922018f08e549902690db9073cce0a45bf748af1940c656b",
+      "previous_source_sha256": "4502fc47c0e4a194922018f08e549902690db9073cce0a45bf748af1940c656b",
+      "source_change": "unchanged"
+    },
+    {
+      "source_path": "website/docs/user-stories.mdx",
+      "extract_path": "_source/pages/user-stories.mdx.md",
+      "canonical_route": "/docs/user-stories",
+      "local_route": "user-stories.html",
+      "local_file_exists": true,
+      "source_sha256": "f6d9b8ac4a9575d926b87bc2b7784eabc6b3ee81652baae96234d4e7f33a28fb",
+      "previous_source_sha256": "f6d9b8ac4a9575d926b87bc2b7784eabc6b3ee81652baae96234d4e7f33a28fb",
+      "source_change": "unchanged"
+    }
+  ]
+}

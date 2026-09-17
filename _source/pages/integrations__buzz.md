@@ -51,5 +51,3 @@ Full configuration reference (env vars, config.yaml, transport modes, access con
 ## Credits
 
 The Buzz integration was built with the community: @SHL0MS (PATH launcher + Desktop security audit), @NYTEMODEONLY (relay-bridge docs), @rob-coco (platform adapter), @ScaleLeanChris (Nostr WebSocket transport + NIP-42/BIP-340 signing), and @jethac (multi-agent verification).
-
-

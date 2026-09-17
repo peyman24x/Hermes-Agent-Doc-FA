@@ -15,6 +15,7 @@ This is separate from the bundled [Himalaya email skill](/docs/user-guide/skills
 | Let people email the Hermes agent and receive replies | Email gateway adapter on this page | None beyond an IMAP/SMTP email account |
 | Let the agent inspect, compose, move, and manage mailbox messages from terminal tools | Himalaya email skill | `himalaya` CLI and `~/.config/himalaya/config.toml` |
 
+---
 
 ## Prerequisites
 
@@ -43,6 +44,32 @@ Most email providers support IMAP/SMTP. Check your provider's documentation for:
 - SMTP host and port (usually port 587 with STARTTLS)
 - Whether app passwords are required
 
+### Proton Mail Bridge / local relays
+
+Proton Mail Bridge (and similar local relays such as a self-hosted MTA) listen on
+loopback with **STARTTLS** and a self-signed certificate, so the defaults
+(implicit TLS on IMAP 993, verified certificates) won't connect. Override the
+transport in `~/.hermes/config.yaml`:
+
+```yaml
+platforms:
+  email:
+    enabled: true
+    extra:
+      imap_host: 127.0.0.1
+      imap_security: starttls     # tls (default) | starttls | plain
+      imap_tls_verify: false      # Bridge uses a self-signed cert
+      smtp_host: 127.0.0.1
+      smtp_security: starttls     # default: tls on port 465, starttls otherwise
+      smtp_tls_verify: false
+```
+
+and set `EMAIL_IMAP_PORT=1143` / `EMAIL_SMTP_PORT=1025` alongside your Bridge
+credentials in `~/.hermes/.env`. Unknown `*_security` values log a warning and
+fall back to the secure default. Only disable `*_tls_verify` for loopback hosts —
+Hermes logs a warning when verification is off for any other host.
+
+---
 
 ## Step 1: Configure Hermes
 
@@ -75,6 +102,7 @@ EMAIL_POLL_INTERVAL=15                 # Seconds between inbox checks (default: 
 EMAIL_HOME_ADDRESS=your@email.com      # Default delivery target for cron jobs
 ```
 
+---
 
 ## Step 2: Start the Gateway
 
@@ -89,6 +117,7 @@ On startup, the adapter:
 2. Marks all existing inbox messages as "seen" (only processes new emails)
 3. Starts polling for new messages
 
+---
 
 ## How It Works
 
@@ -130,6 +159,7 @@ platforms:
 
 When enabled, attachment and inline parts are skipped before payload decoding. The email body text is still processed normally.
 
+---
 
 ## Access Control
 
@@ -144,6 +174,7 @@ Email access is stricter by default than chat-style platforms:
 **Use a dedicated inbox and configure `EMAIL_ALLOWED_USERS` for normal operation.** Email pairing is opt-in because shared inboxes often contain unrelated unread messages, and Hermes should not reply to those contacts by default.
 :::
 
+---
 
 ## Troubleshooting
 
@@ -157,6 +188,7 @@ Email access is stricter by default than chat-style platforms:
 | **Slow response** | The default poll interval is 15 seconds. Reduce with `EMAIL_POLL_INTERVAL=5` for faster response (but more IMAP connections). |
 | **Replies not threading** | The adapter uses In-Reply-To headers. Some email clients (especially web-based) may not thread correctly with automated messages. |
 
+---
 
 ## Security
 
@@ -169,6 +201,7 @@ Email access is stricter by default than chat-style platforms:
 - The password is stored in `~/.hermes/.env` — protect this file (`chmod 600`)
 - IMAP uses SSL (port 993) and SMTP uses STARTTLS (port 587) by default — connections are encrypted
 
+---
 
 ## Environment Variables Reference
 
@@ -184,5 +217,3 @@ Email access is stricter by default than chat-style platforms:
 | `EMAIL_ALLOWED_USERS` | No | — | Comma-separated allowed sender addresses |
 | `EMAIL_HOME_ADDRESS` | No | — | Default delivery target for cron jobs |
 | `EMAIL_ALLOW_ALL_USERS` | No | `false` | Allow all senders (not recommended) |
-
-

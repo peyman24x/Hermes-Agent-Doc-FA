@@ -40,6 +40,7 @@ A few features still need desktop/server-style dependencies that are not publish
 
 That does not stop Hermes from working well as a phone-native CLI agent — it just means the recommended mobile install is intentionally narrower than the desktop/server install.
 
+---
 
 ## Community-maintained native `pkg` option
 
@@ -71,6 +72,7 @@ pkg upgrade hermes-agent
 
 Packaging/repository/signing problems for this option should be reported to the community packaging repositories above. Hermes runtime bugs can still be reported here, keeping in mind that Android/Termux support is best-effort.
 
+---
 
 ## Option 1: One-line installer
 
@@ -90,6 +92,7 @@ On Termux, the installer automatically:
 
 If you want the explicit commands or need to debug a failed install, use the manual path below.
 
+---
 
 ## Option 2: Manual install (fully explicit)
 
@@ -103,6 +106,22 @@ pkg install -y git python clang rust make pkg-config libffi openssl nodejs ripgr
 Why these packages?
 
 - `python` — runtime + venv support
+
+:::warning Supported Python range
+Hermes requires **Python >=3.11,&lt;3.14**. Current Termux ships `python`
+3.14.x, which is outside that range — the installer detects this, and will
+automatically try the [Termux User Repository (TUR)](https://github.com/termux-user-repository/tur)
+for a supported interpreter. For a manual install, get one yourself:
+
+```bash
+pkg install tur-repo
+pkg install python3.13
+```
+
+Then use `python3.13` in place of `python` in the commands below
+(e.g. `python3.13 -m venv venv`).
+:::
+
 - `git` — clone/update the repo
 - `clang`, `rust`, `make`, `pkg-config`, `libffi`, `openssl` — needed to build a few Python dependencies on Android
 - `nodejs` — optional Node runtime for experiments beyond the tested core path
@@ -160,6 +179,7 @@ hermes doctor
 hermes
 ```
 
+---
 
 ## Recommended follow-up setup
 
@@ -198,6 +218,7 @@ The browser tool automatically includes Termux directories (`/data/data/com.term
 
 Treat browser / WhatsApp tooling on Android as experimental until documented otherwise.
 
+---
 
 ## Troubleshooting
 
@@ -258,6 +279,7 @@ Then retry:
 python -m pip install -e '.[termux]' -c constraints-termux.txt
 ```
 
+---
 
 ## Known limitations on phones
 
@@ -273,5 +295,3 @@ If you hit a new Android-specific issue, please open a GitHub issue with:
 - `python --version`
 - `hermes doctor`
 - the exact install command and full error output
-
-

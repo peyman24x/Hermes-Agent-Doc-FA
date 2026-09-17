@@ -12,6 +12,7 @@ Hermes connects to [Raft](https://raft.build) as an external agent through a loc
 The adapter holds no Raft credentials — only a per-session shared token for localhost auth between the bridge and the endpoint.
 :::
 
+---
 
 ## Prerequisites
 
@@ -21,6 +22,7 @@ The adapter holds no Raft credentials — only a per-session shared token for lo
 
 In Raft, open the Agents menu, create an External Agent, and follow the setup card to install the Raft CLI and log in the agent profile. Once the agent is created, Raft shows a Hermes setup guide with the environment variables and configuration needed to start the gateway.
 
+---
 
 ## Setup
 
@@ -32,6 +34,7 @@ RAFT_PROFILE=your-agent-profile
 
 That's it — the adapter auto-enables when `RAFT_PROFILE` is set. It generates a per-session bridge token, picks an ephemeral port, and spawns the bridge child process automatically when the gateway starts.
 
+---
 
 ## How It Works
 
@@ -48,16 +51,16 @@ Agent → raft message send → Raft Server (replies)
 
 Wake payloads are **content-free by contract** — they carry metadata (event ID, message ID, timestamps) but never message bodies, channel names, or sender identities. The adapter rejects any payload containing content-shaped fields (`text`, `body`, `content`, `messages`, etc.).
 
+---
 
 ## Bridge
 
 The adapter automatically spawns `raft agent bridge` as a child process, passing the endpoint URL and token. The bridge connects to the Raft server using the configured profile and begins forwarding wake hints. It is terminated when the gateway shuts down.
 
+---
 
 ## Environment Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `RAFT_PROFILE` | Raft agent profile slug — auto-enables the adapter when set | _(required)_ |
-
-

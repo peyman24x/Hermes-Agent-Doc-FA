@@ -4,6 +4,7 @@
 
 Hermes isn't just a CLI tool. You can import `AIAgent` directly and use it programmatically in your own Python scripts, web applications, or automation pipelines. This guide shows you how.
 
+---
 
 ## Installation
 
@@ -21,6 +22,7 @@ Run your application with `uv run python your_app.py` from that checkout. Hermes
 The same environment variables used by the CLI are required when using Hermes as a library. At minimum, set `OPENROUTER_API_KEY` (or `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` if using direct provider access).
 :::
 
+---
 
 ## Basic Usage
 
@@ -43,6 +45,7 @@ print(response)
 Always set `quiet_mode=True` when embedding Hermes in your own code. Without it, the agent prints CLI spinners, progress indicators, and other terminal output that will clutter your application's output.
 :::
 
+---
 
 ## Full Conversation Control
 
@@ -78,6 +81,7 @@ result = agent.run_conversation(
 )
 ```
 
+---
 
 ## Configuring Tools
 
@@ -103,6 +107,7 @@ agent = AIAgent(
 Use `enabled_toolsets` when you want a minimal, locked-down agent (e.g., only web search for a research bot). Use `disabled_toolsets` when you want most capabilities but need to restrict specific ones (e.g., no terminal access in a shared environment).
 :::
 
+---
 
 ## Multi-turn Conversations
 
@@ -128,6 +133,7 @@ print(result2["final_response"])  # "Your name is Alice."
 
 The `conversation_history` parameter accepts the `messages` list from a previous result. The agent copies it internally, so your original list is never mutated.
 
+---
 
 ## Saving Trajectories
 
@@ -146,6 +152,7 @@ agent.chat("Write a Python function to sort a list")
 
 Each conversation is appended as a single JSONL line, making it easy to collect datasets from automated runs.
 
+---
 
 ## Custom System Prompts
 
@@ -164,6 +171,7 @@ print(response)
 
 This is ideal for building specialized agents — a code reviewer, a documentation writer, a SQL assistant — all using the same underlying tooling.
 
+---
 
 ## Batch Processing
 
@@ -205,6 +213,7 @@ for prompt, result in zip(prompts, results):
 Always create a **new `AIAgent` instance per thread or task**. The agent maintains internal state (conversation history, tool sessions, iteration counters) that is not thread-safe to share.
 :::
 
+---
 
 ## Integration Examples
 
@@ -284,6 +293,7 @@ review = agent.chat(
 print(review)
 ```
 
+---
 
 ## Key Constructor Parameters
 
@@ -302,6 +312,7 @@ print(review)
 | `base_url` | `str` | `None` | Custom API endpoint URL |
 | `platform` | `str` | `None` | Platform hint (`"discord"`, `"telegram"`, etc.) |
 
+---
 
 ## Important Notes
 
@@ -316,5 +327,3 @@ print(review)
 - **Resource cleanup**: The agent automatically cleans up resources (terminal sessions, browser instances) when a conversation ends. If you're running in a long-lived process, ensure each conversation completes normally.
 - **Iteration limits**: The default `max_iterations=500` is generous. For simple Q&A use cases, consider lowering it (e.g., `max_iterations=10`) to prevent runaway tool-calling loops and control costs.
 :::
-
-

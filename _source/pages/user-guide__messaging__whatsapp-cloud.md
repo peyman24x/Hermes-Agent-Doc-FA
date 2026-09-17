@@ -18,6 +18,7 @@ If those constraints don't work for your use case, the [Baileys bridge integrati
 - **[Baileys bridge](./whatsapp.md)** — personal projects, quick demos, single-user setups, willing to risk the bot phone number's account
 :::
 
+---
 
 ## Quick start
 
@@ -29,6 +30,7 @@ The wizard walks you through every credential, validates each one as you paste i
 
 The rest of this page is the manual reference.
 
+---
 
 ## Prerequisites
 
@@ -37,6 +39,7 @@ The rest of this page is the manual reference.
 3. **A way to expose a local port to the public internet** with HTTPS.  Cloudflare Tunnel (`cloudflared`) is recommended — free, no port forwarding, no domain required.  ngrok, your own domain with a reverse proxy + TLS, or a VPS with the gateway directly bound to a public IP all work too.
 4. **Optional but recommended**: ffmpeg on `PATH` so outbound voice messages render as native WhatsApp voice-note bubbles (green waveform) instead of MP3 audio attachments. Hermes degrades gracefully if absent.
 
+---
 
 ## Creating the Meta app
 
@@ -56,6 +59,7 @@ You'll need these values from the dashboard — the wizard prompts for them in t
 | **App ID** (optional) | App Dashboard → Settings → Basic | Numeric, 15-16 digits | Not required for messaging, useful for analytics. |
 | **WABA ID** (optional) | App Dashboard → WhatsApp → API Setup → near the top | Numeric, 15+ digits | Not required for messaging, useful for analytics. |
 
+---
 
 ## Permanent token (production)
 
@@ -76,6 +80,7 @@ Temporary access tokens expire after **24 hours**, which means a token generated
 
 System User tokens don't expire unless you explicitly revoke them.
 
+---
 
 ## Exposing Hermes to the internet
 
@@ -122,6 +127,7 @@ Free tier shows a different URL on each restart.  Paid tier gives you a stable s
 
 If you already have a server with a TLS cert (Caddy, nginx, etc.), point a route at `localhost:8090`.  This is the most stable option for production but requires existing infrastructure.
 
+---
 
 ## Configuring the webhook on Meta's side
 
@@ -154,6 +160,7 @@ curl -i "$TUNNEL/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=$VERIFY&hu
 curl "$TUNNEL/health"
 ```
 
+---
 
 ## Recipient whitelist (Meta-side)
 
@@ -165,6 +172,7 @@ In development mode (before your app goes through App Review), Meta restricts wh
 
 Up to 5 numbers in dev mode.  Going to App Review removes this limit.
 
+---
 
 ## Allowlist (Hermes-side)
 
@@ -180,6 +188,7 @@ WHATSAPP_CLOUD_ALLOWED_USERS=15551234567,15557654321
 
 The wizard sets this in step 6.  Without an allowlist, **every inbound message is denied** — this is intentional, so the bot can't be invoked by random numbers if the recipient whitelist is ever loosened.
 
+---
 
 ## Polishing your bot's WhatsApp profile
 
@@ -196,6 +205,7 @@ Once your bot is working, head to **[business.facebook.com/wa/manage/phone-numbe
 
 The `hermes whatsapp-cloud` wizard prints these links at the end of setup. None of this is required for the bot to work — it's pure polish for how your bot appears to users.
 
+---
 
 ## Configuration reference
 
@@ -219,6 +229,7 @@ All settings live in `~/.hermes/.env`.  Required values are in **bold**.
 
 You can have **both** the Baileys (`whatsapp`) and Cloud (`whatsapp_cloud`) adapters enabled simultaneously, targeting different phone numbers.
 
+---
 
 ## Features
 
@@ -229,7 +240,7 @@ You can have **both** the Baileys (`whatsapp`) and Cloud (`whatsapp_cloud`) adap
 - **Voice notes** — auto-downloaded as `.ogg`, transcribed via your configured STT provider (local faster-whisper, OpenAI/Nous, Groq, etc.), then handed to the agent as text.
 - **Documents** — auto-downloaded. Small text-readable files (`.txt`, `.md`, `.json`, `.py`, `.csv`, etc.) up to 100KB get inlined into the agent's input so it can read them without a tool call. Larger files are cached locally for the agent's other tools to access.
 - **Button taps** — when the user taps a button the bot sent earlier (clarify choice, command approval, slash-command confirm), the tap is routed directly to the right handler. Stale taps fall back to being treated as regular text input.
-- **Reply context** — when the user replies to a previous bot message, the agent sees the original message as context.
+- **Reply context** — when the user replies to a previous message, the agent sees the original text as context. Quoting an image, voice note, video or document (yours or one the bot sent, e.g. a cron-delivered chart) also attaches that file to the turn, so "what is this?" under a quoted image works. Meta's webhook carries only the quoted message id, so this resolves from a local index of recent sends/receives (last 1000 messages per gateway); older quotes arrive without the attachment.
 
 ### Outbound
 
@@ -277,6 +288,7 @@ curl http://localhost:8090/health
 # look for "ffmpeg_present": true
 ```
 
+---
 
 ## Known limitations
 
@@ -303,6 +315,7 @@ The Cloud API has limited group support (capability-tier gated by Meta).  Hermes
 
 Meta's default throughput is **80 messages/second per business phone number**, with upgrades available.  Hermes doesn't currently enforce this client-side — extremely high-volume sends could hit Meta's limit.
 
+---
 
 ## Troubleshooting
 
@@ -357,6 +370,7 @@ hermes gateway restart
 
 This uses your Nous Portal access token instead of needing a separate OpenAI key. (Older docs suggested `stt.use_gateway true` — that flag is legacy; the provider selection alone controls routing now.)
 
+---
 
 ## Security notes
 
@@ -366,6 +380,7 @@ This uses your Nous Portal access token instead of needing a separate OpenAI key
 - **The webhook endpoint accepts only signed requests when `WHATSAPP_CLOUD_APP_SECRET` is set** — leave it set even in development.  Without it, the gateway refuses inbound delivery with HTTP 503.
 - **The `/health` endpoint is unauthenticated** — it's safe to expose because it only reports config-presence booleans, not the values themselves.  But if you'd rather not surface it, restrict access at the reverse proxy / tunnel layer.
 
+---
 
 ## Comparison to the Baileys bridge
 
@@ -389,11 +404,10 @@ This uses your Nous Portal access token instead of needing a separate OpenAI key
 
 Most users running Hermes for personal projects prefer Baileys. Most users running customer-facing bots prefer Cloud API.
 
+---
 
 ## See also
 
 - [Meta's official WhatsApp Business Cloud API docs](https://developers.facebook.com/documentation/business-messaging/whatsapp/) — authoritative reference for the underlying platform, pricing, App Review, and Meta-side rate limits.
 - [WhatsApp (Baileys bridge) Setup](whatsapp.md) — the alternative integration for personal projects.
 - [Messaging Platforms overview](index.md) — all messaging integrations at a glance.
-
-

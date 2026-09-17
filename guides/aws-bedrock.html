@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Bedrock — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/guides/aws-bedrock" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنماها<span class="sep">/</span><strong>AWS Bedrock</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+
+<h1>AWS Bedrock</h1>
+<p>Hermes Agent از Amazon Bedrock به‌عنوان یک ارائه‌دهندهٔ بومی پشتیبانی می‌کند. این قابلیت دسترسی کامل به اکوسیستم Bedrock را فراهم می‌کند: احراز هویت IAM، ‏Guardrails، پروفایل‌های استنتاج میان‌منطقه‌ای و همهٔ مدل‌های پایه.</p>
+<p>هرمس هر خانوادهٔ مدل را از طریق API مناسب آن مسیریابی می‌کند:</p>
+<div class="table-wrap"><table><thead><tr><th>خانوادهٔ مدل</th><th>مسیر API</th><th>دلیل</th></tr></thead><tbody>
+<tr><td>Anthropic Claude</td><td>Anthropic SDK (<code>AnthropicBedrock</code>)</td><td>کش پرامپت، بودجهٔ تفکر و تفکر تطبیقی — قابلیت‌هایی که از طریق Converse ارائه نمی‌شوند</td></tr>
+<tr><td>OpenAI GPT-5.5 / GPT-5.6 (Sol، Terra، Luna)</td><td>نقطهٔ پایانی <b>OpenAI Responses</b> در Bedrock Mantle (<code>bedrock-mantle.&lt;region&gt;.api.aws/openai/v1</code>)</td><td>این مدل‌ها فقط در Mantle ارائه می‌شوند — کارت مدل آن‌ها، پشتیبانی از <code>bedrock-runtime</code>/Converse را رد می‌کند</td></tr>
+<tr><td>سایر مدل‌ها (Nova، DeepSeek، Llama، GPT-OSS و…)</td><td><b>Converse API</b> بومی (<code>bedrock-runtime</code>)</td><td>مجموعهٔ کامل قابلیت‌های Bedrock: ‏Guardrails، پروفایل‌های استنتاج و استریم</td></tr>
+</tbody></table></div>
+<p>هر سه مسیر از زنجیرهٔ اعتبارنامهٔ AWS و سازوکار تعیین منطقهٔ یکسانی استفاده می‌کنند — به پیکربندی جداگانه نیازی نیست. درخواست‌های نقطهٔ پایانی Mantle در صورت تنظیم <code>AWS_BEARER_TOKEN_BEDROCK</code> با آن احراز هویت می‌شوند؛ در غیر این صورت، از طریق زنجیرهٔ استاندارد اعتبارنامهٔ boto3 با SigV4 امضا می‌شوند.</p>
+<section class="doc-sec">
+<h2 id="prerequisites"><span class="secnum">۱</span> پیش‌نیازها</h2>
+<ul>
+<li><b>اعتبارنامه‌های AWS</b> — هر منبعی که <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html" target="_blank" rel="noopener">زنجیرهٔ اعتبارنامهٔ boto3</a> پشتیبانی کند:<ul>
+<li>نقش IAM نمونه (EC2، ECS، Lambda — بدون پیکربندی)</li>
+<li>متغیرهای محیطی <code>AWS_ACCESS_KEY_ID</code> و <code>AWS_SECRET_ACCESS_KEY</code></li>
+<li><code>AWS_PROFILE</code> برای SSO یا پروفایل‌های نام‌دار</li>
+<li><code>aws configure</code> برای توسعهٔ محلی</li></ul></li>
+<li><b><code>boto3</code></b> — نصب با <code>cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[bedrock]"</code></li>
+<li><b>مجوزهای IAM</b> — دست‌کم:<ul><li><code>bedrock:InvokeModel</code> و <code>bedrock:InvokeModelWithResponseStream</code> (برای استنتاج)</li><li><code>bedrock:ListFoundationModels</code> و <code>bedrock:ListInferenceProfiles</code> (برای کشف مدل)</li></ul></li>
+</ul>
+<div class="callout tip"><div class="callout-title">نکته — EC2 / ECS / Lambda</div><p>روی منابع محاسباتی AWS، یک نقش IAM با <code>AmazonBedrockFullAccess</code> متصل کنید و کار تمام است. نه کلید API لازم است، نه پیکربندی <code>.env</code> — هرمس نقش نمونه را خودکار تشخیص می‌دهد.</p></div>
+</section>
+<section class="doc-sec">
+<h2 id="quick-start"><span class="secnum">۲</span> شروع سریع</h2>
+<pre dir="ltr"><code># Install with Bedrock support
+cd ~/.hermes/hermes-agent &amp;&amp; uv pip install -e ".[bedrock]"
+
+# Select Bedrock as your provider
+hermes model
+# → Choose "More providers..." → "AWS Bedrock"
+# → Select your region and model
+
+# Start chatting
+hermes chat
+</code></pre>
+</section>
+<section class="doc-sec">
+<h2 id="configuration"><span class="secnum">۳</span> پیکربندی</h2>
+<p>پس از اجرای <code>hermes model</code>، فایل <code>~/.hermes/config.yaml</code> شامل این موارد خواهد بود:</p>
+<pre dir="ltr"><code>model:
+  default: us.anthropic.claude-sonnet-4-6
+  provider: bedrock
+  base_url: https://bedrock-runtime.us-east-2.amazonaws.com
+
+bedrock:
+  region: us-east-2
+</code></pre>
+<h3 id="region">منطقه</h3>
+<p>منطقهٔ AWS را به یکی از روش‌های زیر تنظیم کنید (به‌ترتیب از بالاترین اولویت):</p>
+<ol><li><code>bedrock.region</code> در <code>config.yaml</code></li><li>متغیر محیطی <code>AWS_REGION</code></li><li>متغیر محیطی <code>AWS_DEFAULT_REGION</code></li><li>پیش‌فرض: <code>us-east-1</code></li></ol>
+<h3 id="guardrails">محافظ‌ها (Guardrails)</h3>
+<p>برای اعمال <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html" target="_blank" rel="noopener">Amazon Bedrock Guardrails</a> به همهٔ فراخوانی‌های مدل:</p>
+<pre dir="ltr"><code>bedrock:
+  region: us-east-2
+  guardrail:
+    guardrail_identifier: "abc123def456"  # From the Bedrock console
+    guardrail_version: "1"                # Version number or "DRAFT"
+    stream_processing_mode: "async"       # "sync" or "async"
+    trace: "disabled"                     # "enabled", "disabled", or "enabled_full"
+</code></pre>
+<p>محافظ در مسیر Converse از طریق <code>guardrailConfig</code> و در مسیر Claude از طریق هدرهای InvokeModel در Anthropic Bedrock SDK متصل می‌شود؛ بنابراین کش پرامپت و تفکر حفظ می‌شوند. درخواست مسدودشده به‌صورت رد درخواست توسط فیلتر محتوا نمایش داده می‌شود، نه متن مدل. <code>stream_processing_mode</code> فقط در Converse کاربرد دارد.</p>
+<p>AWS محافظ‌های Guardrails را روی نقطهٔ پایانی Mantle Responses که مدل‌های <code>openai.gpt-5.x</code> استفاده می‌کنند اعمال نمی‌کند (<a href="https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-mantle.html" target="_blank" rel="noopener">مستندات AWS</a>)؛ اگر به محافظ نیاز دارید، مدلی را انتخاب کنید که از طریق Converse ارائه می‌شود.</p>
+<h3 id="model-discovery">کشف مدل</h3>
+<p>هرمس مدل‌های در دسترس را از طریق صفحهٔ کنترل Bedrock خودکار کشف می‌کند. می‌توانید کشف مدل را سفارشی کنید:</p>
+<pre dir="ltr"><code>bedrock:
+  discovery:
+    enabled: true
+    provider_filter: ["anthropic", "amazon"]  # Only show these providers
+    refresh_interval: 3600                     # Cache for 1 hour
+</code></pre>
+<h3 id="prompt-caching-cachepoint">کش پرامپت (<code>cachePoint</code>)</h3>
+<p>هرمس در مسیر <b>Converse API</b> در Bedrock، با افزودن نشانگرهای <code>cachePoint</code> پس از پرامپت سیستم، تعریف ابزارها و آخرین پیام، کش پرامپت را خودکار اعمال می‌کند. چون ارسال بلوک <code>cachePoint</code> به مدلی که از آن پشتیبانی نمی‌کند، خطای <code>ValidationException</code> ایجاد می‌کند، نشانگرها فقط برای مدل‌های فهرست مجازِ تأییدشده (شناسه‌های مدل Anthropic Claude و Amazon Nova) اضافه می‌شوند؛ مدل‌های ناشناخته به‌طور پیش‌فرض نشانگر کش ندارند. مدل‌های Claude معمولاً از مسیر AnthropicBedrock SDK استفاده می‌کنند که کش پرامپت خودش را دارد — مسیر <code>cachePoint</code> در Converse، مدل Nova و مسیر پشتیبان Claude با توکن حامل را پوشش می‌دهد. پیکربندی لازم نیست؛ خواندن و نوشتن کش در محاسبهٔ مصرف نمایش داده می‌شود.</p>
+<h3 id="context-window-probing">سنجش پنجرهٔ زمینه</h3>
+<p>برای مدل‌هایی که پنجرهٔ زمینهٔ آن‌ها در جدول ثابت هرمس نیست، هرمس می‌تواند با ارسال درخواست‌های بیش‌ازحد بزرگ در سطوح ثابت (حدود ۱٫۳ و ۲٫۲ میلیون توکن) و خواندن مقدار <code>maximum</code> گزارش‌شده در خطای اعتبارسنجی طول Bedrock، حد واقعی را بسنجد. مقادیر سنجیده‌شده وارد همان کش فرادادهٔ جدول ثابت می‌شوند؛ ورودی‌های کهنهٔ کش که پنجرهٔ مدل را کمتر از واقع گزارش می‌کنند (مثلاً ورودی‌هایی که پیش از عرضهٔ عمومی پنجرهٔ یک‌میلیونی مدل ثبت شده‌اند)، خودکار حذف می‌شوند و مقدار بزرگ‌ترِ شناخته‌شده جای آن‌ها را می‌گیرد.</p>
+</section>
+<section class="doc-sec">
+<h2 id="available-models"><span class="secnum">۴</span> مدل‌های در دسترس</h2>
+<p>مدل‌های Bedrock برای فراخوانی درخواستی از <b>شناسه‌های پروفایل استنتاج</b> استفاده می‌کنند. انتخاب‌گر <code>hermes model</code> این موارد را خودکار نمایش می‌دهد و مدل‌های پیشنهادی را در بالای فهرست می‌آورد:</p>
+<div class="table-wrap"><table><thead><tr><th>مدل</th><th>شناسه</th><th>توضیحات</th></tr></thead><tbody>
+<tr><td>Claude Sonnet 4.6</td><td><code>us.anthropic.claude-sonnet-4-6</code></td><td>پیشنهادی — بهترین توازن سرعت و توانایی</td></tr>
+<tr><td>Claude Opus 4.6</td><td><code>us.anthropic.claude-opus-4-6-v1</code></td><td>توانمندترین</td></tr>
+<tr><td>Claude Haiku 4.5</td><td><code>us.anthropic.claude-haiku-4-5-20251001-v1:0</code></td><td>سریع‌ترین Claude</td></tr>
+<tr><td>OpenAI GPT-5.6 Sol</td><td><code>openai.gpt-5.6-sol</code></td><td>مدل پیشرو OpenAI (از طریق Bedrock Mantle)</td></tr>
+<tr><td>OpenAI GPT-5.6 Terra</td><td><code>openai.gpt-5.6-terra</code></td><td>متعادل (از طریق Bedrock Mantle)</td></tr>
+<tr><td>OpenAI GPT-5.6 Luna</td><td><code>openai.gpt-5.6-luna</code></td><td>سریع و مقرون‌به‌صرفه (از طریق Bedrock Mantle)</td></tr>
+<tr><td>OpenAI GPT-5.5</td><td><code>openai.gpt-5.5</code></td><td>پرچم‌دار قبلی OpenAI (از طریق Bedrock Mantle)</td></tr>
+<tr><td>Amazon Nova Pro</td><td><code>us.amazon.nova-pro-v1:0</code></td><td>پرچم‌دار Amazon</td></tr>
+<tr><td>Amazon Nova Micro</td><td><code>us.amazon.nova-micro-v1:0</code></td><td>سریع‌ترین و ارزان‌ترین</td></tr>
+<tr><td>DeepSeek V3.2</td><td><code>deepseek.v3.2</code></td><td>مدل باز قدرتمند</td></tr>
+<tr><td>Llama 4 Scout 17B</td><td><code>us.meta.llama4-scout-17b-instruct-v1:0</code></td><td>جدیدترین مدل Meta</td></tr>
+</tbody></table></div>
+<div class="callout note"><div class="callout-title">توجه — استنتاج میان‌منطقه‌ای</div><p>مدل‌هایی با پیشوند <code>us.</code> از پروفایل‌های استنتاج میان‌منطقه‌ای استفاده می‌کنند که ظرفیت بهتر و انتقال خودکار هنگام خرابی را در مناطق AWS فراهم می‌کنند. مدل‌هایی با پیشوند <code>global.</code> در همهٔ مناطق در دسترس جهان مسیریابی می‌شوند. شناسه‌های مدل <code>openai.*</code> از OpenAI را Bedrock Mantle در منطقهٔ پیکربندی‌شده ارائه می‌کند و این مدل‌ها از پیشوندهای پروفایل استنتاج استفاده نمی‌کنند.</p></div>
+</section>
+<section class="doc-sec">
+<h2 id="switching-models-mid-session"><span class="secnum">۵</span> تغییر مدل در میانهٔ نشست</h2>
+<p>در طول گفتگو از فرمان <code>/model</code> استفاده کنید:</p>
+<pre dir="ltr"><code>/model us.amazon.nova-pro-v1:0
+/model deepseek.v3.2
+/model us.anthropic.claude-opus-4-6-v1
+</code></pre>
+</section>
+<section class="doc-sec">
+<h2 id="diagnostics"><span class="secnum">۶</span> بررسی‌های تشخیصی</h2>
+<pre dir="ltr"><code>hermes doctor
+</code></pre>
+<p>فرمان <code>doctor</code> موارد زیر را بررسی می‌کند:</p>
+<ul><li>در دسترس بودن اعتبارنامه‌های AWS (متغیرهای محیطی، نقش IAM، ‏SSO)</li><li>نصب بودن <code>boto3</code></li><li>قابل‌دسترسی بودن API ‏Bedrock (<code>ListFoundationModels</code>)</li><li>تعداد مدل‌های در دسترس در منطقهٔ شما</li></ul>
+</section>
+<section class="doc-sec">
+<h2 id="gateway-messaging-platforms"><span class="secnum">۷</span> گیت‌وی (پلتفرم‌های پیام‌رسانی)</h2>
+<p>Bedrock با همهٔ پلتفرم‌های گیت‌وی هرمس (Telegram، Discord، Slack، Feishu و غیره) کار می‌کند. Bedrock را به‌عنوان ارائه‌دهنده پیکربندی کنید، سپس گیت‌وی را به‌شکل معمول راه‌اندازی کنید:</p>
+<pre dir="ltr"><code>hermes gateway setup
+hermes gateway start
+</code></pre>
+<p>گیت‌وی <code>config.yaml</code> را می‌خواند و از همان پیکربندی ارائه‌دهندهٔ Bedrock استفاده می‌کند.</p>
+</section>
+<section class="doc-sec">
+<h2 id="troubleshooting"><span class="secnum">۸</span> عیب‌یابی</h2>
+<h3 id="no-api-key-found--no-aws-credentials">«کلید API پیدا نشد» / «اعتبارنامهٔ AWS وجود ندارد»</h3>
+<p>هرمس اعتبارنامه‌ها را به این ترتیب بررسی می‌کند:</p>
+<ol><li><code>AWS_BEARER_TOKEN_BEDROCK</code></li><li><code>AWS_ACCESS_KEY_ID</code> و <code>AWS_SECRET_ACCESS_KEY</code></li><li><code>AWS_PROFILE</code></li><li>فرادادهٔ نمونهٔ EC2 ‏(IMDS)</li><li>اعتبارنامه‌های کانتینر ECS</li><li>نقش اجرای Lambda</li></ol>
+<p>اگر هیچ‌کدام پیدا نشد، <code>aws configure</code> را اجرا کنید یا یک نقش IAM به نمونهٔ محاسباتی خود متصل کنید.</p>
+<h3 id="invocation-of-model-id--with-on-demand-throughput-isnt-supported">«فراخوانی شناسهٔ مدل … با توان عملیاتی درخواستی پشتیبانی نمی‌شود»</h3>
+<p>به‌جای شناسهٔ خام مدل پایه، از <b>شناسهٔ پروفایل استنتاج</b> (با پیشوند <code>us.</code> یا <code>global.</code>) استفاده کنید. برای مثال:</p>
+<ul><li>نادرست: <code>anthropic.claude-sonnet-4-6</code></li><li>درست: <code>us.anthropic.claude-sonnet-4-6</code></li></ul>
+<h3 id="throttlingexception"><code>ThrottlingException</code></h3>
+<p>به محدودیت نرخ Bedrock برای این مدل رسیده‌اید. هرمس خودکار با فاصلهٔ زمانی افزایشی دوباره تلاش می‌کند. برای افزایش محدودیت‌ها، در <a href="https://console.aws.amazon.com/servicequotas/" target="_blank" rel="noopener">کنسول AWS Service Quotas</a> درخواست افزایش سهمیه بدهید.</p>
+</section>
+<section class="doc-sec">
+<h2 id="one-click-aws-deployment"><span class="secnum">۹</span> استقرار یک‌کلیکی روی AWS</h2>
+<p>برای استقرار کاملاً خودکار روی EC2 با CloudFormation:</p>
+<p><b><a href="https://github.com/JiaDe-Wu/sample-hermes-agent-on-aws-with-bedrock" target="_blank" rel="noopener"><code>sample-hermes-agent-on-aws-with-bedrock</code></a></b> — یک VPC، نقش IAM و نمونهٔ EC2 می‌سازد و Bedrock را خودکار پیکربندی می‌کند. در هر منطقه با یک کلیک مستقر کنید.</p>
+</section>
+
+<div class="pager">
+  <a href="automation-blueprints.html"><span class="dir">→ قبلی</span><span class="ttl">نقشه‌های اتوماسیون</span></a>
+  <a class="next" href="azure-foundry.html"><span class="dir">بعدی ←</span><span class="ttl">Microsoft Foundry</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/guides/aws-bedrock" target="_blank" rel="noopener">AWS Bedrock</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -258,5 +258,3 @@ Move project instructions into `AGENTS.md` and keep `SOUL.md` focused on identit
 - [Context Files](/user-guide/features/context-files)
 - [Configuration](/user-guide/configuration)
 - [Tips & Best Practices](/guides/tips)
-
-

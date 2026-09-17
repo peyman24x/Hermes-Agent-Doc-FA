@@ -151,5 +151,3 @@ The following are intentionally **out of scope for v1** and may come later:
 - Signed / integrity-checked managed files.
 - Remote / device-management (MDM) delivery.
 - Tighter (group-scoped) permissions for managed secrets.
-
-

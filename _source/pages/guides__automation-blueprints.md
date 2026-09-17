@@ -18,6 +18,7 @@ For parameterized blueprints with forms instead of cron syntax, see the [Automat
 All three support delivery to Telegram, Discord, Slack, SMS, email, GitHub comments, or local files.
 :::
 
+---
 
 ## Development Workflow
 
@@ -152,6 +153,7 @@ If no vulnerabilities, respond with [SILENT]." \
   --deliver telegram
 ```
 
+---
 
 ## DevOps & Monitoring
 
@@ -260,6 +262,7 @@ hermes cron create "every 30m" \
   --deliver telegram
 ```
 
+---
 
 ## Research & Intelligence
 
@@ -335,6 +338,7 @@ hermes cron create "0 8 * * *" \
   --deliver local
 ```
 
+---
 
 ## GitHub Event Automations
 
@@ -428,6 +432,7 @@ If action is not 'closed' or not merged, respond with [SILENT]." \
   --deliver log
 ```
 
+---
 
 ## Business Operations
 
@@ -482,6 +487,7 @@ Deliver as a clean, scannable message." \
   --deliver telegram
 ```
 
+---
 
 ## Multi-Skill Workflows
 
@@ -535,6 +541,7 @@ Keep the outline to ~300 words. This is a starting point, not a finished post." 
   --deliver local
 ```
 
+---
 
 ## Quick Reference
 
@@ -582,5 +589,3 @@ If nothing noteworthy happened, respond with [SILENT].
 ```
 
 This means you only get notified when the agent has something to report.
-
-

@@ -8,6 +8,7 @@ A quick-wins collection of practical tips that make you immediately more effecti
 Run `hermes setup --portal` — you get 300+ models including Claude, GPT-5, and Gemini under one subscription. See [Nous Portal](/integrations/nous-portal).
 :::
 
+---
 
 ## Getting the Best Results
 
@@ -169,7 +170,7 @@ Instead of manually collecting user IDs for allowlists, enable DM pairing. When 
 Use `/verbose` to control how much tool activity you see. In messaging platforms, less is usually more — keep it on "new" to see just new tool calls. In the CLI, "all" gives you a satisfying live view of everything the agent does.
 
 :::tip
-By default, messaging sessions never auto-reset — context lives until you `/reset` or compression kicks in. If you want sessions to reset automatically (after idle time or daily at a fixed hour), opt in via the `session_reset` section in `~/.hermes/config.yaml`.
+Messaging sessions persist until an explicit `/new` or `/reset`. Context compression manages long conversations without an idle or daily reset.
 :::
 
 ## Security
@@ -228,7 +229,6 @@ DISCORD_ALLOWED_USERS=123456789012345678
 GATEWAY_ALLOWED_USERS=123456789,987654321
 ```
 
+---
 
 *Have a tip that should be on this page? Open an issue or PR — community contributions are welcome.*
-
-

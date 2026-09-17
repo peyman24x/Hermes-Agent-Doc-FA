@@ -170,5 +170,3 @@ The OAuth browser callback runs on the machine where Hermes is running. On a rem
 - **[MCP feature overview](/user-guide/features/mcp)** — what MCP is and how Hermes uses it
 - **[MCP configuration reference](/reference/mcp-config-reference)** — every `mcp_servers` field, including `auth: oauth`
 - **[OAuth over SSH](/guides/oauth-over-ssh)** — logging in from remote or browser-only environments
-
-

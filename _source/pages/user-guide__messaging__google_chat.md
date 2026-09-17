@@ -28,6 +28,7 @@ cannot host Chat apps.
 | **Authentication** | Service Account JSON with `roles/pubsub.subscriber` on the subscription |
 | **User identification** | Chat resource names (`users/{id}`) + email |
 
+---
 
 ## Step 1: Create or pick a GCP project
 
@@ -38,6 +39,7 @@ personal accounts get a free tier that easily covers bot traffic.
 Note the project ID (e.g., `my-chat-bot-123`). You'll use it in every subsequent
 step.
 
+---
 
 ## Step 2: Enable two APIs
 
@@ -48,6 +50,7 @@ In the console, go to **APIs & Services → Library** and enable:
 
 Both are free for the volumes a personal bot generates.
 
+---
 
 ## Step 3: Create a Service Account
 
@@ -68,6 +71,7 @@ installed in a space, not from IAM. All your SA needs is Pub/Sub subscriber on
 the subscription you create in the next step.
 :::
 
+---
 
 ## Step 4: Create the Pub/Sub topic and subscription
 
@@ -83,6 +87,7 @@ After creation, the topic's detail page has a **Subscriptions** tab. Create one:
 - Message retention: **7 days** (so backlog survives a hermes restart)
 - Leave the rest default.
 
+---
 
 ## Step 5: IAM binding on the topic (critical)
 
@@ -94,6 +99,7 @@ On the **topic** (not the subscription), add an IAM principal:
 Without this, Google Chat cannot publish events to your topic and your bot will
 never receive anything.
 
+---
 
 ## Step 6: IAM binding on the subscription
 
@@ -105,6 +111,7 @@ On the **subscription**, add your own Service Account as a principal:
 Also grant `Pub/Sub Viewer` on the same subscription — Hermes calls
 `subscription.get()` at startup as a reachability check.
 
+---
 
 ## Step 7: Configure the Chat app
 
@@ -122,6 +129,7 @@ Go to **APIs & Services → Google Chat API → Configuration**.
 
 Save.
 
+---
 
 ## Step 8: Install the bot in a test space
 
@@ -130,6 +138,7 @@ in the **+ New Chat** menu. The first time you message it, Google sends an
 `ADDED_TO_SPACE` event that Hermes uses to cache the bot's own `users/{id}` for
 self-message filtering.
 
+---
 
 ## Step 9: Configure Hermes
 
@@ -153,12 +162,28 @@ GOOGLE_CHAT_MAX_BYTES=16777216                  # 16 MiB — cap on in-flight me
 The project ID also falls back to `GOOGLE_CLOUD_PROJECT`, and the SA path falls
 back to `GOOGLE_APPLICATION_CREDENTIALS` — use whichever convention you prefer.
 
+Under a [multi-profile gateway](../multi-profile-gateways.md), every
+`GOOGLE_CHAT_*` setting is read from the routed profile's own `.env`; a
+secondary profile never inherits the default profile's project, subscription,
+or service account. If a profile has no SA configured while the process
+environment carries one for another profile, the adapter refuses to fall back
+to Application Default Credentials (which would authenticate as that other
+profile) and logs an explicit error instead — put
+`GOOGLE_CHAT_SERVICE_ACCOUNT_JSON` in that profile's `.env`.
+
 Install the Google Chat adapter dependencies through its maintained installer.
 It applies the same pinned security floors used by the runtime checks:
 
 ```bash
 python -m plugins.platforms.google_chat.oauth --install-deps
 ```
+
+On Docker / hosted images `/opt/hermes/.venv` is read-only. That installer
+routes through `tools.lazy_deps` into `HERMES_LAZY_INSTALL_TARGET`
+(`/opt/data/lazy-packages` in the official image) instead of writing
+site-packages. Restart the gateway after it finishes. The published image
+also bakes the `[google-chat]` extra so a fresh container does not need a
+first-boot install.
 
 Start the gateway:
 
@@ -194,6 +219,7 @@ gets edited in place with the response — so whatever you set here briefly
 appears in the chat as a normal message. Set `typing_indicator: false` to
 disable the marker entirely.
 
+---
 
 ## Formatting and capabilities
 
@@ -225,6 +251,7 @@ the choice back into the waiting session). If the card fails to send, or the
 question has no fixed choices, the adapter falls back to the standard text
 clarify. No configuration needed.
 
+---
 
 ## Step 10: Native attachment delivery (optional)
 
@@ -306,6 +333,7 @@ text notice telling the asker to run `/setup-files`.
 A user revoking only clears their own slot. A 401/403 from one user's token
 evicts only that user's cache. Users don't disrupt each other.
 
+---
 
 ## Troubleshooting
 
@@ -369,6 +397,7 @@ Then send `/setup-files start` again.
 The auth code is single-use and short-lived (typically a few minutes). Send
 `/setup-files start` to get a fresh URL and retry.
 
+---
 
 ## Security notes
 
@@ -395,5 +424,3 @@ The auth code is single-use and short-lived (typically a few minutes). Send
   `~/.hermes/google_chat_user_tokens/<sanitized_email>.json` (filesystem
   permissions are the protection — same model as the SA key file). Each
   token is owned by exactly one user; revoke is scoped to that user.
-
-
