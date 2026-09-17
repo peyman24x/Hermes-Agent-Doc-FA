@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مدل‌های محلی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/local-models" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>مدل‌های محلی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1>مدل‌های محلی</h1>
+<p>Hermes می‌تواند مدل‌های باز را به‌طور کامل روی رایانهٔ خودتان اجرا کند. موتور استنتاج (llama.cpp) را دانلود و مدیریت می‌کند، نسخهٔ مناسب هر مدل را برای سخت‌افزارتان برمی‌گزیند و مدیریت حافظه را بر عهده می‌گیرد؛ بنابراین نیازی نیست اندازهٔ پنجرهٔ زمینه، تعداد لایه‌های مستقر روی GPU یا کوانتیزه‌سازی را تنظیم کنید. شما مدل را انتخاب می‌کنید؛ بقیهٔ کار با Hermes است.</p>
+<p>هیچ داده‌ای از رایانهٔ شما خارج نمی‌شود: نه حساب کاربری لازم است، نه کلید API و نه، پس از دانلود مدل، دسترسی به شبکه.</p>
+
+<section class="doc-sec">
+<h2 id="getting-started"><span class="secnum">۱</span> شروع کار</h2>
+<ol>
+  <li>به <strong>تنظیمات ← ارائه‌دهندگان ← مدل‌های محلی</strong> (<bdi dir="ltr">Settings → Providers → Local Models</bdi>) بروید؛ یا هنگام راه‌اندازی اولیه، <strong>اجرای محلی مدل‌ها</strong> (Run models locally) را انتخاب کنید.</li>
+  <li>روی <strong>نصب محیط اجرا</strong> (Install runtime) کلیک کنید. Hermes نسخهٔ رسمی llama.cpp مناسب سخت‌افزار شما را دانلود می‌کند (چند صد مگابایت)، صحت آن را بررسی می‌کند و آن را به‌روز نگه می‌دارد.</li>
+  <li>مدلی از فهرست انتخاب کنید و روی <strong>دانلود</strong> (Download) کلیک کنید.</li>
+  <li>روی <strong>استفاده</strong> (Use) کلیک کنید. از این پس گفت‌وگوهای جدید با مدل محلی اجرا می‌شوند.</li>
+</ol>
+<p>تمام مراحل همین است. سرور همراه با Hermes راه‌اندازی و متوقف می‌شود و پس از راه‌اندازی مجدد برنامه نیز دوباره در دسترس قرار می‌گیرد. برای بازگشت به یک ارائه‌دهندهٔ ابری هم کافی است در انتخابگر مدل یک بار کلیک کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="how-hermes-picks-what-to-download"><span class="secnum">۲</span> Hermes چگونه نسخهٔ مناسب دانلود را انتخاب می‌کند؟</h2>
+<p>پیش از آنکه چیزی دانلود کنید، نیازهای هر مدل در فهرست با امکانات <strong>رایانهٔ شما</strong> سنجیده می‌شود. هر ردیف این موارد را نشان می‌دهد:</p>
+<ul>
+  <li><strong>تناسب با حافظه</strong> — سبز (<em>در حافظهٔ GPU شما جا می‌گیرد</em>، Fits your GPU: مدل کاملاً در حافظهٔ GPU اجرا می‌شود)، زرد کهربایی (<em>از RAM سیستم استفاده می‌کند</em>، Uses system RAM: کار می‌کند، اما کندتر است) یا قرمز (<em>برای این رایانه بیش از حد بزرگ است</em>، Too big for this machine).</li>
+  <li><strong>زمینه</strong> — اندازهٔ پنجره‌ای که مدل با آن شروع به کار می‌کند و حداکثر اندازه‌ای که می‌تواند به آن برسد.</li>
+  <li>حجم دانلود نسخه‌ای که برای سخت‌افزار شما انتخاب شده است.</li>
+</ul>
+<p>مدل‌ها در چند سطح کیفیت (کوانتیزه‌سازی) عرضه می‌شوند. Hermes باکیفیت‌ترین نسخه‌ای را انتخاب می‌کند که به‌طور کامل روی GPU شما اجرا شود؛ رایانه‌های کم‌حافظه‌تر، نسخه‌ای کم‌حجم‌تر از همان مدل را با همان تضمین‌ها دریافت می‌کنند. در کوانتیزه‌سازی کمتر از ۴ بیت، افت کیفیت بیش از حد شدید است؛ بنابراین Hermes هرگز نسخه‌ای پایین‌تر از این سطح پیشنهاد نمی‌دهد. اگر رایانه‌ای نتواند حتی نسخهٔ ۴ بیتی را با انتقال بخشی از مدل به RAM سیستم اجرا کند، امکان اجرای آن مدل را ندارد.</p>
+<p>مدل‌هایی که با منابع دستگاه سازگار نیستند، همچنان همراه با دلیل این ناسازگاری در فهرست می‌مانند تا همیشه بدانید با ارتقای سخت‌افزار چه مدل‌هایی در دسترس شما قرار می‌گیرند.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="how-memory-management-works"><span class="secnum">۳</span> مدیریت حافظه چگونه کار می‌کند؟</h2>
+<p>کارایی مدل‌های محلی به محل قرارگیری داده‌ها در حافظه وابسته است؛ به همین دلیل Hermes این فرایند را از ابتدا تا انتها مدیریت می‌کند و تنظیم دستی در اختیار کاربر نمی‌گذارد:</p>
+<ul>
+  <li><strong>مدل‌ها با پنجرهٔ زمینه‌ای شروع می‌کنند که کاملاً در حافظهٔ GPU شما جا می‌گیرد</strong> و با نیاز گفت‌وگو به فضای بیشتر، این پنجره تا سقف ذاتی مدل بزرگ‌تر می‌شود. در نشست‌های طولانی ممکن است پیام «پنجرهٔ زمینه بزرگ‌تر شد» (Context window grown) را در گزارش وضعیت ببینید؛ این پیام نشان‌دهندهٔ گسترش پنجره است، نه خطا.</li>
+  <li><strong>هر مدل پیشنهادی دست‌کم یک پنجرهٔ زمینهٔ 64K دارد.</strong> وقتی مدل از حافظهٔ GPU شما بزرگ‌تر باشد، Hermes آگاهانه بخش‌های اضافی را به ترتیبی که کمترین تأثیر منفی را دارد در RAM سیستم قرار می‌دهد: ابتدا وزن‌های بخش‌های خبره و هرگز حافظهٔ نهان توجه. به این ترتیب، برای حفظ اندازهٔ تضمین‌شدهٔ پنجرهٔ زمینه، مقداری از سرعت را فدا می‌کند.</li>
+  <li><strong>سنجش تناسب با حافظه، پیکربندی راه‌اندازی را هم در نظر می‌گیرد</strong>، نه فقط فایل مدل را: وضعیت زمینه، بافرهای محیط اجرا، ماژول نگاشت ویژگی‌های بصری (vision projector) و بافرهای MTP همگی محاسبه می‌شوند. در پیش‌بینی چندتوکنی (MTP)، اگر دسته‌های بزرگ‌تر در همان اندازهٔ پنجرهٔ زمینه باعث انتقال بخشی از داده‌ها به RAM شوند، Hermes از دسته‌های کوچک‌تر استفاده می‌کند. MTP همچنان فعال می‌ماند. هنگام بازیابی پنجرهٔ گسترش‌یافته پس از راه‌اندازی مجدد نیز همین محاسبه انجام می‌شود.</li>
+  <li><strong>فشرده‌سازی گفت‌وگو پس از بررسی امکان گسترش پنجره انجام می‌شود.</strong> اگر پنجرهٔ بزرگ‌تر در حافظه جا نگیرد، تولید پاسخ بیش از حد کند باشد یا پنجره به سقف ذاتی مدل رسیده باشد، Hermes به‌جای نمایش اندازهٔ پنجره‌ای که واقعاً به سرور اعمال نشده، گفت‌وگو را فشرده می‌کند.</li>
+  <li>مدل‌های بی‌کار پس از ۱۵ دقیقه از حافظه خارج می‌شوند تا حافظهٔ GPU آزاد شود؛ با پیام بعدی، به‌طور خودکار دوباره بارگذاری می‌شوند.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2 id="the-status-bar"><span class="secnum">۴</span> نوار وضعیت</h2>
+<p>روی نوار وضعیت راست‌کلیک کنید و <strong>منابع سیستم</strong> (System resources) را فعال کنید تا هنگام اجرای مدل‌های محلی، میزان استفاده از GPU، حافظهٔ GPU و RAM را به‌صورت زنده ببینید. نشانگر زمینه همیشه اندازهٔ پنجره‌ای را نشان می‌دهد که مدل واقعاً با آن در حال اجراست.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="finding-more-models"><span class="secnum">۵</span> پیدا کردن مدل‌های بیشتر</h2>
+<p>فهرست مدل‌ها مجموعه‌ای دست‌چین‌شده برای شروع است، نه محدودیتی برای انتخاب شما. بخش <strong>پیدا کردن مدل‌های بیشتر</strong> (Find more models) در همان صفحه، سراسر Hugging Face را جست‌وجو می‌کند:</p>
+<ul>
+  <li>نتایج، تعداد دانلودها و ارزیابی تناسب هر فایل با منابع رایانهٔ شما را نشان می‌دهند؛ بنابراین پیش از دانلود می‌دانید که آیا یک نسخه به‌طور کامل روی GPU شما اجرا می‌شود یا نه.</li>
+  <li>هر مدلی که دانلود کنید دقیقاً مانند مدل‌های فهرست عمل می‌کند: Hermes خود فایل مدل را می‌خواند تا اندازهٔ پنجرهٔ زمینه و نحوهٔ استقرار آن در حافظه را انتخاب کند. تنها تفاوت این است که مدل‌های جامعهٔ کاربران، نشان «اعتبارسنجی‌شده» (validated) ما را که بیانگر گذراندن آزمون‌هاست ندارند.</li>
+  <li>از قبل یک فایل <code>.gguf</code> روی دیسک دارید؟ گزینهٔ <strong>افزودن فایل مدل</strong> (Add model file) آن را بدون کپی کردن به کتابخانهٔ شما پیوند می‌دهد؛ فایل اصلی در جای خود باقی می‌ماند و مدل بلافاصله قابل استفاده است.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2 id="using-your-own-llama-server"><span class="secnum">۶</span> استفاده از llama-server خودتان</h2>
+<p>اگر یک llama-server از قبل روی رایانهٔ شما در حال اجرا باشد، Hermes آن را شناسایی می‌کند و به‌جای راه‌اندازی سرور خودش، از همان استفاده می‌کند. برای کنترل کامل و دستی، نشانی یک نقطهٔ پایانی سفارشی را روی هر سرور سازگار با OpenAI تنظیم کنید؛ محیط اجرای مدیریت‌شده یک گزینهٔ پیش‌فرض است، نه یک الزام. برای راه‌اندازی دستی با Ollama، MLX، نسخه‌های سفارشی یا روی دستگاه‌های بدون رابط گرافیکی که از خط فرمان استفاده می‌کنند، به <a href="../guides/local-ollama-setup.html">اجرای محلی Hermes با Ollama</a> و <a href="../guides/local-llm-on-mac.html">اجرای مدل‌های زبانی بزرگ به‌صورت محلی روی مک</a> مراجعه کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="configuration"><span class="secnum">۷</span> پیکربندی</h2>
+<p>محیط اجرای مدیریت‌شده از طریق بخش <code>local_runtime</code> در <code>config.yaml</code> کنترل می‌شود. رابط کاربری دسکتاپ این مقدارها را برای شما می‌نویسد؛ توضیحات زیر برای استفاده از خط فرمان و محیط‌های بدون رابط گرافیکی ارائه شده‌اند:</p>
+<pre dir="ltr"><code>local_runtime:
+  enabled: false     # true = start the managed server with Hermes.
+                     # The desktop "Use" button sets this automatically.
+  backend: auto      # auto | cuda | metal | vulkan | hip | cpu
+  tag: b10362        # pinned llama.cpp release; Hermes updates it with
+                     # each release after re-validation
+</code></pre>
+<p>مدل‌ها و نسخه‌های محیط اجرا در زیرپوشه‌های پوشهٔ خانگی Hermes نگهداری می‌شوند: <code>models/</code> و <code>runtimes/llamacpp/</code>. برای انتخاب یک مدل محلی به‌عنوان مدل اصلی، از تنظیمات استاندارد <code>model.provider: llamacpp</code> به همراه <code>model.default</code> استفاده می‌شود؛ ساختار تنظیمات مانند سایر ارائه‌دهندگان است.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="requirements-and-limits"><span class="secnum">۸</span> پیش‌نیازها و محدودیت‌ها</h2>
+<ul>
+  <li><strong>ویندوز و لینوکس:</strong> پردازندهٔ گرافیکی NVIDIA با CUDA یا پردازندهٔ مرکزی (CPU). <strong>macOS:</strong> تراشه‌های Apple Silicon با Metal. نسخه‌های Vulkan برای پردازنده‌های گرافیکی AMD به کار می‌روند.</li>
+  <li>یک GPU با دست‌کم ۸ گیگابایت حافظه، مدل‌های کوچک فهرست را به‌راحتی اجرا می‌کند؛ با دست‌کم ۱۶ گیگابایت حافظه می‌توان مدل‌های ۲۷ تا ۳۵ میلیارد پارامتری را با کیفیت بالا اجرا کرد.</li>
+  <li>هنگام دانلود مدل، اندازهٔ فایل بر حسب بایت با مقدار ثبت‌شده در فهرست تطبیق داده می‌شود. دانلود ناقص حذف و گزارش می‌شود و هرگز به‌صورت ناقص مورد استفاده قرار نمی‌گیرد. (فقط فایل‌های ZIP موتور اجرا با SHA-256 بررسی می‌شوند.)</li>
+  <li>با حذف یک مدل، تمام فایل‌هایی که برای آن آماده شده‌اند نیز حذف می‌شوند؛ از جمله آداپتورهای بینایی و فایل‌های کمکی رمزگشایی حدسی (speculative decoding).</li>
+</ul>
+</section>
+
+<div class="pager">
+  <span class="off"><span class="dir">→ قبلی</span><span class="ttl">جداسازی شبکه</span></span>
+  <a class="next" href="features/overview.html"><span class="dir">بعدی ←</span><span class="ttl">نگاه کلی قابلیت‌ها</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/local-models" target="_blank" rel="noopener">Local Models</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

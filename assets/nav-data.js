@@ -39,7 +39,7 @@ window.HERMES_NAV = [
   { p:"user-guide/windows-native.html",             t:"راهنمای ویندوز (بومی)",            d:1 },
   { p:"user-guide/windows-wsl-quickstart.html",     t:"راهنمای ویندوز (WSL2)",            d:1 },
   { p:"user-guide/egress/network-isolation.html", t:"جداسازی شبکه", d:0 },
-  { p:"user-guide/local-models.html", t:"مدل‌های محلی", d:0 }
+  { p:"user-guide/local-models.html", t:"مدل‌های محلی", d:1 }
 ]},
 { id:"features", cat:"🧠 قابلیت‌های اصلی", pages:[
   { p:"user-guide/features/overview.html",             t:"نگاه کلی قابلیت‌ها",                 d:1 },
