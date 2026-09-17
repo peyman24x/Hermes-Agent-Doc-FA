@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>چرخهٔ حیات صورتحساب — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/billing-lifecycle" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>چرخهٔ حیات صورتحساب</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1 id="billing-lifecycle-tui">چرخهٔ حیات صورتحساب (TUI)</h1>
+<p id="billing-lifecycle-client-side-state-errors-and-recovery"><strong>چرخهٔ حیات صورتحساب: وضعیت سمت کلاینت، خطاها و بازیابی</strong></p>
+<p>این سند نگاشتِ تمام ساختارهای وضعیت <code>billing.*</code>/<code>subscription.*</code> را که گیت‌وی از NAS ارائه می‌کند به آنچه واقعاً در ترمینال نمایش داده می‌شود، و نگاشتِ هر کد مشخصِ رد درخواست یا خطا را به متن دقیقِ قابل‌مشاهده برای کاربر و اقدام بازیابیِ آن شرح می‌دهد. تضمین این است: هیچ وضعیت صورتحساب NAS و هیچ رد درخواستِ دارای کد مشخص، به یک اعلان گذرای عمومی ختم نمی‌شود؛ برای هر مورد زیر، شاخه‌ای صریح در <code>ui-tui/src/app/slash/commands/topup.ts</code>، <code>ui-tui/src/components/billingOverlay.tsx</code> یا <code>ui-tui/src/components/subscriptionOverlay.tsx</code> وجود دارد. حتی کد <strong>ناشناخته</strong> نیز به‌شکل کنترل‌شده مدیریت می‌شود: به‌جای از کار افتادن برنامه یا نادیده‌گرفتن بی‌صدای رد درخواست، وارد شاخهٔ <code>default</code> می‌شود؛ پیامی عمومی اما واقعی از دادهٔ پاسخ سرور نمایش داده می‌شود، نه یک اعلان خالی.</p>
+<section class="doc-sec">
+<h2 id="1-billingstate-shapes--render"><span class="secnum">۱</span> ساختارهای <code>billing.state</code> و نمایش آن‌ها</h2>
+<p>منبع: <code>ui-tui/src/components/billingOverlay.tsx</code> (اجزای <code>OverviewScreen</code>، <code>BuyScreen</code> و <code>AutoReloadScreen</code>) و <code>ui-tui/src/app/slash/commands/topup.ts</code> (اجرای <code>/topup</code>).</p>
+<div class="table-wrap"><table>
+<thead><tr><th>ساختار وضعیت</th><th>نمایش</th></tr></thead>
+<tbody>
+<tr><td>از حساب خارج شده است (<code>s.logged_in === false</code>)</td><td>پنجرهٔ رویی اصلاً باز نمی‌شود. پیام <code>sys</code>: «💳 وارد Nous Portal نشده‌اید؛ برای ورود <code>/portal</code> و سپس <code>/topup</code> را اجرا کنید.»</td></tr>
+<tr><td>دریافت وضعیت با RPCِ <code>billing.state</code> شکست می‌خورد (خطای انتقال یا پایان مهلت)</td><td><strong>توقف امن در صورت خطا (fail-closed)</strong>: <code>.catch(ctx.guardedErr)</code>؛ پنجرهٔ رویی باز نمی‌شود و هیچ وضعیتی مفروض گرفته نمی‌شود. پیام <code>sys</code>: «خطا: <code>&lt;message&gt;</code> یا «درخواست ناموفق بود»». هرگز «کارت وجود ندارد» یا وضعیت حدسیِ دیگری نمایش داده نمی‌شود؛ کاربر باید <code>/topup</code> را دوباره اجرا کند.</td></tr>
+<tr><td><code>card: null</code> (کارتی ذخیره نشده)، منوی کامل (<code>is_admin &amp;&amp; cli_billing_enabled</code>)</td><td>نمای کلی نشان می‌دهد: «هیچ کارت ذخیره‌شده‌ای ثبت نشده است؛ «افزودن وجه» شما را در افزودن کارت راهنمایی می‌کند.» «افزودن وجه» <strong>مسیر افزودن کارت</strong> را باز می‌کند: «افزودن کارت در پورتال» / «کارت را اضافه کردم؛ دوباره بررسی کن» / «بازگشت». هرگز انتخاب‌گر مبلغ باز نمی‌شود؛ چون به خطای ۴۰۳ با کد <code>no_payment_method</code> می‌انجامد.</td></tr>
+<tr><td><code>card</code> موجود است و <code>resolved_via</code> تنظیم شده</td><td>«کارت: <code>{display}</code>» (برای مثال «<bdi dir="ltr">Visa ····4242</bdi> — کارتِ اشتراک شما»)، با استفاده از فیلد <code>display</code> که منشأ کارت را در نظر می‌گیرد.</td></tr>
+<tr><td><code>card</code> موجود است اما <code>resolved_via</code> وجود ندارد (NAS قدیمی‌تر)</td><td>از متن عمومیِ «کارت: <code>{masked}</code>» استفاده می‌شود؛ صفحهٔ تأیید نیز اضافه می‌کند: «مبلغ از کارت ذخیره‌شدهٔ شما در پورتال برداشت خواهد شد.»</td></tr>
+<tr><td><code>auto_reload: null</code></td><td>اصلاً سطری برای شارژ مجدد خودکار نمایش داده نمی‌شود (<code>autoReloadLine</code> مقدار <code>null</code> برمی‌گرداند)؛ این قابلیت در رابط ظاهر نمی‌شود.</td></tr>
+<tr><td><code>auto_reload.card.kind: 'canonical'</code></td><td>هشدارِ کارت متفاوت نمایش داده نمی‌شود؛ سطر کارت از کارت ثبت‌شده استفاده می‌کند.</td></tr>
+<tr><td><code>auto_reload.card.kind: 'distinct'</code></td><td>در صفحهٔ شارژ مجدد خودکار: «⚠ شارژ خودکار از کارت <code>{brand} ••{last4}</code> برداشت می‌کند، نه از کارت ثبت‌شدهٔ شما.» این همان اعلان تفاوت کارت‌هاست.</td></tr>
+<tr><td><code>auto_reload.card.kind: 'none'</code></td><td>از نظر نمایش، مانند <code>canonical</code> است؛ هشداری دربارهٔ متفاوت‌بودن کارت نشان داده نمی‌شود.</td></tr>
+<tr><td><code>monthly_cap</code> موجود است و <code>limit_usd != null</code></td><td>«در این ماه <code>{spent_display}</code> از <code>{limit_display}</code> مصرف شده است»؛ عبارت « (سقف پیش‌فرض)» فقط و فقط در صورت برقرار بودن <code>is_default_ceiling</code> افزوده می‌شود.</td></tr>
+<tr><td><code>monthly_cap</code> وجود ندارد یا <code>limit_usd == null</code></td><td>«سقف ماهانه‌ای قابل‌مشاهده نیست (از پورتال مدیریت می‌شود).»</td></tr>
+<tr><td>نقشی بدون قابلیت مدیریت صورتحساب (<code>!is_admin</code>؛ منو محدود می‌شود)</td><td>یادداشت: «اقدام‌های مربوط به صورتحساب به فردی با مجوزهای صورتحساب نیاز دارند (مالک، مدیر یا مدیر مالی).» منو به «مدیریت در پورتال» / «انصراف» محدود می‌شود.</td></tr>
+<tr><td>کلید سراسری سازمان غیرفعال است (<code>is_admin</code> اما <code>!cli_billing_enabled</code>)</td><td>یادداشت: «خرج‌کرد از راه دور برای این سازمان خاموش است؛ مدیر صورتحساب می‌تواند آن را از صفحهٔ Hermes Agent در پورتال روشن کند.» همان منوی محدود نمایش داده می‌شود.</td></tr>
+</tbody>
+</table></div>
+<p>نکته: <code>full = s.is_admin &amp;&amp; s.cli_billing_enabled</code> کلیدِ <strong>سطح سازمان</strong> را کنترل می‌کند، نه دامنهٔ مجوزِ <code>billing:manage</code> برای هر ترمینال را. نبودِ آن مجوز به‌صورت واکنشی مشخص می‌شود: درخواست برداشت، خطای ۴۰۳ با کد <code>insufficient_scope</code> می‌گیرد و به‌جای بررسی پیشاپیش، جریان به صفحهٔ اخذ مجوز تکمیلی (step-up) هدایت می‌شود که امکان ازسرگیری عملیات را دارد.</p>
+</section>
+<section class="doc-sec">
+<h2 id="2-refusal-codes-renderbillingerror-in-code-order"><span class="secnum">۲</span> کدهای رد درخواست (<code>renderBillingError</code>، به‌ترتیب کد)</h2>
+<p>منبع: <code>renderBillingError</code> در <code>ui-tui/src/app/slash/commands/topup.ts:37-149</code>. منظور از سطر «پورتال»، <code>sys('Portal: {portal_url}')</code> است که هر زمان <code>portal_url</code> موجود باشد، برای همهٔ کدها (از جمله شاخهٔ پیش‌فرض) افزوده می‌شود.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>کد <code>error</code></th><th>متن پیام</th><th>نشانی پورتال</th><th><code>retry_after</code></th></tr></thead>
+<tbody>
+<tr><td><code>insufficient_scope</code></td><td>«این کار به مجازبودن خرج‌کرد از راه دور نیاز دارد. برای دادن این مجوز، فرایند افزودن وجه را شروع کنید و سپس دوباره تلاش کنید.»</td><td>در صورت وجود</td><td>—</td></tr>
+<tr><td><code>remote_spending_revoked</code> (CF-4)</td><td>بسته به <code>actor</code>: «یک مدیر خرج‌کرد از راه دور را برای این ترمینال متوقف کرد.» یا «شما خرج‌کرد از راه دور را برای این ترمینال متوقف کردید.» سپس: «برای بازیابی، دوباره متصل شوید؛ <code>/portal</code> را اجرا کنید تا مجدداً به این ترمینال مجوز بدهید.» وضعیت پنجرهٔ روییِ <code>billing</code> نیز فوراً پاک می‌شود (منتظر نوسازی توکن نمی‌ماند).</td><td>در صورت وجود</td><td>—</td></tr>
+<tr><td><code>session_revoked</code></td><td>«نشست شما از حساب خارج شد. برای ورود دوباره، <code>/portal</code> را اجرا کنید.» وضعیت پنجرهٔ روییِ <code>billing</code> نیز پاک می‌شود.</td><td>در صورت وجود</td><td>—</td></tr>
+<tr><td><code>cli_billing_disabled</code> / <code>remote_spending_disabled</code> (انتشار با هر دو کد)</td><td>«خرج‌کرد از راه دور برای این حساب خاموش است؛ مدیر صورتحساب می‌تواند آن را از صفحهٔ Hermes Agent در پورتال روشن کند.»</td><td>در صورت وجود</td><td>—</td></tr>
+<tr><td><code>role_required</code></td><td>«افزودن وجه به فردی با مجوزهای صورتحساب نیاز دارد (مالک، مدیر یا مدیر مالی)؛ یا این کار را در پورتال مدیریت کنید.»</td><td>در صورت وجود</td><td>—</td></tr>
+<tr><td><code>consent_required</code></td><td>«پیش از ادامهٔ این اقدام، باید مرحلهٔ یک‌بارهٔ تأیید کارت و اعلام رضایت را در پورتال انجام دهید.»</td><td>در صورت وجود</td><td>—</td></tr>
+<tr><td><code>org_access_denied</code></td><td>«این توکن به سازمانی که بتوانید آن را مدیریت کنید متصل نیست. با سازمان درست وارد شوید، یا این کار را در پورتال مدیریت کنید.»</td><td>در صورت وجود</td><td>—</td></tr>
+<tr><td><code>upgrade_cap_exceeded</code></td><td>«🔴 به سقف روزانهٔ تغییر طرح رسیده‌اید (۵ بار برای هر سازمان)؛ فردا دوباره تلاش کنید، یا این کار را در پورتال مدیریت کنید.»</td><td>در صورت وجود</td><td>—</td></tr>
+<tr><td><code>auto_top_up_disabled_failures</code></td><td>«شارژ مجدد خودکار پس از شکست‌های مکررِ برداشت خاموش شد. مشکل کارت را برطرف کنید و سپس از مسیر <code>/topup</code> ← شارژ مجدد خودکار، آن را دوباره فعال کنید.»</td><td>در صورت وجود</td><td>—</td></tr>
+<tr><td><code>idempotency_conflict</code></td><td>«🔴 آن کلید برداشت قبلاً برای مبلغ دیگری استفاده شده است. فرایند جدیدی برای افزودن وجه آغاز کنید.»</td><td>در صورت وجود</td><td>—</td></tr>
+<tr><td><code>no_payment_method</code></td><td>«💳 هنوز کارتی برای برداشت‌های ترمینال ذخیره نشده است. در پورتال یک کارت تنظیم کنید (خریدهای یک‌بارهٔ اعتبار، کارتی قابل‌استفادهٔ مجدد ذخیره نمی‌کنند).»</td><td>در صورت وجود</td><td>—</td></tr>
+<tr><td><code>monthly_cap_exceeded</code></td><td>اگر <code>payload.remainingUsd</code> موجود باشد: «🔴 به سقف هزینهٔ ماهانه رسیده‌اید؛ <code>${remainingUsd}</code> ظرفیت باقی مانده است.» در غیر این صورت: «🔴 به سقف هزینهٔ ماهانه رسیده‌اید.»</td><td>در صورت وجود</td><td>—</td></tr>
+<tr><td><code>rate_limited</code> / <code>temporarily_unavailable</code></td><td>«🟡 در حال حاضر تعداد درخواست‌های برداشت بیش از حد است{ (حدود N دقیقهٔ دیگر دوباره تلاش کنید)}. این به معنای شکست پرداخت نیست.»</td><td>در صورت وجود</td><td><strong>بله</strong>؛ تعداد دقیقه‌ها با <code>max(1, round(retry_after/60))</code> محاسبه می‌شود.</td></tr>
+<tr><td><code>stripe_unavailable</code></td><td>«🟡 Stripe در حال حاضر با مشکل روبه‌روست؛ کمی بعد دوباره تلاش کنید{ (حدود N دقیقهٔ دیگر دوباره تلاش کنید)}.»</td><td>در صورت وجود</td><td><strong>بله</strong> (همان فرمول)</td></tr>
+<tr><td><em>پیش‌فرض (ناشناخته/سایر)</em></td><td>«🔴 <code>{message || error || 'Billing request failed.'}</code>»؛ متن جایگزین: «درخواست صورتحساب ناموفق بود.» همچنان هرچه سرور گفته است نمایش داده می‌شود؛ اعلان هرگز خالی نیست.</td><td>در صورت وجود</td><td>—</td></tr>
+</tbody>
+</table></div>
+</section>
+<section class="doc-sec">
+<h2 id="3-charge-settlement-outcomes-pollcharge--renderchargefailed"><span class="secnum">۳</span> نتایج تسویهٔ برداشت (<code>pollCharge</code> / <code>renderChargeFailed</code>)</h2>
+<p>منبع: <code>pollCharge</code> در <code>ui-tui/src/app/slash/commands/topup.ts:170-258</code> و <code>renderChargeFailed</code> در خطوط <code>:260-290</code>. وضعیت هر ۲ ثانیه پرس‌وجو می‌شود و سقف زمانی آن ۵ دقیقه است (<code>POLL_INTERVAL_MS=2000</code>، <code>POLL_CAP_MS=5*60*1000</code>). این سقف در <strong>تمام</strong> مسیرهایی که هنوز به نتیجهٔ نهایی نرسیده‌اند اعمال می‌شود؛ هم حالت در انتظار و هم حالت محدودشده از نظر نرخ. بنابراین تداوم پاسخ‌های ۴۲۹/۵۰۳ نمی‌تواند پرس‌وجو را برای همیشه زنده نگه دارد.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>نتیجه</th><th>متن پیام</th><th>نکته‌ها</th></tr></thead>
+<tbody>
+<tr><td><code>status: 'settled'</code></td><td>«✅ <code>${amount_usd}</code> اضافه شد.» یا، اگر مبلغ موجود نباشد، «✅ اعتبار اضافه شد.»</td><td>موفقیت نهایی.</td></tr>
+<tr><td><code>status: 'failed'</code>، <code>reason: 'authentication_required'</code></td><td>«🔴 بانک شما به احراز هویت (3DS) نیاز دارد. برای تکمیل این خرید، آن را در پورتال انجام دهید.»</td><td>در صورت وجود <code>portalUrl</code>، سطر <code>Portal:</code> نیز افزوده می‌شود.</td></tr>
+<tr><td><code>status: 'failed'</code>، <code>reason: 'payment_method_expired'</code></td><td>«🔴 کارت شما منقضی شده است. آن را در پورتال به‌روز کنید.»</td><td>به‌همراه سطر <code>Portal:</code>.</td></tr>
+<tr><td><code>status: 'failed'</code>، <code>reason: 'card_declined'</code></td><td>«🔴 کارت شما رد شد. کارت دیگری را در پورتال امتحان کنید.»</td><td>به‌همراه سطر <code>Portal:</code>.</td></tr>
+<tr><td><code>status: 'failed'</code>، <code>reason: 'processing_error'</code></td><td>«🔴 برداشت انجام نشد (<code>processing_error</code>).»</td><td>به‌همراه سطر <code>Portal:</code>.</td></tr>
+<tr><td><code>status: 'failed'</code> با <code>reason</code> ناشناخته یا ناموجود</td><td>«🔴 برداشت انجام نشد (<code>{reason || 'processing_error'}</code>).»</td><td>همان مسیر هدایت به پورتال؛ همسان با <code>_billing_portal_hint</code> در <code>cli.py</code>.</td></tr>
+<tr><td>پایان مهلت پرس‌وجو (پس از سقف ۵ دقیقه، وضعیت همچنان <code>pending</code> است)</td><td>«🟡 پس از ۵ دقیقه همچنان در حال پردازش است؛ این پایان مهلت است، نه شکست. کمی بعد <code>/topup</code> یا پورتال را بررسی کنید.»</td><td>در صورت وجود <code>portalUrl</code>، سطر <code>Portal:</code> افزوده می‌شود. صریحاً شکست نامیده <strong>نمی‌شود</strong>.</td></tr>
+<tr><td>لغو مجوز در میانهٔ پرس‌وجو (<code>remote_spending_revoked</code> / <code>session_revoked</code> هنگام پرس‌وجوی وضعیت)</td><td>متن متناظر در <a href="#2-refusal-codes-renderbillingerror-in-code-order">بخش ۲</a> نمایش داده می‌شود و <strong>سپس</strong> این پیام افزوده می‌شود: «🟡 نتیجهٔ آخرین برداشت شما تأیید نشده است؛ پیش از تلاش دوباره، موجودی/تاریخچهٔ خود را بررسی کنید.»</td><td>قاعدهٔ ۴ از CF-7: پاسخ ۴۰۳ پس از لغو مجوز در حین پرس‌وجو مبهم است؛ ممکن است برداشت قبلاً تسویه شده باشد. هرگز آن را «ناموفق» ننامید.</td></tr>
+<tr><td>۴۲۹/۵۰۳ هنگام پرس‌وجو (<code>rate_limited</code>/<code>temporarily_unavailable</code>/<code>stripe_unavailable</code>)</td><td>خطایی نمایش داده نمی‌شود؛ با استفاده از <code>retry_after</code>، فاصلهٔ تلاش‌ها افزایش می‌یابد (پیش‌فرض ۵ ثانیه، حداکثر ۳۰ ثانیه) و پرس‌وجو تا سقف ۵ دقیقه ادامه پیدا می‌کند؛ سپس به‌صورت پایان مهلت گزارش می‌شود.</td><td>شکست پرداخت نیست.</td></tr>
+<tr><td>سایر خطاهای <code>!ok</code> در بررسی وضعیت</td><td>«🔴 بررسی برداشت ممکن نشد: <code>{message || error || 'error'}</code>»؛ متن جایگزینِ آخر: «خطا».</td><td>—</td></tr>
+<tr><td>قطع ارتباط انتقال (RPC پرس‌وجو استثنا ایجاد می‌کند یا رد می‌شود)</td><td>«🟡 نتیجهٔ آخرین برداشت شما تأیید نشده است؛ پیش از تلاش دوباره، موجودی/تاریخچهٔ خود را بررسی کنید.» (<code>UNCONFIRMED_CHARGE_MESSAGE</code>)</td><td>همان بیانِ «تأیید نشده؛ موجودی را بررسی کنید» که در لغو مجوز در میانهٔ پرس‌وجو استفاده می‌شود؛ قطع اتصال هرگز نباید «شکست» تعبیر شود.</td></tr>
+</tbody>
+</table></div>
+</section>
+<section class="doc-sec">
+<h2 id="4-subscription-preview--pending-change--upgrade-outcomes"><span class="secnum">۴</span> نتایج پیش‌نمایش اشتراک، تغییر در انتظار و ارتقا</h2>
+<p>منبع: <code>previewAndRoute</code>، <code>applyPendingAndRoute</code>، <code>upgradeResult</code> و <code>stepUpDenialResult</code> در <code>ui-tui/src/components/subscriptionOverlay.tsx</code>.</p>
+<p><strong>مقادیر <code>effect</code> در پیش‌نمایش</strong> (تعیین‌کنندهٔ صفحهٔ تأیید):</p>
+<div class="table-wrap"><table>
+<thead><tr><th><code>effect</code></th><th>متن صفحهٔ تأیید</th><th>اقدام اصلی</th></tr></thead>
+<tbody>
+<tr><td><code>charge_now</code></td><td>«ارتقا به <code>{target}</code>. اکنون مبلغ <code>{amount}</code> از شما دریافت می‌شود (متناسب با مدت باقی‌مانده).» به‌همراه تغییر میزان اعتبار ماهانه و، اگر سازوکار تشخیص کارت با اطمینان بداند، مشخصات کارت مورد استفاده.</td><td>«پرداخت <code>{amount}</code> و ارتقای فوری»</td></tr>
+<tr><td><code>scheduled</code></td><td>«تغییر به <code>{target}</code>؛ از <code>{date}</code> اعمال می‌شود. اکنون مبلغی دریافت نمی‌شود؛ تا آن زمان طرح فعلی خود را حفظ می‌کنید.»</td><td>«زمان‌بندی تغییر به <code>{target}</code>»</td></tr>
+<tr><td><code>no_op</code></td><td>«شما از قبل روی <code>{target}</code> هستید؛ چیزی برای تغییر وجود ندارد.»</td><td>هیچ‌کدام (فقط بازگشت)</td></tr>
+<tr><td><code>blocked</code></td><td><code>{preview.reason}</code> یا متن جایگزین: «این تغییر را نمی‌توان اینجا انجام داد؛ آن را در پورتال مدیریت کنید.»</td><td>«مدیریت در پورتال»</td></tr>
+<tr><td>RPC پیش‌نمایش <code>null</code> برمی‌گرداند یا ارتباط انتقال شکست می‌خورد</td><td>مستقیماً به صفحهٔ نتیجه هدایت می‌شود: «پیش‌نمایش آن تغییر ممکن نشد.»</td><td>—</td></tr>
+<tr><td>پیش‌نمایش <code>!ok</code> با <code>insufficient_scope</code></td><td>به صفحهٔ <code>stepup</code> هدایت می‌شود (<code>{kind:'preview', tierId}</code>).</td><td>—</td></tr>
+<tr><td>پیش‌نمایش <code>!ok</code> با خطای دیگر</td><td>با <code>errorResult(p)</code> به صفحهٔ نتیجه هدایت می‌شود (<code>message || error || 'Something went wrong. Try again, or manage on the portal.'</code>؛ متن جایگزین: «مشکلی پیش آمد. دوباره تلاش کنید، یا در پورتال مدیریت کنید.»).</td><td>—</td></tr>
+</tbody>
+</table></div>
+<p><strong>نتایج اعمال تغییرِ در انتظار</strong> (<code>applyPendingAndRoute</code>):</p>
+<div class="table-wrap"><table>
+<thead><tr><th><code>pending.kind</code></th><th>متن موفقیت</th></tr></thead>
+<tbody>
+<tr><td><code>cancellation</code></td><td>«زمان‌بندی شد؛ طرح شما تا پایان دورهٔ صورتحساب فعال می‌ماند و سپس لغو می‌شود. امروز چیزی تغییر نمی‌کند.»</td></tr>
+<tr><td><code>tier_change</code> (تنزل/زمان‌بندی)</td><td>«زمان‌بندی شد؛ طرح شما امروز تغییر نمی‌کند. تا پایان دورهٔ صورتحساب، طرح فعلی خود را حفظ می‌کنید و سپس طرح عوض می‌شود.»</td></tr>
+<tr><td><code>upgrade</code></td><td>از مسیر <code>upgradeResult</code> هدایت می‌شود (در ادامه).</td></tr>
+<tr><td>هر نوعی، با <code>insufficient_scope</code> در عملیات تغییردهندهٔ وضعیت</td><td>به step-up هدایت می‌شود (<code>{kind:'apply'}</code>).</td></tr>
+</tbody>
+</table></div>
+<p><strong>ماتریس <code>status</code> × <code>reason</code> برای ارتقا</strong> (<code>upgradeResult</code>، بررسی به همین ترتیب انجام می‌شود؛ <code>reason</code> <em>پیش از</em> <code>status</code> بررسی می‌شود):</p>
+<div class="table-wrap"><table>
+<thead><tr><th>شرط</th><th>نتیجه</th></tr></thead>
+<tbody>
+<tr><td><code>r === null</code> (شکست ارتباط انتقال در مسیر دریافت وجه)</td><td>«تأیید ارتقا ممکن نشد؛ ممکن است مبلغ از کارت شما برداشت شده باشد یا نشده باشد. پیش از تلاش دوباره، <code>/subscription</code> را مجدداً اجرا کنید تا طرح خود را بررسی کنید.» وضعیت مبهم است؛ هرگز نباید کورکورانه دوباره تلاش کرد.</td></tr>
+<tr><td><code>reason: 'authentication_required'</code> <strong>یا</strong> <code>reason: 'subscription_payment_intent_requires_action'</code></td><td>«لطفاً برای تکمیل این ارتقا، کارت خود را در پورتال تأیید کنید.» ← <code>recovery_url</code>. <strong>هر دو دلیل به متن یکسان SCA نگاشت می‌شوند</strong>. کلاینت بر اساس <code>reason</code> شاخه‌بندی می‌کند، نه <code>status</code>؛ مشخصاً برای آنکه مورد SCA که NAS پیش از تغییر شمارهٔ ۷۱۱ به‌اشتباه با <code>status: 'payment_failed'</code> برچسب می‌زند (هنوز بدون دلیل متمایزکننده)، همچنان به پیام درستِ «کارت خود را تأیید کنید» هدایت شود، نه اینکه رد قطعی کارت تلقی شود.</td></tr>
+<tr><td><code>reason: 'card_declined'</code></td><td>«کارت شما رد شد؛ کارت دیگری را در پورتال امتحان کنید.» ← <code>recovery_url</code>.</td></tr>
+<tr><td><code>ok &amp;&amp; status: 'already_on_tier'</code></td><td>«شما از قبل روی <code>{target_tier_name}</code> هستید.» (موفقیت)</td></tr>
+<tr><td><code>ok &amp;&amp; status: 'upgraded'</code></td><td>«به <code>{target_tier_name}</code> ارتقا یافتید. اعتبار ماهانهٔ جدید شما تا لحظاتی دیگر اضافه می‌شود.» پرس‌وجوی اعمال تغییر برای سازگاری نهایی را آغاز می‌کند (در ادامه).</td></tr>
+<tr><td><code>status: 'requires_action'</code> (بدون دلیل متمایزکننده)</td><td>«این ارتقا به احراز هویت تکمیلی (3DS) نیاز دارد. آن را در پورتال تکمیل کنید.» ← <code>recovery_url</code>.</td></tr>
+<tr><td><code>status: 'payment_failed'</code> (بدون دلیل متمایزکننده)</td><td>«کارت شما رد شد. روش پرداخت خود را در پورتال به‌روز کنید و دوباره تلاش کنید.» ← <code>recovery_url</code>.</td></tr>
+<tr><td>هر حالت دیگر</td><td><code>errorResult(r)</code>: <code>message || error || 'Something went wrong. Try again, or manage on the portal.'</code>؛ متن جایگزین: «مشکلی پیش آمد. دوباره تلاش کنید، یا در پورتال مدیریت کنید.»</td></tr>
+</tbody>
+</table></div>
+<p><strong>یادداشت مترجم:</strong> توضیح منبع در سطر SCA ابهام دارد: هم بر وجود <code>reason</code> برای تشخیص تأکید می‌کند و هم حالت قدیمی را «بدون دلیل متمایزکننده» توصیف می‌کند. طبق ترتیب همین جدول، اگر واقعاً هیچ دلیل متمایزکننده‌ای موجود نباشد و وضعیت <code>payment_failed</code> باشد، شاخهٔ پیام رد کارت انتخاب می‌شود. متن و ترتیب منبع حفظ شده‌اند؛ ادعای پوشش آن حالت قدیمی بدون بررسی پیاده‌سازی قابل‌تأیید نیست.</p>
+<p><strong>پرس‌وجوی اعمال تغییر برای سازگاری نهایی</strong> (<code>ResultScreen</code>، فقط پس از <code>status: 'upgraded'</code>): وضعیت <code>billing</code>/اشتراک را هر ۲ ثانیه (<code>UPGRADE_CONFIRM_INTERVAL_MS</code>) تا ۱۵ بار (<code>UPGRADE_CONFIRM_ATTEMPTS</code>، یعنی حدود ۳۰ ثانیه) پرس‌وجو می‌کند تا <code>current.tier_id</code> به طرح مقصد تغییر کند. در زمان انتظار، صفحه «در حال اعمال…» را نشان می‌دهد. اگر در این محدوده تغییر نکند، متن «هنوز در حال اعمال» / «ارتقای شما موفق بود و هنوز در حال اعمال است؛ لحظاتی دیگر تازه‌سازی کنید.» نمایش داده می‌شود. صرفاً به این دلیل که NAS هنوز به وضعیت جدید نرسیده، ارتقا هرگز دوباره ناموفق گزارش نمی‌شود.</p>
+<p><strong>متن ردِ مجوز تکمیلی</strong> (<code>stepUpDenialResult</code>، در جریان اشتراک):</p>
+<div class="table-wrap"><table>
+<thead><tr><th><code>error</code></th><th>متن پیام</th></tr></thead>
+<tbody>
+<tr><td><code>session_revoked</code></td><td>«نشست شما منقضی شده است؛ برای ورود دوباره <code>/portal</code> را اجرا کنید، سپس تغییر را دوباره امتحان کنید.»</td></tr>
+<tr><td><code>remote_spending_revoked</code></td><td><code>{message}</code> یا «خرج‌کرد از راه دور برای این ترمینال متوقف شده است؛ از پورتال دوباره متصل شوید و سپس دوباره تلاش کنید.»</td></tr>
+<tr><td><code>rate_limited</code></td><td>«تعداد تلاش‌ها بیش از حد است؛ کمی صبر کنید و سپس دوباره تلاش کنید.»</td></tr>
+<tr><td>سایر/ناشناخته</td><td><code>{message}</code> یا «مجوز خرج‌کرد از راه دور داده نشد؛ فردی با مجوزهای صورتحساب (مالک، مدیر یا مدیر مالی) باید آن را تأیید کند. همچنین می‌توانید این تغییر را در پورتال انجام دهید.»</td></tr>
+</tbody>
+</table></div>
+<p>ردِ <strong>مجدد</strong> دامنهٔ مجوز هنگام بازاجرای عملیات پس از اعطای مجوز، هرگز باعث ورود دوباره به صفحهٔ step-up نمی‌شود؛ آن صفحه از قبل در همان‌جا نصب شده است و وصله‌کردن دوبارهٔ وضعیت، آن را متوقف می‌کند. در عوض، <code>allowStepUp=false</code> نتیجه‌ای نهایی نمایش می‌دهد: «خرج‌کرد از راه دور هنوز برای این ترمینال فعال نیست؛ مجوزدهی اعمال نشد. دوباره تلاش کنید، یا این تغییر را در پورتال انجام دهید.»</p>
+</section>
+<section class="doc-sec">
+<h2 id="text-mode-cli-parity"><span class="secnum">۵</span> همسانی در حالت متنی (CLI)</h2>
+<p>توابع <code>_show_billing</code> / <code>_billing_overview</code> و <code>_show_subscription</code> / <code>_subscription_overview</code> در <code>cli.py</code> همان ساختارهای وضعیت را نمایش می‌دهند: عنوان موجودی، نمایش دونَواریِ مصرف دلاری، سطر شارژ مجدد خودکار، سطر کارت و سقف ماهانه. همگی از اصل «در حالت خروج از حساب یا اختلال گذرای پورتال، ادامهٔ کار بدون توقف (fail-open)؛ هرگز از کار نیفتادن برنامه» پیروی می‌کنند. فرمان <code>/subscription</code> در CLI، برای مدیر/مالکِ دارای اشتراک پولی و در محیط تعاملی، <strong>جریان کامل تغییر درون ترمینال</strong> را فراهم می‌کند: انتخاب طرح ← پیش‌نمایش ← تأیید ← اعمال؛ همسان با پنجرهٔ رویی TUI. اعضا و محیط‌های غیرتعاملی به پیوند مستقیمِ <code>_billing_portal_hint</code> به <code>subscription_manage_url</code> ارجاع داده می‌شوند. پنجرهٔ تعاملی <code>/topup</code> با <code>prompt_toolkit</code> نیز به همین شکل پنجرهٔ رویی TUI را بازتاب می‌دهد؛ محیط‌های غیرتعاملی به همان نمایشِ متن و پیوند پورتال برمی‌گردند و هرگز از کاربر ورودی نمی‌خواهند.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>بخش رابط CLI / وضعیت</th><th>رفتار (همسان با TUI / دسکتاپ)</th></tr></thead>
+<tbody>
+<tr><td><code>/subscription</code> روی طرح <strong>رایگان (Free)</strong> + مدیر/مالک + محیط تعاملی</td><td><code>_subscription_free_catalog</code> فهرست طرح‌ها را از همان دادهٔ <code>tiers[]</code> مورد استفادهٔ TUI چاپ می‌کند؛ یک سطر برای هر سطح پولیِ فعال، از ارزان‌ترین به گران‌ترین، با قالب <code>name · $/mo · $credits/mo</code> (نام · دلار در ماه · اعتبار دلاری در ماه). اعتبار ماهانه بر حسب <strong>دلار</strong> است؛ مثلاً <code>$22 credits/mo</code> یعنی ۲۲ دلار اعتبار در ماه، نه هرگز یک عددِ بدون واحد. انتخاب یک شماره، پیوند مستقیمِ <code>/manage-subscription</code> را با پارامترِ افزوده‌شدهٔ <code>plan=&lt;tier_id&gt;</code> باز می‌کند تا پورتال طرح انتخاب‌شده را از پیش برگزیند. شروع اشتراک جدید به ارائهٔ مجدد کارت نیاز دارد؛ بنابراین تنها اقدام، واگذاری ادامهٔ فرایند به پورتال است و ترمینال در این حالت هرگز وجهی دریافت نمی‌کند.</td></tr>
+<tr><td>هر نشانی مدیریت/اشتراک که CLI می‌سازد</td><td><code>subscription_manage_url(state, tier_id=…)</code> پارامتر <code>plan=&lt;tier_id&gt;</code> را <strong>فقط وقتی طرحی انتخاب شده باشد</strong> (در فهرست طرح‌ها برای حساب رایگان) اضافه می‌کند؛ مقدار آن شناسهٔ پایدار در <code>tiers[]</code> است، نه هرگز نام یا اسلاگ. پورتال آن را در سمت سرور اعتبارسنجی می‌کند و طرح ناشناخته را نادیده می‌گیرد؛ بنابراین CLI هنگام انتخاب، بدون شرط دیگری آن را اضافه می‌کند، همانند <code>?plan=</code> در TUI. ابتدا <code>org_id</code> و سپس <code>plan</code> درج می‌شود.</td></tr>
+<tr><td><strong>تنزل طرح</strong> در CLI</td><td>تغییرهای معمول <strong>بومی / درون‌برنامه‌ای</strong> باقی می‌مانند (زمان‌بندی بدون دریافت وجه از طریق <code>put_subscription_pending_change</code>). تنزلِ مسدودشده همچنان ممکن است نشانی عمومی مدیریت را چاپ کند، اما این نشانی هرگز <code>plan=&lt;tier_id&gt;</code> ندارد؛ پیوندهای مستقیمِ دارای طرح انتخاب‌شده، مختص اشتراک‌های جدید و ارتقاها هستند.</td></tr>
+<tr><td>متن اقدام‌ها در نمای کلی <code>/topup</code></td><td>افزودن وجهِ یک‌باره را از شارژ خودکار جدا می‌کند و این تفاوت در همان جملهٔ نخست هر گزینه بیان می‌شود: «همین حالا وجه اضافه کنید؛ یک برداشتِ یک‌باره که امروز به موجودی شما افزوده می‌شود.» در برابر «هنگام کم‌شدن موجودی شارژ کنید؛ وقتی موجودی شما به کمتر از <code>$Y</code> برسد، به‌طور خودکار <code>$X</code> برداشت می‌شود.» واژهٔ «اعتبار» در رابطِ صرفاً دلاریِ <code>/topup</code> به کار نمی‌رود؛ «همین حالا وجه اضافه کنید» بدون آن واژه، معنای یک‌باره‌بودن را می‌رساند. وقتی شارژ مجدد خودکار خاموش باشد، سطر مربوط به آن مبلغ‌های مشخص را حذف می‌کند.</td></tr>
+</tbody>
+</table></div>
+</section>
+<section class="doc-sec">
+<h2 id="forward-compatibility"><span class="secnum">۶</span> سازگاری با نسخه‌های آینده</h2>
+<p>هر کد <code>error</code>/<code>status</code>/<code>reason</code> که در جدول‌های بالا نیامده باشد، به شاخهٔ <code>default</code> در <code>renderBillingError</code> (<a href="#2-refusal-codes-renderbillingerror-in-code-order">بخش ۲</a>) یا مسیر نهاییِ <code>errorResult</code>/<code>upgradeResult</code> (<a href="#4-subscription-preview--pending-change--upgrade-outcomes">بخش ۴</a>) می‌رسد. همچنان <code>message</code> خود سرور را نمایش می‌دهد؛ نه پیام خالی و نه از کار افتادن برنامه، فقط بدون متن اختصاصی یا امکان بازیابیِ ویژهٔ آن نوع خطا. NAS W3 کدهای سلامت کارت را معرفی می‌کند (<code>card_paused</code>، <code>card_expired</code>، <code>card_mismatch</code>) که هنوز اینجا به‌صورت نوع‌های مشخص تعریف نشده‌اند. تا زمانی که به‌روزرسانی کلاینت شاخه‌های صریحی اضافه کند، این کدها ناشناخته دریافت می‌شوند و از همین مسیر پیش‌فرض مدیریت خواهند شد.</p>
+</section>
+<div class="pager"><a class="prev" href="worktree-ui-dev.html"><span class="dir">→ قبلی</span><span class="ttl">توسعهٔ TUI و دسکتاپ در Worktree</span></a><span class="off next"><span class="dir">بعدی ←</span><span class="ttl">قرارداد Cron مدیریت‌شدهٔ Chronos</span></span></div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/billing-lifecycle" target="_blank" rel="noopener">Billing Lifecycle (TUI)</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

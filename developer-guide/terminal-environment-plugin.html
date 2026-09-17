@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پلاگین‌های ارائه‌دهندهٔ محیط ترمینال — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">&#x1FABD;</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/terminal-environment-plugin" target="_blank" rel="noopener">&#x1F310; نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">&#x2B50; GitHub</a>
+      <button class="icon-btn" id="themeToggle">&#x1F319; حالت شب</button>
+      <button class="icon-btn" id="printBtn">&#x1F5A8; چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>پلاگین‌های ارائه‌دهندهٔ محیط ترمینال</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1 id="terminal-environment-provider-plugins">پلاگین‌های ارائه‌دهندهٔ محیط ترمینال</h1>
+<p>Hermes فرمان‌های شِل را از طریق مجموعه‌ای قابل‌گسترش از <strong>بک‌اندهای ترمینال</strong> اجرا می‌کند. بک‌اندهای داخلی (local، Docker، Singularity، Modal، Daytona، Vercel Sandbox و SSH) در مخزن اصلی، زیر مسیر <code>tools/environments/</code> قرار دارند. در مقابل، عرضه‌کنندگان شخص ثالثِ سندباکس از طریق <strong>پلاگین‌ها</strong> یکپارچه می‌شوند: مخزنی مستقل برای پلاگین که زیر مسیر <code>~/.hermes/plugins/</code> نصب می‌شود و بک‌اندی را ثبت می‌کند که کاربر آن را دقیقاً مانند یک بک‌اند داخلی، از طریق <code>terminal.backend</code> در <code>config.yaml</code> انتخاب می‌کند.</p>
+<p>این صفحه همتای راهنمای <a href="browser-provider-plugin.html">پلاگین‌های ارائه‌دهندهٔ مرورگر</a> است؛ فرایند ثبت و قواعد دامنهٔ اثر در هر دو یکسان‌اند.</p>
+<section class="doc-sec">
+<h2 id="what-a-provider-controls"><span class="secnum">۱</span> آنچه ارائه‌دهنده کنترل می‌کند</h2>
+<p>بک‌اند ثبت‌شده به‌طور خودکار در همهٔ بخش‌های زیر از هسته به کار گرفته می‌شود:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>بخش</th><th>عامل تعیین‌کننده</th></tr></thead>
+<tbody>
+<tr><td>ارسال فرمان برای اجرا (<code>terminal</code>، <code>execute_code</code> و ابزارهای فایل)</td><td><code>create_environment()</code></td></tr>
+<tr><td>انتخاب‌گر بک‌اند در <code>hermes setup</code></td><td><code>display_name</code>، <code>description</code>، <code>setup_instructions()</code>، <code>post_setup()</code></td></tr>
+<tr><td>انتخاب‌گر بک‌اند ترمینال در داشبورد (وضعیت بررسی آمادگی)</td><td><code>probe()</code></td></tr>
+<tr><td><code>hermes status</code> / <code>hermes doctor</code></td><td><code>doctor_checks()</code></td></tr>
+<tr><td>راهنمایی‌های مربوط به محیط در پرامپت سیستمی</td><td><code>is_remote</code>، <code>env_description</code></td></tr>
+<tr><td>صرف‌نظر کردن از دریافت تأیید برای فرمان‌های خطرناک</td><td><code>skip_container_guards</code></td></tr>
+<tr><td>مدیریت مسیر و پوشهٔ کاری جاری (<code>cwd</code>) در کانتینر</td><td><code>is_container</code></td></tr>
+<tr><td>تبدیل مسیر فایل‌های کش همگام‌سازی‌شده</td><td><code>cache_path_base</code></td></tr>
+<tr><td>حذف اطلاعات محرمانه از زیرفرایندهای ایجادشده</td><td><code>strip_env_keys</code></td></tr>
+<tr><td>جداسازی سندباکس به‌ازای هر نشست (<code>container_persistent: false</code>)</td><td><code>session_isolated_when_nonpersistent</code></td></tr>
+</tbody>
+</table></div>
+<p>اعلام این پرچم‌ها در ارائه‌دهنده، دستهٔ شناخته‌شده‌ای از باگ‌ها را برطرف می‌کند که در آن «بک‌اند جدید در یکی از محل‌های طبقه‌بندی بک‌اندها از قلم افتاده است». هسته در هر محل، به‌جای تکیه بر فهرستی از نام‌های ثابت در کد، به رجیستری مراجعه می‌کند.</p>
+</section>
+<section class="doc-sec">
+<h2 id="minimal-provider"><span class="secnum">۲</span> ارائه‌دهندهٔ حداقلی</h2>
+<p>فایل <code dir="ltr">~/.hermes/plugins/acmebox/__init__.py</code>:</p>
+<pre dir="ltr"><code>from agent.terminal_env_provider import TerminalEnvironmentProvider
+
+
+class AcmeBoxEnvironment:
+    """Must satisfy the BaseEnvironment duck-typed contract."""
+
+    def __init__(self, cwd, timeout, task_id):
+        self.cwd, self.timeout, self.task_id = cwd, timeout, task_id
+
+    def execute(self, command, timeout=None, **kwargs):
+        ...  # run the command in the sandbox
+        return {"output": "...", "exit_code": 0}
+
+    def cleanup(self):
+        ...  # tear down / detach
+
+
+class AcmeBoxProvider(TerminalEnvironmentProvider):
+    name = "acmebox"
+    display_name = "AcmeBox"
+    is_remote = True          # commands don't run on the host
+    is_container = True       # container-style path/cwd semantics
+
+    @property
+    def description(self):
+        return "Run commands in an AcmeBox cloud sandbox."
+
+    @property
+    def cache_path_base(self):
+        return "~/.hermes"    # where synced cache files land, or None
+
+    @property
+    def strip_env_keys(self):
+        return frozenset({"ACMEBOX_TOKEN"})
+
+    def is_available(self):
+        import importlib.util, os
+        return (
+            importlib.util.find_spec("acmebox") is not None
+            and bool(os.getenv("ACMEBOX_TOKEN"))
+        )
+
+    def create_environment(self, *, cwd, timeout, task_id="default",
+                           image=None, container_config=None, **kwargs):
+        return AcmeBoxEnvironment(cwd, timeout, task_id)
+
+
+def register(ctx):
+    ctx.register_terminal_environment_provider(AcmeBoxProvider())
+</code></pre>
+<p>فایل <code dir="ltr">~/.hermes/plugins/acmebox/plugin.yaml</code>:</p>
+<pre dir="ltr"><code>name: acmebox
+version: 0.1.0
+description: AcmeBox cloud sandbox terminal backend
+kind: backend
+</code></pre>
+<p>پلاگین را فعال کنید، آن را به‌عنوان بک‌اند انتخاب کنید و اجرا کنید:</p>
+<pre dir="ltr"><code>hermes plugins enable acmebox
+hermes config set terminal.backend acmebox
+</code></pre>
+</section>
+<section class="doc-sec">
+<h2 id="rules"><span class="secnum">۳</span> قواعد</h2>
+<ul>
+<li><strong>نام‌های رزروشده.</strong> ثبت‌هایی که نامشان با نام یکی از بک‌اندهای داخلی (<code>local</code>، <code>docker</code>، <code>singularity</code>، <code>modal</code>، <code>managed_modal</code>، <code>daytona</code>، <code>vercel_sandbox</code>، <code>ssh</code>) تداخل داشته باشد، رد می‌شوند. پلاگین‌ها مجموعهٔ بک‌اندها را گسترش می‌دهند؛ هرگز جای بک‌اندهای موجود در درخت کد اصلی را نمی‌گیرند.</li>
+<li><strong><code>create_environment</code> باید <code>**kwargs</code> را بپذیرد</strong> و کلیدهای ناشناخته را نادیده بگیرد. این قراردادِ سازگاری با نسخه‌های آینده، امکان تغییر امضای تابع سازندهٔ محیط را بدون از کار انداختن پلاگین‌های قدیمی‌تر فراهم می‌کند.</li>
+<li><strong><code>is_available()</code> و <code>probe()</code> باید کم‌هزینه باشند.</strong> هیچ فراخوانی شبکه‌ای انجام ندهید؛ این متدها هنگام بررسی پیش‌نیازها و رسم رابط کاربری اجرا می‌شوند.</li>
+<li><strong>مدیریت خطا بدون از کار انداختن سامانه، در همه‌جا.</strong> اگر دسترسی به یک ویژگیِ ارائه‌دهنده استثنا ایجاد کند، هسته مقدار پیش‌فرض آن را در نظر می‌گیرد؛ برای مثال، اگر <code>skip_container_guards</code> استثنا ایجاد کند، لایهٔ تأیید همچنان فعال می‌ماند. برای کنترل جریان اجرا به استثناها تکیه نکنید.</li>
+<li><strong>اطلاعات محرمانه باید در <code>strip_env_keys</code> فهرست شوند.</strong> توکن سرویس‌دهندهٔ شما هرگز نباید برای فرمان شِلی که مدل نوشته است قابل‌خواندن باشد. با قرار دادن نام متغیر آن در این فهرست، آن متغیر بدون هیچ شرطی از محیط هر زیرفرایند ایجادشده حذف می‌شود؛ درست مانند رفتار داخلی برای <code>MODAL_*</code> و <code>DAYTONA_API_KEY</code>.</li>
+</ul>
+</section>
+<section class="doc-sec">
+<h2 id="environment-object-contract"><span class="secnum">۴</span> قرارداد شیء محیط</h2>
+<p><code>create_environment()</code> شیئی برمی‌گرداند که همان رابط مبتنی بر نوع‌دهی اردکی (<span dir="ltr">duck typing</span>) کلاس <code>tools.environments.base.BaseEnvironment</code> را پیاده‌سازی می‌کند:</p>
+<ul>
+<li><code dir="ltr">execute(command, timeout=None, ...)</code> ← خروجی: <code dir="ltr">{"output": str, "exit_code": int}</code></li>
+<li><code>cleanup()</code> — منابع را آزاد می‌کند؛ هنگام پایان نشست یا پاک‌سازی منابع بی‌کار فراخوانی می‌شود.</li>
+<li>اختیاری: هوک‌های ماندگاری، مشابه هوک‌های بک‌اندهای ابری داخلی.</li>
+</ul>
+<p>ارث‌بری از <code>BaseEnvironment</code> توصیه می‌شود، اما الزامی نیست. با این کار، زیرساخت مشترک همگام‌سازی فایل و فرایندهای پس‌زمینه را به ارث می‌برید.</p>
+</section>
+<section class="doc-sec">
+<h2 id="session-isolation-semantics"><span class="secnum">۵</span> قواعد جداسازی نشست‌ها</h2>
+<p>اگر سندباکس شما <strong>با نام از سر گرفته می‌شود</strong> (یعنی ماشین مجازی ماندگاری است که بک‌اند دوباره به آن متصل می‌شود)، مقدار <code dir="ltr">session_isolated_when_nonpersistent = True</code> را تنظیم کنید. در این صورت، با تنظیم <code dir="ltr">terminal.container_persistent: false</code>، هر نشست به‌جای اشتراک یک سندباکس، هویت سندباکس مختص خود را دریافت می‌کند. بدون این تنظیم، دو اجرای موقتی و مستقل ممکن است به یک ماشین مجازیِ در حال اجرا متصل شوند و یکی آن را در حالی حذف کند که دیگری هنوز از آن استفاده می‌کند.</p>
+</section>
+
+<div class="pager"><a class="prev" href="streaming-tts.html"><span class="dir">→ قبلی</span><span class="ttl">تبدیل جریانی متن به گفتار</span></a><span class="off next"><span class="dir">بعدی ←</span><span class="ttl">فرمان‌های CLI</span></span></div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/terminal-environment-plugin" target="_blank" rel="noopener">Terminal Environment Provider Plugins</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">&#x2615; حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

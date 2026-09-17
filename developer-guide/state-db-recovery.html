@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بازیابی پایگاه دادهٔ وضعیت — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/state-db-recovery" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>بازیابی پایگاه دادهٔ وضعیت</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1 id="state-db-recovery">بازیابی پایگاه دادهٔ وضعیت</h1>
+<p id="state-database-and-fts-recovery"><strong>بازیابی پایگاه دادهٔ وضعیت و FTS</strong></p>
+<p><code>state.db</code> دو دستهٔ متفاوت از داده‌ها را ذخیره می‌کند:</p>
+<ul>
+<li><code>sessions</code> و <code>messages</code> متن ثبت‌شدهٔ مرجعِ گفتگوها هستند.</li>
+<li>جدول‌های <code>messages_fts*</code> و تریگرهای همگام‌سازی آن‌ها، نمایه‌های جستجوی مشتق‌شده هستند.</li>
+</ul>
+<p>نمایه‌های مشتق‌شده را می‌توان موقتاً از مدار خارج کرد. این نمایه‌ها نباید عملیات نوشتن پیام یا جستجو در حین کار سامانه را به بازسازیِ بدون کرانِ کل متن گفتگوها تبدیل کنند.</p>
+<section class="doc-sec">
+<h2 id="live-behavior-when-fts-is-corrupt"><span class="secnum">۱</span> رفتار حین کار سامانه در صورت خرابی FTS</h2>
+<p>اگر عملیات نوشتن یا جستجوی FTS خطایی از دستهٔ خطاهای خرابی گزارش کند، <code>SessionDB</code>:</p>
+<ol>
+<li>نشانگر ماندگارِ <code>fts_stale</code> را ثبت می‌کند؛</li>
+<li>تریگرهای همگام‌سازی FTS را در همان تراکنش حذف می‌کند؛</li>
+<li>نوشتن داده‌های مرجع را بدون ارسال داده به نمایه‌های مشتق‌شده دوباره امتحان می‌کند؛ و</li>
+<li>با استفاده از مسیر جایگزینِ <code>LIKE</code>، جستجوها را روی ردیف‌های مرجع پاسخ می‌دهد.</li>
+</ol>
+<p>عملیاتی که در حین کار سامانه شکست می‌خورد، هرگز <code>FTS5('rebuild')</code> را اجرا نمی‌کند. سازوکار موجودِ تعیین مسئولیت بازیابی تغییری نمی‌کند: باز شدن بعدیِ <code>SessionDB</code> ممکن است بازسازی را تحت قفلِ کنترل ورودِ بین‌فرایندی و محافظِ جلوگیری از تداخل با دارنده‌ای در فرایندی دیگر انجام دهد. اگر این بازسازیِ محافظت‌شده امکان اجرا نداشته باشد، FTS خارج از مدار می‌ماند، نوشتن داده‌های مرجع همچنان در دسترس خواهد بود و <code>hermes doctor</code> فرمان صریحِ ترمیم را گزارش می‌کند.</p>
+</section>
+<section class="doc-sec">
+<h2 id="live-behavior-when-the-file-itself-is-corrupt"><span class="secnum">۲</span> رفتار حین کار سامانه در صورت خرابی خود فایل</h2>
+<p>اگر عملیات نوشتن در حین کار سامانه، خطای <code>SQLITE_CORRUPT</code> / <code>SQLITE_NOTADB</code> را به‌تنهایی (<code>database disk image is malformed</code>، <code>file is not a database</code>) و بدون نشانه‌ای از منشأ FTS گزارش کند، آسیب در یک درخت B مرجع، طرح‌واره یا فهرست صفحات آزاد است. در این حالت، <code>SessionDB</code> آن هندل را قرنطینه می‌کند (<code>StateDbCorruptError</code>):</p>
+<ol>
+<li>عملیات نوشتنِ ناموفق، خطای نوع‌دار را به فراخواننده منتقل می‌کند و هیچ عملیاتی دوباره امتحان نمی‌شود؛</li>
+<li>نوشتن‌های بعدی از طریق آن هندل، بلافاصله و بدون دست زدن به فایل شکست می‌خورند؛</li>
+<li>هندل پس از <code>close()</code> هرگز اتصال خود را دوباره باز نمی‌کند؛ و</li>
+<li><code>close()</code> از اجرای چک‌پوینت صریحِ WAL صرف‌نظر می‌کند.</li>
+</ol>
+<p>عامل محافظت، متوقف کردن نوشتن‌هاست. در یک رخداد واقعی، هندلی که پس از نخستین خطای ساختاری حدود ۵۰ دقیقه به نوشتن ادامه داده بود، هنگام خاموش شدن در عملیات چک‌پوینت، ۱۵ صفحه را با شماره‌صفحه‌های نادرست ثبت کرد (صفحهٔ ۱ یک برگِ <code>messages_fts_trigram_data</code> دریافت کرد) و فایلی آسیب‌دیده اما خواندنی را به فایلی تبدیل کرد که دیگر اصلاً باز نمی‌شد. صرف‌نظر کردن از چک‌پوینت صریح، دومین خط دفاع است؛ در Python 3.12 و بالاتر، قرنطینه همچنین چک‌پوینتِ خود SQLite هنگام بسته شدن آخرین اتصال را غیرفعال می‌کند (<code>SQLITE_DBCONFIG_NO_CKPT_ON_CLOSE</code>)، بنابراین فایل جانبیِ <code>-wal</code> پس از <code>close()</code> برای بررسی علت خرابی باقی می‌ماند. در Python 3.11 این گزینه در دسترس نیست و SQLite ممکن است همچنان هنگام بستن اتصال یک بار چک‌پوینت انجام دهد؛ بنابراین پیش از راه‌اندازی مجدد هر چیزی، <code>state.db</code>، <code>state.db-wal</code> و <code>state.db-shm</code> را با هم کپی کنید.</p>
+<p>گیت‌وی و مسیر تخلیهٔ داده‌های بافرشدهٔ ایجنت، با قرنطینه همانند تعویض شدن فایل برخورد می‌کنند: متن‌های ثبت‌شدهٔ در انتظار، به‌جای صف تلاش مجدد به <code>sessions/&lt;id&gt;.jsonl</code> و محل ذخیرهٔ موقتِ <code>pending_messages/</code> گیت‌وی منتقل می‌شوند و بازسازی یک‌بارهٔ FTS هرگز روی فایل آسیب‌دیده اجرا نمی‌شود. قرنطینه در محدودهٔ هر فرایند اعمال می‌شود — هندل مشترک برای همهٔ دارندگانش غیرقابل‌استفاده می‌ماند تا زمانی که فرایند با فایلی ترمیم‌شده یا بازیابی‌شده دوباره راه‌اندازی شود. تا وقتی گیت‌وی همچنان فعال است، <code>hermes doctor --fix</code> را اجرا نکنید. گام‌های بعدی:</p>
+<pre dir="ltr"><code>hermes gateway stop
+HERMES_HOME="$HOME/.hermes" hermes sessions recover --source "$HOME/.hermes/state.db" --inspect-only
+# if recoverable:
+HERMES_HOME="$HOME/.hermes" hermes sessions recover --source "$HOME/.hermes/state.db" --output "$HOME/recovered-state.db"
+</code></pre>
+<p>یا جدیدترین تصویر لحظه‌ای را از <code>state-snapshots/</code> بازیابی کنید.</p>
+</section>
+<section class="doc-sec">
+<h2 id="explicit-repair"><span class="secnum">۳</span> ترمیم صریح</h2>
+<p>پیش از ترمیم، هر فرایندی را که می‌تواند پایگاه دادهٔ پروفایل را باز کند متوقف کنید. این فرایندها را در تمام مدت ترمیم و راستی‌آزمایی متوقف نگه دارید.</p>
+<pre dir="ltr"><code>hermes gateway stop
+HERMES_HOME="$HOME/.hermes" hermes sessions repair --check-only
+HERMES_HOME="$HOME/.hermes" hermes sessions repair
+</code></pre>
+<p><code>sessions repair</code> به‌طور پیش‌فرض یک نسخهٔ پشتیبان SQLite ایجاد می‌کند و کارهای ساختاری را از طریق مسیر محافظت‌شدهٔ مخزن برای تهیهٔ تصویر لحظه‌ای و جایگزینی آن به‌عنوان نسخهٔ اصلی انجام می‌دهد. <code>state.db</code>، <code>state.db-wal</code> و <code>state.db-shm</code> را با <code>cp</code> به‌صورت مستقل کپی نکنید؛ این فایل‌ها در کنار هم یک تصویر زندهٔ SQLite را تشکیل می‌دهند.</p>
+<p>پس از ترمیم، پیش از راه‌اندازی مجدد گیت‌وی، نتیجهٔ آزمون سلامت، نشانگر کهنگی، مجموعهٔ تریگرها و شمار ردیف‌های مرجع را بررسی کنید:</p>
+<pre dir="ltr"><code>HERMES_HOME="$HOME/.hermes" hermes sessions repair --check-only
+sqlite3 "$HOME/.hermes/state.db" \
+  "SELECT key, value FROM state_meta WHERE key = 'fts_stale';"
+sqlite3 "$HOME/.hermes/state.db" \
+  "SELECT type, name FROM sqlite_master WHERE name IN
+   ('messages_fts_insert','messages_fts_update','messages_fts_delete')
+   ORDER BY name;"
+sqlite3 "$HOME/.hermes/state.db" \
+  "SELECT 'sessions', COUNT(*) FROM sessions
+   UNION ALL SELECT 'messages', COUNT(*) FROM messages;"
+</code></pre>
+<p>پرس‌وجوی نشانگر نباید هیچ ردیفی برگرداند، تریگرهای مورد انتظار FTS باید وجود داشته باشند و شمار ردیف‌های مرجع نباید کاهش یابد. اگر ترمیم شکست خورد، هم پایگاه دادهٔ زنده و هم نسخهٔ پشتیبانِ گزارش‌شده را حفظ کنید؛ هرگز برای ناپدید کردن خطای نمایهٔ مشتق‌شده، ردیف‌های مرجع را حذف نکنید.</p>
+</section>
+
+<div class="pager"><span class="off prev"><span class="dir">→ قبلی</span><span class="ttl">معیارهای مشترک Relay</span></span><a class="next" href="streaming-tts.html"><span class="dir">بعدی ←</span><span class="ttl">تبدیل جریانی متن به گفتار</span></a></div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/state-db-recovery" target="_blank" rel="noopener">State DB Recovery</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
