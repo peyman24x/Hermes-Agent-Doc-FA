@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>میان‌افزار — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/middleware" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>میان‌افزار</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1>میان‌افزار Hermes</h1>
+<p>میان‌افزار Hermes مکملِ تغییردهندهٔ رفتار برای هوک‌های ناظر است. هوک‌های ناظر گزارش می‌دهند چه اتفاقی افتاده است. میان‌افزار می‌تواند با بازنویسی درخواست پیش از اجرا یا با قرار دادن تابع بازفراخوانِ اجرا در یک لایهٔ پوشاننده، آنچه را اتفاق می‌افتد تغییر دهد.</p>
+<p>این قرارداد عمداً مستقل از بک‌اند طراحی شده است. یک پلاگین می‌تواند از آن برای سیاست‌های محلی، شکل‌دهی درخواست، ردیابی، مسیریابی تطبیقی، کنترل کش، انتخاب سندباکس یا واگذاری به محیط‌های اجرایی مانند NeMo Relay استفاده کند، بدون آنکه برنامه‌ریز Hermes، آداپتورهای ارائه‌دهندگان مدل، رجیستری ابزارها، حافظه یا تجربهٔ کاربری CLI را تغییر دهد.</p>
+<p>با فعال‌بودن میان‌افزار، پلاگین‌ها می‌توانند:</p>
+<ul>
+<li>آرگومان‌های کلیدواژه‌ای (<code>kwargs</code>) درخواست ارائه‌دهندهٔ LLM را پیش از آنکه Hermes ارائه‌دهنده را فراخوانی کند، بازنویسی کنند.</li>
+<li>آرگومان‌های ابزار را پیش از آنکه سازوکارهای محافظتی، بررسی‌های تأیید، هوک‌ها و اجرای ابزار آن‌ها را ببینند، بازنویسی کنند.</li>
+<li>تابع بازفراخوانِ اجرای واقعی LLM را در یک لایهٔ پوشاننده قرار دهند و در عین حال رفتار Hermes در تلاش مجدد، پردازش جریانی، وقفه و هوک‌ها را حفظ کنند.</li>
+<li>تابع بازفراخوانِ اجرای واقعی ابزار را در یک لایهٔ پوشاننده قرار دهند و در عین حال سازوکارهای محافظتی Hermes، تأیید، هوک‌های پس از ابزار و تبدیل نتیجهٔ ابزار را حفظ کنند.</li>
+</ul>
+<section class="doc-sec">
+<h2 id="contract"><span class="secnum">۱</span> قرارداد</h2>
+<p>پلاگین‌ها میان‌افزار را از داخل <code>register(ctx)</code> ثبت می‌کنند:</p>
+<pre dir="ltr"><code>def register(ctx):
+    ctx.register_middleware("llm_request", on_llm_request)
+    ctx.register_middleware("llm_execution", on_llm_execution)
+    ctx.register_middleware("tool_request", on_tool_request)
+    ctx.register_middleware("tool_execution", on_tool_execution)
+</code></pre>
+<p>هر تابع بازفراخوانِ میان‌افزار موارد زیر را دریافت می‌کند:</p>
+<ul>
+<li><code>telemetry_schema_version</code>: در حال حاضر <code>hermes.observer.v1</code></li>
+<li><code>middleware_schema_version</code>: در حال حاضر <code>hermes.middleware.v1</code></li>
+<li>اطلاعات زمینهٔ زمان اجرا، مانند <code>session_id</code>، <code>task_id</code>، <code>turn_id</code>، <code>api_request_id</code>، <code>provider</code>، <code>model</code>، <code>api_mode</code>، <code>tool_name</code> و <code>tool_call_id</code>، در مواردی که کاربرد دارند.</li>
+</ul>
+<p>انواع پشتیبانی‌شدهٔ میان‌افزار:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>نوع</th><th>دادهٔ ورودی</th><th>قالب مقدار بازگشتی</th><th>هدف</th></tr></thead>
+<tbody>
+<tr><td><code>llm_request</code></td><td><code>request</code>، <code>original_request</code></td><td><code>{"request": {...}}</code></td><td>جایگزینی آرگومان‌های کلیدواژه‌ای مؤثرِ ارائه‌دهنده پیش از اجرای آن.</td></tr>
+<tr><td><code>tool_request</code></td><td><code>tool_name</code>، <code>args</code>، <code>original_args</code></td><td><code>{"args": {...}}</code></td><td>جایگزینی آرگومان‌های مؤثرِ ابزار پیش از هوک‌ها، سازوکارهای محافظتی، تأییدها و اجرا.</td></tr>
+<tr><td><code>llm_execution</code></td><td><code>request</code>، <code>original_request</code>، <code>next_call</code></td><td>هر نوع پاسخ ارائه‌دهنده</td><td>قرار دادن در یک لایهٔ پوشاننده یا جایگزینی فراخوانی واقعی ارائه‌دهنده.</td></tr>
+<tr><td><code>tool_execution</code></td><td><code>tool_name</code>، <code>args</code>، <code>original_args</code>، <code>next_call</code></td><td>هر نوع نتیجهٔ ابزار</td><td>قرار دادن در یک لایهٔ پوشاننده یا جایگزینی فراخوانی واقعی ابزار.</td></tr>
+</tbody>
+</table></div>
+<p>میان‌افزار درخواست می‌تواند فیلدهای اختیاریِ ردیابی را برگرداند:</p>
+<pre dir="ltr"><code>return {
+    "request": updated_request,
+    "source": "my-plugin",
+    "reason": "selected fallback model",
+}
+</code></pre>
+<p>Hermes این مدخل‌های ردیابی را با نام <code>middleware_trace</code> در داده‌های ارسالی به هوک‌های ناظرِ بعدی ذخیره می‌کند.</p>
+<p>میان‌افزار اجرا یک تابع بازفراخوان به نام <code>next_call</code> دریافت می‌کند. برای ادامهٔ زنجیره، آن را فراخوانی کنید:</p>
+<pre dir="ltr"><code>def on_tool_execution(**kwargs):
+    result = kwargs["next_call"](kwargs["args"])
+    return result
+</code></pre>
+<p>اگر چند پلاگین نوع یکسانی از میان‌افزار اجرا را ثبت کنند، Hermes آن‌ها را به‌شکل زنجیره‌ای تودرتو و به‌ترتیب ثبت اجرا می‌کند. شکست میان‌افزار از نوع <code>fail-open</code> است: Hermes هشداری ثبت می‌کند و کار را با میان‌افزار بعدی یا مسیر پایهٔ زمان اجرا ادامه می‌دهد.</p>
+</section>
+<section class="doc-sec">
+<h2 id="execution-order"><span class="secnum">۲</span> ترتیب اجرا</h2>
+<h3 id="llm-calls">فراخوانی‌های LLM</h3>
+<p>Hermes برای هر درخواست ارائه‌دهنده، میان‌افزار را به این ترتیب اعمال می‌کند:</p>
+<ol>
+<li>آرگومان‌های کلیدواژه‌ای ارائه‌دهنده را از گفتگوی جاری می‌سازد.</li>
+<li>میان‌افزار <code>llm_request</code> را اعمال می‌کند.</li>
+<li>هوک‌های ناظرِ <code>pre_api_request</code> را با درخواست مؤثر فراخوانی می‌کند.</li>
+<li>اجرای ارائه‌دهنده را از مسیر میان‌افزار <code>llm_execution</code> انجام می‌دهد.</li>
+<li>هوک‌های ناظرِ <code>post_api_request</code> یا <code>api_request_error</code> را فراخوانی می‌کند.</li>
+</ol>
+<p>میان‌افزار درخواست، همهٔ آرگومان‌های کلیدواژه‌ای ارائه‌دهنده را می‌بیند؛ از جمله <code>messages</code> یا <code>input</code> در Responses API، تنظیمات مدل، تعریف ابزارها، گزینه‌های پردازش جریانی و گزینه‌های مختص ارائه‌دهنده. میان‌افزار اجرا همان درخواست مؤثر را به‌همراه <code>next_call</code> دریافت می‌کند.</p>
+<h3 id="tool-calls">فراخوانی‌های ابزار</h3>
+<p>Hermes برای هر فراخوانی ابزار، میان‌افزار را به این ترتیب اعمال می‌کند:</p>
+<ol>
+<li>آرگومان‌های ابزارِ ارائه‌شده از سوی مدل را تجزیه می‌کند و نوع آن‌ها را به نوع مورد انتظار تبدیل می‌کند.</li>
+<li>میان‌افزار <code>tool_request</code> را اعمال می‌کند.</li>
+<li>مسیر معمول پیش از اجرای Hermes را روی آرگومان‌های مؤثر اجرا می‌کند: بررسی‌های در دسترس بودن ابزار، دستورهای مسدودسازی ناظر، سازوکارهای محافظتی و بررسی‌های تأیید.</li>
+<li>اجرای ابزار را از مسیر میان‌افزار <code>tool_execution</code> انجام می‌دهد.</li>
+<li>هوک‌های ناظرِ <code>post_tool_call</code> را فراخوانی می‌کند.</li>
+<li>پیش از آنکه نتیجه دوباره به زمینهٔ گفتگو افزوده شود، هوک‌های <code>transform_tool_result</code> را اعمال می‌کند.</li>
+</ol>
+<p>میان‌افزار درخواست ابزار پیش از بررسی‌های تأیید اجرا می‌شود. با احتیاط از آن استفاده کنید: مسیر، فرمان یا URL بازنویسی‌شده همان مقداری است که سیاستِ مراحل بعدی ارزیابی خواهد کرد.</p>
+</section>
+<section class="doc-sec">
+<h2 id="enablement"><span class="secnum">۳</span> فعال‌سازی</h2>
+<p>میان‌افزار فقط برای پلاگین‌های فعال اجرا می‌شود. برای یک پلاگین که همراه Hermes عرضه می‌شود:</p>
+<pre dir="ltr"><code>hermes plugins enable &lt;plugin-name&gt;
+</code></pre>
+<p>برای آزمایش محلیِ ایزوله، هم برای فعال‌سازی پلاگین و هم برای اجرای ایجنت از یک <code>HERMES_HOME</code> یکسان استفاده کنید:</p>
+<pre dir="ltr"><code>export HERMES_HOME=/tmp/hermes-middleware-test
+mkdir -p "$HERMES_HOME"
+hermes plugins enable &lt;plugin-name&gt;
+hermes chat --query 'Reply exactly ok'
+</code></pre>
+<p>اگر از نسخهٔ کاریِ کد منبع استفاده می‌کنید، ترجیحاً فرمان را از محیط کد منبع اجرا کنید تا زمان اجرا، پلاگین‌ها و میان‌افزارهای موجود در درخت کاری را ببیند:</p>
+<pre dir="ltr"><code>uv sync
+uv run hermes plugins enable &lt;plugin-name&gt;
+uv run hermes chat --query 'Reply exactly ok'
+</code></pre>
+</section>
+<section class="doc-sec">
+<h2 id="generic-plugin-examples"><span class="secnum">۴</span> نمونه‌های عمومی پلاگین</h2>
+<p>نمونه‌های زیر عمداً کوچک هستند. آن‌ها ساختار قرارداد میان‌افزار را بدون وابستگی به NeMo Relay نشان می‌دهند.</p>
+<h3 id="llm-request-middleware">میان‌افزار درخواست LLM</h3>
+<p>این پلاگین درخواست‌های ارائه‌دهنده را برچسب‌گذاری می‌کند و یک مدخل ردیابی میان‌افزار ثبت می‌کند:</p>
+<pre dir="ltr"><code>def register(ctx):
+    ctx.register_middleware("llm_request", tag_llm_request)
+
+
+def tag_llm_request(**kwargs):
+    request = dict(kwargs["request"])
+    extra_body = dict(request.get("extra_body") or {})
+    extra_body.setdefault("metadata", {})["hermes_middleware_demo"] = True
+    request["extra_body"] = extra_body
+    return {
+        "request": request,
+        "source": "middleware-demo",
+        "reason": "tagged provider request",
+    }
+</code></pre>
+<p>درخواست مؤثر به <code>pre_api_request</code>، اجرای ارائه‌دهنده و <code>post_api_request</code> فرستاده می‌شود.</p>
+<h3 id="tool-request-middleware">میان‌افزار درخواست ابزار</h3>
+<p>این پلاگین فراخوانی‌های <code>terminal</code> را به یک پوشهٔ کاریِ مشخص محدود می‌کند:</p>
+<pre dir="ltr"><code>def register(ctx):
+    ctx.register_middleware("tool_request", normalize_terminal_workdir)
+
+
+def normalize_terminal_workdir(**kwargs):
+    if kwargs.get("tool_name") != "terminal":
+        return None
+    args = dict(kwargs["args"])
+    args.setdefault("workdir", "/tmp/hermes-middleware-demo")
+    return {
+        "args": args,
+        "source": "middleware-demo",
+        "reason": "defaulted terminal workdir",
+    }
+</code></pre>
+<p>از آنجا که این کد پیش از هوک‌ها و تأییدها اجرا می‌شود، تله‌متری و سیاستِ مراحل بعدی، <code>workdir</code> بازنویسی‌شده را مشاهده می‌کنند.</p>
+<p><strong>یادداشت مترجم:</strong> در مثال بالا، <code>setdefault</code> فقط وقتی <code>workdir</code> وجود نداشته باشد مقدار پیش‌فرض را اضافه می‌کند؛ مقدار ازپیش‌تعیین‌شده را تغییر نمی‌دهد. بنابراین این مثال به‌تنهایی محدودیت اجباری برای پوشهٔ کاری ایجاد نمی‌کند.</p>
+<h3 id="llm-execution-middleware">میان‌افزار اجرای LLM</h3>
+<p>این پلاگین فراخوانی ارائه‌دهنده را در یک لایهٔ پوشاننده قرار می‌دهد و پاسخ خام ارائه‌دهنده را حفظ می‌کند:</p>
+<pre dir="ltr"><code>import time
+
+
+def register(ctx):
+    ctx.register_middleware("llm_execution", time_llm_execution)
+
+
+def time_llm_execution(**kwargs):
+    started = time.monotonic()
+    response = kwargs["next_call"](kwargs["request"])
+    elapsed_ms = int((time.monotonic() - started) * 1000)
+    print(f"llm_execution elapsed_ms={elapsed_ms}")
+    return response
+</code></pre>
+<p>پاسخ را با همان قالبی برگردانید که Hermes از آداپتور ارائه‌دهنده انتظار دارد. پاسخ را در یک ساختار پوشانندهٔ مختص پلاگین قرار ندهید، مگر آنکه سایر بخش‌های زمان اجرا همان ساختار را انتظار داشته باشند.</p>
+<h3 id="tool-execution-middleware">میان‌افزار اجرای ابزار</h3>
+<p>این پلاگین اجرای ابزار را در یک لایهٔ پوشاننده قرار می‌دهد و در عین حال نتیجهٔ ابزار را حفظ می‌کند:</p>
+<pre dir="ltr"><code>def register(ctx):
+    ctx.register_middleware("tool_execution", annotate_tool_execution)
+
+
+def annotate_tool_execution(**kwargs):
+    result = kwargs["next_call"](kwargs["args"])
+    # Metrics, logging, or external routing can happen here.
+    return result
+</code></pre>
+<p>میان‌افزار اجرا می‌تواند <code>next_call(modified_args)</code> را فراخوانی کند تا دادهٔ تغییریافته را به میان‌افزارهای بعدی و توزیع‌کنندهٔ پایهٔ ابزار بفرستد.</p>
+<p>نمونه‌های مختص هر پلاگین باید همراه همان پلاگینی نگهداری شوند که مسئول آن رفتار است. میان‌افزار اجرای NeMo Relay از طریق یک فایل <code>plugins.toml</code> متعلق به Relay که صریحاً انتخاب شده باشد، نصب می‌شود؛ <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/relay-shared-metrics" target="_blank" rel="noopener">معیارهای مشترک Relay</a> را ببینید.</p>
+</section>
+<section class="doc-sec">
+<h2 id="safety-notes"><span class="secnum">۵</span> نکات ایمنی</h2>
+<ul>
+<li>میان‌افزار باید برای ورودی یکسان، رفتاری قطعی داشته باشد؛ مگر آنکه صریحاً مسیریابی به یک سامانهٔ خارجیِ پویا را انجام دهد.</li>
+<li>میان‌افزار درخواست باید داده‌های جایگزینِ کامل برگرداند، نه اصلاحات جزئی.</li>
+<li>میان‌افزار اجرا باید <code>next_call(...)</code> را دقیقاً یک بار فراخوانی کند، مگر آنکه عمداً ادامهٔ مسیر اجرا را میان‌بُر بزند.</li>
+<li>اگر میان‌افزار اجرا پیش از فراخوانی <code>next_call(...)</code> استثنا ایجاد کند، Hermes آن را شکست میان‌افزار تلقی می‌کند و کار را با بقیهٔ زنجیرهٔ میان‌افزار و اجرای پایه ادامه می‌دهد.</li>
+<li>اگر میان‌افزار اجرا، <code>next_call(...)</code> را با موفقیت فراخوانی کند و سپس در پس‌پردازش استثنا ایجاد کند، Hermes نتیجهٔ مراحل بعدی را حفظ می‌کند و ارائه‌دهنده یا ابزار را بار دوم اجرا نمی‌کند.</li>
+<li>اگر اجرای ارائه‌دهنده یا ابزار در مراحل بعدی شکست بخورد، میان‌افزار می‌تواند اجازه دهد آن خطا منتشر شود یا آگاهانه آن را به خطای دیگری تبدیل کند. Hermes شکست مراحل بعدی را به یک نتیجهٔ موفق با مقدار <code>None</code> تبدیل نمی‌کند.</li>
+<li>میان‌افزار درخواست ابزار پیش از تأییدها اجرا می‌شود. اگر مسیرهای فایل، فرمان‌ها، URLها یا آرگومان‌ها را تغییر دهد، همان مقادیر تغییریافته هستند که سازوکارهای محافظتی و تأییدها ارزیابی می‌کنند.</li>
+<li>هوک‌های ناظر همچنان محل مناسب برای تله‌متریِ فقط‌خواندنی هستند. فقط زمانی از میان‌افزار استفاده کنید که پلاگین نیاز دارد رفتار را تغییر دهد یا در یک لایهٔ پوشاننده قرار دهد.</li>
+</ul>
+</section>
+
+<div class="pager"><span class="off prev"><span class="dir">→ قبلی</span><span class="ttl">فشرده‌سازی خرد</span></span><span class="off next"><span class="dir">بعدی ←</span><span class="ttl">گیت‌وی چندگانه‌ساز</span></span></div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/middleware" target="_blank" rel="noopener">Middleware</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

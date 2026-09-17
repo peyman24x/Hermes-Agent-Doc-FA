@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>هوک‌های ناظر — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/observer-hooks" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>هوک‌های ناظر</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1>هوک‌های ناظر Hermes</h1>
+<p>هوک‌های ناظر Hermes قرارداد تله‌متریِ فقط‌خواندنی برای افزونه‌هایی هستند که باید روند اجرای ایجنت را بدون تغییر رفتار زمان اجرا بازسازی کنند. این قرارداد از یکپارچه‌سازی‌های ردیابی، سنجه‌ها، ممیزی، بازپخش و صدور داده پشتیبانی می‌کند؛ از جمله Langfuse، گردآورنده‌های به‌سبک OpenTelemetry و NeMo Relay.</p>
+<p>هوک‌های ناظر عمداً به هیچ بک‌اندی وابسته نیستند. آن‌ها رویدادهای پایدار چرخهٔ حیات، شناسه‌های هم‌بستگی، محموله‌های پاک‌سازی‌شده، زمان‌بندی، وضعیت و فیلدهای خطا را در دسترس قرار می‌دهند. این هوک‌ها جایگزین برنامه‌ریز Hermes، ارائه‌دهندگان مدل، حافظه، رجیستری ابزارها، تجربهٔ کاربری تأیید، CLI، رفتار گیت‌وی یا معنای عملیاتی اجرا نمی‌شوند.</p>
+<p>پوشاننده‌های درخواست یا اجرا که رفتار را تغییر می‌دهند، خارج از این قرارداد ناظر هستند. هوک‌های ناظر باید آنچه رخ داده است را گزارش کنند؛ نباید درخواست‌های ارائه‌دهنده، آرگومان‌های ابزار یا توابع بازفراخوانِ اجرا را جایگزین کنند.</p>
+<p>Hermes همچنین یک مسیر رسمی و داخلی برای سنجه‌های مشترک NeMo Relay دارد. این مسیر مستقیماً از همین مرزهای چرخهٔ حیات استفاده می‌کند و نیازی به فعال‌کردن افزونهٔ مشاهده‌پذیری ندارد. به <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/relay-shared-metrics" target="_blank" rel="noopener">سنجه‌های مشترک Relay</a> مراجعه کنید.</p>
+<section class="doc-sec">
+<h2 id="contract"><span class="secnum">۱</span> قرارداد</h2>
+<p>افزونه‌ها توابع بازفراخوانِ ناظر را از داخل <code>register(ctx)</code> ثبت می‌کنند:</p>
+<pre dir="ltr"><code>def register(ctx):
+    ctx.register_hook("pre_api_request", on_pre_api_request)
+    ctx.register_hook("post_api_request", on_post_api_request)
+    ctx.register_hook("pre_tool_call", on_pre_tool_call)
+    ctx.register_hook("post_tool_call", on_post_tool_call)
+</code></pre>
+<p>هر تابع بازفراخوانِ هوک، آرگومان‌ها را به‌صورت نام‌دار دریافت می‌کند. افزونه‌ها باید <code>**kwargs</code> را بپذیرند تا افزودن فیلدهای جدید، سازگاری با نسخه‌های قبلی را حفظ کند:</p>
+<pre dir="ltr"><code>def on_post_tool_call(**kwargs):
+    tool_name = kwargs.get("tool_name")
+    status = kwargs.get("status")
+    result = kwargs.get("result")
+</code></pre>
+<p>مدیر افزونه این فیلد را به محمولهٔ هر هوک تزریق می‌کند:</p>
+<pre dir="ltr"><code>telemetry_schema_version = "hermes.observer.v1"
+</code></pre>
+<p>توابع بازفراخوانِ هوک از الگوی ادامهٔ کار در صورت خطا (<code>fail-open</code>) پیروی می‌کنند. Hermes استثناهای این توابع را می‌گیرد، هشداری در گزارش ثبت می‌کند و حلقهٔ ایجنت را در حال اجرا نگه می‌دارد.</p>
+<p>بیشتر مقادیر بازگشتی هوک‌های ناظر نادیده گرفته می‌شوند. استثناها، هوک‌های قدیمی‌تری هستند که بر رفتار اثر می‌گذارند:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>هوک</th><th>رفتار مقدار بازگشتی</th></tr></thead>
+<tbody>
+<tr><td><code>pre_llm_call</code></td><td>می‌تواند یک رشته یا <code>{"context": "..."}</code> برگرداند تا زمینه‌ای موقتی را به پیام فعلی کاربر تزریق کند.</td></tr>
+<tr><td><code>pre_tool_call</code></td><td>می‌تواند <code>{"action": "block", "message": "..."}</code> برگرداند تا ابزار را پیش از اجرا مسدود کند، یا <code>{"action": "modify", "args": {...}}</code> برگرداند تا آرگومان‌های ورودی ابزار را تبدیل کند.</td></tr>
+<tr><td><code>transform_tool_result</code></td><td>می‌تواند پس از <code>post_tool_call</code> یک رشتهٔ جایگزین برای نتیجهٔ ابزار برگرداند.</td></tr>
+<tr><td><code>transform_llm_output</code></td><td>می‌تواند یک رشتهٔ جایگزین برای متن نهایی دستیار برگرداند.</td></tr>
+</tbody>
+</table></div>
+<p>افزونه‌های تله‌متری باید این مقادیر بازگشتیِ مؤثر بر رفتار را قابلیت‌های اختیاریِ سازگاری در نظر بگیرند، نه الزامات مشاهده‌پذیری.</p>
+</section>
+<section class="doc-sec">
+<h2 id="correlation-ids"><span class="secnum">۲</span> شناسه‌های هم‌بستگی</h2>
+<p>محموله‌های ناظر از شناسه‌های پایدار استفاده می‌کنند تا افزونه‌ها بتوانند رویدادها را بدون اتکای صرف به ترتیب توابع بازفراخوان به هم مرتبط کنند.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>فیلد</th><th>معنا</th></tr></thead>
+<tbody>
+<tr><td><code>session_id</code></td><td>هویت گفتگو/نشست.</td></tr>
+<tr><td><code>task_id</code></td><td>هویت وظیفه؛ به‌ویژه برای زیرایجنت‌ها و اجرای ایزوله مفید است.</td></tr>
+<tr><td><code>turn_id</code></td><td>هویت نوبت کاربر که میان تلاش‌های API و فراخوانی‌های ابزار در یک نوبت مشترک است.</td></tr>
+<tr><td><code>api_request_id</code></td><td>شناسهٔ غیرقابل‌تفسیرِ تلاش نزد ارائه‌دهنده. قالب رشته‌ای آن را تجزیه نکنید.</td></tr>
+<tr><td><code>api_call_count</code></td><td>شمار عددی تلاش‌های API در حلقهٔ ایجنت.</td></tr>
+<tr><td><code>tool_call_id</code></td><td>شناسهٔ فراخوانی ابزار که ارائه‌دهنده تأمین می‌کند، در صورت موجود بودن.</td></tr>
+<tr><td><code>parent_session_id</code> / <code>child_session_id</code></td><td>پیوند نشست برای زیرایجنت‌هایی که کار به آن‌ها واگذار شده است.</td></tr>
+<tr><td><code>parent_subagent_id</code> / <code>child_subagent_id</code></td><td>پیوند زیرایجنت، در صورت موجود بودن.</td></tr>
+<tr><td><code>parent_turn_id</code></td><td>نوبت والد که کار واگذارشده را ایجاد کرده است.</td></tr>
+</tbody>
+</table></div>
+<p>مصرف‌کنندگان باید فیلدهای صریح را بر تجزیهٔ شناسه‌های مرکب ترجیح دهند. به‌طور خاص، <code>api_request_id</code> یک مقدار هم‌بستگیِ غیرقابل‌تفسیر است.</p>
+</section>
+<section class="doc-sec">
+<h2 id="event-families"><span class="secnum">۳</span> خانواده‌های رویداد</h2>
+<h3 id="session-lifecycle">چرخهٔ حیات نشست</h3>
+<p>هوک‌های نشست، مرزهای گفتگو و بازنشانی‌ها را توصیف می‌کنند:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>هوک</th><th>زمان فعال‌شدن</th></tr></thead>
+<tbody>
+<tr><td><code>on_session_start</code></td><td>نشستی کاملاً جدید پس از ساخته‌شدن پرامپت سیستم آغاز می‌شود.</td></tr>
+<tr><td><code>on_session_end</code></td><td>یک فراخوانی <code>run_conversation</code> پایان می‌یابد؛ نوبت‌های قطع‌شده یا ناتمام را نیز شامل می‌شود.</td></tr>
+<tr><td><code>on_session_finalize</code></td><td>CLI یا گیت‌وی به استفاده از یک هویت نشست فعال پایان می‌دهد و آن را برمی‌چیند.</td></tr>
+<tr><td><code>on_session_reset</code></td><td>CLI یا گیت‌وی از هویت نشست قدیمی به هویتی جدید منتقل می‌شود.</td></tr>
+</tbody>
+</table></div>
+<p>فیلدهای رایج، در صورت موجود بودن، عبارت‌اند از <code>session_id</code>، <code>completed</code>، <code>interrupted</code>، <code>reason</code>، <code>old_session_id</code> و <code>new_session_id</code>.</p>
+<p>دامنهٔ <code>on_session_end</code> یک نوبت/اجرا است. این رویداد لزوماً مرز نهایی طول عمر یک هویت گفتگو نیست. برای پاک‌سازی چرخهٔ حیات که باید یک بار به‌ازای هر هویت نشست انجام شود، از <code>on_session_finalize</code> و <code>on_session_reset</code> استفاده کنید.</p>
+<h3 id="turn-scoped-llm-hooks">هوک‌های LLM در سطح نوبت</h3>
+<p>این هوک‌ها آغاز و پایان نوبت کاربر را مشخص می‌کنند، نه تک‌تک تلاش‌های API ارائه‌دهنده را:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>هوک</th><th>زمان فعال‌شدن</th></tr></thead>
+<tbody>
+<tr><td><code>pre_llm_call</code></td><td>پیش از آغاز حلقهٔ ابزار برای یک نوبت کاربر.</td></tr>
+<tr><td><code>post_llm_call</code></td><td>پس از تکمیل نوبت با خروجی نهایی دستیار.</td></tr>
+</tbody>
+</table></div>
+<p>فیلدهای رایج <code>pre_llm_call</code> عبارت‌اند از <code>session_id</code>، <code>turn_id</code>، <code>user_message</code>، <code>conversation_history</code>، <code>is_first_turn</code>، <code>model</code>، <code>platform</code> و <code>sender_id</code>.</p>
+<p>فیلدهای رایج <code>post_llm_call</code> عبارت‌اند از <code>session_id</code>، <code>turn_id</code>، <code>user_message</code>، <code>assistant_response</code>، <code>conversation_history</code>، <code>model</code> و <code>platform</code>.</p>
+<p>برای تله‌متری بازه‌های ردیابی (span) مدل زبانی، از هوک‌های API در سطح درخواست استفاده کنید. از <code>pre_llm_call</code> و <code>post_llm_call</code> برای زمینهٔ سطح نوبت، سازگاری و خلاصهٔ نهایی نوبت استفاده کنید.</p>
+<h3 id="request-scoped-api-hooks">هوک‌های API در سطح درخواست</h3>
+<p>هوک‌های API تلاش‌های ارسال درخواست به ارائه‌دهنده درون حلقهٔ ایجنت را توصیف می‌کنند:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>هوک</th><th>زمان فعال‌شدن</th></tr></thead>
+<tbody>
+<tr><td><code>pre_api_request</code></td><td>بلافاصله پیش از یک درخواست API به ارائه‌دهنده.</td></tr>
+<tr><td><code>post_api_request</code></td><td>پس از پاسخ موفق ارائه‌دهنده.</td></tr>
+<tr><td><code>api_request_error</code></td><td>پس از شکست درخواست به ارائه‌دهنده یا طی‌شدن مسیر خطایی که قابل تلاش مجدد است.</td></tr>
+</tbody>
+</table></div>
+<p><code>pre_api_request</code> شامل موارد زیر است:</p>
+<ul>
+<li>هویت: <code>session_id</code>، <code>task_id</code>، <code>turn_id</code>، <code>api_request_id</code></li>
+<li>زمان اجرا: <code>platform</code>، <code>model</code>، <code>provider</code>، <code>base_url</code>، <code>api_mode</code></li>
+<li>فرادادهٔ تلاش: <code>api_call_count</code>، <code>message_count</code>، <code>tool_count</code>، <code>approx_input_tokens</code>، <code>request_char_count</code>، <code>max_tokens</code></li>
+<li>زمان‌بندی: <code>started_at</code></li>
+<li>محمولهٔ پاک‌سازی‌شدهٔ درخواست: <code>request</code></li>
+</ul>
+<p><code>post_api_request</code> همان فیلدهای هویت/زمان اجرا را به‌همراه موارد زیر دارد:</p>
+<ul>
+<li><code>api_duration</code>، <code>started_at</code>، <code>ended_at</code></li>
+<li><code>finish_reason</code>، <code>message_count</code>، <code>response_model</code></li>
+<li><code>usage</code></li>
+<li><code>assistant_content_chars</code>، <code>assistant_tool_call_count</code></li>
+<li>محمولهٔ پاک‌سازی‌شدهٔ پاسخ: <code>response</code></li>
+<li>شیء سازگاری: <code>assistant_message</code></li>
+</ul>
+<p><code>api_request_error</code> همان فیلدهای هویت/زمان اجرا را به‌همراه موارد زیر دارد:</p>
+<ul>
+<li><code>api_duration</code>، <code>started_at</code>، <code>ended_at</code></li>
+<li><code>status_code</code>، <code>retry_count</code>، <code>max_retries</code>، <code>retryable</code>، <code>reason</code></li>
+<li>خطای ساخت‌یافتهٔ <code>error = {"type": ..., "message": ...}</code></li>
+<li>محمولهٔ پاک‌سازی‌شدهٔ درخواست ناموفق: <code>request</code></li>
+</ul>
+<p>فیلدهای پاک‌سازی‌شدهٔ <code>request</code>، <code>response</code> و <code>error</code> ورودی‌های مرجعِ ناظر برای مصرف‌کنندگان جدید هستند.</p>
+<h3 id="tool-lifecycle">چرخهٔ حیات ابزار</h3>
+<p>هوک‌های ابزار، تک‌تک فراخوانی‌های ابزار را توصیف می‌کنند:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>هوک</th><th>زمان فعال‌شدن</th></tr></thead>
+<tbody>
+<tr><td><code>pre_tool_call</code></td><td>پیش از ارسال ابزار برای اجرا، پس از تأیید کنترل‌های محافظتی.</td></tr>
+<tr><td><code>post_tool_call</code></td><td>پس از ارسال ابزار برای اجرا، لغو، مسدودشدن یا پایان‌یافتن با خطا.</td></tr>
+<tr><td><code>transform_tool_result</code></td><td>پس از <code>post_tool_call</code> و پیش از افزوده‌شدن نتیجه به زمینهٔ مدل.</td></tr>
+</tbody>
+</table></div>
+<p><code>pre_tool_call</code> شامل <code>tool_name</code>، <code>args</code>، <code>task_id</code>، <code>session_id</code>، <code>tool_call_id</code>، <code>turn_id</code> و <code>api_request_id</code> است.</p>
+<p><code>post_tool_call</code> همان فیلدهای هویت را به‌همراه <code>result</code>، <code>duration_ms</code>، <code>status</code>، <code>error_type</code> و <code>error_message</code> دارد.</p>
+<p><code>status</code> بیانگر نتیجهٔ چرخهٔ حیات به‌شکلی مناسب برای ناظر است. مقادیر رایج عبارت‌اند از:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>وضعیت</th><th>معنا</th></tr></thead>
+<tbody>
+<tr><td><code>ok</code></td><td>ابزار به‌طور عادی به پایان رسید.</td></tr>
+<tr><td><code>error</code></td><td>ابزار اجرا شد و نتیجه‌ای خطادار برگرداند یا خطایی ایجاد کرد.</td></tr>
+<tr><td><code>blocked</code></td><td>یک هوک <code>pre_tool_call</code> اجرا را مسدود کرد.</td></tr>
+<tr><td><code>cancelled</code></td><td>اجرا پیش از پایان عادی لغو شد.</td></tr>
+</tbody>
+</table></div>
+<p><code>post_tool_call</code> برای مسیرهای مسدودشده و لغوشده نیز منتشر می‌شود تا افزونه‌های تله‌متری بتوانند بازه‌های ردیابی را به‌درستی ببندند.</p>
+<h3 id="approval-lifecycle">چرخهٔ حیات تأیید</h3>
+<p>هوک‌های تأیید، اعلان‌های درخواست تأیید فرمان‌های خطرناک را توصیف می‌کنند:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>هوک</th><th>زمان فعال‌شدن</th></tr></thead>
+<tbody>
+<tr><td><code>pre_approval_request</code></td><td>پیش از نمایش یا ارسال درخواست تأیید.</td></tr>
+<tr><td><code>post_approval_response</code></td><td>پس از پاسخ کاربر یا پایان مهلت درخواست.</td></tr>
+</tbody>
+</table></div>
+<p>فیلدهای رایج عبارت‌اند از <code>command</code>، <code>description</code>، <code>pattern_key</code>، <code>pattern_keys</code>، <code>session_key</code> و <code>surface</code>.</p>
+<p><code>post_approval_response</code> همچنین شامل <code>choice</code> است، با مقادیری مانند <code>once</code>، <code>session</code>، <code>always</code>، <code>deny</code>، <code>timeout</code> و <code>cancelled</code> (هیچ‌کس پاسخ نداده است: اعلان پس گرفته شده — چون نوبت قطع شده یا پایان یافته — یا در CLI هرگز به کاربر نرسیده است).</p>
+<p>هوک‌های تأیید صرفاً برای مشاهده هستند. افزونه‌ها نمی‌توانند از طریق این هوک‌ها از پیش به درخواست‌های تأیید پاسخ دهند یا آن‌ها را وتو کنند. برای جلوگیری از رسیدن یک ابزار به مرحلهٔ تأیید، از مسدودسازی با <code>pre_tool_call</code> استفاده کنید.</p>
+<h3 id="subagent-lifecycle">چرخهٔ حیات زیرایجنت</h3>
+<p>هوک‌های زیرایجنت، کاری را توصیف می‌کنند که به ایجنت فرزند واگذار شده است:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>هوک</th><th>زمان فعال‌شدن</th></tr></thead>
+<tbody>
+<tr><td><code>subagent_start</code></td><td>یک ایجنت فرزند برای انجام کار واگذارشده ایجاد می‌شود.</td></tr>
+<tr><td><code>subagent_stop</code></td><td>یک ایجنت فرزندِ مأمور به کار واگذارشده، نتیجه را برمی‌گرداند یا شکست می‌خورد.</td></tr>
+</tbody>
+</table></div>
+<p>فیلدهای <code>subagent_start</code> عبارت‌اند از <code>parent_session_id</code>، <code>parent_turn_id</code>، <code>parent_subagent_id</code>، <code>child_session_id</code>، <code>child_subagent_id</code>، <code>child_role</code> و <code>child_goal</code>.</p>
+<p>فیلدهای <code>subagent_stop</code> شامل شناسه‌های نشست والد/فرزند، فیلدهای نقش/وضعیت، <code>child_summary</code>، <code>duration_ms</code> و یک <code>tool_call_history</code> صرفاً حاوی فراداده هستند. هر مدخل تاریخچه شامل نام ابزار، نام آرگومان‌ها، هدف‌های اثرات جانبی با اطلاعات محدودشده، تعداد بایت‌های ورودی/خروجی و نتیجه است. رشتهٔ پرس‌وجو و بخش قطعه (fragment) نشانی‌های URL حذف می‌شوند؛ آرگومان‌های خام، پرامپت‌ها، فرمان‌ها، محتواها، سرآیندها و نتایج عمداً کنار گذاشته می‌شوند.</p>
+<p>ناظرها می‌توانند از این هوک‌ها برای مدل‌سازی مسیرهای اجرای تودرتو استفاده کنند و در عین حال، اجرای ایجنت فرزند را به نوبت والدی که آن را ایجاد کرده است پیوند دهند.</p>
+</section>
+<section class="doc-sec">
+<h2 id="payload-safety"><span class="secnum">۴</span> ایمنی محموله</h2>
+<p>محموله‌های ناظر برای مصرف‌کنندگان تله‌متری طراحی شده‌اند، نه برای دسترسی به اشیای خام. مصرف‌کنندگان جدید باید از محموله‌های پاک‌سازی‌شدهٔ API استفاده کنند:</p>
+<ul>
+<li><code>pre_api_request.request</code></li>
+<li><code>post_api_request.response</code></li>
+<li><code>api_request_error.request</code></li>
+<li><code>api_request_error.error</code></li>
+</ul>
+<p>پاک‌سازی، اشیای ارائه‌دهنده را به ساختارهای سازگار با JSON تبدیل می‌کند، اندازهٔ محموله‌های بزرگ را محدود می‌کند، مقادیر کلیدهای حساس را می‌پوشاند و از افشای اشیای خام پاسخ در فیلدهای پاک‌سازی‌شده جلوگیری می‌کند.</p>
+<p>فیلدهای سازگاری قدیمی مانند <code>request_messages</code>، <code>conversation_history</code> و <code>assistant_message</code> ممکن است همچنان برای افزونه‌های موجود حضور داشته باشند. مصرف‌کنندگان جدید مشاهده‌پذیری باید محموله‌های پاک‌سازی‌شده را ترجیح دهند.</p>
+</section>
+<section class="doc-sec">
+<h2 id="performance"><span class="secnum">۵</span> کارایی</h2>
+<p>مسیر پیش‌فرضِ بدون ابزارگذاری باید کم‌هزینه بماند. ساخت پرهزینهٔ محموله‌های درخواست/پاسخ به بررسی <code>has_hook(...)</code> مشروط شده است؛ بنابراین Hermes فقط زمانی محموله‌های پاک‌سازی‌شدهٔ تله‌متری API را می‌سازد که دست‌کم یک افزونه، هوک مربوطه را ثبت کرده باشد.</p>
+<p>نویسندگان افزونه باید این ویژگی را حفظ کنند:</p>
+<ul>
+<li>فقط هوک‌هایی را ثبت کنید که افزونه واقعاً مصرف می‌کند.</li>
+<li>از کپی عمیق یا پاک‌سازی مجدد محموله‌هایی که قبلاً پاک‌سازی شده‌اند خودداری کنید.</li>
+<li>توابع بازفراخوانِ هوک را سریع و با رفتار ادامهٔ کار در صورت خطا نگه دارید.</li>
+<li>هرجا عملی است، صدور داده از طریق شبکه یا نوشتن دسته‌ای را از مسیر اجرای هوک خارج کنید.</li>
+</ul>
+</section>
+<section class="doc-sec">
+<h2 id="writing-an-observer-plugin"><span class="secnum">۶</span> نوشتن افزونهٔ ناظر</h2>
+<p>یک افزونهٔ ناظر حداقلی:</p>
+<pre dir="ltr"><code>def register(ctx):
+    ctx.register_hook("pre_api_request", on_pre_api_request)
+    ctx.register_hook("post_api_request", on_post_api_request)
+    ctx.register_hook("pre_tool_call", on_pre_tool_call)
+    ctx.register_hook("post_tool_call", on_post_tool_call)
+
+
+def on_pre_api_request(**kwargs):
+    start_llm_span(
+        request_id=kwargs.get("api_request_id"),
+        turn_id=kwargs.get("turn_id"),
+        request=kwargs.get("request"),
+        model=kwargs.get("model"),
+    )
+
+
+def on_post_api_request(**kwargs):
+    finish_llm_span(
+        request_id=kwargs.get("api_request_id"),
+        response=kwargs.get("response"),
+        usage=kwargs.get("usage"),
+        duration=kwargs.get("api_duration"),
+    )
+
+
+def on_pre_tool_call(**kwargs):
+    start_tool_span(
+        call_id=kwargs.get("tool_call_id"),
+        name=kwargs.get("tool_name"),
+        args=kwargs.get("args"),
+    )
+
+
+def on_post_tool_call(**kwargs):
+    finish_tool_span(
+        call_id=kwargs.get("tool_call_id"),
+        result=kwargs.get("result"),
+        status=kwargs.get("status"),
+        duration_ms=kwargs.get("duration_ms"),
+    )
+</code></pre>
+<p>برای هم‌بسته‌سازی بازه‌های ردیابی، از <code>session_id</code>، <code>turn_id</code>، <code>api_request_id</code> و <code>tool_call_id</code> استفاده کنید. هنگامی که قالب صدور داده از کار تودرتوی ایجنت‌ها یا رویدادهای چرخهٔ حیات امنیتی پشتیبانی می‌کند، از هوک‌های زیرایجنت و تأیید استفاده کنید.</p>
+</section>
+<section class="doc-sec">
+<h2 id="existing-consumers"><span class="secnum">۷</span> مصرف‌کنندگان موجود</h2>
+<p>افزونهٔ Langfuse که همراه Hermes عرضه می‌شود، نمونه‌ای از مشاهده‌پذیری مستقیم مبتنی بر هوک برای نوبت‌ها، درخواست‌های ارائه‌دهنده و فراخوانی‌های ابزار است.</p>
+<p>یکپارچه‌سازی بومی SDKِ NeMo Relay، چرخه‌های حیات نشست، نوبت، LLM و ابزار در Hermes را به Relay نگاشت می‌کند. پیکربندی صریح افزونه‌های Relay می‌تواند صادرکننده‌های <a href="https://docs.nvidia.com/nemo/relay/configure-plugins/observability/about" target="_blank" rel="noopener">ATOF، ATIF یا OTEL</a> و میان‌افزار اجرا را اضافه کند؛ به <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/relay-shared-metrics" target="_blank" rel="noopener">سنجه‌های مشترک Relay</a> مراجعه کنید.</p>
+</section>
+
+<div class="pager"><span class="off prev"><span class="dir">→ قبلی</span><span class="ttl">گیت‌وی چندگانه‌ساز</span></span><span class="off next"><span class="dir">بعدی ←</span><span class="ttl">قرارداد اتصال‌دهندهٔ Relay</span></span></div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/observer-hooks" target="_blank" rel="noopener">Observer Hooks</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
