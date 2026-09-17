@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>کاتالوگ افزونه‌ها — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html">
+      <span class="logo">🪽</span>
+      <span>مرجع فارسی Hermes Agent</span>
+    </a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/plugin-catalog" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <a href="../../index.html">خانه</a><span class="sep">/</span>قابلیت‌های اصلی<span class="sep">/</span><strong>کاتالوگ افزونه‌ها</strong>
+</div>
+
+<div class="doc-shell">
+<div class="container">
+<aside class="sidebar"><nav id="sidebar"></nav></aside>
+<main>
+
+<h1 id="plugin-catalog">کاتالوگ افزونه‌ها</h1>
+<p>کاتالوگ افزونه‌ها فهرستی گزینش‌شده از افزونه‌های هرمس است که انسان‌ها آن‌ها را بازبینی کرده‌اند. می‌توانید هر افزونه را با نامش و تنها با یک فرمان نصب کنید:</p>
+<pre dir="ltr"><code>hermes plugins install &lt;name&gt;
+</code></pre>
+<p>برای مرور تصویری کاتالوگ به <strong><a href="https://hermes-agent.nousresearch.com/docs/plugins" target="_blank" rel="noopener">/docs/plugins</a></strong> بروید. مدخل‌ها در دسته‌های حافظه، دسکتاپ، پلتفرم‌ها، وب و مرورگر، ابزارها، صدا، اتوماسیون و مدل‌ها قرار گرفته‌اند. جستجو، فیلتر سطح (رسمی / جامعهٔ کاربری)، برچسب‌های قابلیت و فرمان نصبِ قابل‌کپی برای هر مدخل در دسترس است.</p>
+<p>کاتالوگ مکمل <a href="plugins.html">سیستم افزونه‌ها</a> است، نه جایگزین آن. هر چیزی که از کاتالوگ نصب می‌کنید، در اصل یک افزونهٔ معمولی است؛ کاتالوگ فقط امکان کشف افزونه‌ها و یک لایهٔ بازبینی به آن اضافه می‌کند.</p>
+
+<section class="doc-sec">
+<h2 id="whats-in-an-entry"><span class="secnum">۱</span> هر مدخل شامل چه چیزهایی است</h2>
+<p>هر مدخل کاتالوگ یک فایل کوچک YAML در پوشهٔ <a href="https://github.com/NousResearch/hermes-agent/tree/main/plugin-catalog" target="_blank" rel="noopener"><code>plugin-catalog/</code></a> از مخزن hermes-agent است که موارد زیر را مشخص می‌کند:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>فیلد</th><th>معنا</th></tr></thead>
+  <tbody>
+    <tr><td><code>name</code></td><td>کلید کاتالوگ که به <code>hermes plugins install</code> می‌دهید</td></tr>
+    <tr><td><code>repo</code></td><td>مخزن عمومی گیتِ افزونه</td></tr>
+    <tr><td><code>sha</code></td><td><strong>شناسهٔ دقیقِ ۴۰کاراکتریِ شانزده‌شانزدهیِ کامیت</strong> بازبینی‌شده — هنگام نصب، همین کامیتِ پین‌شده دریافت می‌شود، نه آخرین کامیت شاخه</td></tr>
+    <tr><td><code>tier</code></td><td><code>official</code> (با نگهداری NousResearch) یا <code>community</code></td></tr>
+    <tr><td><code>category</code></td><td>دسته برای مرور: <code>desktop</code> (پیش‌فرض)، <code>memory</code>، <code>platform</code>، <code>web</code>، <code>tools</code>، <code>voice</code>، <code>automation</code>، <code>models</code> یا <code>general</code></td></tr>
+    <tr><td><code>maintainer</code></td><td>مسئول افزونه</td></tr>
+    <tr><td><code>capabilities</code></td><td>ابزارها، هوک‌ها، میان‌افزارها و متغیرهای محیطیِ موردنیازِ اعلام‌شده</td></tr>
+    <tr><td><code>requires_hermes</code></td><td>حداقل نسخهٔ هرمس، مثلاً <code>&gt;=0.19</code> (اختیاری)</td></tr>
+    <tr><td><code>platforms</code></td><td>محدودیت‌های سیستم‌عامل؛ خالی یعنی همه (اختیاری)</td></tr>
+    <tr><td><code>docs_url</code></td><td>پیوند به مستندات خارجی (اختیاری)</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2 id="trust-model"><span class="secnum">۲</span> مدل اعتماد</h2>
+<p>کاتالوگ طوری طراحی شده که دقیقاً بدانید چه چیزی نصب می‌کنید:</p>
+<ul>
+  <li><strong>پذیرش با بازبینی و ادغام انسانی.</strong> هر مدخل و هر به‌روزرسانیِ کامیت پین‌شده از طریق یک درخواست ادغام (PR) وارد می‌شود که یکی از نگهدارندگان آن را بازبینی کرده است. هیچ چیز به‌طور خودکار وارد کاتالوگ نمی‌شود.</li>
+  <li><strong>پین‌کردن SHA دقیق.</strong> مدخل‌ها به یک کامیت مشخص مقیدند، نه به یک شاخه. ارسال کد جدید به مخزن از سوی نویسندهٔ افزونه، آنچه کاتالوگ نصب می‌کند را تغییر <strong>نمی‌دهد</strong>؛ تغییر کامیت پین‌شده به یک PR بازبینی‌شدهٔ دیگر نیاز دارد.</li>
+  <li><strong>اعلام قابلیت‌ها.</strong> مدخل‌ها از ابتدا مشخص می‌کنند افزونه چه ابزارها، هوک‌ها و میان‌افزارهایی ارائه می‌دهد و به چه متغیرهای محیطی‌ای (کلیدهای API و مانند آن) نیاز دارد، تا پیش از نصب بتوانید دامنهٔ اثرگذاری آن را ارزیابی کنید.</li>
+  <li><strong>فهرست حذف‌شده‌ها.</strong> افزونه‌هایی که از کاتالوگ کنار گذاشته می‌شوند (مثلاً پس از یک رخداد امنیتی)، همراه با دلیل و تاریخ در <code>plugin-catalog/removed.yaml</code> ثبت می‌شوند. نصب‌کننده از نصب هر موردی در این فهرست خودداری می‌کند.</li>
+  <li><strong>نصب‌شده ≠ فعال‌شده.</strong> نصب افزونه از کاتالوگ فقط آن را روی دیسک قرار می‌دهد؛ مانند هر افزونهٔ دیگری، پیش از بارگذاری باید فعال شود. به «<a href="plugins.html">افزونه‌ها ← فعال‌سازی و غیرفعال‌سازی</a>» مراجعه کنید.</li>
+</ul>
+<div class="callout warning">
+  <div class="callout-title">بازبینی کاتالوگ فقط به یک مقطع زمانی مربوط است</div>
+  <p>وجود یک مدخل در کاتالوگ یعنی یک انسان کامیت پین‌شده را بررسی کرده، قابلیت‌های اعلام‌شده بررسی شده‌اند و مخزن شرایط پذیرش را داشته است. این بررسی ممیزی امنیتی نیست و دربارهٔ کامیت‌های دیگر همان مخزن چیزی نمی‌گوید. کد هر چیزی را که اطلاعات احراز هویت در اختیارش می‌گذارید، بازبینی کنید.</p>
+</div>
+</section>
+
+<section class="doc-sec">
+<h2 id="installing-from-the-catalog"><span class="secnum">۳</span> نصب از کاتالوگ</h2>
+<pre dir="ltr"><code># Install a reviewed catalog entry by name (checks out the pinned SHA)
+hermes plugins install &lt;name&gt;
+
+# Then enable it, as with any plugin
+hermes plugins enable &lt;name&gt;
+</code></pre>
+<p>پیش از کلون‌شدن هر چیزی، پیام تأیید نصب خلاصهٔ قابلیت‌های مدخل — ابزارها، هوک‌ها و متغیرهای محیطیِ موردنیازِ اعلام‌شده — را نمایش می‌دهد.</p>
+<p>نام مدخل در کاتالوگ ممکن است با نام خود افزونه در مانیفست فرق داشته باشد؛ <code>hermes plugins install</code> نام نصب‌شده را چاپ می‌کند و <code>enable</code> همان نام را می‌پذیرد. مثلاً مدخل <code>touchdesigner</code> (یک بستهٔ قابل‌حمل مطابق نسخهٔ ۱ استاندارد Agent Plugins که سرور MCPِ twozero را همراه با مهارت <code>touchdesigner-mcp</code> عرضه می‌کند) با نام <code>td</code> نصب می‌شود. این نام کوتاه نگه داشته شده تا نام ابزارهای MCPِ تولیدشده از محدودیت طول نام تابع نزد ارائه‌دهندگان فراتر نرود:</p>
+<pre dir="ltr"><code>hermes plugins install touchdesigner
+hermes plugins enable td
+</code></pre>
+<p>بسته‌های قابل‌حمل می‌توانند یک سرور MCP با ارتباط stdio نیز همراه داشته باشند. مدخل <code>snyk</code> نسخهٔ Snyk CLI را پین می‌کند (<code>npx -y snyk@&lt;version&gt; mcp</code>) و مهارت <code>snyk-security-scan</code> را همراه خود دارد. بنابراین با یک نصب، هرمس امکان اسکن کد، وابستگی‌ها، کانتینرها و زیرساخت به‌صورت کد (IaC)، به‌همراه گردش‌کار استفاده از آن را به دست می‌آورد. نام کاتالوگ و مانیفست در این مورد یکسان است:</p>
+<pre dir="ltr"><code>hermes plugins install snyk
+hermes plugins enable snyk
+</code></pre>
+
+<h3 id="updating-a-catalog-install">به‌روزرسانی افزونهٔ نصب‌شده از کاتالوگ</h3>
+<p>فرمان <code>hermes plugins update &lt;name&gt;</code> برای افزونه‌های نصب‌شده از کاتالوگ هرگز <code>git pull</code> اجرا نمی‌کند؛ کامیت پین‌شدهٔ نصب شما را با کامیت پین‌شدهٔ فعلی کاتالوگ مقایسه می‌کند و اگر کاتالوگ از طریق یک PR بازبینی‌شده تغییر کرده باشد، افزونه را به‌اجبار در SHA جدید دوباره نصب می‌کند. وضعیت فعال یا غیرفعال‌بودن افزونه حفظ می‌شود. فرمان <code>hermes plugins list</code> نصب‌های کاتالوگ را به‌شکل <code>catalog:&lt;tier&gt;@&lt;sha&gt;</code> نشان می‌دهد تا منشأ آن‌ها را با یک نگاه ببینید.</p>
+
+<h3 id="names-not-in-the-catalog">نام‌هایی که در کاتالوگ نیستند</h3>
+<p>دادن یک نام تنها که مدخلی در کاتالوگ ندارد، خطا ایجاد می‌کند؛ فهرست نامِ دومی بدون بازبینی وجود ندارد. چنین افزونه‌هایی را با <code>owner/repo</code> یا نشانی گیت نصب کنید (منبع سفارشی؛ توضیح در ادامه)، یا آن‌ها را برای پذیرش در کاتالوگ ارسال کنید.</p>
+
+<h3 id="live-refresh">تازه‌سازی زنده</h3>
+<p>فرایند ساخت مستندات، کاتالوگ را در قالب یک سند JSON منتشر می‌کند (<code>https://hermes-agent.nousresearch.com/docs/api/plugin-catalog.json</code>). فرمان‌های <code>search</code>، <code>install</code> و <code>update</code> آن را حداکثر هر ۶ ساعت یک بار دریافت می‌کنند و در <code>~/.hermes/cache/</code> کش می‌کنند. به این ترتیب، مدخل‌های جدید و حذف‌ها بدون به‌روزرسانی هرمس به کلاینت‌های نصب‌شده می‌رسند. در حالت آفلاین، از نسخهٔ همراه با کپی محلی مخزن شما استفاده می‌شود. محدودیت‌های حذف در هر دو فهرستِ داخل مخزن و فهرست زنده، همواره اعمال می‌شوند.</p>
+
+<h3 id="custom-git-urls-are-different">نشانی‌های سفارشی گیت متفاوت‌اند</h3>
+<p>فرمان <code>hermes plugins install &lt;git-url&gt;</code> همچنان برای هر مخزنی کار می‌کند، اما کاتالوگ را کاملاً دور می‌زند:</p>
+<ul>
+  <li><strong>بدون بازبینی</strong> — هرچه در آخرین کامیت شاخه باشد دریافت می‌کنید، نه یک کامیت پین‌شدهٔ بازبینی‌شده.</li>
+  <li><strong>یک بنر هشدار</strong> نمایش داده می‌شود تا روشن باشد که کد بررسی نشده است.</li>
+  <li>فهرست حذف‌شده‌ها همچنان بررسی می‌شود (نصب مخزنی که نامعتبر شناخته شده باشد، از طریق نشانی هم رد می‌شود).</li>
+</ul>
+<p>از روش نصب با نشانی گیت برای افزونه‌های خودتان و مخزن‌هایی استفاده کنید که از پیش به آن‌ها اعتماد دارید؛ برای کشف افزونه‌ها از کاتالوگ استفاده کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="submitting-a-plugin-to-the-catalog"><span class="secnum">۴</span> ارسال افزونه برای پذیرش در کاتالوگ</h2>
+<p>برای ارسال افزونه، یک درخواست ادغام باز کنید که یک فایل <code>plugin-catalog/&lt;name&gt;.yaml</code> اضافه می‌کند. چک‌لیست کامل در <a href="https://github.com/NousResearch/hermes-agent/tree/main/plugin-catalog" target="_blank" rel="noopener">README کاتالوگ افزونه‌ها</a> آمده است؛ به‌طور خلاصه، هر مدخل باید این شرایط را داشته باشد:</p>
+<ol>
+  <li><strong>ارسال از سوی مالک</strong> — نویسندهٔ PR مالک یا نگهدارندهٔ مخزن افزونه است. نگهدارندگان کاتالوگ همچنین پس از بررسی گروهیِ افزونه‌های جامعهٔ کاربری، مجموعه‌هایی از آن‌ها را اضافه می‌کنند (هر کامیت پین‌شده اعتبارسنجی و در همان کامیت اسکن می‌شود). اگر افزونهٔ شما به این شکل اضافه شده و می‌خواهید تغییر کند یا حذف شود، برای مدخل خود یک PR باز کنید.</li>
+  <li><strong>مخزن عمومی</strong> — نشانی <code>repo</code> برای عموم قابل‌کلون‌کردن باشد.</li>
+  <li><strong>دارای انتشار</strong> — مخزن انتشارها یا برچسب‌های واقعی داشته باشد، نه فقط یک شاخهٔ پیش‌فرض.</li>
+  <li><strong>موفقیت در اعتبارسنجی</strong> — اکشن گیت‌هابِ اعتبارسنجی کاتالوگ برای PR با موفقیت اجرا شود (بررسی طرح‌واره، قالب SHA و دسترس‌پذیری).</li>
+  <li><strong>بدون خودبه‌روزرسانی</strong> — نسخهٔ ارائه‌شده در کاتالوگ نباید فایل‌های خودش را دانلود و جایگزین کند؛ SHA پین‌شده تنها مسیر به‌روزرسانی است (یک PR برای تغییر SHA، به‌علاوهٔ <code>hermes plugins update &lt;name&gt;</code>).</li>
+</ol>
+<p>به‌روزرسانی کامیت پین‌شده (تغییر <code>sha</code> به یک کامیت جدیدتر) نیز همین فرایند PR و بازبینی را طی می‌کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="see-also"><span class="secnum">۵</span> همچنین ببینید</h2>
+<ul>
+  <li><a href="plugins.html">افزونه‌ها</a> — خود سیستم افزونه‌ها: قالب مانیفست، فعال‌سازی و پیکربندی</li>
+  <li><a href="built-in-plugins.html">افزونه‌های داخلی</a> — افزونه‌هایی که همراه هرمس عرضه می‌شوند</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/plugins" target="_blank" rel="noopener">ساخت افزونهٔ هرمس</a> — افزونهٔ خودتان را بنویسید</li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/plugins" target="_blank" rel="noopener">صفحهٔ کاتالوگ افزونه‌ها</a> — کاتالوگ قابل‌مرور</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a class="prev" href="credential-vault.html"><span class="dir">→ قبلی</span><span class="ttl">خزانهٔ اعتبارنامه‌ها</span></a>
+  <a class="next" href="cron.html"><span class="dir">بعدی ←</span><span class="ttl">کارهای زمان‌بندی (Cron)</span></a>
+</div>
+
+</main>
+</div>
+</div>
+
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/plugin-catalog" target="_blank" rel="noopener">Plugin Catalog</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

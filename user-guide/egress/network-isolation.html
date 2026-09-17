@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جداسازی ترافیک خروجی شبکه در Docker — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/egress/network-isolation" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>کار با Hermes<span class="sep">/</span><strong>جداسازی شبکه</strong></div>
+<div class="doc-shell container">
+<aside class="sidebar"><nav id="sidebar"></nav></aside>
+<main>
+
+<h1 id="network-isolation">جداسازی ترافیک خروجی شبکه برای استقرارهای Docker</h1>
+<p>هنگام اجرای Hermes در Docker، تنظیم پیش‌فرض <code>network_mode: host</code> به فرایند ایجنت دسترسی نامحدود به ترافیک خروجی شبکه می‌دهد. این راهنما نشان می‌دهد چگونه ترافیک را تفکیک کنید تا هستهٔ ایجنت فقط به سرویس‌های موردنیازش دسترسی داشته باشد و اتصال‌های خروجی دلخواه مسدود شوند.</p>
+<p>هدف اصلی این کار، دفاع در برابر حملات تزریق پرامپت است که می‌کوشند از طریق فرمان‌های شل تولیدشده توسط ابزارها، داده‌ها را با <code>curl</code>، <code>wget</code> یا درخواست‌های مستقیم HTTP به بیرون نشت دهند.</p>
+
+<section class="doc-sec">
+<h2 id="threat-model"><span class="secnum">۱</span> مدل تهدید</h2>
+<p>بخش ۲ از فایل <a href="https://github.com/NousResearch/hermes-agent/blob/main/SECURITY.md" target="_blank" rel="noopener">SECURITY.md</a> در پروژهٔ Hermes، مدل اعتماد را تعریف می‌کند. بک‌اند ترمینال، مرز اصلی اجرای کد است. بااین‌حال، هنگام اجرا با <code>network_mode: host</code>، هر فرمانی که ایجنت اجرا کند می‌تواند به هر نقطهٔ پایانی در شبکه، از جمله مقصدهای بیرونی، دسترسی داشته باشد.</p>
+<p>جداسازی ترافیک خروجی شبکه لایهٔ دومی اضافه می‌کند: حتی اگر فرمانی مخرب داخل کانتینر اجرا شود، نمی‌تواند به نقاط پایانی خارج از مجموعه‌ای که صریحاً در فهرست مجاز آمده است دسترسی پیدا کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="architecture"><span class="secnum">۲</span> معماری</h2>
+<pre dir="ltr"><code>┌─────────────────────────────────────────────┐
+│  Docker Network: internal (no internet)     │
+│                                             │
+│   ┌──────────────┐   ┌──────────────────┐   │
+│   │ hermes-agent │   │ hermes-dashboard │   │
+│   └──────┬───────┘   └────────┬─────────┘   │
+│          │                    │              │
+│          ▼                    │              │
+│   ┌──────────────┐            │              │
+│   │ hermes-gtw   │◄───────────┘              │
+│   └──────┬───────┘                           │
+│          │                                   │
+└──────────┼───────────────────────────────────┘
+           │
+┌──────────┼───────────────────────────────────┐
+│  Docker Network: egress (internet-capable)   │
+│          │                                   │
+│          ▼                                   │
+│   ┌─────────────────┐                        │
+│   │ egress-proxy     │──► allowlisted hosts  │
+│   │ (squid / envoy)  │                       │
+│   └─────────────────┘                        │
+└──────────────────────────────────────────────┘
+</code></pre>
+<p>دو شبکهٔ Docker داریم:</p>
+<ul>
+  <li><strong><code>internal</code></strong> — بدون مسیر پیش‌فرض و بدون دسترسی به اینترنت. ایجنت، داشبورد و دروازه در این شبکه اجرا می‌شوند.</li>
+  <li><strong><code>egress</code></strong> — دارای دسترسی به اینترنت. فقط سرویس‌هایی که باید به APIهای بیرونی دسترسی داشته باشند به این شبکه متصل می‌شوند.</li>
+</ul>
+<p>سرویس دروازه به هر دو شبکه متصل است (dual-homed) تا بتواند پیام‌های ورودی را از تلگرام، اسلک و سایر پلتفرم‌ها دریافت کند و به ایجنت در شبکهٔ داخلی بفرستد.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="compose-configuration"><span class="secnum">۳</span> پیکربندی Compose</h2>
+<p>تنظیمات پیش‌فرض <code>docker-compose.yml</code> را با یک فایل <code>docker-compose.override.yml</code> بازنویسی کنید:</p>
+<pre dir="ltr"><code># docker-compose.override.yml
+# Network egress isolation for production deployments.
+#
+# Usage:
+#   HERMES_UID=$(id -u) HERMES_GID=$(id -g) docker compose up -d
+#
+# This overrides network_mode: host with isolated Docker networks.
+
+networks:
+  internal:
+    driver: bridge
+    internal: true          # no default route, no internet
+  egress:
+    driver: bridge
+
+services:
+  gateway:
+    network_mode: ""        # clear the host-mode default
+    networks:
+      - internal
+      - egress              # needs outbound for Telegram, LLM APIs
+    ports:
+      - "127.0.0.1:9119:9119"   # dashboard proxy, localhost only
+
+  dashboard:
+    network_mode: ""
+    networks:
+      - internal            # internal only, no egress needed
+</code></pre>
+<h3 id="with-an-egress-proxy-recommended">همراه با پروکسی خروجی (پیشنهادی)</h3>
+<p>برای کنترل دقیق‌تر، تمام ترافیک خروجی را از یک پروکسی HTTP با فهرست مجاز صریح عبور دهید:</p>
+<pre dir="ltr"><code># docker-compose.override.yml (with egress proxy)
+
+networks:
+  internal:
+    driver: bridge
+    internal: true
+  egress:
+    driver: bridge
+
+services:
+  gateway:
+    network_mode: ""
+    networks:
+      - internal
+      - egress
+    environment:
+      - HTTP_PROXY=http://egress-proxy:3128
+      - HTTPS_PROXY=http://egress-proxy:3128
+      - NO_PROXY=hermes,hermes-dashboard,localhost
+
+  dashboard:
+    network_mode: ""
+    networks:
+      - internal
+
+  egress-proxy:
+    image: ubuntu/squid:6.10-24.04_edge
+    networks:
+      - egress
+    volumes:
+      - ./config/squid-allowlist.conf:/etc/squid/conf.d/allowlist.conf:ro
+    restart: unless-stopped
+</code></pre>
+<p>نمونهٔ فایل <code>config/squid-allowlist.conf</code>:</p>
+<pre dir="ltr"><code># Only allow HTTPS CONNECT to these hosts
+acl allowed_hosts dstdomain api.openai.com
+acl allowed_hosts dstdomain api.anthropic.com
+acl allowed_hosts dstdomain openrouter.ai
+acl allowed_hosts dstdomain generativelanguage.googleapis.com
+acl allowed_hosts dstdomain api.telegram.org
+acl allowed_hosts dstdomain api.github.com
+acl allowed_hosts dstdomain discord.com
+
+http_access allow CONNECT allowed_hosts
+http_access deny all
+</code></pre>
+<p>فهرست مجاز را متناسب با ارائه‌دهندهٔ مدل زبانی بزرگ و پلتفرم پیام‌رسان خود تنظیم کنید.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="validating-the-setup"><span class="secnum">۴</span> اعتبارسنجی پیکربندی</h2>
+<p>پس از راه‌اندازی مجموعهٔ سرویس‌ها، جداسازی را بررسی کنید:</p>
+<pre dir="ltr"><code># From the agent container: this should FAIL (no egress)
+docker compose exec gateway \
+  curl -sf --max-time 5 https://example.com &amp;&amp; echo "FAIL: egress not blocked" || echo "OK: egress blocked"
+
+# From the agent container: this should SUCCEED (internal network)
+docker compose exec gateway \
+  curl -sf --max-time 5 http://hermes-dashboard:9119/health &amp;&amp; echo "OK: internal reachable" || echo "FAIL"
+
+# If using egress proxy: this should SUCCEED (allowlisted)
+docker compose exec gateway \
+  curl -sf --max-time 5 --proxy http://egress-proxy:3128 https://api.openai.com/v1/models &amp;&amp; echo "OK" || echo "FAIL"
+</code></pre>
+</section>
+
+<section class="doc-sec">
+<h2 id="limitations"><span class="secnum">۵</span> محدودیت‌ها</h2>
+<p><strong>یادداشت مترجم — محدودیت نمونه‌های منبع:</strong> در پیکربندی‌های بالا، سرویس <code>gateway</code> مستقیماً به شبکهٔ دارای دسترسی اینترنت متصل است. تنظیم <code>HTTP_PROXY</code> و <code>HTTPS_PROXY</code> به‌تنهایی استفاده از پروکسی را برای همهٔ برنامه‌ها اجباری نمی‌کند؛ بنابراین این نمونه‌ها تضمین مسدودبودن تمام اتصال‌های خارج از فهرست مجاز نیستند. همچنین بازبودن پرس‌وجوهای DNS را نباید تضمینی برای جلوگیری از نشت داده دانست. نمونه‌های کد و توضیح منبع در ادامه بدون تغییر محتوایی حفظ شده‌اند.</p>
+<ul>
+  <li><strong>تفکیک نام با DNS:</strong> شبکهٔ <code>internal</code> همچنان می‌تواند نام‌های DNS بیرونی را تفکیک کند، مگر اینکه یک سرویس محلی تفکیک نام DNS نیز اجرا کنید که پرس‌وجوهای بیرونی را مسدود کند. طبق متن اصلی، این وضعیت برای بیشتر مدل‌های تهدید پذیرفتنی است، زیرا تفکیک نام DNS به‌تنهایی دادهٔ معناداری را به بیرون نشت نمی‌دهد.</li>
+  <li><strong>جایگزین بک‌اندهای سندباکس نیست:</strong> این راهنما شبکهٔ <em>کانتینر</em> ایجنت را جدا می‌کند. اگر از بک‌اند پیش‌فرض ترمینال محلی استفاده کنید، فرمان‌های ابزارها داخل همان کانتینر اجرا می‌شوند. برای جداسازی قوی‌تر، تفکیک شبکه را با یک بک‌اند ترمینال سندباکس‌شده (Docker، Modal یا Daytona) ترکیب کنید.</li>
+  <li><strong>آداپتورهای پلتفرم به دسترسی خروجی نیاز دارند:</strong> سرویس دروازه برای دسترسی به APIهای پلتفرم‌های پیام‌رسان به اتصال خروجی نیاز دارد. اگر آداپتور پلتفرم جدیدی اضافه می‌کنید، نقاط پایانی API آن را به فهرست مجاز پروکسی بیفزایید.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2 id="related"><span class="secnum">۶</span> مطالب مرتبط</h2>
+<ul>
+  <li><a href="https://github.com/NousResearch/hermes-agent/blob/main/SECURITY.md" target="_blank" rel="noopener">SECURITY.md</a> — مدل اعتماد Hermes و گزارش آسیب‌پذیری‌ها</li>
+  <li><a href="../docker.html">Docker</a> — اجرای Hermes در کانتینر</li>
+  <li><a href="iron-proxy.html">پروکسی خروجی</a> — فایروال تزریق اعتبارنامه برای سندباکس</li>
+  <li><a href="https://github.com/NousResearch/hermes-agent/blob/main/docker-compose.yml" target="_blank" rel="noopener">docker-compose.yml</a> — پیکربندی پیش‌فرض Compose</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a class="prev" href="../windows-wsl-quickstart.html"><span class="dir">→ قبلی</span><span class="ttl">راهنمای ویندوز (WSL2)</span></a>
+  <a class="next" href="../local-models.html"><span class="dir">بعدی ←</span><span class="ttl">مدل‌های محلی</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/egress/network-isolation" target="_blank" rel="noopener">Network Isolation</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

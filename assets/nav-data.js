@@ -38,7 +38,7 @@ window.HERMES_NAV = [
   { p:"user-guide/which-file-does-what.html",       t:"هر فایل چه‌کاری می‌کند؟",           d:1 },
   { p:"user-guide/windows-native.html",             t:"راهنمای ویندوز (بومی)",            d:1 },
   { p:"user-guide/windows-wsl-quickstart.html",     t:"راهنمای ویندوز (WSL2)",            d:1 },
-  { p:"user-guide/egress/network-isolation.html", t:"جداسازی شبکه", d:0 },
+  { p:"user-guide/egress/network-isolation.html", t:"جداسازی شبکه", d:1 },
   { p:"user-guide/local-models.html", t:"مدل‌های محلی", d:1 }
 ]},
 { id:"features", cat:"🧠 قابلیت‌های اصلی", pages:[
@@ -73,8 +73,8 @@ window.HERMES_NAV = [
   { p:"user-guide/features/web-dashboard.html",        t:"داشبورد وب",                           d:1 },
   { p:"user-guide/features/web-search.html",           t:"جستجو و استخراج وب",                   d:1 },
   { p:"user-guide/features/x-search.html",             t:"جستجوی X (توییتر)",                   d:1 },
-  { p:"user-guide/features/credential-vault.html", t:"خزانهٔ اعتبارنامه‌ها", d:0 },
-  { p:"user-guide/features/plugin-catalog.html", t:"کاتالوگ افزونه‌ها", d:0 }
+  { p:"user-guide/features/credential-vault.html", t:"خزانهٔ اعتبارنامه‌ها", d:1 },
+  { p:"user-guide/features/plugin-catalog.html", t:"کاتالوگ افزونه‌ها", d:1 }
 ]},
 { id:"automation", cat:"🤖 اتوماسیون", pages:[
   { p:"user-guide/features/cron.html",            t:"کارهای زمان‌بندی (Cron)",        d:1 },
