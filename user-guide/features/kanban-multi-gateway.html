@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="../..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>کانبان با چند گیت‌وی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban-multi-gateway" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../../index.html">خانه</a><span class="sep">/</span>اتوماسیون<span class="sep">/</span><strong>کانبان با چند گیت‌وی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1>استقرار کانبان با چند گیت‌وی</h1>
+<p>Hermes از اجرای هم‌زمان چند فرایند گیت‌وی پشتیبانی می‌کند؛ برای هر پروفایل، مانند <code>default</code>، <code>writer</code>، <code>admin</code>، <code>coder</code> و <code>researcher</code>، یک گیت‌وی اجرا می‌شود. هر گیت‌وی اتصال مستقل خود را به APIهای پلتفرم‌ها برقرار می‌کند و پیام‌ها را به مشترکان پروفایل خودش تحویل می‌دهد.</p>
+<p>اشتراک اعلان‌های وظیفه، بازخورد بازبینی را نیز پوشش می‌دهد. رویداد بازبینی <code>changes_requested</code> به‌صورت اعلان قابل‌اقدامِ مسدودشدن در بازبینی (<code>review-BLOCK</code>) تحویل داده می‌شود. اشتراک‌هایی با حالت <code>notify+wake</code> علاوه بر ارسال اعلان، دقیقاً همان گفتگو، رشته‌گفتگو یا نشست مبدأ را بیدار می‌کنند تا کنترل‌کننده کارت موجود و اجرای جاری را بررسی کند. حالت <code>notify</code> همچنان فقط اعلان می‌فرستد و حالت <code>wake</code> فقط بیدارسازی می‌کند. بازخورد بازبینی هرگز وظیفه‌ای را ایجاد نمی‌کند، از حالت مسدود خارج نمی‌کند، دوباره در صف قرار نمی‌دهد و به هیچ شکل دیگری تغییر نمی‌دهد.</p>
+<section class="doc-sec">
+<h2 id="single-dispatcher-posture"><span class="secnum">۱</span> الگوی تک‌توزیع‌کننده</h2>
+<p>فقط یک گیت‌وی مالک توزیع‌کنندهٔ وظایف کانبان است. گیت‌وی مالک، مقدار <code>kanban.dispatch_in_gateway: true</code> را حفظ می‌کند که همان پیش‌فرض است؛ همهٔ گیت‌وی‌های دیگر این مقدار را روی <code>false</code> می‌گذارند.</p>
+<p><strong>چرا این موضوع مهم است؟</strong> توزیع وظایف تنها یک مالک دارد تا چند گیت‌وی برای شروع یک کار یکسان با هم رقابت نکنند. در مقابل، مالکیت تحویل اعلان‌ها بر اساس پروفایل تعیین می‌شود: هر گیت‌وی فقط اشتراک‌های مربوط به پروفایل‌هایی را بررسی می‌کند که آداپتورهای پلتفرم آن‌ها را میزبانی می‌کند. تصاحب اتمی رویداد از تحویل تکراری توسط فرایندهای پایشگر جلوگیری می‌کند.</p>
+</section>
+<section class="doc-sec">
+<h2 id="configuration"><span class="secnum">۲</span> پیکربندی</h2>
+<p>در گیت‌وی مالک توزیع‌کننده، که معمولاً مربوط به پروفایل <code>default</code> است، نیازی به تغییر نیست. برای گیت‌ویِ هر پروفایل دیگر، این تنظیم را به <code>~/.hermes/config.yaml</code> اضافه کنید:</p>
+<pre dir="ltr"><code>kanban:
+  dispatch_in_gateway: false
+</code></pre>
+<p>یا متغیر محیطی <code>HERMES_KANBAN_DISPATCH_IN_GATEWAY=false</code> را تنظیم کنید.</p>
+</section>
+<section class="doc-sec">
+<h2 id="what-each-gateway-does"><span class="secnum">۳</span> وظیفهٔ هر گیت‌وی</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>نقش گیت‌وی</th><th><code>dispatch_in_gateway</code></th><th>پایگاه‌های دادهٔ تخته‌های دارای اشتراک را باز می‌کند؟</th><th>توزیع‌کننده</th><th>اعلان‌رسان</th></tr></thead>
+<tbody>
+<tr><td><code>default</code>؛ مالک تأییدشدهٔ قفل توزیع وظایف</td><td><code>true</code>؛ پیش‌فرض</td><td>بله</td><td>بله</td><td>پروفایل‌های تحت مالکیت خود، به‌علاوهٔ اشتراک‌های قدیمیِ فاقد نشان مالکیت</td></tr>
+<tr><td><code>writer</code>، <code>admin</code>، <code>coder</code> و غیره</td><td><code>false</code></td><td>بله، وقتی پروفایل اشتراک داشته باشد</td><td>خیر</td><td>پروفایل‌های تحت مالکیت همان گیت‌وی</td></tr>
+</tbody>
+</table>
+</div>
+<p>گیت‌وی‌هایی که توزیع‌کننده نیستند، همچنان پیام‌های مربوط به آداپتورهای پلتفرم خود، مانند Telegram و Discord، را تحویل می‌دهند. آن‌ها وظایف را توزیع نمی‌کنند و تخته‌هایی را که هیچ اشتراکی متعلق به پروفایل‌هایشان ندارند، نادیده می‌گیرند.</p>
+</section>
+<div class="pager">
+<a href="batch-processing.html"><span class="dir">→ قبلی</span><span class="ttl">پردازش گروهی</span></a>
+<a class="next" href="voice-mode.html"><span class="dir">بعدی ←</span><span class="ttl">حالت صوتی</span></a>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban-multi-gateway" target="_blank" rel="noopener">Kanban Multi-Gateway Deployment</a><br>
+طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../../assets/main.js"></script>
+</body>
+</html>

@@ -85,7 +85,7 @@ window.HERMES_NAV = [
   { p:"user-guide/features/code-execution.html",  t:"اجرای کد پایتون",               d:1 },
   { p:"user-guide/features/hooks.html",           t:"هوک‌های چرخهٔ حیات",            d:1 },
   { p:"user-guide/features/batch-processing.html", t:"پردازش گروهی",                  d:1 },
-  { p:"user-guide/features/kanban-multi-gateway.html", t:"کانبان با چند گیت‌وی", d:0 }
+  { p:"user-guide/features/kanban-multi-gateway.html", t:"کانبان با چند گیت‌وی", d:1 }
 ]},
 { id:"media", cat:"🎬 رسانه و وب", pages:[
   { p:"user-guide/features/voice-mode.html",      t:"حالت صوتی",                       d:1 },
