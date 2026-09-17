@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سازوکار داخلی گیت‌وی چندپروفایلی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">&#x1FABD;</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/multiplexing-gateway" target="_blank" rel="noopener">&#127760; نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">&#11088; GitHub</a>
+      <button class="icon-btn" id="themeToggle">&#127769; حالت شب</button>
+      <button class="icon-btn" id="printBtn">&#128424; چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>سازوکار داخلی گیت‌وی چندپروفایلی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1 id="multiplexing-gateway-internals">سازوکار داخلی گیت‌وی چندپروفایلی</h1>
+<p class="subtitle" id="multiplexing-gateway"><strong>گیت‌وی چندپروفایلی (Multiplexing Gateway)</strong></p>
+<p>یک فرایند گیت‌وی می‌تواند به همهٔ پروفایل‌های یک نصب سرویس بدهد. این حالت به‌طور پیش‌فرض فعال است (<code>gateway.multiplex_profiles</code>، با مقدار پیش‌فرض <code>true</code>) و به‌محض غیرفعال‌شدن این پرچم، تمام تغییرات رفتاری ناشی از آن به حالت قبل بازمی‌گردند. اگر پرچم <em>تنظیم نشده باشد</em>، مقدار آن هنگام راه‌اندازی با <code>hermes_cli/gateway_multiplex_mode.py::resolve_multiplex_mode</code> تعیین می‌شود. این تابع بررسی مقدماتیِ <code>hermes gateway migrate</code> را اجرا می‌کند و اگر یک پروفایل ثانویه هنوز گیت‌وی خودش را اجرا کند، مانعی وجود داشته باشد یا میزبان قابل مهاجرت نباشد، گیت‌وی را در حالت مستقل نگه می‌دارد (بخش «<a href="#the-mode-flag">پرچم تعیین حالت</a>» را ببینید). این سند دلایل طراحی‌ای را شرح می‌دهد که در <code>agent/secret_scope.py</code> با عنوان «Workstream A» به آن ارجاع شده است: چه چیزهایی برای هر پروفایل جدا می‌شوند، این جداسازی چگونه انجام می‌شود و چه چیزهایی عمداً در سطح کل فرایند مشترک می‌مانند.</p>
+
+<section class="doc-sec">
+<h2 id="overview"><span class="secnum">۱</span> نمای کلی</h2>
+<p>بدون قابلیت چندپروفایلی، هر فرایند گیت‌وی دقیقاً به یک پروفایل سرویس می‌دهد؛ یعنی فایل <code>.env</code>، نشست‌ها، مهارت‌ها و اتصال‌دهنده‌های پلتفرمِ همان پروفایل را مدیریت می‌کند. در نصب‌های چندپروفایلی، به‌ازای هر پروفایل یک فرایند اجرا می‌شود. قابلیت چندپروفایلی این فرایندها را در یک فرایند واحد ادغام می‌کند: پروفایل پیش‌فرض و هر پروفایل نام‌داری که سرویس می‌گیرد، اتصال‌دهنده‌ها، اطلاعات محرمانه، نشست‌ها و تیک‌های cron مختص خود را دارند، اما یک حلقهٔ رویداد، یک شنوندهٔ HTTP، یک قفل فرایند و یک نمای وضعیت را به اشتراک می‌گذارند.</p>
+<p>قید طراحی‌ای که مبنای تمام مطالب زیر است: <strong>نوبت‌های پردازش پروفایل A هرگز نباید به وضعیت پروفایل B دسترسی پیدا کنند</strong>. اطلاعات محرمانه، پوشه‌های خانه، نشست‌ها و مسیرهای مستقل اتصال‌دهنده‌ها برای هر پروفایل جدا هستند؛ هر چیزی که هنوز امکان جداسازی‌اش وجود ندارد، یا در صورت نبود تضمین جداسازی مسدود می‌شود (fail-closed)، یا در انتهای این سند به‌عنوان محدودیتی شناخته‌شده مستند شده است.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="the-mode-flag"><span class="secnum">۲</span> پرچم تعیین حالت</h2>
+<ul>
+<li><strong>پیکربندی:</strong> <code>gateway.multiplex_profiles</code> (در سطح بالای پیکربندی نیز پذیرفته می‌شود). در <code>gateway/config.py</code> با ترتیب تقدمِ متغیر محیطی، سپس پیکربندی و در نهایت حالت تنظیم‌نشده تفسیر می‌شود. <code>GatewayConfig</code> پرچم تنظیم‌نشده را به‌صورت <code>None</code> نگه می‌دارد (مصرف‌کنندگان ارزش صدق آن را بررسی می‌کنند، بنابراین خاموش تلقی می‌شود). سپس <code>load_gateway_config_for_runner</code> تابع <code>resolve_multiplex_mode</code> را فراخوانی می‌کند تا نتیجهٔ تصمیم هنگام راه‌اندازی را ثبت کند: در یک نصب پیش‌فرض چندپروفایلی که فعالیت مزاحمی ندارد، <code>True</code>؛ در غیر این صورت، <code>False</code> همراه با ثبت دلیل در لاگ. مقادیر صریح بدون تغییر عبور می‌کنند؛ پیکربندی‌ای که به <code>GatewayRunner(config=...)</code> تزریق شود، از این مرحلهٔ تعیین مقدار عبور نمی‌کند.</li>
+<li>فرایندهای دیگر ابتدا رکورد <code>served_profiles</code> گیت‌ویِ <strong>در حال اجرا</strong> و سپس پرچم صریح را می‌خوانند (<code>gateway_multiplex_mode.default_gateway_multiplexes</code> / <code>explicit_multiplex_flag</code>)، نه مقدار پیش‌فرض حاصل از ادغام تنظیمات. این قاعده در <code>named_profile_served_by_running_multiplexer</code>، هشدار ثبت پروفایل (enroll)، محافظ شنوندهٔ داشبورد، تعیین‌کنندهٔ پورت cron-fire، راه‌اندازی کانتینر و طرح مهاجرت اعمال می‌شود. طرح مهاجرت از <code>_read_multiplex_flag</code> استفاده می‌کند؛ بنابراین مقدار پیش‌فرض تنظیم‌نشده به‌معنای «هنوز چندپروفایلی نشده» خوانده می‌شود و ادغام ادامه پیدا می‌کند.</li>
+<li><strong>بازنویسی با متغیر محیطی:</strong> <code>GATEWAY_MULTIPLEX_PROFILES</code> فقط مقادیر صریحِ معادل درست یا نادرست را می‌پذیرد؛ مقدار خالی یا ناشناخته، نتیجهٔ «بدون بازنویسی» برمی‌گرداند تا یک مقدار محرمانهٔ خالی در استقرار نتواند فعال‌سازی صریح در پیکربندی را بی‌اثر کند.</li>
+<li>هنگام راه‌اندازی، <code>GatewayRunner.__init__</code> یک بار <code>agent.secret_scope.set_multiplex_active(...)</code> را فراخوانی می‌کند. <code>_MULTIPLEX_ACTIVE</code> یک متغیر سراسری معمولی در سطح ماژول است، نه یک contextvar: حالت استقرار را توصیف می‌کند، نه مقداری مختص هر وظیفه. تنها کار آن فعال‌کردن رفتار fail-closed در <code>get_secret()</code> است.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2 id="scope-composition"><span class="secnum">۳</span> ترکیب محدوده‌ها</h2>
+<p>هر رویداد ورودی، پیش از اجرای هر کدی که متعلق به پروفایل باشد، همین دو محدودهٔ محلیِ زمینه را با هم برقرار می‌کند:</p>
+<pre dir="ltr"><code>platform event
+   │
+   ▼
+profile_routes match ──► served-set check ──► SessionSource.profile stamped
+   │                                           (gateway/profile_routing.py)
+   ▼
+_profile_runtime_scope(profile_home)           (gateway/run.py)
+   ├── set_hermes_home_override(home)          config / state.db / skills /
+   │                                           memory / sessions resolve here
+   └── set_secret_scope(profile .env + secret sources)
+   │                                           provider keys, platform tokens
+   ▼
+agent turn (worker thread via copy_context())
+   │
+   ▼
+scope unwound in finally
+</code></pre>
+<p><code>_profile_runtime_scope</code> تمام نقاطی را در بر می‌گیرد که کد متعلق به پروفایل در آن‌ها اجرا می‌شود: راه‌اندازی اتصال‌دهندهٔ ثانویه، اتصال و اتصال مجدد، رسیدگی‌کنندهٔ اصلی رویدادهای پلتفرم، پیش‌پردازش ورودی، تعیین مدل در <code>/model</code> و اطلاعات نشست، وظیفه‌های پس‌زمینه و خود نوبت ایجنت. بارگذاری مجدد پیکربندی در محدودهٔ پروفایل پیش‌فرض انجام می‌شود تا تنظیمات سراسری گیت‌وی (<code>#64674</code>) به‌صورت سازگار تعیین شوند.</p>
+<p>هر دو محدوده از نوع <code>contextvars</code> هستند؛ بنابراین از طریق <code>copy_context()</code> به رشته‌های کارگرِ اجراکننده منتقل می‌شوند و به‌طور قطعی و قابل پیش‌بینی برچیده می‌شوند؛ هیچ‌چیز، هرگز، در <code>os.environ</code> نوشته نمی‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="workstream-a-context-local-secret-scope"><span class="secnum">۴</span> محور کاری A: محدودهٔ اطلاعات محرمانهٔ محلیِ زمینه</h2>
+<p>دلیل وجود <code>agent/secret_scope.py</code> این است که پیاده‌سازیِ بدیهی — ادغام همهٔ فایل‌های <code>.env</code> پروفایل‌ها در <code>os.environ</code> — کلیدهای پروفایل A را به نوبت‌های پروفایل B و به تمام زیرفرایندهایی نشت می‌دهد که با <code>env=dict(os.environ)</code> ساخته می‌شوند.</p>
+<ul>
+<li><code>build_profile_secret_scope(home)</code> فایل <code>.env</code> پروفایل را با منابع اطلاعات محرمانهٔ پیکربندی‌شدهٔ آن ادغام می‌کند و موارد سراسری را کنار می‌گذارد.</li>
+<li><code>set_secret_scope(mapping)</code> این نگاشت را برای وظیفهٔ جاری برقرار می‌کند.</li>
+<li><code>get_secret(name)</code> مقدار را به این ترتیب پیدا می‌کند: فهرست مجاز سراسری ← محدودهٔ فعال ← مسیر جایگزین. مسیر جایگزین نقش تعیین‌کننده دارد:
+<ul>
+<li>وقتی حالت چندپروفایلی <strong>خاموش</strong> است: از <code>os.environ</code> می‌خواند، بنابراین گیت‌وی‌های تک‌پروفایلی و تمام فراخوانندگان خارج از گیت‌وی دقیقاً مانند قبل رفتار می‌کنند؛</li>
+<li>وقتی حالت چندپروفایلی <strong>روشن</strong> است و محدوده‌ای برقرار نشده: به‌جای خواندن بی‌سروصدای محیط فرایند، <strong>استثنای <code>UnscopedSecretError</code> ایجاد می‌کند</strong>. محل فراخوانی‌ای که هنوز با این سازوکار سازگار نشده است، دقیقاً در همان خط با خطایی آشکار متوقف می‌شود، نه اینکه مقدار متعلق به پروفایل دیگری را نشت دهد.</li>
+</ul>
+</li>
+<li>یک فهرست مجاز کوچک (<code>HERMES_HOME</code>، <code>HERMES_PROFILE</code>، تنظیمات پراکسی و تنظیمات شنوندهٔ <code>API_SERVER_*</code> — اما عمداً نه <code>API_SERVER_KEY</code>) سراسری می‌ماند، زیرا این موارد فرایند را توصیف می‌کنند، نه یک پروفایل را.</li>
+</ul>
+<p>از آنجا که در حالت چندپروفایلی بارگذاری مجدد <code>.env</code> در هر نوبت عملی انجام نمی‌دهد، اطلاعات احراز هویتِ تعویض‌شده در نوبت بعدی از طریق محدودهٔ پروفایل دریافت می‌شوند، نه هرگز از طریق <code>os.environ</code>. این قاعده در مرز بارگذار اعمال می‌شود، نه فقط در تابع کمکیِ بارگذاری مجدد گیت‌وی: هرگاه حالت چندپروفایلی فعال باشد <em>و</em> مسیر خانهٔ پروفایل بازنویسی شده باشد، <code>hermes_cli.env_loader.load_hermes_dotenv</code> از بارگذاری در محیط سراسری فرایند صرف‌نظر می‌کند (فراخوانی‌های هنگام import و فراخوانندگان cron در میانهٔ نوبت به آن می‌رسند)، اما همچنان داده‌های منابع بیرونیِ اطلاعات محرمانهٔ پروفایل را در تصویر لحظه‌ای خصوصی آن بارگذاری می‌کند (<code>#77562</code>). بارگذاری هنگام راه‌اندازی که خارج از محدوده انجام می‌شود، تغییری نکرده است.</p>
+<p>همین قاعدهٔ مرجع‌بودن محدوده، دیگر نقاط تماس با <code>os.environ</code> را هم پوشش می‌دهد که یک نوبت مسیریابی‌شده ممکن است به آن‌ها برسد: وقتی محدوده‌ای برقرار است، ارجاع‌های <code>${VAR}</code> / <code>${env:VAR}</code> در <code>config.yaml</code> پروفایل از طریق <code>get_secret</code> مقداردهی می‌شوند (<code>#84079</code>). همچنین نوشتن در <code>.env</code> درون یک محدوده (<code>save_env_value</code>، مثلاً ثبت نسخه‌ای از مجوز <code>/pair</code>) به‌جای محیط فرایند، نگاشت محدودهٔ برقرارشده را به‌روز می‌کند (<code>#88441</code>).</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="the-hermes_home-override"><span class="secnum">۵</span> بازنویسی HERMES_HOME</h2>
+<p><code>hermes_constants.py</code> یک مقدار بازنویسیِ محلیِ زمینه نگه می‌دارد که <code>get_hermes_home()</code> پیش از متغیر محیطی <code>HERMES_HOME</code> به آن مراجعه می‌کند. هر چیزی که مسیرهایش را از طریق این تابع تعیین می‌کند — پیکربندی، <code>state.db</code>، مهارت‌ها، حافظه، SOUL، نشست‌ها، کانبان، هدف‌ها، کشف افزونه‌ها و راه‌اندازی MCP — به‌طور خودکار از پروفایل فعال پیروی می‌کند. <code>get_process_hermes_home()</code> برای آن چند منبع در سطح ماشین وجود دارد که نباید از این بازنویسی پیروی کنند. <code>hermes_home_key()</code> به رجیستری‌های مختص هر پوشهٔ خانه یک کلید پایدار برای محدوده می‌دهد. اگر کدِ متعلق به محدودهٔ پروفایل در جایی اجرا شود که انتظار می‌رود این بازنویسی برقرار باشد، اما نباشد، هشداری یک‌باره صادر می‌شود (<code>#18594</code>).</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="inbound-routing"><span class="secnum">۶</span> مسیریابی ورودی</h2>
+<p><code>gateway.profile_routes</code> ترکیب <code>(platform, guild_id, chat_id, thread_id)</code> را به یک پروفایل نگاشت می‌کند؛ تطبیق نیازمند برقرار بودن هم‌زمان شرط‌هاست، از خاص‌ترین قاعده آغاز می‌شود و برای رشته‌های گفتگو، تطبیق چت با پیمایش زنجیرهٔ والد انجام می‌شود. مسیریابی فقط وقتی حالت چندپروفایلی فعال است اجرا می‌شود. اگر مسیری منطبق پیدا شود که مقصدش خارج از مجموعهٔ پروفایل‌های سرویس‌گیرنده باشد، رد می‌شود (رویداد کنار گذاشته می‌شود، نه اینکه به مقصد اشتباهی تحویل داده شود). طرح‌وارهٔ کامل و قواعد تطبیق را در <a href="https://hermes-agent.nousresearch.com/docs/user-guide/multi-profile-gateways#routing-shared-bot-chats-to-profiles-profile_routes" target="_blank" rel="noopener">مسیریابی چت‌های ربات مشترک به پروفایل‌ها</a> ببینید.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="serving-selected-profiles"><span class="secnum">۷</span> سرویس‌دهی به پروفایل‌های منتخب</h2>
+<p><code>profiles_to_serve(multiplex, profile_allowlist)</code> در <code>hermes_cli/profiles.py</code> تنها نقطهٔ تصمیم‌گیری دربارهٔ پروفایل‌هایی است که گیت‌وی چندپروفایلی به آن‌ها سرویس می‌دهد: پروفایل پیش‌فرض به‌اضافهٔ تمام پوشه‌های معتبر پروفایل، با امکان فیلترکردن بر اساس فهرست مجاز. اگر ساختار فهرست مجاز نامعتبر باشد، رفتار ایمن این است که فقط پروفایل پیش‌فرض سرویس بگیرد. مجموعهٔ پروفایل‌های سرویس‌گیرنده، راه‌اندازی اتصال‌دهنده‌ها، اجرای تیک‌های cron (<code>#69377</code>)، پذیرش درخواست‌های HTTP در <code>/p/&lt;profile&gt;/</code>، مجازبودن مسیرها و نمای وضعیت زمان اجرا را کنترل می‌کند. پروفایلی که از این مجموعه کنار گذاشته شده است همچنان نصب می‌ماند و می‌تواند گیت‌وی مستقل خودش را اجرا کند.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="per-profile-persistence"><span class="secnum">۸</span> ذخیره‌سازی پایدار به‌ازای هر پروفایل</h2>
+<p><code>SessionStore</code> هنگام ساخته‌شدن به هیچ دستگیرهٔ پایگاه داده‌ای متصل نمی‌شود (<code>#88532</code>). دستگیره‌های پایگاه دادهٔ نشست هنگام فراخوانی، از طریق بازنویسیِ فعالِ HERMES_HOME تعیین می‌شوند؛ به‌ازای هر مسیر نهاییِ <code>profiles/&lt;name&gt;/state.db</code> یک دستگیره در کش نگه داشته می‌شود. به این ترتیب، حتی اگر خود شیء ذخیره‌ساز مشترک باشد، نشست‌ها در ذخیره‌سازِ پروفایل مالکشان قرار می‌گیرند. ذخیره‌سازهای جفت‌سازی برای هر پروفایل سرویس‌گیرنده جداگانه ساخته می‌شوند.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="per-bot-session-lanes"><span class="secnum">۹</span> مسیرهای مستقل نشست به‌ازای هر ربات</h2>
+<p>کلیدهای نشست بر اساس پروفایل در فضای نام جداگانه قرار می‌گیرند (<code>agent:main</code> برای پروفایل پیش‌فرض و <code>agent:&lt;name&gt;</code> برای پروفایل‌های نام‌دار). اتصال‌دهنده‌ها مقدار <code>_owner_profile</code> را همراه دارند؛ این مقدار هنگام پیکربندی اتصال‌دهنده و پیش از هر رویداد ورودی تنظیم می‌شود، زیرا پردازش ورودیِ اتصال‌دهنده پیش از ثبت <code>SessionSource.profile</code> اجرا می‌شود. <code>_session_key_profile</code> مقدار را به‌ترتیب از برچسب ثبت‌شده روی مبدأ، سپس پروفایل مالک و در نهایت سازوکار تعیین پروفایلِ ذخیره‌ساز به دست می‌آورد. تجمیع دسته‌ای متن و رسانه، رهگیری نشست‌های فعال و محافظ نشست مشغول، همگی با کلید مختص هر مسیر مستقل کار می‌کنند؛ بنابراین دو رباتی که در یک چت حضور دارند، مسیر نشست مشترکی ندارند.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="control-plane"><span class="secnum">۱۰</span> لایهٔ کنترل</h2>
+<p>افزونه‌های دسکتاپ فقط از طریق درگاه JSON-RPC روی WebSocket ‏(ws) به گیت‌وی دسترسی دارند؛ بنابراین فهرست‌کردن و پیکربندی پروفایل‌ها در <code>tui_gateway/methods_profiles.py</code> قرار دارد: <code>profiles.list</code>، <code>profiles.create</code>، <code>profiles.describe</code>، <code>profiles.configure</code>، <code>profiles.set_asset</code> و <code>profiles.get_asset</code>. خواندن و نوشتن با بازنویسی HERMES_HOME برای پروفایل مقصد انجام می‌شود. نوشتن منابع به‌صورت اتمی است و نوع و اندازهٔ آن‌ها محدود می‌شود.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="failure-modes"><span class="secnum">۱۱</span> حالت‌های خطا</h2>
+<ul>
+<li><strong>خطای مهلک هنگام راه‌اندازی:</strong> خطاهای پیکربندی چندپروفایلی و فعال‌کردن پلتفرمی که پورت را در اختیار می‌گیرد توسط یک پروفایل ثانویه (<code>MultiplexConfigError</code>، <code>SecondaryPortBindingConfigError</code>)؛ تنها شنوندهٔ مشترک HTTP متعلق به پروفایل پیش‌فرض است.</li>
+<li><strong>صرف‌نظرکردن، نه خطای مهلک:</strong> اگر یک اتصال‌دهندهٔ ثانویه به‌درستی پیکربندی نشده باشد، با صدور هشدار از آن صرف‌نظر می‌شود، نه اینکه کل گیت‌وی چندپروفایلی از کار بیفتد.</li>
+<li><strong>مسدودسازی ایمن (fail-closed):</strong> فراخوانیِ بدون محدودهٔ <code>get_secret()</code> در حالت چندپروفایلی استثنا ایجاد می‌کند؛ رویداد مسیریابی‌شده‌ای که مقصدش پروفایلی خارج از مجموعهٔ سرویس‌گیرندگان باشد کنار گذاشته می‌شود؛ درخواست <code>/p/</code> بدون محدوده، به‌جای ورود به محدوده‌ای تعریف‌نشده، وارد محدودهٔ پروفایل پیش‌فرض می‌شود (<code>#61276</code>).</li>
+<li><strong>مسیر جایگزین:</strong> یک <code>cron.provider</code> بیرونی از حالت چندپروفایلی پشتیبانی نمی‌کند؛ بنابراین با صدور هشدار، تیک‌زن داخلی جایگزین آن می‌شود.</li>
+</ul>
+</section>
+
+<section class="doc-sec">
+<h2 id="known-limitations"><span class="secnum">۱۲</span> محدودیت‌های شناخته‌شده</h2>
+<p>وضعیت‌های سراسریِ فرایند که هنوز به محدودهٔ هر پروفایل تفکیک نشده‌اند:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>بخش</th><th>وضعیت در زمان نگارش</th></tr></thead>
+<tbody>
+<tr><td>کشف MCP و ثبت ابزار</td><td>در سطح کل فرایند مشترک است؛ نخستین پروفایلی که یک ایجنت می‌سازد، جایگاه کشف را در اختیار می‌گیرد. رجیستری‌های کاملاً مستقل MCP برای هر پروفایل در <code>#67605</code> پیگیری می‌شوند.</td></tr>
+<tr><td>محیط ترمینال / سندباکس (<code>TERMINAL_*</code>)</td><td>طبق فهرست مجاز، سراسری است؛ ابزارها آن را از محیط فرایند می‌خوانند.</td></tr>
+<tr><td>رجیستری ابزارهای داخلی</td><td>ابزارهای داخلی در سطح کل فرایند مشترک‌اند؛ ابزارهای ثبت‌شده توسط افزونه‌ها، از طریق <code>hermes_home_key()</code> در لایه‌ای مختص هر پروفایل روی آن‌ها قرار می‌گیرند.</td></tr>
+<tr><td>رجیستری‌های ارائه‌دهندگان و قابلیت‌ها</td><td>از همان الگوی ترکیبیِ لایهٔ مشترک و لایهٔ مختص پروفایل استفاده می‌کنند (مرورگر، تولید تصویر، تبدیل متن به گفتار، تبدیل گفتار به متن، تولید ویدئو، جستجوی وب و منابع اطلاعات محرمانه).</td></tr>
+<tr><td>شنوندهٔ HTTP، ورودی relay و قفل فرایند</td><td>از هرکدام یکی به‌ازای هر فرایند وجود دارد که متعلق به پروفایل پیش‌فرض یا فعال است. <code>runtime_status.json</code> همچنان برای هر پروفایل نوشته می‌شود.</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section class="doc-sec">
+<h2 id="non-goals"><span class="secnum">۱۳</span> موارد خارج از هدف</h2>
+<p>قابلیت چندپروفایلی، <em>پروفایل‌ها</em> را از هم جدا می‌کند؛ وظیفهٔ احراز هویت یا تعیین مجوز <em>کاربران نهایی</em> را ندارد. پروفایل یک پیکربندی است، نه یک شخص: گیت‌وی برای تصمیم‌گیری دربارهٔ اینکه هر رویداد متعلق به کدام پروفایل است، به لایهٔ انتقال و جدول مسیریابی خود اعتماد می‌کند. هویت در سطح درخواست و مجوزدهی به‌ازای هر کاربر در لایه‌ای بالاتر از پروفایل، خارج از محدودهٔ این سند هستند.</p>
+</section>
+
+<section class="doc-sec">
+<h2 id="related"><span class="secnum">۱۴</span> مطالب مرتبط</h2>
+<ul>
+<li><a href="../user-guide/multi-profile-gateways.html">گیت‌وی‌های چندپروفایلی</a> — راهنمای کاربران، شامل <code>profile_routes</code> و گزینهٔ جایگزینِ اجرای یک گیت‌وی مستقل به‌ازای هر پروفایل.</li>
+<li><code>agent/secret_scope.py</code>، <code>hermes_constants.py</code>، <code>gateway/profile_routing.py</code>، <code>gateway/run.py</code> (<code>_profile_runtime_scope</code>)، <code>hermes_cli/profiles.py</code> (<code>profiles_to_serve</code>)، <code>gateway/session.py</code> و <code>tui_gateway/methods_profiles.py</code>.</li>
+</ul>
+</section>
+
+<div class="pager"><a class="prev" href="middleware.html"><span class="dir">→ قبلی</span><span class="ttl">میان‌افزار</span></a><a class="next" href="observer-hooks.html"><span class="dir">بعدی ←</span><span class="ttl">هوک‌های ناظر</span></a></div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/multiplexing-gateway" target="_blank" rel="noopener">Multiplexing Gateway Internals</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">&#9749; حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

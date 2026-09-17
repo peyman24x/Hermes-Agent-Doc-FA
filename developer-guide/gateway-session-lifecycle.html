@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>چرخهٔ حیات نشست گیت‌وی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">&#x1FABD;</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/gateway-session-lifecycle" target="_blank" rel="noopener">&#127760; نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">&#11088; GitHub</a>
+      <button class="icon-btn" id="themeToggle">&#127769; حالت شب</button>
+      <button class="icon-btn" id="printBtn">&#128424; چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>چرخهٔ حیات نشست گیت‌وی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1 id="gateway-session-lifecycle">چرخهٔ حیات نشست گیت‌وی</h1>
+<p class="subtitle" id="session-lifecycle">چرخهٔ حیات نشست</p>
+<blockquote>
+<p><strong>مخاطبان:</strong> توسعه‌دهندگان و نگهدارندگان گیت‌وی<br>
+<strong>فایل‌های منبع:</strong> <code>gateway/session.py</code> (حدود ۱۲۰۰ خط، به‌همراه فایل‌های هم‌ردهٔ <code>session_*.py</code>)، <code>gateway/run.py</code> (حدود ۵۵۰۰ خط در نقش نما یا facade، به‌همراه فازهای <code>run_*.py</code>)، <code>gateway/config.py</code><br>
+<strong>آخرین به‌روزرسانی:</strong> <bdi>2026-06-16</bdi></p>
+</blockquote>
+<section class="doc-sec">
+<h2 id="overview"><span class="secnum">۱</span> نمای کلی</h2>
+<p><strong>نشست</strong> نمایانگر گفتگویی پیوسته میان ایجنت و یک یا چند کاربر در یک پلتفرم پیام‌رسان است. چرخهٔ حیات نشست تعیین می‌کند گفتگوها چه زمانی حفظ شوند، چه زمانی بازنشانی شوند، چگونه پس از راه‌اندازی مجدد گیت‌وی حفظ شوند و پیام‌ها هنگام عملیات هم‌زمان چگونه در صف قرار گیرند.</p>
+<p>سامانهٔ نشست عمدتاً در دو ماژول قرار دارد:</p>
+<ul>
+<li><code>gateway/session.py</code> — مدل داده (<code>SessionSource</code>، <code>SessionEntry</code>، <code>SessionContext</code>)، تولید کلید (<code>build_session_key</code>) و مخزن اصلی (<code>SessionStore</code>).</li>
+<li><code>gateway/run.py</code> — نمای اجراکنندهٔ گیت‌وی (<code>GatewayRunner</code>) که نشست‌ها را به خط پردازش پیام متصل می‌کند؛ فازهای آن در فایل‌های هم‌ردهٔ <code>run_*.py</code> قرار دارند: نگهداشت نشست (<code>run_watchers.py</code>)، کش ایجنت (<code>run_agent_cache.py</code>)، بازیابی پس از راه‌اندازی مجدد (<code>session_recovery.py</code>) و صف‌بندی پیام (<code>run_busy.py</code>).</li>
+</ul>
+</section>
+<hr>
+<section class="doc-sec">
+<h2 id="1-sessionsource--message-origin-descriptor"><span class="secnum">۲</span> SessionSource — توصیفگر مبدأ پیام</h2>
+<p><code>SessionSource</code> رکوردی تغییرناپذیر از <em>محل آمدن پیام</em> است. این رکورد به هر <code>MessageEvent</code> ورودی پیوست می‌شود و برای مسیریابی، جداسازی و تزریق زمینه به کار می‌رود.</p>
+<h3 id="fields">فیلدها</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>فیلد</th><th>نوع</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>platform</code></td><td><code>Platform</code></td><td><em>الزامی</em></td><td>مقدار شمارشیِ مشخص‌کنندهٔ پلتفرم پیام‌رسان (telegram، discord، slack، signal، whatsapp، matrix، local و غیره).</td></tr>
+<tr><td><code>chat_id</code></td><td><code>str</code></td><td><em>الزامی</em></td><td>شناسهٔ چت، گروه یا کانال در سطح پلتفرم. از تبدیل <code>chat_id_key</code> اتصال‌دهنده عبور داده می‌شود.</td></tr>
+<tr><td><code>chat_name</code></td><td><code>Optional[str]</code></td><td><code>None</code></td><td>نام خوانای چت یا گروه برای انسان.</td></tr>
+<tr><td><code>chat_type</code></td><td><code>str</code></td><td><code>"dm"</code></td><td>یکی از مقادیر <code>"dm"</code>، <code>"group"</code>، <code>"channel"</code> یا <code>"thread"</code>. تولید کلید نشست و جداسازی را کنترل می‌کند.</td></tr>
+<tr><td><code>user_id</code></td><td><code>Optional[str]</code></td><td><code>None</code></td><td>شناسهٔ کاربر مختص پلتفرم. برای مجوزدهی و جداسازی نشست به‌ازای هر کاربر استفاده می‌شود.</td></tr>
+<tr><td><code>user_name</code></td><td><code>Optional[str]</code></td><td><code>None</code></td><td>نام نمایشی نویسندهٔ پیام. به پرامپت سیستم تزریق می‌شود.</td></tr>
+<tr><td><code>thread_id</code></td><td><code>Optional[str]</code></td><td><code>None</code></td><td>شناسهٔ موضوع انجمن، رشتهٔ Discord یا رشتهٔ Slack. گفتگوهای رشته‌ای را از هم متمایز می‌کند.</td></tr>
+<tr><td><code>chat_topic</code></td><td><code>Optional[str]</code></td><td><code>None</code></td><td>موضوع یا توضیح کانال (موضوع کانال Discord، هدف کانال Slack).</td></tr>
+<tr><td><code>user_id_alt</code></td><td><code>Optional[str]</code></td><td><code>None</code></td><td>شناسهٔ جایگزینِ پایدار و مختص پلتفرم (UUID در Signal، یا union_id در Feishu). وقتی <code>user_id</code> موقتی است استفاده می‌شود.</td></tr>
+<tr><td><code>chat_id_alt</code></td><td><code>Optional[str]</code></td><td><code>None</code></td><td>شناسهٔ داخلی گروه Signal؛ شناسهٔ گروه V2 در Signal را به شکل معیار آن نگاشت می‌کند.</td></tr>
+<tr><td><code>is_bot</code></td><td><code>bool</code></td><td><code>False</code></td><td>وقتی نویسندهٔ پیام یک بات یا وب‌هوک باشد (بات‌های Discord)، مقدار آن True است.</td></tr>
+<tr><td><code>guild_id</code></td><td><code>Optional[str]</code></td><td><code>None</code></td><td>شناسهٔ محدودهٔ سرور (guild) در Discord، فضای کاری Slack یا سرور Matrix.</td></tr>
+<tr><td><code>parent_chat_id</code></td><td><code>Optional[str]</code></td><td><code>None</code></td><td>کانال والد، زمانی که <code>chat_id</code> به یک رشته اشاره می‌کند.</td></tr>
+<tr><td><code>message_id</code></td><td><code>Optional[str]</code></td><td><code>None</code></td><td>شناسهٔ پیام آغازگر. برای عملیات سنجاق‌کردن، پاسخ‌دادن و واکنش‌گذاشتن، و نیز تزریق شناسهٔ Discord استفاده می‌شود.</td></tr>
+<tr><td><code>role_authorized</code></td><td><code>bool</code></td><td><code>False</code></td><td>اگر اتصال‌دهنده دسترسی را از طریق نقشی در پلتفرم، نه شناسهٔ تک‌کاربر، اعطا کرده باشد، مقدار آن True است.</td></tr>
+</tbody>
+</table></div>
+<h3 id="key-methods">متدهای اصلی</h3>
+<ul>
+<li><strong><code>description</code></strong> (ویژگی از نوع <code>str</code>) — خلاصه‌ای خوانا برای انسان؛ برای مثال <code>"DM with Alice"</code> یا <code>"group: My Group, thread: 12345"</code>.</li>
+<li><strong><code>to_dict()</code> / <code>from_dict()</code></strong> — سریال‌سازی و بازسازی رکورد برای ذخیره‌سازی پایدار در <code>sessions.json</code>.</li>
+</ul>
+</section>
+<hr>
+<section class="doc-sec">
+<h2 id="2-sessionentry--active-session-record"><span class="secnum">۳</span> SessionEntry — رکورد نشست فعال</h2>
+<p><code>SessionEntry</code> رکورد فرادادهٔ هر نشست است که در حافظه نگهداری و در <code>{sessions_dir}/sessions.json</code> ذخیره می‌شود. هر ورودی، یک <code>session_key</code> را به <code>session_id</code> فعلی آن نگاشت می‌کند.</p>
+<h3 id="fields-1">فیلدها</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>فیلد</th><th>نوع</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>session_key</code></td><td><code>str</code></td><td><em>الزامی</em></td><td>کلید قطعیِ شناسایی مسیر گفتگو (بخش «قواعد تولید SessionKey» را ببینید).</td></tr>
+<tr><td><code>session_id</code></td><td><code>str</code></td><td><em>الزامی</em></td><td>شناسهٔ یکتای این دورهٔ مشخص از گفتگو. قالب: <code>YYYYMMDD_HHMMSS_&lt;8hex&gt;</code>.</td></tr>
+<tr><td><code>created_at</code></td><td><code>datetime</code></td><td><em>الزامی</em></td><td>زمان ایجاد این دوره از نشست.</td></tr>
+<tr><td><code>updated_at</code></td><td><code>datetime</code></td><td><em>الزامی</em></td><td>برچسب زمانی آخرین فعالیت که برای نگهداشت منابع استفاده می‌شود.</td></tr>
+<tr><td><code>origin</code></td><td><code>Optional[SessionSource]</code></td><td><code>None</code></td><td>مبدأ ایجادکنندهٔ این نشست؛ برای مسیریابی تحویل استفاده می‌شود.</td></tr>
+<tr><td><code>display_name</code></td><td><code>Optional[str]</code></td><td><code>None</code></td><td>نام نمایشی چت (برگرفته از <code>SessionSource.chat_name</code>).</td></tr>
+<tr><td><code>platform</code></td><td><code>Optional[Platform]</code></td><td><code>None</code></td><td>مقدار شمارشی پلتفرم که برای مسیریابی پس از راه‌اندازی مجدد ذخیره می‌شود.</td></tr>
+<tr><td><code>chat_type</code></td><td><code>str</code></td><td><code>"dm"</code></td><td>نوع چت؛ برای یافتن سیاست مربوطه نیز ذخیره می‌شود.</td></tr>
+<tr><td><code>input_tokens</code></td><td><code>int</code></td><td><code>0</code></td><td>مجموع تجمعی توکن‌های ورودی (پرامپت) مصرف‌شده در LLM.</td></tr>
+<tr><td><code>output_tokens</code></td><td><code>int</code></td><td><code>0</code></td><td>مجموع تجمعی توکن‌های خروجی (تکمیل) مصرف‌شده در LLM.</td></tr>
+<tr><td><code>cache_read_tokens</code></td><td><code>int</code></td><td><code>0</code></td><td>مجموع تجمعی توکن‌های خوانده‌شده از کش پرامپت.</td></tr>
+<tr><td><code>cache_write_tokens</code></td><td><code>int</code></td><td><code>0</code></td><td>مجموع تجمعی توکن‌های نوشته‌شده در کش پرامپت.</td></tr>
+<tr><td><code>total_tokens</code></td><td><code>int</code></td><td><code>0</code></td><td>تعداد کل توکن‌ها در همهٔ نوبت‌ها.</td></tr>
+<tr><td><code>estimated_cost_usd</code></td><td><code>float</code></td><td><code>0.0</code></td><td>هزینهٔ تجمعیِ تخمینی به دلار آمریکا.</td></tr>
+<tr><td><code>cost_status</code></td><td><code>str</code></td><td><code>"unknown"</code></td><td>برچسب وضعیت ردیابی هزینه.</td></tr>
+<tr><td><code>last_prompt_tokens</code></td><td><code>int</code></td><td><code>0</code></td><td>آخرین تعداد توکن‌های پرامپت گزارش‌شده از API. برای بررسی دقیق پیش از فشرده‌سازی استفاده می‌شود.</td></tr>
+</tbody>
+</table></div>
+<h3 id="boolean-flags-state-machine">پرچم‌های بولی (ماشین حالت)</h3>
+<p>SessionEntry چند پرچم بولی دارد که یک ماشین حالت ساده را تشکیل می‌دهند و رفتار نشست را در دسترسی بعدی تعیین می‌کنند.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>پرچم</th><th>نوع</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>was_auto_reset</code></td><td><code>bool</code></td><td><code>False</code></td><td>وقتی تعلیق صریح باعث ایجاد نشست جایگزین می‌شود، تنظیم می‌شود. برای رکوردهای تاریخی نیز حفظ شده است.</td></tr>
+<tr><td><code>auto_reset_reason</code></td><td><code>Optional[str]</code></td><td><code>None</code></td><td>برای تعلیق صریح، <code>"suspended"</code> است؛ ردیف‌های قدیمی‌تر ممکن است همچنان دلایل تاریخیِ بازنشانی را نگه دارند.</td></tr>
+<tr><td><code>reset_had_activity</code></td><td><code>bool</code></td><td><code>False</code></td><td>آیا نشست جایگزین‌شده قبلاً فعالیتی داشته است یا نه.</td></tr>
+<tr><td><code>is_fresh_reset</code></td><td><code>bool</code></td><td><code>False</code></td><td>با فرمان صریح <code>/new</code> یا <code>/reset</code> تنظیم می‌شود. در نخستین پیام، تزریق دوبارهٔ مهارت‌های موضوع یا کانال را فعال می‌کند. برای جلوگیری از اعلان گمراه‌کنندهٔ «نشست منقضی شده است»، از <code>was_auto_reset</code> متمایز است.</td></tr>
+<tr><td><code>expiry_finalized</code></td><td><code>bool</code></td><td><code>False</code></td><td>نشانگر تاریخیِ قطعی‌شدن پایان نشست که برای بازیابی حفظ شده است؛ هیچ تایمری آن را نمی‌نویسد.</td></tr>
+<tr><td><code>suspended</code></td><td><code>bool</code></td><td><code>False</code></td><td>سیگنال قطعیِ پاک‌سازی اجباری. با <code>/stop</code> یا تشدید اقدام در برابر حلقهٔ گیرکرده (۳ شکست پیاپی یا بیشتر در راه‌اندازی مجدد) تنظیم می‌شود. در فراخوانی بعدیِ <code>get_or_create_session()</code>، مستقل از <code>resume_pending</code>، ایجاد <code>session_id</code> جدید را تحمیل می‌کند.</td></tr>
+<tr><td><code>resume_pending</code></td><td><code>bool</code></td><td><code>False</code></td><td>نشانگر بازیابی نرم. با <code>suspend_recently_active()</code> (بازیابی پس از خرابی) یا پایان مهلت انتظار برای اتمام کارهای جاری تنظیم می‌شود. در دسترسی بعدی، <code>session_id</code> موجود را حفظ می‌کند؛ کاربر همان رونوشت گفتگو را ادامه می‌دهد. پس از پایان موفق نوبت بعدی پاک می‌شود.</td></tr>
+<tr><td><code>resume_reason</code></td><td><code>Optional[str]</code></td><td><code>None</code></td><td>دلیل علامت‌گذاری برای ازسرگیری: <code>"restart_timeout"</code>، <code>"shutdown_timeout"</code> یا <code>"restart_interrupted"</code>.</td></tr>
+<tr><td><code>last_resume_marked_at</code></td><td><code>Optional[datetime]</code></td><td><code>None</code></td><td>برچسب زمانی آخرین علامت‌گذاری به‌عنوان در انتظار ازسرگیری.</td></tr>
+</tbody>
+</table></div>
+<h3 id="state-transition-logic-get_or_create_session">منطق گذار حالت (get_or_create_session)</h3>
+<pre dir="ltr"><code>                    ┌──────────┐
+                    │  Incoming │
+                    │  Message  │
+                    └────┬─────┘
+                         │
+                         ▼
+              ┌──────────────────────┐
+              │  session_key exists  │──── No ──► Create fresh SessionEntry
+              │  AND !force_new      │
+              └──────────┬───────────┘
+                         │ Yes
+                         ▼
+              ┌──────────────────────┐
+              │  entry.suspended?    │──── Yes ──► Auto-reset: new session_id
+              └──────────┬───────────┘           (reason="suspended")
+                         │ No
+                         ▼
+              ┌──────────────────────┐
+              │ entry.resume_pending?│──── Yes ──► Return existing entry
+              └──────────┬───────────┘           (preserve session_id)
+                         │ No                     Clear flag on next successful turn
+                         ▼
+              ┌──────────────────────┐
+              │   Policy says reset? │──── Yes ──► Auto-reset: new session_id
+              └──────────┬───────────┘           (reason="idle"/"daily")
+                         │ No
+                         ▼
+              ┌──────────────────────┐
+              │  Return existing     │
+              │  entry, bump         │
+              │  updated_at          │
+              └──────────────────────┘
+</code></pre>
+<p><strong>ترتیب اولویت در <code>get_or_create_session()</code>:</strong></p>
+<ol>
+<li><code>suspended=True</code> ← همیشه بازنشانی اجباری (پاک‌سازی قطعی)</li>
+<li><code>resume_pending=True</code> ← حفظ <code>session_id</code> (بازیابی نرم)</li>
+<li>نبود محرک ← برگرداندن ورودی موجود (به‌روزرسانی <code>updated_at</code>)</li>
+</ol>
+</section>
+<hr>
+<section class="doc-sec">
+<h2 id="3-sessionstore--storage-and-operations"><span class="secnum">۴</span> SessionStore — ذخیره‌سازی و عملیات</h2>
+<p><code>SessionStore</code> لایهٔ اصلی ذخیره‌سازی است. این لایه یک دیکشنری درون‌حافظه‌ای (<code>_entries</code>) را نگه می‌دارد که در <code>sessions.json</code> ذخیره می‌شود؛ SQLite (<code>SessionDB</code>) نیز مخزن مرجع فرادادهٔ نشست و رونوشت پیام‌ها است.</p>
+<h3 id="constructor">سازنده</h3>
+<pre dir="ltr"><code>SessionStore(sessions_dir: Path, config: GatewayConfig, has_active_processes_fn=None)
+</code></pre>
+<ul>
+<li><code>sessions_dir</code> — پوشه‌ای که <code>sessions.json</code> در آن قرار دارد.</li>
+<li><code>config</code> — نمونهٔ <code>GatewayConfig</code> برای تنظیمات مسیریابی و نگهداشت.</li>
+<li><code>has_active_processes_fn</code> — بازفراخوانی اختیاری که با کلید <code>session_key</code>، وجود فرایندهای در حال اجرای پس‌زمینه را بررسی می‌کند. نشست‌هایی که فرایند فعال دارند، از حذف ورودی مسیریابی محافظت می‌شوند.</li>
+</ul>
+<h3 id="operations-methods">عملیات (متدها)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>متد</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>get_or_create_session(source, force_new=False)</code></td><td>نقطهٔ ورود اصلی. <code>SessionEntry</code> موجود را برمی‌گرداند یا نمونه‌ای جدید می‌سازد. وضعیت تعلیق صریح و بازیابی پس از راه‌اندازی مجدد را ارزیابی می‌کند. رکوردهای SQLite را ایجاد می‌کند یا پایان می‌دهد.</td></tr>
+<tr><td><code>update_session(session_key, last_prompt_tokens=None)</code></td><td>به‌روزرسانی سبک فراداده پس از یک تعامل. <code>updated_at</code> را به‌روز می‌کند و در صورت نیاز <code>last_prompt_tokens</code> را ثبت می‌کند.</td></tr>
+<tr><td><code>reset_session(session_key, display_name=None)</code></td><td>بازنشانی صریح (از <code>/new</code> یا <code>/reset</code>). یک <code>session_id</code> جدید ایجاد و <code>is_fresh_reset=True</code> را تنظیم می‌کند. نشست قدیمی SQLite را پایان می‌دهد و نشست جدیدی می‌سازد.</td></tr>
+<tr><td><code>switch_session(session_key, target_session_id)</code></td><td>رفتن به شناسهٔ نشست موجود دیگری (از <code>/resume</code>). نشست فعلی SQLite را پایان می‌دهد و نشست مقصد را دوباره باز می‌کند.</td></tr>
+<tr><td><code>suspend_session(session_key)</code></td><td>نشست را با <code>suspended=True</code> علامت‌گذاری می‌کند (از <code>/stop</code>). بازنشانی خودکار را در دسترسی بعدی تحمیل می‌کند.</td></tr>
+<tr><td><code>mark_resume_pending(session_key, reason)</code></td><td>نشست را با <code>resume_pending=True</code> علامت‌گذاری می‌کند (پس از پایان مهلت انتظار برای اتمام کارهای جاری). <code>session_id</code> را در دسترسی بعدی حفظ می‌کند. <strong>هرگز</strong> وضعیت <code>suspended=True</code> را خنثی نمی‌کند.</td></tr>
+<tr><td><code>clear_resume_pending(session_key)</code></td><td>پس از یک نوبت موفقِ ازسرگرفته‌شده، <code>resume_pending</code> را پاک می‌کند. گیت‌وی پس از بازگشت <code>run_conversation()</code> آن را فراخوانی می‌کند.</td></tr>
+<tr><td><code>suspend_recently_active(max_age_seconds=120)</code></td><td>بازیابی پس از خرابی: نشست‌های دارای فعالیت اخیر را با <code>resume_pending=True</code> علامت‌گذاری می‌کند. از ورودی‌هایی که از قبل در انتظار ازسرگیری یا معلق هستند می‌گذرد. هنگام راه‌اندازی پس از خاموش‌شدن نامنظم فراخوانی می‌شود.</td></tr>
+<tr><td><code>prune_old_entries(max_age_days)</code></td><td>ورودی‌های قدیمی‌تر از <code>max_age_days</code> را حذف می‌کند (بر اساس <code>updated_at</code>). از ورودی‌های <code>suspended</code> و نشست‌های دارای فرایند فعال می‌گذرد.</td></tr>
+<tr><td><code>list_sessions(active_minutes=None)</code></td><td>همهٔ نشست‌ها را برمی‌گرداند؛ در صورت نیاز، با فیلتر فعالیت اخیر. مرتب‌سازی بر اساس <code>updated_at</code> به‌صورت نزولی است.</td></tr>
+<tr><td><code>lookup_by_session_id(session_id)</code></td><td><code>SessionEntry</code> فعال مربوط به یک شناسهٔ نشست ذخیره‌شده را پیدا می‌کند.</td></tr>
+<tr><td><code>has_any_sessions()</code></td><td>بررسی می‌کند آیا تاکنون نشستی ایجاد شده است یا نه (برای تاریخچه از SQLite استفاده می‌کند، نه فقط دیکشنری درون‌حافظه‌ای).</td></tr>
+<tr><td><code>append_to_transcript(session_id, message, skip_db=False)</code></td><td>پیامی به رونوشت SQLite می‌افزاید. وقتی ایجنت قبلاً پیام را ذخیره کرده باشد، <code>skip_db=True</code> مانع نوشتن تکراری می‌شود.</td></tr>
+<tr><td><code>rewrite_transcript(session_id, messages)</code></td><td>جایگزینی کامل رونوشت نشست (مورد استفادهٔ <code>/retry</code>، <code>/undo</code> و <code>/compress</code>).</td></tr>
+<tr><td><code>load_transcript(session_id)</code></td><td>همهٔ پیام‌های رونوشت SQLite یک نشست را بارگیری می‌کند.</td></tr>
+<tr><td><code>rewind_session(session_id, n=1)</code></td><td>به‌اندازهٔ <code>n</code> نوبت کاربر با حذف نرم به عقب برمی‌گردد (ردپای ممیزی حفظ می‌شود)؛ پوششی سبک بر <code>SessionDB.rewind_user_turn</code> (<code>hermes_state_rewind.py</code>)، همان سازوکار واحد بازگشت که با فرمان‌های <code>/undo</code> و <code>/retry</code> در CLI و نیز TUI مشترک است. مقدار <code>{rewound_count, turns_undone, target_text}</code> را برمی‌گرداند.</td></tr>
+</tbody>
+</table></div>
+<h3 id="internal-helpers">توابع کمکی داخلی</h3>
+<ul>
+<li><code>_ensure_loaded()</code> / <code>_ensure_loaded_locked()</code> — بارگیری <code>sessions.json</code> در دیکشنری <code>_entries</code>.</li>
+<li><code>_save()</code> — نوشتن اتمیک در <code>sessions.json</code> از طریق فایل موقت و <code>atomic_replace</code>.</li>
+<li><code>_generate_session_key(source)</code> — واگذاری کار به <code>build_session_key()</code> با پارامترهای پیکربندی.</li>
+</ul>
+<h3 id="storage-layout">ساختار ذخیره‌سازی</h3>
+<pre dir="ltr"><code>{sessions_dir}/
+  sessions.json          # In-memory _entries dict, persisted as JSON
+                           Maps session_key → SessionEntry (metadata only)
+  {session_id}.jsonl     # (Legacy, removed in spec 002)
+</code></pre>
+<p>مخزن مرجع رونوشت، SQLite از طریق <code>SessionDB</code> (از <code>hermes_state</code>) است. فایل <code>sessions.json</code> نگاشت <code>session_key → session_id</code> و فرادادهٔ ورودی را ذخیره می‌کند (پرچم‌ها، برچسب‌های زمانی و شمار توکن‌ها). اگر SQLite در دسترس نباشد، مخزن به JSONL برمی‌گردد، اما این مسیر مربوط به حالت افت قابلیت است.</p>
+</section>
+<hr>
+<section class="doc-sec">
+<h2 id="4-sessionkey-generation-rules"><span class="secnum">۵</span> قواعد تولید SessionKey</h2>
+<p>کلیدهای نشست رشته‌هایی قطعی هستند که یک مسیر گفتگو را شناسایی می‌کنند. این کلیدها با <code>build_session_key(source, group_sessions_per_user, thread_sessions_per_user)</code> تولید می‌شوند.</p>
+<h3 id="key-format">قالب کلید</h3>
+<pre dir="ltr"><code>agent:main:{platform}:{chat_type}[:{chat_id}][:{thread_id}][:{participant_id}]
+</code></pre>
+<h3 id="dm-rules">قواعد پیام خصوصی (DM)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>سناریو</th><th>کلید</th></tr></thead>
+<tbody>
+<tr><td>پیام خصوصی با chat_id</td><td><code>agent:main:telegram:dm:12345</code></td></tr>
+<tr><td>پیام خصوصی با chat_id و رشته</td><td><code>agent:main:telegram:dm:12345:thread_678</code></td></tr>
+<tr><td>پیام خصوصی بدون chat_id، با participant_id</td><td><code>agent:main:signal:dm:user_abc</code></td></tr>
+<tr><td>پیام خصوصی بدون chat_id یا participant_id</td><td><code>agent:main:telegram:dm</code></td></tr>
+<tr><td>پیام خصوصی WhatsApp (تبدیل‌شده به شکل معیار)</td><td><code>agent:main:whatsapp:dm:{canonical_number}</code></td></tr>
+</tbody>
+</table></div>
+<ul>
+<li>پیام‌های خصوصی همیشه در صورت وجود <code>chat_id</code>، آن را در کلید می‌گنجانند تا هر گفتگوی خصوصی جدا باشد.</li>
+<li><code>thread_id</code> پیام‌های خصوصیِ رشته‌ای را درون همان چت خصوصی بیشتر از هم تفکیک می‌کند.</li>
+<li>در نبود <code>chat_id</code>، از <code>user_id_alt</code> یا <code>user_id</code> به‌عنوان <code>participant_id</code> استفاده می‌شود.</li>
+<li>بدون هیچ شناسه‌ای، همهٔ پیام‌های خصوصی آن پلتفرم در یک نشست مشترک جمع می‌شوند.</li>
+</ul>
+<h3 id="groupchannel-rules">قواعد گروه و کانال</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>سناریو</th><th>کلید</th></tr></thead>
+<tbody>
+<tr><td>چت گروهی</td><td><code>agent:main:telegram:group:-10012345</code></td></tr>
+<tr><td>چت گروهی با جداسازی به‌ازای هر کاربر</td><td><code>agent:main:telegram:group:-10012345:user_abc</code></td></tr>
+<tr><td>رشته در گروه، مشترک</td><td><code>agent:main:discord:group:12345:thread_678</code></td></tr>
+<tr><td>رشته در گروه، به‌ازای هر کاربر</td><td><code>agent:main:discord:group:12345:thread_678:user_abc</code></td></tr>
+<tr><td>کانال</td><td><code>agent:main:slack:channel:C12345</code></td></tr>
+<tr><td>گروه WhatsApp (تبدیل‌شده به شکل معیار)</td><td><code>agent:main:whatsapp:group:{canonical_id}:{participant}</code></td></tr>
+</tbody>
+</table></div>
+<ul>
+<li><code>chat_id</code> گروه یا کانال والد را مشخص می‌کند.</li>
+<li><code>thread_id</code> رشته‌های درون آن والد را از هم متمایز می‌کند.</li>
+<li><strong>جداسازی به‌ازای هر کاربر</strong> (افزودن <code>participant_id</code> به انتهای کلید) با این تنظیمات کنترل می‌شود:
+<ul>
+<li><code>group_sessions_per_user</code> (پیش‌فرض: <code>True</code>) — نشست‌های گروه و کانال از هم جدا هستند.</li>
+<li><code>thread_sessions_per_user</code> (پیش‌فرض: <code>False</code>) — رشته‌ها به‌طور پیش‌فرض <strong>مشترک</strong> هستند (موضوع‌های انجمن Telegram، رشته‌های Discord و رشته‌های Slack همگی برای هر رشته یک نشست مشترک دارند).</li>
+</ul></li>
+<li><code>participant_id</code> برابر با <code>user_id_alt</code> یا <code>user_id</code> است (به همین ترتیب اولویت).</li>
+<li>شناسه‌های WhatsApp برای مدیریت جابه‌جایی میان نام‌های مستعار JID/LID به شکل معیار تبدیل می‌شوند.</li>
+</ul>
+<h3 id="special-case-whatapp">حالت ویژه: WhatsApp</h3>
+<p>شماره‌های تلفن WhatsApp از <code>canonical_whatsapp_identifier()</code> عبور می‌کنند؛ این تابع پسوند <code>@s.whatsapp.net</code> را حذف و شماره را به قالب E.164 نرمال‌سازی می‌کند. این کار مانع چندپاره‌شدن نشست می‌شود، وقتی پل شکل‌های مستعار متفاوتی از یک شمارهٔ تلفن را برمی‌گرداند.</p>
+</section>
+<hr>
+<section class="doc-sec">
+<h2 id="5-multi-user-isolation-strategy"><span class="secnum">۶</span> راهبرد جداسازی چندکاربره</h2>
+<p>جداسازی چندکاربره تعیین می‌کند چند کاربر در یک چت، گفتگوی مشترک داشته باشند یا هر کدام نشست خصوصیِ خود را دریافت کنند.</p>
+<h3 id="decision-logic-is_shared_multi_user_session">منطق تصمیم‌گیری (<code>is_shared_multi_user_session</code>)</h3>
+<pre dir="ltr"><code>def is_shared_multi_user_session(source, *, group_sessions_per_user, thread_sessions_per_user):
+    if source.chat_type == "dm":
+        return False  # DMs are always private
+    if source.thread_id:
+        return not thread_sessions_per_user  # Threads: shared unless per-user
+    return not group_sessions_per_user       # Groups: isolated unless shared
+</code></pre>
+<h3 id="summary">خلاصه</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>نوع چت</th><th>پیش‌فرض</th><th>تنظیم کنترل‌کننده</th></tr></thead>
+<tbody>
+<tr><td>پیام خصوصی</td><td>خصوصی (هرگز مشترک نیست)</td><td>کاربرد ندارد</td></tr>
+<tr><td>گروه یا کانال</td><td>جداسازی به‌ازای هر کاربر</td><td><code>group_sessions_per_user</code> (پیش‌فرض: True)</td></tr>
+<tr><td>رشته (انجمن، Discord)</td><td>مشترک (همهٔ شرکت‌کنندگان زمینهٔ یکسانی می‌بینند)</td><td><code>thread_sessions_per_user</code> (پیش‌فرض: False)</td></tr>
+</tbody>
+</table></div>
+<h3 id="impact-on-system-prompt">تأثیر بر پرامپت سیستم</h3>
+<p>وقتی <code>shared_multi_user_session=True</code> باشد، پرامپت سیستم نام ثابت کاربر را حذف می‌کند و به‌جای آن می‌گوید: <em>«{رشته|نشست} چندکاربره — پیشوند پیام‌ها [نام فرستنده] است. ممکن است چند کاربر مشارکت داشته باشند.»</em> گیت‌وی هنگام اجرا نام هر فرستنده را به ابتدای پیام او اضافه می‌کند؛ در نتیجه کش پرامپت حفظ می‌شود (پرامپت سیستم در هر نوبت تغییر نمی‌کند).</p>
+</section>
+<hr>
+<section class="doc-sec">
+<h2 id="6-explicit-conversation-boundaries"><span class="secnum">۷</span> مرزهای صریح گفتگو</h2>
+<p>بی‌فعالیتی و گذشت زمان هرگز گفتگو را با گفتگویی تازه جایگزین نمی‌کنند. <code>/new</code> و <code>/reset</code> یک مرز صریح ایجاد می‌کنند؛ فشرده‌سازی زمینه همچنان تاریخچه‌های طولانی را مدیریت می‌کند. پیکربندی قدیمیِ تایمر نادیده گرفته می‌شود. نوع دادهٔ موجودِ <code>SessionResetPolicy</code> داده‌ای غیرفعال برای سازگاری است، نه سیاستی در زمان اجرا.</p>
+<p>تعلیق صریح همچنان در نوبت ورودیِ بعدی یک مرز ایجاد می‌کند. بازیابی به مرزهای صریح و مرزهای تاریخیِ نهایی‌شده احترام می‌گذارد و آن‌ها را دوباره باز نمی‌کند. حذف صرفاً برای آزادسازی منابع و پاک‌سازی اتصال‌های بی‌صاحب WebSocket، گفتگوها را قابل ازسرگیری باقی می‌گذارند.</p>
+</section>
+<hr>
+<section class="doc-sec">
+<h2 id="7-restart-recovery-flow"><span class="secnum">۸</span> جریان بازیابی پس از راه‌اندازی مجدد</h2>
+<p>سامانهٔ بازیابی پس از راه‌اندازی مجدد تضمین می‌کند نشست‌های در حال پردازش، در راه‌اندازی‌های مجدد گیت‌وی، خرابی‌ها و پایان مهلت انتظار برای اتمام کارهای جاری حفظ شوند. این سامانه راه‌حل مسئلهٔ #7536 است.</p>
+<h3 id="startup-recovery-sequence">توالی بازیابی هنگام راه‌اندازی</h3>
+<pre dir="ltr"><code>Gateway starts
+       │
+       ▼
+┌───────────────────────────────┐
+│ Check for .clean_shutdown     │── Exists? ──► Skip suspension (clean exit)
+│ marker                        │
+└───────────────────────────────┘
+       │ Missing
+       ▼
+┌───────────────────────────────┐
+│ session_store                 │── Marks sessions updated within
+│ .suspend_recently_active()    │   last 120 seconds as resume_pending
+└───────────────────────────────┘
+       │
+       ▼
+┌───────────────────────────────┐
+│ _suspend_stuck_loop_sessions()│── Suspends sessions that have been
+│                               │   active across 3+ restarts
+└───────────────────────────────┘
+       │
+       ▼
+┌───────────────────────────────┐
+│ Queue inbound messages while  │
+│ startup restore runs          │
+│ (_startup_restore_in_progress)│
+└───────────────────────────────┘
+       │
+       ▼
+┌───────────────────────────────┐
+│ For each adapter, find        │
+│ resume_pending sessions →     │
+│ synthesize MessageEvent and   │
+│ run _handle_message to let    │
+│ the agent auto-continue       │
+└───────────────────────────────┘
+</code></pre>
+<h3 id="suspend_recently_activemax_age_seconds120"><code>suspend_recently_active(max_age_seconds=120)</code></h3>
+<p>هنگام راه‌اندازی گیت‌وی، اگر نشانگر <code>.clean_shutdown</code> وجود نداشته باشد (که نشانهٔ خرابی یا خروج غیرمنتظره است)، فراخوانی می‌شود. برای هر نشستی که در ۱۲۰ ثانیهٔ اخیر به‌روز شده باشد:</p>
+<ul>
+<li>مقادیر <code>resume_pending=True</code>، <code>resume_reason="restart_interrupted"</code> و <code>last_resume_marked_at=now</code> را تنظیم می‌کند.</li>
+<li>از ورودی‌هایی که از قبل <code>resume_pending=True</code> دارند می‌گذرد (علامت‌گذاری تکراری انجام نمی‌شود).</li>
+<li>از ورودی‌هایی که صریحاً <code>suspended=True</code> هستند می‌گذرد (پاک‌سازی قطعی باید پابرجا بماند).</li>
+</ul>
+<h3 id="stuck-loop-detection-_suspend_stuck_loop_sessions">تشخیص حلقهٔ گیرکرده (<code>_suspend_stuck_loop_sessions</code>)</h3>
+<p>راه‌اندازی‌های مجدد پیاپی را از طریق یک فایل JSON (<code>{HERMES_HOME}/restart_counts.json</code>) می‌شمارد. اگر نشستی در طول ۳ راه‌اندازی مجدد پیاپی یا بیشتر فعال بوده باشد، خودکار معلق می‌شود تا کاربر از نو شروع کند.</p>
+<h3 id="drain-timeout-marking">علامت‌گذاری پس از پایان مهلت اتمام کارهای جاری</h3>
+<p>هنگام خاموش‌شدن یا راه‌اندازی مجددِ منظم، سازوکار انتظار برای اتمام کارهای جاری (drain)، برای هر نشستی که هنگام پایان مهلت هنوز در میانهٔ نوبت بوده است، <code>mark_resume_pending()</code> را فراخوانی می‌کند. دلایل:</p>
+<ul>
+<li><code>"restart_timeout"</code> — اجرای نشست در مرحلهٔ انتظار برای اتمام کارها پیش از راه‌اندازی مجدد خاتمه داده شده است.</li>
+<li><code>"shutdown_timeout"</code> — اجرای نشست در مرحلهٔ انتظار برای اتمام کارها پیش از خاموش‌شدن خاتمه داده شده است.</li>
+<li><code>"restart_interrupted"</code> — بازیابی پس از خرابی (از <code>suspend_recently_active</code>).</li>
+</ul>
+<p>هر سه دلیل در <code>_AUTO_RESUME_REASONS</code> قرار دارند و واجد شرایط ازسرگیری خودکار هنگام راه‌اندازی هستند.</p>
+<h3 id="auto-resume-on-next-access">ازسرگیری خودکار در دسترسی بعدی</h3>
+<p>وقتی <code>get_or_create_session()</code> با <code>resume_pending=True</code> مواجه می‌شود:</p>
+<ol>
+<li>ورودی موجود را <strong>بدون</strong> ایجاد <code>session_id</code> جدید برمی‌گرداند.</li>
+<li>رونوشت موجود بدون تغییر بارگیری می‌شود.</li>
+<li>علامت‌گذاری در اینجا پاک نمی‌شود؛ تا پایان موفق نوبت بعدی باقی می‌ماند (گیت‌وی پس از آنکه <code>run_conversation()</code> یک پاسخ واقعی برگرداند، <code>clear_resume_pending()</code> را فراخوانی می‌کند).</li>
+<li>اگر نوبت ازسرگرفته‌شده دوباره قطع شود، پرچم <code>resume_pending</code> همچنان تنظیم می‌ماند و راه‌اندازی مجدد بعدی دوباره تلاش می‌کند. شمارندهٔ حلقهٔ گیرکرده، اقدام نهایی را مدیریت می‌کند (۳ تلاش مجدد ← تعلیق).</li>
+</ol>
+<h3 id="clean-shutdown-marker-clean_shutdown">نشانگر خاموش‌شدن منظم (<code>.clean_shutdown</code>)</h3>
+<p>در پایان خاموش‌شدن منظم نوشته می‌شود. در راه‌اندازی بعدی:</p>
+<ul>
+<li>اگر وجود داشته باشد، <code>suspend_recently_active()</code> به‌کلی رد می‌شود. کار ایجنت‌های فعال قبلاً به پایان رسیده است، بنابراین نشستی گیر نکرده است.</li>
+<li>سپس نشانگر حذف می‌شود.</li>
+</ul>
+<p>این کار از بازنشانی‌های خودکارِ ناخواسته پس از <code>hermes update</code>، <code>hermes gateway restart</code> یا <code>/restart</code> جلوگیری می‌کند.</p>
+</section>
+<hr>
+<section class="doc-sec">
+<h2 id="8-message-queuing-flow"><span class="secnum">۹</span> جریان صف‌بندی پیام</h2>
+<p>سامانهٔ صف‌بندی پیام دو سناریو را پوشش می‌دهد:</p>
+<ol>
+<li><strong>پیام‌های تکمیلیِ وقفه‌دهنده</strong> — وقتی کاربر در حین پردازش ایجنت چند پیام می‌فرستد، پیام‌های بعدی به‌صورت پیام‌های معلق در یک جایگاه تک‌پیامی صف‌بندی می‌شوند.</li>
+<li><strong>FIFO برای <code>/queue</code></strong> — فرمان‌های صریح <code>/queue</code> که هر کدام باید به‌ترتیب، بدون ادغام، یک نوبت کامل و مستقل از ایجنت تولید کنند.</li>
+</ol>
+<h3 id="data-structures">ساختارهای داده</h3>
+<pre dir="ltr"><code>adapter._pending_messages: Dict[session_key, MessageEvent]
+    └── Single "next-up" slot per session. Overwritten on repeat sends
+        (burst collapse). Shared with photo-burst follow-ups.
+
+self._queued_events: Dict[session_key, List[MessageEvent]]
+    └── Overflow buffer. Each /queue invocation appends here when the
+        slot is occupied. Promoted one-at-a-time after each drain.
+</code></pre>
+<h3 id="enqueue-_enqueue_fifo">افزودن به صف (<code>_enqueue_fifo</code>)</h3>
+<pre dir="ltr"><code>_enqueue_fifo(session_key, event, adapter)
+       │
+       ▼
+┌───────────────────────────────────────┐
+│ Is slot free?                         │
+│ (session_key NOT in _pending_messages)│── Yes ──► Place event in slot
+└───────────────────────────────────────┘
+       │ No
+       ▼
+Append to _queued_events[session_key] (overflow tail)
+</code></pre>
+<h3 id="dequeue--promotion-_promote_queued_event">برداشت از صف و انتقال به جایگاه بعدی (<code>_promote_queued_event</code>)</h3>
+<p>پس از مصرف پیامِ جایگاه، در محل تخلیهٔ صف فراخوانی می‌شود. اگر موردی در بافر سرریز وجود داشته باشد:</p>
+<ul>
+<li>وقتی <code>pending_event is None</code> است (جایگاه خالی بوده)، نخستین مورد سرریز را به‌عنوان رویداد جدید برمی‌گرداند.</li>
+<li>وقتی <code>pending_event</code> وجود دارد، نخستین مورد سرریز را برای فراخوانی بازگشتی بعدی در جایگاه قرار می‌دهد.</li>
+<li>اگر اتصال‌دهنده‌ای در دسترس نباشد، مورد را به <code>_queued_events</code> برمی‌گرداند (آن را بی‌سروصدا حذف نمی‌کند).</li>
+</ul>
+<h3 id="queue-depth">عمق صف</h3>
+<p><code>_queue_depth(session_key, adapter)</code> مقدار <code>len(overflow) + (1 if slot occupied else 0)</code> را برمی‌گرداند.</p>
+<h3 id="clearing">پاک‌کردن</h3>
+<p>رویدادهای صف‌شدهٔ یک نشست با <code>/new</code> و <code>/reset</code> پاک می‌شوند (از طریق <code>_handle_reset_command</code>).</p>
+<h3 id="fifo-invariant">اصل ثابت FIFO</h3>
+<p>هر فراخوانی <code>/queue</code> دقیقاً یک نوبت کامل ایجنت تولید می‌کند؛ با ترتیب ورود به صف (FIFO) و بدون ادغام. طراحیِ جایگاه تک‌پیامیِ <code>_pending_messages</code> به‌همراه سرریزِ <code>_queued_events</code> تضمین می‌کند ارسال‌های مکرر در طول یک نوبت فعال، باعث پردازش خارج از ترتیب نشوند.</p>
+</section>
+<hr>
+<section class="doc-sec">
+<h2 id="9-session-context-injection"><span class="secnum">۱۰</span> تزریق زمینهٔ نشست</h2>
+<p><code>SessionContext</code> از یک <code>SessionSource</code> و <code>GatewayConfig</code> ساخته و به پرامپت سیستم ایجنت تزریق می‌شود. این زمینه به ایجنت می‌گوید:</p>
+<ul>
+<li>پیام فعلی از کجا آمده است؛</li>
+<li>چه پلتفرم‌هایی متصل هستند؛</li>
+<li>خروجی وظایف زمان‌بندی‌شده را به کجا می‌تواند تحویل دهد؛</li>
+<li>آیا این نشست، چندکاربره و مشترک است یا نه.</li>
+</ul>
+<h3 id="construction-build_session_context">ساخت (<code>build_session_context</code>)</h3>
+<pre dir="ltr"><code>def build_session_context(source, config, session_entry=None) -&gt; SessionContext
+</code></pre>
+<ol>
+<li>پلتفرم‌های متصل را از پیکربندی گردآوری می‌کند.</li>
+<li>کانال‌های خانهٔ هر پلتفرم را گردآوری می‌کند.</li>
+<li><code>shared_multi_user_session</code> را از طریق <code>is_shared_multi_user_session()</code> تعیین می‌کند.</li>
+<li>اگر <code>session_entry</code> ارائه شده باشد، فرادادهٔ نشست (کلید، شناسه و برچسب‌های زمانی) را پیوست می‌کند.</li>
+</ol>
+<h3 id="pii-redaction-build_session_context_prompt">پوشاندن اطلاعات هویتی شخصی (<code>build_session_context_prompt</code>)</h3>
+<p>بخش پویای پرامپت سیستم (<code>## Current Session Context</code>) می‌تواند به‌صورت اختیاری، پیش از ارسال به LLM اطلاعات قابل‌شناساییِ شخصی را بپوشاند:</p>
+<ul>
+<li>شناسه‌های کاربر ← <code>user_&lt;12hex&gt;</code> (پیشوند SHA-256)</li>
+<li>شناسه‌های چت ← <code>&lt;platform&gt;:&lt;12hex&gt;</code> یا فقط <code>&lt;12hex&gt;</code></li>
+<li>پلتفرم‌های مستثنا از پوشاندن: Discord (برای <code>@mentions</code> به شناسه‌های خام نیاز دارد) و هر پلتفرمی که افزونه ثبت کرده باشد و با <code>pii_safe</code> علامت‌گذاری نشده باشد.</li>
+</ul>
+<p>پوشاندن اطلاعات فقط بر متن پرامپت سیستم اعمال می‌شود. مسیریابی، کلیدهای نشست و عملیات اتصال‌دهنده همیشه از مقادیر اصلی استفاده می‌کنند.</p>
+</section>
+<hr>
+<section class="doc-sec">
+<h2 id="10-background-housekeeping"><span class="secnum">۱۱</span> نگهداشت در پس‌زمینه</h2>
+<p><code>_session_housekeeping_watcher</code> به‌طور دوره‌ای ایجنت‌های بی‌فعالیتِ کش‌شده را پاک‌سازی می‌کند، در شرایط فشار حافظه ورودی‌های کش را کنار می‌گذارد و هر ساعت ورودی‌های مسیریابی قدیمی را حذف می‌کند. این پایشگر هرگز رونوشت گفتگو را به‌دلیل بی‌فعالیتی یا ساعت روز پایان نمی‌دهد.</p>
+<p>حذف ناشی از TTL، LRU و فشار حافظه، پیش از آزادسازی نرم کلاینت‌ها، رونوشت زنده را در ارائه‌دهندگان حافظه ثبت می‌کند. نوبت‌های فعال همچنان محافظت می‌شوند؛ منابع ترمینال، مرورگر و فرایندهای پس‌زمینه پس از آزادسازی نرم باقی می‌مانند. حذف ورودی مسیریابی، رونوشت مرجع SQLite را حفظ می‌کند و فرایندهای زنده از ورودی‌های مسیریابی خود در برابر حذف محافظت می‌کنند. پرچم‌های تاریخیِ <code>expiry_finalized</code> همچنان مرزهای بازدارندهٔ بازیابی هستند، اما دیگر پایشگر تایمر آن‌ها را نمی‌نویسد.</p>
+</section>
+<hr>
+<section class="doc-sec">
+<h2 id="11-agent-cache"><span class="secnum">۱۲</span> کش ایجنت</h2>
+<p>گیت‌وی یک کش LRU از نمونه‌های <code>AIAgent</code> با کلید <code>session_key</code> نگه می‌دارد تا کش پرامپت میان نوبت‌ها حفظ شود.</p>
+<h3 id="cache-properties">ویژگی‌های کش</h3>
+<ul>
+<li><strong>حداکثر اندازه:</strong> ۱۲۸ ورودی (<code>agent.agent_cache.max_size</code>، پیش‌فرض <code>_AGENT_CACHE_MAX_SIZE</code>).</li>
+<li><strong>سیاست حذف:</strong> حذف موردی که بیشترین زمان از آخرین استفاده‌اش گذشته است (LRU از طریق <code>OrderedDict</code>).</li>
+<li><strong>TTL بی‌فعالیتی:</strong> ۳۶۰۰ ثانیه (۱ ساعت) — <code>agent.agent_cache.idle_ttl_secs</code>، که <code>_session_housekeeping_watcher</code> آن را اعمال می‌کند.</li>
+<li><strong>بودجهٔ حافظه:</strong> <code>agent.agent_cache.memory_high_mb</code> (پیش‌فرض <code>auto</code>) — توضیح پایین را ببینید.</li>
+<li><strong>قفل:</strong> <code>_agent_cache_lock</code> (از threading) برای ایمنی در برابر دسترسی هم‌زمان رشته‌ها.</li>
+</ul>
+<h3 id="memory-pressure-eviction">حذف از کش در شرایط فشار حافظه</h3>
+<p>ایجنت کش‌شده، <code>_session_messages</code> یعنی رونوشت زندهٔ کامل شامل خروجی ابزارها را در حافظه نگه می‌دارد؛ در نشستی با بیش از ۱۰۰ فراخوانی ابزار، این حجم به ده‌ها مگابایت می‌رسد. هم سقف تعداد ورودی‌ها و هم TTL بی‌فعالیتی از این حجم بی‌خبرند: گیت‌وی‌ای که به چت‌های زیادی سرویس می‌دهد، همهٔ رونوشت‌های اخیراً استفاده‌شده را در حافظه نگه می‌دارد (ایجنت‌هایی که در بازهٔ TTL نوبتی داشته‌اند، هرگز در پاک‌سازی بی‌فعالیتی حذف نمی‌شوند). در نتیجه RSS افزایش می‌یابد تا زمانی که cgroup محدودسازی را اعمال کند و SIGTERM دیگر نتواند داده‌های باقی‌مانده را در مهلت توقف systemd ثبت کند (#80764).</p>
+<p><code>_sweep_agent_cache_under_pressure()</code> سازوکار مهار این فشار است. در هر تیک پایشگر، حافظهٔ ناشناس را با <code>memory_high_mb</code> مقایسه می‌کند؛ اگر گیت‌وی تحت محدودیت cgroup اجرا شود، مقدار <code>anon</code> از <code>memory.stat</code> خود cgroup ملاک است (همان محدوده‌ای که مصرف آن از بودجه کسر می‌شود، بنابراین فرزندان همان واحد، مانند کرنل‌های <code>execute_code</code> نیز شمرده می‌شوند؛ #110549). در غیر این صورت، RSS ناشناسِ خود فرایند ملاک است. در صورت عبور از بودجه، ایجنت‌های LRU را از همان مسیر نرمِ مورد استفادهٔ سازوکار اعمال سقف (<code>_commit_then_release_soft</code>) حذف می‌کند؛ سپس <code>malloc_trim</code> را اجرا می‌کند تا نواحی حافظهٔ آزادشده واقعاً به سیستم‌عامل برگردند. نشست‌های حذف‌شده در نوبت بعدی، رونوشت خود را از نشست ذخیره‌شده بازسازی می‌کنند.</p>
+<p>سه دسته از نشست‌ها هرگز کنار گذاشته نمی‌شوند:</p>
+<ul>
+<li>ایجنت‌هایی که در حال حاضر در میانهٔ نوبت هستند (کلاینت‌ها و سندباکس‌هایشان در حال استفاده‌اند)؛</li>
+<li>به‌تعداد <code>protect_recent</code> از نشست‌هایی که اخیراً استفاده شده‌اند (کش پرامپت آن‌ها بیشترین ارزش را دارد)؛</li>
+<li>هر نشستی که ذخیرهٔ رونوشت زنده‌اش روی دیسک هنوز کامل نشده باشد؛ <code>transcript_persistence_caught_up()</code> مقدار <code>_last_flushed_db_idx</code> را با <code>len(_session_messages)</code> مقایسه می‌کند؛ همان اختلافی که محافظِ جلوگیری از خرابی نوشتن FTS به آن واکنش نشان می‌دهد و تاریخچهٔ زنده را بر رونوشت عقب‌مانده ترجیح می‌دهد.</li>
+</ul>
+<p><code>memory_high_mb: auto</code> بودجه را از محدودیت cgroup محل اجرای گیت‌وی استخراج می‌کند (ابتدا <code>memory.high</code>، سپس <code>memory.max</code> و بعد cgroup v1)؛ اگر محدودیتی وجود نداشته باشد، کل RAM مبنا قرار می‌گیرد. برای تعیین بودجهٔ ثابت، یک عدد تنظیم کنید؛ یا برای غیرفعال‌کردن کامل این گذر، <code>0</code> یا <code>off</code> را قرار دهید. توابع کمکی در <code>gateway/agent_cache_pressure.py</code> قرار دارند.</p>
+<h3 id="cache-lifecycle">چرخهٔ حیات کش</h3>
+<pre dir="ltr"><code>Message arrives
+    │
+    ▼
+get_or_create_session()  →  session_key obtained
+    │
+    ▼
+Lookup _agent_cache[session_key]
+    │
+    ├── Hit → move_to_end(), reuse AIAgent (preserves prompt cache)
+    │
+    └── Miss → create new AIAgent, store in cache
+                (if at capacity, popitem(last=False) evicts LRU entry)
+    │
+    ▼
+run_conversation()  →  agent processes message
+    │
+    ▼
+Housekeeping soft-releases idle agents without ending transcripts
+</code></pre>
+<h3 id="cleanup-flow">جریان پاک‌سازی</h3>
+<p>حذف برای آزادسازی منابع، ایجنت کش‌شده را کنار می‌گذارد و پیش از آزادسازی نرم کلاینت‌ها، حافظه را ثبت می‌کند. پاک‌سازی کامل با <code>_cleanup_agent_resources(agent)</code> فقط برای مرزهای واقعی گفتگو و خاموش‌شدن در نظر گرفته شده است.</p>
+</section>
+<hr>
+<section class="doc-sec">
+<h2 id="appendix-key-configuration"><span class="secnum">۱۳</span> پیوست: تنظیمات اصلی</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>کلید پیکربندی</th><th>نوع</th><th>پیش‌فرض</th><th>توضیح</th></tr></thead>
+<tbody>
+<tr><td><code>group_sessions_per_user</code></td><td><code>bool</code></td><td><code>true</code></td><td>جداسازی نشست‌های گروه و کانال به‌ازای هر کاربر</td></tr>
+<tr><td><code>thread_sessions_per_user</code></td><td><code>bool</code></td><td><code>false</code></td><td>جداسازی نشست‌های رشته به‌ازای هر کاربر</td></tr>
+<tr><td><code>session_store_max_age_days</code></td><td><code>int</code></td><td><code>0</code></td><td>حذف نشست‌های قدیمی‌تر از N روز (۰ = غیرفعال)</td></tr>
+<tr><td><code>agent.gateway_auto_continue_freshness</code></td><td><code>int</code></td><td><code>3600</code></td><td>طول پنجرهٔ تازگی برای ازسرگیری، بر حسب ثانیه</td></tr>
+<tr><td><code>agent.gateway_timeout</code></td><td><code>int</code></td><td><code>1800</code></td><td>مهلت نوبت ایجنت (پیش‌فرض ۳۰ دقیقه)</td></tr>
+<tr><td><code>agent.agent_cache.max_size</code></td><td><code>int</code></td><td><code>128</code></td><td>سقف تعداد ورودی‌های LRU برای نمونه‌های کش‌شدهٔ AIAgent</td></tr>
+<tr><td><code>agent.agent_cache.idle_ttl_secs</code></td><td><code>int</code></td><td><code>3600</code></td><td>حذف ایجنت‌هایی که به این مدت بی‌فعالیت بوده‌اند</td></tr>
+<tr><td><code>agent.agent_cache.memory_high_mb</code></td><td><code>int</code>/<code>str</code></td><td><code>auto</code></td><td>بودجهٔ RSS ناشناس که با عبور از آن، رونوشت‌ها به‌ترتیب LRU کنار گذاشته می‌شوند</td></tr>
+<tr><td><code>agent.agent_cache.max_evictions_per_pass</code></td><td><code>int</code></td><td><code>16</code></td><td>سقف تعداد نشست‌های کنارگذاشته‌شده در هر گذر کنترل فشار حافظه</td></tr>
+<tr><td><code>agent.agent_cache.protect_recent</code></td><td><code>int</code></td><td><code>8</code></td><td>نشست‌های اخیراً استفاده‌شده (MRU) که گذر کنترل فشار هرگز به آن‌ها دست نمی‌زند</td></tr>
+</tbody>
+</table></div>
+</section>
+<section class="doc-sec">
+<h2 id="state-database-and-fts-recovery"><span class="secnum">۱۴</span> پایگاه دادهٔ وضعیت و بازیابی FTS</h2>
+<p>رونوشت مرجع در جدول‌های <code>sessions</code> و <code>messages</code> قرار دارد. جدول‌های FTS5 و تریگرهای همگام‌سازی آن‌ها، نمایه‌های مشتق‌شده‌ای هستند که می‌توان بدون حذف پیام‌های مرجع، آن‌ها را جدا و بازسازی کرد. برای آشنایی با حالت خرابیِ محدود در زمان اجرا و رویهٔ صریح ترمیم، <a href="state-db-recovery.html">بازیابی پایگاه دادهٔ وضعیت</a> را ببینید.</p>
+<h3 id="conversation-lifetime">طول عمر گفتگو</h3>
+<p>هیچ تنظیمی برای بازنشانی بر اثر بی‌فعالیتی یا بازنشانی روزانه پشتیبانی نمی‌شود. فرمان‌های صریح <code>/new</code> و <code>/reset</code>، فشرده‌سازی، تعلیق و بازیابی پس از خرابی، هر کدام نقش جداگانهٔ خود را در چرخهٔ حیات حفظ می‌کنند.</p>
+</section>
+
+<div class="pager"><a class="prev" href="gateway-monitoring.html"><span class="dir">→ قبلی</span><span class="ttl">پایش گیت‌وی</span></a><a class="next" href="micro-compaction.html"><span class="dir">بعدی ←</span><span class="ttl">فشرده‌سازی خرد</span></a></div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/gateway-session-lifecycle" target="_blank" rel="noopener">Gateway Session Lifecycle</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">&#9749; حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -30,7 +30,7 @@
 <p>هوک‌های ناظر Hermes قرارداد تله‌متریِ فقط‌خواندنی برای افزونه‌هایی هستند که باید روند اجرای ایجنت را بدون تغییر رفتار زمان اجرا بازسازی کنند. این قرارداد از یکپارچه‌سازی‌های ردیابی، سنجه‌ها، ممیزی، بازپخش و صدور داده پشتیبانی می‌کند؛ از جمله Langfuse، گردآورنده‌های به‌سبک OpenTelemetry و NeMo Relay.</p>
 <p>هوک‌های ناظر عمداً به هیچ بک‌اندی وابسته نیستند. آن‌ها رویدادهای پایدار چرخهٔ حیات، شناسه‌های هم‌بستگی، محموله‌های پاک‌سازی‌شده، زمان‌بندی، وضعیت و فیلدهای خطا را در دسترس قرار می‌دهند. این هوک‌ها جایگزین برنامه‌ریز Hermes، ارائه‌دهندگان مدل، حافظه، رجیستری ابزارها، تجربهٔ کاربری تأیید، CLI، رفتار گیت‌وی یا معنای عملیاتی اجرا نمی‌شوند.</p>
 <p>پوشاننده‌های درخواست یا اجرا که رفتار را تغییر می‌دهند، خارج از این قرارداد ناظر هستند. هوک‌های ناظر باید آنچه رخ داده است را گزارش کنند؛ نباید درخواست‌های ارائه‌دهنده، آرگومان‌های ابزار یا توابع بازفراخوانِ اجرا را جایگزین کنند.</p>
-<p>Hermes همچنین یک مسیر رسمی و داخلی برای سنجه‌های مشترک NeMo Relay دارد. این مسیر مستقیماً از همین مرزهای چرخهٔ حیات استفاده می‌کند و نیازی به فعال‌کردن افزونهٔ مشاهده‌پذیری ندارد. به <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/relay-shared-metrics" target="_blank" rel="noopener">سنجه‌های مشترک Relay</a> مراجعه کنید.</p>
+<p>Hermes همچنین یک مسیر رسمی و داخلی برای سنجه‌های مشترک NeMo Relay دارد. این مسیر مستقیماً از همین مرزهای چرخهٔ حیات استفاده می‌کند و نیازی به فعال‌کردن افزونهٔ مشاهده‌پذیری ندارد. به <a href="relay-shared-metrics.html">سنجه‌های مشترک Relay</a> مراجعه کنید.</p>
 <section class="doc-sec">
 <h2 id="contract"><span class="secnum">۱</span> قرارداد</h2>
 <p>افزونه‌ها توابع بازفراخوانِ ناظر را از داخل <code>register(ctx)</code> ثبت می‌کنند:</p>
@@ -263,10 +263,10 @@ def on_post_tool_call(**kwargs):
 <section class="doc-sec">
 <h2 id="existing-consumers"><span class="secnum">۷</span> مصرف‌کنندگان موجود</h2>
 <p>افزونهٔ Langfuse که همراه Hermes عرضه می‌شود، نمونه‌ای از مشاهده‌پذیری مستقیم مبتنی بر هوک برای نوبت‌ها، درخواست‌های ارائه‌دهنده و فراخوانی‌های ابزار است.</p>
-<p>یکپارچه‌سازی بومی SDKِ NeMo Relay، چرخه‌های حیات نشست، نوبت، LLM و ابزار در Hermes را به Relay نگاشت می‌کند. پیکربندی صریح افزونه‌های Relay می‌تواند صادرکننده‌های <a href="https://docs.nvidia.com/nemo/relay/configure-plugins/observability/about" target="_blank" rel="noopener">ATOF، ATIF یا OTEL</a> و میان‌افزار اجرا را اضافه کند؛ به <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/relay-shared-metrics" target="_blank" rel="noopener">سنجه‌های مشترک Relay</a> مراجعه کنید.</p>
+<p>یکپارچه‌سازی بومی SDKِ NeMo Relay، چرخه‌های حیات نشست، نوبت، LLM و ابزار در Hermes را به Relay نگاشت می‌کند. پیکربندی صریح افزونه‌های Relay می‌تواند صادرکننده‌های <a href="https://docs.nvidia.com/nemo/relay/configure-plugins/observability/about" target="_blank" rel="noopener">ATOF، ATIF یا OTEL</a> و میان‌افزار اجرا را اضافه کند؛ به <a href="relay-shared-metrics.html">سنجه‌های مشترک Relay</a> مراجعه کنید.</p>
 </section>
 
-<div class="pager"><span class="off prev"><span class="dir">→ قبلی</span><span class="ttl">گیت‌وی چندگانه‌ساز</span></span><span class="off next"><span class="dir">بعدی ←</span><span class="ttl">قرارداد اتصال‌دهندهٔ Relay</span></span></div>
+<div class="pager"><a class="prev" href="multiplexing-gateway.html"><span class="dir">→ قبلی</span><span class="ttl">گیت‌وی چندگانه‌ساز</span></a><span class="off next"><span class="dir">بعدی ←</span><span class="ttl">قرارداد اتصال‌دهندهٔ Relay</span></span></div>
 </main>
 </div>
 <footer class="page-footer">
