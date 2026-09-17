@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پایش گیت‌وی — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">&#x1FABD;</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/gateway-monitoring" target="_blank" rel="noopener">&#127760; نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">&#11088; GitHub</a>
+      <button class="icon-btn" id="themeToggle">&#127769; حالت شب</button>
+      <button class="icon-btn" id="printBtn">&#128424; چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>پایش گیت‌وی</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1 id="gateway-monitoring">پایش گیت‌وی</h1>
+<p>پایش سلامت سرویس به‌همراه اطلاعات ساخت‌یافتهٔ عیب‌یابی عملیاتی برای دیمون گیت‌وی Hermes؛ این داده‌ها از طریق OTLP/HTTP به نقطهٔ پایانیِ پیکربندی‌شده توسط اپراتور صادر می‌شوند؛ مانند OpenTelemetry Collector، DataDog یا هر گیرندهٔ OTLP دیگری.</p>
+<p>این لایه بنا بر ساختارش فاقد محتوای کاربر است. وضعیت چرخهٔ حیات گیت‌وی و cron، سلامت اتصال‌دهنده‌های پلتفرم و اطلاعات عیب‌یابیِ هشدار و خطای بدون محتوا را صادر می‌کند. هرگز پرامپت‌ها، پیام‌ها، آرگومان‌ها یا نتایج ابزار، نام کارها، مقصدها، زمان‌بندی‌ها، خطاهای خام، تاریخچهٔ نشست، تحلیل‌های مصرف، گزارش‌های ممیزی یا ردگیری‌های تفصیلی اجرا را صادر نمی‌کند. ثبت مسیر اجرای فرایندها، مدل‌ها و ابزارها لایه‌ای جداگانه است که یکپارچه‌سازی بومی Hermes با SDKِ NeMo Relay و مشترکان یا صادرکننده‌های Relay که صریحاً پیکربندی شده‌اند، آن را ارائه می‌کنند.</p>
+<section class="doc-sec">
+<h2 id="what-gets-exported"><span class="secnum">۱</span> چه داده‌هایی صادر می‌شوند</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>سیگنال</th><th>مسیر OTLP</th><th>محتوا</th></tr></thead>
+<tbody>
+<tr><td>سنجه‌های لحظه‌ای گیت‌وی</td><td><code>/v1/metrics</code></td><td><code>hermes.gateway.up/state/busy/drainable/active_agents/background_work/background_delegations/restart_requested</code> و <code>hermes.platform.up/degraded</code> با ویژگی‌های <code>error_code</code> دارای مجموعه‌مقادیر محدود</td></tr>
+<tr><td>رویدادهای سلامت و چرخهٔ حیات</td><td><code>/v1/traces</code></td><td>گذارهای وضعیتِ <code>gateway.lifecycle</code> (<code>starting -&gt; running -&gt; draining -&gt; stopped</code>، <code>startup_failed</code> و خروج)، <code>gateway.health_snapshot</code> و تغییرات وضعیت پلتفرم</td></tr>
+<tr><td>اطلاعات عیب‌یابی</td><td><code>/v1/logs</code></td><td>رویدادهای هشدار و خطای گیت‌وی با بدنه‌ای ثابت و ویژگی‌های زیرسامانه، شدت، ردهٔ خطا و کد خطا با مجموعه‌مقادیر محدود؛ متن نهاییِ پیام‌های لاگ هرگز صادر نمی‌شود</td></tr>
+<tr><td>سنجه‌های لحظه‌ای زمان‌بند cron</td><td><code>/v1/metrics</code></td><td>ضربان حیاتِ تیک‌زن و زمان سپری‌شده از آخرین موفقیت (در صورت نبود داده، حذف می‌شوند)، شمارندهٔ یکنواختِ رخدادهای جبرانی از شاخهٔ پنجرهٔ زمانیِ عقب‌افتاده در زمان‌بند، تعداد کارهای فعال و در حال اجرا، و تعداد کارهای عقب‌افتاده که از <code>next_run_at</code> ذخیره‌شده و قاعدهٔ مهلت ارفاقیِ موجودِ زمان‌بند به دست می‌آید</td></tr>
+<tr><td>چرخهٔ حیات اجرای cron</td><td><code>/v1/traces</code></td><td>وضعیت‌های پایدارِ <code>claimed/running/completed/failed/unknown</code>، مبدأ و ردهٔ خطا با مجموعه‌مقادیر محدود، کلید هش‌شده و غیرقابل‌شناساییِ کار، مدت سپری‌شده در صورت وجود برچسب‌های زمانی، و نتیجهٔ تحویل در صورت اطلاع زمان‌بند؛ وضعیت‌های پایانی یک بار برای ارسال فوریِ داده‌های باقی‌مانده با رویکرد ادامهٔ کار در صورت شکست تلاش می‌کنند که ممکن است تکمیل کار را تا یک ثانیه به تأخیر بیندازد</td></tr>
+</tbody>
+</table></div>
+<p>سیگنال‌ها شامل <code>service.name</code>، نسخه، حالت نظارت بر فرایند و یک هش یک‌طرفهٔ پایدار از شناسهٔ نصب هستند؛ بنابراین اپراتور می‌تواند نمونه‌ها را بدون صدور هویت حساب یا پروفایل، یا شناسهٔ خام نصب، از یکدیگر تشخیص دهد.</p>
+<p><code>hermes.gateway.active_agents</code>، <code>hermes.gateway.background_work</code> و <code>hermes.gateway.background_delegations</code> مکمل یکدیگرند. <code>active_agents</code> نوبت‌های پردازش پیام در پیش‌زمینه، کارهای cron در حال اجرا و اجراهای API را می‌شمارد؛ یعنی کارهایی که گیت‌وی هنگام خاموش‌شدن منتظر پایانشان می‌ماند. <code>background_work</code> کارهای جداشده‌ای را می‌شمارد که هرگز در <code>active_agents</code> لحاظ نمی‌شوند: زیرایجنت‌های <code>delegate_task</code> که به پس‌زمینه رفته‌اند، فرایندهای <code>terminal(background=true)</code> و کارگرهای کانبان. این شمارش <strong>در سطح تک‌تک وظیفه‌ها</strong> است؛ یک دستهٔ منشعب‌شده شامل N زیرایجنت، N واحد شمرده می‌شود؛ بنابراین بار واقعیِ زیرایجنت‌های هم‌زمان را نشان می‌دهد. <code>background_delegations</code> فقط <strong>واحدهای</strong> واگذاری ناهمگام را می‌شمارد (هر ارسالِ <code>delegate_task</code> یک واحد است و یک دستهٔ منشعب‌شده نیز یک واحد محسوب می‌شود) و با شیوهٔ محاسبهٔ ظرفیت مخزن ناهمگام مطابقت دارد؛ برای مشاهدهٔ فشار بر جایگاه‌های ظرفیت، هشدار آن را نسبت به <code>delegation.max_concurrent_children</code> تنظیم کنید. برای تعداد کل کارهای زنده در هر نمونه، <code>active_agents</code> و <code>background_work</code> را جمع کنید؛ برای اشباع مخزن، از <code>background_delegations</code> استفاده کنید.</p>
+</section>
+<section class="doc-sec">
+<h2 id="enabling"><span class="secnum">۲</span> فعال‌سازی</h2>
+<pre dir="ltr"><code># config.yaml
+monitoring:
+  gateway_health_export:
+    enabled: true
+  export:
+    otlp:
+      enabled: true
+      endpoint: http://collector-host:4318/v1/traces   # metrics/logs derive
+      headers_env: {}   # header name -&gt; ENV VAR NAME (values never stored)
+</code></pre>
+<p>وضعیت پیکربندی را هر زمان بررسی کنید:</p>
+<pre dir="ltr"><code>hermes monitoring status
+</code></pre>
+<p>SDKِ OpenTelemetry یک افزونهٔ اختیاری است (<code>pip install 'hermes-agent[otlp]'</code>) که هنگام نخستین استفاده نصب می‌شود. اگر SDK موجود نباشد یا نقطهٔ پایانی از دسترس خارج شود، گیت‌وی بدون اختلال به کار ادامه می‌دهد: گردآوری سنجه‌ها و صدور رویدادهای معمول خارج از مسیر حساس به کارایی باقی می‌مانند؛ اما رویدادهای پایانی cron یک بار، با محدودیت حداکثر یک ثانیه و رویکرد ادامهٔ کار در صورت شکست (<code>fail-open</code>)، برای ارسال فوریِ داده‌های باقی‌مانده تلاش می‌کنند تا احتمال از دست رفتن وضعیت نهایی کمتر شود.</p>
+<p>این سازوکار تحت نظارت systemd/launchd/s6، در کانتینرها، در tmux یا با اجرای سادهٔ <code>hermes gateway run</code> یکسان عمل می‌کند: صادرکننده درون فرایند گیت‌وی قرار دارد؛ بنابراین روی میزبان به سایدکار، ایجنت یا گردآورنده نیازی نیست.</p>
+</section>
+<section class="doc-sec">
+<h2 id="collecting-into-datadog"><span class="secnum">۳</span> گردآوری داده‌ها در DataDog</h2>
+<p>یک OpenTelemetry Collector تحت مالکیت مشتری اجرا کنید و داده‌ها را به مقصد بفرستید:</p>
+<pre dir="ltr"><code># otel-collector config
+receivers:
+  otlp:
+    protocols:
+      http:
+exporters:
+  datadog:
+    api:
+      key: ${env:DD_API_KEY}
+service:
+  pipelines:
+    metrics:   {receivers: [otlp], exporters: [datadog]}
+    traces:    {receivers: [otlp], exporters: [datadog]}
+    logs:      {receivers: [otlp], exporters: [datadog]}
+</code></pre>
+<p><code>monitoring.export.otlp.endpoint</code> را به گردآورنده اشاره دهید. هشدارها را بر پایهٔ <code>hermes.gateway.up</code>، <code>hermes.platform.up</code> و <code>hermes.platform.degraded</code> تنظیم کنید.</p>
+</section>
+<section class="doc-sec">
+<h2 id="generic-fleet-queries-and-alerts"><span class="secnum">۴</span> پرس‌وجوها و هشدارهای عمومی برای مجموعهٔ میزبان‌ها</h2>
+<p>نحو دقیق به بک‌اند مشاهده‌پذیریِ مشتری بستگی دارد. مثال‌های زیر از عبارت‌هایی به سبک PromQL استفاده می‌کنند و عمداً از مسیریابی مختص فروشنده، مقصدها یا فهرست دارایی‌های مشتری پرهیز می‌کنند.</p>
+<p>نماهای مجموعهٔ میزبان‌ها را بر اساس ویژگیِ غیرقابل‌شناساییِ منبع، یعنی <code>service.instance.id</code>، گروه‌بندی کنید. فرایندی که از کار افتاده است نمی‌تواند مقدار صفرِ خودش را ارسال کند؛ بنابراین هر استقرار هم به تشخیص وضعیت صریح و هم به تشخیص نبود سری زمانی نیاز دارد.</p>
+<pre dir="ltr"><code># Explicit gateway failure.
+hermes_gateway_up == 0
+
+# Box disappeared or stopped exporting. Choose a window longer than the
+# configured export interval and collector retry allowance.
+absent_over_time(hermes_gateway_up[5m])
+
+# Locally owned bridge is explicitly down.
+hermes_platform_up == 0
+
+# Scheduler thread is stale even though the gateway may still be alive.
+hermes_cron_scheduler_heartbeat_age_seconds &gt; 180
+
+# Ticker loops but has not completed a successful tick recently.
+hermes_cron_scheduler_last_success_age_seconds &gt; 300
+
+# One or more jobs are beyond their existing scheduler grace window.
+hermes_cron_jobs_overdue &gt; 0
+
+# Catch-up counter increased, proving at least one stale occurrence was
+# collapsed and run once after a delay.
+increase(hermes_cron_scheduler_catch_up_occurrences[15m]) &gt; 0
+</code></pre>
+<p>رکوردهای چرخهٔ حیات اجرای cron به‌صورت اسپن‌های <code>hermes.cron_execution</code> می‌رسند. بر اساس ویژگی‌های دارای مجموعه‌مقادیر محدود، مانند موارد زیر، هشدار بدهید یا رویداد استخراج کنید:</p>
+<pre dir="ltr"><code>hermes.status = failed|unknown
+hermes.delivery_outcome = failed|not_configured
+hermes.error_class = auth_failed|rate_limited|timeout|network_error|
+                     dispatch_failed|interrupted|empty_response|
+                     invalid_config|unknown
+</code></pre>
+<p>نماهای پیشنهادی برای اپراتور:</p>
+<ol>
+<li>یک ردیف به‌ازای هر <code>service.instance.id</code>، شامل وضعیت گیت‌وی و پلتفرم‌های محلیِ پیکربندی‌شده؛</li>
+<li>ضربان حیات زمان‌بند، زمان سپری‌شده از آخرین موفقیت، تعداد کارهای در حال اجرا، تعداد کارهای عقب‌افتاده و افزایش شمارندهٔ رخدادهای جبرانی؛</li>
+<li>جریانی از رویدادهای چرخهٔ حیات cron که کلید آن فقط <code>hermes.job_key</code> غیرقابل‌شناسایی باشد؛</li>
+<li>هشدارهای جداگانه برای غیبت میزبان، قطع‌شدن پل محلی، توقف پیشرفت زمان‌بند، شکست یا وضعیت نامعلوم cron، شکست تحویل و فعالیت‌های مربوط به عقب‌افتادگی یا جبران آن.</li>
+</ol>
+<p>آستانه‌های هشدار و مسیریابی را در پیکربندیِ تحت مدیریت استقرار نگه دارید. صرفاً برای خواناتر کردن داشبورد، نام کارها، پرامپت‌ها، خروجی‌ها، زمان‌بندی‌ها، مقصدها، خطاهای خام، نام پروفایل‌ها یا هویت حساب را اضافه نکنید.</p>
+</section>
+<section class="doc-sec">
+<h2 id="release-validation-scenarios"><span class="secnum">۵</span> سناریوهای اعتبارسنجی انتشار</h2>
+<p>پیش از پذیرش یک استقرار، هر پنج حالت زیر را عمداً ایجاد کنید و از طریق گردآورنده و بک‌اند واقعی بررسی کنید:</p>
+<ol>
+<li><strong>موفقیت cron:</strong> گذار <code>claimed -&gt; running -&gt; completed</code>، مدت اجرا و نتیجهٔ تحویلِ مطابق با واقعیت را مشاهده کنید.</li>
+<li><strong>شکست cron:</strong> وضعیت <code>failed</code> را به‌همراه ردهٔ خطا از مجموعه‌مقادیر محدود مشاهده کنید؛ دادهٔ OTLP رمزگشایی‌شده نباید حاوی استثنای خام یا محتوا باشد.</li>
+<li><strong>قطع اجرای cron:</strong> گیت‌ویِ مسئول را هنگام اجرا متوقف کنید، آن را دوباره راه‌اندازی کنید و بازیابی به وضعیت <code>unknown</code> را مشاهده کنید.</li>
+<li><strong>قطعی پل تحت مدیریت محلی:</strong> یکی از اتصال‌دهنده‌های بومی را از کار بیندازید، وضعیت آن را در محدودهٔ ازکارافتاده، در حال تلاش مجدد یا خطای مهلک و سپس بازیابی‌اش مشاهده کنید، و مطمئن شوید میزبان‌های دیگر سالم باقی می‌مانند.</li>
+<li><strong>خاتمهٔ اجباری گیت‌وی:</strong> یکی از نمونه‌های آزمایشیِ استقرار را خاتمه دهید، تشخیص نبود سری زمانی را بررسی کنید، آن را دوباره راه‌اندازی کنید و تأیید کنید همان هویت غیرقابل‌شناساییِ نمونه بازمی‌گردد.</li>
+</ol>
+<p>سلامت لایهٔ انتقال Relay که تحت مالکیت Hermes Agent است، همچنان در محدودهٔ این پایش قرار دارد. یک سرویس جداگانهٔ گیت‌وی یا اتصال‌دهنده، برای هر وضعیت مشترکِ پلتفرم متصلی که مالک آن است، مرجع معتبر باقی می‌ماند و باید آن وضعیت را از مسیر تله‌متریِ خودش صادر کند.</p>
+<p>در هر سناریو، بررسی کنید که سیگنال و هشدار پس از بازیابی برطرف شوند، میزبان‌های دیگر تحت تأثیر قرار نگیرند، شکست گردآورنده مانع ادامهٔ کار نشود، و سنجه‌ها، اسپن‌ها، لاگ‌ها و ویژگی‌های منبعِ رمزگشایی‌شده همچنان فاقد محتوا باشند.</p>
+</section>
+<section class="doc-sec">
+<h2 id="local-smoke-test-no-docker"><span class="secnum">۶</span> آزمون اولیهٔ محلی (بدون Docker)</h2>
+<pre dir="ltr"><code># terminal 1: capture collector on :4318
+python scripts/observability/otel_capture_collector.py \
+  --host 127.0.0.1 --port 4318 --log /tmp/hermes_otel_capture.jsonl
+
+# terminal 2: drive the real exporter through lifecycle transitions,
+# a fatal platform, and a structured warning event, then flush
+python scripts/observability/gateway_health_export_probe.py \
+  --endpoint http://127.0.0.1:4318/v1/traces \
+  --log /tmp/hermes_otel_capture.jsonl --wait 8
+# exit 0 prints: {"requests": 6, "paths": ["/v1/logs", "/v1/metrics", "/v1/traces"]}
+</code></pre>
+</section>
+<section class="doc-sec">
+<h2 id="maintaining-and-extending-this-plane"><span class="secnum">۷</span> نگهداری و گسترش این لایه</h2>
+<p>این لایه به‌عمد دارای <strong>واژگانی ثابت، احصاشده و فاقد محتوا</strong> است. افزودن یک سیگنال صرفاً «ارسال یک سنجهٔ جدید» نیست؛ هر نام و ویژگی جدید باید در تک‌تک لایه‌هایی که این واژگان محدود را اعمال می‌کنند تعریف شود، وگرنه در مراحل بعدی بی‌سروصدا حذف می‌شود. چک‌لیست متناسب با تغییر خود را دنبال کنید. قاعدهٔ طلایی: <strong>سیگنال جدیدی که ارسال می‌شود اما در همهٔ لایه‌ها تعریف نشده است، ظاهراً شبیه اشکال کد به نظر می‌رسد، ولی در واقع اشکال در ثبت واژگان است؛ هیچ خطایی رخ نمی‌دهد، فقط سیگنال هرگز نمی‌رسد.</strong></p>
+<h3 id="content-free-invariant-applies-to-every-change">اصل تغییرناپذیرِ نبود محتوا (برای هر تغییر)</h3>
+<p>پیش از افزودن هر چیزی، مطمئن شوید نمی‌تواند حامل محتوا باشد. عددها، مقادیر بولی، زمان‌های سپری‌شده، مدت‌ها، شمارنده‌های یکنواخت و هش‌های یک‌طرفه ایمن هستند. <strong>هرگز</strong> ویژگی‌ای اضافه نکنید که بتواند نام کار، پرامپت، خروجی، زمان‌بندی، مقصد، متن خام استثنا، مسیر فایل، نام پروفایل، شناسهٔ حساب یا رشتهٔ آزاد را در خود جای دهد. اگر باید رکوردی را با کلید به یک کار یا موجودیت مرتبط کنید، کلید را هش کنید (<code>sha256(...)[:24]</code>؛ تابع <code>_job_key</code> در <code>agent/monitoring/cron_health.py</code> را ببینید)؛ هرگز شناسهٔ خام را ارسال نکنید. همهٔ ویژگی‌های رشته‌ای که ممکن است با ورودی کاربر ارتباط داشته باشند، باید از <code>redaction.redact_for_export</code> عبور کنند و طولشان محدود شود (تابع <code>_span_attrs</code> در <code>agent/monitoring/otlp_exporter.py</code> را ببینید).</p>
+<h3 id="adding-a-new-gaugemetric">افزودن یک سنجهٔ لحظه‌ای یا سنجهٔ جدید</h3>
+<ol>
+<li>آن را در سازندهٔ تصویر لحظه‌ای ارسال کنید (تابع <code>build_gateway_health_snapshot</code> در <code>agent/monitoring/gateway_health.py</code>، تابع <code>build_cron_health_snapshot</code> در <code>cron_health.py</code>، یا یک خوانشگر هم‌رده که به <code>_read_runtime_snapshot</code> در <code>gateway_health_export.py</code> متصل شده باشد). رویکرد بهترین تلاش را رعایت کنید: هرگز اجازه ندهید استثنای خوانشگر به حلقهٔ گردآوری نشت کند؛ آن را با مدیریت استثنا بپوشانید و <strong>یک هشدارِ بدون محتوا در سطح WARNING ثبت کنید که فقط نام نوع استثنا را داشته باشد</strong> (همان الگویی که خوانشگرهای cron و کار پس‌زمینه استفاده می‌کنند) تا پسرفت احتمالیِ آینده قابل مشاهده باشد، نه اینکه سیگنال بی‌سروصدا حذف شود.</li>
+<li>نام نقطه‌دار سنجه را در فهرست <code>metric_names</code> مربوط به سنجه‌های لحظه‌ایِ قابل مشاهده در <code>gateway_health_export.py::_start_metric_provider</code> ثبت کنید. <strong>سنجهٔ لحظه‌ای که در تصویر لحظه‌ای ارسال شود اما اینجا ثبت نشده باشد، هرگز مشاهده نمی‌شود.</strong></li>
+<li>ردیف مربوط به آن را در جدول داده‌های صادراتی و یک نمونهٔ هشدار را در همین فایل اضافه کنید.</li>
+<li>اگر در استقرار، یک OpenTelemetry Collector جلوی صادرکننده قرار دارد که از فهرست مجاز نام سنجه‌ها استفاده می‌کند (پردازندهٔ <code>filter/...</code> با شرط‌های محافظِ <code>name != "..."</code>)، نام جدید را آنجا هم اضافه کنید؛ وگرنه گردآورنده پیش از رسیدن سنجه به بک‌اند آن را حذف می‌کند. این تنظیم بخشی از کد مخزن نیست، اما رایج‌ترین دلیلِ ظاهرنشدن سنجهٔ جدیدی است که به‌درستی ارسال شده است؛ آن را در درخواست ادغام (PR) برجسته کنید تا اپراتورِ استقرار، پیکربندی گردآورنده را به‌روز کند.</li>
+</ol>
+<h3 id="adding-a-new-subsystem-a-new-family-of-signals">افزودن یک زیرسامانهٔ جدید (خانواده‌ای جدید از سیگنال‌ها)</h3>
+<p>الگوی cron را تکرار کنید (<code>cron_health.py</code> به‌همراه اتصالاتش): منطق خواندن و تبدیل به نمای مورد نیاز را در ماژولی مستقل قرار دهید، یک تابع <code>build_&lt;subsystem&gt;_health_snapshot()</code> ارائه کنید که سنجه‌های <code>GatewayMetric</code> با مقادیر محدود (و در صورت وجود، رویدادها) را برگرداند، و آن را با همان محافظِ try/except و هشدار WARNING با رویکرد بهترین تلاش، به <code>_read_runtime_snapshot</code> اضافه کنید. سپس چک‌لیست «افزودن سنجه» را برای هر نام جدید و چک‌لیست «افزودن ویژگی» را برای هر ویژگی جدید رویداد انجام دهید. در ادامه، یک سناریوی اعتبارسنجی انتشار برای حالت شکست آن زیرسامانه اضافه کنید.</p>
+<h3 id="extending-the-error-class--status--source--state-vocabularies">گسترش واژگان ردهٔ خطا، وضعیت، مبدأ و حالت</h3>
+<p>این‌ها شمارش‌های بسته‌ای هستند که مقادیر این لایه را محدود نگه می‌دارند. ابتدا مجموعهٔ مقادیر (SET) و سپس دسته‌بند را گسترش دهید؛ هیچ‌گاه یکی را بدون دیگری تغییر ندهید:</p>
+<ul>
+<li><strong>Cron</strong> (<code>agent/monitoring/cron_health.py</code>): مجموعه‌های <code>_KNOWN_STATUSES</code>، <code>_KNOWN_SOURCES</code> و <code>_KNOWN_DELIVERY_OUTCOMES</code> و گروه‌های کلیدواژه‌ایِ <code>classify_cron_error</code>. هر چیزی که در مجموعه نباشد، هنگام خروج به <code>unknown</code> تبدیل می‌شود؛ بنابراین مقدار جدیدی که به مجموعه اضافه نشده باشد، قابل مشاهده نیست.</li>
+<li><strong>گیت‌وی/پلتفرم</strong> (<code>agent/monitoring/gateway_health.py</code>): <code>_KNOWN_GATEWAY_STATES</code>، <code>_KNOWN_PLATFORM_STATES</code> و <code>classify_gateway_error</code>.</li>
+</ul>
+<p>قواعد: واژگان را کوچک و از نظر عملیاتی معنادار نگه دارید (ردهٔ خطا باید به اقدامی از سوی اپراتور مربوط باشد، نه به یک زیرکلاس استثنا)؛ گروه جدید باید بر اساس کلیدواژه‌ای پایدار تطبیق داده شود، نه متن پیامی که ممکن است تغییر کند؛ فهرست <code>hermes.error_class = ...</code> در بخش هشدارهای همین فایل و آزمون واحدِ شمارش را به‌روز کنید تا قرارداد بررسی شود، نه اینکه صرفاً تعداد ثابتی از مقادیر تثبیت شود.</p>
+<h3 id="adding-a-content-free-attribute-to-an-existing-eventspan">افزودن ویژگیِ بدون محتوا به رویداد یا اسپن موجود</h3>
+<p>کلید را به فهرست مجازِ مختص هر نوع، یعنی <code>keep_by_kind</code>، در <code>agent/monitoring/otlp_exporter.py::_span_attrs</code> اضافه کنید (کلیدهای خارج از فهرست حذف می‌شوند). اگر مقدار آن حتی گاهی از نوع رشته است، آن را از پالایش اطلاعات حساس عبور دهید؛ و همانند سنجه‌ها، اگر گردآورندهٔ استقرار فهرست مجازِ <code>keep_keys(...)</code> برای ویژگی‌های اسپن دارد، ویژگی را آنجا هم اضافه کنید، وگرنه در مسیر انتقال حذف خواهد شد.</p>
+<h3 id="verify-the-whole-chain-not-just-emission">کل زنجیره را بررسی کنید، نه فقط ارسال را</h3>
+<p>ارسال لازم است، اما کافی نیست. مطمئن شوید سیگنال در تمام مسیر تا بک‌اند حفظ می‌شود؛ زیرا شمارش‌ها، ثبت در <code>metric_names</code>، فهرست مجاز ویژگی‌های فرستنده و هر فهرست مجاز در گردآورنده، همگی مقادیر خارج از فهرست را بدون خطا حذف می‌کنند:</p>
+<pre dir="ltr"><code>hermes monitoring status                 # posture
+python scripts/observability/gateway_health_export_probe.py \
+  --endpoint http://127.0.0.1:4318/v1/traces \
+  --log /tmp/cap.jsonl --wait 8          # drive the real exporter
+</code></pre>
+<p>دادهٔ OTLP ثبت‌شده را رمزگشایی کنید و بررسی کنید که نام یا ویژگی جدید وجود دارد <strong>و</strong> هیچ محتوایی نشت نکرده است. وقتی یک گردآورندهٔ واقعی در مسیر قرار دارد، مدخل‌های فهرست مجاز آن را اضافه کنید و دوباره در بک‌اند بررسی کنید، نه فقط در داده‌های ثبت‌شدهٔ محلی.</p>
+</section>
+<section class="doc-sec">
+<h2 id="boundaries-and-roadmap"><span class="secnum">۸</span> مرزها و نقشهٔ راه</h2>
+<p>رابط خط فرمانِ <code>hermes monitoring</code> عمداً فقط <code>status</code> را ارائه می‌کند. این انتشار نخست تنها سیگنال‌های سلامت سرویس و عیب‌یابی عملیاتیِ تحت مالکیت Hermes Agent، از جمله سلامت لایهٔ انتقال Relay تحت مالکیت Hermes Agent را پوشش می‌دهد. وضعیت مشترکِ اتصال‌دهنده یا پلتفرم که مرجع معتبر آن Team Gateway است، صریحاً خارج از محدوده قرار دارد؛ تحلیل محصول، گزارش‌دهی ممیزی و کیفیت و ردگیری‌های تفصیلی اجرا نیز همین‌طور. سنجه‌های مصرف مشترکِ کلاینت‌ها و تله‌متری ردگیریِ سازمانی، بر بستر یکپارچه‌سازی NeMo Relay و با مرزهای مستقلِ رضایت، سیاست و صدور داده در حال طراحی هستند؛ این لایهٔ پایش محدود باقی می‌ماند تا اپراتور بتواند آن را بدون دست‌زدن به هیچ سیگنال حامل محتوا فعال کند. با ارائهٔ آن قابلیت‌ها، ممکن است ساختار تله‌متری بازسازمان‌دهی شود.</p>
+</section>
+
+<div class="pager"><a class="prev" href="completion-backlog-delivery.html"><span class="dir">→ قبلی</span><span class="ttl">تحویل پاسخ‌های تکمیل‌شدهٔ معوق</span></a><span class="off next"><span class="dir">بعدی ←</span><span class="ttl">چرخهٔ حیات نشست گیت‌وی</span></span></div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/gateway-monitoring" target="_blank" rel="noopener">Gateway Monitoring</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">&#9749; حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قرارداد Cron مدیریت‌شدهٔ Chronos — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">&#x1FABD;</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/chronos-managed-cron-contract" target="_blank" rel="noopener">&#x1F310; نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">&#x2B50; GitHub</a>
+      <button class="icon-btn" id="themeToggle">&#x1F319; حالت شب</button>
+      <button class="icon-btn" id="printBtn">&#x1F5A8; چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>قرارداد Cron مدیریت‌شدهٔ Chronos</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1 id="chronos-managed-cron-contract">قرارداد Cron مدیریت‌شدهٔ Chronos</h1>
+<p id="chronos-managed-cron--agent--nas-wire-contract"><strong>کرون مدیریت‌شدهٔ Chronos — قرارداد تبادل پیام میان ایجنت و NAS</strong></p>
+<p><strong>وضعیت:</strong> مشخصات مرجعِ تبادل پیام برای ارائه‌دهندهٔ کرون Chronos.<br>
+<strong>مخاطبان:</strong> پیاده‌سازِ سمت NAS برای نقطه‌های پایانی <code>agent-cron</code> در <code>nous-account-service</code> و هر کسی که مسیر کرون مدیریت‌شده را عیب‌یابی می‌کند.</p>
+<p>Chronos به گیت‌وی میزبانی‌شدهٔ Hermes اجازه می‌دهد در زمان بیکاری <strong>به صفر مقیاس شود</strong> و همچنان کارهای کرون را در موعد مقرر اجرا کند. به‌جای یک تیکرِ درون‌فرایندی با دورهٔ ۶۰ ثانیه، ایجنت از NAS می‌خواهد دقیقاً <strong>یک زمان‌بندی تک‌اجرا در بیرون از فرایند، به‌ازای هر کار و برای زمان واقعی اجرای بعدیِ همان کار</strong> آماده کند. در زمان مقرر، NAS از طریق یک وب‌هوکِ احرازهویت‌شده ایجنت را بازفراخوانی می‌کند؛ ایجنت کار را اجرا می‌کند و زمان‌بندی تک‌اجرای بعدی را دوباره آماده می‌کند. بین اجراها، فرایند ایجنت می‌تواند کاملاً متوقف باشد؛ تنها برای یک اجرای واقعی بیدار می‌شود.</p>
+<p>زمان‌بند خارجی‌ای که NAS برای پیاده‌سازی زمان‌بندی‌های تک‌اجرا به کار می‌گیرد، از <strong>جزئیات داخلی پیاده‌سازی NAS</strong> است. ایجنت هرگز با آن ارتباط برقرار نمی‌کند، اعتبارنامه‌هایش را نگه نمی‌دارد و نامی از آن نمی‌برد. ایجنت فقط سه نقطهٔ پایانی NAS را که در ادامه آمده‌اند می‌شناسد.</p>
+<pre dir="ltr"><code>create/update/pause/resume/remove a cron job (agent side)
+  │
+  ▼
+ChronosCronScheduler.reconcile()        ── agent computes next_run_at
+  │  POST {portal}/api/agent-cron/provision   (auth: agent's Nous access token)
+  ▼
+NAS arms a one-shot for fire_at         ── NAS owns the scheduler + its creds
+  │
+  &#x23F0; at fire_at
+  ▼
+scheduler → POST {portal}/api/agent-cron/relay   (auth: scheduler signature, NAS-verified)
+  │
+  ▼
+NAS mints a short-lived agent-audience JWT (purpose=cron_fire)
+  │  POST {agent_callback_url}/api/cron/fire        (auth: that JWT)
+  ▼
+agent verifies the NAS JWT → store CAS claim → run_one_job → re-arm next one-shot
+</code></pre>
+<section class="doc-sec">
+<h2 id="trust-model-read-this-first"><span class="secnum">۱</span> مدل اعتماد (ابتدا این بخش را بخوانید)</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>گام ارتباطی</th><th>فراخواننده و مقصد</th><th>سازوکار احراز هویت</th><th>اعتبارسنج</th></tr></thead>
+<tbody>
+<tr><td>۱</td><td>ایجنت به NAS (<code>provision</code>/<code>cancel</code>/<code>list</code>)</td><td><strong>توکن دسترسی Nous Portal</strong> که ایجنت از قبل دارد (Bearer)؛ برای ایجنت میزبانی‌شده، این همان <strong>توکن نشست راه‌اندازی اولیه</strong> است که NAS در <code>auth.json</code> قرار داده است (کلاینت <code>hermes-cli-vps</code>)، <strong>نه</strong> توکن یک کلاینت <code>agent:*</code>.</td><td>NAS (مسیر معمول اعتبارسنجی توکن ایجنت)</td></tr>
+<tr><td>۲</td><td>زمان‌بند به NAS (<code>relay</code>)</td><td><strong>امضای</strong> درخواست زمان‌بند</td><td>NAS (مسیر بررسی امضایی که از قبل دارد)</td></tr>
+<tr><td>۳</td><td>NAS به ایجنت (<code>/api/cron/fire</code>)</td><td>یک <strong>JWT کوتاه‌عمر صادرشده توسط NAS</strong> (<code>aud=agent:{instance_id}</code>، <code>purpose=cron_fire</code>)</td><td>ایجنت (با PyJWT و بر اساس JWKS متعلق به NAS)</td></tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>دقیقاً کدام توکن؟ (گام ۱)</strong> ایجنت میزبانی‌شده هرگز اعتبارنامهٔ کلاینت OAuth با قالب <code>agent:{instance_id}</code> را در اختیار ندارد؛ توکنی با این قالب فقط از طریق اعطای مجوز با کد احراز هویت در داشبورد تعاملی صادر می‌شود (برای کاربری در مرورگر). ایجنت برای تمام فراخوانی‌های خروجیِ خودش به پورتال از <strong>توکن دسترسی نشست راه‌اندازی اولیه</strong> استفاده می‌کند (<code>resolve_nous_access_token</code>)؛ این توکن تحت کلاینتِ مخصوص راه‌اندازی اولیه، یعنی <code>hermes-cli-vps</code>، صادر می‌شود و در نخستین راه‌اندازی در کانتینر قرار می‌گیرد. بنابراین NAS باید شناسهٔ نمونهٔ ایجنت فراخواننده را از یکی از این دو راه تعیین کند: یا از کلاینت <code>agent:{id}</code> (برای فراخواننده‌های خودمیزبان یا داشبورد)، یا برای توکن راه‌اندازی اولیه، از تطبیق <code>AgentInstance.bootstrapSessionId</code> با شناسهٔ نشست توکن (<code>sid</code>) در محدودهٔ همان سازمان. در هر صورت، JWT اجرای کار که در گام ۳ صادر می‌شود همچنان <code>aud=agent:{instance_id}</code> را دارد. (اگر گام ۱ فقط کلاینت‌های <code>agent:*</code> را بپذیرد، تمام درخواست‌های واقعیِ فراهم‌سازی از ایجنت‌های میزبانی‌شده با خطای ۴۰۳ مواجه می‌شوند؛ به <code>src/server/agent-cron/instance-auth.ts</code> رجوع کنید.)</p>
+</blockquote>
+<p>چرا NAS واسطه است و ارتباط مستقیمِ زمان‌بند با ایجنت نداریم؟ زمان‌بند با کلیدهای <strong>NAS</strong> امضا می‌کند؛ کلیدهایی که ایجنت در اختیار ندارد و نباید هم داشته باشد. ایجنت تنها می‌تواند توکنی را اعتبارسنجی کند که <strong>NAS صادر کرده باشد</strong>؛ این مسیر اعتماد از قبل وجود دارد. به این ترتیب، تمام اعتبارنامه‌های زمان‌بند درون NAS باقی می‌مانند. (استدلال کامل در بخش DQ-4 طرح آمده است.)</p>
+<p>هیچ رمز جدیدی به ایجنت اضافه نمی‌شود: گام ۱ همان توکنی را دوباره به کار می‌گیرد که ایجنت از قبل برای پورتال استفاده می‌کند، و گام ۳ از همان اعتبارسنجی JWT متعلق به NAS بهره می‌برد که ایجنت از قبل انجام می‌دهد.</p>
+</section>
+<hr>
+<section class="doc-sec">
+<h2 id="endpoint-1--post-apiagent-cronprovision--agent--nas"><span class="secnum">۲</span> نقطهٔ پایانی ۱ — <code>POST /api/agent-cron/provision</code> (ایجنت به NAS)</h2>
+<p>دقیقاً یک زمان‌بندی تک‌اجرا را برای یک کار آماده می‌کند، یا آن را به‌شکلی هم‌توان دوباره آماده می‌کند؛ یعنی تکرار درخواست، اثر اضافه‌ای ندارد.</p>
+<ul>
+<li><strong>احراز هویت:</strong> <code>Authorization: Bearer &lt;agent Nous access token&gt;</code>. NAS از مسیر معمولِ اعتبارسنجی توکن ایجنت استفاده می‌کند و رکورد را به ایجنت و سازمانِ فراخواننده محدود می‌کند.</li>
+<li><strong>بدنهٔ درخواست:</strong>
+<pre dir="ltr"><code>  {
+    "job_id": "ab12cd34",
+    "fire_at": "2026-06-18T12:34:56+00:00",
+    "agent_callback_url": "https://agent-xyz.fly.dev",
+    "dedup_key": "ab12cd34:2026-06-18T12:34:56+00:00"
+  }
+</code></pre>
+<ul>
+<li><code>fire_at</code> — با قالب ISO 8601 و <strong>محاسبه‌شده توسط ایجنت</strong>. ممکن است کمتر از یک دقیقه با زمان کنونی فاصله داشته باشد؛ NAS باید دقتِ ثانیه‌ای را رعایت کند (تعیین زمان بر عهدهٔ ایجنت است، بنابراین محدودیتِ حداقل یک دقیقه‌ایِ زمان‌بند وجود ندارد).</li>
+<li><code>agent_callback_url</code> — نشانی پایهٔ خود ایجنت که به‌صورت عمومی در دسترس است. NAS در زمان اجرا، درخواست POST را به <code>{agent_callback_url}/api/cron/fire</code> می‌فرستد.</li>
+<li><code>dedup_key</code> — برابر با <code>"{job_id}:{fire_at}"</code>. NAS <strong>بر اساس <code>(agent_id, job_id)</code> درج یا به‌روزرسانی می‌کند</strong>؛ بنابراین آماده‌سازی دوبارهٔ همان نوبت اجرا هم‌توان است و زمان‌بندی تک‌اجرای تکراری ایجاد نمی‌کند. یک <code>fire_at</code> جدید برای همان <code>job_id</code> جایگزین زمان‌بندی قبلی می‌شود.</li>
+</ul>
+</li>
+<li><strong>عملیات:</strong> یک زمان‌بندی تک‌اجرا را برای زمان <code>fire_at</code> آماده می‌کند که مقصدش مسیر <strong>رلهٔ</strong> NAS (نقطهٔ پایانی ۳) است، نه مستقیماً ایجنت؛ به این ترتیب NAS در مسیر باقی می‌ماند تا JWT ایجنت را صادر کند. <code>(agent_id, job_id, schedule_id, agent_callback_url)</code> را به‌صورت پایدار ذخیره کنید.</li>
+<li><strong>پاسخ:</strong> <code>200 {"schedule_id": "&lt;opaque&gt;"}</code>.</li>
+</ul>
+</section>
+<section class="doc-sec">
+<h2 id="endpoint-2--post-apiagent-croncancel--agent--nas"><span class="secnum">۳</span> نقطهٔ پایانی ۲ — <code>POST /api/agent-cron/cancel</code> (ایجنت به NAS)</h2>
+<ul>
+<li><strong>احراز هویت:</strong> مانند نقطهٔ پایانی ۱.</li>
+<li><strong>بدنه:</strong> <code>{"job_id": "ab12cd34"}</code>.</li>
+<li><strong>عملیات:</strong> زمان‌بندی تک‌اجرای آماده‌شده برای <code>(agent_id, job_id)</code> را لغو و رکورد را حذف می‌کند. این عملیات هم‌توان است؛ لغو یک کار ناشناخته تغییری ایجاد نمی‌کند و پاسخ ۲۰۰ می‌دهد.</li>
+<li><strong>پاسخ:</strong> <code>200 {"ok": true}</code>.</li>
+</ul>
+</section>
+<section class="doc-sec">
+<h2 id="endpoint-3--post-apiagent-cronrelay--scheduler--nas-the-fire-relay"><span class="secnum">۴</span> نقطهٔ پایانی ۳ — <code>POST /api/agent-cron/relay</code> (زمان‌بند به NAS؛ رلهٔ اجرای کار)</h2>
+<ul>
+<li><strong>احراز هویت:</strong> <strong>امضای</strong> درخواست زمان‌بند که NAS آن را از طریق مسیر بررسی امضای موجود خود اعتبارسنجی می‌کند. این نقطه، مرز اعتماد برای اجرای کار است؛ فراخوانی جعلی رله باید همین‌جا رد شود.</li>
+<li><strong>عملیات:</strong>
+<ol>
+<li>نگاشت <code>(agent_id, job_id) → agent_callback_url</code> را از رکورد ذخیره‌شده بازیابی کنید.</li>
+<li>یک JWT <strong>کوتاه‌عمر</strong> صادر کنید: <code>aud = "agent:{instance_id}"</code>، <code>iss = {portal_url}</code>، <code>purpose = "cron_fire"</code> و <code>exp</code> با مهلتی کوتاه (حدود ۶۰ تا ۱۲۰ ثانیه). این توکن باید با کلید نامتقارنِ معمول NAS امضا شود که از طریق JWKS منتشر می‌شود.</li>
+<li>درخواست <code>POST {agent_callback_url}/api/cron/fire</code> را با <code>Authorization: Bearer &lt;that JWT&gt;</code> و بدنهٔ <code>{"job_id": "...", "fire_at": "..."}</code> ارسال کنید.</li>
+<li>پاسخ ایجنت خارج از بازهٔ 2xx را یک شکست <strong>قابل تلاش مجدد</strong> در نظر بگیرید (اجازه دهید زمان‌بند فراخوانی رله را دوباره امتحان کند). سازوکار مقایسه‌و‌تنظیم (CAS) در مخزن ایجنت از اجرای تکراری جلوگیری می‌کند، بنابراین تلاش مجدد ایمن است.</li>
+</ol>
+</li>
+<li><strong>پاسخ به زمان‌بند:</strong> به‌محض پذیرش درخواست POST از سوی ایجنت (۲۰۲)، پاسخی در بازهٔ 2xx برگردانید تا زمان‌بند درخواست اجرایی را که تحویل داده شده است دوباره ارسال نکند.</li>
+</ul>
+</section>
+<hr>
+<section class="doc-sec">
+<h2 id="inbound-post-apicronfire--nas--agent--agent-side-already-implemented"><span class="secnum">۵</span> درخواست ورودی <code>POST /api/cron/fire</code> (NAS به ایجنت) — سمت ایجنت، از قبل پیاده‌سازی شده</h2>
+<p>این همان نقطهٔ پایانی ایجنت است که NAS در مرحلهٔ ۳ از نقطهٔ پایانی ۳ فراخوانی می‌کند. در استقرارهای میزبانی‌شده، دو گام ارتباطی وجود دارد:</p>
+<ol>
+<li><strong>برنامهٔ داشبورد</strong> (<code>hermes_cli/web_server.py</code>) — تنها رابط HTTP عمومی ایجنت است (پروکسی Fly دقیقاً یک درگاه را در معرض دسترسی قرار می‌دهد؛ درگاه داشبورد). این مسیر در <code>PUBLIC_API_PATHS</code> قرار دارد تا دروازهٔ کنترل کوکیِ داشبورد، درخواست بازفراخوانی با JWT از نوع Bearer را به اعتبارسنج برساند. داشبورد JWT را اعتبارسنجی می‌کند، پروفایل کار را تعیین می‌کند و سپس با حفظ توکن Bearer متعلق به NAS، درخواست اجرا را از طریق رابط بازگشتی محلی (loopback) به گام ۲ <strong>می‌فرستد</strong>؛ خود داشبورد کار را اجرا نمی‌کند.</li>
+<li><strong><code>APIServerAdapter</code> گیت‌وی</strong> (<code>gateway/platforms/api_server.py</code>، متصل به رابط بازگشتی محلی، با درگاه پیش‌فرض ۸۶۴۲) — JWT را دوباره اعتبارسنجی می‌کند (دفاع چندلایه) و کار را با <strong>آداپتورهای فعال پلتفرمِ</strong> گیت‌وی اجرا می‌کند. همین موضوع تحویل را برای پلتفرم‌های منطقیِ پشت رله و اتاق‌های دارای رمزنگاری سرتاسری (E2EE) ممکن می‌کند؛ مسیر ارسال مستقل هیچ‌یک را پشتیبانی نمی‌کند. استقرارهای خودمیزبانِ سرور API که <code>api_server</code> را مستقیماً در دسترس قرار می‌دهند، بدون عبور از گام ۱ مستقیماً وارد گام ۲ می‌شوند.</li>
+</ol>
+<p>اگر گیت‌وی از گام ۱ در دسترس نباشد (هنوز در حال راه‌اندازی پس از بیدارشدن از وضعیت مقیاس صفر باشد، در بازهٔ راه‌اندازی مجدد قرار داشته باشد، یا <code>api_server</code> غیرفعال باشد)، داشبورد پاسخ <strong>۵۰۳</strong> می‌دهد و NAS دوباره تلاش می‌کند (پاسخ خارج از بازهٔ 2xx یعنی قابل تلاش مجدد، مطابق توضیح زیر). CAS مخزن از اجرای تکراریِ احتمالی در نهایت جلوگیری می‌کند. عمداً هیچ مسیر جایگزینی برای اجرای کار درون داشبورد وجود ندارد. اعتبارسنج در <code>plugins/cron/chronos/verify.py</code> قرار دارد.</p>
+<ul>
+<li><strong>احراز هویت:</strong> <code>Authorization: Bearer &lt;NAS-minted JWT&gt;</code>. ایجنت موارد زیر را بررسی می‌کند:
+<ul>
+<li>امضا در برابر JWKS متعلق به NAS (<code>cron.chronos.nas_jwks_url</code>)؛</li>
+<li>برابری <code>aud</code> با <code>cron.chronos.expected_audience</code> (مقدار <code>agent:{instance_id}</code> برای همین ایجنت)؛</li>
+<li>برابری <code>iss</code> با <code>cron.chronos.portal_url</code>؛</li>
+<li><code>exp</code> و <code>nbf</code> (با ۳۰ ثانیه ارفاق زمانی)؛</li>
+<li><code>purpose == "cron_fire"</code>؛ یک JWT عمومی ایجنت (بدون هدف مشخص یا با هدفی دیگر) رد می‌شود تا نتوان آن را برای این نقطهٔ پایانی بازپخش کرد.</li>
+</ul>
+</li>
+<li><strong>بدنه:</strong> <code>{"job_id": "ab12cd34", "fire_at": "..."}</code> (فقط <code>job_id</code> استفاده می‌شود).</li>
+<li><strong>رفتار:</strong>
+<ul>
+<li>توکن نامعتبر، مفقود، جعلی، منقضی‌شده، با مخاطب نادرست یا هدف نادرست: پاسخ <strong>۴۰۱</strong>؛ هیچ کاری اجرا نمی‌شود.</li>
+<li>نبودن <code>job_id</code>: پاسخ <strong>۴۰۰</strong>.</li>
+<li>درخواست معتبر: بلافاصله پاسخ <strong><code>202 {"status": "accepted", "job_id": "..."}</code></strong> برمی‌گردد و کار در پس‌زمینه اجرا می‌شود. ارسال ۲۰۲ پیش از اجرا باعث می‌شود یک نوبت طولانیِ ایجنت هرگز به پایان مهلت HTTP رله منجر نشود.</li>
+</ul>
+</li>
+<li><strong>حداکثر یک بار:</strong> ایجنت پیش از اجرا، با عملیات مقایسه‌و‌تنظیم در سطح مخزن (<code>claim_job_for_fire</code>) حق اجرای کار را تصاحب می‌کند. تلاش مجدد رله یا زمان‌بند که هنگام اجرای نخستین نوبت یا پس از تکمیل آن برسد، در تصاحب این حق موفق نمی‌شود و کار را دوباره اجرا نمی‌کند.</li>
+</ul>
+</section>
+<hr>
+<section class="doc-sec">
+<h2 id="at-most-once--re-arm-semantics"><span class="secnum">۶</span> قواعد اجرای حداکثر یک‌باره و آماده‌سازی دوباره</h2>
+<ul>
+<li><strong>کارهای تکرارشونده (کرون یا فاصلهٔ زمانی):</strong> هنگام دریافت درخواست اجرا، ایجنت به‌عنوان بخشی از تصاحب حق اجرا و زیر قفل مخزن خود، <code>next_run_at</code> را جلو می‌برد؛ سپس کار را اجرا می‌کند و یک زمان‌بندی تک‌اجرا برای مقدار جدید <code>next_run_at</code> فراهم می‌کند. درخواست تکراری رله برای <code>fire_at</code> قدیمی با حق اجرای تصاحب‌شده یا زمانِ جلو‌رفته روبه‌رو می‌شود و کنار گذاشته می‌شود.</li>
+<li><strong>کارهای تک‌اجرا (<code>30m</code>، <code>+90s</code> و مانند آن):</strong> یک بار اجرا می‌شوند؛ <code>mark_job_run</code> آن‌ها را تکمیل‌شده علامت می‌زند. آماده‌سازی دوباره‌ای در کار نیست.</li>
+<li><strong><code>repeat.times = N</code>:</strong> <code>mark_job_run</code> با رسیدن به حد تعیین‌شده، کار را حذف می‌کند؛ در نتیجه <code>get_job</code> پس از آخرین اجرا مقدار <code>None</code> برمی‌گرداند. بنابراین ایجنت زمان‌بندی را دوباره آماده <strong>نمی‌کند</strong> و زمان‌بندی به‌درستی، بدون باقی‌ماندن زمان‌بندی تک‌اجرای بی‌صاحب، متوقف می‌شود.</li>
+<li><strong>ایجنت‌های چندنسخه‌ای:</strong> CAS مخزن تضمین می‌کند که هر نوبت اجرا در میان N نسخهٔ گیت‌وی که یک <code>HERMES_HOME</code> مشترک دارند، حداکثر یک بار انجام شود؛ دقیقاً یک نسخه هر نوبت را اجرا می‌کند.</li>
+</ul>
+</section>
+<section class="doc-sec">
+<h2 id="reconcile-self-healing"><span class="secnum">۷</span> تطبیق وضعیت (خودترمیمی)</h2>
+<p>ایجنت وضعیت مطلوب در <code>jobs.json</code> را در موارد زیر با زمان‌بندی‌های آماده‌شده تطبیق می‌دهد:</p>
+<ul>
+<li>در <code>start()</code> (هنگام راه‌اندازی یا بیدارشدن گیت‌وی)؛</li>
+<li>پس از هر تغییر موفق در کارها (<code>on_jobs_changed</code>)؛</li>
+<li>به‌عنوان بخشی از فرایند پس از هر اجرا (آماده‌سازی دوباره).</li>
+</ul>
+<p>تطبیق وضعیت، زمان‌بندیِ کارهای فاقد زمان‌بندی یا دارای زمان تغییریافته را آماده می‌کند و زمان‌بندی‌های بی‌صاحب را لغو می‌کند. فراهم‌سازیِ انجام‌نشده به‌دلیل خطای گذرای NAS، در تطبیق بعدی خودبه‌خود ترمیم می‌شود. ایجنتِ خوابیده <strong>به‌صورت دوره‌ای بیدار نمی‌شود</strong>؛ چنین کاری مزیت مقیاس‌شدن به صفر را از بین می‌برد.</p>
+</section>
+<section class="doc-sec">
+<h2 id="config-agent-side"><span class="secnum">۸</span> پیکربندی (سمت ایجنت)</h2>
+<p>همهٔ تنظیمات غیرمحرمانه‌اند (<code>cron.chronos.*</code> در <code>config.yaml</code>)؛ ایجنت هیچ اعتبارنامه‌ای برای زمان‌بند نگه نمی‌دارد. برای ایجنت‌های میزبانی‌شده، NAS این مقادیر را هنگام فراهم‌سازی تنظیم می‌کند:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>کلید</th><th>معنا</th></tr></thead>
+<tbody>
+<tr><td><code>cron.provider</code></td><td>برای فعال‌سازی، مقدار <code>"chronos"</code> (خالی یعنی تیکر داخلی).</td></tr>
+<tr><td><code>cron.chronos.portal_url</code></td><td>نشانی پایهٔ NAS (همچنین مقدار مورد انتظارِ <code>iss</code> در JWT).</td></tr>
+<tr><td><code>cron.chronos.callback_url</code></td><td>نشانی پایهٔ عمومیِ خود ایجنت برای درخواست‌های اجرای کار از NAS به ایجنت.</td></tr>
+<tr><td><code>cron.chronos.expected_audience</code></td><td>مقدار <code>aud</code> در JWT این ایجنت (<code>agent:{instance_id}</code>).</td></tr>
+<tr><td><code>cron.chronos.nas_jwks_url</code></td><td>JWKS متعلق به NAS برای اعتبارسنجی JWT اجرای کار.</td></tr>
+</tbody>
+</table></div>
+<p>اگر <code>callback_url</code> یا <code>portal_url</code> خالی باشد یا ایجنت وارد حساب Nous نشده باشد، <code>is_available()</code> مقدار <code>False</code> برمی‌گرداند و سازوکار انتخاب ارائه‌دهنده به تیکر داخلیِ درون‌فرایندی بازمی‌گردد؛ کرون هرگز محرک اجرای خود را از دست نمی‌دهد.</p>
+</section>
+<section class="doc-sec">
+<h2 id="escape-hatch-not-default"><span class="secnum">۹</span> راه جایگزین (غیرپیش‌فرض)</h2>
+<p>اعتبارسنج مسیر ورودی <code>/api/cron/fire</code> قابل تعویض است (<code>get_fire_verifier()</code>). اگر حجم ترافیک رله از مسیر NAS روزی به حد اشباع برسد، می‌توان حالتی با ارتباط مستقیمِ زمان‌بند به ایجنت و یک کلید کرونِ صادرشده توسط NAS به‌ازای هر کار را جایگزین اعتبارسنج JWT متعلق به NAS کرد، <strong>بدون هیچ تغییری در پردازشگر وب‌هوک</strong>. حالت با واسطهٔ NAS (همین قرارداد)، حالت پیش‌فرض است.</p>
+</section>
+<div class="pager"><a class="prev" href="billing-lifecycle.html"><span class="dir">→ قبلی</span><span class="ttl">چرخهٔ حیات صورتحساب</span></a><a class="next" href="cli-internals.html"><span class="dir">بعدی ←</span><span class="ttl">ساختار داخلی CLI</span></a></div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/chronos-managed-cron-contract" target="_blank" rel="noopener">قرارداد Cron مدیریت‌شدهٔ Chronos</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">&#x2615; حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>
