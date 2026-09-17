@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ساختار داخلی CLI — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/cli-internals" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>ساختار داخلی CLI</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1>ساختار داخلی CLI</h1>
+<p>مکمل <code>hermes_cli/AGENTS.md</code> (قواعد) است — این صفحه توضیح‌های مفصل‌تر را در بر می‌گیرد.</p>
+<section class="doc-sec"><h2 id="update-pipeline"><span class="secnum">۱</span> خط لولهٔ به‌روزرسانی</h2>
+<p>قرارداد مرحله‌به‌مرحله (<code>plan → snapshot → apply → restart-per-kind → verify → report</code>) و خطاهای رخ‌داده در محیط واقعی که هر مرحله از آن‌ها جلوگیری می‌کند در <code>hermes_cli/AGENTS.md</code> مستند شده است؛ رفتار قابل‌مشاهده برای کاربر (رسیدها، <code>--plan</code>، حالت‌های اسنپ‌شات) در <a href="../getting-started/updating.html">به‌روزرسانی</a> آمده است.</p>
+<p>روش جایگزینِ راه‌اندازی مجدد مستقیم در systemd به‌اندازهٔ <code>TimeoutStopUSec</code> واحد به‌علاوهٔ <code>TimeoutStartUSec</code>، همراه با ۱۵ ثانیه حاشیهٔ سمتِ کلاینت منتظر می‌ماند. واحد هدف را در همان دامنهٔ مدیر (manager scope)ِ راه‌اندازی مجدد می‌خواند؛ هم تلاش اولیه و هم تلاش مجدد از این بودجه استفاده می‌کنند، از جمله راه‌اندازی مجدد جبرانی پس از یک به‌روزرسانی نیمه‌تمام. راه‌اندازی پس از یک پایان کنترل‌شدهٔ کارهای جاری (graceful drain) فقط از بودجهٔ start به‌علاوهٔ حاشیه استفاده می‌کند. حدِ فازِ ناموجود، تجزیه‌ناپذیر یا بی‌نهایت برای همان فاز به ۹۰ ثانیه برمی‌گردد تا زمان به‌روزرسانی‌های بدون نظارت محدود بماند. تایم‌اوت‌شدن کلاینتِ <code>systemctl</code> تراکنش مدیر را لغو <strong>نمی‌کند</strong>. زنجیره‌های توقف چندفرمانی سفارشی یا <code>EXTEND_TIMEOUT_USEC</code> همچنان می‌توانند از این تخمین فراتر روند؛ یک تایم‌اوت واقعی همچنان یک راه‌اندازی مجدد ناکامل است و فرمان‌های موفق همچنان نیازمند اعتبارسنجی موجودِ سلامت سرویس و نسخهٔ ناوگان هستند. مقادیر عددی خامِ <code>*USec</code> میکروثانیه‌اند، در حالی که مقادیر قالب‌بندی‌شده از واحدهای ثابت systemd استفاده می‌کنند، از جمله روزها، هفته‌ها، ماه‌ها و سال‌ها. سقف مهلت ترکیبی، با درنظرگرفتن حاشیه‌ای برای گردکردن، پایین‌تر از حد بومیِ پایش بر حسب میلی‌ثانیه با عدد صحیح علامت‌دار ۳۲ بیتی تعیین می‌شود؛ بنابراین مهلت‌های بسیار طولانیِ واحدها باعث سرریز در پایش فرایند فرزند نمی‌شوند. برای مهلت‌های صفر، نامشخص یا بی‌نهایتِ هر مرحله، مقدار جایگزینِ محدود به کار می‌رود. این کار تنظیمات تخلیهٔ نوبتِ فعال (active-turn drain) را تغییر نمی‌دهد.</p></section>
+<section class="doc-sec"><h2 id="process-identity-never-infer-it-from-argv-substrings"><span class="secnum">۲</span> هویت فرایند: هرگز از زیررشته‌های argv استنباط نکنید</h2>
+<p>نوع خطایی که ریشهٔ حدود ۱۰ گزارش مشکل در به‌روزرسانی ناوگان بوده است (#90778، #87594، #78089، #76129، #91964، ...): دسته‌بندی یک فرایند با <code>"serve" in cmdline</code> یا مشابه آن. <code>kanban --preserve-cache</code> شامل "serve" است؛ مقدارِ یک پرچم می‌تواند برابر نامِ یک زیرفرمان باشد (<code>-m dashboard serve</code>)؛ خطوط فرمانِ بریده‌شده زیرفرمان واقعی را پنهان می‌کنند. قواعد:</p>
+<ul><li>از تطبیق‌دهنده‌های مرجع استفاده کنید: <code>gateway.status.looks_like_gateway_command_line</code> (اجرای گیت‌وی)، <code>hermes_cli.update_cmd._hermes_holder_subcommand</code> (زیرفرمان سطح‌بالای هر argv از Hermes). هرگز اسکن توکن‌های دست‌ساز ننویسید.</li><li>مجموعه‌های پرچم باید از پارسر <strong>مشتق</strong> شوند (<code>_holder_value_flags()</code> روی <code>build_top_level_parser()</code> درون‌نگری می‌کند)، هرگز فهرست‌های دست‌نویس نباشند — ناهماهنگ می‌شوند.</li><li>هرگز اجداد را به‌صورت کلی از اسکن فرایند مستثنا نکنید: وقتی <code>/update</code> به‌عنوان فرزندِ گیت‌وی اجرا می‌شود، فرایندِ جدی که گیت‌وی است باید برای سازوکار توقف (pause) قابل‌مشاهده بماند (#87594). فرایندهای جدِ تعاملی را کنار بگذارید، اما فرایندهای جدی را که گیت‌وی هستند همچنان در بررسی نگه دارید.</li><li>روی cmdlineهای <strong>کامل</strong> تطبیق دهید؛ بریدن فقط در زمانِ نمایش (#78089).</li><li>پیش از افزودن هر قاعدهٔ ابتکاری جدید برای بررسی فرایندها، #92091 را بخوانید — سوکت کنترل گیت‌وی جایگزین اسکن‌ها به‌عنوان سازوکار اصلی هماهنگی شده است؛ اسکن‌ها لایهٔ پشتیبان برای فرایندهای قدیمی یا ازکارافتاده‌اند.</li></ul></section>
+<section class="doc-sec"><h2 id="skin-engine--what-skins-customize"><span class="secnum">۳</span> موتور پوسته — پوسته‌ها چه چیزهایی را سفارشی می‌کنند</h2>
+<div class="table-wrap"><table><thead><tr><th>عنصر</th><th>کلید پوسته</th><th>استفاده‌شده توسط</th></tr></thead><tbody><tr><td>قاب پنل بنر / عنوان / سرتیترهای بخش / کم‌رنگ / متن</td><td><code>colors.banner_border</code>، <code>banner_title</code>، <code>banner_accent</code>، <code>banner_dim</code>، <code>banner_text</code></td><td><code>banner.py</code></td></tr><tr><td>قاب جعبهٔ پاسخ</td><td><code>colors.response_border</code></td><td><code>cli.py</code></td></tr><tr><td>چهره‌های اسپینر (انتظار / تفکر)</td><td><code>spinner.waiting_faces</code>، <code>spinner.thinking_faces</code></td><td><code>display.py</code></td></tr><tr><td>افعال / بال‌های اسپینر (اختیاری)</td><td><code>spinner.thinking_verbs</code>، <code>spinner.wings</code></td><td><code>display.py</code></td></tr><tr><td>پیشوند خروجی ابزار / ایموجی‌های هر ابزار</td><td><code>tool_prefix</code>، <code>tool_emojis</code></td><td><code>display.py</code> ← <code>get_tool_emoji()</code></td></tr><tr><td>نام ایجنت / خوش‌آمد / برچسب پاسخ / نماد پرامپت</td><td><code>branding.agent_name</code>، <code>welcome</code>، <code>response_label</code>، <code>prompt_symbol</code></td><td><code>banner.py</code>، <code>cli.py</code></td></tr></tbody></table></div>
+<p>پوسته‌های داخلی (<code>_BUILTIN_SKINS</code> در <code>hermes_cli/skin_engine.py</code>): <code>default</code> (طلایی/کاوایی کلاسیک)، <code>ares</code> (لاکی/برنزی با بال‌های اسپینر سفارشی)، <code>mono</code> (طیف خاکستری)، <code>slate</code> (آبیِ سرد). یک پوستهٔ داخلی را به‌صورت یک مدخل دیکشنری <code>{"name", "description", "colors", "spinner", "branding", "tool_prefix"}</code> اضافه کنید. پوسته‌های کاربر <code>~/.hermes/skins/&lt;name&gt;.yaml</code> هستند با همان کلیدها و با <code>/skin &lt;name&gt;</code> یا <code>display.skin: &lt;name&gt;</code> فعال می‌شوند؛ قالب کامل YAML در راهنمای کاربرِ <a href="../user-guide/features/skins.html">پوسته‌ها و تم‌ها</a> آمده است.</p></section>
+<section class="doc-sec"><h2 id="profiles-multi-instance-support"><span class="secnum">۴</span> پروفایل‌ها: پشتیبانی چندنمونه‌ای</h2>
+<p>هرمس از پروفایل‌ها پشتیبانی می‌کند — نمونه‌های کاملاً ایزوله که هرکدام <code>HERMES_HOME</code> خودشان را دارند (پیکربندی، کلیدهای API، حافظه، نشست‌ها، مهارت‌ها، گیت‌وی). برای فرمان‌های تک‌پروفایلی (<code>hermes -p x &lt;cmd&gt;</code>)، تابع <code>_apply_profile_override()</code> در <code>hermes_cli/main.py</code> مقدار <code>HERMES_HOME</code> را پیش از هر import ماژول تنظیم می‌کند، بنابراین هر ارجاع به <code>get_hermes_home()</code> در دامنهٔ پروفایلِ فعال قرار می‌گیرد. اما گیت‌وی مالتی‌پلکس و بک‌اندِ <code>serve</code> دسکتاپ/داشبورد از یک فرایند به چند پروفایل سرویس می‌دهند: پروفایلِ فعال یک override از نوع contextvar است که به‌ازای هر فعالیت مقید می‌شود، <code>os.environ["HERMES_HOME"]</code> متعلق به پروفایلِ راه‌انداز می‌ماند، و یک ثابت سطح‌ماژولِ مشتق‌شده از home روی همان پروفایل راه‌انداز منجمد می‌شود (بنگرید به <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/gateway-internals#multiplexed-profiles" target="_blank" rel="noopener">ساختار داخلی گیت‌وی؛ بخش پروفایل‌های چندگانه</a>). مسیر پایهٔ عملیات پروفایل، پوشهٔ خانگی کاربر است (<code>_get_profiles_root()</code> مقدار <code>Path.home() / ".hermes" / "profiles"</code> را برمی‌گرداند، نه <code>get_hermes_home() / "profiles"</code>) تا <code>hermes -p coder profile list</code> همهٔ پروفایل‌ها را صرف‌نظر از پروفایلِ فعال ببیند — این رفتار عمدی است. قواعد کدنویسیِ سازگار با پروفایل‌ها در <code>AGENTS.md</code> ریشهٔ مخزن است؛ قواعد محدودهٔ دسترسی به اطلاعات محرمانه در حالت چندپروفایلی در <code>gateway/AGENTS.md</code> آمده است.</p></section>
+
+<div class="pager"><span class="off"><span class="dir">→ قبلی</span><span class="ttl">قرارداد Cron مدیریت‌شدهٔ Chronos</span></span><a class="next" href="completion-backlog-delivery.html"><span class="dir">بعدی ←</span><span class="ttl">تحویل پاسخ‌های تکمیل‌شدهٔ معوق</span></a></div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/cli-internals" target="_blank" rel="noopener">CLI Internals</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

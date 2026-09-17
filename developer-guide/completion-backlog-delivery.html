@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تحویل پاسخ‌های تکمیل‌شدهٔ معوق — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/completion-backlog-delivery" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>تحویل پاسخ‌های تکمیل‌شدهٔ معوق</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1>تحویل پاسخ‌های تکمیل‌شدهٔ معوق</h1>
+<p>رابط‌های تعاملی، تکمیل‌های پشت‌زمینه‌ایِ متوالیِ آمادهٔ یک گفتگو را در یک نوبت اعلان واحد ادغام می‌کنند. این کار تأخیری ایجاد نمی‌کند و وعده نمی‌دهد کارهایی را که در زمان‌های متفاوت تمام می‌شوند با هم ترکیب کند. شکست‌ها و خروجی‌های موفق هر دو در دسته باقی می‌مانند؛ اگر فقط یک تکمیل وجود داشته باشد، متن اصلی آن بدون تغییر حفظ می‌شود.</p>
+<p>هویت فرایند تا زمان ارسال در دسترس می‌ماند؛ بنابراین دریافت صریح نتیجه از طریق عملیات <code>wait</code>، <code>log</code> یا <code>kill</code> در <code>process_manage</code> می‌تواند اعلان تکمیل در CLI را حذف کند، حتی اگر آن اعلان از رجیستری فرایندها خارج شده و وارد صف ورودی شده باشد. دسته‌ای که همهٔ نتایجش قبلاً دریافت شده باشند هیچ نوبتی را آغاز نمی‌کند. اعلان‌های پایش خروجی و نتایج واگذاری ناهمگام، اعلان‌های جداگانه‌ای باقی می‌مانند و به ترتیب اصلی خود ارائه می‌شوند؛ این‌ها در دسته‌های تکمیل ادغام نمی‌شوند.</p>
+<section class="doc-sec">
+<h2 id="consumers-and-ownership"><span class="secnum">۱</span> مصرف‌کنندگان و مالکیت</h2>
+<ul>
+<li><strong>CLI کلاسیک:</strong> <code>hermes_cli/cli_process_notifications.py</code> مسئول تخلیهٔ اعلان‌ها در حالت بیکاری/پس از نوبت، مالکیت آگاه از فشرده‌سازی و بازکردن نهایی ورودی است.</li>
+<li><strong>TUI و دسکتاپ:</strong> <code>tui_gateway/session_notifications.py</code> پس از بررسی مالکیت، تصویر لحظه‌ایِ آمادهٔ poller را گروه‌بندی می‌کند. هر فرایند همچنان وضعیت رابط کاربری خود را صادر می‌کند. نشست‌های مشغول رویدادهای ساخت‌یافته را دوباره در صف قرار می‌دهند، نه رشته‌های دستهٔ رندرشده را.</li>
+<li><strong>تور ایمنی TUI پس از نوبت:</strong> <code>tui_gateway/prompt_turn.py</code> از همان مسیر مسیریابی و رندر استفاده می‌کند. کلاینت‌های گفتگوی دسکتاپ و داشبورد از این بک‌اند مشترک استفاده می‌کنند.</li>
+<li><strong>گیت‌وی پیام‌رسان:</strong> <code>gateway/run_notifications.py</code> از قبل از سازوکار اختصاصی دسته‌بندی بر اساس کلید مسیر و در پنجرهٔ زمانی کوتاه استفاده می‌کند. این تغییر در تحویل اعلان‌های معوقِ رابط تعاملی، آن سازوکار را جایگزین نمی‌کند و ارسال‌های آداپتورها را تغییر نمی‌دهد.</li>
+<li><strong>مصرف‌کنندگان غیرتعاملی/بدون رابط گرافیکی:</strong> این تغییر برای درخواست API، کلاینت ACP یا CLI یک‌باره، حلقهٔ اعلان خودکار جدیدی ایجاد نمی‌کند.</li>
+</ul>
+<p>رندرکنندهٔ مشترک، <code>tools/process_registry_notifications.py::ProcessNotificationBatch</code> است. نه دسته و نه وضعیت تحویل آن در پرامپت سیستم ذخیره نمی‌شود. رویدادهای نشانی‌شده همچنان به مالک قابل‌اثبات نیاز دارند؛ نشست زندهٔ دیگری نمی‌تواند آن‌ها را تصاحب کند. تحویل واگذاری همچنان از دفتر کل پایدار claim/complete موجود خود عبور می‌کند؛ یک‌بار برای هر واگذاری، نه یک‌بار برای هر دستهٔ فرایند.</p>
+</section>
+<section class="doc-sec">
+<h2 id="local-validation-and-its-limits"><span class="secnum">۲</span> اعتبارسنجی محلی و محدودیت‌های آن</h2>
+<p><code>evals/completion_backlog_probe.py REPO OUTPUT.json</code> فرایندهای فرزند واقعی پوسته را در پوشه‌های موقت آغاز می‌کند، رویدادهای تکمیل واقعی آن‌ها را می‌خواند و مسیرهای اعلان تولیدی CLI، پایشگر دوره‌ای TUI و پس از نوبت را به کار می‌گیرد. یک مقصد HTTP روی loopback جایگزین <code>chat</code> / <code>_run_prompt_submit</code> می‌شود؛ این مقصد ارسال‌های واقعی را ثبت می‌کند اما استنتاج مدل، تعامل با رندرکنندهٔ بومی یا یک پلتفرم میزبانی‌شده را <strong>آزمون نمی‌کند</strong>. پاکت‌های ساختگی پایش و واگذاری به‌عنوان fixture برچسب‌گذاری شده‌اند؛ ثبت تصاحب واگذاری‌ها از دفتر کل SQLite موقتی واقعی استفاده می‌کنند. سناریوی اعلان‌های معوق شامل یک خروج غیرصفر است.</p>
+<p>این ابزار آزمون، مجموعهٔ اعلان‌های معوق و آماده، حفظ دقیق محتوای یک اعلان منفرد، نتایج صریحاً دریافت‌شده، مالکیت نشست دیگر و پایش‌ها/واگذاری‌های درهم‌آمیخته با تکمیل‌ها را بررسی می‌کند. پذیرش نوبت را در مرز اعلان اندازه می‌گیرد، نه صرفه‌جویی توکن مدل را.</p>
+</section>
+<div class="pager">
+<a href="cli-internals.html"><span class="dir">→ قبلی</span><span class="ttl">ساختار داخلی CLI</span></a>
+<span class="off next"><span class="dir">بعدی ←</span><span class="ttl">پایش گیت‌وی — به‌زودی</span></span>
+</div>
+</main>
+</div>
+<footer class="page-footer">
+ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/completion-backlog-delivery" target="_blank" rel="noopener">Background completion backlogs</a><br>
+طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

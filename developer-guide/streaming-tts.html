@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-root="..">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تبدیل جریانی متن به گفتار — مرجع فارسی Hermes Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/nav-data.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="hamburger" id="navToggle" aria-label="باز کردن فهرست">☰</button>
+    <a class="doc-brand" href="../index.html"><span class="logo">🪽</span><span>مرجع فارسی Hermes Agent</span></a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://hermes-agent.nousresearch.com/docs/developer-guide/streaming-tts" target="_blank" rel="noopener">🌐 نسخهٔ اصلی</a>
+      <a class="icon-btn" href="https://github.com/peyman24x/Hermes-Agent-Doc-FA" target="_blank" rel="noopener">⭐ GitHub</a>
+      <button class="icon-btn" id="themeToggle">🌙 حالت شب</button>
+      <button class="icon-btn" id="printBtn">🖨 چاپ</button>
+    </div>
+  </div>
+</header>
+<div class="breadcrumb"><a href="../index.html">خانه</a><span class="sep">/</span>راهنمای توسعه‌دهنده<span class="sep">/</span><strong>تبدیل جریانی متن به گفتار</strong></div>
+<div class="container">
+<aside class="sidebar" id="sidebar"></aside>
+<main>
+<h1>تبدیل جریانی متن به گفتار</h1>
+<p>Hermes می‌تواند صدای حاصل از تبدیل متن به گفتار (TTS) را هم‌زمان با دریافت از ارائه‌دهنده به‌صورت جریانی پخش کند، به‌جای آنکه پیش از پخش منتظر دریافت کامل صدا بماند. این قابلیت در حالت صوتی (گفتگوی زنده در CLI/TUI)، وب‌سوکت <code>speak-stream</code> داشبورد و — از طریق <code>StreamingTTSConsumer</code> در گیت‌وی — در هر آداپتور پلتفرمی که پخش جریانی صدا را فعال کند، استفاده می‌شود. پخش پاسخ صوتی پس از آماده‌شدن نخستین بند جمله آغاز می‌شود، نه پس از اتمام کامل تولید متن و ساخت صدا.</p>
+<section class="doc-sec">
+<h2 id="architecture"><span class="secnum">۱</span> معماری</h2>
+<p>خط لولهٔ پخش جریانی چهار بخش دارد:</p>
+<ol>
+<li><strong>تولیدکننده</strong> — مدل زبانی بزرگ (LLM) هنگام تولید پاسخ، قطعه‌های افزایشی متن (دلتاها) را منتشر می‌کند.</li>
+<li><strong>قطعه‌بند جمله</strong> — کلاس <code>tools.tts_streaming.SentenceChunker</code> دلتاها را جمع می‌کند، بلوک‌های <code>&lt;think&gt;</code> را حذف می‌کند (حتی اگر میان چند دلتا تقسیم شده باشند) و جمله‌های کامل را برای پردازش بعدی تحویل می‌دهد.</li>
+<li><strong>ارائه‌دهندهٔ TTS</strong> — یک <code>StreamingTTSProvider</code> ثبت‌شده، هر جمله را به قطعه‌های PCM خام تبدیل می‌کند (تک‌کاناله با قالب <code>int16</code> و با نرخ نمونه‌برداری <code>sample_rate</code> اعلام‌شده توسط ارائه‌دهنده).</li>
+<li><strong>مقصد خروجی صدا</strong> — برای پخش محلی، <code>sounddevice.OutputStream</code> در <code>tools.tts_tool_speaker.stream_tts_to_speaker</code>؛ یا نقطهٔ اتصال <code>write_streaming_tts</code> در آداپتور پلتفرم گیت‌وی (<code>gateway/streaming_tts_consumer.py</code>).</li>
+</ol>
+<p>ارائه‌دهندگانی که API قطعه‌ای ندارند نیز از طریق مسیر همگام و آزموده‌شدهٔ <code>text_to_speech_tool</code>، پخش <em>جمله‌به‌جمله</em> را دریافت می‌کنند؛ بنابراین <code>edge</code> (گزینهٔ پیش‌فرض) هم برای گفتگو مناسب است. تمام متن‌هایی که قرار است خوانده شوند، با <code>tools.tts_text_normalize.prepare_spoken_text</code> پاک‌سازی می‌شوند؛ یک پاک‌ساز واحد برای همهٔ مسیرها.</p>
+</section>
+<section class="doc-sec">
+<h2 id="how-to-pick-a-provider"><span class="secnum">۲</span> نحوهٔ انتخاب ارائه‌دهنده</h2>
+<p>به‌طور پیش‌فرض، توزیع‌کننده در صورتی که ارائه‌دهندهٔ ازپیش‌پیکربندی‌شدهٔ شما (<code>tts.provider</code>) API قطعه‌ای داشته باشد، پخش جریانی را با همان ارائه‌دهنده انجام می‌دهد؛ هرگز صرفاً برای دستیابی به پخش جریانی، صدای انتخابی شما را بی‌اطلاع با صدای ارائه‌دهنده‌ای دیگر جایگزین نمی‌کند.</p>
+<p>برای تغییر این انتخاب، <code>tts.streaming.provider</code> را در <code>config.yaml</code> تنظیم کنید:</p>
+<ul>
+<li>نام یک ارائه‌دهنده (<code>elevenlabs</code>، <code>gemini</code>، <code>openai</code> یا <code>xai</code>)، همان ارائه‌دهنده را برای پخش جریانی تثبیت می‌کند.</li>
+<li>مقدار <code>auto</code> فهرست اولویت <bdi dir="ltr"><code>elevenlabs → gemini → openai → xai</code></bdi> را به‌ترتیب بررسی می‌کند و نخستین ارائه‌دهنده‌ای را به کار می‌گیرد که اطلاعات احراز هویتش قابل دریافت باشد؛ این انتخاب، موافقت صریح شما با استفاده از «بهترین صدای قطعه‌ایِ در دسترس» است.</li>
+</ul>
+<pre dir="ltr"><code>tts:
+  provider: gemini
+  streaming:
+    provider: gemini      # or &quot;auto&quot;
+  gemini:
+    model: gemini-2.5-flash-preview-tts
+    voice: Kore
+</code></pre>
+</section>
+<section class="doc-sec">
+<h2 id="capability-matrix"><span class="secnum">۳</span> جدول قابلیت‌ها</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>ارائه‌دهنده</th><th>روش انتقال</th><th>PCM قطعه‌ای</th><th>اطلاعات احراز هویت</th></tr></thead>
+<tbody>
+<tr><td><code>elevenlabs</code></td><td>HTTP قطعه‌ای (<code>pcm_24000</code>)</td><td>بله</td><td><code>ELEVENLABS_API_KEY</code> / <code>tts.elevenlabs</code></td></tr>
+<tr><td><code>openai</code></td><td>HTTP قطعه‌ای (<code>with_streaming_response</code>، <code>pcm</code>)</td><td>بله</td><td><code>tts.openai.api_key</code> ← متغیرهای محیطی ← گیت‌وی مدیریت‌شده</td></tr>
+<tr><td><code>gemini</code></td><td>SSE (<code>streamGenerateContent?alt=sse</code>)</td><td>بله</td><td><code>GEMINI_API_KEY</code> / <code>GOOGLE_API_KEY</code></td></tr>
+<tr><td><code>xai</code></td><td>وب‌سوکت (<code>wss://api.x.ai/v1/tts</code>)</td><td>بله</td><td>OAuth در xAI یا <code>XAI_API_KEY</code></td></tr>
+<tr><td><code>edge</code>، <code>piper</code>، <code>kitten</code>، <code>neutts</code>، <code>mistral</code>، <code>minimax</code>، <code>deepinfra</code>، …</td><td>—</td><td>خیر (مسیر جایگزین همگامِ جمله‌به‌جمله)</td><td>به روش معمول</td></tr>
+</tbody>
+</table></div>
+<p>تمام جستجوهای اطلاعات احراز هویت از طریق <code>resolve_provider_secret()</code> انجام می‌شوند (به‌ترتیب اولویت: پیکربندی، سپس متغیرهای محیطی/<code>.env</code>، سپس مخزن اطلاعات احراز هویت)؛ متغیرهای محیطی هرگز مستقیماً خوانده نمی‌شوند. اندازهٔ بدنه‌های دریافتی به‌صورت جریانی برای هر جمله به ۱۶ MiB محدود است؛ همانند قاعدهٔ ثابت ارائه‌دهندگان همگام که اندازهٔ بدنهٔ پاسخ بالادستی را محدود نگه می‌دارد.</p>
+</section>
+<section class="doc-sec">
+<h2 id="adding-a-new-streaming-provider"><span class="secnum">۴</span> افزودن ارائه‌دهندهٔ جدید برای پخش جریانی</h2>
+<ol>
+<li>در <code>tools/tts_streaming.py</code> زیرکلاسی از <code>StreamingTTSProvider</code> بسازید.</li>
+<li><code>sample_rate</code> را تنظیم کنید (و اگر قالب صدا تک‌کانالهٔ <code>int16</code> نیست، <code>channels</code> و <code>sample_width</code> را نیز تنظیم کنید).</li>
+<li><code>available()</code> را پیاده‌سازی کنید (صرفاً برای بررسی در دسترس بودن؛ هرگز نباید چیزی نصب کند) و <code>stream(self, text) -&gt; Iterator[bytes]</code> را طوری پیاده‌سازی کنید که قطعه‌های PCM خام را با <code>yield</code> برگرداند.</li>
+<li>دکوراتور <code>@register("yourname")</code> را اضافه کنید.</li>
+<li>آزمون‌ها را در <code>tests/tools/test_tts_streaming.py</code> اضافه کنید.</li>
+</ol>
+<p>کلاس پایهٔ انتزاعی (ABC) رعایت قرارداد را الزام می‌کند؛ رجیستری امکان شناسایی ارائه‌دهنده را فراهم می‌کند؛ و توزیع‌کننده (<code>stream_tts_to_speaker</code>) و مصرف‌کنندهٔ گیت‌وی، بدون نیاز به کدنویسی اضافی از جانب شما، بافر جمله‌ها، رویدادهای توقف و مقصد خروجی صدا را مدیریت می‌کنند.</p>
+</section>
+<section class="doc-sec">
+<h2 id="gateway-streaming-platform-adapters"><span class="secnum">۵</span> پخش جریانی در گیت‌وی (آداپتورهای پلتفرم)</h2>
+<p>فایل <code>gateway/streaming_tts_consumer.py</code> دلتاهای ایجنت را به نقطهٔ اتصال صدای جریانی در آداپتور پیوند می‌دهد. آداپتورها با بازنویسی موارد زیر در <code>BasePlatformAdapter</code> این قابلیت را فعال می‌کنند:</p>
+<ul>
+<li><code>supports_streaming_tts(chat_id, audio_format) -&gt; bool</code></li>
+<li><code>begin_streaming_tts / write_streaming_tts / finish_streaming_tts / abort_streaming_tts</code></li>
+</ul>
+<p>همهٔ این موارد به‌طور پیش‌فرض در حالت «پشتیبانی‌نشده» یا بدون عملیات هستند؛ بنابراین آداپتورهای موجود دست‌نخورده می‌مانند. هنگامی که پخش جریانی صدای یک نوبت کامل شود، پاسخ خودکار TTS مبتنی بر فایل کامل برای همان نوبت ارسال نمی‌شود (تا صدا دوبار پخش نشود). اگر پخش جریانی پیش از شنیده‌شدن هرگونه صدا شکست بخورد، گیت‌وی به روش قدیمیِ پاسخ صوتی با فایل کامل بازمی‌گردد.</p>
+</section>
+
+<div class="pager"><span class="off prev"><span class="dir">→ قبلی</span><span class="ttl">بازیابی پایگاه دادهٔ وضعیت</span></span><span class="off next"><span class="dir">بعدی ←</span><span class="ttl">افزونهٔ محیط ترمینال</span></span></div>
+</main>
+</div>
+<footer class="page-footer">
+  ترجمهٔ فارسی غیررسمی · متن اصلی: <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/streaming-tts" target="_blank" rel="noopener">Streaming TTS Internals</a><br>
+  طراحی و اجرا: <a href="https://peyman24x.ir" target="_blank" rel="noopener"><strong>peyman24x.ir</strong></a> · © ۲۰۲۶ · <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT</a> · <a href="../index.html#donate">☕ حمایت از پروژه</a>
+</footer>
+<button id="toTop" title="بازگشت به بالا">↑</button>
+<script src="../assets/main.js"></script>
+</body>
+</html>

@@ -218,8 +218,8 @@ window.HERMES_NAV = [
   { p:"developer-guide/worktree-ui-dev.html",        t:"توسعهٔ TUI و دسکتاپ در Worktree",        d:1 },
   { p:"developer-guide/billing-lifecycle.html", t:"چرخهٔ حیات صورتحساب", d:0 },
   { p:"developer-guide/chronos-managed-cron-contract.html", t:"قرارداد Cron مدیریت‌شدهٔ Chronos", d:0 },
-  { p:"developer-guide/cli-internals.html", t:"ساختار داخلی CLI", d:0 },
-  { p:"developer-guide/completion-backlog-delivery.html", t:"تحویل پاسخ‌های تکمیل‌شدهٔ معوق", d:0 },
+  { p:"developer-guide/cli-internals.html", t:"ساختار داخلی CLI", d:1 },
+  { p:"developer-guide/completion-backlog-delivery.html", t:"تحویل پاسخ‌های تکمیل‌شدهٔ معوق", d:1 },
   { p:"developer-guide/gateway-monitoring.html", t:"پایش گیت‌وی", d:0 },
   { p:"developer-guide/gateway-session-lifecycle.html", t:"چرخهٔ حیات نشست گیت‌وی", d:0 },
   { p:"developer-guide/micro-compaction.html", t:"فشرده‌سازی خرد", d:0 },
@@ -229,7 +229,7 @@ window.HERMES_NAV = [
   { p:"developer-guide/relay-connector-contract.html", t:"قرارداد اتصال‌دهندهٔ Relay", d:0 },
   { p:"developer-guide/relay-shared-metrics.html", t:"معیارهای مشترک Relay", d:0 },
   { p:"developer-guide/state-db-recovery.html", t:"بازیابی پایگاه دادهٔ وضعیت", d:0 },
-  { p:"developer-guide/streaming-tts.html", t:"تبدیل جریانی متن به گفتار", d:0 },
+  { p:"developer-guide/streaming-tts.html", t:"تبدیل جریانی متن به گفتار", d:1 },
   { p:"developer-guide/terminal-environment-plugin.html", t:"افزونهٔ محیط ترمینال", d:0 }
 ]},
 { id:"reference", cat:"📖 مرجع", pages:[
